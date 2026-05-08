@@ -19,12 +19,19 @@ type Props = {
   onFallbackToProductSearch: () => void;
 };
 
+type ErrorReason =
+  | "permission-denied"
+  | "no-camera"
+  | "insecure"
+  | "unsupported"
+  | "generic";
+
 type ScannerState =
   | { kind: "idle" }
   | { kind: "starting" }
   | { kind: "scanning" }
   | { kind: "looking-up"; barcode: string }
-  | { kind: "error"; message: string }
+  | { kind: "error"; message: string; reason: ErrorReason }
   | { kind: "not-found"; barcode: string };
 
 // Format list passed to the native BarcodeDetector. Same set is supported by
@@ -95,6 +102,7 @@ export function BarcodeScannerInput({
           const j = (await r.json().catch(() => ({}))) as { error?: string };
           setState({
             kind: "error",
+            reason: "generic",
             message: j.error ?? `Erreur ${r.status}`,
           });
           // Don't auto-resume: rate limits or server errors would loop right
@@ -117,6 +125,7 @@ export function BarcodeScannerInput({
       } catch (e) {
         setState({
           kind: "error",
+          reason: "generic",
           message: (e as Error).message ?? "Erreur réseau",
         });
         detectedRef.current = false;
@@ -131,11 +140,54 @@ export function BarcodeScannerInput({
       ) {
         setState({
           kind: "error",
+          reason: "unsupported",
           message:
             "Ton navigateur ne supporte pas l'accès à la caméra. Utilise un autre mode de saisie.",
         });
         return;
       }
+
+      // getUserMedia silently fails outside a secure context. Surface a
+      // specific message so the user knows reloading via HTTPS is the fix.
+      if (typeof window !== "undefined" && window.isSecureContext === false) {
+        setState({
+          kind: "error",
+          reason: "insecure",
+          message:
+            "Ouvre le site en HTTPS pour autoriser l'accès caméra (ou via localhost en développement).",
+        });
+        return;
+      }
+
+      // If the user has already denied camera permission for this origin,
+      // Chrome won't show a prompt again — getUserMedia just rejects with
+      // NotAllowedError. Detect that state up-front so we can show the
+      // unblock instructions instead of pretending we just got refused.
+      try {
+        type CameraStatus = { state: "granted" | "denied" | "prompt" };
+        const perms = (
+          navigator as unknown as {
+            permissions?: {
+              query: (d: { name: string }) => Promise<CameraStatus>;
+            };
+          }
+        ).permissions;
+        const status = await perms?.query({ name: "camera" });
+        if (aborted) return;
+        if (status?.state === "denied") {
+          setState({
+            kind: "error",
+            reason: "permission-denied",
+            message:
+              "L'accès caméra est bloqué pour ce site. Réautorise-la depuis les réglages du navigateur, puis recharge la page.",
+          });
+          return;
+        }
+      } catch {
+        // Permissions API doesn't expose 'camera' on Safari < 16 / older
+        // browsers. Fall through and let getUserMedia handle it.
+      }
+
       try {
         // Prefer the rear camera on mobile (environment). On desktop the
         // browser will fall back to the default webcam silently.
@@ -214,17 +266,23 @@ export function BarcodeScannerInput({
         if (err.name === "NotAllowedError") {
           setState({
             kind: "error",
+            reason: "permission-denied",
             message:
-              "Accès caméra refusé. Autorise la caméra dans les réglages de ton navigateur pour scanner.",
+              "Accès caméra refusé. Réautorise la caméra dans les réglages du navigateur, puis recharge la page.",
           });
-        } else if (err.name === "NotFoundError" || err.name === "OverconstrainedError") {
+        } else if (
+          err.name === "NotFoundError" ||
+          err.name === "OverconstrainedError"
+        ) {
           setState({
             kind: "error",
+            reason: "no-camera",
             message: "Aucune caméra détectée sur cet appareil.",
           });
         } else {
           setState({
             kind: "error",
+            reason: "generic",
             message: err.message ?? "Impossible de démarrer la caméra.",
           });
         }
@@ -315,14 +373,27 @@ export function BarcodeScannerInput({
           <p className="text-[13px] font-medium text-rose-700">
             {state.message}
           </p>
+          {state.reason === "permission-denied" ? (
+            <PermissionDeniedHelp />
+          ) : null}
           <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={resumeScanning}
-              className="rounded-xl bg-white px-3.5 py-1.5 text-[13px] font-medium text-ink ring-1 ring-black/[0.06] transition-colors hover:bg-rose-100/30"
-            >
-              Scanner un autre code
-            </button>
+            {state.reason === "permission-denied" ? (
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="rounded-xl bg-white px-3.5 py-1.5 text-[13px] font-medium text-ink ring-1 ring-black/[0.06] transition-colors hover:bg-rose-100/30"
+              >
+                Recharger la page
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={resumeScanning}
+                className="rounded-xl bg-white px-3.5 py-1.5 text-[13px] font-medium text-ink ring-1 ring-black/[0.06] transition-colors hover:bg-rose-100/30"
+              >
+                Scanner un autre code
+              </button>
+            )}
             <button
               type="button"
               onClick={onFallbackToProductSearch}
@@ -378,6 +449,55 @@ export function BarcodeScannerInput({
         </div>
       ) : null}
     </div>
+  );
+}
+
+function PermissionDeniedHelp() {
+  const ua = typeof navigator === "undefined" ? "" : navigator.userAgent;
+  const platform: "ios" | "android" | "desktop" = /iPhone|iPad|iPod/i.test(ua)
+    ? "ios"
+    : /Android/i.test(ua)
+      ? "android"
+      : "desktop";
+
+  if (platform === "ios") {
+    return (
+      <ol className="mt-3 list-decimal space-y-1 pl-5 text-[13px] text-rose-700/90">
+        <li>
+          Touche le <strong>« AA »</strong> à gauche de la barre d&apos;adresse.
+        </li>
+        <li>
+          Choisis <strong>Réglages du site web</strong> →{" "}
+          <strong>Caméra</strong> → <strong>Autoriser</strong>.
+        </li>
+        <li>Recharge la page.</li>
+      </ol>
+    );
+  }
+  if (platform === "android") {
+    return (
+      <ol className="mt-3 list-decimal space-y-1 pl-5 text-[13px] text-rose-700/90">
+        <li>
+          Touche l&apos;icône <strong>cadenas</strong> à gauche de l&apos;URL.
+        </li>
+        <li>
+          Ouvre <strong>Autorisations</strong> → <strong>Caméra</strong> →{" "}
+          <strong>Autoriser</strong>.
+        </li>
+        <li>Recharge la page.</li>
+      </ol>
+    );
+  }
+  return (
+    <ol className="mt-3 list-decimal space-y-1 pl-5 text-[13px] text-rose-700/90">
+      <li>
+        Clique sur le <strong>cadenas</strong> à gauche de l&apos;URL.
+      </li>
+      <li>
+        Passe <strong>Caméra</strong> sur <em>Autoriser</em>.
+      </li>
+      <li>Recharge la page.</li>
+    </ol>
   );
 }
 

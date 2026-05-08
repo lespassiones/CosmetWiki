@@ -91,7 +91,7 @@ export function MobileMenu() {
                   </li>
                 );
               })}
-              <li className="px-1.5 pt-2">
+              <li className="flex justify-center px-1.5 pt-3">
                 <InstallPWAMenuItem onActivate={() => setOpen(false)} />
               </li>
             </ul>

@@ -142,13 +142,11 @@ export function InstallPWAMenuItem({
           const ok = await promptNative();
           if (!ok) setShowHelp(true);
         }}
-        className="flex w-full items-center justify-between rounded-2xl bg-rose-50/70 px-3.5 py-3 text-[15px] font-medium text-rose-700 transition-colors hover:bg-rose-100/80"
+        className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-rose-400 to-pink-400 px-3 py-1.5 text-[13px] font-semibold text-white shadow-[0_4px_14px_-4px_rgba(251,113,133,0.55),inset_0_1px_0_0_rgba(255,255,255,0.30)] transition-all hover:from-rose-500 hover:to-pink-500"
+        aria-label="Installer l'application"
       >
-        <span className="inline-flex items-center gap-2">
-          <DownloadIcon />
-          Installer l&apos;app
-        </span>
-        <ArrowIcon />
+        <DownloadIcon />
+        Installer l&apos;app
       </button>
       {showHelp ? (
         <InstallInstructionsDialog onClose={() => setShowHelp(false)} />
