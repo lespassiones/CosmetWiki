@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { ProductSearchResult } from "@/lib/productSearch/types";
+import type { OpenBeautyFactsCandidate } from "@/lib/productSearch/openBeautyFacts";
 
 const SOURCE_LABEL: Record<string, string> = {
   cache: "cache",
@@ -10,25 +11,45 @@ const SOURCE_LABEL: Record<string, string> = {
   "duckduckgo+mistral": "recherche web",
 };
 
+type FoundPayload = {
+  ingredientsText: string;
+  brand: string | null;
+  productName: string | null;
+  source: string;
+  sourceUrl: string | null;
+};
+
 type Props = {
   /** Called with the ingredients text + source info when a product is found. */
-  onFound: (input: {
-    ingredientsText: string;
-    brand: string | null;
-    productName: string | null;
-    source: string;
-    sourceUrl: string | null;
-  }) => void;
+  onFound: (input: FoundPayload) => void;
   /** Called when the user wants to switch to manual INCI input. */
   onFallbackToManual: (initialText?: string) => void;
+};
+
+type SuggestResponse = {
+  candidates: OpenBeautyFactsCandidate[];
+  hasMore: boolean;
+  page: number;
 };
 
 export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [notFound, setNotFound] = useState(false);
+  const [candidates, setCandidates] = useState<OpenBeautyFactsCandidate[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const [deepSearching, setDeepSearching] = useState(false);
   const inFlightRef = useRef<AbortController | null>(null);
+
+  function resetCandidates() {
+    setCandidates([]);
+    setHasMore(false);
+    setPage(0);
+    setSearched(false);
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,8 +59,92 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
       return;
     }
     setError(null);
-    setNotFound(false);
     setBusy(true);
+    resetCandidates();
+
+    if (inFlightRef.current) inFlightRef.current.abort();
+    const ctrl = new AbortController();
+    inFlightRef.current = ctrl;
+
+    try {
+      const r = await fetch("/api/product-suggest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: q, page: 1 }),
+        signal: ctrl.signal,
+      });
+      if (!r.ok) {
+        const j = (await r.json().catch(() => ({}))) as { error?: string };
+        setError(j.error ?? `Erreur ${r.status}`);
+        return;
+      }
+      const data = (await r.json()) as SuggestResponse;
+      setCandidates(data.candidates);
+      setHasMore(data.hasMore);
+      setPage(data.page);
+      setSearched(true);
+    } catch (err) {
+      if ((err as DOMException)?.name === "AbortError") return;
+      setError((err as Error).message ?? "Erreur réseau");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function loadMore() {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+
+    if (inFlightRef.current) inFlightRef.current.abort();
+    const ctrl = new AbortController();
+    inFlightRef.current = ctrl;
+
+    try {
+      const r = await fetch("/api/product-suggest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: query.trim(), page: nextPage }),
+        signal: ctrl.signal,
+      });
+      if (!r.ok) return;
+      const data = (await r.json()) as SuggestResponse;
+      // Dedupe on id in case OBF returns overlapping entries.
+      setCandidates((prev) => {
+        const seen = new Set(prev.map((c) => c.id));
+        const merged = [...prev];
+        for (const c of data.candidates) {
+          if (!seen.has(c.id)) merged.push(c);
+        }
+        return merged;
+      });
+      setHasMore(data.hasMore);
+      setPage(data.page);
+    } catch (err) {
+      if ((err as DOMException)?.name === "AbortError") return;
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
+  function selectCandidate(c: OpenBeautyFactsCandidate) {
+    onFound({
+      ingredientsText: c.ingredientsText,
+      brand: c.brand,
+      productName: c.productName,
+      source: "openbeautyfacts",
+      sourceUrl: c.sourceUrl,
+    });
+  }
+
+  // Last-resort: when the OBF suggest returned nothing, the user can ask for
+  // the full cascade (INCIDecoder + DDG + Mistral). This is the original
+  // /api/product-search call.
+  async function runDeepSearch() {
+    const q = query.trim();
+    if (q.length < 3) return;
+    setDeepSearching(true);
+    setError(null);
 
     if (inFlightRef.current) inFlightRef.current.abort();
     const ctrl = new AbortController();
@@ -59,7 +164,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
       }
       const data = (await r.json()) as ProductSearchResult;
       if (!data.found) {
-        setNotFound(true);
+        setError(data.message);
         return;
       }
       onFound({
@@ -73,9 +178,11 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
       if ((err as DOMException)?.name === "AbortError") return;
       setError((err as Error).message ?? "Erreur réseau");
     } finally {
-      setBusy(false);
+      setDeepSearching(false);
     }
   }
+
+  const showEmpty = searched && candidates.length === 0 && !busy;
 
   return (
     <form onSubmit={submit} className="w-full">
@@ -88,7 +195,6 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
           onChange={(e) => {
             setQuery(e.target.value);
             if (error) setError(null);
-            if (notFound) setNotFound(false);
           }}
           placeholder="Ex : Effaclar Duo+ La Roche-Posay"
           className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-base text-ink placeholder:text-ink-subtle focus:outline-none"
@@ -104,36 +210,144 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
         </button>
       </div>
 
-      <p className="mt-3 text-[13px] text-ink-subtle">
-        On cherche la composition INCI sur Open Beauty Facts, INCIDecoder, puis le web.
-      </p>
-
-      {error ? (
-        <p className="mt-3 rounded-xl bg-rose-50 px-3.5 py-2 text-sm text-rose-700 ring-1 ring-rose-100">
-          {error}
+      {!searched ? (
+        <p className="mt-3 text-[13px] text-ink-subtle">
+          Tape la marque, le nom du produit, ou les deux. Ex&nbsp;: «&nbsp;baume L&apos;Oréal&nbsp;» ou «&nbsp;Effaclar Duo+&nbsp;».
         </p>
       ) : null}
 
-      {notFound ? (
-        <div className="mt-4 rounded-2xl border border-dashed border-amber-300 bg-amber-50/60 p-4 text-left">
-          <p className="text-sm font-medium text-amber-900">
-            Produit non trouvé sur nos sources publiques.
+      {error ? (
+        <p className="mt-3 text-[13px] text-rose-600">{error}</p>
+      ) : null}
+
+      {searched && candidates.length > 0 ? (
+        <div className="mt-5">
+          <p className="mb-3 text-[13px] text-ink-muted">
+            Plusieurs produits correspondent. Choisis le tien&nbsp;:
           </p>
-          <p className="mt-1 text-sm text-amber-800">
-            Tu peux coller toi-même la composition INCI imprimée au dos du
-            produit pour lancer l&apos;analyse.
+          <ul className="grid gap-2.5 sm:grid-cols-2">
+            {candidates.map((c) => (
+              <li key={c.id}>
+                <CandidateCard candidate={c} onSelect={selectCandidate} />
+              </li>
+            ))}
+          </ul>
+
+          {hasMore ? (
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="rounded-full bg-white/80 px-4 py-2 text-[13px] font-medium text-ink ring-1 ring-black/[0.06] transition-colors hover:bg-white disabled:opacity-60"
+              >
+                {loadingMore ? "Chargement…" : "Voir plus de produits"}
+              </button>
+            </div>
+          ) : null}
+
+          <p className="mt-4 text-[12px] text-ink-subtle">
+            Tu ne vois pas ton produit ?{" "}
+            <button
+              type="button"
+              onClick={runDeepSearch}
+              disabled={deepSearching}
+              className="font-medium text-rose-600 underline underline-offset-2 hover:no-underline disabled:opacity-60"
+            >
+              {deepSearching
+                ? "Recherche approfondie en cours…"
+                : "Lance une recherche approfondie"}
+            </button>{" "}
+            ou{" "}
+            <button
+              type="button"
+              onClick={() => onFallbackToManual()}
+              className="font-medium text-rose-600 underline underline-offset-2 hover:no-underline"
+            >
+              colle la liste INCI manuellement
+            </button>
+            .
           </p>
-          <button
-            type="button"
-            onClick={() => onFallbackToManual()}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-amber-600 px-3.5 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
-          >
-            Coller la composition manuellement
-            <span aria-hidden>→</span>
-          </button>
+        </div>
+      ) : null}
+
+      {showEmpty ? (
+        <div className="mt-5 rounded-2xl bg-white/65 p-5 ring-1 ring-white/70">
+          <p className="text-[14px] text-ink">
+            Aucun produit trouvé sur Open Beauty Facts pour «&nbsp;
+            <span className="font-medium">{query.trim()}</span>&nbsp;».
+          </p>
+          <p className="mt-2 text-[13px] text-ink-muted">
+            Tu peux lancer une recherche approfondie (web + INCIDecoder), ou
+            coller directement la liste INCI.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={runDeepSearch}
+              disabled={deepSearching}
+              className="rounded-xl bg-gradient-to-b from-rose-400 to-pink-400 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(251, 113, 133,0.55),inset_0_1px_0_0_rgba(255,255,255,0.30)] transition-all hover:from-rose-500 hover:to-pink-500 disabled:cursor-not-allowed disabled:from-rose-200 disabled:to-pink-200"
+            >
+              {deepSearching ? "Recherche…" : "Recherche approfondie"}
+            </button>
+            <button
+              type="button"
+              onClick={() => onFallbackToManual()}
+              className="rounded-xl bg-white/80 px-4 py-2 text-sm font-medium text-ink ring-1 ring-black/[0.06] transition-colors hover:bg-white"
+            >
+              Coller la liste INCI
+            </button>
+          </div>
         </div>
       ) : null}
     </form>
+  );
+}
+
+function CandidateCard({
+  candidate,
+  onSelect,
+}: {
+  candidate: OpenBeautyFactsCandidate;
+  onSelect: (c: OpenBeautyFactsCandidate) => void;
+}) {
+  const niceBrand = candidate.brand ? titleCase(candidate.brand) : null;
+  const niceName = candidate.productName
+    ? titleCase(candidate.productName)
+    : null;
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(candidate)}
+      className="group flex w-full items-center gap-3 rounded-2xl bg-white/75 p-3 text-left ring-1 ring-white/70 shadow-[0_2px_18px_-8px_rgba(15,23,42,0.10)] backdrop-blur-xl transition-all hover:bg-white hover:ring-black/[0.10] hover:shadow-[0_6px_22px_-8px_rgba(15,23,42,0.16)]"
+    >
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-rose-50/70 ring-1 ring-black/[0.04]">
+        {candidate.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={candidate.imageUrl}
+            alt=""
+            className="h-full w-full object-contain"
+            loading="lazy"
+          />
+        ) : (
+          <span className="text-xs font-medium text-rose-400">INCI</span>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        {niceBrand ? (
+          <p className="truncate text-[11px] font-semibold uppercase tracking-[0.14em] text-pink-500/80">
+            {niceBrand}
+          </p>
+        ) : null}
+        <p className="truncate text-[14px] font-medium text-ink">
+          {niceName ?? "Produit sans nom"}
+        </p>
+        <p className="mt-0.5 text-[11px] text-ink-subtle">
+          Cliquer pour analyser →
+        </p>
+      </div>
+    </button>
   );
 }
 

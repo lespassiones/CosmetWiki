@@ -3,7 +3,8 @@
     "allow": [
       "mcp__claude_ai_Supabase__list_projects",
       "mcp__claude_ai_Supabase__list_tables",
-      "mcp__claude_ai_Supabase__list_extensions"
+      "mcp__claude_ai_Supabase__list_extensions",
+      "Bash(npx tsc *)"
     ]
   }
 }

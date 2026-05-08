@@ -7,6 +7,7 @@ import { getProductCache, setProductCache } from "./cache";
 import { searchOpenBeautyFacts } from "./openBeautyFacts";
 import { searchInciDecoder } from "./inciDecoder";
 import { searchDuckDuckGo } from "./duckduckgo";
+import { matchesQuery } from "./relevance";
 import type { ProductSearchResult } from "./types";
 
 const NOT_FOUND_MESSAGE =
@@ -32,18 +33,24 @@ export async function searchProductCascade(
     };
   }
 
-  // 1. Cache (Supabase)
+  // 1. Cache (Supabase). Re-validate the cached row against the current query
+  // so historical bad matches (e.g. "brian" → "Mitomo" from a buggy cascade)
+  // self-heal: if the brand+name don't share a token with the query, treat it
+  // as a cache miss and re-run the cascade.
   const cached = await getProductCache(queryNorm);
   if (cached) {
-    return {
-      found: true,
-      brand: cached.brand,
-      productName: cached.product_name,
-      ingredientsText: cached.ingredients_text,
-      source: "cache",
-      sourceUrl: cached.source_url,
-      confidence: cached.confidence ?? 0.9,
-    };
+    const cachedLabel = `${cached.brand ?? ""} ${cached.product_name ?? ""}`;
+    if (matchesQuery(query, cachedLabel)) {
+      return {
+        found: true,
+        brand: cached.brand,
+        productName: cached.product_name,
+        ingredientsText: cached.ingredients_text,
+        source: "cache",
+        sourceUrl: cached.source_url,
+        confidence: cached.confidence ?? 0.9,
+      };
+    }
   }
 
   // 2. Open Beauty Facts (free, structured)

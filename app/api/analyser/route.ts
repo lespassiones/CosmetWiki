@@ -260,37 +260,52 @@ async function generateSynthesis(input: {
     .filter((o) => o.status === "present")
     .map((o) => `${o.label} (${o.count})`);
 
-  const prompt = `Tu rédiges la synthèse d'une analyse INCI cosmétique pour un consommateur français non-chimiste.
+  // Pick the first green ingredient with a known function — the "hero" we
+  // can mention briefly in paragraph 1 without lapsing into marketing.
+  const greenHero = input.enriched.find(
+    (r) => r.color_rating === "Vert" && r.primary_function && r.name,
+  );
+  const greenHeroLine = greenHero
+    ? `${greenHero.name} (${greenHero.primary_function})`
+    : "(aucun ingrédient vert avec fonction connue)";
 
-STRUCTURE OBLIGATOIRE — DEUX PARTIES SÉPARÉES PAR UNE LIGNE VIDE.
+  const prompt = `Tu rédiges la synthèse d'une analyse INCI cosmétique pour un consommateur français.
+Tu es un analyste FACTUEL, pas un rédacteur marketing. Pas de blabla, pas de mise en valeur du produit.
 
-PARTIE 1 — Récap accessible (2 à 4 phrases en prose, AUCUNE puce)
-- Donne un ressenti général sur la composition, en langage clair et humain.
-- Adapte le ton au cas : compo très saine, compo équilibrée avec quelques points d'attention, compo chargée en X, etc.
-- Si tu peux deviner l'usage du produit (hydratation, anti-imperfection, anti-âge, nettoyage, démaquillage, soin après-soleil…) à partir des ingrédients principaux, mentionne-le.
-- VARIE l'attaque : ne commence PAS toujours par "Cette composition…" ni par "Cette analyse…". Tu peux commencer par l'usage présumé, par ce qui ressort, par ce qui est rassurant, etc.
-- Reste neutre, jamais alarmiste, jamais "produit à éviter" ou "produit dangereux".
+STRUCTURE OBLIGATOIRE — DEUX BLOCS SÉPARÉS PAR UNE LIGNE VIDE.
 
-PARTIE 2 — Détail en PUCES (chaque ligne commence par "- ")
-- Cite CHAQUE ingrédient ROUGE en puce : "- **NOM_INCI** : [1 phrase courte expliquant pourquoi pénalisé]"
-- Cite CHAQUE ingrédient ORANGE (limite 6, sinon les 5 premiers + "- et N autres") : "- **NOM_INCI** ([fonction])"
+BLOC 1 — Paragraphe court (2 à 3 phrases MAXIMUM, en prose, AUCUNE puce)
+Ce paragraphe doit dire dans cet ordre logique :
+  (a) Le constat chiffré : combien d'ingrédients verts (bon signal) vs combien d'orange ou rouges (à examiner).
+      Ex : "Sur les ${(input.counts.Vert ?? 0) + (input.counts.Jaune ?? 0) + (input.counts.Orange ?? 0) + (input.counts.Rouge ?? 0)} ingrédients reconnus, ${input.counts.Vert} sont classés vert et ${input.counts.Orange + input.counts.Rouge} demandent une attention particulière."
+  (b) UNE phrase qui cite UN seul bon ingrédient présent et dit BREF à quoi il sert (pas d'éloge).
+      Ex : "**${greenHero?.name ?? "[ingrédient vert]"}** y joue son rôle d'${greenHero?.primary_function ?? "[fonction]"}."
+  (c) UNE phrase de TRANSITION qui introduit la liste à puces qui suit.
+      Cette phrase doit ressembler à : "Voici les ingrédients sur lesquels attirer votre attention :" ou "Les points de vigilance ci-dessous :" ou "Voici le détail des ingrédients problématiques :".
+
+BLOC 2 — Liste en PUCES (chaque ligne commence par "- ")
+- Cite CHAQUE ingrédient ROUGE : "- **NOM_INCI** ([fonction]) : [1 phrase courte expliquant la pénalité]"
+- Cite CHAQUE ingrédient ORANGE (limite 6, sinon les 5 premiers + "- et N autres") : "- **NOM_INCI** ([fonction]) : [1 phrase courte sur la pénalité]"
 - Si plus de 3 jaunes notables, regroupe-les en UNE puce : "- Quelques ingrédients jaunes à surveiller : **NOM1**, **NOM2**, **NOM3**…"
-- Ajoute une puce sur les absences positives SI pertinent : "- Sans **parabens**, sans **sulfates**, sans **silicones**, sans **huiles minérales**" (ne mentionne que les absences réelles).
-- Termine par UNE puce de conseil contextuel non-médical : "- À savoir : …" (test sur petite zone, position dans la liste = concentration, routine simple, etc.).
+- Si pertinent, UNE puce d'absences : "- Sans **parabens**, sans **sulfates**, sans **silicones**, sans **huiles minérales**" — uniquement les absences réelles.
+- Termine par UNE puce factuelle "- À savoir : …" (ex. test sur petite zone, position dans la liste = concentration). Pas de conseil médical.
 
-CONTRAINTES STRICTES
-- Ne JAMAIS inventer un ingrédient. Si une catégorie est vide, ne fais simplement pas la puce.
-- AUCUN emoji.
-- AUCUN conseil médical (pas de "consultez un médecin", pas de pathologies citées).
-- AUCUNE recommandation d'achat / d'évitement d'un produit précis.
+CE QUE TU NE DOIS JAMAIS FAIRE
+- AUCUN langage marketing. Mots et tournures INTERDITS : "mise sur", "rassurante", "rassurant", "généreuse", "généreux", "idéal", "idéale", "parfait", "parfaite", "doux comme caresse", "simplicité", "merites", "vanter", "offre", "apporte un confort", "soin idéal", "à appliquer matin et soir", "en confiance", "agréable".
+- AUCUNE recommandation d'achat ou d'évitement ("à acheter", "à éviter", "produit dangereux", "produit excellent", "à recommander").
+- AUCUNE description sensorielle (texture, parfum, agréable, doux, fondant, onctueux…).
+- AUCUNE phrase qui déduit un usage ("crème pour peau sèche", "produit anti-âge"…) — concentre-toi UNIQUEMENT sur les ingrédients.
+- AUCUN conseil médical, AUCUN emoji.
+- Tu ne dis JAMAIS "ce produit est bon" ni "ce produit est mauvais". Tu énonces les faits ingrédient par ingrédient.
 - Encadre TOUJOURS les noms INCI cités avec **.
-- 4 à 8 puces maximum dans la PARTIE 2.
+- VARIE les formulations entre produits — ne réutilise pas mécaniquement la même phrase d'attaque.
 
-DONNÉES
+DONNÉES FACTUELLES
 ${input.productLabel ? `Produit analysé : ${input.productLabel}` : "Produit : composition collée par l'utilisateur (pas de nom fourni)."}
 Note globale : ${input.score.toFixed(1)}/20 (${input.scoreLabel})
 Comptes : Vert ${input.counts.Vert}, Jaune ${input.counts.Jaune}, Orange ${input.counts.Orange}, Rouge ${input.counts.Rouge}
 3 premiers ingrédients (concentration) : ${mainIngredients.join(", ") || "(non disponibles)"}
+Ingrédient vert "hero" suggéré pour le paragraphe : ${greenHeroLine}
 
 Ingrédients ROUGES :
 ${red.length ? red.map((r) => `- ${r.name} — ${r.fn}`).join("\n") : "(aucun)"}
@@ -304,7 +319,7 @@ ${yellow.length ? yellow.slice(0, 8).join(", ") + (yellow.length > 8 ? ` et ${ye
 Observations positives (absences) : ${positives.join(", ") || "(aucune)"}
 Observations présentes : ${presents.join(", ") || "(aucune)"}
 
-Rédige maintenant la synthèse en respectant la structure (Partie 1 en prose, ligne vide, Partie 2 en puces) :`;
+Rédige maintenant la synthèse. Bloc 1 (prose, 2-3 phrases, finis par la phrase de transition), ligne vide, puis Bloc 2 (puces) :`;
 
   try {
     const r = await fetch("https://api.mistral.ai/v1/chat/completions", {
@@ -322,7 +337,7 @@ Rédige maintenant la synthèse en respectant la structure (Partie 1 en prose, l
           {
             role: "system",
             content:
-              "Tu es un assistant qui rédige des synthèses INCI cosmétiques pour le grand public, à partir de données factuelles fournies — JAMAIS d'invention. Tu varies tes formulations d'un produit à l'autre pour ne JAMAIS sonner robotique : ouverture, ton, mots-clés. Tu restes neutre, jamais alarmiste, jamais médical. Tu structures TOUJOURS ta sortie en deux blocs : un paragraphe de récap accessible (prose, pas de puces), une ligne vide, puis un bloc de puces (chaque ligne commençant par '- '). Tu encadres les noms INCI avec **.",
+              "Tu es un analyste INCI FACTUEL — pas un rédacteur marketing, pas un vendeur. Tu écris pour le grand public français à partir de données fournies, JAMAIS d'invention. Tu énonces les faits chiffrés et tu attires l'attention sur les ingrédients problématiques sans dramatiser. Tu n'utilises JAMAIS de langage marketing (pas de 'mise sur', 'rassurant', 'idéal', 'généreux', 'simplicité', 'apporte', 'offre', 'agréable', 'idéal pour'…). Tu ne décris JAMAIS la texture ni le parfum. Tu ne recommandes JAMAIS d'acheter ni d'éviter le produit. Tu ne donnes AUCUN conseil médical. Tu structures TOUJOURS ta sortie en deux blocs : un paragraphe court de 2-3 phrases (prose, pas de puces) qui (a) donne le constat chiffré, (b) cite UN bon ingrédient avec sa fonction, (c) FINIT par une phrase de transition introduisant la liste, puis une ligne vide, puis un bloc de puces (chaque ligne commençant par '- '). Tu encadres les noms INCI avec **. Tu varies les formulations d'un produit à l'autre.",
           },
           { role: "user", content: prompt },
         ],

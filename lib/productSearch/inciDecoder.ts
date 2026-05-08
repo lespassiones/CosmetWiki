@@ -3,6 +3,7 @@
 
 import { fetchPageHtml } from "./httpFetch";
 import { extractInciFromHtml } from "./extractWithMistral";
+import { matchesQuery } from "./relevance";
 
 const SEARCH_URL = "https://incidecoder.com/search?query=";
 const PRODUCT_LINK_RE = /href=["']\/products\/([a-z0-9\-]+)["']/i;
@@ -22,7 +23,8 @@ export async function searchInciDecoder(query: string): Promise<{
 
   const slugMatch = PRODUCT_LINK_RE.exec(searchHtml);
   if (!slugMatch) return null;
-  const productUrl = `https://incidecoder.com/products/${slugMatch[1]}`;
+  const slug = slugMatch[1]!;
+  const productUrl = `https://incidecoder.com/products/${slug}`;
 
   const productHtml = await fetchPageHtml(productUrl);
   if (!productHtml) return null;
@@ -32,8 +34,13 @@ export async function searchInciDecoder(query: string): Promise<{
   const brandMatch = BRAND_LINK_RE.exec(productHtml);
   const brand = brandMatch ? brandMatch[2]!.trim() : null;
 
+  // Reject loose matches : INCIDecoder returns "did you mean" type results
+  // that have no token in common with the original query.
+  const label = `${brand ?? ""} ${productName ?? ""} ${slug.replace(/-/g, " ")}`;
+  if (!matchesQuery(query, label)) return null;
+
   const inci = await extractInciFromHtml({
-    label: productName ?? slugMatch[1]!,
+    label: productName ?? slug,
     html: productHtml,
   });
   if (!inci) return null;

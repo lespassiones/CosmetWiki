@@ -4,6 +4,7 @@
 
 import { fetchPageHtml } from "./httpFetch";
 import { extractInciFromHtml } from "./extractWithMistral";
+import { matchesQuery } from "./relevance";
 
 const SEARCH_URL = "https://html.duckduckgo.com/html/?q=";
 
@@ -72,7 +73,14 @@ export async function searchDuckDuckGo(query: string): Promise<{
   RESULT_LINK_RE.lastIndex = 0;
   while ((match = RESULT_LINK_RE.exec(html)) !== null) {
     const real = decodeUddg(match[1]!);
-    if (isFetchable(real) && !candidates.includes(real)) {
+    // The URL path is our cheapest relevance signal — if no query token
+    // appears anywhere in the candidate URL, it's almost certainly a generic
+    // "list of all products" page and not the one we asked for.
+    if (
+      isFetchable(real) &&
+      matchesQuery(query, urlSearchableText(real)) &&
+      !candidates.includes(real)
+    ) {
       candidates.push(real);
     }
     if (candidates.length >= 3) break;
@@ -94,4 +102,13 @@ export async function searchDuckDuckGo(query: string): Promise<{
   }
 
   return null;
+}
+
+function urlSearchableText(url: string): string {
+  try {
+    const u = new URL(url);
+    return `${u.hostname} ${u.pathname.replace(/[\/_-]+/g, " ")}`;
+  } catch {
+    return url;
+  }
 }

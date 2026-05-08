@@ -174,8 +174,15 @@ export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
     } finally {
       setProcessing({ active: false, budget: 0 });
       requestAnimationFrame(() => {
-        const el = document.getElementById("analyse-results");
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        // When the analysis came from a product search, scroll all the way
+        // up so the ProductHero (the big product title) is the first thing
+        // visible. Otherwise land on the analyse panel.
+        if (src) {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          const el = document.getElementById("analyse-results");
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       });
     }
   }
