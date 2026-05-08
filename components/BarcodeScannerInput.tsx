@@ -38,6 +38,11 @@ const FORMATS = [
   "code_128",
 ] as const;
 
+// Mirrors the server-side check. A QR on a phone box typically encodes a URL
+// or an IMEI (15 digits) — neither matches, so we drop them client-side and
+// keep scanning instead of burning a request and the rate-limit budget.
+const BARCODE_RE = /^\d{8,14}$/;
+
 export function BarcodeScannerInput({
   onFound,
   onFallbackToManual,
@@ -51,17 +56,28 @@ export function BarcodeScannerInput({
   useEffect(() => {
     onFoundRef.current = onFound;
   }, [onFound]);
+  // Lets the JSX retry buttons resume the underlying decoder loop without
+  // remounting the camera.
+  const resumeDetectionRef = useRef<(() => void) | null>(null);
+  const detectedRef = useRef(false);
 
   // Once the camera mounts we start decoding immediately.
   useEffect(() => {
     let aborted = false;
     let stream: MediaStream | null = null;
     let stopDecoder: (() => void) | null = null;
-    let detectedAlready = false;
 
     async function lookupBarcode(barcode: string) {
-      if (detectedAlready) return;
-      detectedAlready = true;
+      if (detectedRef.current) return;
+
+      // Drop QR payloads that aren't numeric barcodes (URLs, IMEIs on phone
+      // boxes…) without hitting the API, and keep scanning silently.
+      if (!BARCODE_RE.test(barcode)) {
+        resumeDetectionRef.current?.();
+        return;
+      }
+
+      detectedRef.current = true;
       // small haptic cue on phones that support it
       try {
         navigator.vibrate?.(80);
@@ -81,7 +97,9 @@ export function BarcodeScannerInput({
             kind: "error",
             message: j.error ?? `Erreur ${r.status}`,
           });
-          detectedAlready = false; // allow another scan after an error
+          // Don't auto-resume: rate limits or server errors would loop right
+          // back in. The retry button in the error panel resumes manually.
+          detectedRef.current = false;
           return;
         }
         const data = (await r.json()) as ProductSearchResult;
@@ -101,7 +119,7 @@ export function BarcodeScannerInput({
           kind: "error",
           message: (e as Error).message ?? "Erreur réseau",
         });
-        detectedAlready = false;
+        detectedRef.current = false;
       }
     }
 
@@ -164,12 +182,18 @@ export function BarcodeScannerInput({
             }
             raf = requestAnimationFrame(tick);
           };
-          raf = requestAnimationFrame(tick);
+          const startTick = () => {
+            raf = requestAnimationFrame(tick);
+          };
+          resumeDetectionRef.current = startTick;
+          startTick();
           stopDecoder = () => cancelAnimationFrame(raf);
           return;
         }
 
-        // Fallback : @zxing/browser (Safari iOS, Firefox).
+        // Fallback : @zxing/browser (Safari iOS, Firefox). The reader's own
+        // callback fires continuously, so resuming just means letting the
+        // detectedRef gate fall again — no explicit restart needed.
         const { BrowserMultiFormatReader } = await import("@zxing/browser");
         const reader = new BrowserMultiFormatReader();
         const controls = await reader.decodeFromVideoElement(
@@ -183,6 +207,7 @@ export function BarcodeScannerInput({
             }
           },
         );
+        resumeDetectionRef.current = () => {};
         stopDecoder = () => controls.stop();
       } catch (e) {
         const err = e as DOMException;
@@ -210,11 +235,18 @@ export function BarcodeScannerInput({
     return () => {
       aborted = true;
       stopDecoder?.();
+      resumeDetectionRef.current = null;
       stream?.getTracks().forEach((t) => t.stop());
       const v = videoRef.current;
       if (v) v.srcObject = null;
     };
   }, []);
+
+  const resumeScanning = () => {
+    detectedRef.current = false;
+    setState({ kind: "scanning" });
+    resumeDetectionRef.current?.();
+  };
 
   const isCamLive = state.kind === "scanning" || state.kind === "looking-up";
 
@@ -286,6 +318,13 @@ export function BarcodeScannerInput({
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               type="button"
+              onClick={resumeScanning}
+              className="rounded-xl bg-white px-3.5 py-1.5 text-[13px] font-medium text-ink ring-1 ring-black/[0.06] transition-colors hover:bg-rose-100/30"
+            >
+              Scanner un autre code
+            </button>
+            <button
+              type="button"
               onClick={onFallbackToProductSearch}
               className="rounded-xl bg-white px-3.5 py-1.5 text-[13px] font-medium text-ink ring-1 ring-black/[0.06] transition-colors hover:bg-rose-100/30"
             >
@@ -330,7 +369,7 @@ export function BarcodeScannerInput({
             </button>
             <button
               type="button"
-              onClick={() => setState({ kind: "scanning" })}
+              onClick={resumeScanning}
               className="rounded-xl bg-white/80 px-4 py-2 text-sm font-medium text-ink ring-1 ring-black/[0.06] transition-colors hover:bg-white"
             >
               Scanner un autre code
