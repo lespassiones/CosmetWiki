@@ -25,7 +25,7 @@ export function SearchTrigger() {
         type="button"
         aria-label="Rechercher un ingrédient"
         onClick={() => setOpen(true)}
-        className="group grid h-12 w-12 place-items-center rounded-2xl bg-white/55 text-ink ring-1 ring-white/80 shadow-[0_8px_30px_-6px_rgba(15,23,42,0.18),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-2xl transition-all hover:-translate-y-0.5 hover:bg-white/75 hover:shadow-[0_14px_36px_-8px_rgba(139,92,246,0.25),inset_0_1px_0_rgba(255,255,255,1)] active:translate-y-0"
+        className="group grid h-12 w-12 place-items-center rounded-2xl bg-white/55 text-ink ring-1 ring-white/80 shadow-[0_8px_30px_-6px_rgba(15,23,42,0.18),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-2xl transition-all hover:-translate-y-0.5 hover:bg-white/75 hover:shadow-[0_14px_36px_-8px_rgba(244, 63, 94,0.25),inset_0_1px_0_rgba(255,255,255,1)] active:translate-y-0"
       >
         <svg
           viewBox="0 0 24 24"

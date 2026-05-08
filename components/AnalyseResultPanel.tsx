@@ -304,7 +304,7 @@ function ObservationsCard({
                       {it.slug ? (
                         <Link
                           href={`/i/${it.slug}?from=home`}
-                          className="inline-flex items-center gap-1.5 text-ink hover:text-violet-700"
+                          className="inline-flex items-center gap-1.5 text-ink hover:text-rose-700"
                         >
                           {it.colorRating ? (
                             <span className={`h-1.5 w-1.5 rounded-full ${dotForRating(it.colorRating)}`} aria-hidden />
@@ -327,7 +327,7 @@ function ObservationsCard({
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="mt-3 inline-flex items-center gap-1 text-[13px] font-medium text-violet-700 hover:text-violet-900"
+          className="mt-3 inline-flex items-center gap-1 text-[13px] font-medium text-rose-700 hover:text-rose-900"
         >
           {expanded ? "Réduire" : `Voir le détail des observations`}{" "}
           <span aria-hidden>→</span>
@@ -426,10 +426,7 @@ function SynthesisCard({
   // While streaming we may be in the middle of a `**bold**` span — close it
   // temporarily so the markdown renderer doesn't break on an unmatched `**`.
   const safeVisible = balanceBold(visible);
-  const paragraphs = safeVisible
-    .split(/\n{2,}/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+  const blocks = parseSynthesisBlocks(safeVisible);
   const streaming = fullText.length > 0 && shown < fullText.length;
 
   return (
@@ -437,14 +434,34 @@ function SynthesisCard({
       <h2 className="text-base font-semibold text-ink">Synthèse</h2>
       {fullText ? (
         <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-ink">
-          {paragraphs.map((p, i) => (
-            <p key={i}>
-              {renderBoldMarkdown(p)}
-              {streaming && i === paragraphs.length - 1 ? (
-                <span className="ml-0.5 inline-block h-[1em] w-[2px] -mb-[2px] animate-pulse bg-violet-500/70 align-middle" />
-              ) : null}
-            </p>
-          ))}
+          {blocks.map((block, i) => {
+            const isLast = i === blocks.length - 1;
+            const showCursor = streaming && isLast;
+            if (block.type === "p") {
+              return (
+                <p key={i}>
+                  {renderBoldMarkdown(block.text)}
+                  {showCursor ? <StreamCursor /> : null}
+                </p>
+              );
+            }
+            return (
+              <ul key={i} className="space-y-1.5 pl-1">
+                {block.items.map((item, j) => {
+                  const lastItem = j === block.items.length - 1;
+                  return (
+                    <li key={j} className="flex gap-2">
+                      <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-400" />
+                      <span className="flex-1">
+                        {renderBoldMarkdown(item)}
+                        {showCursor && lastItem ? <StreamCursor /> : null}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            );
+          })}
         </div>
       ) : (
         <p className="mt-3 text-sm text-ink-muted">
@@ -454,6 +471,57 @@ function SynthesisCard({
       )}
     </article>
   );
+}
+
+function StreamCursor() {
+  return (
+    <span className="ml-0.5 inline-block h-[1em] w-[2px] -mb-[2px] animate-pulse bg-rose-500/70 align-middle" />
+  );
+}
+
+type SynthesisBlock =
+  | { type: "p"; text: string }
+  | { type: "ul"; items: string[] };
+
+const BULLET_RE = /^[-•*]\s+(.+)$/;
+
+function parseSynthesisBlocks(text: string): SynthesisBlock[] {
+  const blocks: SynthesisBlock[] = [];
+  for (const chunk of text.split(/\n{2,}/)) {
+    const trimmed = chunk.trim();
+    if (!trimmed) continue;
+    const lines = trimmed.split("\n");
+
+    let pBuffer: string[] = [];
+    let ulBuffer: string[] = [];
+
+    const flushP = () => {
+      if (pBuffer.length === 0) return;
+      blocks.push({ type: "p", text: pBuffer.join(" ") });
+      pBuffer = [];
+    };
+    const flushUl = () => {
+      if (ulBuffer.length === 0) return;
+      blocks.push({ type: "ul", items: ulBuffer });
+      ulBuffer = [];
+    };
+
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line) continue;
+      const m = BULLET_RE.exec(line);
+      if (m) {
+        flushP();
+        ulBuffer.push(m[1]!.trim());
+      } else {
+        flushUl();
+        pBuffer.push(line);
+      }
+    }
+    flushP();
+    flushUl();
+  }
+  return blocks;
 }
 
 function balanceBold(text: string): string {
@@ -590,7 +658,7 @@ function ItemsTable({
             placeholder="Rechercher un ingrédient"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-full bg-white/80 py-2 pl-9 pr-3 text-[13px] text-ink placeholder:text-ink-subtle outline-none ring-1 ring-black/[0.06] focus:ring-2 focus:ring-violet-200"
+            className="w-full rounded-full bg-white/80 py-2 pl-9 pr-3 text-[13px] text-ink placeholder:text-ink-subtle outline-none ring-1 ring-black/[0.06] focus:ring-2 focus:ring-rose-200"
           />
         </label>
       </div>
@@ -614,7 +682,7 @@ function ItemsTable({
               </tr>
             ) : (
               filtered.map((i) => (
-                <tr key={`${i.position}-${i.input}`} className="border-t border-black/[0.04] transition-colors hover:bg-violet-50/30">
+                <tr key={`${i.position}-${i.input}`} className="border-t border-black/[0.04] transition-colors hover:bg-rose-50/30">
                   <td className="px-5 py-3">
                     <div className="font-semibold text-ink">
                       {prettyName(i.name ?? i.input)}
@@ -635,7 +703,7 @@ function ItemsTable({
                     {i.slug ? (
                       <Link
                         href={`/i/${i.slug}?from=home`}
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-muted transition hover:bg-violet-50 hover:text-violet-700"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-muted transition hover:bg-rose-50 hover:text-rose-700"
                         aria-label={`Voir la fiche de ${i.name}`}
                       >
                         <ArrowRightIcon className="h-3.5 w-3.5" />

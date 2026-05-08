@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { ProductHit } from "@/lib/supabase";
 
@@ -17,7 +17,7 @@ export function ProductRow({
         rel="noopener noreferrer"
         className="group flex items-center gap-4 rounded-2xl bg-white/70 p-3 shadow-[0_2px_8px_rgba(15,23,42,0.03)] ring-1 ring-white/60 backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:bg-white/85 hover:shadow-[0_8px_24px_rgba(15,23,42,0.07)]"
       >
-        <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-to-br from-violet-50 via-white to-pink-50 ring-1 ring-black/[0.04]">
+        <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-to-br from-rose-50 via-white to-pink-50 ring-1 ring-black/[0.04]">
           {product.image_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img

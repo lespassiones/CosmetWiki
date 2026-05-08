@@ -8,6 +8,7 @@ import { SearchTrigger } from "@/components/SearchTrigger";
 import { ProductRow } from "@/components/ProductRow";
 import { MobileMenu } from "@/components/MobileMenu";
 import { Reveal } from "@/components/Reveal";
+import { SITE_URL } from "@/lib/siteUrl";
 import {
   supabaseAnon,
   type ColorRating,
@@ -66,14 +67,99 @@ async function loadProducts(ingredientId: number): Promise<ProductHit[]> {
   return (data ?? []) as ProductHit[];
 }
 
+const RATING_META_LABEL: Record<ColorRating, string> = {
+  Vert: "sans risque connu",
+  Jaune: "pénalité légère",
+  Orange: "pénalité moyenne",
+  Rouge: "pénalité forte",
+};
+
+function buildMetaDescription(ing: Ingredient): string {
+  const name = prettyName(ing.name);
+  const rating = RATING_META_LABEL[ing.color_rating];
+  const fr = ing.translations?.fr ? ` (${ing.translations.fr})` : "";
+  const fns =
+    ing.functions && ing.functions.length > 0
+      ? ` Fonctions : ${ing.functions
+          .slice(0, 3)
+          .map((f) => f.name)
+          .join(", ")}.`
+      : "";
+  const prev =
+    ing.prevalence_pct != null
+      ? ` Présent dans ${Number(ing.prevalence_pct).toFixed(2)}% des produits.`
+      : "";
+  const desc = ing.description ? ` ${ing.description.slice(0, 120)}` : "";
+  return `${name}${fr} — ingrédient cosmétique INCI, ${rating}.${fns}${prev}${desc}`.slice(
+    0,
+    300,
+  );
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const ing = await loadIngredient(slug);
-  if (!ing) return { title: "Ingrédient introuvable" };
+  if (!ing) {
+    return {
+      title: "Ingrédient introuvable",
+      robots: { index: false, follow: true },
+    };
+  }
+  const name = prettyName(ing.name);
+  const description = buildMetaDescription(ing);
+  const path = `/i/${ing.slug}`;
   return {
-    title: prettyName(ing.name),
-    description: `${prettyName(ing.name)} — classification ${ing.color_rating}. ${ing.description ?? "Détails sur incibeauty.com."}`,
-    alternates: { canonical: `/i/${ing.slug}` },
+    title: name,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      title: `${name} · CosmetWiki`,
+      description,
+      url: path,
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${name} · CosmetWiki`,
+      description,
+    },
+  };
+}
+
+function buildIngredientJsonLd(ing: Ingredient): object {
+  const name = prettyName(ing.name);
+  const url = `${SITE_URL}/i/${ing.slug}`;
+  const sameAs: string[] = [];
+  if (ing.source_url) sameAs.push(ing.source_url);
+
+  const chemical: Record<string, unknown> = {
+    "@type": "ChemicalSubstance",
+    "@id": url,
+    name,
+    url,
+    description: ing.description ?? buildMetaDescription(ing),
+    inLanguage: "fr",
+  };
+  if (ing.cas_number) chemical.identifier = `CAS:${ing.cas_number}`;
+  if (ing.translations?.fr) chemical.alternateName = ing.translations.fr;
+  if (sameAs.length > 0) chemical.sameAs = sameAs;
+
+  const breadcrumb = {
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: SITE_URL },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name,
+        item: url,
+      },
+    ],
+  };
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [chemical, breadcrumb],
   };
 }
 
@@ -106,8 +192,14 @@ export default async function IngredientPage({ params, searchParams }: Props) {
     ing.translations &&
     Object.keys(ing.translations).filter((k) => k !== "fr").length > 0;
 
+  const jsonLd = buildIngredientJsonLd(ing);
+
   return (
     <div className="relative isolate flex min-h-screen flex-col bg-bg">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <BackgroundGlow />
 
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">

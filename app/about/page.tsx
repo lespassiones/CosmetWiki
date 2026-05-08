@@ -1,13 +1,29 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Logo } from "@/components/Logo";
 import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { MobileMenu } from "@/components/MobileMenu";
 
-export const metadata = {
-  title: "À propos",
-  description:
-    "Tout savoir sur CosmetWiki, le moteur de recherche d'ingrédients cosmétiques.",
+const TITLE = "À propos";
+const DESCRIPTION =
+  "CosmetWiki est un moteur de recherche public et libre dédié aux ingrédients cosmétiques. Plus de 15 000 substances INCI classées par tolérance.";
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/about" },
+  openGraph: {
+    title: `${TITLE} · CosmetWiki`,
+    description: DESCRIPTION,
+    url: "/about",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${TITLE} · CosmetWiki`,
+    description: DESCRIPTION,
+  },
 };
 
 export default function AboutPage() {
@@ -59,7 +75,7 @@ export default function AboutPage() {
               href="https://incibeauty.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-violet-700 hover:underline"
+              className="text-rose-700 hover:underline"
             >
               incibeauty.com
             </a>

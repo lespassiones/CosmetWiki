@@ -1,4 +1,4 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -22,7 +22,7 @@
   }
 
   ::selection {
-    background: rgba(139, 92, 246, 0.2);
+    background: rgba(244, 63, 94, 0.2);
     color: #1f2937;
   }
 

@@ -1,19 +1,59 @@
 import type { Metadata, Viewport } from "next";
+import { SITE_URL } from "@/lib/siteUrl";
 import "./globals.css";
 
+const SITE_NAME = "CosmetWiki";
+const DEFAULT_TITLE = "CosmetWiki — Le moteur de recherche public d'ingrédients cosmétiques";
+const DEFAULT_DESCRIPTION =
+  "Recherchez plus de 15 000 ingrédients cosmétiques. Classification couleur, fonctions, prévalence et produits qui en contiennent. Analysez la composition INCI d'un produit en quelques secondes.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "CosmetWiki — Le moteur de recherche public d'ingrédients cosmétiques",
+    default: DEFAULT_TITLE,
     template: "%s · CosmetWiki",
   },
-  description:
-    "Recherchez plus de 15 000 ingrédients cosmétiques. Classification, fonctions, prévalence et produits qui en contiennent.",
-  applicationName: "CosmetWiki",
-  authors: [{ name: "CosmetWiki" }],
+  description: DEFAULT_DESCRIPTION,
+  applicationName: SITE_NAME,
+  authors: [{ name: SITE_NAME }],
+  keywords: [
+    "INCI",
+    "ingrédients cosmétiques",
+    "composition cosmétique",
+    "analyse INCI",
+    "moteur de recherche cosmétique",
+    "perturbateurs endocriniens",
+    "parabens",
+    "silicones",
+    "sulfates",
+  ],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    // OG image is generated dynamically by app/opengraph-image.tsx
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+  },
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+      "max-snippet": -1,
+    },
   },
   formatDetection: { telephone: false, email: false, address: false },
 };

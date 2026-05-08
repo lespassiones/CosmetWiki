@@ -1,4 +1,4 @@
-import type { Config } from "tailwindcss";
+﻿import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
@@ -30,7 +30,7 @@ const config: Config = {
         cardHover: "0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04)",
         search: "0 4px 24px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04)",
         searchFocus:
-          "0 6px 32px rgba(139, 92, 246, 0.18), 0 2px 8px rgba(15, 23, 42, 0.08)",
+          "0 6px 32px rgba(244, 63, 94, 0.18), 0 2px 8px rgba(15, 23, 42, 0.08)",
       },
       animation: {
         "fade-in": "fadeIn 200ms ease-out",

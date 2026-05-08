@@ -1,8 +1,15 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Logo } from "@/components/Logo";
 import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { SearchBar } from "@/components/SearchBar";
+
+export const metadata: Metadata = {
+  title: "Page introuvable",
+  description: "Cette page n'existe pas dans CosmetWiki.",
+  robots: { index: false, follow: true },
+};
 
 export default function NotFound() {
   return (
@@ -25,7 +32,7 @@ export default function NotFound() {
         </div>
         <Link
           href="/"
-          className="mt-8 text-sm font-medium text-violet-700 hover:text-violet-900"
+          className="mt-8 text-sm font-medium text-rose-700 hover:text-rose-900"
         >
           ← Retour à l&apos;accueil
         </Link>

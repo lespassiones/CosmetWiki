@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const text =
@@ -24,7 +24,9 @@ export function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
       </span>
       <span className={`font-semibold tracking-tight ${text}`}>
         <span className="text-ink">Cosmet</span>
-        <span className="text-violet-600">Wiki</span>
+        <span className="bg-gradient-to-r from-rose-400 to-pink-400 bg-clip-text text-transparent">
+          Wiki
+        </span>
       </span>
     </Link>
   );

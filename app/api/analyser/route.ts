@@ -24,6 +24,9 @@ type AnalysePayload = {
   text: string;
   hp?: string;
   withSynthesis?: boolean;
+  /** Optional human label of the analysed product (e.g. "La Roche-Posay Effaclar Duo+"),
+   *  used to vary the AI synthesis. Sent by the product search frontend. */
+  productLabel?: string;
 };
 
 const TAG_LABELS: Record<string, string> = {
@@ -164,7 +167,14 @@ export async function POST(req: NextRequest) {
   // Optional AI synthesis
   let synthesis: string | null = null;
   if (body.withSynthesis !== false) {
-    synthesis = await generateSynthesis({ enriched, counts, score, scoreLabel: scoreLabelText, observations });
+    synthesis = await generateSynthesis({
+      enriched,
+      counts,
+      score,
+      scoreLabel: scoreLabelText,
+      observations,
+      productLabel: body.productLabel?.slice(0, 200) ?? null,
+    });
   }
 
   return NextResponse.json({
@@ -216,19 +226,32 @@ async function generateSynthesis(input: {
   score: number;
   scoreLabel: string;
   observations: { label: string; status: "present" | "absent"; count: number }[];
+  productLabel: string | null;
 }): Promise<string | null> {
   const apiKey = process.env.MISTRAL_API_KEY;
   if (!apiKey) return null;
 
   const red = input.enriched
     .filter((r) => r.color_rating === "Rouge")
-    .map((r) => `${r.name ?? r.input_raw} (${r.primary_function ?? "fonction inconnue"})`);
+    .map((r) => ({
+      name: r.name ?? r.input_raw,
+      fn: r.primary_function ?? "fonction inconnue",
+    }));
   const orange = input.enriched
     .filter((r) => r.color_rating === "Orange")
-    .map((r) => `${r.name ?? r.input_raw} (${r.primary_function ?? "fonction inconnue"})`);
+    .map((r) => ({
+      name: r.name ?? r.input_raw,
+      fn: r.primary_function ?? "fonction inconnue",
+    }));
   const yellow = input.enriched
     .filter((r) => r.color_rating === "Jaune")
     .map((r) => r.name ?? r.input_raw);
+
+  // Top main ingredients (first 3 in the list) — gives Mistral context to
+  // infer the product category for paragraph 1.
+  const mainIngredients = input.enriched
+    .slice(0, 3)
+    .map((r) => `${r.name ?? r.input_raw}${r.primary_function ? ` (${r.primary_function})` : ""}`);
 
   const positives = input.observations
     .filter((o) => o.status === "absent")
@@ -237,46 +260,51 @@ async function generateSynthesis(input: {
     .filter((o) => o.status === "present")
     .map((o) => `${o.label} (${o.count})`);
 
-  const prompt = `Tu vas rédiger une synthèse en français pour une analyse de composition cosmétique INCI.
+  const prompt = `Tu rédiges la synthèse d'une analyse INCI cosmétique pour un consommateur français non-chimiste.
 
-STRUCTURE EN 2 PARAGRAPHES :
+STRUCTURE OBLIGATOIRE — DEUX PARTIES SÉPARÉES PAR UNE LIGNE VIDE.
 
-Paragraphe 1 — État des lieux factuel (3 à 5 phrases) :
-- Toujours mentionner TOUS les ingrédients rouges (le cas échéant) par leur nom INCI EXACT, encadré par **.
-- Si plusieurs orange (≤ 5), citer chacun par son nom INCI en gras. Si > 5 orange, citer les 4 premiers + "et N autres".
-- Mentionner brièvement les jaunes notables si pertinents.
-- Mentionner ce qui est sain (parabens absents, sulfates absents, silicones absents, huiles minérales absentes, etc.) si pertinent.
-- Si la liste contient des allergènes parfumants, les nommer brièvement.
-- Ne JAMAIS inventer un ingrédient. Si une catégorie est vide, ne la mentionne pas.
+PARTIE 1 — Récap accessible (2 à 4 phrases en prose, AUCUNE puce)
+- Donne un ressenti général sur la composition, en langage clair et humain.
+- Adapte le ton au cas : compo très saine, compo équilibrée avec quelques points d'attention, compo chargée en X, etc.
+- Si tu peux deviner l'usage du produit (hydratation, anti-imperfection, anti-âge, nettoyage, démaquillage, soin après-soleil…) à partir des ingrédients principaux, mentionne-le.
+- VARIE l'attaque : ne commence PAS toujours par "Cette composition…" ni par "Cette analyse…". Tu peux commencer par l'usage présumé, par ce qui ressort, par ce qui est rassurant, etc.
+- Reste neutre, jamais alarmiste, jamais "produit à éviter" ou "produit dangereux".
 
-Paragraphe 2 — Touche de conseil bienveillant (2 à 3 phrases) :
-- Donner un ou deux conseils GÉNÉRAUX, doux et rassurants, en lien avec ce que la composition révèle. Exemples : suggérer un test sur une petite zone si la peau est réactive ; rappeler que ces ingrédients sont fréquents dans la cosmétique courante ; conseiller de privilégier une routine simple ; rappeler que la position dans la liste indique la concentration.
-- Pas d'alarmisme, pas de jugement sur le produit, pas de recommandation d'achat ni d'évitement spécifique.
-- Aucun conseil médical (ne pas dire "consultez un médecin", ne pas évoquer de pathologies).
+PARTIE 2 — Détail en PUCES (chaque ligne commence par "- ")
+- Cite CHAQUE ingrédient ROUGE en puce : "- **NOM_INCI** : [1 phrase courte expliquant pourquoi pénalisé]"
+- Cite CHAQUE ingrédient ORANGE (limite 6, sinon les 5 premiers + "- et N autres") : "- **NOM_INCI** ([fonction])"
+- Si plus de 3 jaunes notables, regroupe-les en UNE puce : "- Quelques ingrédients jaunes à surveiller : **NOM1**, **NOM2**, **NOM3**…"
+- Ajoute une puce sur les absences positives SI pertinent : "- Sans **parabens**, sans **sulfates**, sans **silicones**, sans **huiles minérales**" (ne mentionne que les absences réelles).
+- Termine par UNE puce de conseil contextuel non-médical : "- À savoir : …" (test sur petite zone, position dans la liste = concentration, routine simple, etc.).
 
-CONSIGNES GÉNÉRALES :
-- 5 à 8 phrases au total, deux paragraphes séparés par un saut de ligne.
-- Reste neutre, posé, pédagogique.
-- N'utilise pas d'emojis.
-- Conserve les termes techniques INCI quand ils sont nécessaires.
+CONTRAINTES STRICTES
+- Ne JAMAIS inventer un ingrédient. Si une catégorie est vide, ne fais simplement pas la puce.
+- AUCUN emoji.
+- AUCUN conseil médical (pas de "consultez un médecin", pas de pathologies citées).
+- AUCUNE recommandation d'achat / d'évitement d'un produit précis.
+- Encadre TOUJOURS les noms INCI cités avec **.
+- 4 à 8 puces maximum dans la PARTIE 2.
 
-DONNÉES :
+DONNÉES
+${input.productLabel ? `Produit analysé : ${input.productLabel}` : "Produit : composition collée par l'utilisateur (pas de nom fourni)."}
 Note globale : ${input.score.toFixed(1)}/20 (${input.scoreLabel})
 Comptes : Vert ${input.counts.Vert}, Jaune ${input.counts.Jaune}, Orange ${input.counts.Orange}, Rouge ${input.counts.Rouge}
+3 premiers ingrédients (concentration) : ${mainIngredients.join(", ") || "(non disponibles)"}
 
-Ingrédients ROUGES (à citer tous) :
-${red.length ? red.map((r) => `- ${r}`).join("\n") : "(aucun)"}
+Ingrédients ROUGES :
+${red.length ? red.map((r) => `- ${r.name} — ${r.fn}`).join("\n") : "(aucun)"}
 
-Ingrédients ORANGE (à citer dans la limite indiquée) :
-${orange.length ? orange.map((r) => `- ${r}`).join("\n") : "(aucun)"}
+Ingrédients ORANGE :
+${orange.length ? orange.map((r) => `- ${r.name} — ${r.fn}`).join("\n") : "(aucun)"}
 
-Ingrédients JAUNES :
+Ingrédients JAUNES (jusqu'à 8 cités) :
 ${yellow.length ? yellow.slice(0, 8).join(", ") + (yellow.length > 8 ? ` et ${yellow.length - 8} autres` : "") : "(aucun)"}
 
 Observations positives (absences) : ${positives.join(", ") || "(aucune)"}
 Observations présentes : ${presents.join(", ") || "(aucune)"}
 
-Rédige maintenant la synthèse :`;
+Rédige maintenant la synthèse en respectant la structure (Partie 1 en prose, ligne vide, Partie 2 en puces) :`;
 
   try {
     const r = await fetch("https://api.mistral.ai/v1/chat/completions", {
@@ -287,13 +315,14 @@ Rédige maintenant la synthèse :`;
       },
       body: JSON.stringify({
         model: "mistral-small-latest",
-        temperature: 0.2,
-        max_tokens: 750,
+        temperature: 0.55,
+        top_p: 0.95,
+        max_tokens: 900,
         messages: [
           {
             role: "system",
             content:
-              "Tu es un assistant spécialisé dans les compositions INCI cosmétiques. Tu rédiges à partir des données factuelles fournies, sans rien inventer. Tu peux ajouter quelques conseils généraux et bienveillants (test sur une petite zone, attention aux peaux sensibles, privilégier une routine simple, etc.), mais AUCUN conseil médical, AUCUNE recommandation d'achat ou d'évitement d'un produit précis, et AUCUN alarmisme. Tu restes neutre, posé, pédagogique, en 5 à 8 phrases organisées en deux paragraphes (état des lieux puis conseils). Quand tu cites un ingrédient INCI, tu l'encadres avec **.",
+              "Tu es un assistant qui rédige des synthèses INCI cosmétiques pour le grand public, à partir de données factuelles fournies — JAMAIS d'invention. Tu varies tes formulations d'un produit à l'autre pour ne JAMAIS sonner robotique : ouverture, ton, mots-clés. Tu restes neutre, jamais alarmiste, jamais médical. Tu structures TOUJOURS ta sortie en deux blocs : un paragraphe de récap accessible (prose, pas de puces), une ligne vide, puis un bloc de puces (chaque ligne commençant par '- '). Tu encadres les noms INCI avec **.",
           },
           { role: "user", content: prompt },
         ],

@@ -4,12 +4,31 @@ import { useEffect, useRef, useState } from "react";
 import { SearchBar } from "./SearchBar";
 import { ProcessingOverlay, randomProcessingTotal } from "./ProcessingOverlay";
 import { AnalyseResultPanel } from "./AnalyseResultPanel";
+import {
+  ProductSearchInput,
+  ProductHero,
+} from "./ProductSearchInput";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 const STORAGE_KEY = "cw:lastAnalysis";
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 3;
 
-type Cached = { v: number; text: string; result: AnalyseResponse; ts: number };
+type Mode = "inci" | "product";
+
+type ProductSource = {
+  source: string;
+  sourceUrl: string | null;
+  brand: string | null;
+  productName: string | null;
+};
+
+type Cached = {
+  v: number;
+  text: string;
+  result: AnalyseResponse;
+  ts: number;
+  productSource?: ProductSource | null;
+};
 
 function readCache(): Cached | null {
   if (typeof window === "undefined") return null;
@@ -23,12 +42,22 @@ function readCache(): Cached | null {
     return null;
   }
 }
-function writeCache(text: string, result: AnalyseResponse) {
+function writeCache(
+  text: string,
+  result: AnalyseResponse,
+  productSource: ProductSource | null,
+) {
   if (typeof window === "undefined") return;
   try {
     sessionStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ v: CACHE_VERSION, text, result, ts: Date.now() } satisfies Cached),
+      JSON.stringify({
+        v: CACHE_VERSION,
+        text,
+        result,
+        ts: Date.now(),
+        productSource,
+      } satisfies Cached),
     );
   } catch {
     /* ignore */
@@ -44,8 +73,12 @@ function clearCache() {
 }
 
 export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
+  const [mode, setMode] = useState<Mode>("inci");
   const [result, setResult] = useState<AnalyseResponse | null>(null);
   const [originalText, setOriginalText] = useState("");
+  const [productSource, setProductSource] = useState<ProductSource | null>(
+    null,
+  );
   const [processing, setProcessing] = useState<{ active: boolean; budget: number }>({
     active: false,
     budget: 0,
@@ -53,6 +86,7 @@ export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const inFlightRef = useRef<AbortController | null>(null);
+  const pendingProductSourceRef = useRef<ProductSource | null>(null);
 
   // Restore from sessionStorage on mount (e.g., after navigating to a fiche and
   // back). If an `?inci=` param is present, prefer it — but reuse the cached
@@ -70,6 +104,7 @@ export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
       if (cached && cached.text.trim() === trimmed) {
         setResult(cached.result);
         setOriginalText(cached.text);
+        setProductSource(cached.productSource ?? null);
         setHydrated(true);
         return;
       }
@@ -80,6 +115,7 @@ export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
     if (cached) {
       setResult(cached.result);
       setOriginalText(cached.text);
+      setProductSource(cached.productSource ?? null);
     }
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,16 +128,29 @@ export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
     const ctrl = new AbortController();
     inFlightRef.current = ctrl;
 
+    // Consume the pending product source synchronously : whatever happens
+    // next (success, network error, abort), this call owns it exactly once.
+    const src = pendingProductSourceRef.current;
+    pendingProductSourceRef.current = null;
+
     const budget = randomProcessingTotal();
     setProcessing({ active: true, budget });
     setError(null);
     const startedAt = Date.now();
 
+    const productLabel = src
+      ? [src.brand, src.productName].filter(Boolean).join(" ").trim() || undefined
+      : undefined;
+
     try {
       const r = await fetch("/api/analyser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: trimmed, withSynthesis: true }),
+        body: JSON.stringify({
+          text: trimmed,
+          withSynthesis: true,
+          ...(productLabel ? { productLabel } : {}),
+        }),
         signal: ctrl.signal,
       });
       if (!r.ok) {
@@ -115,9 +164,10 @@ export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
       if (elapsed < budget) {
         await new Promise((res) => setTimeout(res, budget - elapsed));
       }
+      setProductSource(src);
       setResult(data);
       setOriginalText(trimmed);
-      writeCache(trimmed, data);
+      writeCache(trimmed, data, src);
     } catch (err) {
       if ((err as DOMException).name === "AbortError") return;
       setError((err as Error).message ?? "Erreur réseau");
@@ -134,6 +184,28 @@ export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
     clearCache();
     setResult(null);
     setOriginalText("");
+    setProductSource(null);
+    setError(null);
+  }
+
+  function handleProductFound(input: {
+    ingredientsText: string;
+    brand: string | null;
+    productName: string | null;
+    source: string;
+    sourceUrl: string | null;
+  }) {
+    pendingProductSourceRef.current = {
+      source: input.source,
+      sourceUrl: input.sourceUrl,
+      brand: input.brand,
+      productName: input.productName,
+    };
+    void runAnalyse(input.ingredientsText);
+  }
+
+  function handleFallbackToManual() {
+    setMode("inci");
     setError(null);
   }
 
@@ -145,6 +217,15 @@ export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
   if (result) {
     return (
       <main className="mx-auto w-full max-w-6xl flex-1 px-6 pb-16">
+        {productSource ? (
+          <ProductHero
+            source={productSource.source}
+            sourceUrl={productSource.sourceUrl}
+            brand={productSource.brand}
+            productName={productSource.productName}
+            onClear={reset}
+          />
+        ) : null}
         <AnalyseResultPanel
           result={result}
           originalText={originalText}
@@ -187,17 +268,42 @@ export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
           </span>
         </h1>
         <p className="mt-4 text-base leading-relaxed text-ink-muted sm:text-lg">
-          Colle la liste INCI d&apos;un produit.
-          <br className="hidden sm:block" />
-          On te montre en couleurs ce qu&apos;elle cache.
+          {mode === "inci" ? (
+            <>
+              Colle la liste INCI d&apos;un produit.
+              <br className="hidden sm:block" />
+              On te montre en couleurs ce qu&apos;elle cache.
+            </>
+          ) : (
+            <>
+              Tape le nom d&apos;un produit.
+              <br className="hidden sm:block" />
+              On retrouve sa composition et on lui calcule sa note sur 20.
+            </>
+          )}
         </p>
 
         <div className="mt-10 w-full">
-          <SearchBar autoFocus size="lg" onAnalyseList={runAnalyse} />
-          <p className="mt-3 text-[13px] text-ink-subtle">
-            Tape un ingrédient pour sa fiche, ou colle une liste pour
-            l&apos;analyser.
-          </p>
+          <ModeToggle mode={mode} onChange={setMode} />
+
+          {mode === "inci" ? (
+            <>
+              <div className="mt-5">
+                <SearchBar autoFocus size="lg" onAnalyseList={runAnalyse} />
+              </div>
+              <p className="mt-3 text-[13px] text-ink-subtle">
+                Tape un ingrédient pour sa fiche, ou colle une liste pour
+                l&apos;analyser.
+              </p>
+            </>
+          ) : (
+            <div className="mt-5">
+              <ProductSearchInput
+                onFound={handleProductFound}
+                onFallbackToManual={handleFallbackToManual}
+              />
+            </div>
+          )}
         </div>
 
         {error ? (
@@ -209,6 +315,80 @@ export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
         <Legend />
       </section>
     </main>
+  );
+}
+
+function ModeToggle({
+  mode,
+  onChange,
+}: {
+  mode: Mode;
+  onChange: (m: Mode) => void;
+}) {
+  const tabs: { key: Mode; label: string; labelShort: string }[] = [
+    {
+      key: "inci",
+      label: "Coller une liste INCI",
+      labelShort: "Liste INCI",
+    },
+    {
+      key: "product",
+      label: "Tape un nom de produit",
+      labelShort: "Nom de produit",
+    },
+  ];
+  return (
+    <div
+      className="
+        relative mx-auto flex w-full max-w-xl items-stretch gap-1
+        rounded-2xl bg-white/35 p-1
+        ring-1 ring-white/60
+        shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),inset_0_-1px_0_0_rgba(15,23,42,0.04),0_10px_30px_-12px_rgba(15,23,42,0.18)]
+        backdrop-blur-2xl backdrop-saturate-150
+        sm:gap-1.5 sm:rounded-full sm:p-1.5
+      "
+    >
+      {/* Top specular sheen of the whole capsule */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-6 top-px h-1/3 rounded-2xl bg-gradient-to-b from-white/55 to-transparent blur-[1px] sm:rounded-full"
+      />
+      {tabs.map((t) => {
+        const active = mode === t.key;
+        const pressed = (active ? "true" : "false") as "true" | "false";
+        return (
+          <button
+            key={t.key}
+            type="button"
+            onClick={() => onChange(t.key)}
+            aria-pressed={pressed}
+            className={`
+              group relative flex flex-1 flex-col items-center justify-center
+              rounded-xl px-2.5 py-1.5 leading-tight
+              transition-all duration-300 ease-out
+              sm:gap-0.5 sm:rounded-full sm:px-4 sm:py-2.5
+              ${
+                active
+                  ? "bg-gradient-to-b from-white to-white/85 text-ink shadow-[0_4px_14px_-4px_rgba(15,23,42,0.18),inset_0_1px_0_0_rgba(255,255,255,0.85),inset_0_-1px_0_0_rgba(15,23,42,0.06)] ring-1 ring-black/[0.08]"
+                  : "text-ink-muted hover:bg-white/45 hover:text-ink hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6)]"
+              }
+            `}
+          >
+            {/* Specular highlight on the active tab: bright crescent at the top */}
+            {active ? (
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-x-3 top-[3px] h-1/3 rounded-lg bg-gradient-to-b from-white/65 via-white/20 to-transparent sm:rounded-full"
+              />
+            ) : null}
+            <span className="relative whitespace-nowrap text-[12px] font-semibold tracking-tight sm:text-sm">
+              <span className="sm:hidden">{t.labelShort}</span>
+              <span className="hidden sm:inline">{t.label}</span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 

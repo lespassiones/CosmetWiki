@@ -103,14 +103,14 @@ export function ProcessingOverlay({
                     state === "done"
                       ? "bg-ink text-white"
                       : state === "active"
-                        ? "bg-white ring-2 ring-violet-300"
+                        ? "bg-white ring-2 ring-rose-300"
                         : "bg-black/[0.05] ring-1 ring-black/[0.05]"
                   }`}
                 >
                   {state === "done" ? (
                     <CheckIcon className="h-3 w-3" />
                   ) : state === "active" ? (
-                    <span className="block h-1.5 w-1.5 rounded-full bg-violet-600 animate-ping" aria-hidden />
+                    <span className="block h-1.5 w-1.5 rounded-full bg-rose-600 animate-ping" aria-hidden />
                   ) : null}
                 </span>
                 <span>{label}</span>
@@ -120,7 +120,7 @@ export function ProcessingOverlay({
         </ul>
 
         <div className="mt-5 h-1 w-full overflow-hidden rounded-full bg-black/[0.05]">
-          <span className="block h-full w-1/3 animate-[shimmer_1.4s_linear_infinite] rounded-full bg-gradient-to-r from-transparent via-violet-500 to-transparent" />
+          <span className="block h-full w-1/3 animate-[shimmer_1.4s_linear_infinite] rounded-full bg-gradient-to-r from-transparent via-rose-500 to-transparent" />
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Logo } from "@/components/Logo";
 import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
@@ -11,6 +12,22 @@ export const dynamic = "force-dynamic";
 type SearchPageProps = {
   searchParams: Promise<{ q?: string }>;
 };
+
+export async function generateMetadata({
+  searchParams,
+}: SearchPageProps): Promise<Metadata> {
+  const params = await searchParams;
+  const q = (params.q ?? "").trim().slice(0, 80);
+  const title = q ? `Recherche : ${q}` : "Recherche d'ingrédients";
+  return {
+    title,
+    description: q
+      ? `Résultats de recherche pour « ${q} » dans la base d'ingrédients cosmétiques CosmetWiki.`
+      : "Recherchez parmi plus de 15 000 ingrédients cosmétiques par nom INCI, traduction française ou numéro CAS.",
+    robots: { index: false, follow: true },
+    alternates: { canonical: "/search" },
+  };
+}
 
 const DOT: Record<SearchHit["color_rating"], string> = {
   Vert: "bg-emerald-500",
@@ -64,7 +81,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
         <div className="mb-5 flex items-baseline justify-between">
           <h1 className="text-xl font-semibold text-ink">
-            Résultats pour <span className="text-violet-700">« {q || "—"} »</span>
+            Résultats pour <span className="text-rose-700">« {q || "—"} »</span>
           </h1>
           <p className="text-sm text-ink-muted">
             {hits.length} ingrédient{hits.length > 1 ? "s" : ""}
@@ -89,7 +106,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               >
                 <Link
                   href={`/i/${h.slug}`}
-                  className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-violet-50/40"
+                  className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-rose-50/40"
                 >
                   <span
                     className={`h-2.5 w-2.5 shrink-0 rounded-full ${DOT[h.color_rating]}`}

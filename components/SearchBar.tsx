@@ -106,10 +106,11 @@ export function SearchBar({
 
   const wrapperBase =
     size === "lg"
-      ? "min-h-[64px] rounded-[28px] pl-6 pr-5 py-3"
-      : "min-h-[48px] rounded-[24px] pl-4 pr-4 py-2";
-  const inputCls = size === "lg" ? "text-lg" : "text-sm";
-  const iconSize = size === "lg" ? "h-5 w-5" : "h-4 w-4";
+      ? "min-h-[52px] rounded-[22px] pl-4 pr-3 py-2.5 sm:min-h-[64px] sm:rounded-[28px] sm:pl-6 sm:pr-5 sm:py-3"
+      : "min-h-[44px] rounded-[20px] pl-3 pr-3 py-2 sm:min-h-[48px] sm:rounded-[24px] sm:pl-4 sm:pr-4";
+  const inputCls =
+    size === "lg" ? "text-[14px] sm:text-lg" : "text-[13px] sm:text-sm";
+  const iconSize = size === "lg" ? "h-4 w-4 sm:h-5 sm:w-5" : "h-4 w-4";
 
   function startProcessingThen(action: () => void) {
     const budget = randomProcessingTotal();
@@ -203,7 +204,7 @@ export function SearchBar({
       <div
         className={`relative flex w-full items-start gap-3 bg-white ${wrapperBase} transition-all duration-200 ${
           focused
-            ? "ring-2 ring-violet-200 shadow-[0_18px_50px_-12px_rgba(139,92,246,0.28),0_8px_24px_-6px_rgba(15,23,42,0.10)]"
+            ? "ring-2 ring-black/[0.18] shadow-[0_18px_50px_-12px_rgba(15,23,42,0.14),0_8px_24px_-6px_rgba(15,23,42,0.10)]"
             : "ring-1 ring-black/[0.06] shadow-[0_14px_40px_-12px_rgba(15,23,42,0.16),0_4px_18px_-4px_rgba(15,23,42,0.08)]"
         }`}
       >
@@ -232,7 +233,7 @@ export function SearchBar({
           }}
           onKeyDown={onKeyDown}
           maxLength={6000}
-          className={`flex-1 resize-none bg-transparent ${inputCls} font-normal leading-7 text-ink placeholder:text-ink-subtle outline-none scrollbar-soft`}
+          className={`flex-1 resize-none bg-transparent ${inputCls} font-normal leading-6 text-ink placeholder:text-ink-subtle outline-none scrollbar-soft sm:leading-7`}
         />
 
         <div className="flex shrink-0 items-center gap-1 self-start pt-0.5">
@@ -243,7 +244,7 @@ export function SearchBar({
                 e.preventDefault();
                 submitList(query.trim());
               }}
-              className="inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-3.5 py-1.5 text-[13px] font-semibold text-white shadow-[0_4px_14px_-4px_rgba(139,92,246,0.6)] transition-all hover:bg-violet-700 hover:shadow-[0_8px_22px_-6px_rgba(139,92,246,0.7)]"
+              className="inline-flex items-center gap-1.5 rounded-full bg-rose-600 px-3.5 py-1.5 text-[13px] font-semibold text-white shadow-[0_4px_14px_-4px_rgba(244, 63, 94,0.6)] transition-all hover:bg-rose-700 hover:shadow-[0_8px_22px_-6px_rgba(244, 63, 94,0.7)]"
             >
               Analyser
               <span aria-hidden>→</span>
@@ -288,7 +289,7 @@ export function SearchBar({
                       go(hit);
                     }}
                     className={`flex w-full cursor-pointer items-center gap-4 px-5 py-3.5 text-left transition-colors ${
-                      idx === highlight ? "bg-violet-50/60" : "hover:bg-black/[0.02]"
+                      idx === highlight ? "bg-rose-50/60" : "hover:bg-black/[0.02]"
                     }`}
                   >
                     <span
@@ -322,7 +323,7 @@ export function SearchBar({
                       router.push(`/search?q=${encodeURIComponent(query.trim())}`),
                     );
                   }}
-                  className="flex w-full items-center justify-center gap-2 px-5 py-3.5 text-sm font-medium text-violet-700 hover:bg-violet-50/60"
+                  className="flex w-full items-center justify-center gap-2 px-5 py-3.5 text-sm font-medium text-rose-700 hover:bg-rose-50/60"
                 >
                   Voir tous les résultats pour « {query.trim()} »
                   <span aria-hidden>→</span>
@@ -389,7 +390,7 @@ function Highlight({ text, q }: { text: string; q: string }) {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="bg-transparent font-semibold text-violet-700">
+      <mark className="bg-transparent font-semibold text-rose-700">
         {text.slice(idx, idx + norm.length)}
       </mark>
       {text.slice(idx + norm.length)}

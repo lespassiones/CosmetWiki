@@ -1,13 +1,29 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Logo } from "@/components/Logo";
 import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { MobileMenu } from "@/components/MobileMenu";
 
-export const metadata = {
-  title: "Comment ça marche",
-  description:
-    "Comprendre le système de notation par couleurs (vert, jaune, orange, rouge) utilisé sur CosmetWiki pour classer les ingrédients cosmétiques.",
+const TITLE = "Comment ça marche";
+const DESCRIPTION =
+  "Comprendre le système de notation par couleurs (vert, jaune, orange, rouge) utilisé sur CosmetWiki pour classer les ingrédients cosmétiques selon leur tolérance.";
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/comment-ca-marche" },
+  openGraph: {
+    title: `${TITLE} · CosmetWiki`,
+    description: DESCRIPTION,
+    url: "/comment-ca-marche",
+    type: "article",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${TITLE} · CosmetWiki`,
+    description: DESCRIPTION,
+  },
 };
 
 const SOURCE_URL = "https://incibeauty.com/blog/396-comment-les-produits-sont-ils-notes";
@@ -143,7 +159,7 @@ export default function HowItWorksPage() {
               href="https://incibeauty.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-violet-700 hover:underline"
+              className="text-rose-700 hover:underline"
             >
               incibeauty.com
             </a>
@@ -155,7 +171,7 @@ export default function HowItWorksPage() {
             href={SOURCE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-violet-700"
+            className="inline-flex items-center gap-1.5 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700"
           >
             Lire l&apos;article complet sur INCI Beauty
             <span aria-hidden>→</span>
