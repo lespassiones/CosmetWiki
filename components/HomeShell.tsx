@@ -224,20 +224,22 @@ export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
   if (result) {
     return (
       <main className="mx-auto w-full max-w-6xl flex-1 px-6 pb-16">
-        {productSource ? (
-          <ProductHero
-            source={productSource.source}
-            sourceUrl={productSource.sourceUrl}
-            brand={productSource.brand}
-            productName={productSource.productName}
-            onClear={reset}
+        <div id="pdf-root">
+          {productSource ? (
+            <ProductHero
+              source={productSource.source}
+              sourceUrl={productSource.sourceUrl}
+              brand={productSource.brand}
+              productName={productSource.productName}
+              onClear={reset}
+            />
+          ) : null}
+          <AnalyseResultPanel
+            result={result}
+            originalText={originalText}
+            onReset={reset}
           />
-        ) : null}
-        <AnalyseResultPanel
-          result={result}
-          originalText={originalText}
-          onReset={reset}
-        />
+        </div>
       </main>
     );
   }

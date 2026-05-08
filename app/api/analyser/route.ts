@@ -46,7 +46,26 @@ const TAG_LABELS: Record<string, string> = {
 };
 
 // Tags reported as "good when absent". The rest are reported only when present.
-const ABSENCE_REPORTED = new Set(["paraben", "sulfate", "huile-minerale", "silicone"]);
+const ABSENCE_REPORTED = new Set([
+  "paraben",
+  "sulfate",
+  "huile-minerale",
+  "silicone",
+  "allergene-parfumant",
+  "ethoxyle",
+  "colorant-synthese",
+  "ammonium-quaternaire",
+  "parfum-synthese",
+]);
+
+// Names that count as "water" when found in position 0 (first ingredient).
+const WATER_NAMES = new Set(["aqua", "water", "eau"]);
+
+// Number of leading positions considered "top of the list" for the
+// "problematic actives near the top" observation.
+const TOP_LIST_WINDOW = 5;
+
+const DIACRITICS_RE = new RegExp("[\\u0300-\\u036f]", "g");
 
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req.headers);
@@ -137,9 +156,10 @@ export async function POST(req: NextRequest) {
   type Observation = {
     tag: string;
     label: string;
-    status: "present" | "absent";
+    status: "present" | "absent" | "info" | "warn";
     count: number;
     items: { name: string; slug: string | null; colorRating: ColorRating | null }[];
+    message?: string;
   };
   const observations: Observation[] = [];
   // Reported absences (good news)
@@ -157,6 +177,68 @@ export async function POST(req: NextRequest) {
     if (c > 0) {
       observations.push({ tag, label: TAG_LABELS[tag] ?? tag, status: "present", count: c, items: tagItems[tag] ?? [] });
     }
+  }
+
+  // ----- Computed observations (no tag, derived from the list itself) -----
+
+  // Sort once by position so first-element checks are stable.
+  const byPosition = [...enriched].sort((a, b) => a.position_idx - b.position_idx);
+
+  // 1. Water-based formula : Aqua / Water in position 0.
+  const first = byPosition[0];
+  if (first) {
+    const firstNorm = (first.name ?? first.input_raw ?? "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(DIACRITICS_RE, "")
+      .trim();
+    const isWater = WATER_NAMES.has(firstNorm);
+    if (isWater) {
+      const display = (first.name ?? first.input_raw ?? "Aqua").trim();
+      const displayCased = display.charAt(0).toUpperCase() + display.slice(1).toLowerCase();
+      observations.push({
+        tag: "water-based",
+        label: "Formule à base d'eau",
+        status: "info",
+        count: 0,
+        items: [],
+        message: `${displayCased} en première position`,
+      });
+    }
+  }
+
+  // 2. Base coverage : how many ingredients we actually recognised.
+  if (enriched.length > 0) {
+    const pct = Math.round((matched / enriched.length) * 100);
+    observations.push({
+      tag: "coverage",
+      label: "Couverture",
+      status: "info",
+      count: matched,
+      items: [],
+      message: `${matched}/${enriched.length} ingrédients reconnus (${pct}%)`,
+    });
+  }
+
+  // 3. Problematic actives in the top of the list.
+  // Position = concentration in INCI lists, so an Orange/Rouge in the top 5 is
+  // a stronger signal than the same ingredient at the very end.
+  const topProblematic = byPosition
+    .slice(0, TOP_LIST_WINDOW)
+    .filter((r) => r.color_rating === "Orange" || r.color_rating === "Rouge");
+  if (topProblematic.length > 0) {
+    observations.push({
+      tag: "top-list-warning",
+      label: "Ingrédients de pénalité en début de liste",
+      status: "warn",
+      count: topProblematic.length,
+      items: topProblematic.map((r) => ({
+        name: r.name ?? r.input_raw,
+        slug: r.slug,
+        colorRating: r.color_rating,
+      })),
+      message: `${topProblematic.length} dans le top ${TOP_LIST_WINDOW} (concentration plus élevée)`,
+    });
   }
 
   // Aliases used (FR/EN equivalents that were resolved)
@@ -225,7 +307,7 @@ async function generateSynthesis(input: {
   counts: Record<string, number>;
   score: number;
   scoreLabel: string;
-  observations: { label: string; status: "present" | "absent"; count: number }[];
+  observations: { label: string; status: "present" | "absent" | "info" | "warn"; count: number }[];
   productLabel: string | null;
 }): Promise<string | null> {
   const apiKey = process.env.MISTRAL_API_KEY;

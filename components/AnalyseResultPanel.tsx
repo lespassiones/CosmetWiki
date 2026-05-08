@@ -264,6 +264,7 @@ function ObservationsCard({
           const isOpen = openTags.has(o.tag);
           const items = o.items ?? [];
           const expandable = o.count > 0 && items.length > 0;
+          const showCount = expandable && (o.status === "present" || o.status === "warn");
           return (
             <li key={o.tag}>
               {expandable ? (
@@ -274,26 +275,18 @@ function ObservationsCard({
                   className="flex w-full items-center gap-2.5 rounded-xl px-1.5 py-1 text-left text-[14px] transition-colors hover:bg-black/[0.025]"
                 >
                   <ObservationIcon obs={o} />
-                  <span className="flex-1 text-ink">
-                    {o.label}{" "}
-                    <span className={o.status === "absent" ? "text-emerald-700" : "text-ink-muted"}>
-                      {o.status === "absent" ? "absents" : "présents"}
+                  <ObservationLabel obs={o} />
+                  {showCount ? (
+                    <span className="rounded-full bg-black/[0.04] px-2 py-0.5 font-mono text-[11px] text-ink-muted">
+                      {o.count}
                     </span>
-                  </span>
-                  <span className="rounded-full bg-black/[0.04] px-2 py-0.5 font-mono text-[11px] text-ink-muted">
-                    {o.count}
-                  </span>
+                  ) : null}
                   <ChevronDownIcon className={`h-3.5 w-3.5 shrink-0 text-ink-subtle transition-transform ${isOpen ? "rotate-180" : ""}`} />
                 </button>
               ) : (
                 <div className="flex w-full items-center gap-2.5 px-1.5 py-1 text-[14px]">
                   <ObservationIcon obs={o} />
-                  <span className="flex-1 text-ink">
-                    {o.label}{" "}
-                    <span className={o.status === "absent" ? "text-emerald-700" : "text-ink-muted"}>
-                      {o.status === "absent" ? "absents" : "présents"}
-                    </span>
-                  </span>
+                  <ObservationLabel obs={o} />
                 </div>
               )}
 
@@ -353,14 +346,96 @@ function ObservationsCard({
 }
 
 function ObservationIcon({ obs }: { obs: Observation }) {
+  if (obs.status === "absent") {
+    return (
+      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-emerald-50 ring-1 ring-emerald-100 text-emerald-600">
+        <CheckIcon className="h-3.5 w-3.5" />
+      </span>
+    );
+  }
+  if (obs.status === "info") {
+    return (
+      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-sky-50 ring-1 ring-sky-100 text-sky-600">
+        <InfoIcon className="h-3.5 w-3.5" />
+      </span>
+    );
+  }
+  if (obs.status === "warn") {
+    return (
+      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-amber-50 ring-1 ring-amber-100 text-amber-700">
+        <WarnIcon className="h-3.5 w-3.5" />
+      </span>
+    );
+  }
   return (
     <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-black/[0.03] ring-1 ring-black/[0.04] text-ink-muted">
-      {obs.status === "absent" ? (
-        <CheckIcon className="h-3.5 w-3.5 text-emerald-600" />
-      ) : (
-        <DotIcon className={`h-2.5 w-2.5 ${tagColor(obs.tag)}`} />
-      )}
+      <DotIcon className={`h-2.5 w-2.5 ${tagColor(obs.tag)}`} />
     </span>
+  );
+}
+
+function ObservationLabel({ obs }: { obs: Observation }) {
+  if (obs.message) {
+    const tone =
+      obs.status === "absent"
+        ? "text-emerald-700"
+        : obs.status === "warn"
+          ? "text-amber-700"
+          : obs.status === "info"
+            ? "text-sky-700"
+            : "text-ink-muted";
+    return (
+      <span className="flex-1 text-ink">
+        {obs.label}{" "}
+        <span className={tone}>{obs.message}</span>
+      </span>
+    );
+  }
+  const suffix = obs.status === "absent" ? "absents" : "présents";
+  const suffixTone = obs.status === "absent" ? "text-emerald-700" : "text-ink-muted";
+  return (
+    <span className="flex-1 text-ink">
+      {obs.label}{" "}
+      <span className={suffixTone}>{suffix}</span>
+    </span>
+  );
+}
+
+function InfoIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <circle cx="12" cy="12" r="9" />
+      <line x1="12" y1="8" x2="12" y2="8" />
+      <line x1="12" y1="11" x2="12" y2="16" />
+    </svg>
+  );
+}
+
+function WarnIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12" y2="17" />
+    </svg>
   );
 }
 
@@ -752,7 +827,11 @@ function ColorChip({ rating }: { rating: ColorRating | null }) {
 // jsPDF primitives.
 // ============================================================
 async function downloadPdf(result: AnalyseResponse, originalText: string) {
-  const el = document.getElementById("analyse-results");
+  // Capture the whole pdf-root (product hero + analyse panel), not just the
+  // analyse section — the hero shows the product name and source.
+  const el =
+    document.getElementById("pdf-root") ??
+    document.getElementById("analyse-results");
   if (!el) return;
 
   // Hide elements flagged as PDF-irrelevant (toolbar buttons) during capture.
@@ -761,9 +840,16 @@ async function downloadPdf(result: AnalyseResponse, originalText: string) {
   hidden.forEach((h) => {
     h.style.display = "none";
   });
-  // Mark the section as capturing — lets us neutralise effects html2canvas
-  // can't render correctly (backdrop-filter, animation start state).
+  // Mark the section as capturing — the .pdf-capturing CSS rule (in
+  // globals.css) forces all Reveal animations to their final state and
+  // disables backdrop-filter, transitions and translucent surfaces — none
+  // of which html2canvas can render reliably.
   el.classList.add("pdf-capturing");
+  // Wait two frames so the browser commits the style change before
+  // html2canvas reads computed styles.
+  await new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+  );
 
   try {
     const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
@@ -776,20 +862,43 @@ async function downloadPdf(result: AnalyseResponse, originalText: string) {
       backgroundColor: "#FAFAFA",
       logging: false,
       useCORS: true,
+      // Mirror the in-place state in the clone html2canvas builds in its
+      // hidden iframe — this is what guarantees all Reveal blocks render
+      // visible in the snapshot.
+      onclone: (clonedDoc, clonedEl) => {
+        clonedEl.classList.add("pdf-capturing");
+        clonedDoc
+          .querySelectorAll<HTMLElement>(".reveal-on-mount")
+          .forEach((node) => {
+            node.style.opacity = "1";
+            node.style.transform = "none";
+            node.style.animation = "none";
+          });
+      },
     });
 
-    const doc = new jsPDF({ unit: "pt", format: "a4", orientation: "portrait" });
+    const doc = new jsPDF({
+      unit: "pt",
+      format: "a4",
+      orientation: "portrait",
+      compress: true,
+    });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const imgWidth = pageWidth;
+
+    // Leave a small margin for breathing room.
+    const margin = 24;
+    const imgWidth = pageWidth - margin * 2;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
     const imgData = canvas.toDataURL("image/jpeg", 0.95);
 
     let yOffset = 0;
+    let pageIdx = 0;
     while (yOffset < imgHeight) {
-      if (yOffset > 0) doc.addPage();
-      doc.addImage(imgData, "JPEG", 0, -yOffset, imgWidth, imgHeight);
-      yOffset += pageHeight;
+      if (pageIdx > 0) doc.addPage();
+      doc.addImage(imgData, "JPEG", margin, margin - yOffset, imgWidth, imgHeight);
+      yOffset += pageHeight - margin * 2;
+      pageIdx++;
     }
 
     const filename = `cosmetwiki-analyse-${new Date().toISOString().slice(0, 10)}.pdf`;

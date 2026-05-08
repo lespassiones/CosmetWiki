@@ -22,9 +22,17 @@ export type AnalyseItem = {
 export type Observation = {
   tag: string;
   label: string;
-  status: "present" | "absent";
+  /**
+   * - `absent`  : tag known to be reported when missing (Parabens absents, etc.)
+   * - `present` : tag found in the list (Conservateurs présents, etc.)
+   * - `info`    : neutral computed insight (water-based formula, coverage, …)
+   * - `warn`    : computed concern (problematic ingredient near the top, …)
+   */
+  status: "present" | "absent" | "info" | "warn";
   count: number;
   items: { name: string; slug: string | null; colorRating: ColorRating | null }[];
+  /** When set, replaces the auto "absents/présents" suffix in the UI. */
+  message?: string;
 };
 
 export type AnalyseResponse = {
