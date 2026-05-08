@@ -4,6 +4,7 @@ import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { MobileMenu } from "@/components/MobileMenu";
 import { HomeShell } from "@/components/HomeShell";
+import { InstallPWAButton } from "@/components/InstallPWAButton";
 
 type Props = {
   searchParams?: Promise<{ inci?: string }>;
@@ -32,6 +33,7 @@ export default async function Home({ searchParams }: Props) {
           >
             À propos
           </Link>
+          <InstallPWAButton className="ml-2" />
         </nav>
         <MobileMenu />
       </header>
