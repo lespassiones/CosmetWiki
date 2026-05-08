@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { InstallPWAMenuItem } from "@/components/InstallPWAButton";
 
 const NAV_ITEMS = [
   { href: "/", label: "Accueil" },
@@ -90,6 +91,9 @@ export function MobileMenu() {
                   </li>
                 );
               })}
+              <li className="px-1.5 pt-2">
+                <InstallPWAMenuItem onActivate={() => setOpen(false)} />
+              </li>
             </ul>
           </nav>
         </div>
