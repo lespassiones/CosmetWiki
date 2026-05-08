@@ -1,9 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { AnalyseItem, AnalyseResponse, Observation } from "@/lib/analyseTypes";
 import type { ColorRating } from "@/lib/supabase";
+import { Reveal } from "./Reveal";
+
+// Delay (ms) after panel mount before each block becomes visible.
+// Synthesis streaming and score animation start at the same time as their
+// Reveal so the motion is seen as the user looks at the block.
+const REVEAL_SCORE_MS = 750;
+const REVEAL_SYNTHESIS_MS = 1100;
 
 export function AnalyseResultPanel({
   result,
@@ -16,7 +23,7 @@ export function AnalyseResultPanel({
 }) {
   return (
     <section id="analyse-results" className="pt-2">
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
+      <div data-pdf-hide className="flex flex-wrap items-center justify-between gap-3 pt-4">
         <button
           type="button"
           onClick={onReset}
@@ -34,63 +41,83 @@ export function AnalyseResultPanel({
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <StatCard label="Ingrédients identifiés" muted>
-          <p className="text-3xl font-semibold tabular-nums text-ink">
-            {result.counts.matched}
-          </p>
-          <p className="mt-0.5 text-[12px] text-ink-subtle">
-            sur {result.counts.total} ingrédients
-          </p>
-        </StatCard>
-        <StatCard label="Vert" dot="bg-emerald-500">
-          <p className="text-3xl font-semibold tabular-nums text-ink">
-            {result.counts.vert}
-          </p>
-          <p className="mt-0.5 text-[12px] text-ink-subtle">
-            {pct(result.counts.vert, result.counts.total)} %
-          </p>
-        </StatCard>
-        <StatCard label="Jaune" dot="bg-amber-400">
-          <p className="text-3xl font-semibold tabular-nums text-ink">
-            {result.counts.jaune}
-          </p>
-          <p className="mt-0.5 text-[12px] text-ink-subtle">
-            {pct(result.counts.jaune, result.counts.total)} %
-          </p>
-        </StatCard>
-        <StatCard label="Orange" dot="bg-orange-500">
-          <p className="text-3xl font-semibold tabular-nums text-ink">
-            {result.counts.orange}
-          </p>
-          <p className="mt-0.5 text-[12px] text-ink-subtle">
-            {pct(result.counts.orange, result.counts.total)} %
-          </p>
-        </StatCard>
-        <StatCard label="Rouge" dot="bg-rose-500">
-          <p className="text-3xl font-semibold tabular-nums text-ink">
-            {result.counts.rouge}
-          </p>
-          <p className="mt-0.5 text-[12px] text-ink-subtle">
-            {pct(result.counts.rouge, result.counts.total)} %
-          </p>
-        </StatCard>
-        <ScoreCard
-          score={result.score}
-          label={result.scoreLabel}
-          tone={result.scoreTone}
-        />
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-[repeat(5,minmax(0,1fr))_1.3fr]">
+        <Reveal delayMs={0}>
+          <StatCard label="Ingrédients identifiés" muted>
+            <p className="text-3xl font-semibold tabular-nums text-ink">
+              {result.counts.matched}
+            </p>
+            <p className="mt-0.5 text-[12px] text-ink-subtle">
+              sur {result.counts.total} ingrédients
+            </p>
+          </StatCard>
+        </Reveal>
+        <Reveal delayMs={150}>
+          <StatCard label="Vert" dot="bg-emerald-500">
+            <p className="text-3xl font-semibold tabular-nums text-ink">
+              {result.counts.vert}
+            </p>
+            <p className="mt-0.5 text-[12px] text-ink-subtle">
+              {pct(result.counts.vert, result.counts.total)} %
+            </p>
+          </StatCard>
+        </Reveal>
+        <Reveal delayMs={300}>
+          <StatCard label="Jaune" dot="bg-amber-400">
+            <p className="text-3xl font-semibold tabular-nums text-ink">
+              {result.counts.jaune}
+            </p>
+            <p className="mt-0.5 text-[12px] text-ink-subtle">
+              {pct(result.counts.jaune, result.counts.total)} %
+            </p>
+          </StatCard>
+        </Reveal>
+        <Reveal delayMs={450}>
+          <StatCard label="Orange" dot="bg-orange-500">
+            <p className="text-3xl font-semibold tabular-nums text-ink">
+              {result.counts.orange}
+            </p>
+            <p className="mt-0.5 text-[12px] text-ink-subtle">
+              {pct(result.counts.orange, result.counts.total)} %
+            </p>
+          </StatCard>
+        </Reveal>
+        <Reveal delayMs={600}>
+          <StatCard label="Rouge" dot="bg-rose-500">
+            <p className="text-3xl font-semibold tabular-nums text-ink">
+              {result.counts.rouge}
+            </p>
+            <p className="mt-0.5 text-[12px] text-ink-subtle">
+              {pct(result.counts.rouge, result.counts.total)} %
+            </p>
+          </StatCard>
+        </Reveal>
+        <Reveal delayMs={REVEAL_SCORE_MS} className="col-span-2 sm:col-span-1">
+          <ScoreCard
+            score={result.score}
+            label={result.scoreLabel}
+            tone={result.scoreTone}
+            startDelayMs={REVEAL_SCORE_MS}
+          />
+        </Reveal>
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1.2fr]">
-        <ObservationsCard observations={result.observations} aliasesUsed={result.aliasesUsed} />
-        <SynthesisCard synthesis={result.synthesis} />
+        <Reveal delayMs={950}>
+          <ObservationsCard observations={result.observations} aliasesUsed={result.aliasesUsed} />
+        </Reveal>
+        <Reveal delayMs={REVEAL_SYNTHESIS_MS}>
+          <SynthesisCard synthesis={result.synthesis} streamDelayMs={REVEAL_SYNTHESIS_MS} />
+        </Reveal>
       </div>
 
-      <ItemsTable items={result.items} counts={result.counts} />
+      <Reveal delayMs={1300} className="mt-4 block">
+        <ItemsTable items={result.items} counts={result.counts} />
+      </Reveal>
     </section>
   );
 }
+
 
 // ============================================================
 // Stat / Score cards
@@ -121,10 +148,12 @@ function ScoreCard({
   score,
   label,
   tone,
+  startDelayMs = 0,
 }: {
   score: number;
   label: string;
   tone: "green" | "amber" | "orange" | "rose";
+  startDelayMs?: number;
 }) {
   const TONE_RING: Record<string, string> = {
     green: "stroke-emerald-500",
@@ -142,15 +171,42 @@ function ScoreCard({
   const circumference = 2 * Math.PI * radius;
   const filled = (score / 20) * circumference;
 
+  // Animate progress from 0 → 1 with an ease-out cubic, after `startDelayMs`.
+  // Drives both the SVG fill and the displayed number.
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    let rafId = 0;
+    let started: number | null = null;
+    const DURATION = 1500;
+    const tick = (now: number) => {
+      if (started === null) started = now;
+      const elapsed = now - started;
+      const t = Math.min(1, elapsed / DURATION);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setProgress(eased);
+      if (t < 1) rafId = requestAnimationFrame(tick);
+    };
+    const startId = window.setTimeout(() => {
+      rafId = requestAnimationFrame(tick);
+    }, startDelayMs);
+    return () => {
+      window.clearTimeout(startId);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [startDelayMs]);
+
+  const animFilled = filled * progress;
+  const animScore = score * progress;
+
   return (
-    <article className="col-span-2 flex items-center gap-3 rounded-2xl bg-white/65 p-4 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl sm:col-span-1">
+    <article className="flex items-center gap-3 rounded-2xl bg-white/65 p-4 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
       <div className="flex flex-1 flex-col">
         <p className="text-[11px] font-medium tracking-wide text-ink-subtle">
           Note globale
         </p>
         <p className="mt-1 flex items-baseline gap-1">
           <span className="text-3xl font-semibold tabular-nums text-ink">
-            {score.toFixed(1)}
+            {animScore.toFixed(1)}
           </span>
           <span className="text-base font-medium text-ink-subtle">/20</span>
         </p>
@@ -165,11 +221,11 @@ function ScoreCard({
             cx="30"
             cy="30"
             r={radius}
-            className={`fill-none ${TONE_RING[tone]} transition-[stroke-dashoffset] duration-700`}
+            className={`fill-none ${TONE_RING[tone]}`}
             strokeWidth="6"
             strokeLinecap="round"
             strokeDasharray={circumference}
-            strokeDashoffset={circumference - filled}
+            strokeDashoffset={circumference - animFilled}
           />
         </svg>
       </div>
@@ -320,14 +376,76 @@ function dotForRating(r: ColorRating): string {
 // ============================================================
 // Synthesis
 // ============================================================
-function SynthesisCard({ synthesis }: { synthesis: string | null }) {
+function SynthesisCard({
+  synthesis,
+  streamDelayMs = 0,
+}: {
+  synthesis: string | null;
+  streamDelayMs?: number;
+}) {
+  const fullText = synthesis ?? "";
+  // Characters revealed so far (the streaming effect). Starts at 0 once we
+  // have text, gets incremented on a timer until we reach the full length.
+  const [shown, setShown] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    setShown(0);
+    if (!fullText) return;
+
+    const TARGET_DURATION = 3500; // total streaming time, ms
+    const TICK = 22;
+    const charsPerTick = Math.max(2, Math.ceil(fullText.length / (TARGET_DURATION / TICK)));
+
+    const start = window.setTimeout(() => {
+      intervalRef.current = setInterval(() => {
+        setShown((prev) => {
+          const next = prev + charsPerTick;
+          if (next >= fullText.length) {
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
+            return fullText.length;
+          }
+          return next;
+        });
+      }, TICK);
+    }, streamDelayMs);
+
+    return () => {
+      window.clearTimeout(start);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [fullText, streamDelayMs]);
+
+  const visible = fullText.slice(0, shown);
+  // While streaming we may be in the middle of a `**bold**` span — close it
+  // temporarily so the markdown renderer doesn't break on an unmatched `**`.
+  const safeVisible = balanceBold(visible);
+  const paragraphs = safeVisible
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const streaming = fullText.length > 0 && shown < fullText.length;
+
   return (
     <article className="rounded-2xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
       <h2 className="text-base font-semibold text-ink">Synthèse</h2>
-      {synthesis ? (
-        <p className="mt-3 text-[15px] leading-relaxed text-ink">
-          {renderBoldMarkdown(synthesis)}
-        </p>
+      {fullText ? (
+        <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-ink">
+          {paragraphs.map((p, i) => (
+            <p key={i}>
+              {renderBoldMarkdown(p)}
+              {streaming && i === paragraphs.length - 1 ? (
+                <span className="ml-0.5 inline-block h-[1em] w-[2px] -mb-[2px] animate-pulse bg-violet-500/70 align-middle" />
+              ) : null}
+            </p>
+          ))}
+        </div>
       ) : (
         <p className="mt-3 text-sm text-ink-muted">
           Synthèse temporairement indisponible. Consulte le détail des
@@ -336,6 +454,11 @@ function SynthesisCard({ synthesis }: { synthesis: string | null }) {
       )}
     </article>
   );
+}
+
+function balanceBold(text: string): string {
+  const stars = (text.match(/\*\*/g) || []).length;
+  return stars % 2 === 1 ? text + "**" : text;
 }
 
 function renderBoldMarkdown(s: string): React.ReactNode {
@@ -430,7 +553,7 @@ function ItemsTable({
   }
 
   return (
-    <article className="mt-4 rounded-2xl bg-white/65 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
+    <article className="rounded-2xl bg-white/65 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
       <div className="flex flex-col gap-3 border-b border-black/[0.05] p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="-mb-px flex flex-wrap gap-1 overflow-x-auto">
           {tabs.map((t) => {
@@ -556,174 +679,60 @@ function ColorChip({ rating }: { rating: ColorRating | null }) {
 }
 
 // ============================================================
-// PDF download
+// PDF download — captures the rendered result panel (DOM) so the PDF matches
+// the on-screen layout pixel-for-pixel rather than re-rendering with custom
+// jsPDF primitives.
 // ============================================================
 async function downloadPdf(result: AnalyseResponse, originalText: string) {
-  const { jsPDF } = await import("jspdf");
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const margin = 40;
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const usable = pageWidth - margin * 2;
-  let y = margin;
+  const el = document.getElementById("analyse-results");
+  if (!el) return;
 
-  const ensureSpace = (h: number) => {
-    if (y + h > pageHeight - margin) {
-      doc.addPage();
-      y = margin;
+  // Hide elements flagged as PDF-irrelevant (toolbar buttons) during capture.
+  const hidden = Array.from(el.querySelectorAll<HTMLElement>("[data-pdf-hide]"));
+  const restore = hidden.map((h) => ({ el: h, prev: h.style.display }));
+  hidden.forEach((h) => {
+    h.style.display = "none";
+  });
+  // Mark the section as capturing — lets us neutralise effects html2canvas
+  // can't render correctly (backdrop-filter, animation start state).
+  el.classList.add("pdf-capturing");
+
+  try {
+    const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+      import("html2canvas"),
+      import("jspdf"),
+    ]);
+
+    const canvas = await html2canvas(el, {
+      scale: 2,
+      backgroundColor: "#FAFAFA",
+      logging: false,
+      useCORS: true,
+    });
+
+    const doc = new jsPDF({ unit: "pt", format: "a4", orientation: "portrait" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+
+    let yOffset = 0;
+    while (yOffset < imgHeight) {
+      if (yOffset > 0) doc.addPage();
+      doc.addImage(imgData, "JPEG", 0, -yOffset, imgWidth, imgHeight);
+      yOffset += pageHeight;
     }
-  };
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.setTextColor(31, 41, 55);
-  doc.text("CosmetWiki", margin, y);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(107, 114, 128);
-  doc.text("Analyse de composition INCI", margin, y + 16);
-  y += 36;
-
-  const now = new Date();
-  doc.setFontSize(9);
-  doc.setTextColor(156, 163, 175);
-  doc.text(
-    `Généré le ${now.toLocaleDateString("fr-FR")} à ${now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`,
-    margin,
-    y,
-  );
-  y += 24;
-
-  ensureSpace(70);
-  doc.setFillColor(250, 250, 250);
-  doc.roundedRect(margin, y, usable, 60, 6, 6, "F");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(28);
-  doc.setTextColor(31, 41, 55);
-  doc.text(`${result.score.toFixed(1)} / 20`, margin + 16, y + 36);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-  doc.setTextColor(107, 114, 128);
-  doc.text(`Note globale — ${result.scoreLabel}`, margin + 16, y + 52);
-  doc.setFontSize(9);
-  doc.setTextColor(156, 163, 175);
-  const countsLine = `Vert ${result.counts.vert}  ·  Jaune ${result.counts.jaune}  ·  Orange ${result.counts.orange}  ·  Rouge ${result.counts.rouge}`;
-  const countsW = doc.getTextWidth(countsLine);
-  doc.text(countsLine, margin + usable - countsW - 16, y + 24);
-  doc.text(
-    `${result.counts.matched} ingrédients identifiés sur ${result.counts.total}`,
-    margin + usable - doc.getTextWidth(`${result.counts.matched} ingrédients identifiés sur ${result.counts.total}`) - 16,
-    y + 40,
-  );
-  y += 80;
-
-  if (result.synthesis) {
-    ensureSpace(20);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.setTextColor(31, 41, 55);
-    doc.text("Synthèse", margin, y);
-    y += 16;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(75, 85, 99);
-    const cleanSynth = result.synthesis.replace(/\*\*/g, "");
-    const lines = doc.splitTextToSize(cleanSynth, usable);
-    ensureSpace(lines.length * 13 + 8);
-    doc.text(lines, margin, y);
-    y += lines.length * 13 + 12;
+    const filename = `cosmetwiki-analyse-${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(filename);
+  } finally {
+    el.classList.remove("pdf-capturing");
+    restore.forEach(({ el: h, prev }) => {
+      h.style.display = prev;
+    });
   }
-
-  if (result.observations.length) {
-    ensureSpace(20);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.setTextColor(31, 41, 55);
-    doc.text("Observations", margin, y);
-    y += 14;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    for (const obs of result.observations) {
-      ensureSpace(14);
-      const status = obs.status === "absent" ? "absents" : `présents (${obs.count})`;
-      doc.setTextColor(75, 85, 99);
-      doc.text(`• ${obs.label} : ${status}`, margin, y);
-      y += 13;
-    }
-    y += 8;
-  }
-
-  ensureSpace(40);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.setTextColor(31, 41, 55);
-  doc.text("Détail des ingrédients", margin, y);
-  y += 14;
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(107, 114, 128);
-  doc.text("Ingrédient", margin, y);
-  doc.text("Fonction", margin + 220, y);
-  doc.text("Tolérance", margin + 380, y);
-  y += 6;
-  doc.setDrawColor(229, 231, 235);
-  doc.line(margin, y, margin + usable, y);
-  y += 8;
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  for (const item of result.items) {
-    ensureSpace(16);
-    doc.setTextColor(31, 41, 55);
-    const name = prettyName(item.name ?? item.input);
-    doc.text(name.length > 40 ? name.slice(0, 38) + "…" : name, margin, y);
-    if (item.translationFr) {
-      doc.setTextColor(156, 163, 175);
-      doc.setFontSize(8);
-      doc.text(item.translationFr.slice(0, 30), margin, y + 9);
-      doc.setFontSize(9);
-    }
-    doc.setTextColor(107, 114, 128);
-    doc.text((item.primaryFunction ?? "—").slice(0, 28), margin + 220, y);
-    if (item.colorRating) {
-      const colorMap: Record<ColorRating, [number, number, number]> = {
-        Vert: [22, 163, 74],
-        Jaune: [202, 138, 4],
-        Orange: [234, 88, 12],
-        Rouge: [220, 38, 38],
-      };
-      const [r, g, b] = colorMap[item.colorRating];
-      doc.setFillColor(r, g, b);
-      doc.circle(margin + 386, y - 3, 3, "F");
-      doc.setTextColor(r, g, b);
-      doc.text(item.colorRating, margin + 396, y);
-    } else {
-      doc.setTextColor(156, 163, 175);
-      doc.text("Non reconnu", margin + 380, y);
-    }
-    y += 18;
-  }
-
-  const totalPages = (doc as unknown as { internal: { getNumberOfPages: () => number } }).internal.getNumberOfPages();
-  for (let p = 1; p <= totalPages; p++) {
-    doc.setPage(p);
-    doc.setFontSize(8);
-    doc.setTextColor(156, 163, 175);
-    doc.text(
-      `cosmetwiki.com  ·  Page ${p} / ${totalPages}`,
-      margin,
-      pageHeight - 20,
-    );
-    doc.text(
-      "Données indicatives, ne remplace pas un avis médical.",
-      pageWidth - margin - doc.getTextWidth("Données indicatives, ne remplace pas un avis médical."),
-      pageHeight - 20,
-    );
-  }
-
-  const filename = `cosmetwiki-analyse-${now.toISOString().slice(0, 10)}.pdf`;
-  doc.save(filename);
+  void result;
   void originalText;
 }
 

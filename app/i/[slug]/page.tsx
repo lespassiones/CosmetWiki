@@ -7,6 +7,7 @@ import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { SearchTrigger } from "@/components/SearchTrigger";
 import { ProductRow } from "@/components/ProductRow";
 import { MobileMenu } from "@/components/MobileMenu";
+import { Reveal } from "@/components/Reveal";
 import {
   supabaseAnon,
   type ColorRating,
@@ -106,7 +107,7 @@ export default async function IngredientPage({ params, searchParams }: Props) {
     Object.keys(ing.translations).filter((k) => k !== "fr").length > 0;
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-bg">
+    <div className="relative isolate flex min-h-screen flex-col bg-bg">
       <BackgroundGlow />
 
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
@@ -165,119 +166,131 @@ export default async function IngredientPage({ params, searchParams }: Props) {
         ) : null}
 
         {/* Hero */}
-        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-3xl font-semibold tracking-tight text-ink sm:text-[40px] sm:leading-tight">
-                {name}
-              </h1>
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 backdrop-blur-md ${RATING_CHIP[ing.color_rating]}`}
-              >
+        <Reveal delayMs={0}>
+          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-3xl font-semibold tracking-tight text-ink sm:text-[40px] sm:leading-tight">
+                  {name}
+                </h1>
                 <span
-                  className={`h-1.5 w-1.5 rounded-full ${RATING_DOT[ing.color_rating]}`}
-                  aria-hidden
-                />
-                {RATING_LABEL[ing.color_rating]}
-              </span>
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 backdrop-blur-md ${RATING_CHIP[ing.color_rating]}`}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${RATING_DOT[ing.color_rating]}`}
+                    aria-hidden
+                  />
+                  {RATING_LABEL[ing.color_rating]}
+                </span>
+              </div>
+              {subtitle ? (
+                <p className="mt-1.5 text-base text-ink-muted">{subtitle}</p>
+              ) : null}
             </div>
-            {subtitle ? (
-              <p className="mt-1.5 text-base text-ink-muted">{subtitle}</p>
+
+            {ing.cas_number ? (
+              <div className="text-right">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
+                  CAS
+                </p>
+                <p className="mt-0.5 font-mono text-[15px] text-ink">
+                  {ing.cas_number}
+                </p>
+              </div>
             ) : null}
           </div>
-
-          {ing.cas_number ? (
-            <div className="text-right">
-              <p className="text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
-                CAS
-              </p>
-              <p className="mt-0.5 font-mono text-[15px] text-ink">
-                {ing.cas_number}
-              </p>
-            </div>
-          ) : null}
-        </div>
+        </Reveal>
 
         {/* Stats cards */}
         <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            label="Niveau de tolérance"
-            cta="En savoir plus"
-            href="/comment-ca-marche"
-          >
-            <div className="flex items-center gap-2">
-              <span
-                className={`h-2.5 w-2.5 rounded-full ${RATING_DOT[ing.color_rating]}`}
-                aria-hidden
-              />
-              <span className="text-lg font-semibold text-ink">
-                {ing.color_rating}
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-ink-muted">
-              {RATING_LABEL[ing.color_rating]}
-            </p>
-          </StatCard>
-
-          {hasPrevalence ? (
-            <StatCard label="Prévalence" cta="Méthodologie" href="/comment-ca-marche">
-              <p className="text-2xl font-semibold tracking-tight text-ink">
-                {Number(ing.prevalence_pct).toFixed(2)}
-                <span className="ml-0.5 text-base font-medium text-ink-muted">
-                  %
+          <Reveal delayMs={200}>
+            <StatCard
+              label="Niveau de tolérance"
+              cta="En savoir plus"
+              href="/comment-ca-marche"
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className={`h-2.5 w-2.5 rounded-full ${RATING_DOT[ing.color_rating]}`}
+                  aria-hidden
+                />
+                <span className="text-lg font-semibold text-ink">
+                  {ing.color_rating}
                 </span>
-              </p>
+              </div>
               <p className="mt-1 text-sm text-ink-muted">
-                des cosmétiques contiennent cet ingrédient
+                {RATING_LABEL[ing.color_rating]}
               </p>
             </StatCard>
+          </Reveal>
+
+          {hasPrevalence ? (
+            <Reveal delayMs={350}>
+              <StatCard label="Prévalence" cta="Méthodologie" href="/comment-ca-marche">
+                <p className="text-2xl font-semibold tracking-tight text-ink">
+                  {Number(ing.prevalence_pct).toFixed(2)}
+                  <span className="ml-0.5 text-base font-medium text-ink-muted">
+                    %
+                  </span>
+                </p>
+                <p className="mt-1 text-sm text-ink-muted">
+                  des cosmétiques contiennent cet ingrédient
+                </p>
+              </StatCard>
+            </Reveal>
           ) : null}
 
           {hasFunctions ? (
-            <StatCard
-              label="Fonctions principales"
-              cta={`Voir tout (${ing.functions!.length})`}
-              href={ing.source_url}
-              external
-            >
-              <ul className="space-y-0.5">
-                {ing.functions!.slice(0, 2).map((f, i) => (
-                  <li key={i} className="text-base font-medium text-ink">
-                    {f.name}
-                  </li>
-                ))}
-              </ul>
-            </StatCard>
+            <Reveal delayMs={500}>
+              <StatCard
+                label="Fonctions principales"
+                cta={`Voir tout (${ing.functions!.length})`}
+                href={ing.source_url}
+                external
+              >
+                <ul className="space-y-0.5">
+                  {ing.functions!.slice(0, 2).map((f, i) => (
+                    <li key={i} className="text-base font-medium text-ink">
+                      {f.name}
+                    </li>
+                  ))}
+                </ul>
+              </StatCard>
+            </Reveal>
           ) : null}
 
           {hasRegulated ? (
-            <StatCard
-              label="Statut réglementaire"
-              cta="Plus de détails"
-              href={ing.source_url}
-              external
-            >
-              <p className="text-sm leading-relaxed text-ink">
-                Réglementé dans&nbsp;: {ing.regulated_zones!.join(", ")}.
-              </p>
-            </StatCard>
+            <Reveal delayMs={650}>
+              <StatCard
+                label="Statut réglementaire"
+                cta="Plus de détails"
+                href={ing.source_url}
+                external
+              >
+                <p className="text-sm leading-relaxed text-ink">
+                  Réglementé dans&nbsp;: {ing.regulated_zones!.join(", ")}.
+                </p>
+              </StatCard>
+            </Reveal>
           ) : (
-            <StatCard
-              label="Statut réglementaire"
-              cta="Vérifier sur incibeauty"
-              href={ing.source_url}
-              external
-            >
-              <p className="text-sm leading-relaxed text-ink">
-                Aucune restriction connue dans nos données.
-              </p>
-            </StatCard>
+            <Reveal delayMs={650}>
+              <StatCard
+                label="Statut réglementaire"
+                cta="Vérifier sur incibeauty"
+                href={ing.source_url}
+                external
+              >
+                <p className="text-sm leading-relaxed text-ink">
+                  Aucune restriction connue dans nos données.
+                </p>
+              </StatCard>
+            </Reveal>
           )}
         </div>
 
         {/* About + Products */}
         <div className="mt-10 grid gap-10 lg:grid-cols-[1.2fr_1fr]">
-          <div>
+          <Reveal delayMs={850}>
             {hasDescription ? (
               <section>
                 <SectionTitle>À savoir</SectionTitle>
@@ -392,10 +405,11 @@ export default async function IngredientPage({ params, searchParams }: Props) {
                 </ul>
               </section>
             ) : null}
-          </div>
+          </Reveal>
 
           {/* Products column */}
-          <aside className="lg:sticky lg:top-6 lg:self-start">
+          <Reveal delayMs={1000} className="lg:sticky lg:top-6 lg:self-start">
+            <aside>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-base font-semibold text-ink">
                 {products.length > 0
@@ -449,7 +463,8 @@ export default async function IngredientPage({ params, searchParams }: Props) {
                 ) : null}
               </>
             )}
-          </aside>
+            </aside>
+          </Reveal>
         </div>
       </main>
 

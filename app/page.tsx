@@ -14,7 +14,7 @@ export default async function Home({ searchParams }: Props) {
   const initialInci = (params?.inci ?? "").slice(0, 6000);
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-bg">
+    <div className="relative isolate flex min-h-screen flex-col bg-bg">
       <BackgroundGlow />
 
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">

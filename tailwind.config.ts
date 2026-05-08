@@ -35,6 +35,7 @@ const config: Config = {
       animation: {
         "fade-in": "fadeIn 200ms ease-out",
         "slide-down": "slideDown 220ms ease-out",
+        reveal: "reveal 620ms cubic-bezier(0.16, 1, 0.3, 1) both",
       },
       keyframes: {
         fadeIn: {
@@ -43,6 +44,10 @@ const config: Config = {
         },
         slideDown: {
           "0%": { opacity: "0", transform: "translateY(-6px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        reveal: {
+          "0%": { opacity: "0", transform: "translateY(14px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
       },

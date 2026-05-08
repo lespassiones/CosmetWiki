@@ -50,8 +50,12 @@ export function parseInciList(text: string): ParsedToken[] {
   // Collapse synonyms separated by " / " or "/" between names → split as separate tokens
   // ex : "AQUA / WATER" → "AQUA, WATER"
   work = work.replace(/\s*\/\s*/g, ", ");
-  // Replace " - " (when used as separator) by comma — but only when surrounded by words
-  work = work.replace(/(?<=\w)\s+-\s+(?=\w)/g, ", ");
+  // Replace hyphens used as separators by commas. Catch all asymmetric spacing
+  // patterns: "X - Y", "X -Y", "X- Y" (but NOT "X-Y", which is too risky — many
+  // INCI names have intra-name hyphens like "PEG-100 Stearate" or "C12-15 Alkyl
+  // Benzoate"). Bullets/middots can also be used as separators in pasted lists.
+  work = work.replace(/(?<=\w)(?:\s+-+\s*|\s*-+\s+)(?=\w)/g, ", ");
+  work = work.replace(/(?<=\w)\s*[•·]\s*(?=\w)/g, ", ");
 
   // Split on common separators
   const rawParts = work

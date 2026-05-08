@@ -32,12 +32,14 @@ const TAG_LABELS: Record<string, string> = {
   sulfate: "Sulfates",
   "huile-minerale": "Huiles minérales",
   ethoxyle: "Composés éthoxylés",
+  propoxyle: "Composés propoxylés",
   "colorant-synthese": "Colorants de synthèse",
   "ammonium-quaternaire": "Ammoniums quaternaires",
   "allergene-parfumant": "Allergènes parfum",
   conservateur: "Conservateurs",
   "parfum-synthese": "Parfums de synthèse",
   "huile-essentielle": "Huiles essentielles",
+  ogm: "OGM",
 };
 
 // Tags reported as "good when absent". The rest are reported only when present.
@@ -237,15 +239,26 @@ async function generateSynthesis(input: {
 
   const prompt = `Tu vas rédiger une synthèse en français pour une analyse de composition cosmétique INCI.
 
-CONSIGNES STRICTES :
-- 3 à 4 phrases.
+STRUCTURE EN 2 PARAGRAPHES :
+
+Paragraphe 1 — État des lieux factuel (3 à 5 phrases) :
 - Toujours mentionner TOUS les ingrédients rouges (le cas échéant) par leur nom INCI EXACT, encadré par **.
 - Si plusieurs orange (≤ 5), citer chacun par son nom INCI en gras. Si > 5 orange, citer les 4 premiers + "et N autres".
-- Ne JAMAIS inventer un ingrédient. Si une liste est vide, ne mentionne pas la catégorie.
-- Mentionner brièvement ce qui est sain (parabens absents, sulfates absents, etc.) si pertinent.
-- Si la synthèse contient des allergènes parfumants, les nommer brièvement.
-- Aucun conseil médical, aucune recommandation d'achat. Reste factuel, neutre, posé.
+- Mentionner brièvement les jaunes notables si pertinents.
+- Mentionner ce qui est sain (parabens absents, sulfates absents, silicones absents, huiles minérales absentes, etc.) si pertinent.
+- Si la liste contient des allergènes parfumants, les nommer brièvement.
+- Ne JAMAIS inventer un ingrédient. Si une catégorie est vide, ne la mentionne pas.
+
+Paragraphe 2 — Touche de conseil bienveillant (2 à 3 phrases) :
+- Donner un ou deux conseils GÉNÉRAUX, doux et rassurants, en lien avec ce que la composition révèle. Exemples : suggérer un test sur une petite zone si la peau est réactive ; rappeler que ces ingrédients sont fréquents dans la cosmétique courante ; conseiller de privilégier une routine simple ; rappeler que la position dans la liste indique la concentration.
+- Pas d'alarmisme, pas de jugement sur le produit, pas de recommandation d'achat ni d'évitement spécifique.
+- Aucun conseil médical (ne pas dire "consultez un médecin", ne pas évoquer de pathologies).
+
+CONSIGNES GÉNÉRALES :
+- 5 à 8 phrases au total, deux paragraphes séparés par un saut de ligne.
+- Reste neutre, posé, pédagogique.
 - N'utilise pas d'emojis.
+- Conserve les termes techniques INCI quand ils sont nécessaires.
 
 DONNÉES :
 Note globale : ${input.score.toFixed(1)}/20 (${input.scoreLabel})
@@ -274,13 +287,13 @@ Rédige maintenant la synthèse :`;
       },
       body: JSON.stringify({
         model: "mistral-small-latest",
-        temperature: 0,
-        max_tokens: 380,
+        temperature: 0.2,
+        max_tokens: 750,
         messages: [
           {
             role: "system",
             content:
-              "Tu es un assistant spécialisé dans les compositions INCI cosmétiques. Tu rédiges UNIQUEMENT à partir des données factuelles fournies. Tu ne donnes JAMAIS de conseil médical, tu n'inventes JAMAIS d'ingrédient, tu n'incites JAMAIS à acheter ou à éviter un produit. Tu restes neutre, factuel, en 3-4 phrases. Quand tu cites un ingrédient INCI, tu l'encadres avec **.",
+              "Tu es un assistant spécialisé dans les compositions INCI cosmétiques. Tu rédiges à partir des données factuelles fournies, sans rien inventer. Tu peux ajouter quelques conseils généraux et bienveillants (test sur une petite zone, attention aux peaux sensibles, privilégier une routine simple, etc.), mais AUCUN conseil médical, AUCUNE recommandation d'achat ou d'évitement d'un produit précis, et AUCUN alarmisme. Tu restes neutre, posé, pédagogique, en 5 à 8 phrases organisées en deux paragraphes (état des lieux puis conseils). Quand tu cites un ingrédient INCI, tu l'encadres avec **.",
           },
           { role: "user", content: prompt },
         ],
