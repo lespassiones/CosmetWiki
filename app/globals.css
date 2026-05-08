@@ -48,6 +48,15 @@
     }
   }
 
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(400%);
+    }
+  }
+
   .gradient-text {
     background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #f97316 100%);
     -webkit-background-clip: text;

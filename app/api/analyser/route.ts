@@ -202,35 +202,52 @@ async function generateSynthesis(input: {
   const apiKey = process.env.MISTRAL_API_KEY;
   if (!apiKey) return null;
 
-  const problematic = input.enriched
-    .filter((r) => r.color_rating === "Rouge" || r.color_rating === "Orange")
-    .map((r) => `- ${r.name ?? r.input_raw} (${r.color_rating}, ${r.primary_function ?? "rôle inconnu"})`)
-    .slice(0, 10);
-
+  const red = input.enriched
+    .filter((r) => r.color_rating === "Rouge")
+    .map((r) => `${r.name ?? r.input_raw} (${r.primary_function ?? "fonction inconnue"})`);
+  const orange = input.enriched
+    .filter((r) => r.color_rating === "Orange")
+    .map((r) => `${r.name ?? r.input_raw} (${r.primary_function ?? "fonction inconnue"})`);
   const yellow = input.enriched
     .filter((r) => r.color_rating === "Jaune")
-    .map((r) => r.name ?? r.input_raw)
-    .slice(0, 8);
+    .map((r) => r.name ?? r.input_raw);
 
-  const observationsLines = input.observations
-    .filter((o) => o.status === "present" || (o.status === "absent" && ["Parabens", "Sulfates", "Huiles minérales"].includes(o.label)))
-    .map((o) => `- ${o.label} : ${o.status === "present" ? `présents (${o.count})` : "absents"}`);
+  const positives = input.observations
+    .filter((o) => o.status === "absent")
+    .map((o) => o.label);
+  const presents = input.observations
+    .filter((o) => o.status === "present")
+    .map((o) => `${o.label} (${o.count})`);
 
-  const prompt = `Voici les chiffres factuels d'une analyse de composition INCI. Rédige UNIQUEMENT 2 à 3 phrases de synthèse en français, factuelles, sans inventer d'ingrédient. Mentionne les ingrédients problématiques par leur nom INCI si pertinent (en gras avec **). Ne donne aucun conseil médical. Reste concis et neutre.
+  const prompt = `Tu vas rédiger une synthèse en français pour une analyse de composition cosmétique INCI.
 
+CONSIGNES STRICTES :
+- 3 à 4 phrases.
+- Toujours mentionner TOUS les ingrédients rouges (le cas échéant) par leur nom INCI EXACT, encadré par **.
+- Si plusieurs orange (≤ 5), citer chacun par son nom INCI en gras. Si > 5 orange, citer les 4 premiers + "et N autres".
+- Ne JAMAIS inventer un ingrédient. Si une liste est vide, ne mentionne pas la catégorie.
+- Mentionner brièvement ce qui est sain (parabens absents, sulfates absents, etc.) si pertinent.
+- Si la synthèse contient des allergènes parfumants, les nommer brièvement.
+- Aucun conseil médical, aucune recommandation d'achat. Reste factuel, neutre, posé.
+- N'utilise pas d'emojis.
+
+DONNÉES :
 Note globale : ${input.score.toFixed(1)}/20 (${input.scoreLabel})
-Vert : ${input.counts.Vert}, Jaune : ${input.counts.Jaune}, Orange : ${input.counts.Orange}, Rouge : ${input.counts.Rouge}
+Comptes : Vert ${input.counts.Vert}, Jaune ${input.counts.Jaune}, Orange ${input.counts.Orange}, Rouge ${input.counts.Rouge}
 
-Ingrédients problématiques (orange/rouge) :
-${problematic.length ? problematic.join("\n") : "(aucun)"}
+Ingrédients ROUGES (à citer tous) :
+${red.length ? red.map((r) => `- ${r}`).join("\n") : "(aucun)"}
 
-Ingrédients jaunes :
-${yellow.length ? yellow.join(", ") : "(aucun)"}
+Ingrédients ORANGE (à citer dans la limite indiquée) :
+${orange.length ? orange.map((r) => `- ${r}`).join("\n") : "(aucun)"}
 
-Observations :
-${observationsLines.join("\n") || "(aucune)"}
+Ingrédients JAUNES :
+${yellow.length ? yellow.slice(0, 8).join(", ") + (yellow.length > 8 ? ` et ${yellow.length - 8} autres` : "") : "(aucun)"}
 
-Synthèse (2-3 phrases) :`;
+Observations positives (absences) : ${positives.join(", ") || "(aucune)"}
+Observations présentes : ${presents.join(", ") || "(aucune)"}
+
+Rédige maintenant la synthèse :`;
 
   try {
     const r = await fetch("https://api.mistral.ai/v1/chat/completions", {
@@ -242,12 +259,12 @@ Synthèse (2-3 phrases) :`;
       body: JSON.stringify({
         model: "mistral-small-latest",
         temperature: 0,
-        max_tokens: 220,
+        max_tokens: 380,
         messages: [
           {
             role: "system",
             content:
-              "Tu es un assistant qui rédige des synthèses factuelles de compositions INCI cosmétiques. Tu ne donnes JAMAIS de conseil médical, tu n'inventes JAMAIS d'ingrédient. Tu restes neutre, concis, en 2-3 phrases maximum.",
+              "Tu es un assistant spécialisé dans les compositions INCI cosmétiques. Tu rédiges UNIQUEMENT à partir des données factuelles fournies. Tu ne donnes JAMAIS de conseil médical, tu n'inventes JAMAIS d'ingrédient, tu n'incites JAMAIS à acheter ou à éviter un produit. Tu restes neutre, factuel, en 3-4 phrases. Quand tu cites un ingrédient INCI, tu l'encadres avec **.",
           },
           { role: "user", content: prompt },
         ],

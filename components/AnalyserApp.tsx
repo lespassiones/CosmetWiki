@@ -50,16 +50,71 @@ BEHENTRIMONIUM METHOSULFATE, ALOE BARBADENSIS LEAF JUICE POWDER,
 PANTHENOL, PRUNUS AMYGDALUS DULCIS OIL, CITRUS PARADISI PEEL OIL,
 BENZYL ALCOHOL, DEHYDROACETIC ACID, SODIUM HYDROXIDE, LIMONENE`;
 
+const STORAGE_KEY = "cw:lastAnalysis";
+const MIN_PROCESSING_MS = 3000;
+
+type CachedAnalysis = {
+  text: string;
+  result: AnalyseResponse;
+  ts: number;
+};
+
+function readCache(): CachedAnalysis | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw) as CachedAnalysis;
+    if (!data || typeof data !== "object" || !data.result) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(text: string, result: AnalyseResponse) {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ text, result, ts: Date.now() } satisfies CachedAnalysis),
+    );
+  } catch {
+    /* quota / disabled — ignore */
+  }
+}
+
+function clearCache() {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function AnalyserApp({ initialText = "" }: { initialText?: string }) {
   const [text, setText] = useState(initialText);
   const [hp, setHp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalyseResponse | null>(null);
+  const [hydrated, setHydrated] = useState(false);
   const triggeredRef = useRef(false);
 
-  // Auto-analyse on mount if initialText is provided (e.g., coming from SearchBar)
+  // Hydrate from sessionStorage on mount
   useEffect(() => {
+    const cached = readCache();
+    if (cached) {
+      const sameText = !initialText || cached.text.trim() === initialText.trim();
+      if (sameText) {
+        setText(cached.text);
+        setResult(cached.result);
+        setHydrated(true);
+        return;
+      }
+    }
+    setHydrated(true);
     if (initialText && !triggeredRef.current) {
       triggeredRef.current = true;
       void analyze(initialText);
@@ -75,6 +130,7 @@ export function AnalyserApp({ initialText = "" }: { initialText?: string }) {
     }
     setLoading(true);
     setError(null);
+    const startedAt = Date.now();
     try {
       const r = await fetch("/api/analyser", {
         method: "POST",
@@ -87,8 +143,13 @@ export function AnalyserApp({ initialText = "" }: { initialText?: string }) {
         setResult(null);
       } else {
         const data = (await r.json()) as AnalyseResponse;
+        // Ensure the processing overlay is shown long enough for credibility
+        const elapsed = Date.now() - startedAt;
+        if (elapsed < MIN_PROCESSING_MS) {
+          await new Promise((res) => setTimeout(res, MIN_PROCESSING_MS - elapsed));
+        }
         setResult(data);
-        // Smooth-scroll to results once they appear
+        writeCache(trimmed, data);
         requestAnimationFrame(() => {
           const el = document.getElementById("analyse-results");
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -102,15 +163,26 @@ export function AnalyserApp({ initialText = "" }: { initialText?: string }) {
   }
 
   function reset() {
+    clearCache();
     setResult(null);
     setError(null);
     setText("");
     triggeredRef.current = false;
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("inci");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }
+
+  if (!hydrated) {
+    return null;
   }
 
   return (
     <div>
-      {/* INPUT state — always visible at top, shrinks to a small recap when results exist */}
+      {loading ? <ProcessingOverlay /> : null}
+
       {!result ? (
         <InputBlock
           text={text}
@@ -125,6 +197,90 @@ export function AnalyserApp({ initialText = "" }: { initialText?: string }) {
       ) : (
         <ResultBlock result={result} originalText={text} onReset={reset} />
       )}
+    </div>
+  );
+}
+
+// ============================================================
+// Processing overlay
+// ============================================================
+function ProcessingOverlay() {
+  const STEPS = [
+    "Lecture de la liste",
+    "Identification des ingrédients",
+    "Détection des catégories",
+    "Calcul de la note globale",
+    "Génération de la synthèse",
+  ];
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setStep((s) => Math.min(s + 1, STEPS.length - 1));
+    }, 600);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 backdrop-blur-md animate-fade-in"
+    >
+      <div className="relative w-[min(28rem,calc(100vw-2rem))] rounded-3xl bg-white/90 p-7 shadow-[0_24px_60px_-20px_rgba(15,23,42,0.20)] ring-1 ring-white/80 backdrop-blur-2xl">
+        <div className="flex items-center gap-3">
+          <span className="grid h-9 w-9 place-items-center rounded-2xl bg-violet-50 ring-1 ring-violet-100">
+            <span className="block h-2 w-2 animate-pulse rounded-full bg-violet-600" aria-hidden />
+          </span>
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
+              Analyse en cours
+            </p>
+            <p className="text-[15px] font-semibold text-ink">
+              On décode la composition…
+            </p>
+          </div>
+        </div>
+
+        <ul className="mt-5 space-y-2 text-[13px]">
+          {STEPS.map((label, i) => {
+            const state = i < step ? "done" : i === step ? "active" : "pending";
+            return (
+              <li
+                key={label}
+                className={`flex items-center gap-2.5 transition-colors ${
+                  state === "active"
+                    ? "text-ink"
+                    : state === "done"
+                      ? "text-ink-muted"
+                      : "text-ink-subtle"
+                }`}
+              >
+                <span
+                  className={`grid h-5 w-5 shrink-0 place-items-center rounded-full ${
+                    state === "done"
+                      ? "bg-ink text-white"
+                      : state === "active"
+                        ? "bg-white ring-2 ring-violet-300"
+                        : "bg-black/[0.05] ring-1 ring-black/[0.05]"
+                  }`}
+                >
+                  {state === "done" ? (
+                    <CheckIcon className="h-3 w-3" />
+                  ) : state === "active" ? (
+                    <span className="block h-1.5 w-1.5 rounded-full bg-violet-600 animate-ping" aria-hidden />
+                  ) : null}
+                </span>
+                <span>{label}</span>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div className="mt-5 h-1 w-full overflow-hidden rounded-full bg-black/[0.05]">
+          <span className="block h-full w-1/3 animate-[shimmer_1.4s_linear_infinite] rounded-full bg-gradient-to-r from-transparent via-violet-500 to-transparent" />
+        </div>
+      </div>
     </div>
   );
 }
@@ -167,12 +323,11 @@ function InputBlock({
         rédige une synthèse.
       </p>
 
-      <div className="mt-8 rounded-3xl bg-white/65 p-5 shadow-[0_18px_44px_-18px_rgba(15,23,42,0.18)] ring-1 ring-white/70 backdrop-blur-2xl sm:p-6">
+      <div className="relative mt-8 rounded-3xl bg-white/65 p-5 shadow-[0_18px_44px_-18px_rgba(15,23,42,0.18)] ring-1 ring-white/70 backdrop-blur-2xl sm:p-6">
         <label className="block text-[13px] font-semibold text-ink">
           Liste d&apos;ingrédients
         </label>
 
-        {/* Honeypot */}
         <input
           type="text"
           name="email_confirm"
@@ -209,17 +364,8 @@ function InputBlock({
             disabled={loading || !text.trim()}
             className="inline-flex items-center justify-center gap-2 rounded-full bg-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_28px_-8px_rgba(139,92,246,0.6)] transition-all hover:-translate-y-0.5 hover:bg-violet-700 hover:shadow-[0_14px_36px_-10px_rgba(139,92,246,0.7)] disabled:cursor-not-allowed disabled:opacity-50 disabled:translate-y-0"
           >
-            {loading ? (
-              <>
-                <Spinner className="h-4 w-4" />
-                Analyse en cours…
-              </>
-            ) : (
-              <>
-                Analyser la composition
-                <span aria-hidden>→</span>
-              </>
-            )}
+            Analyser la composition
+            <span aria-hidden>→</span>
           </button>
         </div>
 
@@ -247,7 +393,6 @@ function ResultBlock({
 }) {
   return (
     <section id="analyse-results" className="pt-2">
-      {/* Top toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
         <button
           type="button"
@@ -257,8 +402,8 @@ function ResultBlock({
           <span aria-hidden>←</span> Nouvelle analyse
         </button>
         <div className="flex items-center gap-2">
-          <ToolbarButton onClick={() => printReport()}>
-            <DownloadIcon className="h-3.5 w-3.5" /> Télécharger le rapport
+          <ToolbarButton onClick={() => downloadPdf(result, originalText)}>
+            <DownloadIcon className="h-3.5 w-3.5" /> Télécharger en PDF
           </ToolbarButton>
           <ToolbarButton onClick={() => shareReport(originalText)}>
             <ShareIcon className="h-3.5 w-3.5" /> Partager
@@ -266,7 +411,6 @@ function ResultBlock({
         </div>
       </div>
 
-      {/* 6 stat cards */}
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <StatCard label="Ingrédients identifiés" muted>
           <p className="text-3xl font-semibold tabular-nums text-ink">
@@ -308,16 +452,18 @@ function ResultBlock({
             {pct(result.counts.rouge, result.counts.total)} %
           </p>
         </StatCard>
-        <ScoreCard score={result.score} label={result.scoreLabel} tone={result.scoreTone} />
+        <ScoreCard
+          score={result.score}
+          label={result.scoreLabel}
+          tone={result.scoreTone}
+        />
       </div>
 
-      {/* Observations + Synthesis */}
       <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1.2fr]">
         <ObservationsCard observations={result.observations} aliasesUsed={result.aliasesUsed} />
         <SynthesisCard synthesis={result.synthesis} />
       </div>
 
-      {/* Filtered table */}
       <ItemsTable items={result.items} counts={result.counts} />
     </section>
   );
@@ -374,7 +520,7 @@ function ScoreCard({
   const filled = (score / 20) * circumference;
 
   return (
-    <article className="col-span-2 flex items-center gap-4 rounded-2xl bg-white/65 p-4 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl sm:col-span-1">
+    <article className="col-span-2 flex items-center gap-3 rounded-2xl bg-white/65 p-4 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl sm:col-span-1">
       <div className="flex flex-1 flex-col">
         <p className="text-[11px] font-medium tracking-wide text-ink-subtle">
           Note globale
@@ -389,15 +535,15 @@ function ScoreCard({
           {label}
         </p>
       </div>
-      <div className="relative h-14 w-14 shrink-0">
+      <div className="relative h-11 w-11 shrink-0 sm:h-12 sm:w-12">
         <svg viewBox="0 0 60 60" className="h-full w-full -rotate-90" aria-hidden>
-          <circle cx="30" cy="30" r={radius} className="fill-none stroke-black/[0.05]" strokeWidth="5" />
+          <circle cx="30" cy="30" r={radius} className="fill-none stroke-black/[0.05]" strokeWidth="6" />
           <circle
             cx="30"
             cy="30"
             r={radius}
             className={`fill-none ${TONE_RING[tone]} transition-[stroke-dashoffset] duration-700`}
-            strokeWidth="5"
+            strokeWidth="6"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={circumference - filled}
@@ -426,10 +572,7 @@ function ObservationsCard({
       <h2 className="text-base font-semibold text-ink">Observations</h2>
       <ul className="mt-3 space-y-2">
         {visible.map((o) => (
-          <li
-            key={o.tag}
-            className="flex items-center gap-2.5 text-[14px]"
-          >
+          <li key={o.tag} className="flex items-center gap-2.5 text-[14px]">
             <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-black/[0.03] ring-1 ring-black/[0.04] text-ink-muted">
               {o.status === "absent" ? (
                 <CheckIcon className="h-3.5 w-3.5 text-emerald-600" />
@@ -687,6 +830,188 @@ function ColorChip({ rating }: { rating: ColorRating | null }) {
 }
 
 // ============================================================
+// PDF download
+// ============================================================
+async function downloadPdf(result: AnalyseResponse, originalText: string) {
+  const { jsPDF } = await import("jspdf");
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const margin = 40;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const usable = pageWidth - margin * 2;
+  let y = margin;
+
+  const ensureSpace = (h: number) => {
+    if (y + h > pageHeight - margin) {
+      doc.addPage();
+      y = margin;
+    }
+  };
+
+  // Header
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.setTextColor(31, 41, 55);
+  doc.text("CosmetWiki", margin, y);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(107, 114, 128);
+  doc.text("Analyse de composition INCI", margin, y + 16);
+  y += 36;
+
+  // Date
+  const now = new Date();
+  doc.setFontSize(9);
+  doc.setTextColor(156, 163, 175);
+  doc.text(
+    `Généré le ${now.toLocaleDateString("fr-FR")} à ${now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`,
+    margin,
+    y,
+  );
+  y += 24;
+
+  // Score block
+  ensureSpace(70);
+  doc.setFillColor(250, 250, 250);
+  doc.roundedRect(margin, y, usable, 60, 6, 6, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(28);
+  doc.setTextColor(31, 41, 55);
+  doc.text(`${result.score.toFixed(1)} / 20`, margin + 16, y + 36);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  doc.setTextColor(107, 114, 128);
+  doc.text(`Note globale — ${result.scoreLabel}`, margin + 16, y + 52);
+  // Counters on the right
+  doc.setFontSize(9);
+  doc.setTextColor(156, 163, 175);
+  const countsLine = `Vert ${result.counts.vert}  ·  Jaune ${result.counts.jaune}  ·  Orange ${result.counts.orange}  ·  Rouge ${result.counts.rouge}`;
+  const countsW = doc.getTextWidth(countsLine);
+  doc.text(countsLine, margin + usable - countsW - 16, y + 24);
+  doc.text(
+    `${result.counts.matched} ingrédients identifiés sur ${result.counts.total}`,
+    margin + usable - doc.getTextWidth(`${result.counts.matched} ingrédients identifiés sur ${result.counts.total}`) - 16,
+    y + 40,
+  );
+  y += 80;
+
+  // Synthèse
+  if (result.synthesis) {
+    ensureSpace(20);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(31, 41, 55);
+    doc.text("Synthèse", margin, y);
+    y += 16;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(75, 85, 99);
+    const cleanSynth = result.synthesis.replace(/\*\*/g, "");
+    const lines = doc.splitTextToSize(cleanSynth, usable);
+    ensureSpace(lines.length * 13 + 8);
+    doc.text(lines, margin, y);
+    y += lines.length * 13 + 12;
+  }
+
+  // Observations
+  if (result.observations.length) {
+    ensureSpace(20);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(31, 41, 55);
+    doc.text("Observations", margin, y);
+    y += 14;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    for (const obs of result.observations) {
+      ensureSpace(14);
+      const status = obs.status === "absent" ? "absents" : `présents (${obs.count})`;
+      doc.setTextColor(75, 85, 99);
+      doc.text(`• ${obs.label} : ${status}`, margin, y);
+      y += 13;
+    }
+    y += 8;
+  }
+
+  // Items table
+  ensureSpace(40);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(31, 41, 55);
+  doc.text("Détail des ingrédients", margin, y);
+  y += 14;
+
+  // Header row
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(107, 114, 128);
+  doc.text("Ingrédient", margin, y);
+  doc.text("Fonction", margin + 220, y);
+  doc.text("Tolérance", margin + 380, y);
+  y += 6;
+  doc.setDrawColor(229, 231, 235);
+  doc.line(margin, y, margin + usable, y);
+  y += 8;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  for (const item of result.items) {
+    ensureSpace(16);
+    doc.setTextColor(31, 41, 55);
+    const name = prettyName(item.name ?? item.input);
+    doc.text(name.length > 40 ? name.slice(0, 38) + "…" : name, margin, y);
+    if (item.translationFr) {
+      doc.setTextColor(156, 163, 175);
+      doc.setFontSize(8);
+      doc.text(item.translationFr.slice(0, 30), margin, y + 9);
+      doc.setFontSize(9);
+    }
+    doc.setTextColor(107, 114, 128);
+    doc.text((item.primaryFunction ?? "—").slice(0, 28), margin + 220, y);
+    if (item.colorRating) {
+      const colorMap: Record<ColorRating, [number, number, number]> = {
+        Vert: [22, 163, 74],
+        Jaune: [202, 138, 4],
+        Orange: [234, 88, 12],
+        Rouge: [220, 38, 38],
+      };
+      const [r, g, b] = colorMap[item.colorRating];
+      doc.setFillColor(r, g, b);
+      doc.circle(margin + 386, y - 3, 3, "F");
+      doc.setTextColor(r, g, b);
+      doc.text(item.colorRating, margin + 396, y);
+    } else {
+      doc.setTextColor(156, 163, 175);
+      doc.text("Non reconnu", margin + 380, y);
+    }
+    y += 18;
+  }
+
+  // Footer on each page
+  const totalPages = (doc as unknown as { internal: { getNumberOfPages: () => number } }).internal.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    doc.setFontSize(8);
+    doc.setTextColor(156, 163, 175);
+    doc.text(
+      `cosmetwiki.com  ·  Page ${p} / ${totalPages}`,
+      margin,
+      pageHeight - 20,
+    );
+    doc.text(
+      "Données indicatives, ne remplace pas un avis médical.",
+      pageWidth - margin - doc.getTextWidth("Données indicatives, ne remplace pas un avis médical."),
+      pageHeight - 20,
+    );
+  }
+
+  const filename = `cosmetwiki-analyse-${now.toISOString().slice(0, 10)}.pdf`;
+  doc.save(filename);
+  // Suppress unused warning when originalText isn't used in PDF body
+  void originalText;
+}
+
+// ============================================================
 // Helpers
 // ============================================================
 function pct(n: number, total: number): string {
@@ -720,10 +1045,6 @@ function ToolbarButton({ children, onClick }: { children: React.ReactNode; onCli
   );
 }
 
-function printReport() {
-  if (typeof window !== "undefined") window.print();
-}
-
 async function shareReport(text: string) {
   if (typeof window === "undefined") return;
   const url = new URL(window.location.href);
@@ -748,15 +1069,6 @@ async function shareReport(text: string) {
 // ============================================================
 // Icons
 // ============================================================
-function Spinner({ className }: { className?: string }) {
-  return (
-    <svg className={`${className ?? ""} animate-spin`} fill="none" viewBox="0 0 24 24" aria-hidden>
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-    </svg>
-  );
-}
-
 function CheckIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
