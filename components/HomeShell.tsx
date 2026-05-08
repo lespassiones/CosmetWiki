@@ -188,12 +188,36 @@ export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
     }
   }
 
-  function reset() {
+  function clearResultState() {
     clearCache();
     setResult(null);
     setOriginalText("");
     setProductSource(null);
     setError(null);
+  }
+
+  // When a result is on screen, push a history entry so the browser/Android
+  // back gesture returns to the search view instead of closing the tab/PWA.
+  // popstate clears the result state — clicking "Nouvelle analyse" calls
+  // history.back() to keep the stack tidy.
+  useEffect(() => {
+    if (!result || typeof window === "undefined") return;
+    window.history.pushState({ cwResult: true }, "");
+    const onPop = () => clearResultState();
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [result]);
+
+  function reset() {
+    if (
+      typeof window !== "undefined" &&
+      (window.history.state as { cwResult?: boolean } | null)?.cwResult
+    ) {
+      // popstate listener will clear the result state.
+      window.history.back();
+      return;
+    }
+    clearResultState();
   }
 
   function handleProductFound(input: {
