@@ -66,6 +66,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icon.png", sizes: "512x512", type: "image/png" },
     ],
     apple: [
@@ -85,7 +86,12 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className="light" data-theme="light">
-      <head>
+      <body className="min-h-screen antialiased">
+        {/* React 19 / Next 15 auto-hoist these <link> tags into <head>.
+            We removed the explicit <head> element because Next streams
+            metadata into the document tail, and a manual <head> was
+            preventing tags like rel="manifest" from being hoisted —
+            which broke PWA installability detection on Chrome. */}
         <link
           rel="preconnect"
           href={process.env.NEXT_PUBLIC_SUPABASE_URL}
@@ -97,8 +103,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
-      </head>
-      <body className="min-h-screen antialiased">
         {children}
         <PWARegister />
         <Analytics />
