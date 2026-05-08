@@ -1,6 +1,7 @@
 export type ProductSource =
   | "cache"
   | "openbeautyfacts"
+  | "openproductsfacts"
   | "incidecoder"
   | "duckduckgo+mistral";
 
