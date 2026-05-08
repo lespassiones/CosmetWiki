@@ -362,56 +362,42 @@ export function ProductHero({
   sourceUrl,
   brand,
   productName,
-  onClear,
 }: {
   source: string;
   sourceUrl: string | null;
   brand: string | null;
   productName: string | null;
-  onClear: () => void;
 }) {
   const sourceText = SOURCE_LABEL[source] ?? source;
   const niceBrand = brand ? titleCase(brand) : null;
   const niceProduct = productName ? titleCase(productName) : null;
   const headline = niceProduct ?? niceBrand ?? "Produit analysé";
   return (
-    <header
-      data-pdf-hide
-      className="mb-6 flex flex-wrap items-start justify-between gap-3 rounded-3xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl sm:p-7"
-    >
-      <div className="min-w-0 flex-1">
-        {niceBrand && niceProduct ? (
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-pink-500/80">
-            {niceBrand}
-          </p>
-        ) : null}
-        <h1 className="mt-1 text-balance text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-          {headline}
-        </h1>
-        <p className="mt-2 flex flex-wrap items-center gap-1.5 text-sm text-ink-muted">
-          <CheckBadgeIcon className="h-4 w-4 text-pink-400" />
-          <span>Composition trouvée via</span>
-          {sourceUrl ? (
-            <a
-              href={sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-rose-500 underline underline-offset-2 hover:no-underline"
-            >
-              {sourceText}
-            </a>
-          ) : (
-            <span className="font-medium text-rose-500">{sourceText}</span>
-          )}
+    <header className="mb-6 rounded-3xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl sm:p-7">
+      {niceBrand && niceProduct ? (
+        <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-pink-500/80">
+          {niceBrand}
         </p>
-      </div>
-      <button
-        type="button"
-        onClick={onClear}
-        className="shrink-0 rounded-full bg-white/80 px-3.5 py-1.5 text-[13px] font-medium text-ink ring-1 ring-black/[0.06] transition-colors hover:bg-white"
-      >
-        Nouvelle recherche
-      </button>
+      ) : null}
+      <h1 className="mt-1 text-balance text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+        {headline}
+      </h1>
+      <p className="mt-2 flex flex-wrap items-center gap-1.5 text-sm text-ink-muted">
+        <CheckBadgeIcon className="h-4 w-4 text-pink-400" />
+        <span>Composition trouvée via</span>
+        {sourceUrl ? (
+          <a
+            href={sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-rose-500 underline underline-offset-2 hover:no-underline"
+          >
+            {sourceText}
+          </a>
+        ) : (
+          <span className="font-medium text-rose-500">{sourceText}</span>
+        )}
+      </p>
     </header>
   );
 }

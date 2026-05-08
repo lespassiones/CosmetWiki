@@ -15,33 +15,96 @@ const REVEAL_SYNTHESIS_MS = 1100;
 export function AnalyseResultPanel({
   result,
   originalText,
-  onReset,
 }: {
   result: AnalyseResponse;
   originalText: string;
-  onReset: () => void;
 }) {
   return (
     <section id="analyse-results" className="pt-2">
-      <div data-pdf-hide className="flex flex-wrap items-center justify-between gap-3 pt-4">
-        <button
-          type="button"
-          onClick={onReset}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink"
-        >
-          <span aria-hidden>←</span> Nouvelle analyse
-        </button>
-        <div className="flex items-center gap-2">
-          <ToolbarButton onClick={() => downloadPdf(result, originalText)}>
-            <DownloadIcon className="h-3.5 w-3.5" /> Télécharger en PDF
-          </ToolbarButton>
-          <ToolbarButton onClick={() => shareReport(originalText)}>
-            <ShareIcon className="h-3.5 w-3.5" /> Partager
-          </ToolbarButton>
+      <div data-pdf-hide className="flex flex-wrap items-center justify-end gap-2 pt-4">
+        <ToolbarButton onClick={() => downloadPdf(result, originalText)}>
+          <DownloadIcon className="h-3.5 w-3.5" /> Télécharger en PDF
+        </ToolbarButton>
+        <ToolbarButton onClick={() => shareReport(originalText)}>
+          <ShareIcon className="h-3.5 w-3.5" /> Partager
+        </ToolbarButton>
+      </div>
+
+      {/* Mobile-only bento layout : Score on top full-width, then 2 big
+          boxes (Ingrédients identifiés + Rouge) on the left and 3 small
+          boxes (Vert / Jaune / Orange) stacked on the right. */}
+      <div className="mt-6 sm:hidden">
+        <Reveal delayMs={0}>
+          <ScoreCard
+            score={result.score}
+            label={result.scoreLabel}
+            tone={result.scoreTone}
+            startDelayMs={REVEAL_SCORE_MS}
+          />
+        </Reveal>
+        <div className="mt-3 grid grid-cols-2 items-stretch gap-3">
+          <div className="flex flex-col gap-3">
+            <Reveal delayMs={0} className="flex flex-1 flex-col">
+              <StatCard
+                label="Ingrédients identifiés"
+                muted
+                className="flex-1"
+              >
+                <p className="text-3xl font-semibold tabular-nums text-ink">
+                  {result.counts.matched}
+                </p>
+                <p className="mt-0.5 text-[12px] text-ink-subtle">
+                  sur {result.counts.total} ingrédients
+                </p>
+              </StatCard>
+            </Reveal>
+            <Reveal delayMs={600} className="flex flex-1 flex-col">
+              <StatCard
+                label="Rouge"
+                dot="bg-rose-500"
+                className="flex-1"
+              >
+                <p className="text-3xl font-semibold tabular-nums text-ink">
+                  {result.counts.rouge}
+                </p>
+                <p className="mt-0.5 text-[12px] text-ink-subtle">
+                  {pct(result.counts.rouge, result.counts.total)} %
+                </p>
+              </StatCard>
+            </Reveal>
+          </div>
+          <div className="flex flex-col gap-3">
+            <Reveal delayMs={150} className="flex flex-1 flex-col">
+              <SmallStatCard
+                label="Vert"
+                dot="bg-emerald-500"
+                count={result.counts.vert}
+                pct={pct(result.counts.vert, result.counts.total)}
+              />
+            </Reveal>
+            <Reveal delayMs={300} className="flex flex-1 flex-col">
+              <SmallStatCard
+                label="Jaune"
+                dot="bg-amber-400"
+                count={result.counts.jaune}
+                pct={pct(result.counts.jaune, result.counts.total)}
+              />
+            </Reveal>
+            <Reveal delayMs={450} className="flex flex-1 flex-col">
+              <SmallStatCard
+                label="Orange"
+                dot="bg-orange-500"
+                count={result.counts.orange}
+                pct={pct(result.counts.orange, result.counts.total)}
+              />
+            </Reveal>
+          </div>
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-[repeat(5,minmax(0,1fr))_1.3fr]">
+      {/* sm+ layout : 6 cards in a horizontal row (3 cols on tablet,
+          5+1 on desktop). Same as before. */}
+      <div className="mt-6 hidden gap-3 sm:grid sm:grid-cols-3 lg:grid-cols-[repeat(5,minmax(0,1fr))_1.3fr]">
         <Reveal delayMs={0}>
           <StatCard label="Ingrédients identifiés" muted>
             <p className="text-3xl font-semibold tabular-nums text-ink">
@@ -92,7 +155,7 @@ export function AnalyseResultPanel({
             </p>
           </StatCard>
         </Reveal>
-        <Reveal delayMs={REVEAL_SCORE_MS} className="col-span-2 sm:col-span-1">
+        <Reveal delayMs={REVEAL_SCORE_MS}>
           <ScoreCard
             score={result.score}
             label={result.scoreLabel}
@@ -107,7 +170,11 @@ export function AnalyseResultPanel({
           <ObservationsCard observations={result.observations} aliasesUsed={result.aliasesUsed} />
         </Reveal>
         <Reveal delayMs={REVEAL_SYNTHESIS_MS}>
-          <SynthesisCard synthesis={result.synthesis} streamDelayMs={REVEAL_SYNTHESIS_MS} />
+          <SynthesisCard
+            synthesis={result.synthesis}
+            items={result.items}
+            streamDelayMs={REVEAL_SYNTHESIS_MS}
+          />
         </Reveal>
       </div>
 
@@ -127,19 +194,50 @@ function StatCard({
   children,
   dot,
   muted = false,
+  className = "",
 }: {
   label: string;
   children: React.ReactNode;
   dot?: string;
   muted?: boolean;
+  className?: string;
 }) {
   return (
-    <article className="flex flex-col rounded-2xl bg-white/65 p-4 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
+    <article
+      className={`flex flex-col rounded-2xl bg-white/65 p-4 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl ${className}`}
+    >
       <p className="flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-ink-subtle">
         {dot ? <span className={`h-1.5 w-1.5 rounded-full ${dot}`} aria-hidden /> : null}
         {label}
       </p>
       <div className={`mt-2 ${muted ? "text-ink-muted" : ""}`}>{children}</div>
+    </article>
+  );
+}
+
+// Compact card used in the mobile bento layout : label on top, then number
+// + percentage on the same baseline (left/right justified).
+function SmallStatCard({
+  label,
+  dot,
+  count,
+  pct,
+}: {
+  label: string;
+  dot: string;
+  count: number;
+  pct: string;
+}) {
+  return (
+    <article className="flex h-full flex-col rounded-2xl bg-white/65 p-4 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
+      <p className="flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-ink-subtle">
+        <span className={`h-1.5 w-1.5 rounded-full ${dot}`} aria-hidden />
+        {label}
+      </p>
+      <div className="mt-auto flex items-baseline justify-between gap-2 pt-2">
+        <p className="text-2xl font-semibold tabular-nums text-ink">{count}</p>
+        <p className="text-[12px] text-ink-subtle tabular-nums">{pct} %</p>
+      </div>
     </article>
   );
 }
@@ -453,12 +551,26 @@ function dotForRating(r: ColorRating): string {
 // ============================================================
 function SynthesisCard({
   synthesis,
+  items,
   streamDelayMs = 0,
 }: {
   synthesis: string | null;
+  items: AnalyseItem[];
   streamDelayMs?: number;
 }) {
   const fullText = synthesis ?? "";
+  // Build a name → colorRating lookup so bold INCI names in the synthesis
+  // can be tinted with their rating colour. Indexed on both the canonical
+  // name and the user-typed token so spelling variants resolve.
+  const colorByName = useMemo(() => {
+    const m = new Map<string, ColorRating>();
+    for (const it of items) {
+      if (!it.colorRating) continue;
+      if (it.name) m.set(normaliseSynthesisToken(it.name), it.colorRating);
+      if (it.input) m.set(normaliseSynthesisToken(it.input), it.colorRating);
+    }
+    return m;
+  }, [items]);
   // Characters revealed so far (the streaming effect). Starts at 0 once we
   // have text, gets incremented on a timer until we reach the full length.
   const [shown, setShown] = useState(0);
@@ -515,7 +627,7 @@ function SynthesisCard({
             if (block.type === "p") {
               return (
                 <p key={i}>
-                  {renderBoldMarkdown(block.text)}
+                  {renderBoldMarkdown(block.text, colorByName)}
                   {showCursor ? <StreamCursor /> : null}
                 </p>
               );
@@ -528,7 +640,7 @@ function SynthesisCard({
                     <li key={j} className="flex gap-2">
                       <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-400" />
                       <span className="flex-1">
-                        {renderBoldMarkdown(item)}
+                        {renderBoldMarkdown(item, colorByName)}
                         {showCursor && lastItem ? <StreamCursor /> : null}
                       </span>
                     </li>
@@ -604,18 +716,46 @@ function balanceBold(text: string): string {
   return stars % 2 === 1 ? text + "**" : text;
 }
 
-function renderBoldMarkdown(s: string): React.ReactNode {
+function renderBoldMarkdown(
+  s: string,
+  colorByName?: Map<string, ColorRating>,
+): React.ReactNode {
   const parts = s.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((p, i) => {
     if (/^\*\*[^*]+\*\*$/.test(p)) {
+      const inner = p.slice(2, -2);
+      const rating = colorByName?.get(normaliseSynthesisToken(inner));
+      const tone = rating ? colorForRating(rating) : "text-ink";
       return (
-        <strong key={i} className="font-semibold text-ink">
-          {p.slice(2, -2)}
+        <strong key={i} className={`font-semibold ${tone}`}>
+          {inner}
         </strong>
       );
     }
     return <span key={i}>{p}</span>;
   });
+}
+
+function normaliseSynthesisToken(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9+]+/g, " ")
+    .trim();
+}
+
+function colorForRating(r: ColorRating): string {
+  switch (r) {
+    case "Vert":
+      return "text-emerald-600";
+    case "Jaune":
+      return "text-amber-600";
+    case "Orange":
+      return "text-orange-600";
+    case "Rouge":
+      return "text-rose-600";
+  }
 }
 
 // ============================================================

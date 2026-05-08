@@ -224,21 +224,25 @@ export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
   if (result) {
     return (
       <main className="mx-auto w-full max-w-6xl flex-1 px-6 pb-16">
-        <div id="pdf-root">
+        <div className="pt-4">
+          <button
+            type="button"
+            onClick={reset}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink"
+          >
+            <span aria-hidden>←</span> Nouvelle analyse
+          </button>
+        </div>
+        <div id="pdf-root" className="mt-4">
           {productSource ? (
             <ProductHero
               source={productSource.source}
               sourceUrl={productSource.sourceUrl}
               brand={productSource.brand}
               productName={productSource.productName}
-              onClear={reset}
             />
           ) : null}
-          <AnalyseResultPanel
-            result={result}
-            originalText={originalText}
-            onReset={reset}
-          />
+          <AnalyseResultPanel result={result} originalText={originalText} />
         </div>
       </main>
     );
