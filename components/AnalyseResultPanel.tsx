@@ -1,388 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
+import type { AnalyseItem, AnalyseResponse, Observation } from "@/lib/analyseTypes";
+import type { ColorRating } from "@/lib/supabase";
 
-type ColorRating = "Vert" | "Jaune" | "Orange" | "Rouge";
-type MatchKind = "exact" | "alias" | "fuzzy" | null;
-
-type AnalyseItem = {
-  position: number;
-  input: string;
-  slug: string | null;
-  name: string | null;
-  colorRating: ColorRating | null;
-  casNumber: string | null;
-  translationFr: string | null;
-  primaryFunction: string | null;
-  tags: string[] | null;
-  matchKind: MatchKind;
-};
-
-type Observation = {
-  tag: string;
-  label: string;
-  status: "present" | "absent";
-  count: number;
-};
-
-type AnalyseResponse = {
-  counts: {
-    total: number;
-    matched: number;
-    vert: number;
-    jaune: number;
-    orange: number;
-    rouge: number;
-    unknown: number;
-  };
-  score: number;
-  scoreLabel: string;
-  scoreTone: "green" | "amber" | "orange" | "rose";
-  items: AnalyseItem[];
-  observations: Observation[];
-  aliasesUsed: { from: string; to: string | null }[];
-  synthesis: string | null;
-};
-
-const SAMPLE = `AQUA, GLYCERIN, CETEARYL ALCOHOL, SIMMONDSIA CHINENSIS SEED OIL,
-BEHENTRIMONIUM METHOSULFATE, ALOE BARBADENSIS LEAF JUICE POWDER,
-PANTHENOL, PRUNUS AMYGDALUS DULCIS OIL, CITRUS PARADISI PEEL OIL,
-BENZYL ALCOHOL, DEHYDROACETIC ACID, SODIUM HYDROXIDE, LIMONENE`;
-
-const STORAGE_KEY = "cw:lastAnalysis";
-const MIN_PROCESSING_MS = 3000;
-
-type CachedAnalysis = {
-  text: string;
-  result: AnalyseResponse;
-  ts: number;
-};
-
-function readCache(): CachedAnalysis | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const data = JSON.parse(raw) as CachedAnalysis;
-    if (!data || typeof data !== "object" || !data.result) return null;
-    return data;
-  } catch {
-    return null;
-  }
-}
-
-function writeCache(text: string, result: AnalyseResponse) {
-  if (typeof window === "undefined") return;
-  try {
-    sessionStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ text, result, ts: Date.now() } satisfies CachedAnalysis),
-    );
-  } catch {
-    /* quota / disabled — ignore */
-  }
-}
-
-function clearCache() {
-  if (typeof window === "undefined") return;
-  try {
-    sessionStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* ignore */
-  }
-}
-
-export function AnalyserApp({ initialText = "" }: { initialText?: string }) {
-  const [text, setText] = useState(initialText);
-  const [hp, setHp] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<AnalyseResponse | null>(null);
-  const [hydrated, setHydrated] = useState(false);
-  const triggeredRef = useRef(false);
-
-  // Hydrate from sessionStorage on mount
-  useEffect(() => {
-    const cached = readCache();
-    if (cached) {
-      const sameText = !initialText || cached.text.trim() === initialText.trim();
-      if (sameText) {
-        setText(cached.text);
-        setResult(cached.result);
-        setHydrated(true);
-        return;
-      }
-    }
-    setHydrated(true);
-    if (initialText && !triggeredRef.current) {
-      triggeredRef.current = true;
-      void analyze(initialText);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  async function analyze(value: string) {
-    const trimmed = value.trim();
-    if (!trimmed) {
-      setError("Colle une liste INCI avant de lancer l'analyse.");
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    const startedAt = Date.now();
-    try {
-      const r = await fetch("/api/analyser", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: trimmed, hp, withSynthesis: true }),
-      });
-      if (!r.ok) {
-        const j = await r.json().catch(() => ({}));
-        setError(j?.error ?? `Erreur ${r.status}`);
-        setResult(null);
-      } else {
-        const data = (await r.json()) as AnalyseResponse;
-        // Ensure the processing overlay is shown long enough for credibility
-        const elapsed = Date.now() - startedAt;
-        if (elapsed < MIN_PROCESSING_MS) {
-          await new Promise((res) => setTimeout(res, MIN_PROCESSING_MS - elapsed));
-        }
-        setResult(data);
-        writeCache(trimmed, data);
-        requestAnimationFrame(() => {
-          const el = document.getElementById("analyse-results");
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        });
-      }
-    } catch (e) {
-      setError((e as Error).message ?? "Erreur réseau");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function reset() {
-    clearCache();
-    setResult(null);
-    setError(null);
-    setText("");
-    triggeredRef.current = false;
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      url.searchParams.delete("inci");
-      window.history.replaceState({}, "", url.toString());
-    }
-  }
-
-  if (!hydrated) {
-    return null;
-  }
-
-  return (
-    <div>
-      {loading ? <ProcessingOverlay /> : null}
-
-      {!result ? (
-        <InputBlock
-          text={text}
-          setText={setText}
-          loading={loading}
-          error={error}
-          onSubmit={() => analyze(text)}
-          onLoadSample={() => setText(SAMPLE)}
-          hp={hp}
-          setHp={setHp}
-        />
-      ) : (
-        <ResultBlock result={result} originalText={text} onReset={reset} />
-      )}
-    </div>
-  );
-}
-
-// ============================================================
-// Processing overlay
-// ============================================================
-function ProcessingOverlay() {
-  const STEPS = [
-    "Lecture de la liste",
-    "Identification des ingrédients",
-    "Détection des catégories",
-    "Calcul de la note globale",
-    "Génération de la synthèse",
-  ];
-  const [step, setStep] = useState(0);
-
-  useEffect(() => {
-    const t = setInterval(() => {
-      setStep((s) => Math.min(s + 1, STEPS.length - 1));
-    }, 600);
-    return () => clearInterval(t);
-  }, []);
-
-  return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 backdrop-blur-md animate-fade-in"
-    >
-      <div className="relative w-[min(28rem,calc(100vw-2rem))] rounded-3xl bg-white/90 p-7 shadow-[0_24px_60px_-20px_rgba(15,23,42,0.20)] ring-1 ring-white/80 backdrop-blur-2xl">
-        <div className="flex items-center gap-3">
-          <span className="grid h-9 w-9 place-items-center rounded-2xl bg-violet-50 ring-1 ring-violet-100">
-            <span className="block h-2 w-2 animate-pulse rounded-full bg-violet-600" aria-hidden />
-          </span>
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
-              Analyse en cours
-            </p>
-            <p className="text-[15px] font-semibold text-ink">
-              On décode la composition…
-            </p>
-          </div>
-        </div>
-
-        <ul className="mt-5 space-y-2 text-[13px]">
-          {STEPS.map((label, i) => {
-            const state = i < step ? "done" : i === step ? "active" : "pending";
-            return (
-              <li
-                key={label}
-                className={`flex items-center gap-2.5 transition-colors ${
-                  state === "active"
-                    ? "text-ink"
-                    : state === "done"
-                      ? "text-ink-muted"
-                      : "text-ink-subtle"
-                }`}
-              >
-                <span
-                  className={`grid h-5 w-5 shrink-0 place-items-center rounded-full ${
-                    state === "done"
-                      ? "bg-ink text-white"
-                      : state === "active"
-                        ? "bg-white ring-2 ring-violet-300"
-                        : "bg-black/[0.05] ring-1 ring-black/[0.05]"
-                  }`}
-                >
-                  {state === "done" ? (
-                    <CheckIcon className="h-3 w-3" />
-                  ) : state === "active" ? (
-                    <span className="block h-1.5 w-1.5 rounded-full bg-violet-600 animate-ping" aria-hidden />
-                  ) : null}
-                </span>
-                <span>{label}</span>
-              </li>
-            );
-          })}
-        </ul>
-
-        <div className="mt-5 h-1 w-full overflow-hidden rounded-full bg-black/[0.05]">
-          <span className="block h-full w-1/3 animate-[shimmer_1.4s_linear_infinite] rounded-full bg-gradient-to-r from-transparent via-violet-500 to-transparent" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================
-// INPUT
-// ============================================================
-function InputBlock({
-  text,
-  setText,
-  loading,
-  error,
-  onSubmit,
-  onLoadSample,
-  hp,
-  setHp,
-}: {
-  text: string;
-  setText: (v: string) => void;
-  loading: boolean;
-  error: string | null;
-  onSubmit: () => void;
-  onLoadSample: () => void;
-  hp: string;
-  setHp: (v: string) => void;
-}) {
-  return (
-    <section className="mx-auto w-full max-w-3xl pt-6 sm:pt-12">
-      <p className="text-[13px] font-medium uppercase tracking-wider text-ink-subtle">
-        Analyseur de composition
-      </p>
-      <h1 className="mt-2 text-balance text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-        Colle la liste INCI d&apos;un produit. <br className="hidden sm:block" />
-        On la décode en 3 secondes.
-      </h1>
-      <p className="mt-3 max-w-xl text-[15px] text-ink-muted">
-        Astérisques, parenthèses, doublons FR/EN — tout est géré
-        automatiquement. Notre analyseur identifie les ingrédients,
-        attribue une couleur de tolérance, calcule une note globale et
-        rédige une synthèse.
-      </p>
-
-      <div className="relative mt-8 rounded-3xl bg-white/65 p-5 shadow-[0_18px_44px_-18px_rgba(15,23,42,0.18)] ring-1 ring-white/70 backdrop-blur-2xl sm:p-6">
-        <label className="block text-[13px] font-semibold text-ink">
-          Liste d&apos;ingrédients
-        </label>
-
-        <input
-          type="text"
-          name="email_confirm"
-          autoComplete="off"
-          tabIndex={-1}
-          value={hp}
-          onChange={(e) => setHp(e.target.value)}
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-[9999px] h-px w-px opacity-0"
-        />
-
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          rows={8}
-          maxLength={6000}
-          spellCheck={false}
-          placeholder="AQUA, GLYCERIN, CETEARYL ALCOHOL, SIMMONDSIA CHINENSIS SEED OIL, ..."
-          className="mt-2 w-full resize-y rounded-2xl border-0 bg-white/70 p-4 font-mono text-[13px] leading-relaxed text-ink placeholder:text-ink-subtle outline-none ring-1 ring-black/[0.06] focus:ring-2 focus:ring-violet-200"
-        />
-
-        <div className="mt-4 flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            type="button"
-            onClick={onLoadSample}
-            className="text-[13px] font-medium text-ink-muted hover:text-ink"
-          >
-            Charger un exemple
-          </button>
-
-          <button
-            type="button"
-            onClick={onSubmit}
-            disabled={loading || !text.trim()}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_28px_-8px_rgba(139,92,246,0.6)] transition-all hover:-translate-y-0.5 hover:bg-violet-700 hover:shadow-[0_14px_36px_-10px_rgba(139,92,246,0.7)] disabled:cursor-not-allowed disabled:opacity-50 disabled:translate-y-0"
-          >
-            Analyser la composition
-            <span aria-hidden>→</span>
-          </button>
-        </div>
-
-        {error ? (
-          <p className="mt-3 rounded-xl bg-rose-50 px-3.5 py-2 text-sm text-rose-700 ring-1 ring-rose-100">
-            {error}
-          </p>
-        ) : null}
-      </div>
-    </section>
-  );
-}
-
-// ============================================================
-// RESULT
-// ============================================================
-function ResultBlock({
+export function AnalyseResultPanel({
   result,
   originalText,
   onReset,
@@ -565,34 +188,83 @@ function ObservationsCard({
   aliasesUsed: { from: string; to: string | null }[];
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [openTags, setOpenTags] = useState<Set<string>>(new Set());
   const visible = expanded ? observations : observations.slice(0, 5);
+
+  function toggleTag(tag: string) {
+    setOpenTags((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) next.delete(tag);
+      else next.add(tag);
+      return next;
+    });
+  }
 
   return (
     <article className="rounded-2xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
       <h2 className="text-base font-semibold text-ink">Observations</h2>
       <ul className="mt-3 space-y-2">
-        {visible.map((o) => (
-          <li key={o.tag} className="flex items-center gap-2.5 text-[14px]">
-            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-black/[0.03] ring-1 ring-black/[0.04] text-ink-muted">
-              {o.status === "absent" ? (
-                <CheckIcon className="h-3.5 w-3.5 text-emerald-600" />
+        {visible.map((o) => {
+          const isOpen = openTags.has(o.tag);
+          const items = o.items ?? [];
+          const expandable = o.count > 0 && items.length > 0;
+          return (
+            <li key={o.tag}>
+              {expandable ? (
+                <button
+                  type="button"
+                  onClick={() => toggleTag(o.tag)}
+                  aria-expanded={isOpen}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-1.5 py-1 text-left text-[14px] transition-colors hover:bg-black/[0.025]"
+                >
+                  <ObservationIcon obs={o} />
+                  <span className="flex-1 text-ink">
+                    {o.label}{" "}
+                    <span className={o.status === "absent" ? "text-emerald-700" : "text-ink-muted"}>
+                      {o.status === "absent" ? "absents" : "présents"}
+                    </span>
+                  </span>
+                  <span className="rounded-full bg-black/[0.04] px-2 py-0.5 font-mono text-[11px] text-ink-muted">
+                    {o.count}
+                  </span>
+                  <ChevronDownIcon className={`h-3.5 w-3.5 shrink-0 text-ink-subtle transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                </button>
               ) : (
-                <DotIcon className={`h-2.5 w-2.5 ${tagColor(o.tag)}`} />
+                <div className="flex w-full items-center gap-2.5 px-1.5 py-1 text-[14px]">
+                  <ObservationIcon obs={o} />
+                  <span className="flex-1 text-ink">
+                    {o.label}{" "}
+                    <span className={o.status === "absent" ? "text-emerald-700" : "text-ink-muted"}>
+                      {o.status === "absent" ? "absents" : "présents"}
+                    </span>
+                  </span>
+                </div>
               )}
-            </span>
-            <span className="flex-1 text-ink">
-              {o.label}{" "}
-              <span className={o.status === "absent" ? "text-emerald-700" : "text-ink-muted"}>
-                {o.status === "absent" ? "absents" : "présents"}
-              </span>
-            </span>
-            {o.count > 0 ? (
-              <span className="rounded-full bg-black/[0.04] px-2 py-0.5 font-mono text-[11px] text-ink-muted">
-                {o.count}
-              </span>
-            ) : null}
-          </li>
-        ))}
+
+              {expandable && isOpen ? (
+                <ul className="ml-9 mt-1.5 space-y-1 border-l border-black/[0.06] pl-3 animate-fade-in">
+                  {items.map((it, idx) => (
+                    <li key={idx} className="text-[13px]">
+                      {it.slug ? (
+                        <Link
+                          href={`/i/${it.slug}?from=home`}
+                          className="inline-flex items-center gap-1.5 text-ink hover:text-violet-700"
+                        >
+                          {it.colorRating ? (
+                            <span className={`h-1.5 w-1.5 rounded-full ${dotForRating(it.colorRating)}`} aria-hidden />
+                          ) : null}
+                          {prettyName(it.name)}
+                        </Link>
+                      ) : (
+                        <span className="text-ink-muted">{prettyName(it.name)}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </li>
+          );
+        })}
       </ul>
 
       {observations.length > 5 ? (
@@ -624,6 +296,27 @@ function ObservationsCard({
   );
 }
 
+function ObservationIcon({ obs }: { obs: Observation }) {
+  return (
+    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-black/[0.03] ring-1 ring-black/[0.04] text-ink-muted">
+      {obs.status === "absent" ? (
+        <CheckIcon className="h-3.5 w-3.5 text-emerald-600" />
+      ) : (
+        <DotIcon className={`h-2.5 w-2.5 ${tagColor(obs.tag)}`} />
+      )}
+    </span>
+  );
+}
+
+function dotForRating(r: ColorRating): string {
+  switch (r) {
+    case "Vert": return "bg-emerald-500";
+    case "Jaune": return "bg-amber-400";
+    case "Orange": return "bg-orange-500";
+    case "Rouge": return "bg-rose-500";
+  }
+}
+
 // ============================================================
 // Synthesis
 // ============================================================
@@ -637,13 +330,10 @@ function SynthesisCard({ synthesis }: { synthesis: string | null }) {
         </p>
       ) : (
         <p className="mt-3 text-sm text-ink-muted">
-          Synthèse IA temporairement indisponible. Consulte le détail des
+          Synthèse temporairement indisponible. Consulte le détail des
           observations et le tableau ci-dessous pour interpréter les résultats.
         </p>
       )}
-      <p className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-medium text-ink-subtle">
-        <span aria-hidden>✦</span> Synthèse générée par IA
-      </p>
     </article>
   );
 }
@@ -665,6 +355,41 @@ function renderBoldMarkdown(s: string): React.ReactNode {
 // ============================================================
 // Items table
 // ============================================================
+type TabKey = "all" | ColorRating | "unknown";
+
+const TAB_TONE: Record<TabKey, { activeBg: string; inactiveHover: string; countInactive: string }> = {
+  all: {
+    activeBg: "bg-ink",
+    inactiveHover: "hover:bg-black/[0.04] hover:text-ink",
+    countInactive: "bg-black/[0.05] text-ink-muted",
+  },
+  Vert: {
+    activeBg: "bg-emerald-500",
+    inactiveHover: "hover:bg-emerald-50 hover:text-emerald-700",
+    countInactive: "bg-emerald-50 text-emerald-700",
+  },
+  Jaune: {
+    activeBg: "bg-amber-500",
+    inactiveHover: "hover:bg-amber-50 hover:text-amber-700",
+    countInactive: "bg-amber-50 text-amber-700",
+  },
+  Orange: {
+    activeBg: "bg-orange-500",
+    inactiveHover: "hover:bg-orange-50 hover:text-orange-700",
+    countInactive: "bg-orange-50 text-orange-700",
+  },
+  Rouge: {
+    activeBg: "bg-rose-500",
+    inactiveHover: "hover:bg-rose-50 hover:text-rose-700",
+    countInactive: "bg-rose-50 text-rose-700",
+  },
+  unknown: {
+    activeBg: "bg-slate-500",
+    inactiveHover: "hover:bg-black/[0.04] hover:text-ink",
+    countInactive: "bg-black/[0.05] text-ink-muted",
+  },
+};
+
 function ItemsTable({
   items,
   counts,
@@ -672,7 +397,7 @@ function ItemsTable({
   items: AnalyseItem[];
   counts: AnalyseResponse["counts"];
 }) {
-  const [filter, setFilter] = useState<"all" | ColorRating | "unknown">("all");
+  const [filter, setFilter] = useState<TabKey>("all");
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {
@@ -710,6 +435,7 @@ function ItemsTable({
         <div className="-mb-px flex flex-wrap gap-1 overflow-x-auto">
           {tabs.map((t) => {
             const active = t.key === filter;
+            const tone = TAB_TONE[t.key];
             return (
               <button
                 key={t.key}
@@ -717,14 +443,14 @@ function ItemsTable({
                 onClick={() => setFilter(t.key)}
                 className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
                   active
-                    ? "bg-ink text-white"
-                    : "text-ink-muted hover:bg-black/[0.04] hover:text-ink"
+                    ? `${tone.activeBg} text-white`
+                    : `text-ink-muted ${tone.inactiveHover}`
                 }`}
               >
                 {t.label}
                 <span
                   className={`rounded-full px-1.5 text-[11px] tabular-nums ${
-                    active ? "bg-white/20 text-white" : "bg-black/[0.05] text-ink-muted"
+                    active ? "bg-white/25 text-white" : tone.countInactive
                   }`}
                 >
                   {t.count}
@@ -785,7 +511,7 @@ function ItemsTable({
                   <td className="px-5 py-3 text-right">
                     {i.slug ? (
                       <Link
-                        href={`/i/${i.slug}?from=analyser`}
+                        href={`/i/${i.slug}?from=home`}
                         className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-muted transition hover:bg-violet-50 hover:text-violet-700"
                         aria-label={`Voir la fiche de ${i.name}`}
                       >
@@ -848,7 +574,6 @@ async function downloadPdf(result: AnalyseResponse, originalText: string) {
     }
   };
 
-  // Header
   doc.setFont("helvetica", "bold");
   doc.setFontSize(20);
   doc.setTextColor(31, 41, 55);
@@ -859,7 +584,6 @@ async function downloadPdf(result: AnalyseResponse, originalText: string) {
   doc.text("Analyse de composition INCI", margin, y + 16);
   y += 36;
 
-  // Date
   const now = new Date();
   doc.setFontSize(9);
   doc.setTextColor(156, 163, 175);
@@ -870,7 +594,6 @@ async function downloadPdf(result: AnalyseResponse, originalText: string) {
   );
   y += 24;
 
-  // Score block
   ensureSpace(70);
   doc.setFillColor(250, 250, 250);
   doc.roundedRect(margin, y, usable, 60, 6, 6, "F");
@@ -882,7 +605,6 @@ async function downloadPdf(result: AnalyseResponse, originalText: string) {
   doc.setFontSize(11);
   doc.setTextColor(107, 114, 128);
   doc.text(`Note globale — ${result.scoreLabel}`, margin + 16, y + 52);
-  // Counters on the right
   doc.setFontSize(9);
   doc.setTextColor(156, 163, 175);
   const countsLine = `Vert ${result.counts.vert}  ·  Jaune ${result.counts.jaune}  ·  Orange ${result.counts.orange}  ·  Rouge ${result.counts.rouge}`;
@@ -895,7 +617,6 @@ async function downloadPdf(result: AnalyseResponse, originalText: string) {
   );
   y += 80;
 
-  // Synthèse
   if (result.synthesis) {
     ensureSpace(20);
     doc.setFont("helvetica", "bold");
@@ -913,7 +634,6 @@ async function downloadPdf(result: AnalyseResponse, originalText: string) {
     y += lines.length * 13 + 12;
   }
 
-  // Observations
   if (result.observations.length) {
     ensureSpace(20);
     doc.setFont("helvetica", "bold");
@@ -933,7 +653,6 @@ async function downloadPdf(result: AnalyseResponse, originalText: string) {
     y += 8;
   }
 
-  // Items table
   ensureSpace(40);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
@@ -941,7 +660,6 @@ async function downloadPdf(result: AnalyseResponse, originalText: string) {
   doc.text("Détail des ingrédients", margin, y);
   y += 14;
 
-  // Header row
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(107, 114, 128);
@@ -987,7 +705,6 @@ async function downloadPdf(result: AnalyseResponse, originalText: string) {
     y += 18;
   }
 
-  // Footer on each page
   const totalPages = (doc as unknown as { internal: { getNumberOfPages: () => number } }).internal.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
@@ -1007,7 +724,6 @@ async function downloadPdf(result: AnalyseResponse, originalText: string) {
 
   const filename = `cosmetwiki-analyse-${now.toISOString().slice(0, 10)}.pdf`;
   doc.save(filename);
-  // Suppress unused warning when originalText isn't used in PDF body
   void originalText;
 }
 
@@ -1117,6 +833,14 @@ function ArrowRightIcon({ className }: { className?: string }) {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
       <line x1="5" y1="12" x2="19" y2="12" />
       <polyline points="12 5 19 12 12 19" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <polyline points="6 9 12 15 18 9" />
     </svg>
   );
 }

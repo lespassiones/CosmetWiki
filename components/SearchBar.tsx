@@ -1,19 +1,31 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SearchHit } from "@/lib/supabase";
+import { ProcessingOverlay, randomProcessingTotal } from "./ProcessingOverlay";
 
 type Props = {
   autoFocus?: boolean;
   placeholder?: string;
   size?: "lg" | "md";
+  /**
+   * Optional callback invoked when the user submits a multi-ingredient list.
+   * When provided, the SearchBar does NOT navigate away — the parent owns the
+   * processing overlay and the result rendering. This is what HomeShell uses
+   * to keep the analyse on the home page.
+   */
+  onAnalyseList?: (text: string) => void | Promise<void>;
 };
+
+const TEXTAREA_MIN_PX = 28;   // single-line height
+const TEXTAREA_MAX_PX = 280;  // before internal scroll kicks in
 
 export function SearchBar({
   autoFocus = false,
   placeholder = "Ex : Glycerin, Phenoxyethanol, 122-99-6…",
   size = "lg",
+  onAnalyseList,
 }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchHit[]>([]);
@@ -22,7 +34,11 @@ export function SearchBar({
   const [loading, setLoading] = useState(false);
   const [hpField, setHpField] = useState("");
   const [focused, setFocused] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [processing, setProcessing] = useState<{ active: boolean; budget: number }>({
+    active: false,
+    budget: 0,
+  });
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
   const listboxId = useId();
   const abortRef = useRef<AbortController | null>(null);
@@ -30,6 +46,16 @@ export function SearchBar({
   useEffect(() => {
     if (autoFocus) inputRef.current?.focus();
   }, [autoFocus]);
+
+  // Auto-resize the textarea : grow up to TEXTAREA_MAX_PX, then internal scroll
+  useLayoutEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const next = Math.min(Math.max(el.scrollHeight, TEXTAREA_MIN_PX), TEXTAREA_MAX_PX);
+    el.style.height = `${next}px`;
+    el.style.overflowY = el.scrollHeight > TEXTAREA_MAX_PX ? "auto" : "hidden";
+  }, [query]);
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -39,7 +65,6 @@ export function SearchBar({
       setLoading(false);
       return;
     }
-    // If the user pasted a list (multiple ingredients separated), don't query autocomplete.
     if (looksLikeIngredientList(trimmed)) {
       setResults([]);
       setIsOpen(false);
@@ -81,18 +106,59 @@ export function SearchBar({
 
   const wrapperBase =
     size === "lg"
-      ? "h-16 rounded-full pl-6 pr-5"
-      : "h-12 rounded-full pl-4 pr-4";
-  const inputCls =
-    size === "lg" ? "text-lg" : "text-sm";
+      ? "min-h-[64px] rounded-[28px] pl-6 pr-5 py-3"
+      : "min-h-[48px] rounded-[24px] pl-4 pr-4 py-2";
+  const inputCls = size === "lg" ? "text-lg" : "text-sm";
   const iconSize = size === "lg" ? "h-5 w-5" : "h-4 w-4";
 
-  function go(hit: SearchHit) {
-    router.push(`/i/${hit.slug}`);
+  function startProcessingThen(action: () => void) {
+    const budget = randomProcessingTotal();
+    setProcessing({ active: true, budget });
     setIsOpen(false);
+    setTimeout(() => {
+      setProcessing({ active: false, budget: 0 });
+      action();
+    }, budget);
   }
 
-  function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+  function go(hit: SearchHit) {
+    startProcessingThen(() => router.push(`/i/${hit.slug}`));
+  }
+
+  function submitList(trimmed: string) {
+    if (onAnalyseList) {
+      // Parent (HomeShell) owns the overlay + result rendering — clear
+      // the query and hand off.
+      void onAnalyseList(trimmed);
+      setQuery("");
+      setIsOpen(false);
+    } else {
+      // Outside the home shell : send the list to the home page, which owns
+      // the analyser flow. No local overlay — HomeShell will show its own
+      // once mounted, so we avoid playing the animation twice.
+      const blob = encodeURIComponent(trimmed.slice(0, 6000));
+      setIsOpen(false);
+      router.push(`/?inci=${blob}`);
+    }
+  }
+
+  function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    // Shift+Enter / Alt+Enter inserts a newline (default behaviour)
+    if (e.key === "Enter" && !e.shiftKey && !e.altKey) {
+      e.preventDefault();
+      const trimmed = query.trim();
+      if (looksLikeIngredientList(trimmed)) {
+        submitList(trimmed);
+        return;
+      }
+      if (results[highlight]) go(results[highlight]);
+      else if (trimmed) {
+        startProcessingThen(() =>
+          router.push(`/search?q=${encodeURIComponent(trimmed)}`),
+        );
+      }
+      return;
+    }
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setHighlight((h) => Math.min(h + 1, results.length - 1));
@@ -100,20 +166,6 @@ export function SearchBar({
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setHighlight((h) => Math.max(h - 1, 0));
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      const trimmed = query.trim();
-      // List → analyse it
-      if (looksLikeIngredientList(trimmed)) {
-        const blob = encodeURIComponent(trimmed.slice(0, 6000));
-        router.push(`/analyser?inci=${blob}`);
-        setIsOpen(false);
-        return;
-      }
-      if (results[highlight]) go(results[highlight]);
-      else if (trimmed) {
-        router.push(`/search?q=${encodeURIComponent(trimmed)}`);
-      }
     } else if (e.key === "Escape") {
       setIsOpen(false);
       inputRef.current?.blur();
@@ -122,10 +174,20 @@ export function SearchBar({
 
   const hasResults = results.length > 0;
   const isList = looksLikeIngredientList(query);
-  const showDropdown = !isList && isOpen && (hasResults || (query.trim().length > 0 && !loading));
+  const showDropdown =
+    !isList && isOpen && (hasResults || (query.trim().length > 0 && !loading));
 
   return (
     <div className="relative w-full">
+      {processing.active ? (
+        <ProcessingOverlay
+          totalMs={processing.budget}
+          headline={
+            isList ? "On décode la composition…" : "On cherche dans la base…"
+          }
+        />
+      ) : null}
+
       {/* honeypot */}
       <input
         type="text"
@@ -139,20 +201,20 @@ export function SearchBar({
       />
 
       <div
-        className={`relative flex w-full items-center bg-white ${wrapperBase} transition-all duration-200 ${
+        className={`relative flex w-full items-start gap-3 bg-white ${wrapperBase} transition-all duration-200 ${
           focused
             ? "ring-2 ring-violet-200 shadow-[0_18px_50px_-12px_rgba(139,92,246,0.28),0_8px_24px_-6px_rgba(15,23,42,0.10)]"
             : "ring-1 ring-black/[0.06] shadow-[0_14px_40px_-12px_rgba(15,23,42,0.16),0_4px_18px_-4px_rgba(15,23,42,0.08)]"
         }`}
       >
-        <SearchIcon className={`shrink-0 text-ink-subtle ${iconSize}`} />
-        <input
+        <SearchIcon
+          className={`mt-1 shrink-0 text-ink-subtle ${iconSize}`}
+        />
+        <textarea
           ref={inputRef}
-          type="search"
-          role="combobox"
-          aria-expanded={showDropdown ? "true" : "false"}
+          rows={1}
+          aria-label="Recherche d'ingrédient ou d'une liste INCI"
           aria-controls={listboxId}
-          aria-autocomplete="list"
           autoComplete="off"
           autoCapitalize="none"
           spellCheck={false}
@@ -169,37 +231,40 @@ export function SearchBar({
             setTimeout(() => setIsOpen(false), 150);
           }}
           onKeyDown={onKeyDown}
-          className={`ml-3 w-full bg-transparent ${inputCls} font-normal text-ink placeholder:text-ink-subtle outline-none`}
+          maxLength={6000}
+          className={`flex-1 resize-none bg-transparent ${inputCls} font-normal leading-7 text-ink placeholder:text-ink-subtle outline-none scrollbar-soft`}
         />
-        {isList ? (
-          <button
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              const blob = encodeURIComponent(query.trim().slice(0, 6000));
-              router.push(`/analyser?inci=${blob}`);
-            }}
-            className="ml-2 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-violet-600 px-3.5 py-1.5 text-[13px] font-semibold text-white shadow-[0_4px_14px_-4px_rgba(139,92,246,0.6)] transition-all hover:bg-violet-700 hover:shadow-[0_8px_22px_-6px_rgba(139,92,246,0.7)]"
-          >
-            Analyser
-            <span aria-hidden>→</span>
-          </button>
-        ) : loading ? (
-          <Spinner className={`ml-2 shrink-0 text-ink-subtle ${iconSize}`} />
-        ) : query ? (
-          <button
-            type="button"
-            aria-label="Effacer"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              setQuery("");
-              inputRef.current?.focus();
-            }}
-            className="ml-2 grid h-7 w-7 shrink-0 place-items-center rounded-full text-ink-subtle hover:bg-black/[0.04] hover:text-ink"
-          >
-            <CloseIcon className="h-4 w-4" />
-          </button>
-        ) : null}
+
+        <div className="flex shrink-0 items-center gap-1 self-start pt-0.5">
+          {isList ? (
+            <button
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                submitList(query.trim());
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-3.5 py-1.5 text-[13px] font-semibold text-white shadow-[0_4px_14px_-4px_rgba(139,92,246,0.6)] transition-all hover:bg-violet-700 hover:shadow-[0_8px_22px_-6px_rgba(139,92,246,0.7)]"
+            >
+              Analyser
+              <span aria-hidden>→</span>
+            </button>
+          ) : loading ? (
+            <Spinner className={`text-ink-subtle ${iconSize}`} />
+          ) : query ? (
+            <button
+              type="button"
+              aria-label="Effacer"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                setQuery("");
+                inputRef.current?.focus();
+              }}
+              className="grid h-7 w-7 place-items-center rounded-full text-ink-subtle hover:bg-black/[0.04] hover:text-ink"
+            >
+              <CloseIcon className="h-4 w-4" />
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {showDropdown ? (
@@ -209,13 +274,14 @@ export function SearchBar({
               <ul
                 id={listboxId}
                 role="listbox"
+                aria-label="Suggestions d'ingrédients"
                 className="max-h-[60vh] overflow-y-auto scrollbar-soft"
               >
                 {results.map((hit, idx) => (
                   <li
                     key={hit.id}
                     role="option"
-                    aria-selected={idx === highlight ? "true" : "false"}
+                    aria-selected={idx === highlight}
                     onMouseEnter={() => setHighlight(idx)}
                     onMouseDown={(e) => {
                       e.preventDefault();
@@ -252,8 +318,9 @@ export function SearchBar({
                   type="button"
                   onMouseDown={(e) => {
                     e.preventDefault();
-                    router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-                    setIsOpen(false);
+                    startProcessingThen(() =>
+                      router.push(`/search?q=${encodeURIComponent(query.trim())}`),
+                    );
                   }}
                   className="flex w-full items-center justify-center gap-2 px-5 py-3.5 text-sm font-medium text-violet-700 hover:bg-violet-50/60"
                 >
@@ -275,11 +342,10 @@ export function SearchBar({
 
 /**
  * Heuristic: does this look like a pasted INCI list rather than a single ingredient?
- * Conditions (any of):
  *   - 2+ commas
  *   - line breaks
- *   - more than ~50 characters (likely several names)
- *   - 3+ separators (semicolons, dashes between words)
+ *   - long single-comma string
+ *   - several semicolons / bullets
  */
 export function looksLikeIngredientList(text: string): boolean {
   if (!text) return false;
@@ -289,7 +355,6 @@ export function looksLikeIngredientList(text: string): boolean {
   const commaCount = (trimmed.match(/,/g) || []).length;
   if (commaCount >= 2) return true;
   if (commaCount === 1 && trimmed.length > 30) return true;
-  // Lots of bullet-style separators
   const sepCount = (trimmed.match(/[;•·]| - /g) || []).length;
   if (sepCount >= 2) return true;
   return false;

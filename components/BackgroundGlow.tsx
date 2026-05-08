@@ -1,22 +1,20 @@
 /**
- * Soft pastel ambient glow rendered behind the page content.
- * Mirrors the violet → fuchsia → peach gradient palette of the brand.
- * Kept light enough to not interfere with content legibility.
+ * Soft pastel orbs in the background, behind the page content.
+ * Two main blobs (violet on the left, peach on the right) framing the search
+ * area, plus a tiny lavender accent in the corner. Kept soft with `blur-3xl`
+ * and low opacities so they don't fight with the foreground.
  */
 export function BackgroundGlow() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      {/* Violet/fuchsia haze, top-left to top-center */}
-      <div className="absolute -top-32 -left-20 h-[70vh] w-[70vw] rounded-full bg-gradient-to-br from-violet-300/45 via-fuchsia-200/35 to-pink-200/25 blur-3xl" />
+      {/* Violet/fuchsia orb — left half, behind the search bar */}
+      <div className="absolute top-[15%] left-[-12%] h-[60vh] w-[55vw] rounded-full bg-gradient-to-br from-violet-300/55 via-fuchsia-200/40 to-pink-200/20 blur-3xl" />
 
-      {/* Pink/peach haze, bottom-right */}
-      <div className="absolute -bottom-32 -right-24 h-[65vh] w-[65vw] rounded-full bg-gradient-to-tl from-orange-200/40 via-rose-200/40 to-pink-200/30 blur-3xl" />
+      {/* Peach/rose orb — right half, behind the search bar */}
+      <div className="absolute top-[18%] right-[-12%] h-[55vh] w-[55vw] rounded-full bg-gradient-to-bl from-orange-200/50 via-rose-200/40 to-pink-200/25 blur-3xl" />
 
-      {/* Lavender accent, center-left */}
-      <div className="absolute top-1/3 -left-32 h-[55vh] w-[45vw] rounded-full bg-gradient-to-tr from-purple-200/35 via-violet-200/30 to-transparent blur-3xl" />
-
-      {/* Subtle peach accent, top-right */}
-      <div className="absolute -top-20 right-0 h-[45vh] w-[50vw] rounded-full bg-gradient-to-bl from-amber-100/35 via-orange-100/30 to-transparent blur-3xl" />
+      {/* Tiny lavender breathing accent — bottom-left, very subtle */}
+      <div className="absolute bottom-[5%] left-[10%] h-[30vh] w-[30vw] rounded-full bg-gradient-to-tr from-purple-200/30 via-violet-100/20 to-transparent blur-3xl" />
     </div>
   );
 }

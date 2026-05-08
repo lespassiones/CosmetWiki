@@ -22,6 +22,13 @@ const config: NextConfig = {
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
+  async redirects() {
+    return [
+      // Legacy : the standalone /analyser page was merged into the home — keep
+      // existing links and bookmarks working.
+      { source: "/analyser", destination: "/", permanent: true },
+    ];
+  },
 };
 
 export default config;

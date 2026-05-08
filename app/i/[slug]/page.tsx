@@ -79,7 +79,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function IngredientPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const sp = searchParams ? await searchParams : undefined;
-  const fromAnalyser = sp?.from === "analyser";
+  const fromAnalyser = sp?.from === "analyser" || sp?.from === "home";
   const ing = await loadIngredient(slug);
   if (!ing) notFound();
 
@@ -141,7 +141,7 @@ export default async function IngredientPage({ params, searchParams }: Props) {
           <ChevronIcon className="h-3.5 w-3.5" />
           {fromAnalyser ? (
             <>
-              <Link href="/analyser" className="hover:text-ink">
+              <Link href="/" className="hover:text-ink">
                 Analyse
               </Link>
               <ChevronIcon className="h-3.5 w-3.5" />
@@ -157,7 +157,7 @@ export default async function IngredientPage({ params, searchParams }: Props) {
 
         {fromAnalyser ? (
           <Link
-            href="/analyser"
+            href="/"
             className="mb-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-violet-700 hover:text-violet-900"
           >
             <span aria-hidden>←</span> Retour à l&apos;analyse

@@ -45,7 +45,7 @@ const ABSENCE_REPORTED = new Set(["paraben", "sulfate", "huile-minerale", "silic
 
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req.headers);
-  // Tighter limit on /analyser : 5/min/IP, 50/day/IP
+  // Tighter limit on the analyser API : 5/min/IP, 50/day/IP
   const rl = checkRateLimit(ip, 5, 60_000);
   if (!rl.ok) {
     return NextResponse.json(
@@ -113,28 +113,44 @@ export async function POST(req: NextRequest) {
   );
   const { label: scoreLabelText, tone: scoreTone } = scoreLabel(score);
 
-  // Tag aggregation
+  // Tag aggregation : count + list of ingredients per tag
   const tagCounts: Record<string, number> = {};
+  const tagItems: Record<string, { name: string; slug: string | null; colorRating: ColorRating | null }[]> = {};
   for (const r of enriched) {
     if (!r.tags) continue;
-    for (const t of r.tags) tagCounts[t] = (tagCounts[t] || 0) + 1;
+    for (const t of r.tags) {
+      tagCounts[t] = (tagCounts[t] || 0) + 1;
+      if (!tagItems[t]) tagItems[t] = [];
+      tagItems[t].push({
+        name: r.name ?? r.input_raw,
+        slug: r.slug,
+        colorRating: r.color_rating,
+      });
+    }
   }
 
-  const observations: { tag: string; label: string; status: "present" | "absent"; count: number }[] = [];
+  type Observation = {
+    tag: string;
+    label: string;
+    status: "present" | "absent";
+    count: number;
+    items: { name: string; slug: string | null; colorRating: ColorRating | null }[];
+  };
+  const observations: Observation[] = [];
   // Reported absences (good news)
   for (const tag of ABSENCE_REPORTED) {
     const c = tagCounts[tag] || 0;
     if (c === 0) {
-      observations.push({ tag, label: TAG_LABELS[tag] ?? tag, status: "absent", count: 0 });
+      observations.push({ tag, label: TAG_LABELS[tag] ?? tag, status: "absent", count: 0, items: [] });
     } else {
-      observations.push({ tag, label: TAG_LABELS[tag] ?? tag, status: "present", count: c });
+      observations.push({ tag, label: TAG_LABELS[tag] ?? tag, status: "present", count: c, items: tagItems[tag] ?? [] });
     }
   }
   // Other tags only when present
   for (const [tag, c] of Object.entries(tagCounts)) {
     if (ABSENCE_REPORTED.has(tag)) continue;
     if (c > 0) {
-      observations.push({ tag, label: TAG_LABELS[tag] ?? tag, status: "present", count: c });
+      observations.push({ tag, label: TAG_LABELS[tag] ?? tag, status: "present", count: c, items: tagItems[tag] ?? [] });
     }
   }
 
