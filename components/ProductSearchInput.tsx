@@ -258,21 +258,10 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
             Tu ne vois pas ton produit ?{" "}
             <button
               type="button"
-              onClick={runDeepSearch}
-              disabled={deepSearching}
-              className="font-medium text-rose-600 underline underline-offset-2 hover:no-underline disabled:opacity-60"
-            >
-              {deepSearching
-                ? "Recherche approfondie en cours…"
-                : "Lance une recherche approfondie"}
-            </button>{" "}
-            ou{" "}
-            <button
-              type="button"
               onClick={() => onFallbackToManual()}
               className="font-medium text-rose-600 underline underline-offset-2 hover:no-underline"
             >
-              colle la liste INCI manuellement
+              Colle la liste INCI manuellement
             </button>
             .
           </p>
