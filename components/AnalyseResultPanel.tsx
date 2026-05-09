@@ -30,19 +30,12 @@ export function AnalyseResultPanel({
         </ToolbarButton>
       </div>
 
-      {/* Mobile-only bento layout : Score on top full-width, then 2 big
-          boxes (Ingrédients identifiés + Rouge) on the left and 3 small
-          boxes (Vert / Jaune / Orange) stacked on the right. */}
+      {/* Mobile-only bento layout : Stats grid first, then Score below.
+          Score is secondary — the observations and ingredient counts are the
+          primary signal. 2 big boxes (Ingrédients identifiés + Rouge) on the
+          left and 3 small boxes (Vert / Jaune / Orange) stacked on the right. */}
       <div className="mt-6 sm:hidden">
-        <Reveal delayMs={0}>
-          <ScoreCard
-            score={result.score}
-            label={result.scoreLabel}
-            tone={result.scoreTone}
-            startDelayMs={REVEAL_SCORE_MS}
-          />
-        </Reveal>
-        <div className="mt-3 grid grid-cols-2 items-stretch gap-3">
+        <div className="grid grid-cols-2 items-stretch gap-3">
           <div className="flex flex-col gap-3">
             <Reveal delayMs={0} className="flex flex-1 flex-col">
               <StatCard
@@ -99,6 +92,16 @@ export function AnalyseResultPanel({
               />
             </Reveal>
           </div>
+        </div>
+        <div className="mt-3">
+          <Reveal delayMs={REVEAL_SCORE_MS}>
+            <ScoreCard
+              score={result.score}
+              label={result.scoreLabel}
+              tone={result.scoreTone}
+              startDelayMs={REVEAL_SCORE_MS}
+            />
+          </Reveal>
         </div>
       </div>
 
@@ -465,9 +468,10 @@ function ObservationIcon({ obs }: { obs: Observation }) {
       </span>
     );
   }
+  // "present" status: use an alert icon so it doesn't look like an ingredient colour rating
   return (
-    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-black/[0.03] ring-1 ring-black/[0.04] text-ink-muted">
-      <DotIcon className={`h-2.5 w-2.5 ${tagColor(obs.tag)}`} />
+    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-orange-50 ring-1 ring-orange-100 text-orange-500">
+      <WarnIcon className="h-3.5 w-3.5" />
     </span>
   );
 }

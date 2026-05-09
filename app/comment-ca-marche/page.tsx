@@ -7,7 +7,7 @@ import { MobileMenu } from "@/components/MobileMenu";
 
 const TITLE = "Comment ça marche";
 const DESCRIPTION =
-  "Comprendre le système de notation par couleurs (vert, jaune, orange, rouge) utilisé sur CosmetWiki pour classer les ingrédients cosmétiques selon leur tolérance.";
+  "Comprendre le système de classification par couleurs (vert, jaune, orange, rouge) utilisé sur CosmetWiki pour classer les ingrédients cosmétiques selon leur tolérance.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -92,7 +92,7 @@ export default function HowItWorksPage() {
           Comment ça marche
         </p>
         <h1 className="mt-2 text-balance text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
-          Comment les ingrédients sont-ils notés&nbsp;?
+          Comment les ingrédients sont-ils classifiés&nbsp;?
         </h1>
         <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-ink-muted">
           Chaque ingrédient est identifié par une couleur — du vert au rouge —

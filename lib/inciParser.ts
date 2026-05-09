@@ -47,9 +47,11 @@ export function parseInciList(text: string): ParsedToken[] {
   work = work.replace(/\*+/g, " ");
   // Final period at end-of-list
   work = work.replace(/\.+$/g, " ");
-  // Collapse synonyms separated by " / " or "/" between names → split as separate tokens
+  // Split synonyms separated by " / " (spaces on both sides) into separate tokens.
   // ex : "AQUA / WATER" → "AQUA, WATER"
-  work = work.replace(/\s*\/\s*/g, ", ");
+  // Do NOT split "CAPRYLIC/CAPRIC TRIGLYCERIDE" or "LEUCONOSTOC/RADISH ROOT FERMENT
+  // FILTRATE" — those are compound INCI names where the slash has no surrounding space.
+  work = work.replace(/\s+\/\s+/g, ", ");
   // Replace hyphens used as separators by commas. Catch all asymmetric spacing
   // patterns: "X - Y", "X -Y", "X- Y" (but NOT "X-Y", which is too risky — many
   // INCI names have intra-name hyphens like "PEG-100 Stearate" or "C12-15 Alkyl

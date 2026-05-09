@@ -1,12 +1,13 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { ProductSearchResult } from "@/lib/productSearch/types";
+import type { ProductSearchResult, ProductSearchHit } from "@/lib/productSearch/types";
 import type { OpenBeautyFactsCandidate } from "@/lib/productSearch/openBeautyFacts";
 
 const SOURCE_LABEL: Record<string, string> = {
-  cache: "cache",
+  cache: "notre base",
   openbeautyfacts: "Open Beauty Facts",
+  openproductsfacts: "Open Products Facts",
   incidecoder: "INCIDecoder",
   "duckduckgo+mistral": "recherche web",
 };
@@ -42,6 +43,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [searched, setSearched] = useState(false);
   const [deepSearching, setDeepSearching] = useState(false);
+  const [deepResult, setDeepResult] = useState<ProductSearchHit | null>(null);
   const inFlightRef = useRef<AbortController | null>(null);
 
   function resetCandidates() {
@@ -49,6 +51,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
     setHasMore(false);
     setPage(0);
     setSearched(false);
+    setDeepResult(null);
   }
 
   async function submit(e: React.FormEvent) {
@@ -137,6 +140,16 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
     });
   }
 
+  function selectDeepResult(hit: ProductSearchHit) {
+    onFound({
+      ingredientsText: hit.ingredientsText,
+      brand: hit.brand,
+      productName: hit.productName,
+      source: hit.source,
+      sourceUrl: hit.sourceUrl,
+    });
+  }
+
   // Last-resort: when the OBF suggest returned nothing, the user can ask for
   // the full cascade (INCIDecoder + DDG + Mistral). This is the original
   // /api/product-search call.
@@ -167,13 +180,8 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
         setError(data.message);
         return;
       }
-      onFound({
-        ingredientsText: data.ingredientsText,
-        brand: data.brand,
-        productName: data.productName,
-        source: data.source,
-        sourceUrl: data.sourceUrl,
-      });
+      // Show the result as a candidate card — never auto-analyse.
+      setDeepResult(data);
     } catch (err) {
       if ((err as DOMException)?.name === "AbortError") return;
       setError((err as Error).message ?? "Erreur réseau");
@@ -268,6 +276,40 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
             </button>
             .
           </p>
+        </div>
+      ) : null}
+
+      {deepResult ? (
+        <div className="mt-5 rounded-2xl bg-white/65 p-5 ring-1 ring-white/70">
+          <p className="mb-3 text-[13px] text-ink-muted">
+            Produit trouvé via{" "}
+            <span className="font-medium text-ink">
+              {SOURCE_LABEL[deepResult.source] ?? deepResult.source}
+            </span>
+            . Clique pour analyser&nbsp;:
+          </p>
+          <button
+            type="button"
+            onClick={() => selectDeepResult(deepResult)}
+            className="group flex w-full items-center gap-3 rounded-2xl bg-white/75 p-3 text-left ring-1 ring-white/70 shadow-[0_2px_18px_-8px_rgba(15,23,42,0.10)] backdrop-blur-xl transition-all hover:bg-white hover:ring-black/[0.10] hover:shadow-[0_6px_22px_-8px_rgba(15,23,42,0.16)]"
+          >
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-rose-50/70 ring-1 ring-black/[0.04]">
+              <span className="text-xs font-medium text-rose-400">INCI</span>
+            </div>
+            <div className="min-w-0 flex-1">
+              {deepResult.brand ? (
+                <p className="truncate text-[11px] font-semibold uppercase tracking-[0.14em] text-pink-500/80">
+                  {titleCase(deepResult.brand)}
+                </p>
+              ) : null}
+              <p className="truncate text-[14px] font-medium text-ink">
+                {deepResult.productName ? titleCase(deepResult.productName) : "Produit sans nom"}
+              </p>
+              <p className="mt-0.5 text-[11px] text-ink-subtle">
+                Cliquer pour analyser →
+              </p>
+            </div>
+          </button>
         </div>
       ) : null}
 
