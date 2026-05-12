@@ -1,4 +1,4 @@
-# CosmetWiki — Log d'implémentation
+# Cosme Check — Log d'implémentation
 
 > Journal des implémentations effectuées. Format volontairement bref : ce qui a été fait + ce qui a été testé.
 > Source de vérité : [ROADMAP.md](ROADMAP.md) et [VISUAL_SPEC.md](VISUAL_SPEC.md).
@@ -21,7 +21,7 @@
 - 🧪 Testé : 5 cas (alias court, sans parenthèses, traduction, code CI, slash sans espace) — comportement attendu.
 
 ### 2026-05-12 — Phase 0.2 — Fuzzy match + suggestions
-- ✅ Fait : RPC `cosmetwiki_match_inci_batch` v2 — seuil strict 0.90 pour auto-match (`fuzzy_high`), tier "suggestion" entre 0.55 et 0.90 (ne compte pas dans le score), colonne `confidence` retournée. Migration `cosmetwiki_match_inci_batch_v2_with_suggestions`. Types TS et route `/api/analyser` adaptés.
+- ✅ Fait : RPC `cosme_check_match_inci_batch` v2 — seuil strict 0.90 pour auto-match (`fuzzy_high`), tier "suggestion" entre 0.55 et 0.90 (ne compte pas dans le score), colonne `confidence` retournée. Migration `cosme_check_match_inci_batch_v2_with_suggestions`. Types TS et route `/api/analyser` adaptés.
 - 🧪 Testé : SQL direct sur 4 cas — exact (1.0), 2 suggestions (0.7 et 0.81), aucun match aléatoire. Typecheck TS passe.
 - ⚠️ Le dev server doit être redémarré pour prendre en compte le route handler.
 
@@ -34,7 +34,7 @@
 - 🧪 Testé : typecheck. À valider visuellement quand le composant UI sera fait.
 
 ### 2026-05-12 — Phase 1.1 + 1.2 + 1.3 — Auth Supabase + profils + tier premium
-- ✅ Fait : tables `cosmetwiki.user_profiles`, `analyses`, `routine_items`, `ai_cache`, `ai_logs`, `ingredient_explanations` créées avec RLS (chaque user n'accède qu'à ses propres lignes). Trigger `cosmetwiki.handle_new_user` qui auto-crée le profil à l'inscription. Schéma isolé du `public.profiles` d'une autre app qui partage la DB.
+- ✅ Fait : tables `cosme_check.user_profiles`, `analyses`, `routine_items`, `ai_cache`, `ai_logs`, `ingredient_explanations` créées avec RLS (chaque user n'accède qu'à ses propres lignes). Trigger `cosme_check.handle_new_user` qui auto-crée le profil à l'inscription. Schéma isolé du `public.profiles` d'une autre app qui partage la DB.
 - ✅ Fait : pages `/auth/sign-up` et `/auth/sign-in` avec server actions (`signUp`, `signIn`, `signOut`). Champs prénom + email + mot de passe (≥6 caractères). Validation côté serveur.
 - ✅ Fait : helpers `lib/auth.ts` (`getUser`, `getProfile`, `canAccess`). Clients SSR (`supabaseServer`, `supabaseBrowser`) ajoutés dans `lib/supabase.ts` via `@supabase/ssr`.
 - ✅ Fait : middleware refresh la session sur chaque requête et redirige vers `/auth/sign-in` les routes `/history`, `/routine`, `/profile`, `/compare`.
@@ -43,7 +43,7 @@
 - ⚠️ Test E2E sign-up à faire dans le navigateur après redémarrage du dev server (NODE_TLS_REJECT_UNAUTHORIZED + nouveau code).
 
 ### 2026-05-12 — Phase 2.6 — Architecture IA centralisée
-- ✅ Fait : SDK `openai` installé. Module `lib/ai/client.ts` expose `openai()`, `callWithFallback()`, `getCached()`, `setCached()`, `logAI()`. RPC SQL `cosmetwiki_increment_ai_cache_hit` pour atomic hit counter. Toutes les features IA passent par ce wrapper (retry, timeout 10s défaut, fallback, log dans `ai_logs`).
+- ✅ Fait : SDK `openai` installé. Module `lib/ai/client.ts` expose `openai()`, `callWithFallback()`, `getCached()`, `setCached()`, `logAI()`. RPC SQL `cosme_check_increment_ai_cache_hit` pour atomic hit counter. Toutes les features IA passent par ce wrapper (retry, timeout 10s défaut, fallback, log dans `ai_logs`).
 - 🧪 Testé : appel direct `gpt-4o-mini` OK (réponse en 1 token, usage retourné). Typecheck OK.
 
 ### 2026-05-12 — Phase 2.9 — Switch synthèse Mistral → GPT-4o-mini
@@ -63,11 +63,11 @@
 - 🧪 Testé : typecheck OK. UI caméra et fallback Tesseract côté client à faire avec les écrans (différé).
 
 ### 2026-05-12 — Phase 4.1 — Auto-save analyses
-- ✅ Fait : la route `/api/analyser` insère automatiquement dans `cosmetwiki.analyses` quand l'user est connecté. Nom auto = `productLabel` ou "Analyse du {date}". Catégorie inférée via `categorizeProduct()`. L'insert est non-bloquant — toute erreur reste silencieuse pour ne pas affecter la réponse principale.
+- ✅ Fait : la route `/api/analyser` insère automatiquement dans `cosme_check.analyses` quand l'user est connecté. Nom auto = `productLabel` ou "Analyse du {date}". Catégorie inférée via `categorizeProduct()`. L'insert est non-bloquant — toute erreur reste silencieuse pour ne pas affecter la réponse principale.
 - 🧪 Testé : typecheck OK.
 
 ### 2026-05-12 — Phase 5.1 — Schema monétisation (non activé)
-- ✅ Fait : colonne `tier` sur `cosmetwiki.user_profiles` (default 'premium' pour tous). Helper `canAccess()` dans `lib/auth.ts` retourne `true` partout pour le moment. Table `subscriptions` distincte non créée (pas besoin tant que tier vient du profil).
+- ✅ Fait : colonne `tier` sur `cosme_check.user_profiles` (default 'premium' pour tous). Helper `canAccess()` dans `lib/auth.ts` retourne `true` partout pour le moment. Table `subscriptions` distincte non créée (pas besoin tant que tier vient du profil).
 - 🧪 Testé : revue manuelle du schéma.
 
 ### 2026-05-12 — Phase 2.10 — Recherche produit GPT (DIFFÉRÉ)
@@ -88,14 +88,14 @@
 - 🧪 Testé : typecheck + build OK.
 
 ### 2026-05-12 — Phase 4.2 — Page historique
-- ✅ Fait : `app/history/page.tsx` (server component) qui charge les analyses depuis `cosmetwiki.analyses` ordonnées par `created_at desc` (limit 50). État vide géré avec CTA vers `/`. Chaque ligne affiche pastille score colorée + nom + date.
+- ✅ Fait : `app/history/page.tsx` (server component) qui charge les analyses depuis `cosme_check.analyses` ordonnées par `created_at desc` (limit 50). État vide géré avec CTA vers `/`. Chaque ligne affiche pastille score colorée + nom + date.
 - ✅ Fait : `app/routine/page.tsx` et `app/profile/page.tsx` stubs fonctionnels (sinon la nav menait à des 404). Profile montre l'encart "Accès complet · Gratuit pour le moment" + déconnexion via server action.
 - 🧪 Testé : build production a généré ces 3 routes côté server-rendered. Auth gates fonctionnent (redirect vers /auth/sign-in si non connecté).
 
 ### 2026-05-12 — Phase 2.7 + 2.8 wire-up — Branchement typo + validation dans /api/analyser
-- ✅ Fait : Migration RPC `cosmetwiki_top_trigram_candidates(token, limit)` qui retourne les 5 candidats trigram les plus proches.
+- ✅ Fait : Migration RPC `cosme_check_top_trigram_candidates(token, limit)` qui retourne les 5 candidats trigram les plus proches.
 - ✅ Fait : Route `/api/analyser` appelle maintenant `validateInciInput()` après vérif de la longueur — si le texte n'est pas une liste INCI, on renvoie 400 avec un message clair.
-- ✅ Fait : Pour chaque row `match_kind='suggestion'`, on récupère les 5 candidats trigram et on demande à `correctTypo()` (GPT-4o-mini) de trancher. Si la confiance retournée est ≥ 0.85, on upgrade en `match_kind='fuzzy_high'` avec l'ingrédient choisi (refresh des colonnes name/color/tags/etc. via lookup direct sur `cosmetwiki.ingredients`).
+- ✅ Fait : Pour chaque row `match_kind='suggestion'`, on récupère les 5 candidats trigram et on demande à `correctTypo()` (GPT-4o-mini) de trancher. Si la confiance retournée est ≥ 0.85, on upgrade en `match_kind='fuzzy_high'` avec l'ingrédient choisi (refresh des colonnes name/color/tags/etc. via lookup direct sur `cosme_check.ingredients`).
 - 🧪 Testé : typecheck + build OK.
 
 ### 2026-05-12 — Phase 4.2 détail + actions — Page /history/[id] + renommer/supprimer
@@ -104,7 +104,7 @@
 - 🧪 Testé : typecheck + build OK, route `/history/[id]` générée.
 
 ### 2026-05-12 — Phase 2.3 — Refonte Home dashboard
-- ✅ Fait : `components/home/HomeDashboard.tsx` — greeting personnalisé, carte "Dernière analyse" (cliquable vers `/history/[id]`), carte "Ta routine" (score moyen + nombre), Astuce du jour (rotation déterministe sur 8 tips via `lib/tips.ts`), grille 2×3 Catégories populaires, panneau "Ingrédients tendance cette semaine" alimenté par la RPC `cosmetwiki_trending_ingredients`.
+- ✅ Fait : `components/home/HomeDashboard.tsx` — greeting personnalisé, carte "Dernière analyse" (cliquable vers `/history/[id]`), carte "Ta routine" (score moyen + nombre), Astuce du jour (rotation déterministe sur 8 tips via `lib/tips.ts`), grille 2×3 Catégories populaires, panneau "Ingrédients tendance cette semaine" alimenté par la RPC `cosme_check_trending_ingredients`.
 - ✅ Fait : Le dashboard ne s'affiche qu'aux utilisateurs connectés. Les invités gardent l'expérience HomeShell directe (sans doublon).
 - 🧪 Testé : build OK, page `/` à 8.29 kB.
 
@@ -122,7 +122,7 @@
 - 🧪 Testé : build OK, route `/scan/photo` 2.73 kB. Tesseract est dynamiquement chargé donc pas dans le bundle principal.
 
 ### 2026-05-12 — Audit sécurité final
-- ✅ Aucun ERROR. Uniquement des WARN pré-existants (extensions `pg_trgm`/`unaccent` dans public, RPCs CosmetWiki en SECURITY DEFINER pour les cross-schema queries — comportement attendu).
+- ✅ Aucun ERROR. Uniquement des WARN pré-existants (extensions `pg_trgm`/`unaccent` dans public, RPCs Cosme Check en SECURITY DEFINER pour les cross-schema queries — comportement attendu).
 - ✅ Nouvelles RPCs (`top_trigram_candidates`, `trending_ingredients`, `increment_ai_cache_hit`) suivent la même convention SECURITY DEFINER + search_path explicite.
 
 ---
@@ -155,7 +155,7 @@ Objectif explicite : « super intelligent, très utile, pas boring ». Toutes le
 
 ### 2026-05-12 — Phase 6.5 — Explication ingrédient à la demande
 - ✅ Fait : `lib/ai/explain.ts` + route `/api/ingredient/[slug]/explain` + composant `ExplainIngredient`. Cache permanent en DB (table `ingredient_explanations` déjà créée Phase 1). Première génération facturée, toutes les suivantes gratuites à vie.
-- 🎯 Game-changer : si user connecté, le panneau ajoute une ligne **personnalisée** "Tu as cet ingrédient dans 3 produits de ta routine" — exposé via 2 nouvelles RPCs `cosmetwiki_count_ingredient_in_routine` et `cosmetwiki_count_ingredient_in_history`. Aucun coût pour l'utilisateur sur un ingrédient déjà expliqué une fois.
+- 🎯 Game-changer : si user connecté, le panneau ajoute une ligne **personnalisée** "Tu as cet ingrédient dans 3 produits de ta routine" — exposé via 2 nouvelles RPCs `cosme_check_count_ingredient_in_routine` et `cosme_check_count_ingredient_in_history`. Aucun coût pour l'utilisateur sur un ingrédient déjà expliqué une fois.
 
 ### 2026-05-12 — Phase 6.2 — Fallback OBF (constat)
 - ✅ Déjà en place : `lib/productSearch/cascade.ts` interroge Open Beauty Facts en première étape, fallback INCI Decoder → DDG → Mistral. Source affichée dans `ProductSearchInput` via `SOURCE_LABEL`. Rien de neuf à coder.
@@ -190,7 +190,7 @@ Objectif explicite : « super intelligent, très utile, pas boring ». Toutes le
 - 🎯 Game-changer : **l'insight cross-routine** est unique — comparer deux produits n'a de sens que par rapport au reste de ta routine, et personne ne le fait. Et le pattern discret (CTA invisible jusqu'à intent de comparer) évite de surcharger la liste d'historique.
 
 ### 2026-05-12 — Phase 6.4 — Skin advisor
-- ✅ Fait : `lib/skin/profile.ts` — 5 types de peau, 8 préoccupations, allergies free-text. Stocké dans `cosmetwiki.user_profiles.preferences.skin` (le champ existait déjà depuis Phase 1).
+- ✅ Fait : `lib/skin/profile.ts` — 5 types de peau, 8 préoccupations, allergies free-text. Stocké dans `cosme_check.user_profiles.preferences.skin` (le champ existait déjà depuis Phase 1).
 - ✅ Fait : page `/advisor` avec deux modes :
   - **Onboarding 3 questions** si profil incomplet : type de peau (cards), préoccupations (pills multi-select), allergies (textarea).
   - **Chat streaming** si profil complet, avec rappel discret du profil + bouton "Modifier" en repli.
@@ -202,7 +202,7 @@ Objectif explicite : « super intelligent, très utile, pas boring ». Toutes le
 - 🎯 Game-changer : le LLM **voit la vraie routine de l'utilisateur** (pas juste un profil générique). Quand tu demandes "Que penses-tu de ma routine ?", il répond en citant tes produits réels avec leurs tags. Aucune appli cosméto grand public ne fait ça avec ce niveau de personnalisation factuelle.
 
 ### 2026-05-12 — Migrations Supabase de cette session
-- `cosmetwiki_user_exposure_counters` — 2 RPCs (`cosmetwiki_count_ingredient_in_routine`, `cosmetwiki_count_ingredient_in_history`) pour la contextualisation de l'explication ingrédient.
+- `cosme_check_user_exposure_counters` — 2 RPCs (`cosme_check_count_ingredient_in_routine`, `cosme_check_count_ingredient_in_history`) pour la contextualisation de l'explication ingrédient.
 - Pas de nouvelle table — réutilisation des tables Phase 1 (`user_profiles.preferences`, `ingredient_explanations`, `ai_cache`, `ai_logs`, `routine_items`, `analyses`).
 
 ### 2026-05-12 — Build final
@@ -223,10 +223,10 @@ Toute la roadmap (Phase 0 → 6) est implémentée, à l'exception explicite de 
 
 ## État de la base à ce stade
 
-**Schéma DB (`cosmetwiki`)**
+**Schéma DB (`cosme_check`)**
 - ✅ `user_profiles` (auto-créé via trigger `handle_new_user`), `analyses`, `routine_items`, `ai_cache`, `ai_logs`, `ingredient_explanations` créés avec RLS.
-- ✅ Fonction `cosmetwiki_match_inci_batch(text[])` v2 — exact / alias / fuzzy_high (≥0.90) / suggestion (0.55–0.90) / null.
-- ✅ Fonction `cosmetwiki_increment_ai_cache_hit(text)` pour l'atomic counter.
+- ✅ Fonction `cosme_check_match_inci_batch(text[])` v2 — exact / alias / fuzzy_high (≥0.90) / suggestion (0.55–0.90) / null.
+- ✅ Fonction `cosme_check_increment_ai_cache_hit(text)` pour l'atomic counter.
 
 **Code Next.js**
 - ✅ Auth SSR complet (sign-up / sign-in / sign-out / middleware refresh + protection routes).

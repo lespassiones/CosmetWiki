@@ -1,4 +1,4 @@
-# CosmetWiki — Roadmap d'implémentation
+# Cosme Check — Roadmap d'implémentation
 
 > Document de référence pour toutes les évolutions à venir, classées par phase et par priorité.
 > **Aucun code ici** — uniquement des spécifications fonctionnelles et techniques.
@@ -46,7 +46,7 @@ Le fuzzy match peut soit générer des faux positifs (matche un ingrédient inex
 
 **Implémentation**
 - Activer l'extension PostgreSQL `pg_trgm` sur Supabase.
-- Modifier `cosmetwiki_match_inci_batch` (fonction Postgres) pour ajouter une étape :
+- Modifier `cosme_check_match_inci_batch` (fonction Postgres) pour ajouter une étape :
   1. Exact match → si trouvé, OK.
   2. Sinon, alias match → si trouvé, OK.
   3. Sinon, trigram similarity sur le nom INCI avec seuil **≥ 0,75**.

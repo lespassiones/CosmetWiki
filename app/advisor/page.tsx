@@ -6,7 +6,7 @@ import { isProfileComplete, readSkinProfile, SKIN_CONCERN_LABEL, SKIN_TYPE_LABEL
 import { AdvisorOnboarding } from "@/components/advisor/AdvisorOnboarding";
 import { AdvisorChat } from "@/components/advisor/AdvisorChat";
 
-export const metadata = { title: "Skin advisor · CosmetWiki" };
+export const metadata = { title: "Skin advisor · Cosme Check" };
 export const dynamic = "force-dynamic";
 
 export default async function AdvisorPage() {
@@ -16,7 +16,7 @@ export default async function AdvisorPage() {
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
   const { data: row } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("user_profiles")
     .select("preferences")
     .eq("id", user.id)

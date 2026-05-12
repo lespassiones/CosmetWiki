@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Non connecté." }, { status: 401 });
 
   const { data } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("routine_items")
     .select("frequency, analyses(id, name, product_label, score, result_json)");
 

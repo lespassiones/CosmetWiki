@@ -1,14 +1,14 @@
-# CosmetWiki — État du projet
+# Cosme Check — État du projet
 
 > **Dernière mise à jour :** 2026-05-08
 > **Stack imposée :** Next.js + Supabase (free tier) + Vercel (free tier)
-> **Contraintes fortes :** zéro service payant, light mode uniquement, base Supabase partagée → schéma isolé `cosmetwiki`
+> **Contraintes fortes :** zéro service payant, light mode uniquement, base Supabase partagée → schéma isolé `cosme_check`
 
 ---
 
 ## 1. Vision
 
-**CosmetWiki** est un moteur de recherche d'ingrédients cosmétiques inspiré de Google et de Perplexity :
+**Cosme Check** est un moteur de recherche d'ingrédients cosmétiques inspiré de Google et de Perplexity :
 
 - **Page d'accueil minimaliste** : une barre de recherche, c'est tout.
 - **Autocomplétion ultra-rapide** : on tape "MEA", la liste filtre en temps réel.
@@ -57,14 +57,14 @@ Le script [scripts/scrape_incibeauty.py](scripts/scrape_incibeauty.py) a parcour
 - **Feuil3** : liste manuelle d'ingrédients orange/rouge à surveiller.
 - **Feuil4** : liste alphabétique des ingrédients INCI Beauty avec hyperliens (inspiration directe pour le format hyperlink des Excel générés).
 
-→ Conclusion : ce fichier est un **outil de veille concurrentielle** que l'utilisateur enrichit à la main. Hors périmètre direct de CosmetWiki mais pourra plus tard servir de base pour une fonctionnalité "comparateur de produits".
+→ Conclusion : ce fichier est un **outil de veille concurrentielle** que l'utilisateur enrichit à la main. Hors périmètre direct de Cosme Check mais pourra plus tard servir de base pour une fonctionnalité "comparateur de produits".
 
 ### 2.4 Décisions de stack et de contraintes
 
 Voir [docs/cahier-des-charges.md](docs/cahier-des-charges.md) pour le détail. Décisions clés :
 
 - ✅ **Next.js 15** (App Router) hébergé sur **Vercel free tier**
-- ✅ **Supabase free tier** (DB partagée avec une autre app → schéma PostgreSQL isolé `cosmetwiki`)
+- ✅ **Supabase free tier** (DB partagée avec une autre app → schéma PostgreSQL isolé `cosme_check`)
 - ✅ **Stockage images** : Supabase Storage avec optimisation WebP agressive
 - ✅ **Recherche** : full-text PostgreSQL natif (`pg_trgm` + `tsvector`) — pas d'Algolia
 - ✅ **Anti-bot** : middleware Next.js + hCaptcha (free) + honeypots + robots.txt strict
@@ -77,7 +77,7 @@ Voir [docs/cahier-des-charges.md](docs/cahier-des-charges.md) pour le détail. D
 ### Phase A — Infrastructure base ✅ FAIT
 
 - [x] **A.1** Identifiants Supabase dans `.env`.
-- [x] **A.2** Schéma PostgreSQL isolé `cosmetwiki` créé (extensions `pg_trgm`, `unaccent` activées).
+- [x] **A.2** Schéma PostgreSQL isolé `cosme_check` créé (extensions `pg_trgm`, `unaccent` activées).
 - [x] **A.3** Migrations SQL appliquées : tables `ingredients`, `products`, `product_ingredients`, `search_log` + index full-text + RPCs.
 - [x] **A.4** Les 15 722 ingrédients chargés (15 s d'exécution, via `scripts/load_ingredients_to_supabase.py`).
 
@@ -88,7 +88,7 @@ Voir [docs/cahier-des-charges.md](docs/cahier-des-charges.md) pour le détail. D
 - [x] **B.1** `scripts/scrape_ingredient_details.py` écrit (politesse, retry, parallélisme 4 workers, checkpoint via flag `details_scraped` en BDD, mode `--debug-url`).
 - [x] **B.2** Extraction fusionnée (détails ingrédient + produits + composition) dans le même script.
 - [x] **B.3** Images en **hotlink direct** vers incibeauty.com (décision MVP : pas de Supabase Storage pour rester sous 1 GB).
-- [x] **B.4** RPC `cosmetwiki_pending_ingredients` pour ne traiter que ce qui n'est pas encore scrapé.
+- [x] **B.4** RPC `cosme_check_pending_ingredients` pour ne traiter que ce qui n'est pas encore scrapé.
 
 **À exécuter par l'utilisateur :**
 ```bash
@@ -101,7 +101,7 @@ python scripts/scrape_ingredient_details.py                # tout (4-12h)
 - [x] **C.1** Next.js 15.5 + App Router + TypeScript à la racine.
 - [x] **C.2** `@supabase/supabase-js` + Tailwind CSS 3.4.
 - [x] **C.3** Page d'accueil `/` : logo, barre de recherche centrée, suggestions populaires, légende des couleurs, footer.
-- [x] **C.4** Composant `SearchBar` : autocomplete avec debounce 150 ms, navigation clavier, highlight, honeypot, RPC `cosmetwiki_search`.
+- [x] **C.4** Composant `SearchBar` : autocomplete avec debounce 150 ms, navigation clavier, highlight, honeypot, RPC `cosme_check_search`.
 - [x] **C.5** Page `/i/[slug]` : hero gradient par couleur, description, fonctions INCI, classification, prévalence, breakdown par catégorie, grille de produits, traductions, ISR 24 h.
 - [x] **C.6** Light mode strict (palette `#FAFAFA`, fond blanc pour les cartes, accents par rating).
 - [x] **C.7** Page `/search` (résultats étendus), `/about`, `/robots.txt`, page 404 stylée.
@@ -151,7 +151,7 @@ python scripts/scrape_ingredient_details.py                # tout (4-12h)
 ## 5. Structure du repo
 
 ```
-CosmetWiki/
+Cosme Check/
 ├── .env.example              ← variables d'environnement (template)
 ├── .gitignore
 ├── README.md

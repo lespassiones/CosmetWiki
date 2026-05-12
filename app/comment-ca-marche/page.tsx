@@ -7,21 +7,21 @@ import { MobileMenu } from "@/components/MobileMenu";
 
 const TITLE = "Comment ça marche";
 const DESCRIPTION =
-  "Comprendre le système de classification par couleurs (vert, jaune, orange, rouge) utilisé sur CosmetWiki pour classer les ingrédients cosmétiques selon leur tolérance.";
+  "Comprendre le système de classification par couleurs (vert, jaune, orange, rouge) utilisé sur Cosme Check pour classer les ingrédients cosmétiques selon leur tolérance.";
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/comment-ca-marche" },
   openGraph: {
-    title: `${TITLE} · CosmetWiki`,
+    title: `${TITLE} · Cosme Check`,
     description: DESCRIPTION,
     url: "/comment-ca-marche",
     type: "article",
   },
   twitter: {
     card: "summary_large_image",
-    title: `${TITLE} · CosmetWiki`,
+    title: `${TITLE} · Cosme Check`,
     description: DESCRIPTION,
   },
 };
@@ -153,7 +153,7 @@ export default function HowItWorksPage() {
 
           <h2 className="pt-6 text-xl font-semibold text-ink">Aller plus loin</h2>
           <p>
-            Les classifications utilisées sur CosmetWiki proviennent
+            Les classifications utilisées sur Cosme Check proviennent
             d&apos;
             <a
               href="https://incibeauty.com"

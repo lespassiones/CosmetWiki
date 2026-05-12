@@ -141,8 +141,8 @@ function DesktopSidebar({
           </svg>
         </span>
         <span className="text-[15px] font-bold tracking-tight">
-          <span className="text-[#111111]">Cosmet</span>
-          <span className="text-[#F43F5E]">Wiki</span>
+          <span className="text-[#111111]">Cosme </span>
+          <span className="text-[#F43F5E]">Check</span>
         </span>
       </Link>
 

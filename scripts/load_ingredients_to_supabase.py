@@ -1,10 +1,10 @@
 """Load the 15 722 ingredients from data/ingredients_raw.json into Supabase.
 
-Calls the SECURITY DEFINER RPC `public.cosmetwiki_upsert_ingredients(rows JSONB)`
-which writes into the isolated `cosmetwiki.ingredients` table.
+Calls the SECURITY DEFINER RPC `public.cosme_check_upsert_ingredients(rows JSONB)`
+which writes into the isolated `cosme_check.ingredients` table.
 
 Usage:
-    cd CosmetWiki
+    cd Cosme Check
     python scripts/load_ingredients_to_supabase.py
 """
 import json
@@ -96,7 +96,7 @@ def main() -> None:
 
     print(f"Prepared {len(rows)} unique rows ({skipped} skipped, no parseable id)")
 
-    endpoint = f"{supabase_url}/rest/v1/rpc/cosmetwiki_upsert_ingredients"
+    endpoint = f"{supabase_url}/rest/v1/rpc/cosme_check_upsert_ingredients"
     headers = {
         "apikey": service_key,
         "Authorization": f"Bearer {service_key}",

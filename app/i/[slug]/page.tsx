@@ -52,7 +52,7 @@ const RATING_BAR: Record<ColorRating, string> = {
 const PRODUCTS_VISIBLE = 3;
 
 async function loadIngredient(slug: string): Promise<Ingredient | null> {
-  const { data, error } = await supabaseAnon().rpc("cosmetwiki_get_ingredient", {
+  const { data, error } = await supabaseAnon().rpc("cosme_check_get_ingredient", {
     p_slug: slug,
   });
   if (error || !data || data.length === 0) return null;
@@ -61,7 +61,7 @@ async function loadIngredient(slug: string): Promise<Ingredient | null> {
 
 async function loadProducts(ingredientId: number): Promise<ProductHit[]> {
   const { data, error } = await supabaseAnon().rpc(
-    "cosmetwiki_products_for_ingredient",
+    "cosme_check_products_for_ingredient",
     { p_ingredient_id: ingredientId, p_limit: 12 },
   );
   if (error) return [];
@@ -114,14 +114,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     alternates: { canonical: path },
     openGraph: {
-      title: `${name} · CosmetWiki`,
+      title: `${name} · Cosme Check`,
       description,
       url: path,
       type: "article",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${name} · CosmetWiki`,
+      title: `${name} · Cosme Check`,
       description,
     },
   };

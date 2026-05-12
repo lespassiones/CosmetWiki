@@ -37,7 +37,7 @@ function deriveFirstName(user: User): string {
   return local.charAt(0).toUpperCase() + local.slice(1);
 }
 
-/** Loads the CosmetWiki profile (first_name, tier, preferences) for the current user. */
+/** Loads the Cosme Check profile (first_name, tier, preferences) for the current user. */
 export async function getProfile(): Promise<CosmetUserProfile | null> {
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
@@ -45,7 +45,7 @@ export async function getProfile(): Promise<CosmetUserProfile | null> {
   if (!user) return null;
 
   const { data } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("user_profiles")
     .select("id, first_name, tier, preferences")
     .eq("id", user.id)
@@ -60,7 +60,7 @@ export async function getProfile(): Promise<CosmetUserProfile | null> {
   try {
     const svc = supabaseService();
     await svc
-      .schema("cosmetwiki")
+      .schema("cosme_check")
       .from("user_profiles")
       .upsert(
         { id: user.id, first_name: fallbackFirstName },

@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   }
 
   const sb = supabaseAnon();
-  const { data, error } = await sb.rpc("cosmetwiki_search", {
+  const { data, error } = await sb.rpc("cosme_check_search", {
     q,
     result_limit: 10,
   });

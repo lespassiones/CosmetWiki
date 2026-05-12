@@ -9,7 +9,7 @@ import { RoutineProductRow } from "@/components/routine/RoutineProductRow";
 import { RoutineSuggestions } from "@/components/routine/RoutineSuggestions";
 import { TagExposureBar } from "@/components/routine/TagExposureBar";
 
-export const metadata = { title: "Ma routine · CosmetWiki" };
+export const metadata = { title: "Ma routine · Cosme Check" };
 export const dynamic = "force-dynamic";
 
 function exposureTone(label: string): { bg: string; fg: string; ring: string } {
@@ -26,7 +26,7 @@ export default async function RoutinePage() {
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
   const { data } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("routine_items")
     .select("id, frequency, added_at, analysis_id, analyses(id, name, product_label, score, result_json)")
     .order("added_at", { ascending: false });

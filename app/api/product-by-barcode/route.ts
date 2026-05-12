@@ -52,7 +52,7 @@ async function fetchOFFProduct(
       `https://${domain}/api/v2/product/${barcode}.json`,
       {
         headers: {
-          "User-Agent": "CosmetWiki/1.0 (https://cosmet-wiki.vercel.app)",
+          "User-Agent": "Cosme-Check/1.0 (https://cosme-check.vercel.app)",
           Accept: "application/json",
         },
         signal: AbortSignal.timeout(8_000),

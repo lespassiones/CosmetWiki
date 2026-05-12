@@ -6,8 +6,8 @@ import { AppShell } from "@/components/nav/AppShell";
 import { getProfile, getUser } from "@/lib/auth";
 import "./globals.css";
 
-const SITE_NAME = "CosmetWiki";
-const DEFAULT_TITLE = "CosmetWiki — Le moteur de recherche public d'ingrédients cosmétiques";
+const SITE_NAME = "Cosme Check";
+const DEFAULT_TITLE = "Cosme Check — Le moteur de recherche public d'ingrédients cosmétiques";
 const DEFAULT_DESCRIPTION =
   "Recherchez plus de 15 000 ingrédients cosmétiques. Classification couleur, fonctions, prévalence et produits qui en contiennent. Analysez la composition INCI d'un produit en quelques secondes.";
 
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: DEFAULT_TITLE,
-    template: "%s · CosmetWiki",
+    template: "%s · Cosme Check",
   },
   description: DEFAULT_DESCRIPTION,
   applicationName: SITE_NAME,

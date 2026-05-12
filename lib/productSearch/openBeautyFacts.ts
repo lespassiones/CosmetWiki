@@ -55,7 +55,7 @@ export async function searchOpenBeautyFacts(query: string): Promise<{
   try {
     const r = await fetch(url, {
       headers: {
-        "User-Agent": "CosmetWiki/1.0 (https://cosmetwiki.vercel.app)",
+        "User-Agent": "Cosme-Check/1.0 (https://cosme-check.vercel.app)",
         Accept: "application/json",
       },
       signal: AbortSignal.timeout(8_000),
@@ -117,7 +117,7 @@ export async function searchOpenBeautyFactsList(
   try {
     const r = await fetch(url, {
       headers: {
-        "User-Agent": "CosmetWiki/1.0 (https://cosmetwiki.vercel.app)",
+        "User-Agent": "Cosme-Check/1.0 (https://cosme-check.vercel.app)",
         Accept: "application/json",
       },
       signal: AbortSignal.timeout(8_000),

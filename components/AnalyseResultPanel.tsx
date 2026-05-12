@@ -1089,7 +1089,7 @@ async function downloadPdf(result: AnalyseResponse, originalText: string) {
       pageIdx++;
     }
 
-    const filename = `cosmetwiki-analyse-${new Date().toISOString().slice(0, 10)}.pdf`;
+    const filename = `cosme-check-analyse-${new Date().toISOString().slice(0, 10)}.pdf`;
     doc.save(filename);
   } finally {
     el.classList.remove("pdf-capturing");
@@ -1143,7 +1143,7 @@ async function shareReport(text: string) {
   try {
     if (navigator.share) {
       await navigator.share({
-        title: "Mon analyse CosmetWiki",
+        title: "Mon analyse Cosme Check",
         text: "Voici l'analyse de ce produit",
         url: shareUrl,
       });

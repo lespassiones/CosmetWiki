@@ -183,7 +183,7 @@ function InstallInstructionsDialog({ onClose }: { onClose: () => void }) {
       <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-[0_24px_48px_rgba(15,23,42,0.18)] ring-1 ring-black/[0.04]">
         <div className="flex items-start justify-between">
           <h2 id="install-help-title" className="text-lg font-semibold text-ink">
-            Installer CosmetWiki
+            Installer Cosme Check
           </h2>
           <button
             type="button"
@@ -214,7 +214,7 @@ function PlatformInstructions({ platform }: { platform: Platform }) {
           Fais défiler et choisis <strong>« Sur l&apos;écran d&apos;accueil »</strong>.
         </li>
         <li>
-          Confirme avec <strong>Ajouter</strong>. CosmetWiki apparaît comme une
+          Confirme avec <strong>Ajouter</strong>. Cosme Check apparaît comme une
           app sur ton écran d&apos;accueil.
         </li>
       </ol>
@@ -247,7 +247,7 @@ function PlatformInstructions({ platform }: { platform: Platform }) {
           flèche) à droite de la barre d&apos;adresse.
         </li>
         <li>
-          Sinon, ouvre le menu <strong>⋮</strong> → <strong>Installer CosmetWiki…</strong>
+          Sinon, ouvre le menu <strong>⋮</strong> → <strong>Installer Cosme Check…</strong>
         </li>
         <li>Valide la fenêtre. L&apos;app se lance comme un logiciel à part.</li>
       </ol>
@@ -257,7 +257,7 @@ function PlatformInstructions({ platform }: { platform: Platform }) {
     return (
       <p>
         Firefox ne propose pas l&apos;installation de PWA sur cette plateforme.
-        Tu peux ajouter le site à tes favoris ou ouvrir CosmetWiki dans Chrome /
+        Tu peux ajouter le site à tes favoris ou ouvrir Cosme Check dans Chrome /
         Edge / Safari pour l&apos;installer.
       </p>
     );

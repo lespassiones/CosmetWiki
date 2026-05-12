@@ -7,21 +7,21 @@ import { MobileMenu } from "@/components/MobileMenu";
 
 const TITLE = "À propos";
 const DESCRIPTION =
-  "CosmetWiki est un moteur de recherche public et libre dédié aux ingrédients cosmétiques. Plus de 15 000 substances INCI classées par tolérance.";
+  "Cosme Check est un moteur de recherche public et libre dédié aux ingrédients cosmétiques. Plus de 15 000 substances INCI classées par tolérance.";
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/about" },
   openGraph: {
-    title: `${TITLE} · CosmetWiki`,
+    title: `${TITLE} · Cosme Check`,
     description: DESCRIPTION,
     url: "/about",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: `${TITLE} · CosmetWiki`,
+    title: `${TITLE} · Cosme Check`,
     description: DESCRIPTION,
   },
 };
@@ -52,18 +52,18 @@ export default function AboutPage() {
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16">
         <h1 className="text-4xl font-semibold tracking-tight text-ink">
-          À propos de CosmetWiki
+          À propos de Cosme Check
         </h1>
         <div className="mt-6 space-y-6 text-[15px] leading-relaxed text-ink-muted">
           <p>
-            CosmetWiki est un moteur de recherche public et libre dédié aux
+            Cosme Check est un moteur de recherche public et libre dédié aux
             ingrédients cosmétiques. Il référence plus de 15&nbsp;000 substances
             INCI et leur niveau de tolérance (vert, jaune, orange, rouge).
           </p>
           <h2 className="pt-4 text-lg font-semibold text-ink">Pourquoi&nbsp;?</h2>
           <p>
             Lire la liste INCI au dos d&apos;un cosmétique est intimidant.
-            CosmetWiki simplifie cette lecture&nbsp;: tape un nom — qu&apos;il
+            Cosme Check simplifie cette lecture&nbsp;: tape un nom — qu&apos;il
             soit en anglais, en français ou un numéro CAS — et tu obtiens un
             résumé de la classification, de la prévalence dans les produits, et
             des produits qui en contiennent.
@@ -79,7 +79,7 @@ export default function AboutPage() {
             >
               incibeauty.com
             </a>
-            , une base publique de référence en France. CosmetWiki les rend
+            , une base publique de référence en France. Cosme Check les rend
             simplement plus rapides à parcourir.
           </p>
           <h2 className="pt-4 text-lg font-semibold text-ink">Limites</h2>

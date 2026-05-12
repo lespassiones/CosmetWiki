@@ -1,4 +1,4 @@
-# CosmetWiki
+# Cosme Check
 
 Moteur de recherche d'ingrédients cosmétiques inspiré de Google et Perplexity. **15 722 ingrédients** indexés depuis incibeauty.com, classés par tolérance (vert / jaune / orange / rouge), avec autocomplete fuzzy et fiches détaillées.
 
@@ -27,7 +27,7 @@ Le fichier `.env` contient les identifiants Supabase :
 ## Architecture
 
 ```
-CosmetWiki/
+Cosme Check/
 ├── app/                              ← Next.js App Router
 │   ├── layout.tsx                    ← layout global, light mode forcé
 │   ├── page.tsx                      ← page d'accueil (SearchBar centrée)
@@ -65,7 +65,7 @@ CosmetWiki/
 Le scraping est **séparé** du site. Quatre phases :
 
 1. **Phase 1 — index alphabétique** ✅ (15 722 ingrédients en JSON).
-2. **Phase 2 — chargement Supabase** ✅ (table `cosmetwiki.ingredients` peuplée).
+2. **Phase 2 — chargement Supabase** ✅ (table `cosme_check.ingredients` peuplée).
 3. **Phase 3 — enrichissement détaillé** ⏳ (CAS, fonctions, prévalence, produits scrapés progressivement).
 4. **Phase 4 — auto-hébergement images** ✅ activé : chaque image produit est convertie en WebP (≈ 4-15 KB) et uploadée dans le bucket Supabase Storage `cosmetwiki-products`. Le site **n'a plus aucune dépendance** vers incibeauty.com pour ses ressources.
 
@@ -98,26 +98,26 @@ python scripts/scrape_ingredient_details.py --debug-url https://incibeauty.com/i
 
 ## Schéma Supabase
 
-Toutes les données vivent dans le schéma isolé **`cosmetwiki`** (la base est partagée avec une autre app, le schéma `public` n'est pas touché).
+Toutes les données vivent dans le schéma isolé **`cosme_check`** (la base est partagée avec une autre app, le schéma `public` n'est pas touché).
 
 | Table | Rôle |
 |---|---|
-| `cosmetwiki.ingredients` | 15 722 ingrédients INCI, full-text + trigram |
-| `cosmetwiki.products` | produits scrapés (avec `image_url` en hotlink) |
-| `cosmetwiki.product_ingredients` | jonction produits ↔ ingrédients |
-| `cosmetwiki.search_log` | log anonyme des recherches (service_role only) |
+| `cosme_check.ingredients` | 15 722 ingrédients INCI, full-text + trigram |
+| `cosme_check.products` | produits scrapés (avec `image_url` en hotlink) |
+| `cosme_check.product_ingredients` | jonction produits ↔ ingrédients |
+| `cosme_check.search_log` | log anonyme des recherches (service_role only) |
 
 Le client web ne tape pas directement les tables : il appelle des **fonctions RPC** définies dans `public` en `SECURITY DEFINER` :
 
 | RPC | Rôle | Accès |
 |---|---|---|
-| `cosmetwiki_search(q, result_limit)` | autocomplete fuzzy (trigram + tsvector) | anon |
-| `cosmetwiki_get_ingredient(slug)` | fiche complète | anon |
-| `cosmetwiki_products_for_ingredient(id, limit)` | produits associés | anon |
-| `cosmetwiki_popular_suggestions(limit)` | suggestions home | anon |
-| `cosmetwiki_pending_ingredients(limit)` | liste à enrichir | service_role only |
-| `cosmetwiki_upsert_ingredients(rows)` | upsert batch ingrédients | service_role only |
-| `cosmetwiki_upsert_products(rows)` | upsert batch produits + composition | service_role only |
+| `cosme_check_search(q, result_limit)` | autocomplete fuzzy (trigram + tsvector) | anon |
+| `cosme_check_get_ingredient(slug)` | fiche complète | anon |
+| `cosme_check_products_for_ingredient(id, limit)` | produits associés | anon |
+| `cosme_check_popular_suggestions(limit)` | suggestions home | anon |
+| `cosme_check_pending_ingredients(limit)` | liste à enrichir | service_role only |
+| `cosme_check_upsert_ingredients(rows)` | upsert batch ingrédients | service_role only |
+| `cosme_check_upsert_products(rows)` | upsert batch produits + composition | service_role only |
 
 ## Sécurité
 

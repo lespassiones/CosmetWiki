@@ -6,7 +6,7 @@ import { supabaseServer } from "@/lib/supabase";
 import { compareAnalyses, type CompareSide } from "@/lib/routine/compare";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
-export const metadata = { title: "Comparer · CosmetWiki" };
+export const metadata = { title: "Comparer · Cosme Check" };
 export const dynamic = "force-dynamic";
 
 function renderBold(text: string) {
@@ -46,7 +46,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
   const { data } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("analyses")
     .select("id, name, product_label, score, result_json")
     .in("id", list);
@@ -72,7 +72,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
   // Collect the user's routine ingredient slugs (excluding A and B) for the
   // cross-routine insight ("ces ingrédients sont déjà dans 4 autres produits").
   const { data: routine } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("routine_items")
     .select("analyses(id, result_json)");
   const routineSlugs = new Set<string>();

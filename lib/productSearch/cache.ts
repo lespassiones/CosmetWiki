@@ -20,7 +20,7 @@ export async function getProductCache(
 ): Promise<CacheRow | null> {
   try {
     const { data, error } = await supabaseAnon().rpc(
-      "cosmetwiki_get_product_cache",
+      "cosme_check_get_product_cache",
       { p_query_norm: queryNorm },
     );
     if (error) return null;
@@ -43,7 +43,7 @@ export async function setProductCache(input: {
 }): Promise<void> {
   try {
     const sb = supabaseService();
-    await sb.rpc("cosmetwiki_set_product_cache", {
+    await sb.rpc("cosme_check_set_product_cache", {
       p_query_norm: input.queryNorm,
       p_brand: input.brand,
       p_product_name: input.productName,

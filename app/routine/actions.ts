@@ -15,7 +15,7 @@ export async function addToRoutine(analysisId: string): Promise<RoutineActionRes
   if (!user) return { ok: false, error: "Non connecté." };
 
   const { error } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("routine_items")
     .upsert(
       { user_id: user.id, analysis_id: analysisId, frequency: "daily" },
@@ -40,7 +40,7 @@ export async function setRoutineFrequency(
   if (!user) return { ok: false, error: "Non connecté." };
 
   const { error } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("routine_items")
     .update({ frequency })
     .eq("id", routineItemId)
@@ -57,7 +57,7 @@ export async function removeFromRoutine(routineItemId: string): Promise<RoutineA
   if (!user) return { ok: false, error: "Non connecté." };
 
   const { error } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("routine_items")
     .delete()
     .eq("id", routineItemId)

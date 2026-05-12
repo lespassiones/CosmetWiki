@@ -2,7 +2,7 @@
  * On-demand human-friendly explanation of a single INCI ingredient.
  *
  * Strategy:
- *   1. Try the permanent DB cache (cosmetwiki.ingredient_explanations).
+ *   1. Try the permanent DB cache (cosme_check.ingredient_explanations).
  *      Once generated, it's served forever for free.
  *   2. If absent, call GPT-4o-mini with structured context (name, function,
  *      color rating, tags) and store the result.
@@ -51,7 +51,7 @@ export async function explainIngredient(ctx: ExplainContext, userId?: string | n
 
   // 1. Permanent DB cache lookup (free).
   const { data: cached } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("ingredient_explanations")
     .select("explanation")
     .eq("inci_id", ctx.inciId)
@@ -115,7 +115,7 @@ Réponds avec UNIQUEMENT le texte de l'explication (3 phrases sur 3 lignes).`;
     if (text && text !== "Pas d'explication disponible pour le moment.") {
       // Permanent cache (one row per inci_id).
       await sb
-        .schema("cosmetwiki")
+        .schema("cosme_check")
         .from("ingredient_explanations")
         .upsert({ inci_id: ctx.inciId, explanation: text }, { onConflict: "inci_id" });
     }

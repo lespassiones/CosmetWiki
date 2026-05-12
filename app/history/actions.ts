@@ -17,7 +17,7 @@ export async function renameAnalysis(id: string, newName: string): Promise<Actio
   if (!user) return { ok: false, error: "Non connecté." };
 
   const { error } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("analyses")
     .update({ name: trimmed })
     .eq("id", id)
@@ -37,7 +37,7 @@ export async function deleteAnalysis(id: string): Promise<void> {
   if (!user) redirect("/auth/sign-in");
 
   await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("analyses")
     .delete()
     .eq("id", id)

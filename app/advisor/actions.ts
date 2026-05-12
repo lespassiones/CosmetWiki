@@ -42,7 +42,7 @@ export async function saveSkinProfile(form: FormData): Promise<SkinProfileResult
 
   // Merge into existing preferences (don't clobber other future settings).
   const { data: existing } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("user_profiles")
     .select("preferences")
     .eq("id", user.id)
@@ -54,7 +54,7 @@ export async function saveSkinProfile(form: FormData): Promise<SkinProfileResult
   };
 
   const { error } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("user_profiles")
     .update({ preferences: merged, updated_at: new Date().toISOString() })
     .eq("id", user.id);

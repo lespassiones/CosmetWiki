@@ -1,5 +1,5 @@
 /**
- * User skin profile. Stored in cosmetwiki.user_profiles.preferences (jsonb)
+ * User skin profile. Stored in cosme_check.user_profiles.preferences (jsonb)
  * under the `skin` key.
  */
 

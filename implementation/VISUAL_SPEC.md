@@ -1,4 +1,4 @@
-# CosmetWiki — Spécification visuelle pixel-perfect
+# Cosme Check — Spécification visuelle pixel-perfect
 
 > Document de référence pour l'intégration UI. Décrit **exactement** ce qui doit être à l'écran, dans quel ordre, à quelle taille, avec quelle couleur.
 > Source : maquettes validées (mobile 6 écrans + desktop 6 fenêtres).
@@ -185,7 +185,7 @@ xl    1280px
 8. **Section "Ingrédients tendance cette semaine"** :
    - Titre h2.
    - Liste de 4–5 lignes, chacune : pastille couleur (8×8px) + nom INCI bold + traduction FR en `body-secondary` + chevron `→` droite.
-   - **Source** : RPC `cosmetwiki_trending_ingredients(days := 7, limit := 5)`.
+   - **Source** : RPC `cosme_check_trending_ingredients(days := 7, limit := 5)`.
 9. **Légende** (juste avant la nav) : ligne horizontale centrée avec les 4 pastilles "● Vert ● Jaune ● Orange ● Rouge" en `caption`.
 10. **Espace bas** : `padding-bottom: 96px` pour ne pas être recouvert par la nav.
 

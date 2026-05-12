@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
 import { SignInForm } from "@/components/auth/SignInForm";
 
-export const metadata = { title: "Se connecter · CosmetWiki" };
+export const metadata = { title: "Se connecter · Cosme Check" };
 
 export default async function SignInPage() {
   const user = await getUser();

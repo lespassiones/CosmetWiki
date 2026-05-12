@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
   const since = new Date();
   since.setHours(0, 0, 0, 0);
   const { count: usedToday } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("ai_logs")
     .select("id", { count: "exact", head: true })
     .eq("user_id", user.id)
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
   // Pull the user's skin profile + a compact routine summary.
   const { data: profileRow } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("user_profiles")
     .select("first_name, preferences")
     .eq("id", user.id)
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
   const skin = readSkinProfile((profileRow?.preferences ?? null) as Record<string, unknown> | null);
 
   const { data: routineRows } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("routine_items")
     .select("frequency, analyses(name, product_label, score, result_json)");
   const routineFacts = ((routineRows ?? []) as unknown as {
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
         .map((r) => `- ${r.name} (${r.score?.toFixed(1) ?? "?"}/20, ${r.frequency}, tags: ${r.tags.join(", ") || "—"})`)
         .join("\n");
 
-  const system = `Tu es un assistant cosmétique factuel pour CosmetWiki. Tu réponds à un consommateur français à partir de FAITS et UNIQUEMENT à partir de faits. RÈGLES STRICTES :
+  const system = `Tu es un assistant cosmétique factuel pour Cosme Check. Tu réponds à un consommateur français à partir de FAITS et UNIQUEMENT à partir de faits. RÈGLES STRICTES :
 - AUCUN conseil médical, AUCUN diagnostic, AUCUNE mention de marque.
 - Si la question relève du soin médical (acné sévère, rosacée diagnostiquée, eczéma…), oriente vers un dermatologue.
 - Tu peux mentionner des ingrédients (par leur nom INCI) connus pour une catégorie (ex. niacinamide, acide salicylique, panthénol) mais sans recommander un produit précis.

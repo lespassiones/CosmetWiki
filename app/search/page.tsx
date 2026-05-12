@@ -22,7 +22,7 @@ export async function generateMetadata({
   return {
     title,
     description: q
-      ? `Résultats de recherche pour « ${q} » dans la base d'ingrédients cosmétiques CosmetWiki.`
+      ? `Résultats de recherche pour « ${q} » dans la base d'ingrédients cosmétiques Cosme Check.`
       : "Recherchez parmi plus de 15 000 ingrédients cosmétiques par nom INCI, traduction française ou numéro CAS.",
     robots: { index: false, follow: true },
     alternates: { canonical: "/search" },
@@ -38,7 +38,7 @@ const DOT: Record<SearchHit["color_rating"], string> = {
 
 async function search(q: string): Promise<SearchHit[]> {
   if (!q) return [];
-  const { data, error } = await supabaseAnon().rpc("cosmetwiki_search", {
+  const { data, error } = await supabaseAnon().rpc("cosme_check_search", {
     q,
     result_limit: 50,
   });

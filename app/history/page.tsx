@@ -5,7 +5,7 @@ import { getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { HistoryList } from "@/components/history/HistoryList";
 
-export const metadata = { title: "Mon historique · CosmetWiki" };
+export const metadata = { title: "Mon historique · Cosme Check" };
 export const dynamic = "force-dynamic";
 
 type AnalysisRow = {
@@ -23,7 +23,7 @@ export default async function HistoryPage() {
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
   const { data, error } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("analyses")
     .select("id, name, product_label, score, created_at")
     .order("created_at", { ascending: false })

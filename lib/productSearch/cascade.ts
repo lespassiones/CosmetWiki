@@ -1,6 +1,7 @@
 // Orchestrates the product → INCI cascade :
-// cache → Open Beauty Facts → INCIDecoder → DuckDuckGo+Mistral → not_found.
-// Each step is a fallback and is only attempted if the previous one fails.
+// cache → Open Beauty Facts → INCIDecoder → brand-specific (if brand detected)
+// → DuckDuckGo+Mistral → not_found. Each step is a fallback and is only
+// attempted if the previous one fails.
 
 import { normalizeQuery } from "./normalize";
 import { getProductCache, setProductCache } from "./cache";
@@ -8,6 +9,7 @@ import { searchOpenBeautyFacts } from "./openBeautyFacts";
 import { searchInciDecoder } from "./inciDecoder";
 import { searchDuckDuckGo } from "./duckduckgo";
 import { matchesQuery } from "./relevance";
+import { detectBrand, stripBrandFromQuery } from "./brands";
 import type { ProductSearchResult } from "./types";
 
 const NOT_FOUND_MESSAGE =
@@ -99,7 +101,39 @@ export async function searchProductCascade(
     };
   }
 
-  // 4. DuckDuckGo + Mistral extraction (last automated fallback)
+  // 4. Brand-specific search — if the query mentions a known brand
+  // (La Roche-Posay, Vichy, Bioderma, etc.), hit DDG with a `site:` filter
+  // restricted to the brand's own domain. More reliable than the generic
+  // DDG step below because the brand's official page is guaranteed to have
+  // the real INCI list (whereas generic DDG might surface an aggregator with
+  // truncated data or a blog post).
+  const brand = detectBrand(query);
+  if (brand) {
+    const productQuery = stripBrandFromQuery(query, brand) || query;
+    const brandResult = await brand.search(productQuery);
+    if (brandResult) {
+      void setProductCache({
+        queryNorm,
+        brand: brandResult.brand,
+        productName: brandResult.productName,
+        ingredientsText: brandResult.ingredientsText,
+        source: `brand:${brand.domain}`,
+        sourceUrl: brandResult.sourceUrl,
+        confidence: 0.9,
+      });
+      return {
+        found: true,
+        brand: brandResult.brand,
+        productName: brandResult.productName,
+        ingredientsText: brandResult.ingredientsText,
+        source: `brand:${brand.domain}`,
+        sourceUrl: brandResult.sourceUrl,
+        confidence: 0.9,
+      };
+    }
+  }
+
+  // 5. DuckDuckGo + Mistral extraction (last automated fallback)
   const ddg = await searchDuckDuckGo(query);
   if (ddg) {
     void setProductCache({
@@ -122,7 +156,7 @@ export async function searchProductCascade(
     };
   }
 
-  // 5. All free fallbacks failed
+  // 6. All free fallbacks failed
   return {
     found: false,
     reason: "not_found",

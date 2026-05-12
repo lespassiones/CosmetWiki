@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
 
   // Batch-match against the database
   const sb = supabaseAnon();
-  const { data, error } = await sb.rpc("cosmetwiki_match_inci_batch", {
+  const { data, error } = await sb.rpc("cosme_check_match_inci_batch", {
     p_tokens: tokens.map((t) => t.normalized),
   });
   if (error) {
@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
   if (suggestionRows.length > 0) {
     await Promise.all(
       suggestionRows.map(async (row) => {
-        const { data: candidates } = await sb.rpc("cosmetwiki_top_trigram_candidates", {
+        const { data: candidates } = await sb.rpc("cosme_check_top_trigram_candidates", {
           p_token: tokens[row.position_idx]?.normalized ?? row.input_token,
           p_limit: 5,
         });
@@ -184,7 +184,7 @@ export async function POST(req: NextRequest) {
         ) {
           // Fetch the full row for the chosen INCI and replace the match in place.
           const { data: ingRows } = await sb
-            .schema("cosmetwiki")
+            .schema("cosme_check")
             .from("ingredients")
             .select(
               "inci_id, slug, name, color_rating, cas_number, translations, functions, tags",
@@ -557,7 +557,7 @@ export async function POST(req: NextRequest) {
       }
       const autoName = body.productLabel?.slice(0, 200)
         ?? `Analyse du ${new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
-      await sb.schema("cosmetwiki").from("analyses").insert({
+      await sb.schema("cosme_check").from("analyses").insert({
         user_id: user.id,
         name: autoName,
         product_label: body.productLabel?.slice(0, 200) ?? null,

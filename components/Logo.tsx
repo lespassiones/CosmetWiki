@@ -23,9 +23,9 @@ export function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
         </svg>
       </span>
       <span className={`font-semibold tracking-tight ${text}`}>
-        <span className="text-ink">Cosmet</span>
+        <span className="text-ink">Cosme </span>
         <span className="bg-gradient-to-r from-rose-400 to-pink-400 bg-clip-text text-transparent">
-          Wiki
+          Check
         </span>
       </span>
     </Link>

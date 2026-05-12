@@ -17,7 +17,7 @@ async function fetchIngredientSlugs(): Promise<SlugRow[]> {
   // Primary path : SECURITY DEFINER RPC returning every ingredient slug.
   try {
     const { data, error } = await supabaseAnon().rpc(
-      "cosmetwiki_list_active_slugs",
+      "cosme_check_list_active_slugs",
       { p_limit: 45_000 },
     );
     if (!error && Array.isArray(data) && data.length > 0) {
@@ -30,11 +30,11 @@ async function fetchIngredientSlugs(): Promise<SlugRow[]> {
     console.warn("[sitemap] RPC threw:", err);
   }
 
-  // Fallback : direct schema query (works only if `cosmetwiki` is in
+  // Fallback : direct schema query (works only if `cosme_check` is in
   // Supabase Dashboard > Project Settings > API > Exposed schemas).
   try {
     const { data, error } = await supabaseAnon()
-      .schema("cosmetwiki")
+      .schema("cosme_check")
       .from("ingredients")
       .select("slug")
       .limit(45_000);

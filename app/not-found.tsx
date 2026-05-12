@@ -7,7 +7,7 @@ import { SearchBar } from "@/components/SearchBar";
 
 export const metadata: Metadata = {
   title: "Page introuvable",
-  description: "Cette page n'existe pas dans CosmetWiki.",
+  description: "Cette page n'existe pas dans Cosme Check.",
   robots: { index: false, follow: true },
 };
 

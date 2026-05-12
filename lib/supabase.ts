@@ -19,7 +19,7 @@ export function supabaseAnon(): SupabaseClient {
   if (!_anon) {
     _anon = createClient(url!, anonKey!, {
       auth: { persistSession: false },
-      global: { headers: { "x-application": "cosmetwiki" } },
+      global: { headers: { "x-application": "cosme-check" } },
     });
   }
   return _anon;

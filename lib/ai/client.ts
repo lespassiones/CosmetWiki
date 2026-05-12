@@ -50,12 +50,12 @@ type LogEntry = {
   user_id?: string | null;
 };
 
-/** Fire-and-forget log to cosmetwiki.ai_logs. */
+/** Fire-and-forget log to cosme_check.ai_logs. */
 export function logAI(entry: LogEntry): void {
   try {
     const sb = supabaseService();
     void sb
-      .schema("cosmetwiki")
+      .schema("cosme_check")
       .from("ai_logs")
       .insert({
         feature: entry.feature,
@@ -77,7 +77,7 @@ export async function getCached<T = unknown>(cacheKey: string): Promise<T | null
   try {
     const sb = supabaseService();
     const { data } = await sb
-      .schema("cosmetwiki")
+      .schema("cosme_check")
       .from("ai_cache")
       .select("result")
       .eq("cache_key", cacheKey)
@@ -85,8 +85,8 @@ export async function getCached<T = unknown>(cacheKey: string): Promise<T | null
     if (!data) return null;
     // Best-effort hit counter (ignore failure)
     void sb
-      .schema("cosmetwiki")
-      .rpc("cosmetwiki_increment_ai_cache_hit", { p_key: cacheKey })
+      .schema("cosme_check")
+      .rpc("cosme_check_increment_ai_cache_hit", { p_key: cacheKey })
       .then(() => undefined);
     return data.result as T;
   } catch {
@@ -98,7 +98,7 @@ export async function setCached(cacheKey: string, result: unknown): Promise<void
   try {
     const sb = supabaseService();
     await sb
-      .schema("cosmetwiki")
+      .schema("cosme_check")
       .from("ai_cache")
       .upsert({ cache_key: cacheKey, result }, { onConflict: "cache_key" });
   } catch {

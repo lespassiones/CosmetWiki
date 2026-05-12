@@ -33,13 +33,13 @@ async function loadDashboard(firstName: string | null): Promise<DashboardData> {
   if (user) {
     const [lastResult, routineResult] = await Promise.all([
       sb
-        .schema("cosmetwiki")
+        .schema("cosme_check")
         .from("analyses")
         .select("id, name, product_label, score, created_at")
         .order("created_at", { ascending: false })
         .limit(1),
       sb
-        .schema("cosmetwiki")
+        .schema("cosme_check")
         .from("routine_items")
         .select("analyses(score)"),
     ]);
@@ -56,7 +56,7 @@ async function loadDashboard(firstName: string | null): Promise<DashboardData> {
       : null;
   }
 
-  const { data: trendingData } = await sb.rpc("cosmetwiki_trending_ingredients", {
+  const { data: trendingData } = await sb.rpc("cosme_check_trending_ingredients", {
     p_days: 7,
     p_limit: 5,
   });

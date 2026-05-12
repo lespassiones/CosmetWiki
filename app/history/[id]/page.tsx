@@ -8,7 +8,7 @@ import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { HistoryItemActions } from "@/components/history/HistoryItemActions";
 import { AddToRoutineButton } from "@/components/routine/AddToRoutineButton";
 
-export const metadata = { title: "Analyse · CosmetWiki" };
+export const metadata = { title: "Analyse · Cosme Check" };
 export const dynamic = "force-dynamic";
 
 export default async function HistoryDetailPage({
@@ -23,7 +23,7 @@ export default async function HistoryDetailPage({
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
   const { data, error } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("analyses")
     .select("id, name, product_label, score, input_text, result_json, created_at")
     .eq("id", id)
@@ -33,7 +33,7 @@ export default async function HistoryDetailPage({
 
   // Is this analysis already pinned to the user's routine?
   const { data: routineRow } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("routine_items")
     .select("id")
     .eq("analysis_id", id)

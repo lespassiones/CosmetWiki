@@ -1,4 +1,4 @@
-# CosmetWiki — Cahier des charges technique (v2)
+# Cosme Check — Cahier des charges technique (v2)
 
 > Version révisée pour respecter la contrainte **« zéro service payant »**.
 > Stack imposée : **Next.js + Supabase free tier + Vercel free tier**.
@@ -26,7 +26,7 @@ Un moteur de recherche d'ingrédients cosmétiques type Google :
 |---|---|---|
 | **Framework web** | Next.js 15 (App Router, RSC) + TypeScript | SSR pour SEO, ISR pour mise en cache des fiches, free sur Vercel |
 | **Hébergement** | Vercel **free tier** | Déploiement zero-config, CDN edge mondial, 100 GB bandwidth gratuit |
-| **Base de données** | Supabase **free tier**, PostgreSQL 15+ | Schéma isolé `cosmetwiki` dans une base déjà partagée avec une autre app |
+| **Base de données** | Supabase **free tier**, PostgreSQL 15+ | Schéma isolé `cosme_check` dans une base déjà partagée avec une autre app |
 | **Stockage images** | Supabase Storage (free, 1 GB) | Optimisation WebP agressive pour rester sous le quota |
 | **Recherche** | PostgreSQL natif : `pg_trgm` + `tsvector` + `ts_rank` | Pas besoin d'Algolia/Meilisearch — Postgres gère 15k lignes en <50ms |
 | **Cache** | Vercel Edge Cache + ISR (revalidate 24 h) | Réduit drastiquement les hits Supabase |
@@ -47,25 +47,25 @@ Un moteur de recherche d'ingrédients cosmétiques type Google :
 
 ---
 
-## 3. Modèle de données — schéma `cosmetwiki`
+## 3. Modèle de données — schéma `cosme_check`
 
-> ⚠️ **Important :** la base Supabase est partagée avec une autre application. Toutes les tables CosmetWiki vivent dans un **schéma PostgreSQL dédié `cosmetwiki`**. Le schéma `public` est intouchable.
+> ⚠️ **Important :** la base Supabase est partagée avec une autre application. Toutes les tables Cosme Check vivent dans un **schéma PostgreSQL dédié `cosme_check`**. Le schéma `public` est intouchable.
 
 ### 3.1 Création du schéma et extensions
 
 ```sql
 -- À exécuter une seule fois, par un compte ayant les droits owner
-CREATE SCHEMA IF NOT EXISTS cosmetwiki;
+CREATE SCHEMA IF NOT EXISTS cosme_check;
 
 -- Extensions nécessaires (souvent déjà actives sur Supabase)
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE EXTENSION IF NOT EXISTS unaccent;
 
 -- Donner accès au rôle anon en lecture seule, et authenticated/service_role en lecture (et service_role en écriture)
-GRANT USAGE ON SCHEMA cosmetwiki TO anon, authenticated, service_role;
-ALTER DEFAULT PRIVILEGES IN SCHEMA cosmetwiki
+GRANT USAGE ON SCHEMA cosme_check TO anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA cosme_check
   GRANT SELECT ON TABLES TO anon, authenticated;
-ALTER DEFAULT PRIVILEGES IN SCHEMA cosmetwiki
+ALTER DEFAULT PRIVILEGES IN SCHEMA cosme_check
   GRANT ALL ON TABLES TO service_role;
 ```
 
@@ -75,7 +75,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA cosmetwiki
 -- ====================================
 -- Table : ingredients
 -- ====================================
-CREATE TABLE cosmetwiki.ingredients (
+CREATE TABLE cosme_check.ingredients (
   id              BIGSERIAL PRIMARY KEY,
   inci_id         INTEGER UNIQUE NOT NULL,         -- id incibeauty (ex: 20312)
   slug            TEXT UNIQUE NOT NULL,            -- "acid-blue-74-aluminum-lake"
@@ -99,23 +99,23 @@ CREATE TABLE cosmetwiki.ingredients (
 
 -- Index pour la recherche full-text
 CREATE INDEX ingredients_search_idx
-  ON cosmetwiki.ingredients USING GIN(search_vector);
+  ON cosme_check.ingredients USING GIN(search_vector);
 
 -- Index trigram pour la recherche fuzzy par nom
 CREATE INDEX ingredients_name_trgm_idx
-  ON cosmetwiki.ingredients USING GIN(name gin_trgm_ops);
+  ON cosme_check.ingredients USING GIN(name gin_trgm_ops);
 
 -- Index sur la couleur pour les filtres
 CREATE INDEX ingredients_color_idx
-  ON cosmetwiki.ingredients(color_rating);
+  ON cosme_check.ingredients(color_rating);
 
 -- Index sur le CAS pour la recherche par numéro CAS
 CREATE INDEX ingredients_cas_idx
-  ON cosmetwiki.ingredients(cas_number)
+  ON cosme_check.ingredients(cas_number)
   WHERE cas_number IS NOT NULL;
 
 -- Trigger pour maintenir search_vector
-CREATE OR REPLACE FUNCTION cosmetwiki.ingredients_search_trigger() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION cosme_check.ingredients_search_trigger() RETURNS trigger AS $$
 BEGIN
   NEW.search_vector :=
     setweight(to_tsvector('simple', unaccent(coalesce(NEW.name, ''))), 'A') ||
@@ -128,13 +128,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER ingredients_search_update
-  BEFORE INSERT OR UPDATE ON cosmetwiki.ingredients
-  FOR EACH ROW EXECUTE FUNCTION cosmetwiki.ingredients_search_trigger();
+  BEFORE INSERT OR UPDATE ON cosme_check.ingredients
+  FOR EACH ROW EXECUTE FUNCTION cosme_check.ingredients_search_trigger();
 
 -- ====================================
 -- Table : products
 -- ====================================
-CREATE TABLE cosmetwiki.products (
+CREATE TABLE cosme_check.products (
   id              BIGSERIAL PRIMARY KEY,
   inci_product_id TEXT UNIQUE,                     -- id incibeauty produit
   brand           TEXT NOT NULL,
@@ -146,25 +146,25 @@ CREATE TABLE cosmetwiki.products (
   scraped_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX products_brand_idx ON cosmetwiki.products(brand);
+CREATE INDEX products_brand_idx ON cosme_check.products(brand);
 
 -- ====================================
 -- Table de jonction : products ↔ ingredients
 -- ====================================
-CREATE TABLE cosmetwiki.product_ingredients (
-  product_id    BIGINT NOT NULL REFERENCES cosmetwiki.products(id) ON DELETE CASCADE,
-  ingredient_id BIGINT NOT NULL REFERENCES cosmetwiki.ingredients(id) ON DELETE CASCADE,
+CREATE TABLE cosme_check.product_ingredients (
+  product_id    BIGINT NOT NULL REFERENCES cosme_check.products(id) ON DELETE CASCADE,
+  ingredient_id BIGINT NOT NULL REFERENCES cosme_check.ingredients(id) ON DELETE CASCADE,
   position      INTEGER,                           -- ordre dans la composition (1 = principal)
   PRIMARY KEY (product_id, ingredient_id)
 );
 
 CREATE INDEX product_ingredients_ingredient_idx
-  ON cosmetwiki.product_ingredients(ingredient_id);
+  ON cosme_check.product_ingredients(ingredient_id);
 
 -- ====================================
 -- Table : recherche - log anonyme (pour débugger les requêtes vides)
 -- ====================================
-CREATE TABLE cosmetwiki.search_log (
+CREATE TABLE cosme_check.search_log (
   id          BIGSERIAL PRIMARY KEY,
   query       TEXT NOT NULL,
   result_count INTEGER NOT NULL,
@@ -172,35 +172,35 @@ CREATE TABLE cosmetwiki.search_log (
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX search_log_query_idx ON cosmetwiki.search_log(query);
-CREATE INDEX search_log_created_idx ON cosmetwiki.search_log(created_at);
+CREATE INDEX search_log_query_idx ON cosme_check.search_log(query);
+CREATE INDEX search_log_created_idx ON cosme_check.search_log(created_at);
 
 -- ====================================
 -- Row Level Security : lecture publique, écriture interdite côté client
 -- ====================================
-ALTER TABLE cosmetwiki.ingredients ENABLE ROW LEVEL SECURITY;
-ALTER TABLE cosmetwiki.products ENABLE ROW LEVEL SECURITY;
-ALTER TABLE cosmetwiki.product_ingredients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cosme_check.ingredients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cosme_check.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cosme_check.product_ingredients ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "public read" ON cosmetwiki.ingredients
+CREATE POLICY "public read" ON cosme_check.ingredients
   FOR SELECT TO anon, authenticated USING (true);
 
-CREATE POLICY "public read" ON cosmetwiki.products
+CREATE POLICY "public read" ON cosme_check.products
   FOR SELECT TO anon, authenticated USING (true);
 
-CREATE POLICY "public read" ON cosmetwiki.product_ingredients
+CREATE POLICY "public read" ON cosme_check.product_ingredients
   FOR SELECT TO anon, authenticated USING (true);
 
 -- search_log : pas accessible aux anon
-ALTER TABLE cosmetwiki.search_log ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "service only" ON cosmetwiki.search_log
+ALTER TABLE cosme_check.search_log ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "service only" ON cosme_check.search_log
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 ```
 
 ### 3.3 Fonction RPC pour la recherche
 
 ```sql
-CREATE OR REPLACE FUNCTION cosmetwiki.search_ingredients(
+CREATE OR REPLACE FUNCTION cosme_check.search_ingredients(
   q TEXT,
   result_limit INTEGER DEFAULT 8
 )
@@ -216,7 +216,7 @@ LANGUAGE sql STABLE AS $$
       similarity(i.name, q),
       ts_rank(i.search_vector, plainto_tsquery('simple', unaccent(q)))
     ) AS rank
-  FROM cosmetwiki.ingredients i
+  FROM cosme_check.ingredients i
   WHERE
     i.search_vector @@ plainto_tsquery('simple', unaccent(q))
     OR i.name ILIKE q || '%'
@@ -226,7 +226,7 @@ LANGUAGE sql STABLE AS $$
   LIMIT result_limit;
 $$;
 
-GRANT EXECUTE ON FUNCTION cosmetwiki.search_ingredients(TEXT, INTEGER) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION cosme_check.search_ingredients(TEXT, INTEGER) TO anon, authenticated;
 ```
 
 ---
@@ -256,7 +256,7 @@ Pour chaque ingrédient de `ingredients_raw.json` :
    - Zones réglementées
    - Traductions multilingues (extraire dans un dict `{"en": ..., "de": ...}`)
    - **URLs des produits qui en contiennent** (jusqu'à 20)
-3. UPSERT dans `cosmetwiki.ingredients` (set `details_scraped = TRUE`)
+3. UPSERT dans `cosme_check.ingredients` (set `details_scraped = TRUE`)
 4. Sauvegarder les URLs produits dans une queue (fichier JSON ou table dédiée) pour la phase 3
 
 **Politesse :** délai aléatoire 0,5–1,5 s, pool de 6 workers max, retry exponentiel, checkpoint tous les 100 ingrédients.
@@ -271,9 +271,9 @@ Pour chaque URL produit collectée :
 
 1. GET la page produit
 2. Extraire : marque, nom, volume, score INCI, URL image
-3. UPSERT dans `cosmetwiki.products`
+3. UPSERT dans `cosme_check.products`
 4. Récupérer la composition complète (liste ordonnée d'ingrédients)
-5. INSERT dans `cosmetwiki.product_ingredients` (avec `position`)
+5. INSERT dans `cosme_check.product_ingredients` (avec `position`)
 
 **Stratégie de déduplication :** un même produit peut apparaître sur les fiches de plusieurs ingrédients → on déduplique par `inci_product_id`.
 
@@ -288,7 +288,7 @@ Pour chaque `image_url` non encore traité :
 1. GET l'image originale
 2. Conversion **WebP qualité 75, max 400 px de large** via Pillow
 3. Upload dans Supabase Storage : `products/{product_id}.webp`
-4. Update `cosmetwiki.products.image_path`
+4. Update `cosme_check.products.image_path`
 
 **Optimisation cible :** 50 000 × 18 KB = ~900 MB → on tient dans le 1 GB du free tier.
 
@@ -347,7 +347,7 @@ web/
 ```
                                                     [À propos]
 
-                          🌿 CosmetWiki
+                          🌿 Cosme Check
 
          ┌────────────────────────────────────────────────┐
          │ 🔍  Cherchez un ingrédient (ex: Glycerin)      │
@@ -389,7 +389,7 @@ web/
 
 - Composant `SearchBar` côté client avec **debounce 150 ms**.
 - Appelle une **Server Action** (pas une API route) → pas d'endpoint REST exposé publiquement.
-- Server Action : appelle la fonction RPC `cosmetwiki.search_ingredients(query)`.
+- Server Action : appelle la fonction RPC `cosme_check.search_ingredients(query)`.
 - Résultat caché 60 s côté Vercel (Vary sur la query).
 - Fuzzy matching tolère les fautes de frappe.
 - Recherche aussi par **N° CAS** (ex : taper "122-99-6" → trouve Phenoxyethanol).
@@ -509,7 +509,7 @@ headers: [
 
 | Phase | Durée | Output |
 |---|---|---|
-| **A — Infra** | 2 h | Schéma `cosmetwiki` créé, 15 722 lignes de base chargées |
+| **A — Infra** | 2 h | Schéma `cosme_check` créé, 15 722 lignes de base chargées |
 | **B — Scraping** | 1 j dev + 18 h exécution | Toutes les fiches détaillées + produits + images |
 | **C — Site Next.js** | 2 j | Page d'accueil + fiche ingrédient + autocomplete fonctionnels |
 | **D — Sécurité** | ½ j | Rate limit + hCaptcha + honeypots + robots.txt |
@@ -521,7 +521,7 @@ headers: [
 
 ## 9. Décisions à acter avec l'utilisateur
 
-1. **Domaine custom ?** (cosmetwiki.com / cosmetwiki.fr / sous-domaine Vercel par défaut ?)
+1. **Domaine custom ?** (cosme_check.com / cosme_check.fr / sous-domaine Vercel par défaut ?)
 2. **Identifiants Supabase** : à coller dans `.env.local` quand prêt.
 3. **Ordre des produits** sur les fiches ingrédient : par score décroissant ou par marque alphabétique ?
 4. **Volume de produits par fiche** : 10 ou 20 ? Affecte le quota storage.

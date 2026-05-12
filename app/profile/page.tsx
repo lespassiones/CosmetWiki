@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getProfile, getUser } from "@/lib/auth";
 import { signOut } from "@/app/auth/actions";
 
-export const metadata = { title: "Mon profil · CosmetWiki" };
+export const metadata = { title: "Mon profil · Cosme Check" };
 export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {

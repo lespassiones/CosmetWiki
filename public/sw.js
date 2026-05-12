@@ -1,4 +1,4 @@
-// CosmetWiki service worker — minimal install + runtime cache.
+// Cosme Check service worker — minimal install + runtime cache.
 // Goals:
 //  - Make the app installable (Chrome / Android require a fetch handler).
 //  - Network-first for navigation, with a tiny offline fallback page.

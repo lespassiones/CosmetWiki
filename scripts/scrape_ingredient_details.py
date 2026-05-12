@@ -16,7 +16,7 @@ Features:
   - --limit, --debug-url, --no-images, --workers, --batch flags
 
 Usage:
-    cd CosmetWiki
+    cd Cosme Check
     python scripts/scrape_ingredient_details.py --limit 50           # test on 50
     python scripts/scrape_ingredient_details.py                      # all pending
     python scripts/scrape_ingredient_details.py --debug-url <url>    # debug a single page
@@ -449,16 +449,16 @@ class SBClient:
         )
 
     def fetch_pending(self, limit: int) -> list[dict]:
-        url = f"{self.url}/rest/v1/rpc/cosmetwiki_pending_ingredients"
+        url = f"{self.url}/rest/v1/rpc/cosme_check_pending_ingredients"
         r = self.session.post(url, json={"p_limit": limit}, timeout=60)
         if r.status_code == 404:
-            print("RPC cosmetwiki_pending_ingredients missing - apply the migration first.")
+            print("RPC cosme_check_pending_ingredients missing - apply the migration first.")
             sys.exit(1)
         r.raise_for_status()
         return r.json() or []
 
     def fetch_by_slugs(self, slugs: list[str]) -> list[dict]:
-        url = f"{self.url}/rest/v1/rpc/cosmetwiki_pending_by_slugs"
+        url = f"{self.url}/rest/v1/rpc/cosme_check_pending_by_slugs"
         r = self.session.post(url, json={"p_slugs": slugs}, timeout=60)
         r.raise_for_status()
         return r.json() or []
@@ -466,7 +466,7 @@ class SBClient:
     def upsert_ingredients(self, rows: list[dict]) -> None:
         if not rows:
             return
-        url = f"{self.url}/rest/v1/rpc/cosmetwiki_upsert_ingredients"
+        url = f"{self.url}/rest/v1/rpc/cosme_check_upsert_ingredients"
         r = self.session.post(url, json={"rows": rows}, timeout=120)
         if r.status_code >= 300:
             raise RuntimeError(f"upsert_ingredients failed: {r.status_code} {r.text[:300]}")
@@ -474,7 +474,7 @@ class SBClient:
     def upsert_products(self, rows: list[dict]) -> None:
         if not rows:
             return
-        url = f"{self.url}/rest/v1/rpc/cosmetwiki_upsert_products"
+        url = f"{self.url}/rest/v1/rpc/cosme_check_upsert_products"
         r = self.session.post(url, json={"rows": rows}, timeout=120)
         if r.status_code >= 300:
             raise RuntimeError(f"upsert_products failed: {r.status_code} {r.text[:300]}")

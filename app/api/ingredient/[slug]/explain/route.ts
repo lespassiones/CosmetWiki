@@ -22,11 +22,11 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ slug: stri
 
   // Look up the ingredient via the anon client. We need its inci_id and
   // metadata to feed the explanation. We deliberately do not call the
-  // existing `cosmetwiki_get_ingredient` RPC because it returns a lot of
+  // existing `cosme_check_get_ingredient` RPC because it returns a lot of
   // data we don't need; a direct select is cheaper.
   const sb = supabaseAnon();
   const { data, error } = await sb
-    .schema("cosmetwiki")
+    .schema("cosme_check")
     .from("ingredients")
     .select("inci_id, name, color_rating, functions, tags")
     .eq("slug", slug)
@@ -55,11 +55,11 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ slug: stri
       // Count routine analyses that contain this ingredient in their JSON items
       // and history analyses that contain it.
       const [routineRes, historyRes] = await Promise.all([
-        svc.rpc("cosmetwiki_count_ingredient_in_routine", {
+        svc.rpc("cosme_check_count_ingredient_in_routine", {
           p_user: user.id,
           p_slug: slug,
         }),
-        svc.rpc("cosmetwiki_count_ingredient_in_history", {
+        svc.rpc("cosme_check_count_ingredient_in_history", {
           p_user: user.id,
           p_slug: slug,
         }),

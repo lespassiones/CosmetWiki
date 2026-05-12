@@ -3,7 +3,8 @@ export type ProductSource =
   | "openbeautyfacts"
   | "openproductsfacts"
   | "incidecoder"
-  | "duckduckgo+mistral";
+  | "duckduckgo+mistral"
+  | `brand:${string}`;
 
 export type ProductSearchHit = {
   found: true;

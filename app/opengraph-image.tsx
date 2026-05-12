@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "CosmetWiki — moteur de recherche d'ingrédients cosmétiques";
+export const alt = "Cosme Check — moteur de recherche d'ingrédients cosmétiques";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -40,7 +40,7 @@ export default async function Image() {
             }}
           />
           <div style={{ fontSize: 36, fontWeight: 700, color: "#1a0f2e" }}>
-            CosmetWiki
+            Cosme Check
           </div>
         </div>
         <div

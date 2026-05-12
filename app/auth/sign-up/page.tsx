@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 
-export const metadata = { title: "Créer un compte · CosmetWiki" };
+export const metadata = { title: "Créer un compte · Cosme Check" };
 
 export default async function SignUpPage() {
   const user = await getUser();
