@@ -49,6 +49,19 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
   // step-by-step animation inside the overlay.
   const budgetRef = useRef<number>(randomProcessingTotal());
 
+  // React StrictMode (dev) runs useEffect TWICE per mount: Effect 1 fires,
+  // its cleanup aborts the in-flight fetch, then Effect 2 fires. The
+  // sessionStorage flag consumed by Effect 1 is already gone when Effect 2
+  // runs → Effect 2 would see addToRoutine=false and complete successfully
+  // without adding to routine.
+  //
+  // Fix: use refs that survive across both effect executions for the same
+  // `initialInci`. Effect 1 reads sessionStorage and stores the result in
+  // the refs. Effect 2 sees the same `initialInci` → skips the storage read
+  // → reuses the value set by Effect 1. New `initialInci` → refs reset.
+  const pendingAddToRoutineRef = useRef<boolean>(false);
+  const pendingAddToRoutineInciRef = useRef<string>("");
+
   useEffect(() => {
     const trimmed = initialInci.trim();
     if (!trimmed) {
@@ -67,16 +80,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
     setAddedToRoutine(false);
     budgetRef.current = randomProcessingTotal();
 
-    // Pick up the product source (brand + name + attribution link) written
-    // by the ScanSheet "Rechercher un produit" / "Code-barres" flows. Also
-    // pick up the "add to routine" flag set by /routine's "+ Ajouter un
-    // produit" button. We consume them HERE (in useEffect) rather than inside
-    // runAnalyse, because React strict-mode / Next.js fast refresh runs the
-    // effect twice — the second pass would otherwise see an empty storage and
-    // silently drop the flag. By the time runAnalyse fires we already have
-    // the values in local vars.
     let src: ProductSource | null = null;
-    let addToRoutine = false;
     if (typeof window !== "undefined") {
       try {
         const stored = sessionStorage.getItem(PENDING_SOURCE_KEY);
@@ -84,12 +88,21 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
           src = JSON.parse(stored) as ProductSource;
           sessionStorage.removeItem(PENDING_SOURCE_KEY);
         }
-        const stamp = sessionStorage.getItem(PENDING_ADD_TO_ROUTINE_KEY);
-        if (stamp) {
-          sessionStorage.removeItem(PENDING_ADD_TO_ROUTINE_KEY);
-          const ts = Number(stamp);
-          if (Number.isFinite(ts) && Date.now() - ts < PENDING_FLAG_TTL_MS) {
-            addToRoutine = true;
+
+        // Read the "add to routine" flag only ONCE per initialInci value.
+        // pendingAddToRoutineInciRef tracks which inci we've already read for,
+        // so Effect 2 (StrictMode re-run) skips the storage read and reuses
+        // the value written by Effect 1.
+        if (pendingAddToRoutineInciRef.current !== trimmed) {
+          pendingAddToRoutineRef.current = false;
+          pendingAddToRoutineInciRef.current = trimmed;
+          const stamp = sessionStorage.getItem(PENDING_ADD_TO_ROUTINE_KEY);
+          if (stamp) {
+            sessionStorage.removeItem(PENDING_ADD_TO_ROUTINE_KEY);
+            const ts = Number(stamp);
+            if (Number.isFinite(ts) && Date.now() - ts < PENDING_FLAG_TTL_MS) {
+              pendingAddToRoutineRef.current = true;
+            }
           }
         }
       } catch {
@@ -101,7 +114,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
       window.history.replaceState({}, "", url.pathname + (url.search || ""));
     }
 
-    void runAnalyse(trimmed, src, addToRoutine);
+    void runAnalyse(trimmed, src, pendingAddToRoutineRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialInci]);
 

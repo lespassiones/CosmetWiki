@@ -271,10 +271,16 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
 
       {searched && candidates.length > 0 ? (
         <div className="mt-5">
-          <p className="mb-3 text-[13px] text-ink-muted">
-            Plusieurs produits correspondent. Choisis le tien&nbsp;:
-          </p>
-          <ul className="grid gap-2.5 sm:grid-cols-2">
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <p className="text-[13px] text-ink-muted">
+              {candidates.length} produit{candidates.length > 1 ? "s" : ""} trouvé{candidates.length > 1 ? "s" : ""} — choisis le tien&nbsp;:
+            </p>
+            <span className="text-[11px] text-ink-subtle/70">défile pour voir plus</span>
+          </div>
+          {/* Scrollable list — keeps the search input + footer in view while the
+              user browses 30+ candidates. The pr-1 gives the scrollbar room
+              without pushing cards under it. */}
+          <ul className="grid gap-2.5 sm:grid-cols-2 max-h-[58vh] overflow-y-auto overscroll-contain pr-1 -mr-1">
             {candidates.map((c) => (
               <li key={c.id}>
                 <CandidateCard
@@ -285,20 +291,19 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
                 />
               </li>
             ))}
+            {hasMore ? (
+              <li className="sm:col-span-2 flex justify-center pt-1">
+                <button
+                  type="button"
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="rounded-full bg-white/80 px-4 py-2 text-[13px] font-medium text-ink ring-1 ring-black/[0.06] transition-colors hover:bg-white disabled:opacity-60"
+                >
+                  {loadingMore ? "Chargement…" : "Voir encore plus de produits"}
+                </button>
+              </li>
+            ) : null}
           </ul>
-
-          {hasMore ? (
-            <div className="mt-4 flex justify-center">
-              <button
-                type="button"
-                onClick={loadMore}
-                disabled={loadingMore}
-                className="rounded-full bg-white/80 px-4 py-2 text-[13px] font-medium text-ink ring-1 ring-black/[0.06] transition-colors hover:bg-white disabled:opacity-60"
-              >
-                {loadingMore ? "Chargement…" : "Voir plus de produits"}
-              </button>
-            </div>
-          ) : null}
 
           <p className="mt-4 text-[12px] text-ink-subtle">
             Tu ne vois pas ton produit ?{" "}

@@ -15,12 +15,12 @@ type RequestBody = {
   hp?: string;
 };
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 24;
 // Cache and INCIDecoder only contribute on page 1 — page 2+ is pure OBF
 // pagination since cache hits are a small fixed set and INCIDecoder lists
 // are also a single search-page extract.
-const CACHE_LIMIT = 8;
-const INCIDECODER_LIMIT = 8;
+const CACHE_LIMIT = 16;
+const INCIDECODER_LIMIT = 20;
 
 function normalize(s: string): string {
   return s
