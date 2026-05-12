@@ -47,6 +47,10 @@ type AnalysePayload = {
   /** Optional human label of the analysed product (e.g. "La Roche-Posay Effaclar Duo+"),
    *  used to vary the AI synthesis. Sent by the product search frontend. */
   productLabel?: string;
+  /** When true, the resulting analysis is also pushed to the signed-in user's
+   *  routine (`routine_items`). Set by the "+ Ajouter un produit" button on
+   *  /routine via sessionStorage → AnalysisRunner. */
+  addToRoutine?: boolean;
 };
 
 const TAG_LABELS: Record<string, string> = {
@@ -479,6 +483,38 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  // ----- Post-fragrance penalty mitigation -----
+  // In a regulation-compliant INCI list, anything below the fragrance marker
+  // (PARFUM / FRAGRANCE / parfum-synthese tag) is typically present at
+  // concentrations under ~1 %. Penalized ingredients (Jaune/Orange/Rouge)
+  // sitting below that threshold are flagged as "impact limité" so the user
+  // doesn't over-react to a Rouge buried at position 30.
+  if (firstFragranceIdx >= 0) {
+    const afterFragrance = byPosition
+      .slice(firstFragranceIdx + 1)
+      .filter(
+        (r) =>
+          r.effective_color === "Jaune" ||
+          r.effective_color === "Orange" ||
+          r.effective_color === "Rouge",
+      );
+    if (afterFragrance.length > 0) {
+      const n = afterFragrance.length;
+      observations.push({
+        tag: "after-fragrance",
+        label: "Pénalité atténuée par la position",
+        status: "info",
+        count: n,
+        items: afterFragrance.map((r) => ({
+          name: r.effective_name ?? r.input_raw,
+          slug: r.slug,
+          colorRating: r.effective_color,
+        })),
+        message: `${n} ingrédient${n > 1 ? "s" : ""} sensible${n > 1 ? "s" : ""} apparai${n > 1 ? "ssent" : "t"} après le parfum — concentration ≤ 1 %, impact réel limité.`,
+      });
+    }
+  }
+
   // ----- Spectrum: color ratings of top 5 and top 10 ingredients -----
   const spectrumTop5: (ColorRating | null)[] = Array.from({ length: 5 }, (_, i) => {
     const r = byPosition[i];
@@ -564,6 +600,8 @@ export async function POST(req: NextRequest) {
   // the user. Categorization runs in the background and is patched in later.
   // Errors are logged server-side — they used to be swallowed silently, which
   // hid a months-long RLS misconfiguration (zero rows ever persisted).
+  let savedAnalysisId: string | null = null;
+  let addedToRoutine = false;
   try {
     const cookieStore = await cookies();
     const sb = supabaseServer(cookieStore);
@@ -582,7 +620,9 @@ export async function POST(req: NextRequest) {
       }
       const autoName = body.productLabel?.slice(0, 200)
         ?? `Analyse du ${new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
-      const { error: insertError } = await sb
+      // We need the inserted row id when the caller wants the analysis pushed
+      // to their routine, so use .select().single() instead of a bare insert.
+      const { data: inserted, error: insertError } = await sb
         .schema("cosme_check")
         .from("analyses")
         .insert({
@@ -593,7 +633,9 @@ export async function POST(req: NextRequest) {
           input_text: text,
           result_json: responsePayload,
           score: Number(score.toFixed(2)),
-        });
+        })
+        .select("id")
+        .single();
       if (insertError) {
         // Surface the error so RLS / column-mismatch regressions are obvious
         // in the server logs instead of being silently swallowed.
@@ -602,6 +644,22 @@ export async function POST(req: NextRequest) {
           insertError.message,
           insertError.code ? `(${insertError.code})` : "",
         );
+      } else if (inserted?.id) {
+        savedAnalysisId = inserted.id as string;
+        if (body.addToRoutine === true) {
+          const { error: routineErr } = await sb
+            .schema("cosme_check")
+            .from("routine_items")
+            .upsert(
+              { user_id: user.id, analysis_id: inserted.id, frequency: "daily" },
+              { onConflict: "user_id,analysis_id" },
+            );
+          if (routineErr) {
+            console.error("[analyser] routine insert failed:", routineErr.message);
+          } else {
+            addedToRoutine = true;
+          }
+        }
       }
     }
   } catch (err) {
@@ -609,5 +667,5 @@ export async function POST(req: NextRequest) {
     // still don't propagate — the analysis response must reach the client
   }
 
-  return NextResponse.json(responsePayload);
+  return NextResponse.json({ ...responsePayload, analysisId: savedAnalysisId, addedToRoutine });
 }

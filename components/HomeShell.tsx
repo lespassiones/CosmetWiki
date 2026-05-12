@@ -7,10 +7,12 @@ import { ProcessingOverlay, randomProcessingTotal } from "./ProcessingOverlay";
 import { AnalyseResultPanel } from "./AnalyseResultPanel";
 import { ProductSearchInput } from "./ProductSearchInput";
 import { BarcodeScannerInput } from "./BarcodeScannerInput";
+import { PENDING_ADD_TO_ROUTINE_KEY } from "./routine/AddProductButton";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 const STORAGE_KEY = "cw:lastAnalysis";
 const CACHE_VERSION = 3;
+const PENDING_FLAG_TTL_MS = 30 * 60 * 1000;
 
 type Mode = "inci" | "product" | "barcode";
 
@@ -174,6 +176,24 @@ export function HomeShell({
       ? [src.brand, src.productName].filter(Boolean).join(" ").trim() || undefined
       : undefined;
 
+    // Consume the "add to routine" flag (set by /routine's "+ Ajouter un
+    // produit" button) eagerly so a refresh or duplicate trigger can't replay it.
+    let addToRoutine = false;
+    if (typeof window !== "undefined") {
+      try {
+        const stamp = sessionStorage.getItem(PENDING_ADD_TO_ROUTINE_KEY);
+        sessionStorage.removeItem(PENDING_ADD_TO_ROUTINE_KEY);
+        if (stamp) {
+          const ts = Number(stamp);
+          if (Number.isFinite(ts) && Date.now() - ts < PENDING_FLAG_TTL_MS) {
+            addToRoutine = true;
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
     try {
       const r = await fetch("/api/analyser", {
         method: "POST",
@@ -182,6 +202,7 @@ export function HomeShell({
           text: trimmed,
           withSynthesis: true,
           ...(productLabel ? { productLabel } : {}),
+          ...(addToRoutine ? { addToRoutine: true } : {}),
         }),
         signal: ctrl.signal,
       });

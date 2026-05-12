@@ -1,12 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProcessingOverlay, randomProcessingTotal } from "./ProcessingOverlay";
 import { AnalyseResultPanel } from "./AnalyseResultPanel";
+import { PENDING_ADD_TO_ROUTINE_KEY } from "./routine/AddProductButton";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 const PENDING_SOURCE_KEY = "cw:pendingProductSource";
+// Stale-flag cutoff for the pending "add to routine" stamp. If the user clicks
+// the routine button, cancels the ScanSheet, then analyses something else 30
+// min later, we should NOT secretly add that analyse to their routine.
+const PENDING_FLAG_TTL_MS = 30 * 60 * 1000;
 
 type ProductSource = {
   source: string;
@@ -33,6 +39,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
   const [result, setResult] = useState<AnalyseResponse | null>(null);
   const [originalText, setOriginalText] = useState("");
   const [productSource, setProductSource] = useState<ProductSource | null>(null);
+  const [addedToRoutine, setAddedToRoutine] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inFlightRef = useRef<AbortController | null>(null);
 
@@ -57,6 +64,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
     setError(null);
     setOriginalText("");
     setProductSource(null);
+    setAddedToRoutine(false);
     budgetRef.current = randomProcessingTotal();
 
     // Pick up the product source (brand + name + attribution link) written
@@ -97,6 +105,25 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
       ? [src.brand, src.productName].filter(Boolean).join(" ").trim() || undefined
       : undefined;
 
+    // Pick up the "add to routine" flag set by /routine's "+ Ajouter un produit"
+    // button. We consume it eagerly (before the await) so a concurrent navigation
+    // or a refresh mid-flight can't accidentally use it twice.
+    let addToRoutine = false;
+    if (typeof window !== "undefined") {
+      try {
+        const stamp = sessionStorage.getItem(PENDING_ADD_TO_ROUTINE_KEY);
+        sessionStorage.removeItem(PENDING_ADD_TO_ROUTINE_KEY);
+        if (stamp) {
+          const ts = Number(stamp);
+          if (Number.isFinite(ts) && Date.now() - ts < PENDING_FLAG_TTL_MS) {
+            addToRoutine = true;
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
     try {
       const r = await fetch("/api/analyser", {
         method: "POST",
@@ -105,6 +132,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
           text: trimmed,
           withSynthesis: true,
           ...(productLabel ? { productLabel } : {}),
+          ...(addToRoutine ? { addToRoutine: true } : {}),
         }),
         signal: ctrl.signal,
       });
@@ -113,7 +141,8 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
         setError(j?.error ?? `Erreur ${r.status}`);
         return;
       }
-      const data = (await r.json()) as AnalyseResponse;
+      const data = (await r.json()) as AnalyseResponse & { addedToRoutine?: boolean };
+      if (data.addedToRoutine) setAddedToRoutine(true);
       const elapsed = Date.now() - startedAt;
       // Always honour the minimum animation budget so the user has time to
       // read the "On décode la composition…" steps. The fetch itself is
@@ -174,6 +203,20 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
 
   return (
     <main className="w-full px-3 lg:px-6 pt-4 pb-16">
+      {addedToRoutine && (
+        <div className="mx-auto max-w-6xl mb-4 flex items-center gap-3 rounded-2xl bg-emerald-50 ring-1 ring-emerald-200 px-4 py-3 text-[13px] text-emerald-800">
+          <span aria-hidden className="text-base">✓</span>
+          <span className="flex-1">
+            Produit ajouté à ta routine — il pèse maintenant dans ton exposition cumulée.
+          </span>
+          <Link
+            href="/routine"
+            className="shrink-0 rounded-full bg-emerald-600 text-white px-3 py-1.5 text-[12px] font-semibold hover:bg-emerald-700 transition"
+          >
+            Voir ma routine →
+          </Link>
+        </div>
+      )}
       <div id="pdf-root">
         <AnalyseResultPanel
           result={result}

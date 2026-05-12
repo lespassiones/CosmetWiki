@@ -39,6 +39,8 @@ export type RoutineMetrics = {
   exposureScore: number;        // /20 — higher = safer
   exposureLabel: "Faible" | "Modérée" | "Élevée" | "Très élevée";
   totalUseUnits: number;        // sum of frequency weights
+  /** Count of routine products whose own score falls in orange/rose band (< 13/20). */
+  penalizingProductsCount: number;
   tagExposure: { tag: string; label: string; cumulativeCount: number }[];
   topIngredients: {
     name: string;
@@ -57,6 +59,18 @@ export type RoutineMetrics = {
     minus1: { exposureScore: number; removedName: string | null };
     /** Exposure score if the two worst products are removed. */
     minus2: { exposureScore: number; removedNames: string[] };
+    /** Detailed info on the 1-2 worst products (id, name, score, top problematic ingredients). */
+    worstProducts: {
+      id: string;
+      name: string;
+      score: number | null;
+      worstIngredients: {
+        name: string;
+        slug: string | null;
+        colorRating: AnalyseItem["colorRating"];
+        tags: string[];
+      }[];
+    }[];
   };
 };
 
@@ -102,12 +116,14 @@ export function computeRoutineMetrics(products: RoutineProduct[]): RoutineMetric
       exposureScore: 20,
       exposureLabel: "Faible",
       totalUseUnits: 0,
+      penalizingProductsCount: 0,
       tagExposure: [],
       topIngredients: [],
       allergenOverlap: [],
       simulation: {
         minus1: { exposureScore: 20, removedName: null },
         minus2: { exposureScore: 20, removedNames: [] },
+        worstProducts: [],
       },
     };
   }
@@ -215,6 +231,34 @@ export function computeRoutineMetrics(products: RoutineProduct[]): RoutineMetric
   const remove2 = products.filter(
     (p) => p.id !== sortedByScore[0]?.id && p.id !== sortedByScore[1]?.id,
   );
+
+  // Per-product detail for the simulation modal: surface the 3 worst
+  // (Rouge then Orange) ingredients of each worst product so the user can see
+  // *why* removing it matters.
+  const worstProducts = [sortedByScore[0], sortedByScore[1]]
+    .filter((p): p is RoutineProduct => Boolean(p))
+    .map((p) => {
+      const ranked = [...p.result.items]
+        .filter((it) => it.colorRating === "Rouge" || it.colorRating === "Orange")
+        .sort((a, b) => {
+          const ra = a.colorRating === "Rouge" ? 0 : 1;
+          const rb = b.colorRating === "Rouge" ? 0 : 1;
+          if (ra !== rb) return ra - rb;
+          return (a.position ?? 999) - (b.position ?? 999);
+        })
+        .slice(0, 5);
+      return {
+        id: p.id,
+        name: p.name,
+        score: p.score,
+        worstIngredients: ranked.map((it) => ({
+          name: it.name ?? it.input,
+          slug: it.slug,
+          colorRating: it.colorRating,
+          tags: it.tags ?? [],
+        })),
+      };
+    });
   const simulation = {
     minus1: {
       exposureScore: Number(scoreOf(remove1).toFixed(1)),
@@ -226,12 +270,20 @@ export function computeRoutineMetrics(products: RoutineProduct[]): RoutineMetric
         .filter((p): p is RoutineProduct => Boolean(p))
         .map((p) => p.name),
     },
+    worstProducts,
   };
+
+  // Products that are themselves "penalizing": their own score is < 13/20
+  // (i.e. orange/rose band — Bien threshold sits at 13).
+  const penalizingProductsCount = products.filter(
+    (p) => typeof p.score === "number" && p.score < 13,
+  ).length;
 
   return {
     exposureScore: Number(exposureScore.toFixed(1)),
     exposureLabel: exposureLabelFor(exposureScore),
     totalUseUnits: Number(totalUseUnits.toFixed(2)),
+    penalizingProductsCount,
     tagExposure,
     topIngredients,
     allergenOverlap,

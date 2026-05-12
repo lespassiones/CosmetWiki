@@ -23,6 +23,7 @@ export type DashboardData = {
     name: string;
     color_rating: "Vert" | "Jaune" | "Orange" | "Rouge" | null;
     translation_fr: string | null;
+    primary_function: string | null;
   }[];
 };
 
@@ -34,11 +35,52 @@ const RATING_COLOR: Record<NonNullable<DashboardData["trendingIngredients"][numb
 };
 
 function scoreTone(s: number | null) {
-  if (s === null) return { bg: "bg-[#F3F4F6]", fg: "text-[#6B7280]", label: "—" };
-  if (s >= 17) return { bg: "bg-emerald-50", fg: "text-emerald-700", label: "Très bien" };
-  if (s >= 13) return { bg: "bg-amber-50", fg: "text-amber-700", label: "Bien" };
-  if (s >= 9) return { bg: "bg-orange-50", fg: "text-orange-700", label: "Moyen" };
-  return { bg: "bg-rose-50", fg: "text-rose-700", label: "À éviter" };
+  if (s === null) return { bg: "bg-[#F3F4F6]", fg: "text-[#6B7280]", stroke: "#9CA3AF", label: "—" };
+  if (s >= 17) return { bg: "bg-emerald-50", fg: "text-emerald-700", stroke: "#10B981", label: "Très bien" };
+  if (s >= 13) return { bg: "bg-amber-50", fg: "text-amber-700", stroke: "#F59E0B", label: "Bien" };
+  if (s >= 9) return { bg: "bg-orange-50", fg: "text-orange-700", stroke: "#FB923C", label: "Moyen" };
+  return { bg: "bg-rose-50", fg: "text-rose-700", stroke: "#EF4444", label: "À éviter" };
+}
+
+function HalfCircleScore({
+  score,
+  stroke,
+}: {
+  score: number | null;
+  stroke: string;
+}) {
+  const radius = 44;
+  const arcLength = Math.PI * radius;
+  const filled = score !== null ? Math.max(0, Math.min(1, score / 20)) * arcLength : 0;
+  const path = "M 8 56 A 44 44 0 0 1 96 56";
+  return (
+    <div className="relative h-[64px] w-[104px] shrink-0">
+      <svg viewBox="0 0 104 60" className="h-full w-full" aria-hidden>
+        <path
+          d={path}
+          fill="none"
+          stroke="rgba(15,23,42,0.08)"
+          strokeWidth="8"
+          strokeLinecap="round"
+        />
+        <path
+          d={path}
+          fill="none"
+          stroke={stroke}
+          strokeWidth="8"
+          strokeLinecap="round"
+          strokeDasharray={arcLength}
+          strokeDashoffset={arcLength - filled}
+        />
+      </svg>
+      <div className="absolute inset-x-0 bottom-0 flex items-baseline justify-center">
+        <span className="text-[20px] font-bold leading-none text-[#111111] tabular-nums">
+          {score !== null ? score.toFixed(1) : "—"}
+        </span>
+        <span className="ml-0.5 text-[11px] font-medium leading-none text-[#6B7280]">/20</span>
+      </div>
+    </div>
+  );
 }
 
 export function HomeDashboard({ data }: { data: DashboardData }) {
@@ -56,7 +98,7 @@ export function HomeDashboard({ data }: { data: DashboardData }) {
         .
       </p>
 
-      <div className="mt-5 lg:mt-6 h-px bg-black/[0.08]" />
+      <div className="mt-5 -mx-5 h-[2px] bg-black/30 lg:mx-0 lg:mt-6 lg:h-px lg:bg-black/[0.08]" />
 
       <TipCard text={data.tipOfTheDay} />
 
@@ -111,16 +153,11 @@ function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
         <span className="text-[11px] text-[#F43F5E] font-medium">Voir →</span>
       </div>
       <div className="mt-3 flex items-center gap-4">
-        <div className={`h-14 w-14 shrink-0 rounded-xl flex flex-col items-center justify-center ${tone.bg} ${tone.fg}`}>
-          <span className="text-base font-bold leading-none">
-            {last.score !== null ? last.score.toFixed(1) : "—"}
-          </span>
-          <span className="text-[10px] mt-0.5">/20</span>
-        </div>
         <div className="min-w-0 flex-1">
           <div className="font-semibold text-[#111111] truncate">{title}</div>
-          <div className="text-[12px] text-[#6B7280]">{tone.label}</div>
+          <div className={`mt-0.5 text-[12px] font-medium ${tone.fg}`}>{tone.label}</div>
         </div>
+        <HalfCircleScore score={last.score} stroke={tone.stroke} />
       </div>
     </Link>
   );
@@ -152,18 +189,15 @@ function RoutineCard({ count, avgScore }: { count: number; avgScore: number | nu
         <span className="text-[11px] text-[#F43F5E] font-medium">Voir →</span>
       </div>
       <div className="mt-3 flex items-center gap-4">
-        <div className={`h-14 w-14 shrink-0 rounded-xl flex flex-col items-center justify-center ${tone.bg} ${tone.fg}`}>
-          <span className="text-base font-bold leading-none">
-            {avgScore !== null ? avgScore.toFixed(1) : "—"}
-          </span>
-          <span className="text-[10px] mt-0.5">/20</span>
-        </div>
         <div className="min-w-0 flex-1">
           <div className="font-semibold text-[#111111]">
-            {count} produit{count > 1 ? "s" : ""} dans ta routine
+            {count} produit{count > 1 ? "s" : ""} actif{count > 1 ? "s" : ""}
           </div>
-          <div className="text-[12px] text-[#6B7280]">Exposition moyenne {tone.label.toLowerCase()}</div>
+          <div className={`mt-0.5 text-[12px] font-medium ${tone.fg}`}>
+            Exposition {tone.label.toLowerCase()}
+          </div>
         </div>
+        <HalfCircleScore score={avgScore} stroke={tone.stroke} />
       </div>
     </Link>
   );
@@ -206,6 +240,12 @@ function TrendingCard({ items }: { items: DashboardData["trendingIngredients"] }
                     <div className="text-[11px] text-[#6B7280] truncate">{it.translation_fr}</div>
                   )}
                 </div>
+                {it.primary_function ? (
+                  <div className="hidden sm:block min-w-0 max-w-[40%] text-right">
+                    <div className="text-[10px] uppercase tracking-wide text-[#9CA3AF]">Fonction</div>
+                    <div className="text-[12px] text-[#4B5563] truncate">{it.primary_function}</div>
+                  </div>
+                ) : null}
                 <span aria-hidden className="text-[#9CA3AF]">›</span>
               </Link>
             </li>

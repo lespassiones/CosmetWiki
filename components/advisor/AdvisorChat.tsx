@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { GLASS_CARD, GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
@@ -11,6 +11,80 @@ const SUGGESTED_PROMPTS = [
   "Quels ingrédients éviter selon mon profil ?",
   "Comment ajuster ma routine pour l'hiver ?",
 ];
+
+/**
+ * Minimal inline markdown renderer for assistant messages. Handles the cases
+ * the model actually produces (bold, italic, bullet lists, line breaks). Not a
+ * full CommonMark parser — that would be overkill for a chat bubble.
+ */
+function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
+  const nodes: React.ReactNode[] = [];
+  // Match **bold**, *italic*, `code`, then plain text in between.
+  const re = /\*\*([^*]+?)\*\*|\*([^*]+?)\*|`([^`]+?)`/g;
+  let lastIdx = 0;
+  let m: RegExpExecArray | null;
+  let i = 0;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > lastIdx) nodes.push(text.slice(lastIdx, m.index));
+    if (m[1] !== undefined) {
+      nodes.push(<strong key={`${keyPrefix}-b-${i}`} className="font-semibold">{m[1]}</strong>);
+    } else if (m[2] !== undefined) {
+      nodes.push(<em key={`${keyPrefix}-i-${i}`} className="italic">{m[2]}</em>);
+    } else if (m[3] !== undefined) {
+      nodes.push(
+        <code key={`${keyPrefix}-c-${i}`} className="rounded bg-black/[0.06] px-1 py-0.5 text-[12.5px] font-mono">
+          {m[3]}
+        </code>,
+      );
+    }
+    lastIdx = m.index + m[0].length;
+    i++;
+  }
+  if (lastIdx < text.length) nodes.push(text.slice(lastIdx));
+  return nodes;
+}
+
+function MarkdownMessage({ content }: { content: string }) {
+  const lines = content.split("\n");
+  const blocks: React.ReactNode[] = [];
+  let listBuf: string[] = [];
+  let key = 0;
+  const flushList = () => {
+    if (listBuf.length === 0) return;
+    const items = listBuf;
+    blocks.push(
+      <ul key={`ul-${key++}`} className="list-disc pl-5 space-y-0.5 my-1">
+        {items.map((it, idx) => (
+          <li key={idx}>{renderInline(it, `li-${idx}`)}</li>
+        ))}
+      </ul>,
+    );
+    listBuf = [];
+  };
+  for (let idx = 0; idx < lines.length; idx++) {
+    const raw = lines[idx];
+    const line = raw.trimEnd();
+    const bullet = line.match(/^\s*[-*•]\s+(.*)$/);
+    if (bullet) {
+      listBuf.push(bullet[1]);
+      continue;
+    }
+    flushList();
+    if (line.trim() === "") {
+      blocks.push(<div key={`sp-${key++}`} className="h-2" aria-hidden />);
+    } else {
+      blocks.push(<p key={`p-${key++}`}>{renderInline(line, `p-${idx}`)}</p>);
+    }
+  }
+  flushList();
+  return (
+    <div className="space-y-1">
+      {blocks.map((b, i) => (
+        <Fragment key={i}>{b}</Fragment>
+      ))}
+    </div>
+  );
+}
 
 export function AdvisorChat({ firstName }: { firstName: string }) {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
@@ -92,13 +166,21 @@ export function AdvisorChat({ firstName }: { firstName: string }) {
           messages.map((m, i) => (
             <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap ${
+                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed ${
                   m.role === "user"
-                    ? "bg-[#111111] text-white"
+                    ? "bg-[#111111] text-white whitespace-pre-wrap"
                     : "bg-[#F3F4F6] text-[#111111]"
                 }`}
               >
-                {m.content || (streaming && i === messages.length - 1 ? "…" : "")}
+                {m.role === "assistant" ? (
+                  m.content ? (
+                    <MarkdownMessage content={m.content} />
+                  ) : (
+                    streaming && i === messages.length - 1 ? "…" : ""
+                  )
+                ) : (
+                  m.content
+                )}
               </div>
             </div>
           ))

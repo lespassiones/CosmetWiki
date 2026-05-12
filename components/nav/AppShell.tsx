@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BackgroundGlow } from "../BackgroundGlow";
 import { ScanSheet } from "./ScanSheet";
-import { CameraIcon, ClockIcon, HomeIcon, LayersIcon, UserIcon } from "./NavIcons";
+import { CameraIcon, ClockIcon, HomeIcon, LayersIcon, SparklesIcon, UserIcon } from "./NavIcons";
 
 const NAV_ITEMS = [
   { href: "/", label: "Accueil", icon: HomeIcon },
   { href: "/routine", label: "Routine", icon: LayersIcon },
   { href: "/history", label: "Historique", icon: ClockIcon },
+  { href: "/advisor", label: "Skin advisor", icon: SparklesIcon },
   { href: "/profile", label: "Profil", icon: UserIcon },
 ] as const;
 
@@ -28,6 +29,14 @@ export function AppShell({
 }) {
   const pathname = usePathname() ?? "/";
   const [scanOpen, setScanOpen] = useState(false);
+
+  // Allow any client component anywhere in the tree (e.g. /routine's "Ajouter un
+  // produit" button) to open the scan sheet by dispatching a custom DOM event.
+  useEffect(() => {
+    const handler = () => setScanOpen(true);
+    window.addEventListener("cosmecheck:open-scan", handler);
+    return () => window.removeEventListener("cosmecheck:open-scan", handler);
+  }, []);
 
   const hidden = hideOnPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   if (hidden) return <>{children}</>;
@@ -58,6 +67,19 @@ export function AppShell({
 
       {/* Mobile bottom nav */}
       <MobileBottomNav pathname={pathname} onScanClick={() => setScanOpen(true)} />
+
+      {/* Mobile floating Skin Advisor button — sits above the bottom nav,
+          hidden when already on /advisor to avoid redundancy. */}
+      {!pathname.startsWith("/advisor") && (
+        <Link
+          href="/advisor"
+          aria-label="Ouvrir Skin Advisor"
+          className="lg:hidden fixed right-4 z-40 h-12 w-12 rounded-full bg-gradient-to-br from-[#1F2937] via-[#111111] to-[#0A0A0A] text-white flex items-center justify-center ring-1 ring-white/[0.08] shadow-[0_10px_24px_-8px_rgba(15,23,42,0.45),inset_0_1px_0_rgba(255,255,255,0.18)] hover:brightness-110 active:scale-95 transition"
+          style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 88px)" }}
+        >
+          <SparklesIcon className="h-5 w-5 text-[#FBBF24]" />
+        </Link>
+      )}
 
       <ScanSheet open={scanOpen} onClose={() => setScanOpen(false)} />
     </div>
