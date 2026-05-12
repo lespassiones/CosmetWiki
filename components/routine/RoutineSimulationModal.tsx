@@ -99,6 +99,7 @@ export function RoutineSimulationModal({
   const tips = buildAlternatives(worst);
 
   const canSimulate = worst.length > 0;
+  const isSingle = worst.length === 1;
 
   const trigger = (
     <button
@@ -127,7 +128,11 @@ export function RoutineSimulationModal({
       <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-[0_30px_80px_-20px_rgba(15,23,42,0.40)] ring-1 ring-black/[0.06]">
         <div className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-black/[0.06] px-5 py-4 flex items-start gap-3 z-10">
           <div className="flex-1 min-w-0">
-            <h2 className="text-[17px] font-bold text-[#111111]">Simulation : retirer les produits pénalisants</h2>
+            <h2 className="text-[17px] font-bold text-[#111111]">
+              {isSingle
+                ? "Simulation : retirer le produit pénalisant"
+                : "Simulation : retirer les produits pénalisants"}
+            </h2>
             <p className="text-[12px] text-[#6B7280] mt-0.5">
               Score actuel <span className="font-semibold text-[#111111] tabular-nums">{currentScore.toFixed(1)}/20</span>
               {" → "}
@@ -150,7 +155,7 @@ export function RoutineSimulationModal({
         <div className="px-5 py-5 space-y-5">
           <section>
             <h3 className="text-[13px] font-semibold uppercase tracking-wide text-[#6B7280] mb-3">
-              Produits à retirer
+              {isSingle ? "Produit à retirer" : "Produits à retirer"}
             </h3>
             <ul className="space-y-4">
               {worst.map((p) => (

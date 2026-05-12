@@ -59,8 +59,14 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
   // `initialInci`. Effect 1 reads sessionStorage and stores the result in
   // the refs. Effect 2 sees the same `initialInci` → skips the storage read
   // → reuses the value set by Effect 1. New `initialInci` → refs reset.
+  // Both `src` (product source / name) and `addToRoutine` are consumed from
+  // sessionStorage inside useEffect. React StrictMode runs the effect TWICE:
+  // Effect 1 reads and removes the keys, Effect 2 finds empty storage and
+  // loses both values. Fix: read once (guarded by initialInci) and persist in
+  // refs so Effect 2 reuses what Effect 1 already found.
+  const pendingSourceRef = useRef<ProductSource | null>(null);
   const pendingAddToRoutineRef = useRef<boolean>(false);
-  const pendingAddToRoutineInciRef = useRef<string>("");
+  const pendingSeenInciRef = useRef<string>("");
 
   useEffect(() => {
     const trimmed = initialInci.trim();
@@ -80,22 +86,22 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
     setAddedToRoutine(false);
     budgetRef.current = randomProcessingTotal();
 
-    let src: ProductSource | null = null;
     if (typeof window !== "undefined") {
       try {
-        const stored = sessionStorage.getItem(PENDING_SOURCE_KEY);
-        if (stored) {
-          src = JSON.parse(stored) as ProductSource;
-          sessionStorage.removeItem(PENDING_SOURCE_KEY);
-        }
-
-        // Read the "add to routine" flag only ONCE per initialInci value.
-        // pendingAddToRoutineInciRef tracks which inci we've already read for,
-        // so Effect 2 (StrictMode re-run) skips the storage read and reuses
-        // the value written by Effect 1.
-        if (pendingAddToRoutineInciRef.current !== trimmed) {
+        if (pendingSeenInciRef.current !== trimmed) {
+          // First pass for this initialInci: read sessionStorage and cache in refs.
+          // Effect 2 (StrictMode) will see pendingSeenInciRef.current === trimmed
+          // and skip straight to using the cached values.
+          pendingSeenInciRef.current = trimmed;
+          pendingSourceRef.current = null;
           pendingAddToRoutineRef.current = false;
-          pendingAddToRoutineInciRef.current = trimmed;
+
+          const stored = sessionStorage.getItem(PENDING_SOURCE_KEY);
+          if (stored) {
+            pendingSourceRef.current = JSON.parse(stored) as ProductSource;
+            sessionStorage.removeItem(PENDING_SOURCE_KEY);
+          }
+
           const stamp = sessionStorage.getItem(PENDING_ADD_TO_ROUTINE_KEY);
           if (stamp) {
             sessionStorage.removeItem(PENDING_ADD_TO_ROUTINE_KEY);
@@ -114,7 +120,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
       window.history.replaceState({}, "", url.pathname + (url.search || ""));
     }
 
-    void runAnalyse(trimmed, src, pendingAddToRoutineRef.current);
+    void runAnalyse(trimmed, pendingSourceRef.current, pendingAddToRoutineRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialInci]);
 

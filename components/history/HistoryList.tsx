@@ -80,7 +80,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
   return (
     <div>
       {/* Discrete toolbar — only the "Comparer" entry point is visible when idle */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between">
         <p className="text-sm text-[#6B7280]">
           {rows.length === 0
             ? "Tu n'as pas encore d'analyse sauvegardée."
@@ -117,7 +117,9 @@ export function HistoryList({ rows }: { rows: Row[] }) {
         )}
       </div>
 
-      <ul className="space-y-3">
+      <div className="mt-5 -mx-5 h-[2px] bg-black/30 lg:mx-0 lg:mt-6 lg:h-px lg:bg-black/[0.08]" />
+
+      <ul className="mt-6 space-y-3">
         {rows.map((a) => {
           const tone = scoreTone(a.score);
           const displayName =

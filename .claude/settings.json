@@ -6,7 +6,9 @@
       "mcp__claude_ai_Supabase__list_extensions",
       "Bash(npx tsc *)",
       "Bash(Get-ChildItem -Path \"d:\\\\MesApps\\\\deploy\\\\CosmetWiki\" -Recurse -Depth 2)",
-      "Bash(Select-Object -Property Name, FullName)"
+      "Bash(Select-Object -Property Name, FullName)",
+      "Bash(git show *)",
+      "Read(//tmp/**)"
     ]
   }
 }

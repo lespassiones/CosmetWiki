@@ -57,7 +57,7 @@ export type RoutineMetrics = {
   simulation: {
     /** Exposure score if the single worst product is removed. */
     minus1: { exposureScore: number; removedName: string | null };
-    /** Exposure score if the two worst products are removed. */
+    /** Exposure score if all suggested-to-remove products are removed. */
     minus2: { exposureScore: number; removedNames: string[] };
     /** Detailed info on the 1-2 worst products (id, name, score, top problematic ingredients). */
     worstProducts: {
@@ -71,6 +71,13 @@ export type RoutineMetrics = {
         tags: string[];
       }[];
     }[];
+    /**
+     * How many products are actually worth removing (0, 1 or 2).
+     * 0 → no penalizing product, hide the simulation card.
+     * 1 → suggest removing the worst one only.
+     * 2 → suggest removing the two worst ones.
+     */
+    removableCount: 0 | 1 | 2;
   };
 };
 
@@ -124,6 +131,7 @@ export function computeRoutineMetrics(products: RoutineProduct[]): RoutineMetric
         minus1: { exposureScore: 20, removedName: null },
         minus2: { exposureScore: 20, removedNames: [] },
         worstProducts: [],
+        removableCount: 0,
       },
     };
   }
@@ -225,52 +233,90 @@ export function computeRoutineMetrics(products: RoutineProduct[]): RoutineMetric
     .map(([inciName, v]) => ({ inciName, label: v.label, productCount: v.products.size }))
     .sort((a, b) => b.productCount - a.productCount);
 
-  // Simulation : remove the 1 or 2 products with the worst (lowest) score.
-  const sortedByScore = [...products].sort((a, b) => (a.score ?? 0) - (b.score ?? 0));
-  const remove1 = products.filter((p) => p.id !== sortedByScore[0]?.id);
-  const remove2 = products.filter(
-    (p) => p.id !== sortedByScore[0]?.id && p.id !== sortedByScore[1]?.id,
-  );
+  // Simulation : suggest removing ONLY products that are actually
+  // penalizing. A product is "removable" when at least one of these is true:
+  //   - it contains at least one Rouge ingredient (high concern)
+  //   - its own score is in the orange/rose band (< 13/20)
+  //   - it stacks a lot of irritants (>= 5 Orange + Jaune combined)
+  // Sorted by impact: more Rouge first, then Orange, then Jaune, then lowest
+  // own score. Capped at 2 — proposing to remove every product in the routine
+  // (and pretending the user reaches 20/20) is dishonest.
+  function ratingCounts(p: RoutineProduct) {
+    let rouge = 0;
+    let orange = 0;
+    let jaune = 0;
+    for (const it of p.result.items) {
+      if (it.colorRating === "Rouge") rouge++;
+      else if (it.colorRating === "Orange") orange++;
+      else if (it.colorRating === "Jaune") jaune++;
+    }
+    return { rouge, orange, jaune };
+  }
 
-  // Per-product detail for the simulation modal: surface the 3 worst
-  // (Rouge then Orange) ingredients of each worst product so the user can see
-  // *why* removing it matters.
-  const worstProducts = [sortedByScore[0], sortedByScore[1]]
-    .filter((p): p is RoutineProduct => Boolean(p))
-    .map((p) => {
-      const ranked = [...p.result.items]
-        .filter((it) => it.colorRating === "Rouge" || it.colorRating === "Orange")
-        .sort((a, b) => {
-          const ra = a.colorRating === "Rouge" ? 0 : 1;
-          const rb = b.colorRating === "Rouge" ? 0 : 1;
-          if (ra !== rb) return ra - rb;
-          return (a.position ?? 999) - (b.position ?? 999);
-        })
-        .slice(0, 5);
-      return {
-        id: p.id,
-        name: p.name,
-        score: p.score,
-        worstIngredients: ranked.map((it) => ({
-          name: it.name ?? it.input,
-          slug: it.slug,
-          colorRating: it.colorRating,
-          tags: it.tags ?? [],
-        })),
-      };
-    });
+  const removable = products
+    .map((p) => ({ product: p, counts: ratingCounts(p) }))
+    .filter(({ product, counts }) => {
+      if (counts.rouge >= 1) return true;
+      if (typeof product.score === "number" && product.score < 13) return true;
+      if (counts.orange + counts.jaune >= 5) return true;
+      return false;
+    })
+    .sort((a, b) => {
+      if (b.counts.rouge !== a.counts.rouge) return b.counts.rouge - a.counts.rouge;
+      if (b.counts.orange !== a.counts.orange) return b.counts.orange - a.counts.orange;
+      if (b.counts.jaune !== a.counts.jaune) return b.counts.jaune - a.counts.jaune;
+      return (a.product.score ?? 20) - (b.product.score ?? 20);
+    })
+    .slice(0, 2)
+    .map((c) => c.product);
+
+  const removableCount = removable.length as 0 | 1 | 2;
+  const removeFirstId = removable[0]?.id;
+  const removeIds = new Set(removable.map((p) => p.id));
+
+  const projectedMinus1 = removeFirstId
+    ? products.filter((p) => p.id !== removeFirstId)
+    : products;
+  const projectedMinusAll = removeIds.size > 0
+    ? products.filter((p) => !removeIds.has(p.id))
+    : products;
+
+  // Per-product detail for the simulation modal: surface the 5 worst
+  // (Rouge then Orange) ingredients of each suggested product so the user
+  // sees *why* removing it matters.
+  const worstProducts = removable.map((p) => {
+    const ranked = [...p.result.items]
+      .filter((it) => it.colorRating === "Rouge" || it.colorRating === "Orange")
+      .sort((a, b) => {
+        const ra = a.colorRating === "Rouge" ? 0 : 1;
+        const rb = b.colorRating === "Rouge" ? 0 : 1;
+        if (ra !== rb) return ra - rb;
+        return (a.position ?? 999) - (b.position ?? 999);
+      })
+      .slice(0, 5);
+    return {
+      id: p.id,
+      name: p.name,
+      score: p.score,
+      worstIngredients: ranked.map((it) => ({
+        name: it.name ?? it.input,
+        slug: it.slug,
+        colorRating: it.colorRating,
+        tags: it.tags ?? [],
+      })),
+    };
+  });
   const simulation = {
     minus1: {
-      exposureScore: Number(scoreOf(remove1).toFixed(1)),
-      removedName: sortedByScore[0]?.name ?? null,
+      exposureScore: Number(scoreOf(projectedMinus1).toFixed(1)),
+      removedName: removable[0]?.name ?? null,
     },
     minus2: {
-      exposureScore: Number(scoreOf(remove2).toFixed(1)),
-      removedNames: [sortedByScore[0], sortedByScore[1]]
-        .filter((p): p is RoutineProduct => Boolean(p))
-        .map((p) => p.name),
+      exposureScore: Number(scoreOf(projectedMinusAll).toFixed(1)),
+      removedNames: removable.map((p) => p.name),
     },
     worstProducts,
+    removableCount,
   };
 
   // Products that are themselves "penalizing": their own score is < 13/20

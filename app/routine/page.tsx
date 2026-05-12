@@ -9,6 +9,7 @@ import { RoutineSuggestions } from "@/components/routine/RoutineSuggestions";
 import { TagExposureBar } from "@/components/routine/TagExposureBar";
 import { AddProductButton } from "@/components/routine/AddProductButton";
 import { RoutineSimulationModal } from "@/components/routine/RoutineSimulationModal";
+import { Tooltip } from "@/components/Tooltip";
 import { GLASS_CARD, GLASS_CARD_AMBER, GLASS_CARD_ROSE } from "@/lib/ui/glass";
 
 export const metadata = { title: "Ma routine · Cosme Check" };
@@ -97,6 +98,21 @@ export default async function RoutinePage() {
   const exposureStrokeColor = exposureStroke(metrics.exposureLabel);
   const exposureFgCls = exposureFg(metrics.exposureLabel);
 
+  // Details for the "Produits pénalisants" tooltip.
+  const penalizingDetails = products
+    .filter((p) => typeof p.score === "number" && p.score < 13)
+    .map((p) => {
+      const worst = p.result.items
+        .filter((it) => it.colorRating === "Rouge" || it.colorRating === "Orange")
+        .sort((a, b) => {
+          if (a.colorRating !== b.colorRating) return a.colorRating === "Rouge" ? -1 : 1;
+          return (a.position ?? 999) - (b.position ?? 999);
+        })
+        .slice(0, 3)
+        .map((it) => it.name ?? it.input);
+      return { name: p.name, score: p.score, worst };
+    });
+
   // Empty state — keep it inviting + make the CTA actually open the scan sheet.
   if (products.length === 0) {
     return (
@@ -125,20 +141,30 @@ export default async function RoutinePage() {
   const tagsTop = metrics.tagExposure.slice(0, 8);
 
   return (
-    <div className="mx-auto max-w-6xl px-5 lg:px-8 py-8 lg:py-12">
-      {/* Header */}
-      <header className="mb-6 flex items-start justify-between gap-4 flex-wrap">
+    <div className="mx-auto max-w-6xl px-5 lg:px-8 pt-4 pb-8 lg:py-12">
+      {/* Header — mobile: title → desc → separator → button (stacked)
+                   desktop: title+desc on the left, button on the right */}
+      <header className="lg:flex lg:items-start lg:justify-between lg:gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold mb-1">Ma routine quotidienne</h1>
-          <p className="text-[12px] text-[#9CA3AF]">
-            Astuce : sélectionne 2 analyses pour les comparer côte à côte.
+          <h1 className="text-2xl lg:text-3xl font-bold">Ma routine quotidienne</h1>
+          <p className="mt-1 text-[12px] text-[#9CA3AF]">
+            Suis l&apos;exposition cumulée de ta routine et repère les produits à ajuster.
           </p>
         </div>
-        <AddProductButton />
+
+        {/* Mobile-only separator placed between description and button */}
+        <div className="mt-4 -mx-5 h-[2px] bg-black/30 lg:hidden" />
+
+        <div className="mt-4 lg:mt-0">
+          <AddProductButton />
+        </div>
       </header>
 
+      {/* Desktop-only separator below the whole header row */}
+      <div className="hidden lg:block lg:mt-6 lg:h-px lg:bg-black/[0.08]" />
+
       {/* 3 stat cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4 mb-6">
+      <section className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4 mb-6">
         <div className={`${GLASS_CARD} p-5 flex items-center gap-4`}>
           <div className="min-w-0 flex-1">
             <div className="text-[11px] uppercase tracking-wide text-[#6B7280] mb-1">Exposition cumulée</div>
@@ -164,11 +190,38 @@ export default async function RoutinePage() {
         <div className={`${GLASS_CARD} p-5`}>
           <div className="text-[11px] uppercase tracking-wide text-[#6B7280] mb-1">Produits pénalisants</div>
           <div className="flex items-baseline gap-2">
-            <span className={`text-3xl font-bold tabular-nums ${metrics.penalizingProductsCount > 0 ? "text-rose-600" : ""}`}>
-              {metrics.penalizingProductsCount}
-            </span>
-            {metrics.penalizingProductsCount > 0 && (
-              <span aria-hidden className="text-rose-500 text-xl">⚠</span>
+            {metrics.penalizingProductsCount > 0 ? (
+              <Tooltip
+                placement="bottom"
+                maxWidth={300}
+                content={
+                  <div className="space-y-2.5">
+                    {penalizingDetails.map((p, i) => (
+                      <div key={i}>
+                        <div className="font-semibold text-white leading-tight truncate">
+                          {p.name} — {p.score?.toFixed(1)}/20
+                        </div>
+                        {p.worst.length > 0 && (
+                          <div className="text-[11px] text-white/70 mt-0.5 leading-snug">
+                            {p.worst.join(" · ")}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                }
+              >
+                <span className="inline-flex items-baseline gap-2 cursor-help">
+                  <span className="text-3xl font-bold tabular-nums text-rose-600">
+                    {metrics.penalizingProductsCount}
+                  </span>
+                  <span aria-hidden className="text-rose-500 text-xl">⚠</span>
+                </span>
+              </Tooltip>
+            ) : (
+              <span className="text-3xl font-bold tabular-nums">
+                {metrics.penalizingProductsCount}
+              </span>
             )}
           </div>
           <p className="text-[11px] text-[#9CA3AF] mt-1">
@@ -221,33 +274,40 @@ export default async function RoutinePage() {
         </div>
       </section>
 
-      {/* Simulation */}
-      <section className={`${GLASS_CARD} p-5 mb-6`}>
-        <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-          <div className="min-w-0 flex-1">
-            <h2 className="text-[15px] font-semibold mb-1">Simulation</h2>
-            <p className="text-[13px] text-[#6B7280]">
-              Que se passe-t-il si je retire les 2 produits les plus pénalisants ?
-            </p>
-          </div>
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="text-[12px] text-[#6B7280]">
-              Nouvelle exposition :{" "}
-              <span className="text-xl font-bold text-[#111111] tabular-nums">
-                {metrics.simulation.minus2.exposureScore.toFixed(1)}
-              </span>
-              <span className="text-sm text-[#6B7280]">/20</span>
+      {/* Simulation — only rendered if there's at least one penalizing
+          product to remove. Otherwise the suggestion is dishonest: removing a
+          well-scored product just to bump the average doesn't reflect a real
+          improvement. */}
+      {metrics.simulation.removableCount > 0 && (
+        <section className={`${GLASS_CARD} p-5 mb-6`}>
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-[15px] font-semibold mb-1">Simulation</h2>
+              <p className="text-[13px] text-[#6B7280]">
+                {metrics.simulation.removableCount === 1
+                  ? "Que se passe-t-il si je retire le produit le plus pénalisant ?"
+                  : "Que se passe-t-il si je retire les 2 produits les plus pénalisants ?"}
+              </p>
             </div>
-            <div className="text-[12px] font-semibold text-emerald-600 flex items-center gap-1">
-              <span aria-hidden>↑</span>
-              <span className="tabular-nums">
-                {(metrics.simulation.minus2.exposureScore - metrics.exposureScore).toFixed(1)}
-              </span>
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="text-[12px] text-[#6B7280]">
+                Nouvelle exposition :{" "}
+                <span className="text-xl font-bold text-[#111111] tabular-nums">
+                  {metrics.simulation.minus2.exposureScore.toFixed(1)}
+                </span>
+                <span className="text-sm text-[#6B7280]">/20</span>
+              </div>
+              <div className="text-[12px] font-semibold text-emerald-600 flex items-center gap-1">
+                <span aria-hidden>↑</span>
+                <span className="tabular-nums">
+                  {(metrics.simulation.minus2.exposureScore - metrics.exposureScore).toFixed(1)}
+                </span>
+              </div>
+              <RoutineSimulationModal metrics={metrics} currentScore={metrics.exposureScore} />
             </div>
-            <RoutineSimulationModal metrics={metrics} currentScore={metrics.exposureScore} />
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Allergen overlap warning */}
       {metrics.allergenOverlap.length > 0 && (
