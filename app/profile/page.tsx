@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getProfile, getUser } from "@/lib/auth";
 import { signOut } from "@/app/auth/actions";
+import { GLASS_CARD, GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
 
 export const metadata = { title: "Mon profil · Cosme Check" };
 export const dynamic = "force-dynamic";
@@ -15,7 +16,7 @@ export default async function ProfilePage() {
   return (
     <div className="mx-auto max-w-3xl px-5 lg:px-8 py-8 lg:py-12">
       <div className="flex items-center gap-4 mb-8">
-        <div className="h-14 w-14 rounded-full bg-[#111111] text-white flex items-center justify-center text-xl font-semibold">
+        <div className="h-14 w-14 rounded-full bg-gradient-to-br from-[#1F2937] to-[#0A0A0A] text-white flex items-center justify-center text-xl font-semibold ring-1 ring-white/[0.08] shadow-[0_10px_24px_-10px_rgba(15,23,42,0.45),inset_0_1px_0_rgba(255,255,255,0.18)]">
           {initials}
         </div>
         <div>
@@ -24,9 +25,9 @@ export default async function ProfilePage() {
         </div>
       </div>
 
-      <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 mb-4">
+      <section className={`${GLASS_CARD} p-5 mb-4`}>
         <h2 className="text-sm font-semibold mb-3">Mon abonnement</h2>
-        <div className="inline-flex items-center gap-2 rounded-full bg-[#111111] text-white px-3 py-1.5 text-[12px] font-medium">
+        <div className={`inline-flex items-center gap-2 ${GLASS_PILL_DARK} px-3 py-1.5 text-[12px] font-medium`}>
           <span>✨</span>
           Accès complet · Gratuit pour le moment
         </div>
@@ -35,10 +36,10 @@ export default async function ProfilePage() {
         </p>
       </section>
 
-      <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5">
+      <section className={`${GLASS_CARD} p-5`}>
         <h2 className="text-sm font-semibold mb-3">Compte</h2>
         <dl className="space-y-2 text-sm">
-          <div className="flex justify-between border-b border-[#F0F0F0] py-2">
+          <div className="flex justify-between border-b border-white/60 py-2">
             <dt className="text-[#6B7280]">Prénom</dt>
             <dd className="font-medium">{profile?.first_name ?? "—"}</dd>
           </div>
@@ -51,7 +52,7 @@ export default async function ProfilePage() {
         <form action={signOut} className="mt-5">
           <button
             type="submit"
-            className="w-full sm:w-auto rounded-xl border border-[#E5E7EB] px-5 py-2.5 text-sm font-medium text-[#E11D48] hover:bg-rose-50 transition"
+            className={`w-full sm:w-auto ${GLASS_PILL} px-5 py-2.5 text-sm font-semibold text-[#E11D48]`}
           >
             Se déconnecter
           </button>

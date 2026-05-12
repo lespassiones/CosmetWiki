@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { GLASS_CARD, GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 
@@ -76,7 +77,7 @@ export function AdvisorChat({ firstName }: { firstName: string }) {
   const showSuggestions = messages.length === 0;
 
   return (
-    <div className="flex flex-col bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden" style={{ height: "min(70vh, 640px)" }}>
+    <div className={`${GLASS_CARD} flex flex-col overflow-hidden`} style={{ height: "min(70vh, 640px)" }}>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
         {messages.length === 0 ? (
           <div className="text-center py-6">
@@ -117,7 +118,7 @@ export function AdvisorChat({ firstName }: { firstName: string }) {
                 type="button"
                 onClick={() => send(p)}
                 disabled={streaming}
-                className="rounded-full border border-[#E5E7EB] bg-white px-3 py-1.5 text-[12px] hover:border-[#111111] transition disabled:opacity-50"
+                className={`${GLASS_PILL} px-3 py-1.5 text-[12px] disabled:opacity-50`}
               >
                 {p}
               </button>
@@ -145,7 +146,7 @@ export function AdvisorChat({ firstName }: { firstName: string }) {
           type="submit"
           disabled={streaming || input.trim().length === 0}
           aria-label="Envoyer"
-          className="h-10 w-10 rounded-full bg-[#111111] text-white flex items-center justify-center hover:brightness-110 transition disabled:opacity-40"
+          className={`${GLASS_PILL_DARK} h-10 w-10 flex items-center justify-center disabled:opacity-40`}
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
             <path d="m22 2-11 11M22 2l-7 20-4-9-9-4 20-7z" />

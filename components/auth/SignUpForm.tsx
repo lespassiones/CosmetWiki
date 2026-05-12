@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { signUp } from "@/app/auth/actions";
 
-export function SignUpForm() {
+export function SignUpForm({ next = "/" }: { next?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [showPwd, setShowPwd] = useState(false);
@@ -19,6 +19,7 @@ export function SignUpForm() {
       }}
       className="space-y-4"
     >
+      <input type="hidden" name="next" value={next} />
       <Field name="first_name" label="Prénom" type="text" autoComplete="given-name" required />
       <Field name="email" label="Email" type="email" autoComplete="email" required />
       <Field

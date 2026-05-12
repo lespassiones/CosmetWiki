@@ -81,8 +81,14 @@ export default async function Home({ searchParams }: Props) {
   const showDashboard = Boolean(user);
 
   return (
-    <div className="relative isolate flex min-h-screen flex-col bg-bg">
-      <BackgroundGlow />
+    <div
+      className={`relative isolate flex flex-col bg-bg ${
+        showDashboard ? "" : "min-h-screen"
+      }`}
+    >
+      {/* AppShell paints its own BackgroundGlow for signed-in users; only
+          render ours on the public landing to avoid stacking two glows. */}
+      {!showDashboard && <BackgroundGlow />}
 
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
         <Logo size="md" />
@@ -100,15 +106,27 @@ export default async function Home({ searchParams }: Props) {
             À propos
           </Link>
           <InstallPWAButton className="ml-2" />
+          {!showDashboard && (
+            <Link
+              href="/auth/sign-in"
+              className="ml-2 rounded-full px-3 py-1.5 font-medium text-ink transition-colors hover:bg-black/[0.04]"
+            >
+              Se connecter
+            </Link>
+          )}
         </nav>
         <MobileMenu />
       </header>
 
       {showDashboard && <HomeDashboard data={dashboard} />}
 
-      <HomeShell initialInci={initialInci} initialMode={initialMode} />
+      <HomeShell
+        initialInci={initialInci}
+        initialMode={initialMode}
+        signedIn={showDashboard}
+      />
 
-      <Footer />
+      {!showDashboard && <Footer />}
     </div>
   );
 }

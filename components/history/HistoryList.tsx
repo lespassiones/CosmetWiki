@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { GLASS_CARD, GLASS_CARD_HOVER, GLASS_PILL_DARK } from "@/lib/ui/glass";
 
 type Row = {
   id: string;
@@ -108,7 +109,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
               type="button"
               onClick={compare}
               disabled={!canCompare}
-              className="rounded-lg bg-[#111111] text-white text-[12px] font-semibold px-3 py-1.5 disabled:opacity-40"
+              className={`${GLASS_PILL_DARK} text-[12px] font-semibold px-3 py-1.5 disabled:opacity-40`}
             >
               Comparer ({selectedCount}/2)
             </button>
@@ -130,8 +131,8 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                   type="button"
                   onClick={() => toggle(a.id)}
                   aria-pressed={isSelected}
-                  className={`w-full flex items-center gap-4 rounded-2xl border bg-white p-4 text-left transition ${
-                    isSelected ? "border-[#111111] ring-2 ring-[#111111]" : "border-[#E5E7EB]"
+                  className={`${GLASS_CARD} ${GLASS_CARD_HOVER} w-full flex items-center gap-4 p-4 text-left ${
+                    isSelected ? "ring-2 ring-[#111111]" : ""
                   }`}
                 >
                   <span
@@ -167,7 +168,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
             <li key={a.id}>
               <Link
                 href={`/history/${a.id}`}
-                className="flex items-center gap-4 rounded-2xl border border-[#E5E7EB] bg-white p-4 hover:border-[#111111] transition"
+                className={`${GLASS_CARD} ${GLASS_CARD_HOVER} flex items-center gap-4 p-4`}
               >
                 <div className={`flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl ${tone.bg} ${tone.text}`}>
                   <span className="text-base font-bold leading-none">

@@ -5,6 +5,7 @@ import { supabaseServer } from "@/lib/supabase";
 import { isProfileComplete, readSkinProfile, SKIN_CONCERN_LABEL, SKIN_TYPE_LABEL } from "@/lib/skin/profile";
 import { AdvisorOnboarding } from "@/components/advisor/AdvisorOnboarding";
 import { AdvisorChat } from "@/components/advisor/AdvisorChat";
+import { GLASS_CARD, GLASS_CARD_ROSE } from "@/lib/ui/glass";
 
 export const metadata = { title: "Skin advisor · Cosme Check" };
 export const dynamic = "force-dynamic";
@@ -37,7 +38,7 @@ export default async function AdvisorPage() {
       </p>
 
       {!complete ? (
-        <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 lg:p-7">
+        <section className={`${GLASS_CARD} p-5 lg:p-7`}>
           <h2 className="text-lg font-semibold mb-1">Crée ton profil en 3 questions</h2>
           <p className="text-sm text-[#6B7280] mb-6">
             On utilise ces réponses pour adapter les conseils à ta peau. Tu peux les modifier à tout moment.
@@ -46,7 +47,7 @@ export default async function AdvisorPage() {
         </section>
       ) : (
         <>
-          <section className="rounded-2xl bg-[#FFF1F2] p-4 mb-4 text-[13px] text-[#9F1239] flex items-start gap-3">
+          <section className={`${GLASS_CARD_ROSE} p-4 mb-4 text-[13px] text-[#9F1239] flex items-start gap-3`}>
             <span aria-hidden className="text-base">🧬</span>
             <div className="flex-1 leading-relaxed">
               <strong className="font-semibold">{SKIN_TYPE_LABEL[skin.skinType!]}</strong>

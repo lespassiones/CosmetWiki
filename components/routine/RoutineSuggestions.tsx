@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { RoutineMetrics, RoutineProduct } from "@/lib/routine/engine";
+import { GLASS_CARD, GLASS_PILL_DARK } from "@/lib/ui/glass";
 
 type Suggestion = {
   text: string;
@@ -52,7 +53,7 @@ export function RoutineSuggestions({
 
   if (suggestions === null) {
     return (
-      <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 mb-6">
+      <section className={`${GLASS_CARD} p-5 mb-6`}>
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
             <h2 className="text-[15px] font-semibold flex items-center gap-2">
@@ -67,7 +68,7 @@ export function RoutineSuggestions({
             type="button"
             onClick={load}
             disabled={pending}
-            className="rounded-xl bg-[#111111] text-white text-sm font-semibold px-4 py-2.5 hover:brightness-110 transition disabled:opacity-50"
+            className={`${GLASS_PILL_DARK} text-sm font-semibold px-4 py-2.5 disabled:opacity-50`}
           >
             {pending ? "Génération…" : "Générer"}
           </button>
@@ -80,7 +81,7 @@ export function RoutineSuggestions({
   }
 
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 mb-6">
+    <section className={`${GLASS_CARD} p-5 mb-6`}>
       <div className="flex items-center justify-between gap-3 mb-3">
         <h2 className="text-[15px] font-semibold flex items-center gap-2">
           <span aria-hidden>✨</span>

@@ -8,15 +8,32 @@ import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { RoutineProductRow } from "@/components/routine/RoutineProductRow";
 import { RoutineSuggestions } from "@/components/routine/RoutineSuggestions";
 import { TagExposureBar } from "@/components/routine/TagExposureBar";
+import {
+  GLASS_CARD,
+  GLASS_CARD_AMBER,
+  GLASS_CARD_EMERALD,
+  GLASS_CARD_ORANGE,
+  GLASS_CARD_ROSE,
+} from "@/lib/ui/glass";
+
+const EXPOSURE_GLASS: Record<string, string> = {
+  Faible: GLASS_CARD_EMERALD,
+  Modérée: GLASS_CARD_AMBER,
+  Élevée: GLASS_CARD_ORANGE,
+};
+
+function exposureGlass(label: string): string {
+  return EXPOSURE_GLASS[label] ?? GLASS_CARD_ROSE;
+}
 
 export const metadata = { title: "Ma routine · Cosme Check" };
 export const dynamic = "force-dynamic";
 
-function exposureTone(label: string): { bg: string; fg: string; ring: string } {
-  if (label === "Faible") return { bg: "bg-emerald-50", fg: "text-emerald-700", ring: "ring-emerald-200" };
-  if (label === "Modérée") return { bg: "bg-amber-50", fg: "text-amber-700", ring: "ring-amber-200" };
-  if (label === "Élevée") return { bg: "bg-orange-50", fg: "text-orange-700", ring: "ring-orange-200" };
-  return { bg: "bg-rose-50", fg: "text-rose-700", ring: "ring-rose-200" };
+function exposureFg(label: string): string {
+  if (label === "Faible") return "text-emerald-700";
+  if (label === "Modérée") return "text-amber-700";
+  if (label === "Élevée") return "text-orange-700";
+  return "text-rose-700";
 }
 
 export default async function RoutinePage() {
@@ -56,7 +73,8 @@ export default async function RoutinePage() {
     }));
 
   const metrics = computeRoutineMetrics(products);
-  const tone = exposureTone(metrics.exposureLabel);
+  const exposureGlassCls = exposureGlass(metrics.exposureLabel);
+  const exposureFgCls = exposureFg(metrics.exposureLabel);
 
   return (
     <div className="mx-auto max-w-5xl px-5 lg:px-8 py-8 lg:py-12">
@@ -70,14 +88,14 @@ export default async function RoutinePage() {
       </header>
 
       {products.length === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-[#F43F5E] bg-[#FFF1F2] p-8 text-center">
-          <p className="text-sm text-[#F43F5E] font-medium mb-2">+ Ajouter un produit à ma routine</p>
+        <div className={`${GLASS_CARD_ROSE} p-8 text-center`}>
+          <p className="text-sm text-[#F43F5E] font-semibold mb-2">+ Ajouter un produit à ma routine</p>
           <p className="text-xs text-[#6B7280] mb-4">
             Analyse un produit puis ajoute-le à ta routine pour suivre ton exposition cumulée.
           </p>
           <Link
             href="/history"
-            className="inline-block text-sm font-medium text-[#111111] hover:underline"
+            className="inline-block text-sm font-semibold text-[#111111] hover:underline"
           >
             Voir mon historique →
           </Link>
@@ -86,26 +104,26 @@ export default async function RoutinePage() {
         <>
           {/* Hero: exposure score + simulation teaser */}
           <section className="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr] gap-3 lg:gap-4 mb-6">
-            <div className={`rounded-2xl ${tone.bg} ring-1 ${tone.ring} p-5`}>
+            <div className={`${exposureGlassCls} p-5`}>
               <div className="text-[11px] uppercase tracking-wide text-[#6B7280] mb-1">Exposition cumulée</div>
               <div className="flex items-baseline gap-2">
-                <span className={`text-4xl font-bold ${tone.fg}`}>{metrics.exposureScore}</span>
+                <span className={`text-4xl font-bold ${exposureFgCls}`}>{metrics.exposureScore}</span>
                 <span className="text-sm text-[#6B7280]">/20</span>
-                <span className={`ml-auto text-sm font-semibold ${tone.fg}`}>{metrics.exposureLabel}</span>
+                <span className={`ml-auto text-sm font-semibold ${exposureFgCls}`}>{metrics.exposureLabel}</span>
               </div>
               <p className="text-[12px] text-[#6B7280] mt-3 leading-relaxed">
                 Score pondéré par la fréquence d&apos;usage. Plus tu utilises un produit pénalisant, plus
                 il pèse dans le total.
               </p>
             </div>
-            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5">
+            <div className={`${GLASS_CARD} p-5`}>
               <div className="text-[11px] uppercase tracking-wide text-[#6B7280] mb-1">Produits actifs</div>
               <div className="text-3xl font-bold">{products.length}</div>
               <p className="text-[11px] text-[#9CA3AF] mt-1">
                 {metrics.totalUseUnits.toFixed(1)} unités d&apos;usage / jour
               </p>
             </div>
-            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5">
+            <div className={`${GLASS_CARD} p-5`}>
               <div className="text-[11px] uppercase tracking-wide text-[#6B7280] mb-1">Catégories pénalisantes</div>
               <div className="text-3xl font-bold">{metrics.tagExposure.length}</div>
               <p className="text-[11px] text-[#9CA3AF] mt-1">tags cumulés détectés</p>
@@ -114,7 +132,7 @@ export default async function RoutinePage() {
 
           {/* Allergen overlap warning */}
           {metrics.allergenOverlap.length > 0 && (
-            <section className="rounded-2xl bg-amber-50 ring-1 ring-amber-200 p-4 mb-6">
+            <section className={`${GLASS_CARD_AMBER} p-4 mb-6`}>
               <h2 className="text-sm font-semibold text-amber-900 mb-2">
                 ⚠️ Allergènes parfumants en doublon
               </h2>
@@ -125,7 +143,7 @@ export default async function RoutinePage() {
                 {metrics.allergenOverlap.map((a) => (
                   <li
                     key={a.inciName}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-white text-amber-800 text-[12px] font-medium px-2.5 py-1 ring-1 ring-amber-200"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-white/70 backdrop-blur-md text-amber-800 text-[12px] font-medium px-2.5 py-1 ring-1 ring-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]"
                   >
                     {a.label}
                     <span className="text-amber-600 text-[10px]">×{a.productCount}</span>
@@ -137,7 +155,7 @@ export default async function RoutinePage() {
 
           {/* Top problematic ingredients across the whole routine */}
           {metrics.topIngredients.length > 0 && (
-            <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 mb-6">
+            <section className={`${GLASS_CARD} p-5 mb-6`}>
               <h2 className="text-[15px] font-semibold mb-3">
                 Ingrédients à surveiller dans ta routine
               </h2>
@@ -179,7 +197,7 @@ export default async function RoutinePage() {
 
           {/* Tag exposure (heat map) */}
           {metrics.tagExposure.length > 0 && (
-            <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 mb-6">
+            <section className={`${GLASS_CARD} p-5 mb-6`}>
               <h2 className="text-[15px] font-semibold mb-2">Exposition par catégorie</h2>
               <p className="text-[12px] text-[#6B7280] mb-4">
                 Combien de fois par jour tu rencontres chaque famille d&apos;ingrédients.
@@ -198,14 +216,14 @@ export default async function RoutinePage() {
           )}
 
           {/* Simulation: what-if I remove the worst */}
-          <section className="rounded-2xl bg-[#FFF1F2] p-5 mb-6">
+          <section className={`${GLASS_CARD_ROSE} p-5 mb-6`}>
             <h2 className="text-[15px] font-semibold mb-2 text-[#9F1239]">Simulation</h2>
             <p className="text-[13px] text-[#9F1239] mb-4 leading-relaxed">
               Si tu retirais les produits les plus pénalisants, voici comment ton score évoluerait :
             </p>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {metrics.simulation.minus1.removedName && (
-                <div className="rounded-xl bg-white p-4">
+                <div className="rounded-2xl bg-white/70 ring-1 ring-white/80 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] p-4">
                   <div className="text-[11px] uppercase tracking-wide text-[#6B7280] mb-1">Sans le pire</div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-bold">{metrics.simulation.minus1.exposureScore}</span>
@@ -220,7 +238,7 @@ export default async function RoutinePage() {
                 </div>
               )}
               {metrics.simulation.minus2.removedNames.length === 2 && (
-                <div className="rounded-xl bg-white p-4">
+                <div className="rounded-2xl bg-white/70 ring-1 ring-white/80 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] p-4">
                   <div className="text-[11px] uppercase tracking-wide text-[#6B7280] mb-1">Sans les 2 pires</div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-bold">{metrics.simulation.minus2.exposureScore}</span>
@@ -241,7 +259,7 @@ export default async function RoutinePage() {
           <RoutineSuggestions metrics={metrics} products={products} />
 
           {/* Products list with frequency selector */}
-          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5">
+          <section className={`${GLASS_CARD} p-5`}>
             <h2 className="text-[15px] font-semibold mb-4">Mes produits</h2>
             <ul className="divide-y divide-[#F0F0F0]">
               {items

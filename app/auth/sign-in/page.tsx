@@ -5,9 +5,23 @@ import { SignInForm } from "@/components/auth/SignInForm";
 
 export const metadata = { title: "Se connecter · Cosme Check" };
 
-export default async function SignInPage() {
+type Props = {
+  searchParams?: Promise<{ next?: string }>;
+};
+
+function safeNext(value: string | undefined): string {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/";
+  return value;
+}
+
+export default async function SignInPage({ searchParams }: Props) {
+  const params = searchParams ? await searchParams : undefined;
+  const next = safeNext(params?.next);
+
   const user = await getUser();
-  if (user) redirect("/");
+  if (user) redirect(next);
+
+  const signUpHref = next === "/" ? "/auth/sign-up" : `/auth/sign-up?next=${encodeURIComponent(next)}`;
 
   return (
     <main className="min-h-svh flex items-center justify-center px-5 py-10 bg-[#FAFAFA]">
@@ -20,11 +34,11 @@ export default async function SignInPage() {
           </h1>
         </div>
 
-        <SignInForm />
+        <SignInForm next={next} />
 
         <p className="mt-6 text-center text-sm text-[#6B7280]">
           Pas encore de compte ?{" "}
-          <Link href="/auth/sign-up" className="text-[#F43F5E] font-medium hover:underline">
+          <Link href={signUpHref} className="text-[#F43F5E] font-medium hover:underline">
             S&apos;inscrire
           </Link>
         </p>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
 
 type Step = "capture" | "processing" | "review" | "error";
 
@@ -203,7 +204,7 @@ export function PhotoOcrFlow() {
                 setText("");
                 setUncertain([]);
               }}
-              className="flex-1 rounded-xl border border-[#E5E7EB] py-3 text-sm font-medium"
+              className={`${GLASS_PILL} flex-1 py-3 text-sm font-medium`}
             >
               Reprendre
             </button>
@@ -211,7 +212,7 @@ export function PhotoOcrFlow() {
               type="button"
               onClick={analyse}
               disabled={text.trim().length === 0}
-              className="flex-1 rounded-xl bg-[#111111] text-white py-3 text-sm font-semibold disabled:opacity-40"
+              className={`${GLASS_PILL_DARK} flex-1 py-3 text-sm font-semibold disabled:opacity-40`}
             >
               Analyser cette liste
             </button>

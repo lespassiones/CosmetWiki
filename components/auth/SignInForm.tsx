@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { signIn } from "@/app/auth/actions";
 
-export function SignInForm() {
+export function SignInForm({ next = "/" }: { next?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [showPwd, setShowPwd] = useState(false);
@@ -19,6 +19,7 @@ export function SignInForm() {
       }}
       className="space-y-4"
     >
+      <input type="hidden" name="next" value={next} />
       <label className="block">
         <span className="text-xs font-medium text-[#6B7280] mb-1.5 block">Email</span>
         <input

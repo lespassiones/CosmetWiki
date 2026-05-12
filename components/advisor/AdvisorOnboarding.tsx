@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { saveSkinProfile } from "@/app/advisor/actions";
+import { GLASS_PILL_DARK } from "@/lib/ui/glass";
 import {
   SKIN_CONCERN_LABEL,
   SKIN_CONCERNS,
@@ -130,7 +131,7 @@ export function AdvisorOnboarding({ initial }: { initial?: SkinProfile }) {
         type="button"
         onClick={submit}
         disabled={pending}
-        className="w-full rounded-xl bg-[#111111] text-white text-sm font-semibold py-3 hover:brightness-110 transition disabled:opacity-50"
+        className={`${GLASS_PILL_DARK} w-full text-sm font-semibold py-3 disabled:opacity-50`}
       >
         {pending ? "Enregistrement…" : "Enregistrer mon profil"}
       </button>

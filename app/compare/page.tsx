@@ -5,6 +5,7 @@ import { getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { compareAnalyses, type CompareSide } from "@/lib/routine/compare";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
+import { GLASS_CARD } from "@/lib/ui/glass";
 
 export const metadata = { title: "Comparer · Cosme Check" };
 export const dynamic = "force-dynamic";
@@ -138,7 +139,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
       </div>
 
       {/* Differences */}
-      <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 mb-4">
+      <section className={`${GLASS_CARD} p-5 mb-4`}>
         <h2 className="text-[15px] font-semibold mb-3">Différences clés</h2>
         <ul className="space-y-2 text-[14px] leading-relaxed">
           {diff.insights.map((ins, i) => (
@@ -173,7 +174,7 @@ function UniqueList({
   items: { name: string; slug: string | null; colorRating: string | null }[];
 }) {
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5">
+    <section className={`${GLASS_CARD} p-5`}>
       <h3 className="text-[14px] font-semibold mb-3">{title}</h3>
       {items.length === 0 ? (
         <p className="text-[12px] text-[#6B7280]">Aucun ingrédient pénalisant exclusif.</p>

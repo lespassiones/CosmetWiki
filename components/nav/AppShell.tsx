@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { BackgroundGlow } from "../BackgroundGlow";
 import { ScanSheet } from "./ScanSheet";
 import { CameraIcon, ClockIcon, HomeIcon, LayersIcon, UserIcon } from "./NavIcons";
 
@@ -31,8 +32,17 @@ export function AppShell({
   const hidden = hideOnPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   if (hidden) return <>{children}</>;
 
+  // Logged-out visitors get a chrome-less shell — the public home page renders
+  // its own header / footer and gating happens via the search bar.
+  if (!signedIn) return <>{children}</>;
+
   return (
-    <div className="min-h-svh bg-[#FAFAFA]">
+    <div className="relative isolate min-h-svh bg-[#FAFAFA] overflow-x-hidden">
+      {/* Pastel orbs behind everything — gives the glass surfaces something to
+          refract and ties the signed-in pages to the public landing visual
+          language. */}
+      <BackgroundGlow />
+
       {/* Desktop sidebar */}
       <DesktopSidebar
         pathname={pathname}
@@ -63,20 +73,20 @@ function MobileBottomNav({ pathname, onScanClick }: { pathname: string; onScanCl
       aria-label="Navigation principale"
     >
       <div className="relative mx-auto max-w-md pointer-events-auto">
-        {/* The glass pill itself */}
-        <div className="relative flex items-end justify-between rounded-full bg-gradient-to-b from-[#EAF6F1]/85 to-[#D6EFE4]/75 backdrop-blur-2xl ring-1 ring-white/60 shadow-[0_10px_30px_-12px_rgba(15,72,55,0.25),inset_0_1px_0_rgba(255,255,255,0.65)] px-3 py-1.5">
+        {/* The glass pill itself — rose/pink tint to match the site palette */}
+        <div className="relative flex items-end justify-between rounded-full bg-gradient-to-b from-[#FFE4E6]/85 to-[#FFD1DC]/75 backdrop-blur-2xl ring-1 ring-white/70 shadow-[0_10px_30px_-12px_rgba(244,63,94,0.25),inset_0_1px_0_rgba(255,255,255,0.75)] px-3 py-1.5">
           <NavBtnMobile href="/" label="Accueil" icon={HomeIcon} active={pathname === "/"} />
           <NavBtnMobile href="/routine" label="Routine" icon={LayersIcon} active={pathname.startsWith("/routine")} />
           <div className="w-14 h-14" aria-hidden />
           <NavBtnMobile href="/history" label="Historique" icon={ClockIcon} active={pathname.startsWith("/history")} />
           <NavBtnMobile href="/profile" label="Profil" icon={UserIcon} active={pathname.startsWith("/profile")} />
         </div>
-        {/* Center FAB — pastel mint with a frosted ring and inner highlight */}
+        {/* Center FAB — rose gradient matching the "Installer l'app" CTA */}
         <button
           type="button"
           onClick={onScanClick}
           aria-label="Ouvrir le menu d'analyse"
-          className="absolute left-1/2 -translate-x-1/2 -top-5 w-14 h-14 rounded-full bg-gradient-to-br from-[#5FBFA0] to-[#2FA37A] text-white flex items-center justify-center transition active:scale-95 hover:brightness-105 ring-4 ring-white/70 shadow-[0_8px_22px_-6px_rgba(47,163,122,0.55),inset_0_1px_0_rgba(255,255,255,0.55)]"
+          className="absolute left-1/2 -translate-x-1/2 -top-5 w-14 h-14 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 text-white flex items-center justify-center transition active:scale-95 hover:brightness-105 ring-4 ring-white/70 shadow-[0_8px_22px_-6px_rgba(244,63,94,0.55),inset_0_1px_0_rgba(255,255,255,0.55)]"
         >
           <CameraIcon className="h-6 w-6 drop-shadow-sm" />
         </button>
@@ -102,7 +112,7 @@ function NavBtnMobile({
       href={href}
       aria-current={active ? "page" : undefined}
       className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 w-14 text-[10px] font-medium transition ${
-        active ? "text-[#1F8A6A]" : "text-[#4B5563]"
+        active ? "text-[#F43F5E]" : "text-[#4B5563]"
       }`}
     >
       {active && (
@@ -130,7 +140,7 @@ function DesktopSidebar({
 }) {
   return (
     <aside
-      className="hidden lg:flex fixed left-0 top-0 w-60 h-screen flex-col bg-white border-r border-[#E5E7EB] p-5"
+      className="hidden lg:flex fixed left-0 top-0 w-60 h-screen flex-col bg-white/60 backdrop-blur-2xl backdrop-saturate-150 ring-1 ring-white/70 shadow-[8px_0_30px_-12px_rgba(15,23,42,0.10),inset_-1px_0_0_rgba(255,255,255,0.65)] p-5"
       aria-label="Navigation latérale"
     >
       <Link href="/" className="flex items-center gap-2 mb-8">
@@ -149,7 +159,7 @@ function DesktopSidebar({
       <button
         type="button"
         onClick={onScanClick}
-        className="flex items-center gap-2 justify-center bg-[#111111] hover:brightness-110 text-white rounded-xl py-3 text-sm font-semibold mb-6"
+        className="flex items-center gap-2 justify-center rounded-full bg-gradient-to-br from-[#1F2937] via-[#111111] to-[#0A0A0A] text-white py-3 text-sm font-semibold mb-6 ring-1 ring-white/[0.08] shadow-[0_14px_30px_-12px_rgba(15,23,42,0.45),inset_0_1px_0_rgba(255,255,255,0.10),inset_0_-1px_0_rgba(0,0,0,0.30)] hover:brightness-110 transition"
       >
         <CameraIcon className="h-4 w-4" />
         Analyser un produit
@@ -162,12 +172,12 @@ function DesktopSidebar({
             <li key={href}>
               <Link
                 href={href}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition"
-                style={{
-                  color: active ? "#111111" : "#6B7280",
-                  background: active ? "#F0F0F0" : "transparent",
-                  fontWeight: active ? 600 : 500,
-                }}
+                aria-current={active ? "page" : undefined}
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm transition ${
+                  active
+                    ? "bg-white/85 text-[#111111] font-semibold ring-1 ring-white/90 shadow-[0_4px_14px_-4px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.95)]"
+                    : "text-[#6B7280] font-medium hover:text-[#111111] hover:bg-white/55"
+                }`}
               >
                 <Icon className="h-5 w-5" />
                 {label}
@@ -177,10 +187,10 @@ function DesktopSidebar({
         })}
       </ul>
 
-      <div className="mt-auto pt-6 border-t border-[#E5E7EB]">
+      <div className="mt-auto pt-6 border-t border-white/60">
         {signedIn ? (
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-[#111111] text-white flex items-center justify-center text-xs font-semibold">
+          <div className="flex items-center gap-3 rounded-full bg-white/55 ring-1 ring-white/80 backdrop-blur-xl shadow-[0_8px_22px_-8px_rgba(15,23,42,0.14),inset_0_1px_0_rgba(255,255,255,0.9)] px-2.5 py-2">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#1F2937] to-[#0A0A0A] text-white flex items-center justify-center text-xs font-semibold ring-1 ring-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]">
               {(firstName ?? "U").slice(0, 1).toUpperCase()}
             </div>
             <div className="min-w-0">
@@ -194,7 +204,7 @@ function DesktopSidebar({
           <div className="space-y-2">
             <Link
               href="/auth/sign-in"
-              className="block text-center text-sm font-medium border border-[#E5E7EB] rounded-xl py-2 hover:border-[#111111] transition"
+              className="block text-center text-sm font-semibold rounded-full bg-white/65 ring-1 ring-white/80 backdrop-blur-xl shadow-[0_8px_22px_-8px_rgba(15,23,42,0.14),inset_0_1px_0_rgba(255,255,255,0.9)] py-2 hover:bg-white/85 transition"
             >
               Se connecter
             </Link>

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SearchBar } from "./SearchBar";
 import { ProcessingOverlay, randomProcessingTotal } from "./ProcessingOverlay";
@@ -76,7 +77,8 @@ function clearCache() {
 export function HomeShell({
   initialInci = "",
   initialMode,
-}: { initialInci?: string; initialMode?: Mode }) {
+  signedIn = true,
+}: { initialInci?: string; initialMode?: Mode; signedIn?: boolean }) {
   const [mode, setMode] = useState<Mode>(initialMode ?? "inci");
   const [result, setResult] = useState<AnalyseResponse | null>(null);
   const [originalText, setOriginalText] = useState("");
@@ -249,6 +251,14 @@ export function HomeShell({
     return null;
   }
 
+  // Signed-in users see the dashboard at the top of /; the hero/search zone is
+  // a guest-only landing element. We still mount HomeShell so the ?inci= flow
+  // (paste → analyse) keeps working — processing overlay is fixed-position and
+  // the result view renders below — but we render nothing when idle.
+  if (signedIn && !result) {
+    return null;
+  }
+
   if (result) {
     return (
       <main className="mx-auto w-full max-w-6xl flex-1 px-6 pb-16">
@@ -336,7 +346,9 @@ export function HomeShell({
           {mode === "inci" ? (
             <>
               <div className="mt-5">
-                <SearchBar autoFocus size="lg" onAnalyseList={runAnalyse} />
+                <AuthGate signedIn={signedIn}>
+                  <SearchBar autoFocus={signedIn} size="lg" onAnalyseList={runAnalyse} />
+                </AuthGate>
               </div>
               <p className="mt-3 text-[13px] text-ink-subtle">
                 Tape un ingrédient pour sa fiche, ou colle une liste pour
@@ -345,18 +357,22 @@ export function HomeShell({
             </>
           ) : mode === "product" ? (
             <div className="mt-5">
-              <ProductSearchInput
-                onFound={handleProductFound}
-                onFallbackToManual={handleFallbackToManual}
-              />
+              <AuthGate signedIn={signedIn}>
+                <ProductSearchInput
+                  onFound={handleProductFound}
+                  onFallbackToManual={handleFallbackToManual}
+                />
+              </AuthGate>
             </div>
           ) : (
             <div className="mt-5">
-              <BarcodeScannerInput
-                onFound={handleProductFound}
-                onFallbackToManual={() => setMode("inci")}
-                onFallbackToProductSearch={() => setMode("product")}
-              />
+              <AuthGate signedIn={signedIn}>
+                <BarcodeScannerInput
+                  onFound={handleProductFound}
+                  onFallbackToManual={() => setMode("inci")}
+                  onFallbackToProductSearch={() => setMode("product")}
+                />
+              </AuthGate>
             </div>
           )}
         </div>
@@ -370,6 +386,33 @@ export function HomeShell({
         <Legend />
       </section>
     </main>
+  );
+}
+
+function AuthGate({
+  signedIn,
+  children,
+}: {
+  signedIn: boolean;
+  children: React.ReactNode;
+}) {
+  if (signedIn) return <>{children}</>;
+  // Block all interaction with the inner input — every click anywhere on top
+  // of it bubbles up to the overlay link, which sends the user to sign-in
+  // with ?next pointing back to the home page so they land back here after
+  // authenticating.
+  const href = `/auth/sign-in?next=${encodeURIComponent("/")}`;
+  return (
+    <div className="relative">
+      <div aria-hidden tabIndex={-1} className="pointer-events-none select-none">
+        {children}
+      </div>
+      <Link
+        href={href}
+        aria-label="Connecte-toi pour analyser un produit"
+        className="absolute inset-0 z-20 rounded-[28px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/60"
+      />
+    </div>
   );
 }
 

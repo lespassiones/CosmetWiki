@@ -1,6 +1,7 @@
 "use client";
 
 import type { ColorRating } from "@/lib/supabase";
+import { GLASS_CARD } from "@/lib/ui/glass";
 
 const COLOR_MAP: Record<NonNullable<ColorRating>, string> = {
   Vert: "#10B981",
@@ -35,7 +36,7 @@ export function IngredientSpectrum({
   return (
     <section
       aria-label="Spectre des premiers ingrédients"
-      className="rounded-2xl border border-[#E5E7EB] bg-white p-5"
+      className={`${GLASS_CARD} p-5`}
     >
       <div className="mb-3">
         <h3 className="text-[15px] font-semibold">Spectre top 5</h3>

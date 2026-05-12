@@ -1,4 +1,10 @@
 import Link from "next/link";
+import {
+  GLASS_CARD,
+  GLASS_CARD_DARK,
+  GLASS_CARD_HOVER,
+  GLASS_CARD_ROSE,
+} from "@/lib/ui/glass";
 
 export type DashboardData = {
   firstName: string | null;
@@ -19,15 +25,6 @@ export type DashboardData = {
     translation_fr: string | null;
   }[];
 };
-
-const CATEGORIES = [
-  { emoji: "🧴", label: "Crème visage", q: "crème visage" },
-  { emoji: "🧼", label: "Shampooing", q: "shampooing" },
-  { emoji: "☀️", label: "Solaire", q: "solaire" },
-  { emoji: "💄", label: "Maquillage", q: "maquillage" },
-  { emoji: "🧴", label: "Corps", q: "corps" },
-  { emoji: "👶", label: "Bébé", q: "bébé" },
-];
 
 const RATING_COLOR: Record<NonNullable<DashboardData["trendingIngredients"][number]["color_rating"]>, string> = {
   Vert: "#10B981",
@@ -68,7 +65,7 @@ export function HomeDashboard({ data }: { data: DashboardData }) {
 
       <Link
         href="/advisor"
-        className="mt-4 block rounded-2xl bg-gradient-to-r from-[#111111] to-[#1F2937] text-white p-5 hover:brightness-110 transition group"
+        className={`mt-4 block ${GLASS_CARD_DARK} p-5 transition group`}
       >
         <div className="flex items-center gap-4">
           <span aria-hidden className="text-2xl">✨</span>
@@ -82,8 +79,7 @@ export function HomeDashboard({ data }: { data: DashboardData }) {
         </div>
       </Link>
 
-      <div className="mt-4 grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-4">
-        <CategoriesCard />
+      <div className="mt-4">
         <TrendingCard items={data.trendingIngredients} />
       </div>
     </section>
@@ -93,7 +89,7 @@ export function HomeDashboard({ data }: { data: DashboardData }) {
 function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
   if (!last) {
     return (
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5">
+      <div className={`${GLASS_CARD} p-5`}>
         <div className="text-[11px] text-[#6B7280] uppercase tracking-wide">Dernière analyse</div>
         <div className="mt-2 text-sm text-[#6B7280]">
           Aucune analyse pour le moment. Lance ta première analyse via le bouton scan.
@@ -106,7 +102,7 @@ function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
   return (
     <Link
       href={`/history/${last.id}`}
-      className="block rounded-2xl border border-[#E5E7EB] bg-white p-5 hover:border-[#111111] transition"
+      className={`block ${GLASS_CARD} ${GLASS_CARD_HOVER} p-5 transition`}
     >
       <div className="flex items-center justify-between">
         <div className="text-[11px] text-[#6B7280] uppercase tracking-wide">Dernière analyse</div>
@@ -133,7 +129,7 @@ function RoutineCard({ count, avgScore }: { count: number; avgScore: number | nu
     return (
       <Link
         href="/routine"
-        className="block rounded-2xl border border-[#E5E7EB] bg-white p-5 hover:border-[#111111] transition"
+        className={`block ${GLASS_CARD} ${GLASS_CARD_HOVER} p-5 transition`}
       >
         <div className="text-[11px] text-[#6B7280] uppercase tracking-wide">Ta routine</div>
         <div className="mt-3 text-sm text-[#6B7280]">
@@ -147,7 +143,7 @@ function RoutineCard({ count, avgScore }: { count: number; avgScore: number | nu
   return (
     <Link
       href="/routine"
-      className="block rounded-2xl border border-[#E5E7EB] bg-white p-5 hover:border-[#111111] transition"
+      className={`block ${GLASS_CARD} ${GLASS_CARD_HOVER} p-5 transition`}
     >
       <div className="flex items-center justify-between">
         <div className="text-[11px] text-[#6B7280] uppercase tracking-wide">Ta routine</div>
@@ -173,7 +169,7 @@ function RoutineCard({ count, avgScore }: { count: number; avgScore: number | nu
 
 function TipCard({ text }: { text: string }) {
   return (
-    <div className="mt-4 rounded-2xl bg-[#FFF1F2] p-4 lg:p-5 flex items-start gap-3">
+    <div className={`mt-4 ${GLASS_CARD_ROSE} p-4 lg:p-5 flex items-start gap-3`}>
       <div className="text-xl shrink-0" aria-hidden>💡</div>
       <div>
         <div className="text-[11px] uppercase tracking-wide text-[#F43F5E] font-semibold">Astuce du jour</div>
@@ -183,30 +179,9 @@ function TipCard({ text }: { text: string }) {
   );
 }
 
-function CategoriesCard() {
-  return (
-    <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5">
-      <h2 className="text-[15px] font-semibold mb-3">Catégories populaires</h2>
-      <ul className="grid grid-cols-2 gap-2">
-        {CATEGORIES.map((c) => (
-          <li key={c.label}>
-            <Link
-              href={`/?mode=search&q=${encodeURIComponent(c.q)}`}
-              className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] px-3 py-2.5 text-sm hover:border-[#111111] transition"
-            >
-              <span aria-hidden className="text-base">{c.emoji}</span>
-              <span className="font-medium">{c.label}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 function TrendingCard({ items }: { items: DashboardData["trendingIngredients"] }) {
   return (
-    <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5">
+    <div className={`${GLASS_CARD} p-5`}>
       <h2 className="text-[15px] font-semibold mb-3">Ingrédients tendance cette semaine</h2>
       {items.length === 0 ? (
         <p className="text-sm text-[#6B7280]">Pas encore de tendance — reviens bientôt.</p>

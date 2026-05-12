@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addToRoutine } from "@/app/routine/actions";
+import { GLASS_PILL } from "@/lib/ui/glass";
 
 export function AddToRoutineButton({
   analysisId,
@@ -41,7 +42,7 @@ export function AddToRoutineButton({
       type="button"
       onClick={add}
       disabled={pending}
-      className="inline-flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-white text-[12px] font-medium px-2.5 py-1 hover:border-[#111111] transition disabled:opacity-50"
+      className={`${GLASS_PILL} inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-1 disabled:opacity-50`}
     >
       <span aria-hidden>＋</span>
       {pending ? "Ajout…" : "Ajouter à ma routine"}

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { renameAnalysis, deleteAnalysis } from "@/app/history/actions";
+import { GLASS_CARD, GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
 
 export function HistoryItemActions({ id, currentName }: { id: string; currentName: string }) {
   const [open, setOpen] = useState(false);
@@ -40,7 +41,7 @@ export function HistoryItemActions({ id, currentName }: { id: string; currentNam
         type="button"
         onClick={() => setOpen((s) => !s)}
         aria-label="Plus d'actions"
-        className="h-9 w-9 rounded-full border border-[#E5E7EB] bg-white hover:border-[#111111] inline-flex items-center justify-center"
+        className={`${GLASS_PILL} h-9 w-9 inline-flex items-center justify-center`}
       >
         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
           <circle cx="5" cy="12" r="1.6" />
@@ -51,7 +52,7 @@ export function HistoryItemActions({ id, currentName }: { id: string; currentNam
 
       {open && (
         <div
-          className="absolute right-0 top-11 z-30 w-64 rounded-2xl border border-[#E5E7EB] bg-white shadow-lg p-2"
+          className={`${GLASS_CARD} absolute right-0 top-11 z-30 w-64 p-2`}
           onMouseLeave={() => !editing && setOpen(false)}
         >
           {editing ? (
@@ -74,7 +75,7 @@ export function HistoryItemActions({ id, currentName }: { id: string; currentNam
                   type="button"
                   onClick={save}
                   disabled={pending}
-                  className="flex-1 rounded-lg bg-[#111111] text-white text-xs font-semibold py-2 disabled:opacity-50"
+                  className={`${GLASS_PILL_DARK} flex-1 text-xs font-semibold py-2 disabled:opacity-50`}
                 >
                   Enregistrer
                 </button>
@@ -84,7 +85,7 @@ export function HistoryItemActions({ id, currentName }: { id: string; currentNam
                     setName(currentName);
                     setEditing(false);
                   }}
-                  className="rounded-lg border border-[#E5E7EB] px-3 text-xs"
+                  className={`${GLASS_PILL} px-3 text-xs`}
                 >
                   Annuler
                 </button>
