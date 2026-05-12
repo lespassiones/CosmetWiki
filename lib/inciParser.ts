@@ -31,6 +31,27 @@ function stripAccents(s: string): string {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
+// Detects content INSIDE parentheses that looks like an ingredient alias
+// (Water / Eau, Tocopherol, INCI:Aqua, etc.). Heuristic: short content
+// without weasel words and without slashes pointing to non-ingredient text.
+// If matched, we DROP the parenthesized content entirely (it's just a
+// translation/synonym of the principal name placed before).
+const PAREN_ALIAS_RE = /\(([^()]{1,60})\)/g;
+
+function looksLikeAliasContent(inner: string): boolean {
+  const trimmed = inner.trim();
+  if (!trimmed) return false;
+  // Reject anything that looks like a sentence fragment (long sentences are
+  // handled by the > 60 chars pattern below anyway).
+  if (/[.;:!?]/.test(trimmed)) return false;
+  // Reject batch/CI codes — those are kept as part of the principal name.
+  if (/^CI\s*\d/i.test(trimmed)) return false;
+  if (/^\d/.test(trimmed)) return false;
+  // Accept tokens or token-lists separated by "/", "," or whitespace.
+  // ex: "WATER", "Water / Eau", "Tocopherol", "INCI Aqua"
+  return /^[a-zA-ZÀ-ÿ\s/,'-]+$/.test(trimmed);
+}
+
 export function parseInciList(text: string): ParsedToken[] {
   if (!text) return [];
 
@@ -40,6 +61,12 @@ export function parseInciList(text: string): ParsedToken[] {
   for (const re of NOISE_PATTERNS) {
     work = work.replace(re, " ");
   }
+  // Drop parenthesized aliases like "(Water / Eau)" right after a token —
+  // we keep only the principal INCI name. This avoids "Aqua, Water, Eau"
+  // being parsed as 3 separate ingredients.
+  work = work.replace(PAREN_ALIAS_RE, (_match, inner: string) =>
+    looksLikeAliasContent(inner) ? " " : `(${inner})`,
+  );
   // Drop parenthesized notes like "(en français)" but keep things like
   // "(i)", "(ii)" by collapsing them
   work = work.replace(/\([^)]{20,}\)/g, " ");

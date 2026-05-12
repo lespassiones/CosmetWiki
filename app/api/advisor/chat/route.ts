@@ -1,0 +1,202 @@
+import { NextRequest } from "next/server";
+import { cookies } from "next/headers";
+import { supabaseServer } from "@/lib/supabase";
+import { openai, hasOpenAI, logAI } from "@/lib/ai/client";
+import { readSkinProfile, SKIN_CONCERN_LABEL, SKIN_TYPE_LABEL } from "@/lib/skin/profile";
+import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import type { AnalyseResponse } from "@/lib/analyseTypes";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+const MODEL = "gpt-4o-mini";
+const MAX_MESSAGES_PER_DAY = 30;
+
+type ChatMessage = { role: "user" | "assistant"; content: string };
+
+export async function POST(req: NextRequest) {
+  const ip = getClientIp(req.headers);
+  // Hard per-IP rate limit to keep the cost bounded.
+  const rl = checkRateLimit(ip, 12, 60_000);
+  if (!rl.ok) {
+    return new Response(
+      JSON.stringify({ error: "Trop de messages récents. Patiente une minute." }),
+      { status: 429, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  if (!hasOpenAI()) {
+    return new Response(
+      JSON.stringify({ error: "Assistant indisponible pour le moment." }),
+      { status: 503, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  let body: { messages?: unknown };
+  try {
+    body = (await req.json()) as { messages?: unknown };
+  } catch {
+    return new Response(JSON.stringify({ error: "Invalid body" }), { status: 400 });
+  }
+
+  const raw = Array.isArray(body.messages) ? body.messages : [];
+  const messages: ChatMessage[] = raw
+    .filter((m): m is { role: string; content: string } =>
+      typeof m === "object"
+      && m !== null
+      && typeof (m as { role?: unknown }).role === "string"
+      && typeof (m as { content?: unknown }).content === "string",
+    )
+    .map<ChatMessage>((m) => ({
+      role: m.role === "assistant" ? "assistant" : "user",
+      content: m.content.slice(0, 2000),
+    }))
+    .slice(-12);   // keep last 12 turns max
+  if (messages.length === 0) {
+    return new Response(JSON.stringify({ error: "Pas de message" }), { status: 400 });
+  }
+
+  const cookieStore = await cookies();
+  const sb = supabaseServer(cookieStore);
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) {
+    return new Response(JSON.stringify({ error: "Non connecté." }), { status: 401 });
+  }
+
+  // Daily per-user cap on advisor usage to keep cost predictable.
+  const since = new Date();
+  since.setHours(0, 0, 0, 0);
+  const { count: usedToday } = await sb
+    .schema("cosmetwiki")
+    .from("ai_logs")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("feature", "synthesis")    // we'll log advisor under "synthesis" feature for now
+    .gte("created_at", since.toISOString());
+  if ((usedToday ?? 0) > MAX_MESSAGES_PER_DAY) {
+    return new Response(
+      JSON.stringify({ error: `Limite quotidienne atteinte (${MAX_MESSAGES_PER_DAY}/jour). À demain !` }),
+      { status: 429, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  // Pull the user's skin profile + a compact routine summary.
+  const { data: profileRow } = await sb
+    .schema("cosmetwiki")
+    .from("user_profiles")
+    .select("first_name, preferences")
+    .eq("id", user.id)
+    .maybeSingle();
+  const skin = readSkinProfile((profileRow?.preferences ?? null) as Record<string, unknown> | null);
+
+  const { data: routineRows } = await sb
+    .schema("cosmetwiki")
+    .from("routine_items")
+    .select("frequency, analyses(name, product_label, score, result_json)");
+  const routineFacts = ((routineRows ?? []) as unknown as {
+    frequency: string;
+    analyses: { name: string | null; product_label: string | null; score: number | null; result_json: AnalyseResponse } | null;
+  }[])
+    .filter((r) => r.analyses)
+    .slice(0, 12)
+    .map((r) => {
+      const tags = new Set<string>();
+      for (const it of r.analyses!.result_json.items) {
+        for (const t of it.tags ?? []) tags.add(t);
+      }
+      return {
+        name: r.analyses!.product_label ?? r.analyses!.name ?? "Analyse",
+        score: r.analyses!.score,
+        frequency: r.frequency,
+        tags: Array.from(tags).slice(0, 6),
+      };
+    });
+
+  const profileSummary = [
+    skin.skinType ? `Type de peau : ${SKIN_TYPE_LABEL[skin.skinType]}` : "Type de peau : non renseigné",
+    skin.concerns && skin.concerns.length > 0
+      ? `Préoccupations : ${skin.concerns.map((c) => SKIN_CONCERN_LABEL[c]).join(", ")}`
+      : "Préoccupations : non renseignées",
+    skin.allergiesFreeform
+      ? `Allergies / intolérances : ${skin.allergiesFreeform}`
+      : "",
+  ].filter(Boolean).join("\n");
+
+  const routineSummary = routineFacts.length === 0
+    ? "Routine : (aucune)"
+    : "Routine :\n" + routineFacts
+        .map((r) => `- ${r.name} (${r.score?.toFixed(1) ?? "?"}/20, ${r.frequency}, tags: ${r.tags.join(", ") || "—"})`)
+        .join("\n");
+
+  const system = `Tu es un assistant cosmétique factuel pour CosmetWiki. Tu réponds à un consommateur français à partir de FAITS et UNIQUEMENT à partir de faits. RÈGLES STRICTES :
+- AUCUN conseil médical, AUCUN diagnostic, AUCUNE mention de marque.
+- Si la question relève du soin médical (acné sévère, rosacée diagnostiquée, eczéma…), oriente vers un dermatologue.
+- Tu peux mentionner des ingrédients (par leur nom INCI) connus pour une catégorie (ex. niacinamide, acide salicylique, panthénol) mais sans recommander un produit précis.
+- Tu cites les FAITS PERSONNELS de l'utilisateur (type de peau, routine actuelle) si pertinents, en restant factuel.
+- Style : phrases courtes, ton calme, pas d'emoji, pas de marketing.
+- Si la question n'a rien à voir avec la cosmétique, redirige poliment.
+
+CONTEXTE UTILISATEUR :
+${profileSummary}
+
+${routineSummary}`;
+
+  const t0 = Date.now();
+  let totalIn = 0;
+  let totalOut = 0;
+
+  // Streaming SSE-like response. We emit chunks of text separated by newlines
+  // and a final "[DONE]" line. The client parses incrementally.
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        const enc = new TextEncoder();
+        const completion = await openai().chat.completions.create({
+          model: MODEL,
+          temperature: 0.4,
+          max_tokens: 600,
+          stream: true,
+          messages: [{ role: "system", content: system }, ...messages],
+        });
+        for await (const part of completion) {
+          const delta = part.choices?.[0]?.delta?.content;
+          if (delta) {
+            controller.enqueue(enc.encode(delta));
+          }
+          const usage = (part as unknown as { usage?: { prompt_tokens?: number; completion_tokens?: number } }).usage;
+          if (usage) {
+            totalIn = usage.prompt_tokens ?? 0;
+            totalOut = usage.completion_tokens ?? 0;
+          }
+        }
+        controller.close();
+        logAI({
+          feature: "synthesis",
+          provider: "openai",
+          status: "success",
+          tokens_in: totalIn,
+          tokens_out: totalOut,
+          duration_ms: Date.now() - t0,
+          user_id: user.id,
+        });
+      } catch (err) {
+        logAI({
+          feature: "synthesis",
+          provider: "openai",
+          status: "error",
+          duration_ms: Date.now() - t0,
+          user_id: user.id,
+        });
+        controller.error(err);
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "X-Accel-Buffering": "no",
+    },
+  });
+}

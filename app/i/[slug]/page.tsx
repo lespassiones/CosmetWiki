@@ -8,6 +8,7 @@ import { SearchTrigger } from "@/components/SearchTrigger";
 import { ProductRow } from "@/components/ProductRow";
 import { MobileMenu } from "@/components/MobileMenu";
 import { Reveal } from "@/components/Reveal";
+import { ExplainIngredient } from "@/components/ingredient/ExplainIngredient";
 import { SITE_URL } from "@/lib/siteUrl";
 import {
   supabaseAnon,
@@ -412,6 +413,8 @@ export default async function IngredientPage({ params, searchParams }: Props) {
                 </p>
               </section>
             )}
+
+            <ExplainIngredient slug={ing.slug} />
 
             {hasFunctions ? (
               <section className="mt-10 border-t border-black/[0.06] pt-8">

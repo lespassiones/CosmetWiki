@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchProductCascade } from "@/lib/productSearch/cascade";
 import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { normalizeProductQuery } from "@/lib/ai/productNormalize";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -45,6 +46,38 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const result = await searchProductCascade(query);
-  return NextResponse.json(result);
+  // GPT-4o-mini pre-normalization: handles barcodes pasted into the name
+  // field, common typos, missing brand, and surfaces multiple candidates
+  // when ambiguous. Falls through to the raw cascade if not useful.
+  const norm = await normalizeProductQuery(query);
+
+  if (norm.kind === "barcode") {
+    // Re-route to the dedicated barcode endpoint by calling the cascade
+    // with the canonical barcode string (the cascade detects barcodes as
+    // an early step too, so this guarantees consistent routing).
+    const result = await searchProductCascade(norm.barcode);
+    return NextResponse.json({ ...result, normalization: { kind: "barcode", value: norm.barcode } });
+  }
+
+  if (norm.kind === "candidates") {
+    // Ambiguous — return the candidates so the UI can let the user pick,
+    // without burning the deep cascade. The frontend can re-call this
+    // route with the chosen candidate.
+    return NextResponse.json({
+      results: [],
+      candidates: norm.candidates,
+      reason: norm.reason,
+      normalization: { kind: "candidates" },
+    });
+  }
+
+  const refinedQuery = norm.kind === "query" ? norm.query : query;
+  const result = await searchProductCascade(refinedQuery);
+  return NextResponse.json({
+    ...result,
+    normalization:
+      norm.kind === "query"
+        ? { kind: "query", original: query, refined: refinedQuery, confidence: norm.confidence }
+        : { kind: "unchanged" },
+  });
 }

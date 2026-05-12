@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SITE_URL } from "@/lib/siteUrl";
 import { PWARegister } from "@/components/PWARegister";
+import { AppShell } from "@/components/nav/AppShell";
+import { getProfile, getUser } from "@/lib/auth";
 import "./globals.css";
 
 const SITE_NAME = "CosmetWiki";
@@ -83,15 +85,16 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const [user, profile] = await Promise.all([getUser(), getProfile()]);
+  const signedIn = Boolean(user);
+  const firstName = profile?.first_name ?? null;
+  // Hide the shell on full-screen flows that need their own chrome.
+  const hideOnPaths = ["/auth", "/scan/photo"];
+
   return (
     <html lang="fr" className="light" data-theme="light">
       <body className="min-h-screen antialiased">
-        {/* React 19 / Next 15 auto-hoist these <link> tags into <head>.
-            We removed the explicit <head> element because Next streams
-            metadata into the document tail, and a manual <head> was
-            preventing tags like rel="manifest" from being hoisted —
-            which broke PWA installability detection on Chrome. */}
         <link
           rel="preconnect"
           href={process.env.NEXT_PUBLIC_SUPABASE_URL}
@@ -103,7 +106,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
-        {children}
+        <AppShell signedIn={signedIn} firstName={firstName} hideOnPaths={hideOnPaths}>
+          {children}
+        </AppShell>
         <PWARegister />
         <Analytics />
       </body>

@@ -73,8 +73,11 @@ function clearCache() {
   }
 }
 
-export function HomeShell({ initialInci = "" }: { initialInci?: string }) {
-  const [mode, setMode] = useState<Mode>("inci");
+export function HomeShell({
+  initialInci = "",
+  initialMode,
+}: { initialInci?: string; initialMode?: Mode }) {
+  const [mode, setMode] = useState<Mode>(initialMode ?? "inci");
   const [result, setResult] = useState<AnalyseResponse | null>(null);
   const [originalText, setOriginalText] = useState("");
   const [productSource, setProductSource] = useState<ProductSource | null>(

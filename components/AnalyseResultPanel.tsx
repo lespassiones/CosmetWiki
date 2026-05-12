@@ -5,6 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { AnalyseItem, AnalyseResponse, Observation } from "@/lib/analyseTypes";
 import type { ColorRating } from "@/lib/supabase";
 import { Reveal } from "./Reveal";
+import { IngredientSpectrum } from "./analyse/IngredientSpectrum";
+import { MobileExpander } from "./analyse/MobileExpander";
 
 // Delay (ms) after panel mount before each block becomes visible.
 // Synthesis streaming and score animation start at the same time as their
@@ -173,16 +175,26 @@ export function AnalyseResultPanel({
           <ObservationsCard observations={result.observations} aliasesUsed={result.aliasesUsed} />
         </Reveal>
         <Reveal delayMs={REVEAL_SYNTHESIS_MS}>
-          <SynthesisCard
-            synthesis={result.synthesis}
-            items={result.items}
-            streamDelayMs={REVEAL_SYNTHESIS_MS}
-          />
+          <div>
+            <MobileExpander expandLabel="Voir la synthèse complète" collapsedMaxHeight={110}>
+              <SynthesisCard
+                synthesis={result.synthesis}
+                items={result.items}
+                streamDelayMs={REVEAL_SYNTHESIS_MS}
+              />
+            </MobileExpander>
+          </div>
         </Reveal>
       </div>
 
+      {result.spectrum ? (
+        <Reveal delayMs={1100} className="mt-4 block">
+          <IngredientSpectrum top5={result.spectrum.top5} top10={result.spectrum.top10} />
+        </Reveal>
+      ) : null}
+
       <Reveal delayMs={1300} className="mt-4 block">
-        <ItemsTable items={result.items} counts={result.counts} />
+        <ItemsTable items={result.items} counts={result.counts} mobileLimit={5} />
       </Reveal>
     </section>
   );
@@ -803,12 +815,16 @@ const TAB_TONE: Record<TabKey, { activeBg: string; inactiveHover: string; countI
 function ItemsTable({
   items,
   counts,
+  mobileLimit,
 }: {
   items: AnalyseItem[];
   counts: AnalyseResponse["counts"];
+  /** When set, mobile only shows the first N rows + a "Voir les {total}" link. */
+  mobileLimit?: number;
 }) {
   const [filter, setFilter] = useState<TabKey>("all");
   const [search, setSearch] = useState("");
+  const [mobileExpanded, setMobileExpanded] = useState(false);
 
   const filtered = useMemo(() => {
     let out = items;
@@ -900,8 +916,17 @@ function ItemsTable({
                 </td>
               </tr>
             ) : (
-              filtered.map((i) => (
-                <tr key={`${i.position}-${i.input}`} className="border-t border-black/[0.04] transition-colors hover:bg-rose-50/30">
+              filtered.map((i, idx) => {
+                const hiddenOnMobile =
+                  mobileLimit !== undefined
+                  && !mobileExpanded
+                  && idx >= mobileLimit;
+                return (
+                <tr
+                  key={`${i.position}-${i.input}`}
+                  id={`ingredient-row-${i.position}`}
+                  className={`border-t border-black/[0.04] transition-colors hover:bg-rose-50/30 scroll-mt-24 ${hiddenOnMobile ? "hidden lg:table-row" : ""}`}
+                >
                   <td className="px-5 py-3">
                     <div className="font-semibold text-ink">
                       {prettyName(i.name ?? i.input)}
@@ -917,6 +942,11 @@ function ItemsTable({
                   </td>
                   <td className="px-5 py-3">
                     <ColorChip rating={i.colorRating} />
+                    {i.thresholdLabel ? (
+                      <span className="ml-2 inline-flex items-center rounded-full bg-[#F3F4F6] px-2 py-0.5 text-[10px] font-medium text-[#6B7280] align-middle">
+                        {i.thresholdLabel}
+                      </span>
+                    ) : null}
                   </td>
                   <td className="px-5 py-3 text-right">
                     {i.slug ? (
@@ -934,11 +964,25 @@ function ItemsTable({
                     )}
                   </td>
                 </tr>
-              ))
+                );
+              })
             )}
           </tbody>
         </table>
       </div>
+      {mobileLimit !== undefined && filtered.length > mobileLimit ? (
+        <div className="lg:hidden border-t border-black/[0.04] px-5 py-3 text-center">
+          <button
+            type="button"
+            onClick={() => setMobileExpanded((v) => !v)}
+            className="text-[13px] font-medium text-[#F43F5E] hover:underline"
+          >
+            {mobileExpanded
+              ? "Replier ↑"
+              : `Voir les ${filtered.length} ingrédients →`}
+          </button>
+        </div>
+      ) : null}
     </article>
   );
 }

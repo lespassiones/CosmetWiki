@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAnon } from "@/lib/supabase";
+import { cookies } from "next/headers";
+import { supabaseAnon, supabaseServer } from "@/lib/supabase";
 import { parseInciList, computeScore, scoreLabel, type ColorRating } from "@/lib/inciParser";
 import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { generateSynthesis } from "@/lib/ai/synthesis";
+import { categorizeProduct, type ProductCategory } from "@/lib/ai/categorize";
+import { correctTypo } from "@/lib/ai/typo";
+import { parseInciWithAI } from "@/lib/ai/parseInci";
+import { validateInciInput } from "@/lib/ai/validate";
+import {
+  EU_ALLERGENS_TOTAL,
+  EU_FRAGRANCE_ALLERGENS,
+  getEuFragranceAllergen,
+  isEuFragranceAllergen,
+} from "@/lib/euAllergens";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,8 +29,16 @@ type MatchRow = {
   translation_fr: string | null;
   primary_function: string | null;
   tags: string[] | null;
-  match_kind: "exact" | "alias" | "fuzzy" | null;
+  match_kind: "exact" | "alias" | "fuzzy_high" | "suggestion" | null;
+  confidence: number | string | null;
 };
+
+type ThresholdContext =
+  | "before_fragrance"
+  | "after_fragrance"
+  | "before_preservative"
+  | "after_preservative"
+  | null;
 
 type AnalysePayload = {
   text: string;
@@ -93,9 +113,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const text = (body.text ?? "").slice(0, 8000);
-  if (!text.trim()) {
+  const rawText = (body.text ?? "").slice(0, 8000);
+  if (!rawText.trim()) {
     return NextResponse.json({ error: "Liste vide." }, { status: 400 });
+  }
+
+  // AI-powered INCI parser cascade: Mistral (gratuit, primary) → OpenAI (fallback)
+  // → regex (final fallback below). Handles lists pasted without separators,
+  // OCR noise, typos. Cached by hash of input so a repeated paste is free.
+  const aiParsed = await parseInciWithAI(rawText);
+  // If the AI reconstructed the list, feed the clean comma-separated version
+  // back into the rest of the pipeline. Validation + regex parser handle
+  // clean input perfectly.
+  const text = aiParsed && aiParsed.ingredients.length > 0
+    ? aiParsed.ingredients.join(", ")
+    : rawText;
+
+  // Pre-flight: bail out on garbage input (cheap local checks + AI for the
+  // borderline cases). The AI defaults to "valid" if unavailable so we never
+  // block a real user.
+  const validation = await validateInciInput(text);
+  if (!validation.valid) {
+    return NextResponse.json(
+      { error: validation.reason ?? "Ceci ne ressemble pas à une liste INCI." },
+      { status: 400 },
+    );
   }
 
   const tokens = parseInciList(text);
@@ -111,28 +153,113 @@ export async function POST(req: NextRequest) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  const rows = (data ?? []) as MatchRow[];
+  let rows = (data ?? []) as MatchRow[];
 
-  // Re-attach the original raw token (for display) by position
+  // AI typo correction: for each "suggestion" row (fuzzy 0.55..0.90), ask
+  // GPT-4o-mini to pick the most likely INCI candidate from the top-5 trigram
+  // hits. If GPT is confident enough (≥0.85), upgrade the row to a real match
+  // marked as "ai_corrected". Otherwise keep it as a suggestion.
+  const suggestionRows = rows.filter((r) => r.match_kind === "suggestion");
+  if (suggestionRows.length > 0) {
+    await Promise.all(
+      suggestionRows.map(async (row) => {
+        const { data: candidates } = await sb.rpc("cosmetwiki_top_trigram_candidates", {
+          p_token: tokens[row.position_idx]?.normalized ?? row.input_token,
+          p_limit: 5,
+        });
+        const list = (candidates ?? []) as {
+          inci_id: number;
+          name: string;
+          primary_function: string | null;
+          similarity: number;
+        }[];
+        if (list.length === 0) return;
+        const decision = await correctTypo(
+          tokens[row.position_idx]?.normalized ?? row.input_token,
+          list,
+        );
+        if (
+          decision.matchedInciId !== null
+          && decision.confidence >= 0.85
+        ) {
+          // Fetch the full row for the chosen INCI and replace the match in place.
+          const { data: ingRows } = await sb
+            .schema("cosmetwiki")
+            .from("ingredients")
+            .select(
+              "inci_id, slug, name, color_rating, cas_number, translations, functions, tags",
+            )
+            .eq("inci_id", decision.matchedInciId)
+            .limit(1);
+          const ing = (ingRows ?? [])[0] as
+            | {
+                inci_id: number;
+                slug: string;
+                name: string;
+                color_rating: ColorRating | null;
+                cas_number: string | null;
+                translations: Record<string, string> | null;
+                functions: { name?: string }[] | null;
+                tags: string[] | null;
+              }
+            | undefined;
+          if (ing) {
+            const idx = rows.findIndex((r) => r.position_idx === row.position_idx);
+            if (idx >= 0) {
+              rows[idx] = {
+                input_token: row.input_token,
+                position_idx: row.position_idx,
+                inci_id: ing.inci_id,
+                slug: ing.slug,
+                name: ing.name,
+                color_rating: ing.color_rating,
+                cas_number: ing.cas_number,
+                translation_fr: ing.translations?.fr ?? "",
+                primary_function: ing.functions?.[0]?.name ?? "",
+                tags: ing.tags,
+                match_kind: "fuzzy_high",
+                confidence: decision.confidence,
+              };
+            }
+          }
+        }
+      }),
+    );
+  }
+
+  // Re-attach the original raw token (for display) by position. Suggestions
+  // (fuzzy 0.55..0.90) are NOT treated as matches: the candidate is kept on
+  // the side so the UI can show "Did you mean: X?" but the ingredient is
+  // counted as "unknown" in stats and excluded from the score.
   const enriched = rows.map((r) => {
     const tok = tokens[r.position_idx];
+    const isSuggestion = r.match_kind === "suggestion";
+    const confidence =
+      typeof r.confidence === "string" ? Number(r.confidence) : (r.confidence ?? 0);
     return {
       ...r,
       input_raw: tok ? tok.raw : r.input_token,
+      // For the rest of the pipeline, treat suggestions as unmatched.
+      effective_color: isSuggestion ? null : r.color_rating,
+      effective_inci_id: isSuggestion ? null : r.inci_id,
+      effective_name: isSuggestion ? null : r.name,
+      effective_tags: isSuggestion ? null : r.tags,
+      suggested_name: isSuggestion ? r.name : null,
+      confidence,
     };
   });
 
-  // Counters
+  // Counters (suggestions count as "Non reconnu" — they did not match)
   const counts: Record<string, number> = { Vert: 0, Jaune: 0, Orange: 0, Rouge: 0, "Non reconnu": 0 };
   for (const r of enriched) {
-    if (r.color_rating) counts[r.color_rating]++;
+    if (r.effective_color) counts[r.effective_color]++;
     else counts["Non reconnu"]++;
   }
   const matched = enriched.length - counts["Non reconnu"];
 
-  // Score
+  // Score (suggestions ignored)
   const score = computeScore(
-    enriched.map((r) => ({ color_rating: r.color_rating, position: r.position_idx })),
+    enriched.map((r) => ({ color_rating: r.effective_color, position: r.position_idx })),
     enriched.length,
   );
   const { label: scoreLabelText, tone: scoreTone } = scoreLabel(score);
@@ -141,14 +268,14 @@ export async function POST(req: NextRequest) {
   const tagCounts: Record<string, number> = {};
   const tagItems: Record<string, { name: string; slug: string | null; colorRating: ColorRating | null }[]> = {};
   for (const r of enriched) {
-    if (!r.tags) continue;
-    for (const t of r.tags) {
+    if (!r.effective_tags) continue;
+    for (const t of r.effective_tags) {
       tagCounts[t] = (tagCounts[t] || 0) + 1;
       if (!tagItems[t]) tagItems[t] = [];
       tagItems[t].push({
-        name: r.name ?? r.input_raw,
+        name: r.effective_name ?? r.input_raw,
         slug: r.slug,
-        colorRating: r.color_rating,
+        colorRating: r.effective_color,
       });
     }
   }
@@ -225,7 +352,7 @@ export async function POST(req: NextRequest) {
   // a stronger signal than the same ingredient at the very end.
   const topProblematic = byPosition
     .slice(0, TOP_LIST_WINDOW)
-    .filter((r) => r.color_rating === "Orange" || r.color_rating === "Rouge");
+    .filter((r) => r.effective_color === "Orange" || r.effective_color === "Rouge");
   if (topProblematic.length > 0) {
     observations.push({
       tag: "top-list-warning",
@@ -233,9 +360,9 @@ export async function POST(req: NextRequest) {
       status: "warn",
       count: topProblematic.length,
       items: topProblematic.map((r) => ({
-        name: r.name ?? r.input_raw,
+        name: r.effective_name ?? r.input_raw,
         slug: r.slug,
-        colorRating: r.color_rating,
+        colorRating: r.effective_color,
       })),
       message: `${topProblematic.length} dans le top ${TOP_LIST_WINDOW} (concentration plus élevée)`,
     });
@@ -246,20 +373,144 @@ export async function POST(req: NextRequest) {
     .filter((r) => r.match_kind === "alias")
     .map((r) => ({ from: r.input_raw, to: r.name }));
 
-  // Optional AI synthesis
+  // Suggestions (fuzzy 0.55..0.90) — propose "Did you mean: X?" to the UI
+  const suggestions = enriched
+    .filter((r) => r.match_kind === "suggestion" && r.suggested_name)
+    .map((r) => ({
+      position: r.position_idx + 1,
+      input: r.input_raw,
+      suggestedName: r.suggested_name as string,
+      confidence: Number(r.confidence.toFixed(3)),
+    }));
+
+  // ----- Threshold context: before/after first fragrance and/or preservative -----
+  // Fragrance = ingredient whose name is PARFUM/FRAGRANCE OR tagged
+  // "parfum-synthese". Preservative = ingredient tagged "conservateur".
+  const FRAGRANCE_NAMES = new Set(["PARFUM", "FRAGRANCE", "AROMA", "FLAVOR"]);
+  const firstFragranceIdx = byPosition.findIndex(
+    (r) =>
+      (r.effective_name && FRAGRANCE_NAMES.has(r.effective_name.toUpperCase())) ||
+      (r.effective_tags?.includes("parfum-synthese") ?? false),
+  );
+  const firstPreservativeIdx = byPosition.findIndex(
+    (r) => r.effective_tags?.includes("conservateur") ?? false,
+  );
+  // We pick the earliest threshold as the reference (most informative).
+  const validIdx = [firstFragranceIdx, firstPreservativeIdx].filter((i) => i >= 0);
+  const earliestThresholdIdx = validIdx.length ? Math.min(...validIdx) : -1;
+  const thresholdKind: "fragrance" | "preservative" | null =
+    earliestThresholdIdx < 0
+      ? null
+      : earliestThresholdIdx === firstFragranceIdx
+        ? "fragrance"
+        : "preservative";
+
+  function thresholdFor(positionIdx: number): {
+    context: ThresholdContext;
+    label: string | null;
+  } {
+    if (earliestThresholdIdx < 0 || !thresholdKind) return { context: null, label: null };
+    if (positionIdx === earliestThresholdIdx) return { context: null, label: null };
+    const before = positionIdx < earliestThresholdIdx;
+    if (thresholdKind === "fragrance") {
+      return before
+        ? { context: "before_fragrance", label: "avant parfum" }
+        : { context: "after_fragrance", label: "après parfum" };
+    }
+    return before
+      ? { context: "before_preservative", label: "avant conservateur" }
+      : { context: "after_preservative", label: "après conservateur" };
+  }
+
+  // ----- EU fragrance allergens (Annex III, 26 substances) -----
+  // We scan effective_name + input_raw because some users paste raw labels
+  // where the canonical INCI lookup fails (e.g. LYRAL old name).
+  const allergensDetected: { inciName: string; label: string; note: string; position: number }[] = [];
+  const seenAllergens = new Set<string>();
+  for (const r of enriched) {
+    const candidates = [r.effective_name, r.input_raw].filter(Boolean) as string[];
+    for (const c of candidates) {
+      const upper = c.toUpperCase().trim();
+      if (seenAllergens.has(upper)) continue;
+      if (isEuFragranceAllergen(upper)) {
+        const meta = getEuFragranceAllergen(upper)!;
+        allergensDetected.push({
+          inciName: meta.inciName,
+          label: meta.label,
+          note: meta.note,
+          position: r.position_idx + 1,
+        });
+        seenAllergens.add(upper);
+        break;
+      }
+    }
+  }
+  // Add an observation when at least one is detected. Style matches existing
+  // observations — "X allergènes parfumants UE sur 26 listés."
+  if (allergensDetected.length > 0) {
+    observations.push({
+      tag: "eu-fragrance-allergens",
+      label: "Allergènes parfumants UE",
+      status: "warn",
+      count: allergensDetected.length,
+      items: allergensDetected.map((a) => ({ name: a.label, slug: null, colorRating: "Jaune" })),
+      message: `${allergensDetected.length} sur ${EU_ALLERGENS_TOTAL} substances réglementées détectées.`,
+    });
+  }
+
+  // ----- Spectrum: color ratings of top 5 and top 10 ingredients -----
+  const spectrumTop5: (ColorRating | null)[] = Array.from({ length: 5 }, (_, i) => {
+    const r = byPosition[i];
+    return r ? r.effective_color : null;
+  });
+  const spectrumTop10: (ColorRating | null)[] = Array.from({ length: 10 }, (_, i) => {
+    const r = byPosition[i];
+    return r ? r.effective_color : null;
+  });
+
+  // Optional AI synthesis (GPT-4o-mini primary, Mistral fallback, cached)
   let synthesis: string | null = null;
   if (body.withSynthesis !== false) {
+    const cookieStore = await cookies();
+    const { data: { user } } = await supabaseServer(cookieStore).auth.getUser();
     synthesis = await generateSynthesis({
-      enriched,
+      enriched: enriched.map((r) => ({
+        input_raw: r.input_raw,
+        name: r.effective_name,
+        color_rating: r.effective_color,
+        primary_function: r.primary_function,
+        tags: r.effective_tags,
+        position_idx: r.position_idx,
+      })),
       counts,
       score,
       scoreLabel: scoreLabelText,
       observations,
       productLabel: body.productLabel?.slice(0, 200) ?? null,
+      userId: user?.id ?? null,
     });
   }
 
-  return NextResponse.json({
+  const itemsResponse = enriched.map((r) => {
+    const threshold = thresholdFor(r.position_idx);
+    return {
+      position: r.position_idx + 1,
+      input: r.input_raw,
+      slug: r.slug,
+      name: r.effective_name,
+      colorRating: r.effective_color,
+      casNumber: r.cas_number,
+      translationFr: r.translation_fr,
+      primaryFunction: r.primary_function,
+      tags: r.effective_tags,
+      matchKind: r.match_kind,
+      confidence: Number(r.confidence.toFixed(3)),
+      thresholdContext: threshold.context,
+      thresholdLabel: threshold.label,
+    };
+  });
+
+  const responsePayload = {
     counts: {
       total: enriched.length,
       matched,
@@ -272,164 +523,53 @@ export async function POST(req: NextRequest) {
     score,
     scoreLabel: scoreLabelText,
     scoreTone,
-    items: enriched.map((r) => ({
-      position: r.position_idx + 1,
-      input: r.input_raw,
-      slug: r.slug,
-      name: r.name,
-      colorRating: r.color_rating,
-      casNumber: r.cas_number,
-      translationFr: r.translation_fr,
-      primaryFunction: r.primary_function,
-      tags: r.tags,
-      matchKind: r.match_kind,
-    })),
+    items: itemsResponse,
     observations,
     aliasesUsed,
+    suggestions,
+    spectrum: { top5: spectrumTop5, top10: spectrumTop10 },
+    euFragranceAllergens: {
+      detected: allergensDetected,
+      total: EU_ALLERGENS_TOTAL,
+    },
     synthesis,
-  });
-}
+  };
+  // Silence unused-import noise in some narrow code paths.
+  void EU_FRAGRANCE_ALLERGENS;
 
-// ============================================================
-// Mistral synthesis
-// ============================================================
-type EnrichedItem = {
-  input_raw: string;
-  name: string | null;
-  color_rating: ColorRating | null;
-  primary_function: string | null;
-  tags: string[] | null;
-  position_idx: number;
-};
-
-async function generateSynthesis(input: {
-  enriched: EnrichedItem[];
-  counts: Record<string, number>;
-  score: number;
-  scoreLabel: string;
-  observations: { label: string; status: "present" | "absent" | "info" | "warn"; count: number }[];
-  productLabel: string | null;
-}): Promise<string | null> {
-  const apiKey = process.env.MISTRAL_API_KEY;
-  if (!apiKey) return null;
-
-  const red = input.enriched
-    .filter((r) => r.color_rating === "Rouge")
-    .map((r) => ({
-      name: r.name ?? r.input_raw,
-      fn: r.primary_function ?? "fonction inconnue",
-    }));
-  const orange = input.enriched
-    .filter((r) => r.color_rating === "Orange")
-    .map((r) => ({
-      name: r.name ?? r.input_raw,
-      fn: r.primary_function ?? "fonction inconnue",
-    }));
-  const yellow = input.enriched
-    .filter((r) => r.color_rating === "Jaune")
-    .map((r) => r.name ?? r.input_raw);
-
-  // Top main ingredients (first 3 in the list) — gives Mistral context to
-  // infer the product category for paragraph 1.
-  const mainIngredients = input.enriched
-    .slice(0, 3)
-    .map((r) => `${r.name ?? r.input_raw}${r.primary_function ? ` (${r.primary_function})` : ""}`);
-
-  const positives = input.observations
-    .filter((o) => o.status === "absent")
-    .map((o) => o.label);
-  const presents = input.observations
-    .filter((o) => o.status === "present")
-    .map((o) => `${o.label} (${o.count})`);
-
-  // Pick the first green ingredient with a known function — the "hero" we
-  // can mention briefly in paragraph 1 without lapsing into marketing.
-  const greenHero = input.enriched.find(
-    (r) => r.color_rating === "Vert" && r.primary_function && r.name,
-  );
-  const greenHeroLine = greenHero
-    ? `${greenHero.name} (${greenHero.primary_function})`
-    : "(aucun ingrédient vert avec fonction connue)";
-
-  const prompt = `Tu rédiges la synthèse d'une analyse INCI cosmétique pour un consommateur français.
-Tu es un analyste FACTUEL, pas un rédacteur marketing. Pas de blabla, pas de mise en valeur du produit.
-
-STRUCTURE OBLIGATOIRE — DEUX BLOCS SÉPARÉS PAR UNE LIGNE VIDE.
-
-BLOC 1 — Paragraphe court (2 à 3 phrases MAXIMUM, en prose, AUCUNE puce)
-Ce paragraphe doit dire dans cet ordre logique :
-  (a) Le constat chiffré : combien d'ingrédients verts (bon signal) vs combien d'orange ou rouges (à examiner).
-      Ex : "Sur les ${(input.counts.Vert ?? 0) + (input.counts.Jaune ?? 0) + (input.counts.Orange ?? 0) + (input.counts.Rouge ?? 0)} ingrédients reconnus, ${input.counts.Vert} sont classés vert et ${input.counts.Orange + input.counts.Rouge} demandent une attention particulière."
-  (b) UNE phrase qui cite UN seul bon ingrédient présent et dit BREF à quoi il sert (pas d'éloge).
-      Ex : "**${greenHero?.name ?? "[ingrédient vert]"}** y joue son rôle d'${greenHero?.primary_function ?? "[fonction]"}."
-  (c) UNE phrase de TRANSITION qui introduit la liste à puces qui suit.
-      Cette phrase doit ressembler à : "Voici les ingrédients sur lesquels attirer votre attention :" ou "Les points de vigilance ci-dessous :" ou "Voici le détail des ingrédients problématiques :".
-
-BLOC 2 — Liste en PUCES (chaque ligne commence par "- ")
-- Cite CHAQUE ingrédient ROUGE : "- **NOM_INCI** ([fonction]) : [1 phrase courte expliquant la pénalité]"
-- Cite CHAQUE ingrédient ORANGE (limite 6, sinon les 5 premiers + "- et N autres") : "- **NOM_INCI** ([fonction]) : [1 phrase courte sur la pénalité]"
-- Si plus de 3 jaunes notables, regroupe-les en UNE puce : "- Quelques ingrédients jaunes à surveiller : **NOM1**, **NOM2**, **NOM3**…"
-- Si pertinent, UNE puce d'absences : "- Sans **parabens**, sans **sulfates**, sans **silicones**, sans **huiles minérales**" — uniquement les absences réelles.
-- Termine par UNE puce factuelle "- À savoir : …" (ex. test sur petite zone, position dans la liste = concentration). Pas de conseil médical.
-
-CE QUE TU NE DOIS JAMAIS FAIRE
-- AUCUN langage marketing. Mots et tournures INTERDITS : "mise sur", "rassurante", "rassurant", "généreuse", "généreux", "idéal", "idéale", "parfait", "parfaite", "doux comme caresse", "simplicité", "merites", "vanter", "offre", "apporte un confort", "soin idéal", "à appliquer matin et soir", "en confiance", "agréable".
-- AUCUNE recommandation d'achat ou d'évitement ("à acheter", "à éviter", "produit dangereux", "produit excellent", "à recommander").
-- AUCUNE description sensorielle (texture, parfum, agréable, doux, fondant, onctueux…).
-- AUCUNE phrase qui déduit un usage ("crème pour peau sèche", "produit anti-âge"…) — concentre-toi UNIQUEMENT sur les ingrédients.
-- AUCUN conseil médical, AUCUN emoji.
-- Tu ne dis JAMAIS "ce produit est bon" ni "ce produit est mauvais". Tu énonces les faits ingrédient par ingrédient.
-- Encadre TOUJOURS les noms INCI cités avec **.
-- VARIE les formulations entre produits — ne réutilise pas mécaniquement la même phrase d'attaque.
-
-DONNÉES FACTUELLES
-${input.productLabel ? `Produit analysé : ${input.productLabel}` : "Produit : composition collée par l'utilisateur (pas de nom fourni)."}
-Note globale : ${input.score.toFixed(1)}/20 (${input.scoreLabel})
-Comptes : Vert ${input.counts.Vert}, Jaune ${input.counts.Jaune}, Orange ${input.counts.Orange}, Rouge ${input.counts.Rouge}
-3 premiers ingrédients (concentration) : ${mainIngredients.join(", ") || "(non disponibles)"}
-Ingrédient vert "hero" suggéré pour le paragraphe : ${greenHeroLine}
-
-Ingrédients ROUGES :
-${red.length ? red.map((r) => `- ${r.name} — ${r.fn}`).join("\n") : "(aucun)"}
-
-Ingrédients ORANGE :
-${orange.length ? orange.map((r) => `- ${r.name} — ${r.fn}`).join("\n") : "(aucun)"}
-
-Ingrédients JAUNES (jusqu'à 8 cités) :
-${yellow.length ? yellow.slice(0, 8).join(", ") + (yellow.length > 8 ? ` et ${yellow.length - 8} autres` : "") : "(aucun)"}
-
-Observations positives (absences) : ${positives.join(", ") || "(aucune)"}
-Observations présentes : ${presents.join(", ") || "(aucune)"}
-
-Rédige maintenant la synthèse. Bloc 1 (prose, 2-3 phrases, finis par la phrase de transition), ligne vide, puis Bloc 2 (puces) :`;
-
+  // Auto-save the analysis for signed-in users + AI categorize (fire-and-forget).
+  // We do this AFTER preparing the response so a failure here never blocks
+  // the user. Categorization runs in the background and is patched in later.
   try {
-    const r = await fetch("https://api.mistral.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "mistral-small-latest",
-        temperature: 0.55,
-        top_p: 0.95,
-        max_tokens: 900,
-        messages: [
-          {
-            role: "system",
-            content:
-              "Tu es un analyste INCI FACTUEL — pas un rédacteur marketing, pas un vendeur. Tu écris pour le grand public français à partir de données fournies, JAMAIS d'invention. Tu énonces les faits chiffrés et tu attires l'attention sur les ingrédients problématiques sans dramatiser. Tu n'utilises JAMAIS de langage marketing (pas de 'mise sur', 'rassurant', 'idéal', 'généreux', 'simplicité', 'apporte', 'offre', 'agréable', 'idéal pour'…). Tu ne décris JAMAIS la texture ni le parfum. Tu ne recommandes JAMAIS d'acheter ni d'éviter le produit. Tu ne donnes AUCUN conseil médical. Tu structures TOUJOURS ta sortie en deux blocs : un paragraphe court de 2-3 phrases (prose, pas de puces) qui (a) donne le constat chiffré, (b) cite UN bon ingrédient avec sa fonction, (c) FINIT par une phrase de transition introduisant la liste, puis une ligne vide, puis un bloc de puces (chaque ligne commençant par '- '). Tu encadres les noms INCI avec **. Tu varies les formulations d'un produit à l'autre.",
-          },
-          { role: "user", content: prompt },
-        ],
-      }),
-    });
-    if (!r.ok) return null;
-    const json = (await r.json()) as { choices?: { message?: { content?: string } }[] };
-    const txt = json?.choices?.[0]?.message?.content?.trim();
-    return txt || null;
+    const cookieStore = await cookies();
+    const sb = supabaseServer(cookieStore);
+    const { data: { user } } = await sb.auth.getUser();
+    if (user) {
+      const top5 = byPosition
+        .slice(0, 5)
+        .map((r) => r.effective_name ?? r.input_raw)
+        .filter(Boolean);
+      let category: ProductCategory | null = null;
+      try {
+        category = await categorizeProduct(top5, user.id);
+      } catch {
+        category = null;
+      }
+      const autoName = body.productLabel?.slice(0, 200)
+        ?? `Analyse du ${new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
+      await sb.schema("cosmetwiki").from("analyses").insert({
+        user_id: user.id,
+        name: autoName,
+        product_label: body.productLabel?.slice(0, 200) ?? null,
+        category,
+        input_text: text,
+        result_json: responsePayload,
+        score: Number(score.toFixed(2)),
+      });
+    }
   } catch {
-    return null;
+    // never let history save break the analysis response
   }
+
+  return NextResponse.json(responsePayload);
 }

@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.45.4",
     "@vercel/analytics": "^2.0.1",
     "@zxing/browser": "^0.2.0",
@@ -15,8 +16,10 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "next": "^15.0.3",
+    "openai": "^6.37.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
