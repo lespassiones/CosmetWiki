@@ -1,7 +1,9 @@
 "use client";
 
+import type { AnalyseItem } from "@/lib/analyseTypes";
 import type { ColorRating } from "@/lib/supabase";
 import { GLASS_CARD } from "@/lib/ui/glass";
+import { InfoBadge, Tooltip } from "../Tooltip";
 
 const COLOR_MAP: Record<NonNullable<ColorRating>, string> = {
   Vert: "#10B981",
@@ -10,17 +12,33 @@ const COLOR_MAP: Record<NonNullable<ColorRating>, string> = {
   Rouge: "#EF4444",
 };
 
+const RATING_LABEL: Record<NonNullable<ColorRating>, string> = {
+  Vert: "Sans risque connu",
+  Jaune: "Pénalité légère",
+  Orange: "Pénalité moyenne",
+  Rouge: "Pénalité forte",
+};
+
 const EMPTY_COLOR = "#E5E7EB";
 
 /**
  * Visual "spectrum" of the first 5 / first 10 ingredients of the formula.
- * Tap on a square scrolls to the matching ingredient row (the row must have
- * an id like `ingredient-row-{position}` — 1-indexed).
+ *
+ * Each square is interactive:
+ *  - hover (desktop) / tap (mobile) shows a tooltip with the ingredient name
+ *    and its color rating
+ *  - clicking scrolls the matching row into view (ids `ingredient-row-{N}`)
+ *
+ * Section titles carry an (i) tooltip explaining why the spectrum matters.
+ * A warning chip is shown when any of the first 5 isn't green — those are the
+ * ~75% of the formula, so a non-vert there is worth flagging.
  */
 export function IngredientSpectrum({
+  items,
   top5,
   top10,
 }: {
+  items: AnalyseItem[];
   top5: (ColorRating | null)[];
   top10: (ColorRating | null)[];
 }) {
@@ -33,48 +51,130 @@ export function IngredientSpectrum({
     window.setTimeout(() => el.classList.remove("ring-2", "ring-[#F43F5E]"), 1500);
   }
 
+  function ingredientAt(position: number): AnalyseItem | undefined {
+    return items.find((it) => it.position === position);
+  }
+
+  const nonGreenInTop5 = top5.filter((r) => r && r !== "Vert").length;
+
   return (
     <section
       aria-label="Spectre des premiers ingrédients"
       className={`${GLASS_CARD} p-5`}
     >
-      <div className="mb-3">
+      <div className="mb-3 flex items-center gap-2">
         <h3 className="text-[15px] font-semibold">Spectre top 5</h3>
-        <p className="text-[11px] text-[#6B7280] mt-0.5">
-          Les 5 premiers ingrédients représentent environ 75 % de la formule.
-        </p>
+        <Tooltip
+          content={
+            <>
+              Les 5 premiers ingrédients représentent environ <b>75 %</b> de la formule.
+              Si l&apos;un d&apos;eux n&apos;est pas vert, l&apos;ingrédient en question
+              pèse beaucoup dans le produit — c&apos;est un point d&apos;attention.
+            </>
+          }
+        >
+          <button type="button" aria-label="À quoi sert le spectre top 5 ?">
+            <InfoBadge />
+          </button>
+        </Tooltip>
       </div>
 
-      <ul className="flex items-end gap-2 mb-5">
-        {top5.map((rating, i) => (
-          <li key={i} className="flex flex-col items-center gap-1">
-            <button
-              type="button"
-              onClick={() => scrollToPosition(i + 1)}
-              aria-label={`Position ${i + 1}${rating ? ` — ${rating}` : ""}`}
-              className="h-8 w-8 rounded-md transition hover:scale-110"
-              style={{ background: rating ? COLOR_MAP[rating] : EMPTY_COLOR }}
-            />
-            <span className="text-[10px] text-[#9CA3AF]">{i + 1}</span>
-          </li>
-        ))}
+      <ul className="flex items-end gap-2 mb-2">
+        {top5.map((rating, i) => {
+          const position = i + 1;
+          const it = ingredientAt(position);
+          const name = it?.name ?? it?.input ?? "—";
+          return (
+            <li key={i} className="flex flex-col items-center gap-1">
+              <Tooltip
+                placement="top"
+                content={
+                  <>
+                    <div className="font-semibold leading-tight">{name}</div>
+                    <div className="mt-0.5 text-white/70">
+                      Position {position}
+                      {rating ? ` · ${rating} — ${RATING_LABEL[rating]}` : " · non reconnu"}
+                    </div>
+                  </>
+                }
+              >
+                <button
+                  type="button"
+                  onClick={() => scrollToPosition(position)}
+                  aria-label={`${name} — position ${position}${rating ? ` — ${rating}` : ""}`}
+                  className="h-9 w-9 rounded-md transition hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+                  style={{ background: rating ? COLOR_MAP[rating] : EMPTY_COLOR }}
+                />
+              </Tooltip>
+              <span className="text-[10px] text-[#9CA3AF]">{position}</span>
+            </li>
+          );
+        })}
       </ul>
 
-      <h3 className="text-[13px] font-semibold mb-2">Top 10</h3>
+      {nonGreenInTop5 > 0 ? (
+        <p className="mb-4 rounded-xl bg-rose-50/70 ring-1 ring-rose-100 px-3 py-2 text-[11px] leading-snug text-rose-700">
+          <span className="font-semibold">Attention : </span>
+          {nonGreenInTop5} ingrédient{nonGreenInTop5 > 1 ? "s" : ""} non-vert
+          {nonGreenInTop5 > 1 ? "s" : ""} dans le top 5 — c&apos;est l&apos;essentiel de la formule.
+        </p>
+      ) : (
+        <p className="mb-4 text-[11px] text-[#9CA3AF]">
+          Top 5 entièrement vert — la majorité de la formule est sans risque connu.
+        </p>
+      )}
+
+      <div className="mb-2 flex items-center gap-2">
+        <h3 className="text-[13px] font-semibold">Spectre top 10</h3>
+        <Tooltip
+          content={
+            <>
+              Une vue élargie sur les 10 premiers ingrédients. Plus le rang est
+              bas (1, 2, 3…), plus l&apos;ingrédient est concentré dans le
+              produit.
+            </>
+          }
+        >
+          <button type="button" aria-label="À quoi sert le spectre top 10 ?">
+            <InfoBadge />
+          </button>
+        </Tooltip>
+      </div>
+
       <ul className="flex gap-1">
-        {top10.map((rating, i) => (
-          <li key={i}>
-            <button
-              type="button"
-              onClick={() => scrollToPosition(i + 1)}
-              aria-label={`Position ${i + 1}${rating ? ` — ${rating}` : ""}`}
-              className="h-4 w-4 rounded-sm transition hover:scale-125"
-              style={{ background: rating ? COLOR_MAP[rating] : EMPTY_COLOR }}
-            />
-          </li>
-        ))}
+        {top10.map((rating, i) => {
+          const position = i + 1;
+          const it = ingredientAt(position);
+          const name = it?.name ?? it?.input ?? "—";
+          return (
+            <li key={i}>
+              <Tooltip
+                placement="top"
+                content={
+                  <>
+                    <div className="font-semibold leading-tight">{name}</div>
+                    <div className="mt-0.5 text-white/70">
+                      Position {position}
+                      {rating ? ` · ${rating}` : " · non reconnu"}
+                    </div>
+                  </>
+                }
+              >
+                <button
+                  type="button"
+                  onClick={() => scrollToPosition(position)}
+                  aria-label={`${name} — position ${position}${rating ? ` — ${rating}` : ""}`}
+                  className="h-5 w-5 rounded-sm transition hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+                  style={{ background: rating ? COLOR_MAP[rating] : EMPTY_COLOR }}
+                />
+              </Tooltip>
+            </li>
+          );
+        })}
       </ul>
-      <p className="text-[10px] text-[#9CA3AF] mt-2">Touche un carré pour voir l&apos;ingrédient correspondant.</p>
+      <p className="text-[10px] text-[#9CA3AF] mt-2">
+        Touche un carré pour aller à l&apos;ingrédient correspondant.
+      </p>
     </section>
   );
 }

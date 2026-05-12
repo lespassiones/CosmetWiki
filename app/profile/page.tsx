@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { getProfile, getUser } from "@/lib/auth";
 import { signOut } from "@/app/auth/actions";
 import { GLASS_CARD, GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
+import { SkinProfileCard } from "@/components/profile/SkinProfileCard";
+import { readSkinProfile } from "@/lib/skin/profile";
 
 export const metadata = { title: "Mon profil · Cosme Check" };
 export const dynamic = "force-dynamic";
@@ -12,6 +14,7 @@ export default async function ProfilePage() {
   const profile = await getProfile();
 
   const initials = (profile?.first_name ?? "U").slice(0, 1).toUpperCase();
+  const skin = readSkinProfile(profile?.preferences ?? null);
 
   return (
     <div className="mx-auto max-w-3xl px-5 lg:px-8 py-8 lg:py-12">
@@ -35,6 +38,10 @@ export default async function ProfilePage() {
           Toutes les fonctionnalités sont disponibles gratuitement pendant la phase de lancement.
         </p>
       </section>
+
+      <div className="mb-4">
+        <SkinProfileCard initial={skin} />
+      </div>
 
       <section className={`${GLASS_CARD} p-5`}>
         <h2 className="text-sm font-semibold mb-3">Compte</h2>

@@ -78,7 +78,11 @@ export default async function Home({ searchParams }: Props) {
 
   const [user, profile] = await Promise.all([getUser(), getProfile()]);
   const dashboard = await loadDashboard(profile?.first_name ?? null);
-  const showDashboard = Boolean(user);
+  const signedIn = Boolean(user);
+  // Signed-in users see the dashboard. When an analysis is in flight (via
+  // ?inci=…) HomeShell takes over rendering on top — it knows how to hide the
+  // dashboard chrome itself.
+  const showDashboard = signedIn && !initialInci;
 
   return (
     <div
@@ -86,47 +90,49 @@ export default async function Home({ searchParams }: Props) {
         showDashboard ? "" : "min-h-screen"
       }`}
     >
-      {/* AppShell paints its own BackgroundGlow for signed-in users; only
-          render ours on the public landing to avoid stacking two glows. */}
-      {!showDashboard && <BackgroundGlow />}
-
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
-        <Logo size="md" />
-        <nav className="hidden items-center gap-1 text-sm text-ink-muted sm:flex">
-          <Link
-            href="/comment-ca-marche"
-            className="rounded-full px-3 py-1.5 transition-colors hover:text-ink"
-          >
-            Comment ça marche
-          </Link>
-          <Link
-            href="/about"
-            className="rounded-full px-3 py-1.5 transition-colors hover:text-ink"
-          >
-            À propos
-          </Link>
-          <InstallPWAButton className="ml-2" />
-          {!showDashboard && (
-            <Link
-              href="/auth/sign-in"
-              className="ml-2 rounded-full px-3 py-1.5 font-medium text-ink transition-colors hover:bg-black/[0.04]"
-            >
-              Se connecter
-            </Link>
-          )}
-        </nav>
-        <MobileMenu />
-      </header>
+      {/* AppShell paints its own BackgroundGlow + chrome (sidebar / bottom nav)
+          for signed-in users — we only render the public landing chrome
+          (BackgroundGlow + header) for guests. */}
+      {!signedIn && (
+        <>
+          <BackgroundGlow />
+          <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
+            <Logo size="md" />
+            <nav className="hidden items-center gap-1 text-sm text-ink-muted sm:flex">
+              <Link
+                href="/comment-ca-marche"
+                className="rounded-full px-3 py-1.5 transition-colors hover:text-ink"
+              >
+                Comment ça marche
+              </Link>
+              <Link
+                href="/about"
+                className="rounded-full px-3 py-1.5 transition-colors hover:text-ink"
+              >
+                À propos
+              </Link>
+              <InstallPWAButton className="ml-2" />
+              <Link
+                href="/auth/sign-in"
+                className="ml-2 rounded-full px-3 py-1.5 font-medium text-ink transition-colors hover:bg-black/[0.04]"
+              >
+                Se connecter
+              </Link>
+            </nav>
+            <MobileMenu />
+          </header>
+        </>
+      )}
 
       {showDashboard && <HomeDashboard data={dashboard} />}
 
       <HomeShell
         initialInci={initialInci}
         initialMode={initialMode}
-        signedIn={showDashboard}
+        signedIn={signedIn}
       />
 
-      {!showDashboard && <Footer />}
+      {!signedIn && <Footer />}
     </div>
   );
 }

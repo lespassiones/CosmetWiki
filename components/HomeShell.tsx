@@ -5,10 +5,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SearchBar } from "./SearchBar";
 import { ProcessingOverlay, randomProcessingTotal } from "./ProcessingOverlay";
 import { AnalyseResultPanel } from "./AnalyseResultPanel";
-import {
-  ProductSearchInput,
-  ProductHero,
-} from "./ProductSearchInput";
+import { ProductSearchInput } from "./ProductSearchInput";
 import { BarcodeScannerInput } from "./BarcodeScannerInput";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
@@ -74,11 +71,17 @@ function clearCache() {
   }
 }
 
+const PENDING_SOURCE_KEY = "cw:pendingProductSource";
+
 export function HomeShell({
   initialInci = "",
   initialMode,
   signedIn = true,
-}: { initialInci?: string; initialMode?: Mode; signedIn?: boolean }) {
+}: {
+  initialInci?: string;
+  initialMode?: Mode;
+  signedIn?: boolean;
+}) {
   const [mode, setMode] = useState<Mode>(initialMode ?? "inci");
   const [result, setResult] = useState<AnalyseResponse | null>(null);
   const [originalText, setOriginalText] = useState("");
@@ -100,6 +103,22 @@ export function HomeShell({
   useEffect(() => {
     const trimmed = initialInci.trim();
     const cached = readCache();
+
+    // ScanSheet → product / barcode flow writes the brand+name to session
+    // storage right before navigating to /?inci=… so we can render the
+    // ProductHero on top of the result. Consume it once.
+    if (typeof window !== "undefined") {
+      try {
+        const stored = sessionStorage.getItem(PENDING_SOURCE_KEY);
+        if (stored) {
+          pendingProductSourceRef.current = JSON.parse(stored) as ProductSource;
+          sessionStorage.removeItem(PENDING_SOURCE_KEY);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
     if (trimmed) {
       // Strip the param from the URL so reloads / back-nav don't re-trigger.
       if (typeof window !== "undefined") {
@@ -118,14 +137,21 @@ export function HomeShell({
       void runAnalyse(trimmed);
       return;
     }
-    if (cached) {
+    // For signed-in users, never auto-restore a cached result on / — the
+    // analysis lives on /analyse now, and showing a ghost result under the
+    // dashboard was confusing. Guests still get back-nav cache restoration
+    // for the public landing flow.
+    if (!signedIn && cached) {
       setResult(cached.result);
       setOriginalText(cached.text);
       setProductSource(cached.productSource ?? null);
     }
     setHydrated(true);
+    // We depend on `initialInci` so that staying on `/` while the search-param
+    // changes (legacy /?inci= flow) re-triggers analysis. Without this dep
+    // the effect runs only on first mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialInci]);
 
   async function runAnalyse(text: string) {
     const trimmed = text.trim();
@@ -251,36 +277,49 @@ export function HomeShell({
     return null;
   }
 
-  // Signed-in users see the dashboard at the top of /; the hero/search zone is
-  // a guest-only landing element. We still mount HomeShell so the ?inci= flow
-  // (paste → analyse) keeps working — processing overlay is fixed-position and
-  // the result view renders below — but we render nothing when idle.
-  if (signedIn && !result) {
+  // Signed-in users never see the hero/search section — they have the
+  // ScanSheet (sidebar / mobile FAB) to pick a flow, and the inputs render
+  // inline inside that modal. HomeShell stays mounted only to handle the
+  // ?inci= → analyse → result handoff: show the fixed-position overlay while
+  // processing, then the result panel.
+  if (signedIn) {
+    if (result) return renderResult();
+    if (processing.active) {
+      return (
+        <ProcessingOverlay
+          totalMs={processing.budget}
+          headline="On décode la composition…"
+        />
+      );
+    }
     return null;
   }
 
-  if (result) {
+  if (result) return renderResult();
+
+  function renderResult() {
+    // Build a single human-readable label from the product source (brand +
+    // product name), falling back to the panel's own "Analyse de votre liste"
+    // when nothing was found.
+    const productLabel = productSource
+      ? [productSource.brand, productSource.productName].filter(Boolean).join(" ").trim() || null
+      : null;
     return (
-      <main className="mx-auto w-full max-w-6xl flex-1 px-6 pb-16">
-        <div className="pt-4">
-          <button
-            type="button"
-            onClick={reset}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink"
-          >
-            <span aria-hidden>←</span> Nouvelle analyse
-          </button>
-        </div>
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-16 lg:px-8">
         <div id="pdf-root" className="mt-4">
-          {productSource ? (
-            <ProductHero
-              source={productSource.source}
-              sourceUrl={productSource.sourceUrl}
-              brand={productSource.brand}
-              productName={productSource.productName}
+          {result ? (
+            <AnalyseResultPanel
+              result={result}
+              originalText={originalText}
+              productLabel={productLabel}
+              productSource={productSource ? {
+                source: productSource.source,
+                sourceUrl: productSource.sourceUrl,
+                brand: productSource.brand,
+              } : null}
+              onResetHome={reset}
             />
           ) : null}
-          <AnalyseResultPanel result={result} originalText={originalText} />
         </div>
       </main>
     );

@@ -14,6 +14,8 @@ export type SynthesisInput = {
     primary_function: string | null;
     tags: string[] | null;
     position_idx: number;
+    /** Short human label like "avant parfum" / "après conservateur" — null when not applicable. */
+    threshold_label?: string | null;
   }[];
   counts: Record<string, number>;
   score: number;
@@ -23,12 +25,17 @@ export type SynthesisInput = {
   userId?: string | null;
 };
 
+// Bump this any time `buildPrompt()` changes meaningfully — old cached
+// outputs keyed on the previous version will no longer be served.
+const PROMPT_VERSION = 3;
+
 function makeCacheKey(input: SynthesisInput): string {
   const list = input.enriched
     .map((r) => `${(r.name ?? r.input_raw).trim().toUpperCase()}:${r.color_rating ?? "?"}`)
     .join("|");
   const productKey = input.productLabel ? `|p=${input.productLabel.toLowerCase()}` : "";
-  const hash = crypto.createHash("sha256").update(list + productKey).digest("hex").slice(0, 32);
+  const versionKey = `|v=${PROMPT_VERSION}`;
+  const hash = crypto.createHash("sha256").update(list + productKey + versionKey).digest("hex").slice(0, 32);
   return `synthesis:${hash}`;
 }
 
@@ -36,79 +43,98 @@ function buildPrompt(input: SynthesisInput): { system: string; user: string } {
   const red = input.enriched.filter((r) => r.color_rating === "Rouge");
   const orange = input.enriched.filter((r) => r.color_rating === "Orange");
   const yellow = input.enriched.filter((r) => r.color_rating === "Jaune");
-  const mainIngredients = input.enriched
-    .slice(0, 3)
-    .map((r) => `${r.name ?? r.input_raw}${r.primary_function ? ` (${r.primary_function})` : ""}`);
-  const greenHero = input.enriched.find(
-    (r) => r.color_rating === "Vert" && r.primary_function && r.name,
-  );
-  const greenHeroLine = greenHero
-    ? `${greenHero.name} (${greenHero.primary_function})`
-    : "(aucun ingrédient vert avec fonction connue)";
+  const green = input.enriched.filter((r) => r.color_rating === "Vert");
   const positives = input.observations.filter((o) => o.status === "absent").map((o) => o.label);
-  const presents = input.observations
-    .filter((o) => o.status === "present")
-    .map((o) => `${o.label} (${o.count})`);
   const total =
     (input.counts.Vert ?? 0) +
     (input.counts.Jaune ?? 0) +
     (input.counts.Orange ?? 0) +
     (input.counts.Rouge ?? 0);
 
+  // Top 3 ingredients by position — these define the "character" of the
+  // formula (water-based, oil-based, alcohol-heavy, etc.). The model uses
+  // them to write the opening sentence with personality.
+  const top3 = input.enriched
+    .slice()
+    .sort((a, b) => a.position_idx - b.position_idx)
+    .slice(0, 3)
+    .map((r) => `${r.name ?? r.input_raw}${r.primary_function ? ` (${r.primary_function})` : ""}`);
+
+  // A handful of green ingredients with a known function — the model picks
+  // ONE if it has something genuinely interesting to say. Optional.
+  const greenWithFunction = green
+    .filter((r) => r.primary_function && r.name)
+    .slice(0, 6)
+    .map((r) => `- ${r.name} — ${r.primary_function}`);
+
+  // Helper: full data per ingredient with position hint when available.
+  const fmt = (r: SynthesisInput["enriched"][number]) =>
+    `- ${r.name ?? r.input_raw} — ${r.primary_function ?? "fonction inconnue"}${r.tags && r.tags.length ? ` [tags: ${r.tags.slice(0, 3).join(", ")}]` : ""}${r.threshold_label ? ` [position: ${r.threshold_label}]` : ""}`;
+
   const system =
-    "Tu es un analyste INCI FACTUEL — pas un rédacteur marketing, pas un vendeur. Tu écris pour le grand public français à partir de données fournies, JAMAIS d'invention. Tu énonces les faits chiffrés et tu attires l'attention sur les ingrédients problématiques sans dramatiser. Tu n'utilises JAMAIS de langage marketing (pas de 'mise sur', 'rassurant', 'idéal', 'généreux', 'simplicité', 'apporte', 'offre', 'agréable'…). Tu ne décris JAMAIS la texture ni le parfum. Tu ne recommandes JAMAIS d'acheter ni d'éviter le produit. Tu ne donnes AUCUN conseil médical. Tu structures TOUJOURS ta sortie en deux blocs : un paragraphe court de 2-3 phrases (prose, pas de puces) qui (a) donne le constat chiffré, (b) cite UN bon ingrédient avec sa fonction, (c) FINIT par une phrase de transition introduisant la liste, puis une ligne vide, puis un bloc de puces (chaque ligne commençant par '- '). Tu encadres les noms INCI avec **. Tu varies les formulations d'un produit à l'autre.";
+    "Tu écris la synthèse d'une analyse cosmétique INCI pour un consommateur français. Style : comme un pote bien informé qui prend 30 secondes pour t'expliquer ce qu'il y a dans le produit. Accessible à un lecteur de 15 ans — phrases courtes, vocabulaire simple, jamais enfantin. Tu peux mentionner brièvement ce qu'est un ingrédient (sa famille : 'alcool dénaturé', 'tensioactif', 'huile minérale', 'silicone', 'conservateur', 'actif hydratant'…) et à quoi il sert généralement en cosmétique — c'est de la connaissance produit, pas de l'invention. Tu peux ajouter UN détail intéressant ou utile par ingrédient flaggé pour que ça ne soit pas un listing sec. Tu n'évalues JAMAIS le produit dans son ensemble ('bon', 'mauvais', 'à éviter', 'à acheter'). Tu attires l'attention, tu laisses décider. Pas de marketing ('idéal', 'généreux', 'rassurant', 'agréable'…), pas de description sensorielle (texture, odeur, fini), pas d'emoji, pas de conseil médical. Tu utilises **gras** uniquement pour les noms INCI.";
 
-  const user = `Tu rédiges la synthèse d'une analyse INCI cosmétique pour un consommateur français.
-Tu es un analyste FACTUEL, pas un rédacteur marketing. Pas de blabla, pas de mise en valeur du produit.
+  const user = `Rédige la synthèse de l'analyse INCI ci-dessous. Le but : que le lecteur trouve ça intéressant à lire ET concret — pas un résumé sec des chiffres.
 
-STRUCTURE OBLIGATOIRE — DEUX BLOCS SÉPARÉS PAR UNE LIGNE VIDE.
+STRUCTURE — deux blocs séparés par une ligne vide.
 
-BLOC 1 — Paragraphe court (2 à 3 phrases MAXIMUM, en prose, AUCUNE puce)
-Ce paragraphe doit dire dans cet ordre logique :
-  (a) Le constat chiffré : combien d'ingrédients verts (bon signal) vs combien d'orange ou rouges (à examiner).
-      Ex : "Sur les ${total} ingrédients reconnus, ${input.counts.Vert} sont classés vert et ${input.counts.Orange + input.counts.Rouge} demandent une attention particulière."
-  (b) UNE phrase qui cite UN seul bon ingrédient présent et dit BREF à quoi il sert (pas d'éloge).
-      Ex : "**${greenHero?.name ?? "[ingrédient vert]"}** y joue son rôle d'${greenHero?.primary_function ?? "[fonction]"}."
-  (c) UNE phrase de TRANSITION qui introduit la liste à puces qui suit.
-      Cette phrase doit ressembler à : "Voici les ingrédients sur lesquels attirer votre attention :" ou "Les points de vigilance ci-dessous :" ou "Voici le détail des ingrédients problématiques :".
+BLOC 1 — Paragraphe d'intro (2 à 3 phrases, prose, pas de puce)
+- Phrase 1 : caractérise la formule en t'appuyant sur les 3 premiers ingrédients listés ci-dessous. Donne au lecteur une idée de "à quoi il a affaire" sans juger. Ex : "Cette formule est dominée par l'eau et le glycérine — un duo classique pour rester légère et hydratante." OU "Le produit s'ouvre sur une base d'huile minérale et de silicone, profil typique d'un soin gainant." Pas de mention de note, pas de "bon signal", pas de "rassurant".
+- Phrase 2 : le constat chiffré, naturel. Ex : "Sur les ${total} ingrédients identifiés, ${input.counts.Vert ?? 0} sont sans risque connu et ${(input.counts.Jaune ?? 0) + (input.counts.Orange ?? 0) + (input.counts.Rouge ?? 0)} demandent un coup d'œil."
+- Phrase 3 (transition) : courte, vers les puces. Ex : "Voici ce qui mérite ton attention :" ou "Les points à connaître :".
 
-BLOC 2 — Liste en PUCES (chaque ligne commence par "- ")
-- Cite CHAQUE ingrédient ROUGE : "- **NOM_INCI** ([fonction]) : [1 phrase courte expliquant la pénalité]"
-- Cite CHAQUE ingrédient ORANGE (limite 6, sinon les 5 premiers + "- et N autres") : "- **NOM_INCI** ([fonction]) : [1 phrase courte sur la pénalité]"
-- Si plus de 3 jaunes notables, regroupe-les en UNE puce : "- Quelques ingrédients jaunes à surveiller : **NOM1**, **NOM2**, **NOM3**…"
-- Si pertinent, UNE puce d'absences : "- Sans **parabens**, sans **sulfates**, sans **silicones**, sans **huiles minérales**" — uniquement les absences réelles.
-- Termine par UNE puce factuelle "- À savoir : …" (ex. test sur petite zone, position dans la liste = concentration). Pas de conseil médical.
+BLOC 2 — Puces (chaque ligne commence par "- "). Vise 4 à 6 puces qui apportent vraiment quelque chose.
 
-CE QUE TU NE DOIS JAMAIS FAIRE
-- AUCUN langage marketing. Mots et tournures INTERDITS : "mise sur", "rassurante", "rassurant", "généreuse", "généreux", "idéal", "idéale", "parfait", "parfaite", "doux comme caresse", "simplicité", "merites", "vanter", "offre", "apporte un confort", "soin idéal", "à appliquer matin et soir", "en confiance", "agréable".
-- AUCUNE recommandation d'achat ou d'évitement ("à acheter", "à éviter", "produit dangereux", "produit excellent", "à recommander").
-- AUCUNE description sensorielle (texture, parfum, agréable, doux, fondant, onctueux…).
-- AUCUNE phrase qui déduit un usage ("crème pour peau sèche", "produit anti-âge"…) — concentre-toi UNIQUEMENT sur les ingrédients.
-- AUCUN conseil médical, AUCUN emoji.
-- Tu ne dis JAMAIS "ce produit est bon" ni "ce produit est mauvais". Tu énonces les faits ingrédient par ingrédient.
-- Encadre TOUJOURS les noms INCI cités avec **.
-- VARIE les formulations entre produits — ne réutilise pas mécaniquement la même phrase d'attaque.
+Pour CHAQUE ingrédient ROUGE et ORANGE (limite combinée : 4 puces, garde les plus parlants si plus) :
+"- **NOM** (famille simple + rôle) : un petit fait sur ce qu'il est ou pourquoi il est utilisé, puis l'effet/le souci concret. Si une position [avant/après parfum/conservateur] est dispo, glisse-la EN FIN de phrase pour donner un indice de quantité, sans expliquer la règle."
 
-DONNÉES FACTUELLES
-${input.productLabel ? `Produit analysé : ${input.productLabel}` : "Produit : composition collée par l'utilisateur (pas de nom fourni)."}
-Note globale : ${input.score.toFixed(1)}/20 (${input.scoreLabel})
-Comptes : Vert ${input.counts.Vert}, Jaune ${input.counts.Jaune}, Orange ${input.counts.Orange}, Rouge ${input.counts.Rouge}
-3 premiers ingrédients (concentration) : ${mainIngredients.join(", ") || "(non disponibles)"}
-Ingrédient vert "hero" suggéré pour le paragraphe : ${greenHeroLine}
+Exemple de bonne puce :
+"- **Alcohol Denat.** (alcool dénaturé, sert à fluidifier la texture et accélérer la pénétration) : courant dans les soins légers, mais peut tirailler les peaux sensibles à l'usage répété — et ici il apparaît avant le parfum, donc présent en bonne quantité."
 
-Ingrédients ROUGES :
-${red.length ? red.map((r) => `- ${r.name} — ${r.primary_function ?? "fonction inconnue"}`).join("\n") : "(aucun)"}
+JAUNES :
+- Si 1 à 3 jaunes notables, fais 1 puce par jaune (format identique mais plus court).
+- Si plus de 3 jaunes, regroupe-les en UNE puce : "- À surveiller selon les peaux sensibles : **NOM1**, **NOM2**, **NOM3**…"
 
-Ingrédients ORANGE :
-${orange.length ? orange.map((r) => `- ${r.name} — ${r.primary_function ?? "fonction inconnue"}`).join("\n") : "(aucun)"}
+BONUS — Ajoute si pertinent :
+- UNE puce "Bon à savoir" sur UN ingrédient VERT vraiment notable (pas l'eau, pas la glycérine — choisis un actif intéressant comme **Niacinamide**, **Acide Hyaluronique**, **Panthénol**, **Centella Asiatica**…). Ex : "- Bon à savoir : le **Niacinamide** présent ici est un actif populaire pour resserrer les pores et apaiser les rougeurs."
+- UNE puce d'absences si la liste 'Absences réelles' n'est pas vide : "- Sans **parabens**, sans **sulfates**, sans **silicones**…" — uniquement les absences fournies, ne pas inventer.
 
-Ingrédients JAUNES (jusqu'à 8 cités) :
-${yellow.length ? yellow.slice(0, 8).map((r) => r.name).join(", ") + (yellow.length > 8 ? ` et ${yellow.length - 8} autres` : "") : "(aucun)"}
+CLOSING — TERMINE par UNE puce qui invite à la réflexion. Ex : "- À toi de voir si ces ingrédients te conviennent — ça dépend aussi de ta peau et de la fréquence d'usage." OU "- Au final, tout dépend de comment tu utilises le produit et de la sensibilité de ta peau."
 
-Observations positives (absences) : ${positives.join(", ") || "(aucune)"}
-Observations présentes : ${presents.join(", ") || "(aucune)"}
+CONTRAINTES STRICTES
+- Total puces (bloc 2) : 4 à 7 maximum.
+- Chaque puce : 1 à 2 phrases courtes max. Pas de pavé.
+- Pas de jugement global du produit. Pas de "à éviter", "recommandé", "à acheter".
+- Pas de "vous devez", "il faut". Préfère "tu peux", "à toi de voir", "selon ta peau".
+- Pas de jargon médical (dermatite, eczéma, comédogène, sébo-régulateur…). Préfère "peut irriter", "peut boucher les pores", "régule l'excès de sébum".
+- Pas d'emoji, pas d'astérisque autre que ceux du **gras INCI**.
+- Si un ingrédient n'a aucune raison concrète d'être flaggé (fonction inconnue, aucun tag), passe-le.
+- Si rouge + orange + jaune sont tous vides : bloc 2 = puce "Bon à savoir" (si possible) + puce d'absences (si possible) + puce de closing.
+- VARIE l'attaque du bloc 1 d'une analyse à l'autre — ne réutilise pas une phrase type.
 
-Rédige maintenant la synthèse. Bloc 1 (prose, 2-3 phrases, finis par la phrase de transition), ligne vide, puis Bloc 2 (puces) :`;
+DONNÉES
+${input.productLabel ? `Produit : ${input.productLabel}` : "Produit : liste collée par l'utilisateur, pas de nom de produit fourni."}
+Note : ${input.score.toFixed(1)}/20 (${input.scoreLabel})
+Comptes : Vert=${input.counts.Vert ?? 0}, Jaune=${input.counts.Jaune ?? 0}, Orange=${input.counts.Orange ?? 0}, Rouge=${input.counts.Rouge ?? 0}, total reconnu=${total}.
+
+3 premiers ingrédients (à utiliser pour caractériser la formule dans la phrase 1 du bloc 1) :
+${top3.length ? top3.map((t, i) => `${i + 1}. ${t}`).join("\n") : "(non disponible)"}
+
+ROUGES :
+${red.length ? red.map(fmt).join("\n") : "(aucun)"}
+
+ORANGE :
+${orange.length ? orange.map(fmt).join("\n") : "(aucun)"}
+
+JAUNES (jusqu'à 8 cités) :
+${yellow.length ? yellow.slice(0, 8).map(fmt).join("\n") + (yellow.length > 8 ? `\n- et ${yellow.length - 8} autres` : "") : "(aucun)"}
+
+VERTS notables (utilise UN seul pour la puce "Bon à savoir" si pertinent — ignore eau / glycérine / propanediol / sodium hydroxide / les pH ajusteurs) :
+${greenWithFunction.length ? greenWithFunction.join("\n") : "(aucun avec fonction connue)"}
+
+Absences réelles à mentionner si tu fais la puce d'absences : ${positives.join(", ") || "(aucune)"}
+
+Écris maintenant la synthèse en suivant la structure (Bloc 1 prose, ligne vide, Bloc 2 puces). Pas de titre, pas de préambule, pas de signature.`;
 
   return { system, user };
 }

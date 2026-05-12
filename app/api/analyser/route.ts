@@ -231,7 +231,7 @@ export async function POST(req: NextRequest) {
   // (fuzzy 0.55..0.90) are NOT treated as matches: the candidate is kept on
   // the side so the UI can show "Did you mean: X?" but the ingredient is
   // counted as "unknown" in stats and excluded from the score.
-  const enriched = rows.map((r) => {
+  const rawEnriched = rows.map((r) => {
     const tok = tokens[r.position_idx];
     const isSuggestion = r.match_kind === "suggestion";
     const confidence =
@@ -248,6 +248,32 @@ export async function POST(req: NextRequest) {
       confidence,
     };
   });
+
+  // Capture FR/EN alias matches BEFORE we dedupe — the UI surfaces these as
+  // "Doublons FR/EN détectés (Water → Aqua, Eau → Aqua)" so the user sees
+  // why their pasted list shrank.
+  const aliasesUsed = rawEnriched
+    .filter((r) => r.match_kind === "alias")
+    .map((r) => ({ from: r.input_raw, to: r.name }));
+
+  // Dedupe by canonical INCI id (keep the earliest position). Without this,
+  // pasting "AQUA, WATER, EAU" produces three identical "Aqua" rows in the
+  // results table and triple-counts a single ingredient in score/spectrum/
+  // observations. Suggestions and unmatched inputs (effective_inci_id null)
+  // pass through untouched — each user-typed token is unique on its own.
+  // Positions are renumbered to stay contiguous so the spectrum and the
+  // threshold-context computation downstream don't see gaps.
+  const seenInciIds = new Set<string | number>();
+  const enriched = rawEnriched
+    .slice()
+    .sort((a, b) => a.position_idx - b.position_idx)
+    .filter((r) => {
+      if (!r.effective_inci_id) return true;
+      if (seenInciIds.has(r.effective_inci_id)) return false;
+      seenInciIds.add(r.effective_inci_id);
+      return true;
+    })
+    .map((r, i) => ({ ...r, position_idx: i }));
 
   // Counters (suggestions count as "Non reconnu" — they did not match)
   const counts: Record<string, number> = { Vert: 0, Jaune: 0, Orange: 0, Rouge: 0, "Non reconnu": 0 };
@@ -368,11 +394,6 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Aliases used (FR/EN equivalents that were resolved)
-  const aliasesUsed = enriched
-    .filter((r) => r.match_kind === "alias")
-    .map((r) => ({ from: r.input_raw, to: r.name }));
-
   // Suggestions (fuzzy 0.55..0.90) — propose "Did you mean: X?" to the UI
   const suggestions = enriched
     .filter((r) => r.match_kind === "suggestion" && r.suggested_name)
@@ -481,6 +502,7 @@ export async function POST(req: NextRequest) {
         primary_function: r.primary_function,
         tags: r.effective_tags,
         position_idx: r.position_idx,
+        threshold_label: thresholdFor(r.position_idx).label,
       })),
       counts,
       score,
@@ -540,6 +562,8 @@ export async function POST(req: NextRequest) {
   // Auto-save the analysis for signed-in users + AI categorize (fire-and-forget).
   // We do this AFTER preparing the response so a failure here never blocks
   // the user. Categorization runs in the background and is patched in later.
+  // Errors are logged server-side — they used to be swallowed silently, which
+  // hid a months-long RLS misconfiguration (zero rows ever persisted).
   try {
     const cookieStore = await cookies();
     const sb = supabaseServer(cookieStore);
@@ -552,23 +576,37 @@ export async function POST(req: NextRequest) {
       let category: ProductCategory | null = null;
       try {
         category = await categorizeProduct(top5, user.id);
-      } catch {
+      } catch (catErr) {
+        console.warn("[analyser] categorize failed:", (catErr as Error).message);
         category = null;
       }
       const autoName = body.productLabel?.slice(0, 200)
         ?? `Analyse du ${new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
-      await sb.schema("cosme_check").from("analyses").insert({
-        user_id: user.id,
-        name: autoName,
-        product_label: body.productLabel?.slice(0, 200) ?? null,
-        category,
-        input_text: text,
-        result_json: responsePayload,
-        score: Number(score.toFixed(2)),
-      });
+      const { error: insertError } = await sb
+        .schema("cosme_check")
+        .from("analyses")
+        .insert({
+          user_id: user.id,
+          name: autoName,
+          product_label: body.productLabel?.slice(0, 200) ?? null,
+          category,
+          input_text: text,
+          result_json: responsePayload,
+          score: Number(score.toFixed(2)),
+        });
+      if (insertError) {
+        // Surface the error so RLS / column-mismatch regressions are obvious
+        // in the server logs instead of being silently swallowed.
+        console.error(
+          "[analyser] history insert failed:",
+          insertError.message,
+          insertError.code ? `(${insertError.code})` : "",
+        );
+      }
     }
-  } catch {
-    // never let history save break the analysis response
+  } catch (err) {
+    console.error("[analyser] history save threw:", (err as Error).message);
+    // still don't propagate — the analysis response must reach the client
   }
 
   return NextResponse.json(responsePayload);

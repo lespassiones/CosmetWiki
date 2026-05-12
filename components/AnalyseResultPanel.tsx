@@ -11,192 +11,398 @@ import { MobileExpander } from "./analyse/MobileExpander";
 // Delay (ms) after panel mount before each block becomes visible.
 // Synthesis streaming and score animation start at the same time as their
 // Reveal so the motion is seen as the user looks at the block.
-const REVEAL_SCORE_MS = 750;
-const REVEAL_SYNTHESIS_MS = 1100;
+const REVEAL_SCORE_MS = 400;
+const REVEAL_SYNTHESIS_MS = 900;
+
+export type BreadcrumbItem = {
+  label: string;
+  href?: string;
+  onClick?: () => void;
+};
 
 export function AnalyseResultPanel({
   result,
   originalText,
+  productLabel = null,
+  productSource = null,
+  onResetHome,
+  breadcrumb,
 }: {
   result: AnalyseResponse;
   originalText: string;
+  /**
+   * Human title for the analysis. When null and there's no productSource we
+   * fall back to "Analyse de votre liste" (pasted-INCI flow).
+   */
+  productLabel?: string | null;
+  productSource?: {
+    source: string;
+    sourceUrl: string | null;
+    brand: string | null;
+  } | null;
+  /**
+   * Optional handler fired when the user clicks "Accueil" in the default
+   * breadcrumb. Used by HomeShell to clear cached result state. Ignored
+   * when `breadcrumb` is provided.
+   */
+  onResetHome?: () => void;
+  /**
+   * Override the breadcrumb trail. Last item is the current page (not
+   * clickable). When omitted, defaults to `[Accueil, Nouvelle analyse]`
+   * with the home item wired to `onResetHome` if provided.
+   */
+  breadcrumb?: BreadcrumbItem[];
 }) {
+  const title = productLabel?.trim() || "Analyse de votre liste";
+
+  const trail: BreadcrumbItem[] = breadcrumb ?? [
+    { label: "Accueil", href: "/", onClick: onResetHome },
+    { label: "Nouvelle analyse" },
+  ];
+
   return (
     <section id="analyse-results" className="pt-2">
-      <div data-pdf-hide className="flex flex-wrap items-center justify-end gap-2 pt-4">
-        <ToolbarButton onClick={() => downloadPdf(result, originalText)}>
-          <DownloadIcon className="h-3.5 w-3.5" /> Télécharger en PDF
-        </ToolbarButton>
-        <ToolbarButton onClick={() => shareReport(originalText)}>
-          <ShareIcon className="h-3.5 w-3.5" /> Partager
-        </ToolbarButton>
-      </div>
+      <TitleBar
+        title={title}
+        productSource={productSource}
+        onDownload={() => downloadPdf(result, originalText)}
+        onShare={() => shareReport(originalText)}
+        breadcrumb={trail}
+      />
 
-      {/* Mobile-only bento layout : Stats grid first, then Score below.
-          Score is secondary — the observations and ingredient counts are the
-          primary signal. 2 big boxes (Ingrédients identifiés + Rouge) on the
-          left and 3 small boxes (Vert / Jaune / Orange) stacked on the right. */}
-      <div className="mt-6 sm:hidden">
-        <div className="grid grid-cols-2 items-stretch gap-3">
-          <div className="flex flex-col gap-3">
-            <Reveal delayMs={0} className="flex flex-1 flex-col">
-              <StatCard
-                label="Ingrédients identifiés"
-                muted
-                className="flex-1"
-              >
-                <p className="text-3xl font-semibold tabular-nums text-ink">
-                  {result.counts.matched}
-                </p>
-                <p className="mt-0.5 text-[12px] text-ink-subtle">
-                  sur {result.counts.total} ingrédients
-                </p>
-              </StatCard>
-            </Reveal>
-            <Reveal delayMs={600} className="flex flex-1 flex-col">
-              <StatCard
-                label="Rouge"
-                dot="bg-rose-500"
-                className="flex-1"
-              >
-                <p className="text-3xl font-semibold tabular-nums text-ink">
-                  {result.counts.rouge}
-                </p>
-                <p className="mt-0.5 text-[12px] text-ink-subtle">
-                  {pct(result.counts.rouge, result.counts.total)} %
-                </p>
-              </StatCard>
-            </Reveal>
-          </div>
-          <div className="flex flex-col gap-3">
-            <Reveal delayMs={150} className="flex flex-1 flex-col">
-              <SmallStatCard
-                label="Vert"
-                dot="bg-emerald-500"
-                count={result.counts.vert}
-                pct={pct(result.counts.vert, result.counts.total)}
-              />
-            </Reveal>
-            <Reveal delayMs={300} className="flex flex-1 flex-col">
-              <SmallStatCard
-                label="Jaune"
-                dot="bg-amber-400"
-                count={result.counts.jaune}
-                pct={pct(result.counts.jaune, result.counts.total)}
-              />
-            </Reveal>
-            <Reveal delayMs={450} className="flex flex-1 flex-col">
-              <SmallStatCard
-                label="Orange"
-                dot="bg-orange-500"
-                count={result.counts.orange}
-                pct={pct(result.counts.orange, result.counts.total)}
-              />
-            </Reveal>
-          </div>
-        </div>
-        <div className="mt-3">
-          <Reveal delayMs={REVEAL_SCORE_MS}>
-            <ScoreCard
-              score={result.score}
-              label={result.scoreLabel}
-              tone={result.scoreTone}
-              startDelayMs={REVEAL_SCORE_MS}
-            />
-          </Reveal>
-        </div>
-      </div>
+      {/*
+        Layout via grid-template-areas — same DOM order regardless of
+        viewport, but the placement of each section differs:
 
-      {/* sm+ layout : 6 cards in a horizontal row (3 cols on tablet,
-          5+1 on desktop). Same as before. */}
-      <div className="mt-6 hidden gap-3 sm:grid sm:grid-cols-3 lg:grid-cols-[repeat(5,minmax(0,1fr))_1.3fr]">
-        <Reveal delayMs={0}>
-          <StatCard label="Ingrédients identifiés" muted>
-            <p className="text-3xl font-semibold tabular-nums text-ink">
-              {result.counts.matched}
-            </p>
-            <p className="mt-0.5 text-[12px] text-ink-subtle">
-              sur {result.counts.total} ingrédients
-            </p>
-          </StatCard>
+        MOBILE (single column, user-requested order)
+          counts → score → synthesis → spectrum → observations → items
+
+        DESKTOP (3-column bento)
+          col 1 (1fr) : score → spectrum → counts
+          col 2 (1fr) : observations on top, synthesis spanning 2 rows below
+          col 3 (1.3fr): items spanning the full height
+      */}
+      <div className="mt-6 grid gap-4 grid-cols-1 [grid-template-areas:'counts''score''synthesis''spectrum''observations''items'] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:[grid-template-areas:'score_observations_items''spectrum_synthesis_items''counts_synthesis_items']">
+        <Reveal delayMs={0} className="[grid-area:counts]">
+          <CountsStrip counts={result.counts} />
         </Reveal>
-        <Reveal delayMs={150}>
-          <StatCard label="Vert" dot="bg-emerald-500">
-            <p className="text-3xl font-semibold tabular-nums text-ink">
-              {result.counts.vert}
-            </p>
-            <p className="mt-0.5 text-[12px] text-ink-subtle">
-              {pct(result.counts.vert, result.counts.total)} %
-            </p>
-          </StatCard>
-        </Reveal>
-        <Reveal delayMs={300}>
-          <StatCard label="Jaune" dot="bg-amber-400">
-            <p className="text-3xl font-semibold tabular-nums text-ink">
-              {result.counts.jaune}
-            </p>
-            <p className="mt-0.5 text-[12px] text-ink-subtle">
-              {pct(result.counts.jaune, result.counts.total)} %
-            </p>
-          </StatCard>
-        </Reveal>
-        <Reveal delayMs={450}>
-          <StatCard label="Orange" dot="bg-orange-500">
-            <p className="text-3xl font-semibold tabular-nums text-ink">
-              {result.counts.orange}
-            </p>
-            <p className="mt-0.5 text-[12px] text-ink-subtle">
-              {pct(result.counts.orange, result.counts.total)} %
-            </p>
-          </StatCard>
-        </Reveal>
-        <Reveal delayMs={600}>
-          <StatCard label="Rouge" dot="bg-rose-500">
-            <p className="text-3xl font-semibold tabular-nums text-ink">
-              {result.counts.rouge}
-            </p>
-            <p className="mt-0.5 text-[12px] text-ink-subtle">
-              {pct(result.counts.rouge, result.counts.total)} %
-            </p>
-          </StatCard>
-        </Reveal>
-        <Reveal delayMs={REVEAL_SCORE_MS}>
-          <ScoreCard
+
+        <Reveal delayMs={REVEAL_SCORE_MS} className="[grid-area:score]">
+          <BigScoreCard
             score={result.score}
             label={result.scoreLabel}
             tone={result.scoreTone}
+            matched={result.counts.matched}
+            total={result.counts.total}
             startDelayMs={REVEAL_SCORE_MS}
           />
         </Reveal>
-      </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1.2fr]">
-        <Reveal delayMs={950}>
+        <Reveal delayMs={REVEAL_SYNTHESIS_MS} className="[grid-area:synthesis]">
+          <MobileExpander
+            expandLabel="Voir la synthèse complète"
+            collapsedMaxHeight={160}
+            desktopCollapsedMaxHeight={320}
+          >
+            <SynthesisCard
+              synthesis={result.synthesis}
+              items={result.items}
+              streamDelayMs={REVEAL_SYNTHESIS_MS}
+            />
+          </MobileExpander>
+        </Reveal>
+
+        {result.spectrum ? (
+          <Reveal delayMs={650} className="[grid-area:spectrum]">
+            <IngredientSpectrum
+              items={result.items}
+              top5={result.spectrum.top5}
+              top10={result.spectrum.top10}
+            />
+          </Reveal>
+        ) : null}
+
+        <Reveal delayMs={500} className="[grid-area:observations]">
           <ObservationsCard observations={result.observations} aliasesUsed={result.aliasesUsed} />
         </Reveal>
-        <Reveal delayMs={REVEAL_SYNTHESIS_MS}>
-          <div>
-            <MobileExpander expandLabel="Voir la synthèse complète" collapsedMaxHeight={110}>
-              <SynthesisCard
-                synthesis={result.synthesis}
-                items={result.items}
-                streamDelayMs={REVEAL_SYNTHESIS_MS}
-              />
-            </MobileExpander>
-          </div>
+
+        <Reveal delayMs={1000} className="[grid-area:items]">
+          <ItemsTable items={result.items} counts={result.counts} mobileLimit={5} desktopLimit={8} compact />
         </Reveal>
       </div>
-
-      {result.spectrum ? (
-        <Reveal delayMs={1100} className="mt-4 block">
-          <IngredientSpectrum top5={result.spectrum.top5} top10={result.spectrum.top10} />
-        </Reveal>
-      ) : null}
-
-      <Reveal delayMs={1300} className="mt-4 block">
-        <ItemsTable items={result.items} counts={result.counts} mobileLimit={5} />
-      </Reveal>
     </section>
+  );
+}
+
+function TitleBar({
+  title,
+  productSource,
+  onDownload,
+  onShare,
+  breadcrumb,
+}: {
+  title: string;
+  productSource: { source: string; sourceUrl: string | null; brand: string | null } | null;
+  onDownload: () => void;
+  onShare: () => void;
+  breadcrumb: BreadcrumbItem[];
+}) {
+  const brand = productSource?.brand ?? null;
+  // Standard convention: last item is the current location (not clickable).
+  const trail = breadcrumb.slice(0, -1);
+  const current = breadcrumb[breadcrumb.length - 1];
+  return (
+    <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0">
+        <nav className="flex flex-wrap items-center gap-1.5 text-[12px] text-ink-subtle" aria-label="Fil d'Ariane">
+          {trail.map((item, i) => (
+            <span key={`${item.label}-${i}`} className="inline-flex items-center gap-1.5">
+              {item.onClick ? (
+                <button type="button" onClick={item.onClick} className="rounded-md px-0.5 hover:text-ink">
+                  {item.label}
+                </button>
+              ) : item.href ? (
+                <Link href={item.href} className="hover:text-ink">{item.label}</Link>
+              ) : (
+                <span>{item.label}</span>
+              )}
+              <span aria-hidden>›</span>
+            </span>
+          ))}
+          {current ? (
+            <span className="text-ink-muted truncate max-w-[16rem]">{current.label}</span>
+          ) : null}
+        </nav>
+        {brand ? (
+          <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-pink-500/80">
+            {brand}
+          </p>
+        ) : null}
+        <h1 className="mt-1 text-balance text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+          {title}
+        </h1>
+        {productSource ? (
+          <p className="mt-1 text-[12px] text-ink-subtle">
+            Composition trouvée via{" "}
+            {productSource.sourceUrl ? (
+              <a
+                href={productSource.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-rose-500 underline underline-offset-2 hover:no-underline"
+              >
+                {productSource.source}
+              </a>
+            ) : (
+              <span className="text-rose-500">{productSource.source}</span>
+            )}
+          </p>
+        ) : null}
+      </div>
+      <div data-pdf-hide className="flex flex-wrap items-center gap-2 sm:shrink-0">
+        <ToolbarButton onClick={onDownload}>
+          <DownloadIcon className="h-3.5 w-3.5" /> Télécharger en PDF
+        </ToolbarButton>
+        <ToolbarButton onClick={onShare}>
+          <ShareIcon className="h-3.5 w-3.5" /> Partager
+        </ToolbarButton>
+      </div>
+    </header>
+  );
+}
+
+function BigScoreCard({
+  score,
+  label,
+  tone,
+  matched,
+  total,
+  startDelayMs = 0,
+}: {
+  score: number;
+  label: string;
+  tone: "green" | "amber" | "orange" | "rose";
+  matched: number;
+  total: number;
+  startDelayMs?: number;
+}) {
+  const TONE_RING: Record<string, string> = {
+    green: "stroke-emerald-500",
+    amber: "stroke-amber-500",
+    orange: "stroke-orange-500",
+    rose: "stroke-rose-500",
+  };
+  const TONE_TEXT: Record<string, string> = {
+    green: "text-emerald-600",
+    amber: "text-amber-600",
+    orange: "text-orange-600",
+    rose: "text-rose-600",
+  };
+  const radius = 46;
+  const circumference = 2 * Math.PI * radius;
+  const filled = (score / 20) * circumference;
+
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    let rafId = 0;
+    let started: number | null = null;
+    const DURATION = 1500;
+    const tick = (now: number) => {
+      if (started === null) started = now;
+      const elapsed = now - started;
+      const t = Math.min(1, elapsed / DURATION);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setProgress(eased);
+      if (t < 1) rafId = requestAnimationFrame(tick);
+    };
+    const startId = window.setTimeout(() => {
+      rafId = requestAnimationFrame(tick);
+    }, startDelayMs);
+    return () => {
+      window.clearTimeout(startId);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [startDelayMs]);
+
+  const animFilled = filled * progress;
+  const animScore = score * progress;
+
+  // Gauge SVG — reused at two sizes (small on mobile, large on desktop).
+  // Single React node so the animation only runs once per card instance.
+  const gauge = (size: "sm" | "lg") => {
+    const dim = size === "sm" ? "h-20 w-20" : "h-32 w-32";
+    const scoreTextCls = size === "sm" ? "text-base" : "text-3xl";
+    const slashCls = size === "sm" ? "text-[10px]" : "text-[13px]";
+    return (
+      <div className={`relative shrink-0 ${dim}`}>
+        <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90" aria-hidden>
+          <circle cx="60" cy="60" r={radius} className="fill-none stroke-black/[0.05]" strokeWidth="9" />
+          <circle
+            cx="60"
+            cy="60"
+            r={radius}
+            className={`fill-none ${TONE_RING[tone]}`}
+            strokeWidth="9"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference - animFilled}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <p className="flex items-baseline gap-0.5">
+            <span className={`${scoreTextCls} font-bold tabular-nums text-ink`}>
+              {animScore.toFixed(1)}
+            </span>
+            <span className={`${slashCls} font-medium text-ink-subtle`}>/20</span>
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <article className="rounded-2xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
+      {/* MOBILE — horizontal layout: label + big score + pill on the left,
+          smaller gauge on the right (mirrors the user-provided reference). */}
+      <div className="flex items-center justify-between gap-4 lg:hidden">
+        <div className="flex flex-col gap-2 min-w-0">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
+            Note globale
+          </p>
+          <p className="flex items-baseline gap-1">
+            <span className="text-3xl font-bold tabular-nums text-ink">
+              {animScore.toFixed(1)}
+            </span>
+            <span className="text-base font-medium text-ink-subtle">/20</span>
+          </p>
+          <p className={`self-start inline-flex items-center rounded-full bg-white/70 px-3 py-1 text-[12px] font-semibold ring-1 ring-white/80 ${TONE_TEXT[tone]}`}>
+            {label}
+          </p>
+          <p className="text-[11px] text-ink-subtle">
+            <span className="font-semibold text-ink">{matched}</span> / {total} ingrédients reconnus
+          </p>
+        </div>
+        {gauge("sm")}
+      </div>
+
+      {/* DESKTOP — centered layout: label on top, big gauge with score
+          inside, pill below, then the matched/total ratio. */}
+      <div className="hidden lg:flex lg:flex-col lg:items-center">
+        <p className="self-start text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
+          Note globale
+        </p>
+        <div className="mt-3">{gauge("lg")}</div>
+        <p className={`mt-3 inline-flex items-center rounded-full bg-white/70 px-3 py-1 text-[12px] font-semibold ring-1 ring-white/80 ${TONE_TEXT[tone]}`}>
+          {label}
+        </p>
+        <p className="mt-3 text-[12px] text-ink-subtle">
+          <span className="font-semibold text-ink">{matched}</span> / {total} ingrédients reconnus
+        </p>
+      </div>
+    </article>
+  );
+}
+
+function CountsStrip({ counts }: { counts: AnalyseResponse["counts"] }) {
+  const colors = [
+    { label: "Vert", count: counts.vert, dot: "bg-emerald-500", text: "text-emerald-700" },
+    { label: "Jaune", count: counts.jaune, dot: "bg-amber-400", text: "text-amber-700" },
+    { label: "Orange", count: counts.orange, dot: "bg-orange-500", text: "text-orange-700" },
+    { label: "Rouge", count: counts.rouge, dot: "bg-rose-500", text: "text-rose-700" },
+  ];
+
+  return (
+    <>
+      {/* MOBILE — prominent stats grid (first thing the user sees). Includes
+          the "Ingrédients identifiés" tile + the 4 colour counts in 2 cols. */}
+      <div className="grid grid-cols-2 gap-3 lg:hidden">
+        <article className="rounded-2xl bg-white/65 p-4 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-ink-subtle">
+            Ingrédients identifiés
+          </p>
+          <p className="mt-2 text-3xl font-bold tabular-nums text-ink">
+            {counts.matched}
+          </p>
+          <p className="mt-0.5 text-[12px] text-ink-subtle">
+            sur {counts.total} ingrédients
+          </p>
+        </article>
+        {colors.map((c) => (
+          <article
+            key={c.label}
+            className="rounded-2xl bg-white/65 p-4 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl"
+          >
+            <p className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-ink-subtle">
+              <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
+              <span className={c.text}>{c.label}</span>
+            </p>
+            <p className="mt-2 text-3xl font-bold tabular-nums text-ink">{c.count}</p>
+            <p className="mt-0.5 text-right text-[12px] text-ink-subtle tabular-nums">
+              {pct(c.count, counts.total)} %
+            </p>
+          </article>
+        ))}
+      </div>
+
+      {/* DESKTOP — compact 4-cell strip living under the score gauge in the
+          left column of the bento. */}
+      <article className="hidden lg:block rounded-2xl bg-white/65 p-3 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
+        <ul className="grid grid-cols-4 gap-2">
+          {colors.map((c) => (
+            <li key={c.label} className="flex flex-col items-center gap-0.5 py-1.5">
+              <span className="flex items-center gap-1.5">
+                <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
+                <span className={`text-[11px] font-semibold ${c.text}`}>{c.label}</span>
+              </span>
+              <span className="text-lg font-bold tabular-nums text-ink">{c.count}</span>
+              <span className="text-[10px] text-ink-subtle tabular-nums">
+                {pct(c.count, counts.total)} %
+              </span>
+            </li>
+          ))}
+        </ul>
+      </article>
+    </>
   );
 }
 
@@ -816,15 +1022,23 @@ function ItemsTable({
   items,
   counts,
   mobileLimit,
+  desktopLimit,
+  compact = false,
 }: {
   items: AnalyseItem[];
   counts: AnalyseResponse["counts"];
   /** When set, mobile only shows the first N rows + a "Voir les {total}" link. */
   mobileLimit?: number;
+  /** When set, desktop also collapses to the first N rows behind a "Voir tout". */
+  desktopLimit?: number;
+  /** Tighter typography / spacing — used when the table sits inside a narrow
+   * column of the analysis grid. */
+  compact?: boolean;
 }) {
   const [filter, setFilter] = useState<TabKey>("all");
   const [search, setSearch] = useState("");
   const [mobileExpanded, setMobileExpanded] = useState(false);
+  const [desktopExpanded, setDesktopExpanded] = useState(false);
 
   const filtered = useMemo(() => {
     let out = items;
@@ -857,7 +1071,17 @@ function ItemsTable({
 
   return (
     <article className="rounded-2xl bg-white/65 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
-      <div className="flex flex-col gap-3 border-b border-black/[0.05] p-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Header — in `compact` mode (narrow column on the analysis page) the
+          filter chips and the search bar are stacked vertically: a single
+          row would otherwise wrap chaotically with 5+ chips beside the input.
+          In the full-width case (history page etc.) we keep them on one row. */}
+      <div
+        className={`border-b border-black/[0.05] p-4 ${
+          compact
+            ? "flex flex-col gap-3"
+            : "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        }`}
+      >
         <div className="-mb-px flex flex-wrap gap-1 overflow-x-auto">
           {tabs.map((t) => {
             const active = t.key === filter;
@@ -867,7 +1091,7 @@ function ItemsTable({
                 key={t.key}
                 type="button"
                 onClick={() => setFilter(t.key)}
-                className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full ${compact ? "px-2.5 py-1 text-[12px]" : "px-3 py-1.5 text-[13px]"} font-medium transition-colors ${
                   active
                     ? `${tone.activeBg} text-white`
                     : `text-ink-muted ${tone.inactiveHover}`
@@ -886,7 +1110,7 @@ function ItemsTable({
           })}
         </div>
 
-        <label className="relative w-full sm:w-64">
+        <label className={`relative ${compact ? "w-full" : "w-full sm:w-64"}`}>
           <SearchIcon className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-subtle" aria-hidden />
           <input
             type="search"
@@ -921,34 +1145,43 @@ function ItemsTable({
                   mobileLimit !== undefined
                   && !mobileExpanded
                   && idx >= mobileLimit;
+                const hiddenOnDesktop =
+                  desktopLimit !== undefined
+                  && !desktopExpanded
+                  && idx >= desktopLimit;
+                let hiddenCls = "";
+                if (hiddenOnMobile && hiddenOnDesktop) hiddenCls = "hidden";
+                else if (hiddenOnMobile) hiddenCls = "hidden lg:table-row";
+                else if (hiddenOnDesktop) hiddenCls = "lg:hidden";
+                const cellPad = compact ? "px-3 py-2" : "px-5 py-3";
                 return (
                 <tr
                   key={`${i.position}-${i.input}`}
                   id={`ingredient-row-${i.position}`}
-                  className={`border-t border-black/[0.04] transition-colors hover:bg-rose-50/30 scroll-mt-24 ${hiddenOnMobile ? "hidden lg:table-row" : ""}`}
+                  className={`border-t border-black/[0.04] transition-colors hover:bg-rose-50/30 scroll-mt-24 ${hiddenCls}`}
                 >
-                  <td className="px-5 py-3">
-                    <div className="font-semibold text-ink">
+                  <td className={cellPad}>
+                    <div className={`font-semibold text-ink ${compact ? "text-[13px]" : ""}`}>
                       {prettyName(i.name ?? i.input)}
                     </div>
                     {i.translationFr ? (
-                      <div className="text-[12px] text-ink-muted">{i.translationFr}</div>
+                      <div className="text-[11px] text-ink-muted">{i.translationFr}</div>
                     ) : i.matchKind === null ? (
-                      <div className="text-[12px] text-ink-subtle">Non reconnu</div>
+                      <div className="text-[11px] text-ink-subtle">Non reconnu</div>
                     ) : null}
                   </td>
-                  <td className="px-5 py-3 text-ink-muted max-md:hidden">
+                  <td className={`${cellPad} text-ink-muted max-md:hidden ${compact ? "hidden xl:table-cell" : ""}`}>
                     {i.primaryFunction || "—"}
                   </td>
-                  <td className="px-5 py-3">
+                  <td className={cellPad}>
                     <ColorChip rating={i.colorRating} />
-                    {i.thresholdLabel ? (
+                    {i.thresholdLabel && !compact ? (
                       <span className="ml-2 inline-flex items-center rounded-full bg-[#F3F4F6] px-2 py-0.5 text-[10px] font-medium text-[#6B7280] align-middle">
                         {i.thresholdLabel}
                       </span>
                     ) : null}
                   </td>
-                  <td className="px-5 py-3 text-right">
+                  <td className={`${cellPad} text-right`}>
                     {i.slug ? (
                       <Link
                         href={`/i/${i.slug}?from=home`}
@@ -978,6 +1211,19 @@ function ItemsTable({
             className="text-[13px] font-medium text-[#F43F5E] hover:underline"
           >
             {mobileExpanded
+              ? "Replier ↑"
+              : `Voir les ${filtered.length} ingrédients →`}
+          </button>
+        </div>
+      ) : null}
+      {desktopLimit !== undefined && filtered.length > desktopLimit ? (
+        <div className="hidden lg:block border-t border-black/[0.04] px-5 py-3 text-center">
+          <button
+            type="button"
+            onClick={() => setDesktopExpanded((v) => !v)}
+            className="text-[13px] font-medium text-[#F43F5E] hover:underline"
+          >
+            {desktopExpanded
               ? "Replier ↑"
               : `Voir les ${filtered.length} ingrédients →`}
           </button>

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
@@ -45,37 +44,35 @@ export default async function HistoryDetailPage({
     ?? data.name
     ?? `Analyse du ${new Date(data.created_at).toLocaleDateString("fr-FR")}`;
   const result = data.result_json as AnalyseResponse;
+  const analysedAt = new Date(data.created_at).toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   return (
-    <div className="mx-auto max-w-6xl px-5 lg:px-8 py-6 lg:py-10">
-      <div className="flex items-center justify-between mb-2">
-        <Link href="/history" className="text-sm text-[#6B7280] hover:text-black">
-          ← Mon historique
-        </Link>
-        <div className="flex items-center gap-2">
-          <AddToRoutineButton analysisId={data.id} alreadyInRoutine={inRoutine} />
-          <HistoryItemActions
-            id={data.id}
-            currentName={data.name ?? displayName}
-          />
-        </div>
+    <div className="w-full px-3 lg:px-6 pt-4 pb-16">
+      {/* Action buttons floating above the title bar — rename / delete /
+          add-to-routine. The title + breadcrumb live inside the panel below. */}
+      <div className="flex items-center justify-end gap-2 mb-2">
+        <AddToRoutineButton analysisId={data.id} alreadyInRoutine={inRoutine} />
+        <HistoryItemActions id={data.id} currentName={data.name ?? displayName} />
       </div>
-
-      <h1 className="text-2xl lg:text-3xl font-bold mb-1">{displayName}</h1>
-      <p className="text-xs text-[#6B7280] mb-6">
-        Analysé le {new Date(data.created_at).toLocaleDateString("fr-FR", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
-      </p>
 
       <AnalyseResultPanel
         result={result}
         originalText={data.input_text ?? ""}
+        productLabel={displayName}
+        breadcrumb={[
+          { label: "Accueil", href: "/" },
+          { label: "Mon historique", href: "/history" },
+          { label: displayName },
+        ]}
       />
+
+      <p className="mt-3 text-[11px] text-ink-subtle">Analysé le {analysedAt}</p>
     </div>
   );
 }
