@@ -3,8 +3,8 @@ import {
   GLASS_CARD,
   GLASS_CARD_DARK,
   GLASS_CARD_HOVER,
-  GLASS_CARD_ROSE,
 } from "@/lib/ui/glass";
+import { TipCarousel } from "./TipCarousel";
 
 export type DashboardData = {
   firstName: string | null;
@@ -17,7 +17,7 @@ export type DashboardData = {
   } | null;
   routineCount: number;
   routineAvgScore: number | null;
-  tipOfTheDay: string;
+  tips: string[];
   trendingIngredients: {
     slug: string;
     name: string;
@@ -100,7 +100,7 @@ export function HomeDashboard({ data }: { data: DashboardData }) {
 
       <div className="mt-5 -mx-5 h-[2px] bg-black/30 lg:mx-0 lg:mt-6 lg:h-px lg:bg-black/[0.08]" />
 
-      <TipCard text={data.tipOfTheDay} />
+      <TipCarousel tips={data.tips} />
 
       <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
         <LastAnalysisCard last={data.lastAnalysis} />
@@ -200,18 +200,6 @@ function RoutineCard({ count, avgScore }: { count: number; avgScore: number | nu
         <HalfCircleScore score={avgScore} stroke={tone.stroke} />
       </div>
     </Link>
-  );
-}
-
-function TipCard({ text }: { text: string }) {
-  return (
-    <div className={`mt-4 ${GLASS_CARD_ROSE} p-4 lg:p-5 flex items-start gap-3`}>
-      <div className="text-xl shrink-0" aria-hidden>💡</div>
-      <div>
-        <div className="text-[11px] uppercase tracking-wide text-[#F43F5E] font-semibold">Astuce du jour</div>
-        <p className="mt-1 text-sm text-[#111111] leading-relaxed">{text}</p>
-      </div>
-    </div>
   );
 }
 

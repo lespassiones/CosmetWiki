@@ -68,14 +68,29 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
     budgetRef.current = randomProcessingTotal();
 
     // Pick up the product source (brand + name + attribution link) written
-    // by the ScanSheet "Rechercher un produit" / "Code-barres" flows.
+    // by the ScanSheet "Rechercher un produit" / "Code-barres" flows. Also
+    // pick up the "add to routine" flag set by /routine's "+ Ajouter un
+    // produit" button. We consume them HERE (in useEffect) rather than inside
+    // runAnalyse, because React strict-mode / Next.js fast refresh runs the
+    // effect twice — the second pass would otherwise see an empty storage and
+    // silently drop the flag. By the time runAnalyse fires we already have
+    // the values in local vars.
     let src: ProductSource | null = null;
+    let addToRoutine = false;
     if (typeof window !== "undefined") {
       try {
         const stored = sessionStorage.getItem(PENDING_SOURCE_KEY);
         if (stored) {
           src = JSON.parse(stored) as ProductSource;
           sessionStorage.removeItem(PENDING_SOURCE_KEY);
+        }
+        const stamp = sessionStorage.getItem(PENDING_ADD_TO_ROUTINE_KEY);
+        if (stamp) {
+          sessionStorage.removeItem(PENDING_ADD_TO_ROUTINE_KEY);
+          const ts = Number(stamp);
+          if (Number.isFinite(ts) && Date.now() - ts < PENDING_FLAG_TTL_MS) {
+            addToRoutine = true;
+          }
         }
       } catch {
         /* ignore */
@@ -86,11 +101,11 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
       window.history.replaceState({}, "", url.pathname + (url.search || ""));
     }
 
-    void runAnalyse(trimmed, src);
+    void runAnalyse(trimmed, src, addToRoutine);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialInci]);
 
-  async function runAnalyse(text: string, src: ProductSource | null) {
+  async function runAnalyse(text: string, src: ProductSource | null, addToRoutine: boolean) {
     const trimmed = text.trim();
     if (!trimmed) return;
     if (inFlightRef.current) inFlightRef.current.abort();
@@ -104,25 +119,6 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
     const productLabel = src
       ? [src.brand, src.productName].filter(Boolean).join(" ").trim() || undefined
       : undefined;
-
-    // Pick up the "add to routine" flag set by /routine's "+ Ajouter un produit"
-    // button. We consume it eagerly (before the await) so a concurrent navigation
-    // or a refresh mid-flight can't accidentally use it twice.
-    let addToRoutine = false;
-    if (typeof window !== "undefined") {
-      try {
-        const stamp = sessionStorage.getItem(PENDING_ADD_TO_ROUTINE_KEY);
-        sessionStorage.removeItem(PENDING_ADD_TO_ROUTINE_KEY);
-        if (stamp) {
-          const ts = Number(stamp);
-          if (Number.isFinite(ts) && Date.now() - ts < PENDING_FLAG_TTL_MS) {
-            addToRoutine = true;
-          }
-        }
-      } catch {
-        /* ignore */
-      }
-    }
 
     try {
       const r = await fetch("/api/analyser", {

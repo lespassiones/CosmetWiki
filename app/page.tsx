@@ -9,7 +9,7 @@ import { InstallPWAButton } from "@/components/InstallPWAButton";
 import { HomeDashboard, type DashboardData } from "@/components/home/HomeDashboard";
 import { getProfile, getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
-import { tipForToday } from "@/lib/tips";
+import { tipsForCarousel } from "@/lib/tips";
 
 type Props = {
   searchParams?: Promise<{ inci?: string; mode?: string }>;
@@ -66,7 +66,7 @@ async function loadDashboard(firstName: string | null): Promise<DashboardData> {
     lastAnalysis,
     routineCount,
     routineAvgScore,
-    tipOfTheDay: tipForToday(),
+    tips: tipsForCarousel(12),
     trendingIngredients: (trendingData ?? []) as DashboardData["trendingIngredients"],
   };
 }

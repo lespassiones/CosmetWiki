@@ -12,6 +12,8 @@ export const DAILY_TIPS: string[] = [
   "Si AQUA est en 1ère position, c'est une formule à base d'eau.",
   "Un actif placé après le 1er conservateur est généralement présent à moins de 1 %.",
   "Au-dessous d'1 %, les ingrédients peuvent être listés dans n'importe quel ordre.",
+  "Un ingrédient placé après PARFUM ou FRAGRANCE est généralement présent à moins de 1 % — son impact réel reste limité même s'il est pénalisé.",
+  "Avant PARFUM dans la liste = concentration ≥ 1 %, à surveiller. Après PARFUM = traces, plus rassurant.",
   "Le mot \"parfum\" ou \"fragrance\" peut cacher des dizaines de molécules non déclarées individuellement.",
   "Les colorants apparaissent souvent en fin de liste sous la forme \"CI 12345\".",
   "Un nom en italique sur l'étiquette physique indique souvent un actif issu de la nomenclature INCI.",
@@ -83,4 +85,20 @@ export const DAILY_TIPS: string[] = [
 export function tipForToday(date: Date = new Date()): string {
   const hoursSinceEpoch = Math.floor(date.getTime() / (1000 * 60 * 60));
   return DAILY_TIPS[hoursSinceEpoch % DAILY_TIPS.length];
+}
+
+/**
+ * Return a rotated slice of `count` tips starting at the current hour. This
+ * gives the carousel a "tip-of-the-day-first, then variety" feel — the user
+ * always sees the same first tip everyone else sees right now, but can swipe
+ * to discover more.
+ */
+export function tipsForCarousel(count = 12, date: Date = new Date()): string[] {
+  const hoursSinceEpoch = Math.floor(date.getTime() / (1000 * 60 * 60));
+  const start = hoursSinceEpoch % DAILY_TIPS.length;
+  const out: string[] = [];
+  for (let i = 0; i < Math.min(count, DAILY_TIPS.length); i++) {
+    out.push(DAILY_TIPS[(start + i) % DAILY_TIPS.length]);
+  }
+  return out;
 }

@@ -44,6 +44,10 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
   const [searched, setSearched] = useState(false);
   const [deepSearching, setDeepSearching] = useState(false);
   const [deepResult, setDeepResult] = useState<ProductSearchHit | null>(null);
+  /** When the user clicks an INCIDecoder candidate, we POST /api/incidecoder-fetch
+   *  to pull its INCI on demand. `lazyFetching` holds the candidate id while that
+   *  call is in flight so the card can show a spinner / dim itself. */
+  const [lazyFetching, setLazyFetching] = useState<string | null>(null);
   const inFlightRef = useRef<AbortController | null>(null);
 
   function resetCandidates() {
@@ -130,12 +134,49 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
     }
   }
 
-  function selectCandidate(c: OpenBeautyFactsCandidate) {
+  async function selectCandidate(c: OpenBeautyFactsCandidate) {
+    // INCIDecoder candidates ship without INCI to keep the suggest endpoint
+    // fast. We lazy-fetch the INCI now (single product-page scrape) before
+    // handing the payload to the analyse flow.
+    if (c.source === "incidecoder" && c.slug && !c.ingredientsText) {
+      setLazyFetching(c.id);
+      setError(null);
+      try {
+        const r = await fetch("/api/incidecoder-fetch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slug: c.slug }),
+        });
+        if (!r.ok) {
+          const j = (await r.json().catch(() => ({}))) as { error?: string };
+          setError(j.error ?? `Impossible de charger ce produit (${r.status})`);
+          return;
+        }
+        const data = (await r.json()) as {
+          brand: string | null;
+          productName: string | null;
+          ingredientsText: string;
+          sourceUrl: string;
+        };
+        onFound({
+          ingredientsText: data.ingredientsText,
+          brand: data.brand ?? c.brand,
+          productName: data.productName ?? c.productName,
+          source: "incidecoder",
+          sourceUrl: data.sourceUrl ?? c.sourceUrl,
+        });
+      } catch (err) {
+        setError((err as Error).message ?? "Erreur réseau");
+      } finally {
+        setLazyFetching(null);
+      }
+      return;
+    }
     onFound({
       ingredientsText: c.ingredientsText,
       brand: c.brand,
       productName: c.productName,
-      source: "openbeautyfacts",
+      source: c.source ?? "openbeautyfacts",
       sourceUrl: c.sourceUrl,
     });
   }
@@ -236,7 +277,12 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
           <ul className="grid gap-2.5 sm:grid-cols-2">
             {candidates.map((c) => (
               <li key={c.id}>
-                <CandidateCard candidate={c} onSelect={selectCandidate} />
+                <CandidateCard
+                  candidate={c}
+                  onSelect={selectCandidate}
+                  loading={lazyFetching === c.id}
+                  disabled={lazyFetching !== null && lazyFetching !== c.id}
+                />
               </li>
             ))}
           </ul>
@@ -335,47 +381,97 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
   );
 }
 
+function ProductPlaceholderIcon() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-7 w-7 text-rose-400"
+    >
+      <path d="M9 2h6v3a2 2 0 0 0 .6 1.4L17 7.8A4 4 0 0 1 18 10.6V19a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3v-8.4a4 4 0 0 1 1-2.8l1.4-1.4A2 2 0 0 0 9 5z" />
+      <path d="M9 12h6M9 16h6" />
+    </svg>
+  );
+}
+
+const SOURCE_BADGE: Record<string, { label: string; cls: string }> = {
+  cache: { label: "BASE", cls: "bg-emerald-100 text-emerald-700 ring-emerald-200" },
+  openbeautyfacts: { label: "OBF", cls: "bg-amber-100 text-amber-700 ring-amber-200" },
+  incidecoder: { label: "INCIDECODER", cls: "bg-violet-100 text-violet-700 ring-violet-200" },
+};
+
 function CandidateCard({
   candidate,
   onSelect,
+  loading = false,
+  disabled = false,
 }: {
   candidate: OpenBeautyFactsCandidate;
   onSelect: (c: OpenBeautyFactsCandidate) => void;
+  loading?: boolean;
+  disabled?: boolean;
 }) {
   const niceBrand = candidate.brand ? titleCase(candidate.brand) : null;
   const niceName = candidate.productName
     ? titleCase(candidate.productName)
     : null;
+  const [imgFailed, setImgFailed] = useState(false);
+  const showImage = candidate.imageUrl && !imgFailed;
+  const sourceMeta = candidate.source ? SOURCE_BADGE[candidate.source] : null;
+  const needsLoad = candidate.source === "incidecoder" && !candidate.ingredientsText;
   return (
     <button
       type="button"
       onClick={() => onSelect(candidate)}
-      className="group flex w-full items-center gap-3 rounded-2xl bg-white/75 p-3 text-left ring-1 ring-white/70 shadow-[0_2px_18px_-8px_rgba(15,23,42,0.10)] backdrop-blur-xl transition-all hover:bg-white hover:ring-black/[0.10] hover:shadow-[0_6px_22px_-8px_rgba(15,23,42,0.16)]"
+      disabled={loading || disabled}
+      className={`group flex w-full items-center gap-3 rounded-2xl bg-white/75 p-3 text-left ring-1 ring-white/70 shadow-[0_2px_18px_-8px_rgba(15,23,42,0.10)] backdrop-blur-xl transition-all hover:bg-white hover:ring-black/[0.10] hover:shadow-[0_6px_22px_-8px_rgba(15,23,42,0.16)] disabled:cursor-not-allowed ${disabled && !loading ? "opacity-40" : ""}`}
     >
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-rose-50/70 ring-1 ring-black/[0.04]">
-        {candidate.imageUrl ? (
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-rose-50 to-rose-100/60 ring-1 ring-black/[0.04]">
+        {loading ? (
+          <svg className="h-5 w-5 animate-spin text-rose-500" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" opacity="0.25" />
+            <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        ) : showImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={candidate.imageUrl}
+            src={candidate.imageUrl!}
             alt=""
             className="h-full w-full object-contain"
             loading="lazy"
+            onError={() => setImgFailed(true)}
           />
         ) : (
-          <span className="text-xs font-medium text-rose-400">INCI</span>
+          <ProductPlaceholderIcon />
         )}
       </div>
       <div className="min-w-0 flex-1">
-        {niceBrand ? (
-          <p className="truncate text-[11px] font-semibold uppercase tracking-[0.14em] text-pink-500/80">
-            {niceBrand}
-          </p>
-        ) : null}
+        <div className="flex items-center gap-1.5">
+          {niceBrand ? (
+            <p className="truncate text-[11px] font-semibold uppercase tracking-[0.14em] text-pink-500/80">
+              {niceBrand}
+            </p>
+          ) : null}
+          {sourceMeta && (
+            <span className={`shrink-0 inline-flex items-center rounded-full px-1.5 py-0.5 text-[8.5px] font-semibold tracking-wide ring-1 ${sourceMeta.cls}`}>
+              {sourceMeta.label}
+            </span>
+          )}
+        </div>
         <p className="truncate text-[14px] font-medium text-ink">
           {niceName ?? "Produit sans nom"}
         </p>
         <p className="mt-0.5 text-[11px] text-ink-subtle">
-          Cliquer pour analyser →
+          {loading
+            ? "Chargement de la composition…"
+            : needsLoad
+              ? "Cliquer pour récupérer la composition →"
+              : "Cliquer pour analyser →"}
         </p>
       </div>
     </button>
