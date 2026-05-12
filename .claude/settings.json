@@ -4,7 +4,9 @@
       "mcp__claude_ai_Supabase__list_projects",
       "mcp__claude_ai_Supabase__list_tables",
       "mcp__claude_ai_Supabase__list_extensions",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(Get-ChildItem -Path \"d:\\\\MesApps\\\\deploy\\\\CosmetWiki\" -Recurse -Depth 2)",
+      "Bash(Select-Object -Property Name, FullName)"
     ]
   }
 }

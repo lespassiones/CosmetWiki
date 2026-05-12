@@ -118,7 +118,7 @@ function NavBtnMobile({
       {active && (
         <span
           aria-hidden
-          className="absolute inset-x-1 inset-y-0.5 -z-10 rounded-full bg-white/65 backdrop-blur-md ring-1 ring-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+          className="absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-6 rounded-full bg-[#F43F5E]"
         />
       )}
       <Icon className="h-5 w-5" />

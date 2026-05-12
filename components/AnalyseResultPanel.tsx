@@ -82,21 +82,36 @@ export function AnalyseResultPanel({
           col 2 (1fr) : observations on top, synthesis spanning 2 rows below
           col 3 (1.3fr): items spanning the full height
       */}
-      <div className="mt-6 grid gap-4 grid-cols-1 [grid-template-areas:'counts''score''synthesis''spectrum''observations''items'] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:[grid-template-areas:'score_observations_items''spectrum_synthesis_items''counts_synthesis_items']">
-        <Reveal delayMs={0} className="[grid-area:counts]">
-          <CountsStrip counts={result.counts} />
-        </Reveal>
+      <div className="mt-6 grid gap-4 grid-cols-1 [grid-template-areas:'counts''score''synthesis''spectrum''observations''items'] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:[grid-template-areas:'left_observations_items''left_synthesis_items']">
+        {/* Left column: on desktop, grouped as a flex column so Score + Spectrum
+            + Counts stack tightly with no gap from row height mismatch. On mobile,
+            `contents` makes each child participate directly in the outer grid. */}
+        <div className="contents lg:flex lg:flex-col lg:gap-4 lg:[grid-area:left]">
+          <Reveal delayMs={REVEAL_SCORE_MS} className="[grid-area:score]">
+            <BigScoreCard
+              score={result.score}
+              label={result.scoreLabel}
+              tone={result.scoreTone}
+              matched={result.counts.matched}
+              total={result.counts.total}
+              startDelayMs={REVEAL_SCORE_MS}
+            />
+          </Reveal>
 
-        <Reveal delayMs={REVEAL_SCORE_MS} className="[grid-area:score]">
-          <BigScoreCard
-            score={result.score}
-            label={result.scoreLabel}
-            tone={result.scoreTone}
-            matched={result.counts.matched}
-            total={result.counts.total}
-            startDelayMs={REVEAL_SCORE_MS}
-          />
-        </Reveal>
+          {result.spectrum ? (
+            <Reveal delayMs={650} className="[grid-area:spectrum]">
+              <IngredientSpectrum
+                items={result.items}
+                top5={result.spectrum.top5}
+                top10={result.spectrum.top10}
+              />
+            </Reveal>
+          ) : null}
+
+          <Reveal delayMs={0} className="[grid-area:counts]">
+            <CountsStrip counts={result.counts} />
+          </Reveal>
+        </div>
 
         <Reveal delayMs={REVEAL_SYNTHESIS_MS} className="[grid-area:synthesis]">
           <MobileExpander
@@ -111,16 +126,6 @@ export function AnalyseResultPanel({
             />
           </MobileExpander>
         </Reveal>
-
-        {result.spectrum ? (
-          <Reveal delayMs={650} className="[grid-area:spectrum]">
-            <IngredientSpectrum
-              items={result.items}
-              top5={result.spectrum.top5}
-              top10={result.spectrum.top10}
-            />
-          </Reveal>
-        ) : null}
 
         <Reveal delayMs={500} className="[grid-area:observations]">
           <ObservationsCard observations={result.observations} aliasesUsed={result.aliasesUsed} />
@@ -271,8 +276,8 @@ function BigScoreCard({
   // Single React node so the animation only runs once per card instance.
   const gauge = (size: "sm" | "lg") => {
     const dim = size === "sm" ? "h-20 w-20" : "h-32 w-32";
-    const scoreTextCls = size === "sm" ? "text-base" : "text-3xl";
-    const slashCls = size === "sm" ? "text-[10px]" : "text-[13px]";
+    const scoreTextCls = size === "sm" ? "text-sm" : "text-2xl";
+    const slashCls = size === "sm" ? "text-[9px]" : "text-[11px]";
     return (
       <div className={`relative shrink-0 ${dim}`}>
         <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90" aria-hidden>
@@ -288,7 +293,7 @@ function BigScoreCard({
             strokeDashoffset={circumference - animFilled}
           />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="absolute inset-3 flex flex-col items-center justify-center">
           <p className="flex items-baseline gap-0.5">
             <span className={`${scoreTextCls} font-bold tabular-nums text-ink`}>
               {animScore.toFixed(1)}

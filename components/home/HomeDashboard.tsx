@@ -56,12 +56,14 @@ export function HomeDashboard({ data }: { data: DashboardData }) {
         .
       </p>
 
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+      <div className="mt-5 lg:mt-6 h-px bg-black/[0.08]" />
+
+      <TipCard text={data.tipOfTheDay} />
+
+      <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
         <LastAnalysisCard last={data.lastAnalysis} />
         <RoutineCard count={data.routineCount} avgScore={data.routineAvgScore} />
       </div>
-
-      <TipCard text={data.tipOfTheDay} />
 
       <Link
         href="/advisor"
