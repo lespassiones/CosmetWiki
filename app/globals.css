@@ -98,8 +98,51 @@
       transform: translateY(0);
     }
   }
+
+  /* Pop-in for the ingredient blob (half-ring viz). The cubic-bezier easing
+     overshoots slightly at the end (>1.0) so the blob "lands" with a small
+     bounce — playful without being silly. transform-box ensures the scale
+     pivots from the SVG's centre regardless of viewBox dimensions. */
+  .blob-pop-in {
+    transform-origin: 50% 60%;
+    transform-box: fill-box;
+    animation: blob-pop-anim 720ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: var(--blob-pop-delay, 0ms);
+  }
+  @keyframes blob-pop-anim {
+    0% {
+      opacity: 0;
+      transform: scale(0.55);
+    }
+    60% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Staggered fade-up for sibling cards. Each item sets its own
+     `--stagger-delay` inline so the cascade reads left-to-right / top-to-bottom
+     without Javascript. */
+  .stagger-up {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: stagger-up-anim 520ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: var(--stagger-delay, 0ms);
+  }
+  @keyframes stagger-up-anim {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .reveal-on-mount {
+    .reveal-on-mount,
+    .blob-pop-in,
+    .stagger-up {
       opacity: 1;
       transform: none;
       animation: none;

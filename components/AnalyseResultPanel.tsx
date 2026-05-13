@@ -233,7 +233,7 @@ function BigScoreCard({
     <article className="rounded-2xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
       {/* MOBILE — compact stacked: blob (no legend) + ratio. */}
       <div className="flex flex-col items-center gap-3 lg:hidden">
-        <IngredientBlob counts={counts} variant="md" showCenter />
+        <IngredientBlob counts={counts} variant="md" showCenter animate />
         <p className="text-[11px] text-ink-subtle">
           <span className="font-semibold text-ink">{matched}</span> / {total} ingrédients reconnus
         </p>
@@ -241,7 +241,7 @@ function BigScoreCard({
 
       {/* DESKTOP — full blob with legend, then ratio. */}
       <div className="hidden lg:flex lg:flex-col lg:items-center">
-        <IngredientBlob counts={counts} variant="lg" showCenter showLegend />
+        <IngredientBlob counts={counts} variant="lg" showCenter showLegend animate />
         <p className="mt-3 text-[12px] text-ink-subtle">
           <span className="font-semibold text-ink">{matched}</span> / {total} ingrédients reconnus
         </p>
@@ -270,12 +270,15 @@ function CountsStrip({ counts }: { counts: AnalyseResponse["counts"] }) {
       {/* MOBILE — asymmetric 2-col bento:
             LEFT  (1fr) : 2 stacked tall cards   → Identifiés + Vert
             RIGHT (1fr) : 3 stacked thin strips  → Jaune / Orange / Rouge
-          The whole grid is shorter than before — strips on the right are
-          horizontal (label+penalty on the left, count on the right) so each
-          one only takes ~52px of height. */}
+          Each tile gets a `stagger-up` animation with an incrementing delay
+          so the bento "fills up" cell-by-cell (~80ms apart) — playful and
+          guides the eye through the breakdown after the blob lands. */}
       <div className="grid grid-cols-2 gap-2.5 lg:hidden">
         <div className="flex flex-col gap-2.5">
-          <article className={`${CARD} p-3.5`}>
+          <article
+            className={`${CARD} stagger-up p-3.5`}
+            style={{ ["--stagger-delay" as string]: "60ms" } as React.CSSProperties}
+          >
             <p className="text-[10px] font-medium uppercase tracking-wide text-ink-subtle">
               Ingrédients identifiés
             </p>
@@ -286,7 +289,10 @@ function CountsStrip({ counts }: { counts: AnalyseResponse["counts"] }) {
               sur {counts.total} ingrédients
             </p>
           </article>
-          <article className={`${CARD} p-3.5`}>
+          <article
+            className={`${CARD} stagger-up p-3.5`}
+            style={{ ["--stagger-delay" as string]: "220ms" } as React.CSSProperties}
+          >
             <p className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide">
               <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${vert.dot}`} />
               <span className={vert.text}>{vert.label}</span>
@@ -299,8 +305,12 @@ function CountsStrip({ counts }: { counts: AnalyseResponse["counts"] }) {
         </div>
 
         <div className="flex flex-col gap-2.5">
-          {penaltyColors.map((c) => (
-            <article key={c.label} className={`${CARD} flex items-center gap-2 p-2.5`}>
+          {penaltyColors.map((c, i) => (
+            <article
+              key={c.label}
+              className={`${CARD} stagger-up flex items-center gap-2 p-2.5`}
+              style={{ ["--stagger-delay" as string]: `${140 + i * 80}ms` } as React.CSSProperties}
+            >
               <div className="min-w-0 flex-1">
                 <p className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide">
                   <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />

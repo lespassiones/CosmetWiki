@@ -78,14 +78,11 @@ export function PhotoOcrFlow() {
   function analyse() {
     const t = text.trim();
     if (t.length === 0) return;
-    // Push the OCR'd text to the home in INCI mode via sessionStorage so it
-    // pre-fills the textarea without showing in the URL.
-    try {
-      sessionStorage.setItem("cw:scanPhotoText", t);
-    } catch {
-      // ignore — fallback to URL param below
-    }
-    router.push(`/?mode=paste&inci=${encodeURIComponent(t)}`);
+    // Hand off to the dedicated /analyse page. AnalysisRunner derives its
+    // loading state from `initialInci` on the FIRST render, so the processing
+    // overlay paints immediately — no blank frame like we'd get if we routed
+    // back to "/" (which only flips processing on inside a useEffect).
+    router.push(`/analyse?inci=${encodeURIComponent(t.slice(0, 6000))}`);
   }
 
   return (

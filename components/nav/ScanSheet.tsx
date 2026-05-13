@@ -44,9 +44,17 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
   const sheetRef = useRef<HTMLDivElement>(null);
 
   // Reset the inner view to the tile picker each time the sheet opens fresh.
+  // Also prefetch /analyse so when the user submits a flow (barcode lookup,
+  // INCI paste, product search), the destination page is already in cache and
+  // its ProcessingOverlay paints in the same frame as `router.push` —
+  // otherwise the user briefly sees the underlying page (home / dashboard)
+  // before /analyse mounts, which feels like "the click did nothing".
   useEffect(() => {
-    if (open) setView("picker");
-  }, [open]);
+    if (open) {
+      setView("picker");
+      router.prefetch("/analyse");
+    }
+  }, [open, router]);
 
   useEffect(() => {
     if (!open) return;

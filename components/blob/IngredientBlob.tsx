@@ -185,12 +185,19 @@ export function IngredientBlob({
   showLegend = false,
   showCenter = false,
   className = "",
+  animate = false,
 }: {
   counts: BlobCounts;
   variant?: Variant;
   showLegend?: boolean;
   showCenter?: boolean;
   className?: string;
+  /**
+   * When true, the SVG plays a "pop-in" animation on mount (scale + fade with
+   * a small overshoot). Off by default so list/row variants don't all animate
+   * on every render — only the big card on the analyse page opts in.
+   */
+  animate?: boolean;
 }) {
   const geom = GEOMETRY[variant];
   const total = counts.vert + counts.jaune + counts.orange + counts.rouge;
@@ -268,7 +275,7 @@ export function IngredientBlob({
     <div className={`flex w-full flex-col items-center ${className}`}>
       <svg
         viewBox={`0 0 ${geom.width} ${geom.height}`}
-        className="h-auto w-full"
+        className={`h-auto w-full ${animate ? "blob-pop-in" : ""}`}
         role="img"
         aria-label={ariaLabel}
       >
