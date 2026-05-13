@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GLASS_CARD, GLASS_CARD_HOVER, GLASS_PILL_DARK } from "@/lib/ui/glass";
+import { HistoryItemActions } from "@/components/history/HistoryItemActions";
 
 type Row = {
   id: string;
@@ -167,10 +168,10 @@ export function HistoryList({ rows }: { rows: Row[] }) {
           }
 
           return (
-            <li key={a.id}>
+            <li key={a.id} className="relative">
               <Link
                 href={`/history/${a.id}`}
-                className={`${GLASS_CARD} ${GLASS_CARD_HOVER} flex items-center gap-4 p-4`}
+                className={`${GLASS_CARD} ${GLASS_CARD_HOVER} flex items-center gap-4 p-4 pr-16`}
               >
                 <div className={`flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl ${tone.bg} ${tone.text}`}>
                   <span className="text-base font-bold leading-none">
@@ -184,10 +185,10 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                     {tone.label} · {formatDate(a.created_at)}
                   </div>
                 </div>
-                <svg className="h-4 w-4 text-[#9CA3AF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
-                  <path d="m9 6 6 6-6 6" />
-                </svg>
               </Link>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
+                <HistoryItemActions id={a.id} currentName={a.name ?? displayName} />
+              </div>
             </li>
           );
         })}
