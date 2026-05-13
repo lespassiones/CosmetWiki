@@ -76,14 +76,14 @@ export function AnalyseResultPanel({
         viewport, but the placement of each section differs:
 
         MOBILE (single column, user-requested order)
-          counts → score → synthesis → spectrum → observations → items
+          score → counts → synthesis → spectrum → observations → items
 
         DESKTOP (3-column bento)
           col 1 (1fr) : score → spectrum → counts
           col 2 (1fr) : observations on top, synthesis spanning 2 rows below
           col 3 (1.3fr): items spanning the full height
       */}
-      <div className="mt-6 grid gap-4 grid-cols-1 [grid-template-areas:'counts''score''synthesis''spectrum''observations''items'] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:[grid-template-areas:'left_observations_items''left_synthesis_items']">
+      <div className="mt-6 grid gap-4 grid-cols-1 [grid-template-areas:'score''counts''synthesis''spectrum''observations''items'] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:[grid-template-areas:'left_observations_items''left_synthesis_items']">
         {/* Left column: on desktop, grouped as a flex column so Score + Spectrum
             + Counts stack tightly with no gap from row height mismatch. On mobile,
             `contents` makes each child participate directly in the outer grid. */}
@@ -96,8 +96,6 @@ export function AnalyseResultPanel({
                 orange: result.counts.orange,
                 rouge: result.counts.rouge,
               }}
-              label={result.scoreLabel}
-              tone={result.scoreTone}
               matched={result.counts.matched}
               total={result.counts.total}
             />
@@ -223,43 +221,26 @@ function TitleBar({
 
 function BigScoreCard({
   counts,
-  label,
-  tone,
   matched,
   total,
 }: {
   counts: BlobCounts;
-  label: string;
-  tone: "green" | "amber" | "orange" | "rose";
   matched: number;
   total: number;
 }) {
-  const TONE_TEXT: Record<string, string> = {
-    green: "text-emerald-600",
-    amber: "text-amber-600",
-    orange: "text-orange-600",
-    rose: "text-rose-600",
-  };
-
   return (
     <article className="rounded-2xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
-      {/* MOBILE — compact stacked: blob (no legend) + pill + ratio. */}
+      {/* MOBILE — compact stacked: blob (no legend) + ratio. */}
       <div className="flex flex-col items-center gap-3 lg:hidden">
         <IngredientBlob counts={counts} variant="md" showCenter />
-        <p className={`inline-flex items-center rounded-full bg-white/70 px-3 py-1 text-[12px] font-semibold ring-1 ring-white/80 ${TONE_TEXT[tone]}`}>
-          {label}
-        </p>
         <p className="text-[11px] text-ink-subtle">
           <span className="font-semibold text-ink">{matched}</span> / {total} ingrédients reconnus
         </p>
       </div>
 
-      {/* DESKTOP — full blob with legend, then pill + ratio. */}
+      {/* DESKTOP — full blob with legend, then ratio. */}
       <div className="hidden lg:flex lg:flex-col lg:items-center">
         <IngredientBlob counts={counts} variant="lg" showCenter showLegend />
-        <p className={`mt-4 inline-flex items-center rounded-full bg-white/70 px-3 py-1 text-[12px] font-semibold ring-1 ring-white/80 ${TONE_TEXT[tone]}`}>
-          {label}
-        </p>
         <p className="mt-3 text-[12px] text-ink-subtle">
           <span className="font-semibold text-ink">{matched}</span> / {total} ingrédients reconnus
         </p>
@@ -270,48 +251,73 @@ function BigScoreCard({
 
 function CountsStrip({ counts }: { counts: AnalyseResponse["counts"] }) {
   const colors = [
-    { label: "Vert", count: counts.vert, dot: "bg-emerald-500", text: "text-emerald-700" },
-    { label: "Jaune", count: counts.jaune, dot: "bg-amber-400", text: "text-amber-700" },
-    { label: "Orange", count: counts.orange, dot: "bg-orange-500", text: "text-orange-700" },
-    { label: "Rouge", count: counts.rouge, dot: "bg-rose-500", text: "text-rose-700" },
+    { label: "Vert", count: counts.vert, dot: "bg-emerald-500", text: "text-emerald-700", penalty: "sans pénalité" },
+    { label: "Jaune", count: counts.jaune, dot: "bg-amber-400", text: "text-amber-700", penalty: "pénalité faible" },
+    { label: "Orange", count: counts.orange, dot: "bg-orange-500", text: "text-orange-700", penalty: "pénalité moyenne" },
+    { label: "Rouge", count: counts.rouge, dot: "bg-rose-500", text: "text-rose-700", penalty: "pénalité forte" },
   ];
+  const vert = colors[0];
+  const penaltyColors = [colors[1], colors[2], colors[3]];
+
+  // Common card chrome (bg/blur/ring/shadow) — extracted so the mobile bento
+  // and the desktop strip stay visually consistent if we tweak it later.
+  const CARD =
+    "rounded-2xl bg-white/65 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl";
 
   return (
     <>
-      {/* MOBILE — prominent stats grid (first thing the user sees). Includes
-          the "Ingrédients identifiés" tile + the 4 colour counts in 2 cols. */}
-      <div className="grid grid-cols-2 gap-3 lg:hidden">
-        <article className="rounded-2xl bg-white/65 p-4 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-ink-subtle">
-            Ingrédients identifiés
-          </p>
-          <p className="mt-2 text-3xl font-bold tabular-nums text-ink">
-            {counts.matched}
-          </p>
-          <p className="mt-0.5 text-[12px] text-ink-subtle">
-            sur {counts.total} ingrédients
-          </p>
-        </article>
-        {colors.map((c) => (
-          <article
-            key={c.label}
-            className="rounded-2xl bg-white/65 p-4 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl"
-          >
-            <p className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-ink-subtle">
-              <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
-              <span className={c.text}>{c.label}</span>
+      {/* MOBILE — asymmetric 2-col bento:
+            LEFT  (1fr) : 2 stacked tall cards   → Identifiés + Vert
+            RIGHT (1fr) : 3 stacked thin strips  → Jaune / Orange / Rouge
+          The whole grid is shorter than before — strips on the right are
+          horizontal (label+penalty on the left, count on the right) so each
+          one only takes ~52px of height. */}
+      <div className="grid grid-cols-2 gap-2.5 lg:hidden">
+        <div className="flex flex-col gap-2.5">
+          <article className={`${CARD} p-3.5`}>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-ink-subtle">
+              Ingrédients identifiés
             </p>
-            <p className="mt-2 text-3xl font-bold tabular-nums text-ink">{c.count}</p>
-            <p className="mt-0.5 text-right text-[12px] text-ink-subtle tabular-nums">
-              {pct(c.count, counts.total)} %
+            <p className="mt-1.5 text-2xl font-bold tabular-nums text-ink leading-none">
+              {counts.matched}
+            </p>
+            <p className="mt-1 text-[11px] text-ink-subtle">
+              sur {counts.total} ingrédients
             </p>
           </article>
-        ))}
+          <article className={`${CARD} p-3.5`}>
+            <p className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide">
+              <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${vert.dot}`} />
+              <span className={vert.text}>{vert.label}</span>
+            </p>
+            <p className="mt-1.5 text-2xl font-bold tabular-nums text-ink leading-none">
+              {vert.count}
+            </p>
+            <p className={`mt-1 text-[10px] italic ${vert.text}`}>{vert.penalty}</p>
+          </article>
+        </div>
+
+        <div className="flex flex-col gap-2.5">
+          {penaltyColors.map((c) => (
+            <article key={c.label} className={`${CARD} flex items-center gap-2 p-2.5`}>
+              <div className="min-w-0 flex-1">
+                <p className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide">
+                  <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
+                  <span className={c.text}>{c.label}</span>
+                </p>
+                <p className={`mt-0.5 text-[10px] italic ${c.text}`}>{c.penalty}</p>
+              </div>
+              <p className="text-xl font-bold tabular-nums text-ink leading-none">
+                {c.count}
+              </p>
+            </article>
+          ))}
+        </div>
       </div>
 
       {/* DESKTOP — compact 4-cell strip living under the score gauge in the
           left column of the bento. */}
-      <article className="hidden lg:block rounded-2xl bg-white/65 p-3 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
+      <article className={`hidden lg:block ${CARD} p-3`}>
         <ul className="grid grid-cols-4 gap-2">
           {colors.map((c) => (
             <li key={c.label} className="flex flex-col items-center gap-0.5 py-1.5">
