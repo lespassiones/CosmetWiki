@@ -44,7 +44,10 @@ export function HomeDashboard({
   return (
     <section aria-label="Tableau de bord" className="mx-auto w-full max-w-6xl px-5 lg:px-8 mt-2 lg:mt-6">
       <h1 className="text-[26px] lg:text-[36px] leading-tight font-bold tracking-tight">{greeting}</h1>
-      <p className="mt-1 lg:mt-2 text-sm lg:text-base text-[#6B7280]">
+
+      <div className="mt-3 -mx-5 h-[2px] bg-black/30 lg:mx-0 lg:mt-4 lg:h-px lg:bg-black/[0.08]" />
+
+      <p className="mt-3 lg:mt-4 text-sm lg:text-base text-[#6B7280]">
         Décrypte tes cosmétiques en{" "}
         <span className="relative inline-block font-medium text-[#111111]">
           3 secondes
@@ -52,8 +55,6 @@ export function HomeDashboard({
         </span>
         .
       </p>
-
-      <div className="mt-5 -mx-5 h-[2px] bg-black/30 lg:mx-0 lg:mt-6 lg:h-px lg:bg-black/[0.08]" />
 
       <TipCarousel tips={data.tips} />
 

@@ -99,20 +99,22 @@ function MobileBottomNav({ pathname, onScanClick }: { pathname: string; onScanCl
         <div className="relative flex items-end justify-between rounded-full bg-gradient-to-b from-[#FFE4E6]/85 to-[#FFD1DC]/75 backdrop-blur-2xl ring-1 ring-white/70 shadow-[0_10px_30px_-12px_rgba(244,63,94,0.25),inset_0_1px_0_rgba(255,255,255,0.75)] px-3 py-1.5">
           <NavBtnMobile href="/" label="Accueil" icon={HomeIcon} active={pathname === "/"} />
           <NavBtnMobile href="/routine" label="Routine" icon={LayersIcon} active={pathname.startsWith("/routine")} />
-          <div className="w-14 h-14" aria-hidden />
+          <div className="w-16 h-16" aria-hidden />
           <NavBtnMobile href="/history" label="Historique" icon={ClockIcon} active={pathname.startsWith("/history")} />
           <NavBtnMobile href="/profile" label="Profil" icon={UserIcon} active={pathname.startsWith("/profile")} />
         </div>
-        {/* Center FAB — rose gradient matching the "Installer l'app" CTA */}
+        {/* Center FAB — rose gradient matching the "Installer l'app" CTA.
+            Sized at 64px (15% bigger than the original 56px) so the
+            "Analyse-moi" label has more breathing room. */}
         <button
           type="button"
           onClick={onScanClick}
           aria-label="Ouvrir le menu d'analyse"
-          className="absolute left-1/2 -translate-x-1/2 -top-5 w-14 h-14 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 text-white flex flex-col items-center justify-center gap-0.5 transition active:scale-95 hover:brightness-105 ring-4 ring-white/70 shadow-[0_8px_22px_-6px_rgba(244,63,94,0.55),inset_0_1px_0_rgba(255,255,255,0.55)]"
+          className="absolute left-1/2 -translate-x-1/2 -top-6 w-16 h-16 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 text-white flex flex-col items-center justify-center gap-0.5 transition active:scale-95 hover:brightness-105 ring-4 ring-white/70 shadow-[0_8px_22px_-6px_rgba(244,63,94,0.55),inset_0_1px_0_rgba(255,255,255,0.55)]"
         >
-          <CameraIcon className="h-[18px] w-[18px] drop-shadow-sm" />
-          <span className="text-[9px] font-semibold leading-none tracking-wide drop-shadow-sm">
-            Scan me
+          <CameraIcon className="h-5 w-5 drop-shadow-sm" />
+          <span className="text-[10px] font-semibold leading-none tracking-tight drop-shadow-sm">
+            Analyse-moi
           </span>
         </button>
       </div>

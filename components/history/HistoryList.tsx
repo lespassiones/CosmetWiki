@@ -82,8 +82,12 @@ export function HistoryList({ rows }: { rows: Row[] }) {
 
   return (
     <div>
+      {/* Separator first — sits right under the page title (which is rendered
+          by the parent route), before the toolbar / count subline. */}
+      <div className="-mx-5 h-[2px] bg-black/30 lg:mx-0 lg:h-px lg:bg-black/[0.08]" />
+
       {/* Discrete toolbar — only the "Comparer" entry point is visible when idle */}
-      <div className="flex items-center justify-between">
+      <div className="mt-3 flex items-center justify-between">
         <p className="text-sm text-[#6B7280]">
           {rows.length === 0
             ? "Tu n'as pas encore d'analyse sauvegardée."
@@ -119,8 +123,6 @@ export function HistoryList({ rows }: { rows: Row[] }) {
           </div>
         )}
       </div>
-
-      <div className="mt-5 -mx-5 h-[2px] bg-black/30 lg:mx-0 lg:mt-6 lg:h-px lg:bg-black/[0.08]" />
 
       <ul className="mt-6 space-y-3">
         {rows.map((a) => {

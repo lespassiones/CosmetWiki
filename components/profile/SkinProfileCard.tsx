@@ -180,10 +180,19 @@ function SkinProfileForm({
     });
   }
 
+  // Each form section lives in its own opaque-white sub-card. The parent
+  // SkinProfileCard uses a translucent GLASS_CARD background; making the
+  // sub-sections fully white creates the visual hierarchy that was missing
+  // (form sections clearly delimited, pills standing out from their section
+  // background instead of melting into the card chrome).
+  const SECTION = "rounded-2xl bg-white p-4 ring-1 ring-black/[0.06]";
+  const PILL_INACTIVE =
+    "bg-[#F3F4F6] ring-1 ring-[#E5E7EB] text-ink hover:bg-[#E9EBEE]";
+
   return (
-    <div className="space-y-5">
-      <fieldset>
-        <legend className="text-[13px] font-semibold text-ink mb-2">
+    <div className="space-y-3">
+      <fieldset className={SECTION}>
+        <legend className="text-[13px] font-semibold text-ink mb-2.5 px-1 -ml-1">
           Type de peau
         </legend>
         <div className="flex flex-wrap gap-1.5">
@@ -196,9 +205,7 @@ function SkinProfileForm({
                 onClick={() => setSkinType(t)}
                 aria-pressed={active ? "true" : "false"}
                 className={`rounded-full px-3 py-1.5 text-[12px] font-medium transition ${
-                  active
-                    ? "bg-[#111111] text-white"
-                    : "bg-white/65 ring-1 ring-white/80 text-ink hover:bg-white/85"
+                  active ? "bg-[#111111] text-white" : PILL_INACTIVE
                 }`}
               >
                 {SKIN_TYPE_LABEL[t]}
@@ -208,11 +215,11 @@ function SkinProfileForm({
         </div>
       </fieldset>
 
-      <fieldset>
-        <legend className="text-[13px] font-semibold text-ink mb-1">
+      <fieldset className={SECTION}>
+        <legend className="text-[13px] font-semibold text-ink mb-0.5 px-1 -ml-1">
           Préoccupations
         </legend>
-        <p className="text-[11px] text-[#6B7280] mb-2">Plusieurs choix possibles.</p>
+        <p className="text-[11px] text-[#6B7280] mb-2.5">Plusieurs choix possibles.</p>
         <div className="flex flex-wrap gap-1.5">
           {SKIN_CONCERNS.map((c) => {
             const active = concerns.has(c);
@@ -223,9 +230,7 @@ function SkinProfileForm({
                 onClick={() => toggleConcern(c)}
                 aria-pressed={active ? "true" : "false"}
                 className={`rounded-full px-3 py-1.5 text-[12px] font-medium transition ${
-                  active
-                    ? "bg-[#F43F5E] text-white"
-                    : "bg-white/65 ring-1 ring-white/80 text-ink hover:bg-white/85"
+                  active ? "bg-[#F43F5E] text-white" : PILL_INACTIVE
                 }`}
               >
                 {SKIN_CONCERN_LABEL[c]}
@@ -235,8 +240,8 @@ function SkinProfileForm({
         </div>
       </fieldset>
 
-      <fieldset>
-        <legend className="text-[13px] font-semibold text-ink mb-1">
+      <fieldset className={SECTION}>
+        <legend className="text-[13px] font-semibold text-ink mb-2 px-1 -ml-1">
           Allergies / intolérances{" "}
           <span className="text-[11px] font-normal text-[#9CA3AF]">(facultatif)</span>
         </legend>
@@ -246,7 +251,7 @@ function SkinProfileForm({
           rows={2}
           maxLength={500}
           placeholder="Ex : alcool, parfum, certains conservateurs…"
-          className="w-full rounded-xl bg-white/80 ring-1 ring-white/80 px-3.5 py-2.5 text-[13px] outline-none focus:ring-2 focus:ring-rose-200"
+          className="w-full rounded-xl bg-[#F9FAFB] ring-1 ring-[#E5E7EB] px-3.5 py-2.5 text-[13px] outline-none transition focus:ring-2 focus:ring-rose-300 focus:bg-white"
         />
       </fieldset>
 
@@ -256,7 +261,7 @@ function SkinProfileForm({
         </p>
       )}
 
-      <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-2">
+      <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-2 pt-1">
         <button
           type="button"
           onClick={onSaved}

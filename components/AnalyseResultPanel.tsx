@@ -8,6 +8,7 @@ import { Reveal } from "./Reveal";
 import { IngredientSpectrum } from "./analyse/IngredientSpectrum";
 import { MobileExpander } from "./analyse/MobileExpander";
 import { IngredientBlob, type BlobCounts } from "./blob/IngredientBlob";
+import { InfoBadge, Tooltip } from "./Tooltip";
 
 // Delay (ms) after panel mount before each block becomes visible.
 // Synthesis streaming and score animation start at the same time as their
@@ -626,6 +627,32 @@ function ObservationIcon({ obs }: { obs: Observation }) {
 }
 
 function ObservationLabel({ obs }: { obs: Observation }) {
+  // Some observations get an inline info tooltip when the topic needs a bit
+  // of pedagogy (e.g. "Conservateurs" — explaining that any water-based
+  // formula needs a preservative system, what the colour means, etc.).
+  const inlineTooltip =
+    obs.label === "Conservateurs" ? (
+      <Tooltip
+        maxWidth={300}
+        content={
+          <>
+            Toute formule à base d&apos;eau <b>a besoin de conservateurs</b> pour limiter
+            le développement microbien. Une formule aqueuse sans conservateur identifiable
+            doit donc attirer l&apos;attention. La différence se joue surtout sur leur{" "}
+            <b>nombre</b>, leur <b>nature</b> et leur classement (vert / jaune / orange / rouge).
+          </>
+        }
+      >
+        <button
+          type="button"
+          aria-label="Pourquoi des conservateurs ?"
+          className="ml-1 inline-flex items-center align-middle"
+        >
+          <InfoBadge />
+        </button>
+      </Tooltip>
+    ) : null;
+
   if (obs.message) {
     const tone =
       obs.status === "absent"
@@ -639,6 +666,7 @@ function ObservationLabel({ obs }: { obs: Observation }) {
       <span className="flex-1 text-ink">
         {obs.label}{" "}
         <span className={tone}>{obs.message}</span>
+        {inlineTooltip}
       </span>
     );
   }
@@ -648,6 +676,7 @@ function ObservationLabel({ obs }: { obs: Observation }) {
     <span className="flex-1 text-ink">
       {obs.label}{" "}
       <span className={suffixTone}>{suffix}</span>
+      {inlineTooltip}
     </span>
   );
 }

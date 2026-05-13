@@ -142,26 +142,26 @@ export default async function RoutinePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 lg:px-8 pt-4 pb-8 lg:py-12">
-      {/* Header — mobile: title → desc → separator → button (stacked)
-                   desktop: title+desc on the left, button on the right */}
-      <header className="lg:flex lg:items-start lg:justify-between lg:gap-4">
-        <div>
+      {/* Header — mobile: title → separator → desc → button (stacked)
+                   desktop: title on top, separator under it, then desc + button row */}
+      <header>
+        <div className="lg:flex lg:items-baseline lg:justify-between lg:gap-4">
           <h1 className="text-2xl lg:text-3xl font-bold">Ma routine quotidienne</h1>
-          <p className="mt-1 text-[12px] text-[#9CA3AF]">
+        </div>
+
+        {/* Separator immediately under the title (both mobile and desktop) */}
+        <div className="mt-3 -mx-5 h-[2px] bg-black/30 lg:mx-0 lg:mt-4 lg:h-px lg:bg-black/[0.08]" />
+
+        <div className="lg:flex lg:items-start lg:justify-between lg:gap-4 lg:mt-4">
+          <p className="mt-3 text-[12px] text-[#9CA3AF] lg:mt-0">
             Suis l&apos;exposition cumulée de ta routine et repère les produits à ajuster.
           </p>
-        </div>
 
-        {/* Mobile-only separator placed between description and button */}
-        <div className="mt-4 -mx-5 h-[2px] bg-black/30 lg:hidden" />
-
-        <div className="mt-4 lg:mt-0">
-          <AddProductButton />
+          <div className="mt-4 lg:mt-0">
+            <AddProductButton />
+          </div>
         </div>
       </header>
-
-      {/* Desktop-only separator below the whole header row */}
-      <div className="hidden lg:block lg:mt-6 lg:h-px lg:bg-black/[0.08]" />
 
       {/* 3 stat cards */}
       <section className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4 mb-6">

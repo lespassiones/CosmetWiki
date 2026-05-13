@@ -65,17 +65,22 @@ type Geom = {
   /** Sample count for each radial boundary. */
   edgeSegments: number;
   /**
-   * Stroke width drawn in the *same colour as the fill*, with rounded line
-   * joins/caps. Cosmetic only: it doesn't change the ring colour, it just
-   * smooths every corner where a radial edge meets the inner/outer arc, and
-   * smooths the wavy radial edges themselves. Larger variants need a thicker
-   * stroke to round the larger corners.
+   * Same-colour stroke with rounded line joins/caps — heavily smooths every
+   * corner so each slice reads as a soft "blob" rather than a sharp angular
+   * sector. Set generously: with a gap between slices, the stroke can spill
+   * outwards without bleeding into a neighbour.
    */
   roundStroke: number;
   /**
-   * CSS drop-shadow applied to the slice group — gives the half-ring a soft
-   * "claymorphism" lift off the page (matches the reference mock's painted
-   * blob look). Tuned per-variant so it stays subtle at every size.
+   * Angular gap between adjacent slices (radians). Each internal junction
+   * loses `gapAngle` total — half taken from each side — leaving a clean
+   * background-coloured groove between coloured sectors.
+   */
+  gapAngle: number;
+  /**
+   * CSS drop-shadow applied per slice — gives every blob its own soft
+   * "claymorphism" lift (now possible because slices no longer share radial
+   * edges, so the shadows don't double-up at junctions).
    */
   shadow: string;
 };
@@ -90,7 +95,8 @@ const GEOMETRY: Record<Variant, Geom> = {
     rInner: 90,
     jitter: 0.07,
     edgeSegments: 16,
-    roundStroke: 8,
+    roundStroke: 18,
+    gapAngle: 0.11,
     shadow: "drop-shadow(0 6px 10px rgba(15,23,42,0.10)) drop-shadow(0 2px 3px rgba(15,23,42,0.06))",
   },
   md: {
@@ -102,7 +108,8 @@ const GEOMETRY: Record<Variant, Geom> = {
     rInner: 46,
     jitter: 0.06,
     edgeSegments: 12,
-    roundStroke: 4,
+    roundStroke: 9,
+    gapAngle: 0.10,
     shadow: "drop-shadow(0 3px 5px rgba(15,23,42,0.10)) drop-shadow(0 1px 2px rgba(15,23,42,0.06))",
   },
   sm: {
@@ -114,7 +121,8 @@ const GEOMETRY: Record<Variant, Geom> = {
     rInner: 12,
     jitter: 0.04,
     edgeSegments: 8,
-    roundStroke: 1.5,
+    roundStroke: 3,
+    gapAngle: 0.10,
     shadow: "drop-shadow(0 1px 2px rgba(15,23,42,0.10))",
   },
 };
@@ -188,44 +196,63 @@ export function IngredientBlob({
   const total = counts.vert + counts.jaune + counts.orange + counts.rouge;
   const slices = computeSlices(counts);
 
-  // Pre-compute the radial boundaries:
-  //   edges[0]   = far-left  (straight, sits on the half-ring's flat base)
-  //   edges[1..] = internal junctions between adjacent colours (wavy)
-  //   edges[N]   = far-right (straight, sits on the flat base)
-  const edges = [
-    straightRadialEdge(
-      geom.cx,
-      geom.cy,
-      geom.rInner,
-      geom.rOuter,
-      slices[0].start,
-      geom.edgeSegments,
-    ),
-  ];
-  for (let i = 0; i < slices.length - 1; i++) {
-    edges.push(
-      wavyRadialEdge(
-        geom.cx,
-        geom.cy,
-        geom.rInner,
-        geom.rOuter,
-        slices[i].end,
-        JUNCTION_SEEDS[i] ?? SEEDS[slices[i].color],
-        geom.jitter,
-        geom.edgeSegments,
-      ),
-    );
-  }
-  edges.push(
-    straightRadialEdge(
-      geom.cx,
-      geom.cy,
-      geom.rInner,
-      geom.rOuter,
-      slices[slices.length - 1].end,
-      geom.edgeSegments,
-    ),
-  );
+  // Apply the inter-slice gap: each internal junction loses `gapAngle` total,
+  // half from each side. The far-left and far-right ends of the half-ring
+  // stay on the flat base (no gap there — there's no neighbour).
+  const half = geom.gapAngle / 2;
+  const gappedSlices = slices.map((s, i) => ({
+    color: s.color,
+    start: i === 0 ? s.start : s.start + half,
+    end: i === slices.length - 1 ? s.end : s.end - half,
+  }));
+
+  // Each slice gets its OWN pair of radial edges (left + right). Adjacent
+  // slices no longer share an edge — that's what creates the visible gap.
+  // We seed the two edges of the same junction with the same JUNCTION_SEED
+  // so their wavy silhouettes mirror each other (constant-width groove).
+  const sliceEdges = gappedSlices.map((s, i) => {
+    const isFirst = i === 0;
+    const isLast = i === gappedSlices.length - 1;
+    const leftEdge = isFirst
+      ? straightRadialEdge(
+          geom.cx,
+          geom.cy,
+          geom.rInner,
+          geom.rOuter,
+          s.start,
+          geom.edgeSegments,
+        )
+      : wavyRadialEdge(
+          geom.cx,
+          geom.cy,
+          geom.rInner,
+          geom.rOuter,
+          s.start,
+          JUNCTION_SEEDS[i - 1] ?? SEEDS[s.color],
+          geom.jitter,
+          geom.edgeSegments,
+        );
+    const rightEdge = isLast
+      ? straightRadialEdge(
+          geom.cx,
+          geom.cy,
+          geom.rInner,
+          geom.rOuter,
+          s.end,
+          geom.edgeSegments,
+        )
+      : wavyRadialEdge(
+          geom.cx,
+          geom.cy,
+          geom.rInner,
+          geom.rOuter,
+          s.end,
+          JUNCTION_SEEDS[i] ?? SEEDS[s.color],
+          geom.jitter,
+          geom.edgeSegments,
+        );
+    return { leftEdge, rightEdge };
+  });
 
   const ariaLabel = `${total} ingrédient${total > 1 ? "s" : ""} : ${counts.vert} vert${
     counts.vert > 1 ? "s" : ""
@@ -246,20 +273,26 @@ export function IngredientBlob({
         aria-label={ariaLabel}
       >
         {/*
-          Slice group: a single CSS drop-shadow on the wrapper produces the
-          claymorphism lift. We don't apply it per-slice because adjacent
-          slices share a radial edge — a per-slice shadow would visibly
-          double-up at every junction.
+          Slice group: each slice now has its own dedicated pair of radial
+          edges, so we can apply the claymorphism shadow per-slice without
+          the doubled-shadow artefact at junctions.
         */}
         <g style={{ filter: geom.shadow }}>
-          {slices.map((s, i) => (
+          {gappedSlices.map((s, i) => (
             <path
               key={s.color}
-              d={ringSectorPath(geom.rInner, geom.rOuter, edges[i], edges[i + 1])}
+              d={ringSectorPath(
+                geom.rInner,
+                geom.rOuter,
+                sliceEdges[i].leftEdge,
+                sliceEdges[i].rightEdge,
+              )}
               fill={BLOB_COLORS[s.color]}
-              // Same-colour stroke with rounded joins/caps softens every corner
-              // (radial-edge ↔ inner/outer arc) and the wavy radial edges
-              // themselves — the "pill morphism" rounding.
+              // Same-colour stroke with rounded joins/caps softens every
+              // corner (radial-edge ↔ inner/outer arc) and the wavy radial
+              // edges themselves — the "pill morphism" rounding. The gap
+              // between slices means a wide stroke can spill outwards
+              // without bleeding into a neighbour.
               stroke={BLOB_COLORS[s.color]}
               strokeWidth={geom.roundStroke}
               strokeLinejoin="round"

@@ -15,6 +15,7 @@ export const SKIN_CONCERNS = [
   "sensibilite",
   "pores_dilates",
   "cuir_chevelu",
+  "cheveux",
 ] as const;
 export type SkinConcern = typeof SKIN_CONCERNS[number];
 
@@ -35,6 +36,7 @@ export const SKIN_CONCERN_LABEL: Record<SkinConcern, string> = {
   sensibilite: "Sensibilité",
   pores_dilates: "Pores dilatés",
   cuir_chevelu: "Cuir chevelu",
+  cheveux: "Cheveux (longueurs)",
 };
 
 export type SkinProfile = {
