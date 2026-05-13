@@ -7,6 +7,7 @@ import type { ColorRating } from "@/lib/supabase";
 import { Reveal } from "./Reveal";
 import { IngredientSpectrum } from "./analyse/IngredientSpectrum";
 import { MobileExpander } from "./analyse/MobileExpander";
+import { IngredientBlob, type BlobCounts } from "./blob/IngredientBlob";
 
 // Delay (ms) after panel mount before each block becomes visible.
 // Synthesis streaming and score animation start at the same time as their
@@ -89,12 +90,16 @@ export function AnalyseResultPanel({
         <div className="contents lg:flex lg:flex-col lg:gap-4 lg:[grid-area:left]">
           <Reveal delayMs={REVEAL_SCORE_MS} className="[grid-area:score]">
             <BigScoreCard
-              score={result.score}
+              counts={{
+                vert: result.counts.vert,
+                jaune: result.counts.jaune,
+                orange: result.counts.orange,
+                rouge: result.counts.rouge,
+              }}
               label={result.scoreLabel}
               tone={result.scoreTone}
               matched={result.counts.matched}
               total={result.counts.total}
-              startDelayMs={REVEAL_SCORE_MS}
             />
           </Reveal>
 
@@ -217,127 +222,42 @@ function TitleBar({
 }
 
 function BigScoreCard({
-  score,
+  counts,
   label,
   tone,
   matched,
   total,
-  startDelayMs = 0,
 }: {
-  score: number;
+  counts: BlobCounts;
   label: string;
   tone: "green" | "amber" | "orange" | "rose";
   matched: number;
   total: number;
-  startDelayMs?: number;
 }) {
-  const TONE_RING: Record<string, string> = {
-    green: "stroke-emerald-500",
-    amber: "stroke-amber-500",
-    orange: "stroke-orange-500",
-    rose: "stroke-rose-500",
-  };
   const TONE_TEXT: Record<string, string> = {
     green: "text-emerald-600",
     amber: "text-amber-600",
     orange: "text-orange-600",
     rose: "text-rose-600",
   };
-  const radius = 46;
-  const circumference = 2 * Math.PI * radius;
-  const filled = (score / 20) * circumference;
-
-  const [progress, setProgress] = useState(0);
-  useEffect(() => {
-    let rafId = 0;
-    let started: number | null = null;
-    const DURATION = 1500;
-    const tick = (now: number) => {
-      if (started === null) started = now;
-      const elapsed = now - started;
-      const t = Math.min(1, elapsed / DURATION);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setProgress(eased);
-      if (t < 1) rafId = requestAnimationFrame(tick);
-    };
-    const startId = window.setTimeout(() => {
-      rafId = requestAnimationFrame(tick);
-    }, startDelayMs);
-    return () => {
-      window.clearTimeout(startId);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, [startDelayMs]);
-
-  const animFilled = filled * progress;
-  const animScore = score * progress;
-
-  // Gauge SVG — reused at two sizes (small on mobile, large on desktop).
-  // Single React node so the animation only runs once per card instance.
-  const gauge = (size: "sm" | "lg") => {
-    const dim = size === "sm" ? "h-20 w-20" : "h-32 w-32";
-    const scoreTextCls = size === "sm" ? "text-sm" : "text-2xl";
-    const slashCls = size === "sm" ? "text-[9px]" : "text-[11px]";
-    return (
-      <div className={`relative shrink-0 ${dim}`}>
-        <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90" aria-hidden>
-          <circle cx="60" cy="60" r={radius} className="fill-none stroke-black/[0.05]" strokeWidth="9" />
-          <circle
-            cx="60"
-            cy="60"
-            r={radius}
-            className={`fill-none ${TONE_RING[tone]}`}
-            strokeWidth="9"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={circumference - animFilled}
-          />
-        </svg>
-        <div className="absolute inset-3 flex flex-col items-center justify-center">
-          <p className="flex items-baseline gap-0.5">
-            <span className={`${scoreTextCls} font-bold tabular-nums text-ink`}>
-              {animScore.toFixed(1)}
-            </span>
-            <span className={`${slashCls} font-medium text-ink-subtle`}>/20</span>
-          </p>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <article className="rounded-2xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
-      {/* MOBILE — horizontal layout: label + big score + pill on the left,
-          smaller gauge on the right (mirrors the user-provided reference). */}
-      <div className="flex items-center justify-between gap-4 lg:hidden">
-        <div className="flex flex-col gap-2 min-w-0">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
-            Note globale
-          </p>
-          <p className="flex items-baseline gap-1">
-            <span className="text-3xl font-bold tabular-nums text-ink">
-              {animScore.toFixed(1)}
-            </span>
-            <span className="text-base font-medium text-ink-subtle">/20</span>
-          </p>
-          <p className={`self-start inline-flex items-center rounded-full bg-white/70 px-3 py-1 text-[12px] font-semibold ring-1 ring-white/80 ${TONE_TEXT[tone]}`}>
-            {label}
-          </p>
-          <p className="text-[11px] text-ink-subtle">
-            <span className="font-semibold text-ink">{matched}</span> / {total} ingrédients reconnus
-          </p>
-        </div>
-        {gauge("sm")}
+      {/* MOBILE — compact stacked: blob (no legend) + pill + ratio. */}
+      <div className="flex flex-col items-center gap-3 lg:hidden">
+        <IngredientBlob counts={counts} variant="md" showCenter />
+        <p className={`inline-flex items-center rounded-full bg-white/70 px-3 py-1 text-[12px] font-semibold ring-1 ring-white/80 ${TONE_TEXT[tone]}`}>
+          {label}
+        </p>
+        <p className="text-[11px] text-ink-subtle">
+          <span className="font-semibold text-ink">{matched}</span> / {total} ingrédients reconnus
+        </p>
       </div>
 
-      {/* DESKTOP — centered layout: label on top, big gauge with score
-          inside, pill below, then the matched/total ratio. */}
+      {/* DESKTOP — full blob with legend, then pill + ratio. */}
       <div className="hidden lg:flex lg:flex-col lg:items-center">
-        <p className="self-start text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
-          Note globale
-        </p>
-        <div className="mt-3">{gauge("lg")}</div>
-        <p className={`mt-3 inline-flex items-center rounded-full bg-white/70 px-3 py-1 text-[12px] font-semibold ring-1 ring-white/80 ${TONE_TEXT[tone]}`}>
+        <IngredientBlob counts={counts} variant="lg" showCenter showLegend />
+        <p className={`mt-4 inline-flex items-center rounded-full bg-white/70 px-3 py-1 text-[12px] font-semibold ring-1 ring-white/80 ${TONE_TEXT[tone]}`}>
           {label}
         </p>
         <p className="mt-3 text-[12px] text-ink-subtle">

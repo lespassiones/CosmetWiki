@@ -8,7 +8,6 @@ import { AdvisorChat } from "@/components/advisor/AdvisorChat";
 import { GLASS_CARD, GLASS_CARD_ROSE } from "@/lib/ui/glass";
 
 export const metadata = { title: "Skin advisor · Cosme Check" };
-export const dynamic = "force-dynamic";
 
 export default async function AdvisorPage() {
   const user = await getUser();

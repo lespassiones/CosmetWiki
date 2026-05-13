@@ -6,7 +6,6 @@ import { SkinProfileCard } from "@/components/profile/SkinProfileCard";
 import { readSkinProfile } from "@/lib/skin/profile";
 
 export const metadata = { title: "Mon profil · Cosme Check" };
-export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
   const user = await getUser();

@@ -15,6 +15,16 @@ type AnalysisRow = {
   product_label: string | null;
   score: number | null;
   created_at: string;
+  counts: { vert: number; jaune: number; orange: number; rouge: number } | null;
+};
+
+type RawRow = {
+  id: string;
+  name: string | null;
+  product_label: string | null;
+  score: number | null;
+  created_at: string;
+  result_json: { counts?: { vert?: number; jaune?: number; orange?: number; rouge?: number } } | null;
 };
 
 export default async function HistoryPage() {
@@ -26,11 +36,26 @@ export default async function HistoryPage() {
   const { data, error } = await sb
     .schema("cosme_check")
     .from("analyses")
-    .select("id, name, product_label, score, created_at")
+    .select("id, name, product_label, score, created_at, result_json")
     .order("created_at", { ascending: false })
     .limit(50);
 
-  const analyses = (error ? [] : (data ?? [])) as AnalysisRow[];
+  const raw = (error ? [] : (data ?? [])) as RawRow[];
+  const analyses: AnalysisRow[] = raw.map((r) => ({
+    id: r.id,
+    name: r.name,
+    product_label: r.product_label,
+    score: r.score,
+    created_at: r.created_at,
+    counts: r.result_json?.counts
+      ? {
+          vert: r.result_json.counts.vert ?? 0,
+          jaune: r.result_json.counts.jaune ?? 0,
+          orange: r.result_json.counts.orange ?? 0,
+          rouge: r.result_json.counts.rouge ?? 0,
+        }
+      : null,
+  }));
 
   return (
     <div className="mx-auto max-w-4xl px-5 lg:px-8 py-8 lg:py-12">

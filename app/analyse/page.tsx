@@ -1,7 +1,6 @@
 import { AnalysisRunner } from "@/components/AnalysisRunner";
 
 export const metadata = { title: "Analyse · Cosme Check" };
-export const dynamic = "force-dynamic";
 
 type Props = {
   searchParams?: Promise<{ inci?: string }>;

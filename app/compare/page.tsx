@@ -8,7 +8,6 @@ import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { GLASS_CARD } from "@/lib/ui/glass";
 
 export const metadata = { title: "Comparer · Cosme Check" };
-export const dynamic = "force-dynamic";
 
 function renderBold(text: string) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);

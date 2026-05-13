@@ -260,16 +260,28 @@ export default async function RoutinePage() {
           <ul className="divide-y divide-[#F0F0F0]">
             {items
               .filter((it) => it.analyses)
-              .map((it) => (
-                <RoutineProductRow
-                  key={it.id}
-                  routineItemId={it.id}
-                  analysisId={it.analysis_id}
-                  name={it.analyses!.product_label ?? it.analyses!.name ?? "Analyse"}
-                  score={it.analyses!.score}
-                  frequency={it.frequency}
-                />
-              ))}
+              .map((it) => {
+                const c = it.analyses!.result_json?.counts;
+                return (
+                  <RoutineProductRow
+                    key={it.id}
+                    routineItemId={it.id}
+                    analysisId={it.analysis_id}
+                    name={it.analyses!.product_label ?? it.analyses!.name ?? "Analyse"}
+                    counts={
+                      c
+                        ? {
+                            vert: c.vert,
+                            jaune: c.jaune,
+                            orange: c.orange,
+                            rouge: c.rouge,
+                          }
+                        : null
+                    }
+                    frequency={it.frequency}
+                  />
+                );
+              })}
           </ul>
         </div>
       </section>

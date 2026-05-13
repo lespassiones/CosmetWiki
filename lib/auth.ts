@@ -1,6 +1,7 @@
 /**
  * Server-side auth helpers. The browser side is in `components/AuthProvider.tsx`.
  */
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { supabaseServer, supabaseService } from "./supabase";
 import type { User } from "@supabase/supabase-js";
@@ -12,13 +13,18 @@ export type CosmetUserProfile = {
   preferences: Record<string, unknown>;
 };
 
-/** Returns the auth user (from Supabase Auth) for the current request, or null. */
-export async function getUser() {
+/**
+ * Returns the auth user (from Supabase Auth) for the current request, or null.
+ *
+ * Wrapped in React's `cache()` so all `getUser()` calls inside the same server
+ * request (layout + page + nested helpers) share a single Supabase round-trip.
+ */
+export const getUser = cache(async (): Promise<User | null> => {
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
   const { data } = await sb.auth.getUser();
   return data.user ?? null;
-}
+});
 
 /**
  * Derives a reasonable first_name from a Supabase user, preferring (in order):
@@ -37,13 +43,20 @@ function deriveFirstName(user: User): string {
   return local.charAt(0).toUpperCase() + local.slice(1);
 }
 
-/** Loads the Cosme Check profile (first_name, tier, preferences) for the current user. */
-export async function getProfile(): Promise<CosmetUserProfile | null> {
-  const cookieStore = await cookies();
-  const sb = supabaseServer(cookieStore);
-  const { data: { user } } = await sb.auth.getUser();
+/**
+ * Loads the Cosme Check profile (first_name, tier, preferences) for the current
+ * user.
+ *
+ * Wrapped in `cache()` so concurrent calls from the layout and the page resolve
+ * to a single DB query, and reuses the cached `getUser()` so we don't perform a
+ * second `auth.getUser()` round-trip.
+ */
+export const getProfile = cache(async (): Promise<CosmetUserProfile | null> => {
+  const user = await getUser();
   if (!user) return null;
 
+  const cookieStore = await cookies();
+  const sb = supabaseServer(cookieStore);
   const { data } = await sb
     .schema("cosme_check")
     .from("user_profiles")
@@ -76,7 +89,7 @@ export async function getProfile(): Promise<CosmetUserProfile | null> {
     tier: "premium",
     preferences: {},
   };
-}
+});
 
 /**
  * Feature gating helper. For now everyone has full access; the function is

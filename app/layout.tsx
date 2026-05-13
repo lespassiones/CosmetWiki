@@ -1,10 +1,22 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SITE_URL } from "@/lib/siteUrl";
 import { PWARegister } from "@/components/PWARegister";
 import { AppShell } from "@/components/nav/AppShell";
 import { getProfile, getUser } from "@/lib/auth";
 import "./globals.css";
+
+// Self-host Inter on the Vercel edge: zero FOUT, no fonts.googleapis.com
+// round-trip on first visit. We expose it as a CSS variable so the existing
+// Tailwind `font-sans` / `font-display` chain (and globals.css) can reference
+// it via `var(--font-inter)`.
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 const SITE_NAME = "Cosme Check";
 const DEFAULT_TITLE = "Cosme Check — Le moteur de recherche public d'ingrédients cosmétiques";
@@ -93,18 +105,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const hideOnPaths = ["/auth", "/scan/photo"];
 
   return (
-    <html lang="fr" className="light" data-theme="light">
+    <html lang="fr" className={`light ${inter.variable}`} data-theme="light">
       <body className="min-h-screen antialiased">
         <link
           rel="preconnect"
           href={process.env.NEXT_PUBLIC_SUPABASE_URL}
           crossOrigin="anonymous"
-        />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
         />
         <AppShell signedIn={signedIn} firstName={firstName} hideOnPaths={hideOnPaths}>
           {children}

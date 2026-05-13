@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { Logo } from "@/components/Logo";
 import { Footer } from "@/components/Footer";
@@ -7,9 +8,11 @@ import { MobileMenu } from "@/components/MobileMenu";
 import { HomeShell } from "@/components/HomeShell";
 import { InstallPWAButton } from "@/components/InstallPWAButton";
 import { HomeDashboard, type DashboardData } from "@/components/home/HomeDashboard";
+import { TrendingCard, TrendingCardSkeleton } from "@/components/home/TrendingCard";
 import { getProfile, getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { tipsForCarousel } from "@/lib/tips";
+import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 type Props = {
   searchParams?: Promise<{ inci?: string; mode?: string }>;
@@ -24,28 +27,52 @@ const MODE_MAP: Record<string, "inci" | "product" | "barcode" | undefined> = {
 async function loadDashboard(firstName: string | null): Promise<DashboardData> {
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
-  const { data: { user } } = await sb.auth.getUser();
+  // Reuse the request-cached `getUser()` so this dashboard doesn't trigger a
+  // second `auth.getUser()` round-trip (the layout already resolved it).
+  const user = await getUser();
 
   let lastAnalysis: DashboardData["lastAnalysis"] = null;
   let routineCount = 0;
   let routineAvgScore: number | null = null;
+  let routineCounts: DashboardData["routineCounts"] = null;
 
   if (user) {
     const [lastResult, routineResult] = await Promise.all([
       sb
         .schema("cosme_check")
         .from("analyses")
-        .select("id, name, product_label, score, created_at")
+        .select("id, name, product_label, score, created_at, result_json")
         .order("created_at", { ascending: false })
         .limit(1),
       sb
         .schema("cosme_check")
         .from("routine_items")
-        .select("analyses(score)"),
+        .select("analyses(score, result_json)"),
     ]);
-    lastAnalysis = (lastResult.data?.[0] ?? null) as DashboardData["lastAnalysis"];
+
+    const lastRow = lastResult.data?.[0] as
+      | { id: string; name: string | null; product_label: string | null; score: number | null; created_at: string; result_json: AnalyseResponse | null }
+      | undefined;
+    if (lastRow) {
+      lastAnalysis = {
+        id: lastRow.id,
+        name: lastRow.name,
+        product_label: lastRow.product_label,
+        score: lastRow.score,
+        created_at: lastRow.created_at,
+        counts: lastRow.result_json
+          ? {
+              vert: lastRow.result_json.counts.vert,
+              jaune: lastRow.result_json.counts.jaune,
+              orange: lastRow.result_json.counts.orange,
+              rouge: lastRow.result_json.counts.rouge,
+            }
+          : null,
+      };
+    }
+
     const routine = (routineResult.data ?? []) as unknown as {
-      analyses: { score: number | null } | null;
+      analyses: { score: number | null; result_json: AnalyseResponse | null } | null;
     }[];
     const scores = routine
       .map((r) => r.analyses?.score)
@@ -54,20 +81,30 @@ async function loadDashboard(firstName: string | null): Promise<DashboardData> {
     routineAvgScore = scores.length > 0
       ? scores.reduce((a, b) => a + b, 0) / scores.length
       : null;
-  }
 
-  const { data: trendingData } = await sb.rpc("cosme_check_trending_ingredients", {
-    p_days: 7,
-    p_limit: 5,
-  });
+    // Aggregate counts across all routine products so the routine card blob
+    // reflects the cumulative composition (matches "exposition cumulée").
+    const agg = { vert: 0, jaune: 0, orange: 0, rouge: 0 };
+    let any = false;
+    for (const r of routine) {
+      const c = r.analyses?.result_json?.counts;
+      if (!c) continue;
+      any = true;
+      agg.vert += c.vert ?? 0;
+      agg.jaune += c.jaune ?? 0;
+      agg.orange += c.orange ?? 0;
+      agg.rouge += c.rouge ?? 0;
+    }
+    routineCounts = any ? agg : null;
+  }
 
   return {
     firstName,
     lastAnalysis,
     routineCount,
     routineAvgScore,
+    routineCounts,
     tips: tipsForCarousel(12),
-    trendingIngredients: (trendingData ?? []) as DashboardData["trendingIngredients"],
   };
 }
 
@@ -124,7 +161,16 @@ export default async function Home({ searchParams }: Props) {
         </>
       )}
 
-      {showDashboard && <HomeDashboard data={dashboard} />}
+      {showDashboard && (
+        <HomeDashboard
+          data={dashboard}
+          trendingSlot={
+            <Suspense fallback={<TrendingCardSkeleton />}>
+              <TrendingCard />
+            </Suspense>
+          }
+        />
+      )}
 
       <HomeShell
         initialInci={initialInci}

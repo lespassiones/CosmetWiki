@@ -6,7 +6,7 @@ const DEFAULT_STEPS = [
   "Lecture de la liste",
   "Identification des ingrédients",
   "Détection des catégories",
-  "Calcul de la note globale",
+  "Évaluation des ingrédients",
   "Génération de la synthèse",
 ];
 

@@ -4,32 +4,24 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { removeFromRoutine, setRoutineFrequency } from "@/app/routine/actions";
-
-function scoreTone(s: number | null) {
-  if (s === null) return { bg: "bg-[#F3F4F6]", fg: "text-[#6B7280]" };
-  if (s >= 17) return { bg: "bg-emerald-50", fg: "text-emerald-700" };
-  if (s >= 13) return { bg: "bg-amber-50", fg: "text-amber-700" };
-  if (s >= 9) return { bg: "bg-orange-50", fg: "text-orange-700" };
-  return { bg: "bg-rose-50", fg: "text-rose-700" };
-}
+import { IngredientBlob, type BlobCounts } from "@/components/blob/IngredientBlob";
 
 export function RoutineProductRow({
   routineItemId,
   analysisId,
   name,
-  score,
+  counts,
   frequency,
 }: {
   routineItemId: string;
   analysisId: string;
   name: string;
-  score: number | null;
+  counts: BlobCounts | null;
   frequency: "daily" | "weekly" | "monthly";
 }) {
   const [pending, startTransition] = useTransition();
   const [localFreq, setLocalFreq] = useState(frequency);
   const router = useRouter();
-  const tone = scoreTone(score);
 
   function changeFreq(next: string) {
     setLocalFreq(next as typeof localFreq);
@@ -49,11 +41,11 @@ export function RoutineProductRow({
 
   return (
     <li className="flex items-center gap-3 py-3">
-      <div className={`h-12 w-12 shrink-0 rounded-xl flex flex-col items-center justify-center ${tone.bg} ${tone.fg}`}>
-        <span className="text-sm font-bold leading-none">
-          {score !== null ? score.toFixed(1) : "—"}
-        </span>
-        <span className="text-[9px] mt-0.5">/20</span>
+      <div className="h-10 w-14 shrink-0">
+        <IngredientBlob
+          counts={counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 }}
+          variant="sm"
+        />
       </div>
       <div className="min-w-0 flex-1">
         <Link href={`/history/${analysisId}`} className="block font-semibold truncate hover:underline">

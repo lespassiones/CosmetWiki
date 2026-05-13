@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GLASS_CARD, GLASS_CARD_HOVER, GLASS_PILL_DARK } from "@/lib/ui/glass";
 import { HistoryItemActions } from "@/components/history/HistoryItemActions";
+import { IngredientBlob, type BlobCounts } from "@/components/blob/IngredientBlob";
 
 type Row = {
   id: string;
@@ -12,14 +13,15 @@ type Row = {
   product_label: string | null;
   score: number | null;
   created_at: string;
+  counts: BlobCounts | null;
 };
 
 function scoreTone(score: number | null) {
-  if (score === null) return { bg: "bg-[#F3F4F6]", text: "text-[#6B7280]", label: "—" };
-  if (score >= 17) return { bg: "bg-emerald-50", text: "text-emerald-700", label: "Très bien" };
-  if (score >= 13) return { bg: "bg-amber-50", text: "text-amber-700", label: "Bien" };
-  if (score >= 9) return { bg: "bg-orange-50", text: "text-orange-700", label: "Moyen" };
-  return { bg: "bg-rose-50", text: "text-rose-700", label: "À éviter" };
+  if (score === null) return { text: "text-[#6B7280]", label: "—" };
+  if (score >= 17) return { text: "text-emerald-700", label: "Très bien" };
+  if (score >= 13) return { text: "text-amber-700", label: "Bien" };
+  if (score >= 9) return { text: "text-orange-700", label: "Moyen" };
+  return { text: "text-rose-700", label: "À éviter" };
 }
 
 function formatDate(iso: string): string {
@@ -150,16 +152,16 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                       </svg>
                     )}
                   </span>
-                  <div className={`flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl ${tone.bg} ${tone.text}`}>
-                    <span className="text-base font-bold leading-none">
-                      {a.score !== null ? a.score.toFixed(1) : "—"}
-                    </span>
-                    <span className="text-[10px] mt-0.5">/20</span>
+                  <div className="h-12 w-16 shrink-0">
+                    <IngredientBlob
+                      counts={a.counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 }}
+                      variant="sm"
+                    />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold text-[#111111] truncate">{displayName}</div>
-                    <div className="text-[12px] text-[#6B7280]">
-                      {tone.label} · {formatDate(a.created_at)}
+                    <div className={`text-[12px] ${tone.text}`}>
+                      {tone.label} · <span className="text-[#6B7280]">{formatDate(a.created_at)}</span>
                     </div>
                   </div>
                 </button>
@@ -173,16 +175,16 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                 href={`/history/${a.id}`}
                 className={`${GLASS_CARD} ${GLASS_CARD_HOVER} flex items-center gap-4 p-4 pr-16`}
               >
-                <div className={`flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl ${tone.bg} ${tone.text}`}>
-                  <span className="text-base font-bold leading-none">
-                    {a.score !== null ? a.score.toFixed(1) : "—"}
-                  </span>
-                  <span className="text-[10px] mt-0.5">/20</span>
+                <div className="h-12 w-16 shrink-0">
+                  <IngredientBlob
+                    counts={a.counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 }}
+                    variant="sm"
+                  />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-[#111111] truncate">{displayName}</div>
-                  <div className="text-[12px] text-[#6B7280]">
-                    {tone.label} · {formatDate(a.created_at)}
+                  <div className={`text-[12px] ${tone.text}`}>
+                    {tone.label} · <span className="text-[#6B7280]">{formatDate(a.created_at)}</span>
                   </div>
                 </div>
               </Link>

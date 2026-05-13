@@ -7,8 +7,6 @@ import { SearchBar } from "@/components/SearchBar";
 import { MobileMenu } from "@/components/MobileMenu";
 import { supabaseAnon, type SearchHit } from "@/lib/supabase";
 
-export const dynamic = "force-dynamic";
-
 type SearchPageProps = {
   searchParams: Promise<{ q?: string }>;
 };

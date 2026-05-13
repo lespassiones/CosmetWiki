@@ -1,9 +1,11 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   GLASS_CARD,
   GLASS_CARD_DARK,
   GLASS_CARD_HOVER,
 } from "@/lib/ui/glass";
+import { IngredientBlob, type BlobCounts } from "../blob/IngredientBlob";
 import { TipCarousel } from "./TipCarousel";
 
 export type DashboardData = {
@@ -14,76 +16,29 @@ export type DashboardData = {
     product_label: string | null;
     score: number | null;
     created_at: string;
+    counts: BlobCounts | null;
   } | null;
   routineCount: number;
   routineAvgScore: number | null;
+  routineCounts: BlobCounts | null;
   tips: string[];
-  trendingIngredients: {
-    slug: string;
-    name: string;
-    color_rating: "Vert" | "Jaune" | "Orange" | "Rouge" | null;
-    translation_fr: string | null;
-    primary_function: string | null;
-  }[];
-};
-
-const RATING_COLOR: Record<NonNullable<DashboardData["trendingIngredients"][number]["color_rating"]>, string> = {
-  Vert: "#10B981",
-  Jaune: "#F59E0B",
-  Orange: "#FB923C",
-  Rouge: "#EF4444",
 };
 
 function scoreTone(s: number | null) {
-  if (s === null) return { bg: "bg-[#F3F4F6]", fg: "text-[#6B7280]", stroke: "#9CA3AF", label: "—" };
-  if (s >= 17) return { bg: "bg-emerald-50", fg: "text-emerald-700", stroke: "#10B981", label: "Très bien" };
-  if (s >= 13) return { bg: "bg-amber-50", fg: "text-amber-700", stroke: "#F59E0B", label: "Bien" };
-  if (s >= 9) return { bg: "bg-orange-50", fg: "text-orange-700", stroke: "#FB923C", label: "Moyen" };
-  return { bg: "bg-rose-50", fg: "text-rose-700", stroke: "#EF4444", label: "À éviter" };
+  if (s === null) return { fg: "text-[#6B7280]", label: "—" };
+  if (s >= 17) return { fg: "text-emerald-700", label: "Très bien" };
+  if (s >= 13) return { fg: "text-amber-700", label: "Bien" };
+  if (s >= 9) return { fg: "text-orange-700", label: "Moyen" };
+  return { fg: "text-rose-700", label: "À éviter" };
 }
 
-function HalfCircleScore({
-  score,
-  stroke,
+export function HomeDashboard({
+  data,
+  trendingSlot,
 }: {
-  score: number | null;
-  stroke: string;
+  data: DashboardData;
+  trendingSlot: ReactNode;
 }) {
-  const radius = 44;
-  const arcLength = Math.PI * radius;
-  const filled = score !== null ? Math.max(0, Math.min(1, score / 20)) * arcLength : 0;
-  const path = "M 8 56 A 44 44 0 0 1 96 56";
-  return (
-    <div className="relative h-[64px] w-[104px] shrink-0">
-      <svg viewBox="0 0 104 60" className="h-full w-full" aria-hidden>
-        <path
-          d={path}
-          fill="none"
-          stroke="rgba(15,23,42,0.08)"
-          strokeWidth="8"
-          strokeLinecap="round"
-        />
-        <path
-          d={path}
-          fill="none"
-          stroke={stroke}
-          strokeWidth="8"
-          strokeLinecap="round"
-          strokeDasharray={arcLength}
-          strokeDashoffset={arcLength - filled}
-        />
-      </svg>
-      <div className="absolute inset-x-0 bottom-0 flex items-baseline justify-center">
-        <span className="text-[20px] font-bold leading-none text-[#111111] tabular-nums">
-          {score !== null ? score.toFixed(1) : "—"}
-        </span>
-        <span className="ml-0.5 text-[11px] font-medium leading-none text-[#6B7280]">/20</span>
-      </div>
-    </div>
-  );
-}
-
-export function HomeDashboard({ data }: { data: DashboardData }) {
   const greeting = data.firstName ? `Bonjour ${data.firstName} 👋` : "Bienvenue 👋";
 
   return (
@@ -104,7 +59,11 @@ export function HomeDashboard({ data }: { data: DashboardData }) {
 
       <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
         <LastAnalysisCard last={data.lastAnalysis} />
-        <RoutineCard count={data.routineCount} avgScore={data.routineAvgScore} />
+        <RoutineCard
+          count={data.routineCount}
+          avgScore={data.routineAvgScore}
+          counts={data.routineCounts}
+        />
       </div>
 
       <Link
@@ -123,9 +82,7 @@ export function HomeDashboard({ data }: { data: DashboardData }) {
         </div>
       </Link>
 
-      <div className="mt-4">
-        <TrendingCard items={data.trendingIngredients} />
-      </div>
+      <div className="mt-4">{trendingSlot}</div>
     </section>
   );
 }
@@ -143,6 +100,7 @@ function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
   }
   const tone = scoreTone(last.score);
   const title = last.product_label ?? last.name ?? "Analyse";
+  const counts = last.counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 };
   return (
     <Link
       href={`/history/${last.id}`}
@@ -157,13 +115,23 @@ function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
           <div className="font-semibold text-[#111111] truncate">{title}</div>
           <div className={`mt-0.5 text-[12px] font-medium ${tone.fg}`}>{tone.label}</div>
         </div>
-        <HalfCircleScore score={last.score} stroke={tone.stroke} />
+        <div className="w-[140px] shrink-0">
+          <IngredientBlob counts={counts} variant="md" />
+        </div>
       </div>
     </Link>
   );
 }
 
-function RoutineCard({ count, avgScore }: { count: number; avgScore: number | null }) {
+function RoutineCard({
+  count,
+  avgScore,
+  counts,
+}: {
+  count: number;
+  avgScore: number | null;
+  counts: BlobCounts | null;
+}) {
   if (count === 0) {
     return (
       <Link
@@ -179,6 +147,7 @@ function RoutineCard({ count, avgScore }: { count: number; avgScore: number | nu
     );
   }
   const tone = scoreTone(avgScore);
+  const safeCounts = counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 };
   return (
     <Link
       href="/routine"
@@ -197,49 +166,10 @@ function RoutineCard({ count, avgScore }: { count: number; avgScore: number | nu
             Exposition {tone.label.toLowerCase()}
           </div>
         </div>
-        <HalfCircleScore score={avgScore} stroke={tone.stroke} />
+        <div className="w-[140px] shrink-0">
+          <IngredientBlob counts={safeCounts} variant="md" />
+        </div>
       </div>
     </Link>
-  );
-}
-
-function TrendingCard({ items }: { items: DashboardData["trendingIngredients"] }) {
-  return (
-    <div className={`${GLASS_CARD} p-5`}>
-      <h2 className="text-[15px] font-semibold mb-3">Ingrédients tendance cette semaine</h2>
-      {items.length === 0 ? (
-        <p className="text-sm text-[#6B7280]">Pas encore de tendance — reviens bientôt.</p>
-      ) : (
-        <ul className="divide-y divide-[#F0F0F0]">
-          {items.map((it) => (
-            <li key={it.slug}>
-              <Link
-                href={`/i/${it.slug}`}
-                className="flex items-center gap-3 py-2.5 hover:bg-[#FAFAFA] -mx-2 px-2 rounded-lg transition"
-              >
-                <span
-                  aria-hidden
-                  className="h-2 w-2 rounded-full shrink-0"
-                  style={{ background: it.color_rating ? RATING_COLOR[it.color_rating] : "#E5E7EB" }}
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold truncate">{it.name}</div>
-                  {it.translation_fr && (
-                    <div className="text-[11px] text-[#6B7280] truncate">{it.translation_fr}</div>
-                  )}
-                </div>
-                {it.primary_function ? (
-                  <div className="hidden sm:block min-w-0 max-w-[40%] text-right">
-                    <div className="text-[10px] uppercase tracking-wide text-[#9CA3AF]">Fonction</div>
-                    <div className="text-[12px] text-[#4B5563] truncate">{it.primary_function}</div>
-                  </div>
-                ) : null}
-                <span aria-hidden className="text-[#9CA3AF]">›</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
   );
 }
