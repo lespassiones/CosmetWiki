@@ -5,11 +5,19 @@ import type { ColorRating } from "@/lib/supabase";
 import { GLASS_CARD } from "@/lib/ui/glass";
 import { InfoBadge, Tooltip } from "../Tooltip";
 
+// Aligned with the rest of the app's rating palette (Tailwind dot/badge
+// classes used in CountsStrip, RoutineProductRow, search results, etc.):
+//   Vert   → emerald-500  (#10B981)
+//   Jaune  → amber-400    (#FBBF24)  ← was #F59E0B (amber-500), too orange
+//   Orange → orange-400   (#FB923C)
+//   Rouge  → rose-500     (#F43F5E)  ← was #EF4444 (red-500), drifted from theme
+// Without this fix a Jaune ingredient at the top of the spectrum read as
+// "Orange" because amber-500 is visually closer to the Orange swatch.
 const COLOR_MAP: Record<NonNullable<ColorRating>, string> = {
   Vert: "#10B981",
-  Jaune: "#F59E0B",
+  Jaune: "#FBBF24",
   Orange: "#FB923C",
-  Rouge: "#EF4444",
+  Rouge: "#F43F5E",
 };
 
 const RATING_LABEL: Record<NonNullable<ColorRating>, string> = {

@@ -11,11 +11,14 @@ type TrendingItem = {
   primary_function: string | null;
 };
 
+// Same palette as IngredientSpectrum — aligned with the rest of the app's
+// rating colours (amber-400 for Jaune, rose-500 for Rouge) so the same
+// ingredient looks identical here, in the spectrum, and in the result panel.
 const RATING_COLOR: Record<NonNullable<TrendingItem["color_rating"]>, string> = {
   Vert: "#10B981",
-  Jaune: "#F59E0B",
+  Jaune: "#FBBF24",
   Orange: "#FB923C",
-  Rouge: "#EF4444",
+  Rouge: "#F43F5E",
 };
 
 /**
