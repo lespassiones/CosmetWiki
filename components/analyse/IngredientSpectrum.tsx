@@ -67,9 +67,10 @@ export function IngredientSpectrum({
         <Tooltip
           content={
             <>
-              Les 5 premiers ingrédients représentent environ <b>75 %</b> de la formule.
-              Si l&apos;un d&apos;eux n&apos;est pas vert, l&apos;ingrédient en question
-              pèse beaucoup dans le produit — c&apos;est un point d&apos;attention.
+              Les 5 premiers ingrédients représentent la majeure partie de la formule
+              (souvent <b>75 à 99 %</b>). Un ingrédient non vert dans ce top 5 a bien
+              plus d&apos;impact qu&apos;un même ingrédient placé plus loin dans la
+              liste INCI.
             </>
           }
         >

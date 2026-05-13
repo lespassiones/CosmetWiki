@@ -64,6 +64,20 @@ type Geom = {
   jitter: number;
   /** Sample count for each radial boundary. */
   edgeSegments: number;
+  /**
+   * Stroke width drawn in the *same colour as the fill*, with rounded line
+   * joins/caps. Cosmetic only: it doesn't change the ring colour, it just
+   * smooths every corner where a radial edge meets the inner/outer arc, and
+   * smooths the wavy radial edges themselves. Larger variants need a thicker
+   * stroke to round the larger corners.
+   */
+  roundStroke: number;
+  /**
+   * CSS drop-shadow applied to the slice group — gives the half-ring a soft
+   * "claymorphism" lift off the page (matches the reference mock's painted
+   * blob look). Tuned per-variant so it stays subtle at every size.
+   */
+  shadow: string;
 };
 
 const GEOMETRY: Record<Variant, Geom> = {
@@ -76,6 +90,8 @@ const GEOMETRY: Record<Variant, Geom> = {
     rInner: 90,
     jitter: 0.07,
     edgeSegments: 16,
+    roundStroke: 8,
+    shadow: "drop-shadow(0 6px 10px rgba(15,23,42,0.10)) drop-shadow(0 2px 3px rgba(15,23,42,0.06))",
   },
   md: {
     width: 280,
@@ -86,6 +102,8 @@ const GEOMETRY: Record<Variant, Geom> = {
     rInner: 46,
     jitter: 0.06,
     edgeSegments: 12,
+    roundStroke: 4,
+    shadow: "drop-shadow(0 3px 5px rgba(15,23,42,0.10)) drop-shadow(0 1px 2px rgba(15,23,42,0.06))",
   },
   sm: {
     width: 64,
@@ -96,16 +114,21 @@ const GEOMETRY: Record<Variant, Geom> = {
     rInner: 12,
     jitter: 0.04,
     edgeSegments: 8,
+    roundStroke: 1.5,
+    shadow: "drop-shadow(0 1px 2px rgba(15,23,42,0.10))",
   },
 };
 
 /**
- * Distribute the half-circle's 180° among the four colours proportionally.
+ * Distribute the half-circle's 180° among the colours that actually have at
+ * least one ingredient.
  *
- *  - All-zero counts → equal split (45° each).
- *  - Tiny counts get a `minAngle` floor so the slice stays *visible* in the
- *    ring (otherwise it'd collapse and disappear). The surplus is taken
- *    pro-rata from the bigger slices.
+ *  - Colours with `count === 0` are **excluded** from the ring entirely (the
+ *    legend below still shows them at 0/N).
+ *  - All-zero counts (total === 0) → equal split across the 4 categories so
+ *    the ring isn't empty.
+ *  - Present-but-tiny slices get a `minAngle` floor so they stay visible in
+ *    the ring; the surplus is taken pro-rata from the bigger slices.
  */
 function computeSlices(counts: BlobCounts): {
   color: ColorKey;
@@ -113,14 +136,15 @@ function computeSlices(counts: BlobCounts): {
   end: number;
 }[] {
   const total = counts.vert + counts.jaune + counts.orange + counts.rouge;
-  const minAngle = Math.PI * 0.04; // ~7° minimum per colour
+  const minAngle = Math.PI * 0.04; // ~7° minimum per *present* colour
 
   let raw: { color: ColorKey; angle: number }[];
   if (total === 0) {
     const equal = Math.PI / ARC_ORDER.length;
     raw = ARC_ORDER.map((c) => ({ color: c, angle: equal }));
   } else {
-    raw = ARC_ORDER.map((c) => ({
+    const present = ARC_ORDER.filter((c) => counts[c] > 0);
+    raw = present.map((c) => ({
       color: c,
       angle: (counts[c] / total) * Math.PI,
     }));
@@ -221,13 +245,28 @@ export function IngredientBlob({
         role="img"
         aria-label={ariaLabel}
       >
-        {slices.map((s, i) => (
-          <path
-            key={s.color}
-            d={ringSectorPath(geom.rInner, geom.rOuter, edges[i], edges[i + 1])}
-            fill={BLOB_COLORS[s.color]}
-          />
-        ))}
+        {/*
+          Slice group: a single CSS drop-shadow on the wrapper produces the
+          claymorphism lift. We don't apply it per-slice because adjacent
+          slices share a radial edge — a per-slice shadow would visibly
+          double-up at every junction.
+        */}
+        <g style={{ filter: geom.shadow }}>
+          {slices.map((s, i) => (
+            <path
+              key={s.color}
+              d={ringSectorPath(geom.rInner, geom.rOuter, edges[i], edges[i + 1])}
+              fill={BLOB_COLORS[s.color]}
+              // Same-colour stroke with rounded joins/caps softens every corner
+              // (radial-edge ↔ inner/outer arc) and the wavy radial edges
+              // themselves — the "pill morphism" rounding.
+              stroke={BLOB_COLORS[s.color]}
+              strokeWidth={geom.roundStroke}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          ))}
+        </g>
 
         {showCenter && (
           <g>
