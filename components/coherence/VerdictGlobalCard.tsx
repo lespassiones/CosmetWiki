@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { GLASS_CARD } from "@/lib/ui/glass";
 import { InfoBadge, Tooltip } from "../Tooltip";
 import type { CoherenceResult } from "@/lib/coherence/types";
@@ -7,8 +10,13 @@ import type { CoherenceResult } from "@/lib/coherence/types";
  * bicolour donut on the right (green = kept, rose = not kept).
  *
  * Donut design : "claymorphism" / soft 3D — radial gradients on each segment
- * (lighter on the inner edge, darker on the outer edge) + a subtle inset
- * shadow so it looks like a thick rope of paint, not a flat ring.
+ * + a subtle drop shadow so it looks like a thick rope of paint.
+ *
+ * Mount animation:
+ *   - The donut's emerald fill grows from 0 → target percentage with an
+ *     ease-out cubic over ~1100ms (the rose track stays full underneath).
+ *   - The big number on the left and the centre badge tick from 0 → pct in
+ *     sync, so the whole card "comes to life" together.
  */
 export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metrics"] }) {
   const pct = metrics.tenuePct;
@@ -20,6 +28,37 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
   const r = 38;
   const c = 2 * Math.PI * r;
   const filled = (pct / 100) * c;
+
+  // Mount-time animation. `progress` ramps 0 → 1 over DURATION ms with an
+  // ease-out cubic. Honours prefers-reduced-motion: jumps straight to 1.
+  const [progress, setProgress] = useState(0);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const reduce
+      = typeof window !== "undefined"
+      && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setProgress(1);
+      return;
+    }
+    const DURATION = 3500;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / DURATION);
+      // ease-out cubic: starts fast, lands smoothly
+      const eased = 1 - Math.pow(1 - t, 3);
+      setProgress(eased);
+      if (t < 1) rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  const animatedFilled = filled * progress;
+  const animatedPct = Math.round(pct * progress);
 
   return (
     <article className={`${GLASS_CARD} p-5 lg:p-7 h-full flex flex-col`}>
@@ -54,11 +93,8 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
       </div>
       <div className="flex items-center justify-between gap-4 flex-1">
         <div className="min-w-0 flex-1">
-          {/* Inline-flex with explicit small gap so the "%" sits tight against
-              the number on the same baseline. whitespace-nowrap prevents the
-              "%" from wrapping when the column is narrow. */}
           <div className="inline-flex items-baseline gap-1 whitespace-nowrap text-[52px] lg:text-[64px] font-bold leading-none tabular-nums text-ink">
-            <span>{pct}</span>
+            <span>{animatedPct}</span>
             <span className="text-[32px] lg:text-[40px] font-bold">%</span>
           </div>
           <p className="mt-3 lg:mt-4 text-[14px] lg:text-[15px] text-[#6B7280] leading-snug">
@@ -83,7 +119,6 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
             }}
           >
             <defs>
-              {/* Radial gradients to give each segment a soft 3D "rope" feel */}
               <linearGradient id="vc-rose" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stopColor="#FB7185" />
                 <stop offset="100%" stopColor="#E11D48" />
@@ -93,7 +128,7 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
                 <stop offset="100%" stopColor="#059669" />
               </linearGradient>
             </defs>
-            {/* Track (rose, "not kept" share) */}
+            {/* Rose track always full — the emerald fill animates over it */}
             <circle
               cx="50"
               cy="50"
@@ -103,7 +138,7 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
               strokeWidth="16"
               strokeLinecap="butt"
             />
-            {/* Filled (emerald, "kept" share) */}
+            {/* Emerald filled segment, animates from 0 to its target */}
             <circle
               cx="50"
               cy="50"
@@ -112,10 +147,9 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
               stroke="url(#vc-emerald)"
               strokeWidth="16"
               strokeDasharray={c}
-              strokeDashoffset={c - filled}
+              strokeDashoffset={c - animatedFilled}
               strokeLinecap="butt"
             />
-            {/* Inner highlight ring — gives the "polished" look */}
             <circle
               cx="50"
               cy="50"
@@ -125,10 +159,9 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
               strokeWidth="1.2"
             />
           </svg>
-          {/* Inner % badge */}
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="rounded-full bg-white/90 px-2 py-0.5 text-[12px] lg:text-[13px] font-bold tabular-nums text-ink shadow-[0_2px_6px_-2px_rgba(15,23,42,0.18),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-black/[0.04]">
-              {pct} %
+              {animatedPct} %
             </span>
           </div>
         </div>

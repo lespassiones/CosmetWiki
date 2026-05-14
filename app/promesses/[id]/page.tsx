@@ -10,6 +10,7 @@ import { ConclusionCard } from "@/components/coherence/ConclusionCard";
 import { IngredientsPositionChart } from "@/components/coherence/IngredientsPositionChart";
 import { DescriptionKeywordsCard } from "@/components/coherence/DescriptionKeywordsCard";
 import { MarketingIndexCard } from "@/components/coherence/MarketingIndexCard";
+import { Reveal } from "@/components/Reveal";
 import { computeMetrics } from "@/lib/coherence/engine";
 import type { CoherenceResult } from "@/lib/coherence/types";
 
@@ -91,31 +92,45 @@ export default async function PromesseDetailPage({
         </p>
       </header>
 
-      {/* Bento grid : verdict global (left) + promises bar chart (right) on desktop */}
+      {/* Sections animated in cascade — top→bottom fade-up, with progressive
+          delays. The donut and the per-promise bars also have their own
+          inner animations (radial fill / width fill) that start once their
+          card is visible (see VerdictGlobalCard / PromisesBarChart).        */}
+
+      {/* Bento : verdict global + bar chart */}
       <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-4 lg:gap-5">
-        <VerdictGlobalCard metrics={result.metrics} />
-        <PromisesBarChart promises={result.promises} />
+        <Reveal delayMs={100}>
+          <VerdictGlobalCard metrics={result.metrics} />
+        </Reveal>
+        <Reveal delayMs={200}>
+          <PromisesBarChart promises={result.promises} />
+        </Reveal>
       </section>
 
-      {/* Coherence table (wide) + conclusion (narrow, vertically centred).
-          items-center makes the conclusion card sit at the vertical centre
-          of the table column instead of stretching to match its height — the
-          conclusion is short, no need to inflate it. */}
+      {/* Coherence table + conclusion */}
       <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.5fr)_minmax(0,1fr)] gap-4 lg:gap-5 items-center">
-        <CoherenceTable promises={result.promises} />
-        <ConclusionCard conclusion={result.conclusion} />
+        <Reveal delayMs={350}>
+          <CoherenceTable promises={result.promises} />
+        </Reveal>
+        <Reveal delayMs={450}>
+          <ConclusionCard conclusion={result.conclusion} />
+        </Reveal>
       </section>
 
-      {/* Position chart */}
-      <IngredientsPositionChart snapshot={result.positionSnapshot} />
+      <Reveal delayMs={600}>
+        <IngredientsPositionChart snapshot={result.positionSnapshot} />
+      </Reveal>
 
-      {/* Description keywords + marketing index */}
       <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4 lg:gap-5">
-        <DescriptionKeywordsCard
-          promises={result.promises}
-          unverifiable={result.unverifiable}
-        />
-        <MarketingIndexCard metrics={result.metrics} />
+        <Reveal delayMs={750}>
+          <DescriptionKeywordsCard
+            promises={result.promises}
+            unverifiable={result.unverifiable}
+          />
+        </Reveal>
+        <Reveal delayMs={850}>
+          <MarketingIndexCard metrics={result.metrics} />
+        </Reveal>
       </section>
     </div>
   );
