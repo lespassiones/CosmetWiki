@@ -1,4 +1,5 @@
 import { GLASS_CARD } from "@/lib/ui/glass";
+import { InfoBadge, Tooltip } from "../Tooltip";
 import type { CoherenceResult } from "@/lib/coherence/types";
 
 /**
@@ -17,16 +18,36 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
   const filled = (pct / 100) * c;
 
   return (
-    <article className={`${GLASS_CARD} p-5 lg:p-6`}>
-      <div className="text-[11px] font-medium uppercase tracking-wider text-ink-subtle mb-3">
-        Verdict global
+    <article className={`${GLASS_CARD} p-5 lg:p-7 h-full flex flex-col`}>
+      <div className="flex items-center gap-2 mb-4">
+        <div className="text-[11px] lg:text-[12px] font-medium uppercase tracking-wider text-ink-subtle">
+          Verdict global
+        </div>
+        <Tooltip
+          maxWidth={280}
+          content={
+            <>
+              On a trouvé <b>{metrics.totalPromises} promesse{metrics.totalPromises > 1 ? "s" : ""}</b> dans la description.
+              Sur ces {metrics.totalPromises}, <b>{metrics.tenueCount}</b> {metrics.tenueCount > 1 ? "sont totalement tenues" : "est totalement tenue"} par la formule (verdict <b>Tenue</b>) — c&apos;est ce {pct} %.
+              Les autres ne sont pas zéro : elles peuvent être <b>partielles</b> (actifs présents mais en trace), <b>marketing</b> (effet visuel seulement) ou <b>non démontrées</b> (rien dans la formule).
+            </>
+          }
+        >
+          <button type="button" aria-label="Que signifie le verdict global ?">
+            <InfoBadge />
+          </button>
+        </Tooltip>
       </div>
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 flex-1">
         <div className="min-w-0 flex-1">
-          <div className="text-[44px] lg:text-[56px] font-bold leading-none tabular-nums text-ink">
-            {pct} %
+          {/* Inline-flex with explicit small gap so the "%" sits tight against
+              the number on the same baseline. whitespace-nowrap prevents the
+              "%" from wrapping when the column is narrow. */}
+          <div className="inline-flex items-baseline gap-1 whitespace-nowrap text-[52px] lg:text-[64px] font-bold leading-none tabular-nums text-ink">
+            <span>{pct}</span>
+            <span className="text-[32px] lg:text-[40px] font-bold">%</span>
           </div>
-          <p className="mt-2 text-[13px] text-[#6B7280]">
+          <p className="mt-3 lg:mt-4 text-[14px] lg:text-[15px] text-[#6B7280] leading-snug">
             Promesses tenues :{" "}
             <span className="font-semibold text-ink">{metrics.tenueCount}</span>{" "}
             sur <span className="font-semibold text-ink">{metrics.totalPromises}</span>
@@ -35,7 +56,7 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
         <div className="relative shrink-0">
           <svg
             viewBox="0 0 100 100"
-            className="h-24 w-24 lg:h-28 lg:w-28 -rotate-90"
+            className="h-28 w-28 lg:h-36 lg:w-36 -rotate-90"
             style={{
               filter:
                 "drop-shadow(0 6px 10px rgba(15,23,42,0.12)) drop-shadow(0 2px 3px rgba(15,23,42,0.06))",

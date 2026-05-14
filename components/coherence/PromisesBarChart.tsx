@@ -1,4 +1,5 @@
 import { GLASS_CARD } from "@/lib/ui/glass";
+import { InfoBadge, Tooltip } from "../Tooltip";
 import type { CoherencePromise } from "@/lib/coherence/types";
 import { VERDICT_TONE } from "./tone";
 
@@ -10,9 +11,43 @@ import { VERDICT_TONE } from "./tone";
 export function PromisesBarChart({ promises }: { promises: CoherencePromise[] }) {
   if (promises.length === 0) return null;
 
+  // Real examples from the current promises so the tooltip is concrete.
+  const exampleTenue = promises.find((p) => p.verdict === "tenue");
+  const examplePartielle = promises.find((p) => p.verdict === "partielle");
+  const exampleNon = promises.find((p) => p.verdict === "non_demontree");
+
   return (
     <article className={`${GLASS_CARD} p-5 lg:p-6`}>
-      <h2 className="text-[15px] lg:text-[17px] font-semibold mb-1">Détail par promesse</h2>
+      <div className="flex items-center gap-2 mb-1">
+        <h2 className="text-[15px] lg:text-[17px] font-semibold">Détail par promesse</h2>
+        <Tooltip
+          maxWidth={320}
+          content={
+            <>
+              Chaque barre montre à quel point la formule soutient la promesse.
+              <br /><br />
+              <b>Échelle</b> : 0 % = rien · 35-60 % = présent mais en trace (≤ 1 %)
+              · 80-100 % = présent et bien dosé.
+              {exampleTenue && (
+                <><br /><br /><b>Ici</b>, <i>{exampleTenue.label}</i> à{" "}
+                <b>{exampleTenue.score} %</b> = au moins un actif bien dosé.</>
+              )}
+              {examplePartielle && (
+                <><br /><i>{examplePartielle.label}</i> à{" "}
+                <b>{examplePartielle.score} %</b> = actifs présents mais en trace.</>
+              )}
+              {exampleNon && (
+                <><br /><i>{exampleNon.label}</i> à <b>{exampleNon.score} %</b> =
+                aucun ingrédient connu trouvé.</>
+              )}
+            </>
+          }
+        >
+          <button type="button" aria-label="Que signifient ces barres ?">
+            <InfoBadge />
+          </button>
+        </Tooltip>
+      </div>
       <p className="text-[12px] text-[#6B7280] mb-4">
         Plus la barre est remplie, plus la promesse est documentée par les
         ingrédients de la formule.

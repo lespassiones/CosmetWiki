@@ -1,4 +1,5 @@
 import { GLASS_CARD } from "@/lib/ui/glass";
+import { InfoBadge, Tooltip } from "../Tooltip";
 import type { CoherencePromise, UnverifiableClaim } from "@/lib/coherence/types";
 import { VERDICT_TONE } from "./tone";
 
@@ -25,9 +26,32 @@ export function DescriptionKeywordsCard({
 
   return (
     <article className={`${GLASS_CARD} p-5 lg:p-6`}>
-      <h2 className="text-[15px] lg:text-[17px] font-semibold mb-1">
-        Ce qu&apos;on a lu sur l&apos;emballage
-      </h2>
+      <div className="flex items-center gap-2 mb-1">
+        <h2 className="text-[15px] lg:text-[17px] font-semibold">
+          Ce qu&apos;on a lu sur l&apos;emballage
+        </h2>
+        <Tooltip
+          maxWidth={320}
+          content={
+            <>
+              À <b>gauche</b> : les promesses extraites de la description, colorées
+              par leur verdict (vert = tenue, jaune = partielle, orange = marketing,
+              rose = non démontrée).
+              <br /><br />
+              À <b>droite</b> : les phrases qu&apos;on n&apos;a pas pu vérifier
+              côté formule (ex : « 96 % naturel » = composition, « odeur sucrée »
+              = sensoriel). Pas un défaut, juste hors champ d&apos;analyse.
+              <br /><br />
+              <b>Ici</b> : {promises.length} promesse{promises.length > 1 ? "s" : ""} analysée{promises.length > 1 ? "s" : ""},{" "}
+              {unverifiable.length} mention{unverifiable.length > 1 ? "s" : ""} hors analyse.
+            </>
+          }
+        >
+          <button type="button" aria-label="Que veulent dire ces deux colonnes ?">
+            <InfoBadge />
+          </button>
+        </Tooltip>
+      </div>
       <p className="text-[12px] text-[#6B7280] mb-4">
         Les promesses extraites de la description (avec leur verdict) et les
         mentions qui n&apos;ont pas pu être analysées côté formule.

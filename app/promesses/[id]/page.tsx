@@ -53,7 +53,7 @@ export default async function PromesseDetailPage({
   const result = row.result_json;
 
   return (
-    <div className="mx-auto max-w-5xl px-5 lg:px-8 py-6 lg:py-10 space-y-4 lg:space-y-5">
+    <div className="mx-auto max-w-[90rem] px-5 lg:px-10 xl:px-14 py-6 lg:py-10 space-y-4 lg:space-y-5">
       {/* Breadcrumb + title */}
       <nav className="text-[12px] text-[#6B7280] flex flex-wrap items-center gap-1">
         <Link href="/" className="hover:text-ink">
@@ -88,11 +88,14 @@ export default async function PromesseDetailPage({
         <PromisesBarChart promises={result.promises} />
       </section>
 
-      {/* Coherence table — full width so the 4 columns breathe */}
-      <CoherenceTable promises={result.promises} />
-
-      {/* Conclusion in its own row, full width — short text, gives it weight */}
-      <ConclusionCard conclusion={result.conclusion} />
+      {/* Coherence table (wide) + conclusion (narrow, right) — like the mock.
+          items-stretch + h-full inside ConclusionCard makes the conclusion
+          card match the table's height; the conclusion text scales up + is
+          vertically centred so the card never looks empty. */}
+      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.5fr)_minmax(0,1fr)] gap-4 lg:gap-5 items-stretch">
+        <CoherenceTable promises={result.promises} />
+        <ConclusionCard conclusion={result.conclusion} />
+      </section>
 
       {/* Position chart */}
       <IngredientsPositionChart snapshot={result.positionSnapshot} />

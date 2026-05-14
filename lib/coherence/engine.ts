@@ -129,29 +129,30 @@ function deriveVerdict({
 }
 
 /**
- * Score 0–100 for the per-promise progress bar.
- *   - 100 if every documented active is present and well dosed.
- *   - In-trace doses count as half-credit (the active *is* there, just under
- *     the efficacy threshold — partial credit).
- *   - Marketing-only matches count as 10 (visible on the bar but clearly low).
+ * Unified score 0–100 — same scale for catalogue AND open promises so the
+ * progress bars are visually comparable.
+ *
+ * Anchored on the verdict tier (predictable colour + rough position), with a
+ * small bonus per additional active so users see "more support" within the
+ * same tier:
+ *   - tenue   (well dosed documented)         → 80 + 5×(extra wells), max 100
+ *   - partielle (only in-trace documented)    → 35 + 5×(extra traces), max 60
+ *   - marketing (only cosmetic actives)       → 20 + 5×(extra cosmetics), max 35
+ *   - non_demontree                            → 0
  */
-function scoreFor({
-  documentedExpected,
-  documentedFoundWellDosed,
-  documentedFoundInTrace,
-  marketingFound,
+function unifiedScore({
+  wellDosed,
+  inTrace,
+  cosmetic,
 }: {
-  documentedExpected: number;
-  documentedFoundWellDosed: number;
-  documentedFoundInTrace: number;
-  marketingFound: number;
+  wellDosed: number;
+  inTrace: number;
+  cosmetic: number;
 }): number {
-  if (documentedExpected === 0) {
-    return marketingFound > 0 ? 25 : 0;
-  }
-  const ratio
-    = (documentedFoundWellDosed + documentedFoundInTrace * 0.5) / documentedExpected;
-  return Math.round(Math.min(1, ratio) * 100);
+  if (wellDosed > 0) return Math.min(100, 80 + (wellDosed - 1) * 5);
+  if (inTrace > 0) return Math.min(60, 35 + (inTrace - 1) * 5);
+  if (cosmetic > 0) return Math.min(35, 20 + (cosmetic - 1) * 5);
+  return 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -248,11 +249,10 @@ export function resolvePromise(
     documentedFoundWellDosed: wellDosed,
     marketingFound: foundCosmetic.length,
   });
-  const score = scoreFor({
-    documentedExpected: documentedActives.length,
-    documentedFoundWellDosed: wellDosed,
-    documentedFoundInTrace: inTrace,
-    marketingFound: foundCosmetic.length,
+  const score = unifiedScore({
+    wellDosed,
+    inTrace,
+    cosmetic: foundCosmetic.length,
   });
 
   return {
@@ -349,16 +349,14 @@ export function resolveOpenPromise(
     marketingFound: foundCosmetic.length,
   });
 
-  // Score for open promises: there's no "expected count" to divide by, so
-  // we score by depth-of-evidence directly.
-  //   - well-dosed documented: 60 + 15 per extra (cap 100)
-  //   - in-trace documented:   20 + 8 per extra (cap 40)
-  //   - cosmetic only:         25
-  //   - nothing:               0
-  let score = 0;
-  if (wellDosed > 0) score = Math.min(100, 60 + (wellDosed - 1) * 15);
-  else if (trace > 0) score = Math.min(40, 20 + (trace - 1) * 8);
-  else if (foundCosmetic.length > 0) score = 25;
+  // Same unified scale as catalogue path — keeps progress bars comparable
+  // across catalogue and open promises (a "partielle" verdict shows ~35-60 %
+  // either way, instead of 6 % vs 40 %).
+  const score = unifiedScore({
+    wellDosed,
+    inTrace: trace,
+    cosmetic: foundCosmetic.length,
+  });
 
   return {
     slug: proposal.category_slug || "autre",

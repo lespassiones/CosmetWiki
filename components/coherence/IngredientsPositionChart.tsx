@@ -1,4 +1,5 @@
 import { GLASS_CARD } from "@/lib/ui/glass";
+import { InfoBadge, Tooltip } from "../Tooltip";
 import type { CoherenceResult } from "@/lib/coherence/types";
 
 /**
@@ -39,11 +40,39 @@ export function IngredientsPositionChart({
 
   const thresholdLabel = firstFragrancePos !== null ? "Parfum" : "Conservateur";
 
+  const beforeCount = before.length;
+  const afterCount = after.length;
+  const thresholdLabelTip = firstFragrancePos !== null ? "parfum" : "conservateur";
+
   return (
     <article className={`${GLASS_CARD} p-5 lg:p-7`}>
-      <h2 className="text-[15px] lg:text-[17px] font-semibold mb-1">
-        Où se trouvent les ingrédients clés ?
-      </h2>
+      <div className="flex items-center gap-2 mb-1">
+        <h2 className="text-[15px] lg:text-[17px] font-semibold">
+          Où se trouvent les ingrédients clés ?
+        </h2>
+        <Tooltip
+          maxWidth={340}
+          content={
+            <>
+              En INCI, les ingrédients sont listés <b>du plus concentré au moins concentré</b>.
+              Réglementairement, parfums et conservateurs sont à <b>≤ 1 %</b> — donc tout ce
+              qui est <b>après</b> dans la liste est aussi à ≤ 1 %.
+              <br /><br />
+              <b>Sur cette formule</b> : le seuil est à la <b>position {thresholdPos}</b> ({thresholdLabelTip}).
+              {beforeCount > 0 && (
+                <> {beforeCount} ingrédient{beforeCount > 1 ? "s" : ""} clé{beforeCount > 1 ? "s sont" : " est"} bien dosé{beforeCount > 1 ? "s" : ""} (zone verte).</>
+              )}
+              {afterCount > 0 && (
+                <> {afterCount} ingrédient{afterCount > 1 ? "s" : ""} clé{afterCount > 1 ? "s sont" : " est"} en trace ≤ 1 % (zone bleue) — peu d&apos;effet réel.</>
+              )}
+            </>
+          }
+        >
+          <button type="button" aria-label="Pourquoi le seuil 1 % ?">
+            <InfoBadge />
+          </button>
+        </Tooltip>
+      </div>
       <p className="text-[12px] text-[#6B7280] mb-5">
         Tout ce qui est après le parfum (ou le 1<sup>er</sup> conservateur) est dosé
         à moins de 1 %, donc avec peu d&apos;effet réel sur le produit.

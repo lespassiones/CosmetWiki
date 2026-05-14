@@ -1,3 +1,4 @@
+import { InfoBadge, Tooltip } from "../Tooltip";
 import type { CoherenceResult } from "@/lib/coherence/types";
 
 /**
@@ -22,8 +23,33 @@ export function MarketingIndexCard({
   return (
     <article className="rounded-2xl bg-rose-50/70 ring-1 ring-rose-100 p-5 lg:p-6 flex flex-col gap-3 lg:flex-row lg:items-start lg:gap-6">
       <div className="lg:flex-[0_0_180px]">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-rose-600 mb-1">
-          Indice marketing
+        <div className="flex items-center gap-2 mb-1">
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-rose-600">
+            Indice marketing
+          </div>
+          <Tooltip
+            maxWidth={320}
+            content={
+              <>
+                <b>Indice marketing</b> = % de promesses sans <b>aucun</b> ingrédient
+                documenté (verdict <b>marketing</b> ou <b>non démontrée</b>).
+                <br /><br />
+                C&apos;est <b>différent du verdict global</b> (qui ne compte que les
+                promesses <b>totalement tenues</b>). La différence : les promesses{" "}
+                <b>partielles</b> (actifs présents mais en trace ≤ 1 %) ne sont
+                comptées ni dans l&apos;un ni dans l&apos;autre — elles ont des
+                actifs, juste sous-dosés.
+                <br /><br />
+                <b>Ici</b> : {metrics.marketingCount + metrics.nonDemontreeCount}{" "}
+                promesse{metrics.marketingCount + metrics.nonDemontreeCount > 1 ? "s" : ""}{" "}
+                sans actif sur {metrics.totalPromises} = {idx} % marketing pur.
+              </>
+            }
+          >
+            <button type="button" aria-label="Comment l'indice marketing est-il calculé ?">
+              <InfoBadge />
+            </button>
+          </Tooltip>
         </div>
         <div className="text-[44px] lg:text-[56px] font-bold leading-none tabular-nums text-rose-700">
           {idx} %

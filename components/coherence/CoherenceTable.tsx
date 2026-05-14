@@ -1,4 +1,5 @@
 import { GLASS_CARD } from "@/lib/ui/glass";
+import { InfoBadge, Tooltip } from "../Tooltip";
 import type { CoherencePromise } from "@/lib/coherence/types";
 import { VERDICT_TONE } from "./tone";
 
@@ -22,13 +23,52 @@ export function CoherenceTable({ promises }: { promises: CoherencePromise[] }) {
     );
   }
 
+  // Counts for the contextual tooltip — picks an example per verdict tier.
+  const verdictCounts = {
+    tenue: promises.filter((p) => p.verdict === "tenue").length,
+    partielle: promises.filter((p) => p.verdict === "partielle").length,
+    marketing: promises.filter((p) => p.verdict === "marketing").length,
+    non_demontree: promises.filter((p) => p.verdict === "non_demontree").length,
+  };
+
   return (
     <article className={`${GLASS_CARD} p-5 lg:p-6`}>
-      <h2 className="text-[15px] lg:text-[17px] font-semibold mb-4">Tableau de cohérence</h2>
+      <div className="flex items-center gap-2 mb-4">
+        <h2 className="text-[15px] lg:text-[17px] font-semibold">Tableau de cohérence</h2>
+        <Tooltip
+          maxWidth={340}
+          content={
+            <>
+              <b>Promesse</b> : ce que dit l&apos;emballage.<br />
+              <b>Verdict</b> : niveau de soutien par la formule.<br />
+              <b>Ingrédients trouvés</b> : actifs présents dans la formule pour cette promesse.<br />
+              <b>Manque</b> : actifs typiquement utilisés pour cette promesse mais absents.
+              <br /><br />
+              <b>Sur cette analyse</b> :{" "}
+              {verdictCounts.tenue > 0 && <>{verdictCounts.tenue} tenue{verdictCounts.tenue > 1 ? "s" : ""}</>}
+              {verdictCounts.partielle > 0 && <>{verdictCounts.tenue > 0 ? ", " : ""}{verdictCounts.partielle} partielle{verdictCounts.partielle > 1 ? "s" : ""}</>}
+              {verdictCounts.marketing > 0 && <>, {verdictCounts.marketing} marketing</>}
+              {verdictCounts.non_demontree > 0 && <>, {verdictCounts.non_demontree} non démontrée{verdictCounts.non_demontree > 1 ? "s" : ""}</>}.
+            </>
+          }
+        >
+          <button type="button" aria-label="Comment lire ce tableau ?">
+            <InfoBadge />
+          </button>
+        </Tooltip>
+      </div>
 
-      {/* DESKTOP TABLE */}
+      {/* DESKTOP TABLE — column widths tuned: promise & verdict stay tight,
+          "found" is squeezed (the user said names don't really matter), and
+          "missing" gets the most room (it's the actionable info). */}
       <div className="hidden lg:block overflow-x-auto">
-        <table className="w-full text-left text-[13px]">
+        <table className="w-full text-left text-[13px] table-fixed">
+          <colgroup>
+            <col className="w-[18%]" />
+            <col className="w-[12%]" />
+            <col className="w-[22%]" />
+            <col className="w-[48%]" />
+          </colgroup>
           <thead>
             <tr className="text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
               <th className="pb-3 pr-4">Promesse</th>
@@ -45,7 +85,7 @@ export function CoherenceTable({ promises }: { promises: CoherencePromise[] }) {
                   <td className="py-3 pr-4 align-top">
                     <div className="flex items-start gap-2">
                       <span aria-hidden className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${tone.bg}`} />
-                      <span className="font-medium text-ink">{p.label}</span>
+                      <span className="font-medium text-ink leading-snug">{p.label}</span>
                     </div>
                   </td>
                   <td className="py-3 pr-4 align-top">
@@ -55,10 +95,12 @@ export function CoherenceTable({ promises }: { promises: CoherencePromise[] }) {
                       {tone.label}
                     </span>
                   </td>
-                  <td className="py-3 pr-4 align-top text-ink-muted">
-                    {renderFoundList(p)}
+                  <td className="py-3 pr-4 align-top text-ink-muted text-[12px]">
+                    <div className="line-clamp-3" title={renderFoundList(p)}>
+                      {renderFoundList(p)}
+                    </div>
                   </td>
-                  <td className="py-3 align-top text-ink-muted">
+                  <td className="py-3 align-top text-ink-muted text-[12px] leading-relaxed">
                     {p.missingActives.length === 0
                       ? "—"
                       : p.missingActives.join(", ")}
