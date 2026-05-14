@@ -555,11 +555,23 @@ function ObservationsCard({
           return (
             <li key={o.tag}>
               {expandable ? (
-                <button
-                  type="button"
+                // Rendered as a <div role="button"> instead of a real <button>
+                // because <ObservationLabel> embeds an inline tooltip whose
+                // trigger is itself a <button> — and HTML forbids nesting
+                // <button> inside <button>. Keyboard accessibility is preserved
+                // via tabIndex + onKeyDown.
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => toggleTag(o.tag)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      toggleTag(o.tag);
+                    }
+                  }}
                   aria-expanded={isOpen}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-1.5 py-1 text-left text-[14px] transition-colors hover:bg-black/[0.025]"
+                  className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-1.5 py-1 text-left text-[14px] transition-colors hover:bg-black/[0.025] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500"
                 >
                   <ObservationIcon obs={o} />
                   <ObservationLabel obs={o} />
@@ -569,7 +581,7 @@ function ObservationsCard({
                     </span>
                   ) : null}
                   <ChevronDownIcon className={`h-3.5 w-3.5 shrink-0 text-ink-subtle transition-transform ${isOpen ? "rotate-180" : ""}`} />
-                </button>
+                </div>
               ) : (
                 <div className="flex w-full items-center gap-2.5 px-1.5 py-1 text-[14px]">
                   <ObservationIcon obs={o} />
