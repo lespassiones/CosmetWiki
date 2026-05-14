@@ -5,12 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BackgroundGlow } from "../BackgroundGlow";
 import { ScanSheet } from "./ScanSheet";
-import { CameraIcon, ClockIcon, HomeIcon, LayersIcon, SparklesIcon, UserIcon } from "./NavIcons";
+import { CameraIcon, ClockIcon, HomeIcon, LayersIcon, PromisesIcon, SparklesIcon, UserIcon } from "./NavIcons";
 
 const NAV_ITEMS = [
   { href: "/", label: "Accueil", icon: HomeIcon },
   { href: "/routine", label: "Routine", icon: LayersIcon },
   { href: "/history", label: "Historique", icon: ClockIcon },
+  { href: "/promesses", label: "Promesses", icon: PromisesIcon },
   { href: "/advisor", label: "Skin advisor", icon: SparklesIcon },
   { href: "/profile", label: "Profil", icon: UserIcon },
 ] as const;

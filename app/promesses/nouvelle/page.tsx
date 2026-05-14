@@ -1,0 +1,103 @@
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { getUser } from "@/lib/auth";
+import { supabaseServer } from "@/lib/supabase";
+import { GLASS_CARD, GLASS_PILL_DARK } from "@/lib/ui/glass";
+import { CoherenceWizard, type AnalysisOption } from "@/components/coherence/CoherenceWizard";
+import type { AnalyseResponse } from "@/lib/analyseTypes";
+
+export const metadata = { title: "Nouvelle analyse de cohérence · Cosme Check" };
+
+type AnalysisRow = {
+  id: string;
+  name: string | null;
+  product_label: string | null;
+  score: number | null;
+  created_at: string;
+  result_json: AnalyseResponse | null;
+};
+
+export default async function NouvellePromessePage() {
+  const user = await getUser();
+  if (!user) redirect("/auth/sign-in?next=/promesses/nouvelle");
+
+  const cookieStore = await cookies();
+  const sb = supabaseServer(cookieStore);
+  const { data, error } = await sb
+    .schema("cosme_check")
+    .from("analyses")
+    .select("id, name, product_label, score, created_at, result_json")
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  const raw = (error ? [] : (data ?? [])) as AnalysisRow[];
+
+  // Build a lighter projection to send to the client — we only need what the
+  // wizard's confirmation step displays (top 3 ingredients + counts), not the
+  // full INCI payload.
+  const options: AnalysisOption[] = raw
+    .filter((r) => r.result_json !== null)
+    .map((r) => {
+      const result = r.result_json as AnalyseResponse;
+      const top3 = (result.items ?? [])
+        .slice()
+        .sort((a, b) => a.position - b.position)
+        .slice(0, 3)
+        .map((it) => it.name ?? it.input);
+      return {
+        id: r.id,
+        title:
+          r.product_label
+          ?? r.name
+          ?? `Analyse du ${new Date(r.created_at).toLocaleDateString("fr-FR")}`,
+        score: r.score,
+        createdAt: r.created_at,
+        totalIngredients: result.counts?.total ?? 0,
+        matchedIngredients: result.counts?.matched ?? 0,
+        counts: {
+          vert: result.counts?.vert ?? 0,
+          jaune: result.counts?.jaune ?? 0,
+          orange: result.counts?.orange ?? 0,
+          rouge: result.counts?.rouge ?? 0,
+        },
+        top3,
+      };
+    });
+
+  return (
+    <div className="mx-auto max-w-3xl px-5 lg:px-8 py-8 lg:py-12">
+      <Link
+        href="/promesses"
+        className="text-sm text-[#6B7280] hover:text-black inline-flex items-center gap-1 mb-3"
+      >
+        ← Promesses
+      </Link>
+      <h1 className="text-2xl lg:text-3xl font-bold mb-2">Nouvelle analyse de cohérence</h1>
+
+      <div className="mt-3 -mx-5 h-[2px] bg-black/30 lg:mx-0 lg:mt-4 lg:h-px lg:bg-black/[0.08]" />
+
+      <p className="mt-3 text-[13px] text-[#6B7280]">
+        On compare ce qui est promis sur l&apos;emballage avec ce qui est vraiment dans la liste INCI.
+      </p>
+
+      {options.length === 0 ? (
+        <article className={`${GLASS_CARD} p-6 mt-6 text-center`}>
+          <p className="text-[14px] text-[#6B7280] mb-4">
+            Tu n&apos;as encore aucune analyse INCI sauvegardée. Lance d&apos;abord une analyse de produit, puis reviens ici.
+          </p>
+          <Link
+            href="/"
+            className={`${GLASS_PILL_DARK} inline-block px-5 py-2.5 text-sm font-semibold`}
+          >
+            Analyser un produit
+          </Link>
+        </article>
+      ) : (
+        <div className="mt-6">
+          <CoherenceWizard options={options} />
+        </div>
+      )}
+    </div>
+  );
+}

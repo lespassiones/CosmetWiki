@@ -85,3 +85,19 @@ export function SparklesIcon({ className }: Props) {
     </svg>
   );
 }
+
+/**
+ * "Promesses" icon — a checklist with a tick, evokes the idea of "verifying
+ * what's claimed" without being too literal (a target / shield / contract
+ * would carry too much positive or negative weight).
+ */
+export function PromisesIcon({ className }: Props) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="4" y="3" width="16" height="18" rx="2" />
+      <path d="M8 8h8" />
+      <path d="M8 12h5" />
+      <path d="m14 16 2 2 4-4" />
+    </svg>
+  );
+}

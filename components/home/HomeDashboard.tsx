@@ -67,21 +67,39 @@ export function HomeDashboard({
         />
       </div>
 
-      <Link
-        href="/advisor"
-        className={`mt-4 block ${GLASS_CARD_DARK} p-5 transition group`}
-      >
-        <div className="flex items-center gap-4">
-          <span aria-hidden className="text-2xl">✨</span>
-          <div className="flex-1">
-            <div className="text-[15px] font-semibold">Skin advisor</div>
-            <p className="text-[12px] text-white/70 mt-1 leading-snug">
-              Pose tes questions sur ta routine. L&apos;assistant s&apos;appuie sur ton profil et tes analyses.
-            </p>
+      <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+        <Link
+          href="/advisor"
+          className={`block ${GLASS_CARD_DARK} p-5 transition group`}
+        >
+          <div className="flex items-center gap-4">
+            <span aria-hidden className="text-2xl">✨</span>
+            <div className="flex-1">
+              <div className="text-[15px] font-semibold">Skin advisor</div>
+              <p className="text-[12px] text-white/70 mt-1 leading-snug">
+                Pose tes questions sur ta routine. L&apos;assistant s&apos;appuie sur ton profil et tes analyses.
+              </p>
+            </div>
+            <span aria-hidden className="opacity-60 group-hover:translate-x-1 transition">→</span>
           </div>
-          <span aria-hidden className="opacity-60 group-hover:translate-x-1 transition">→</span>
-        </div>
-      </Link>
+        </Link>
+
+        <Link
+          href="/promesses"
+          className={`block ${GLASS_CARD_DARK} p-5 transition group`}
+        >
+          <div className="flex items-center gap-4">
+            <span aria-hidden className="text-2xl">🔍</span>
+            <div className="flex-1">
+              <div className="text-[15px] font-semibold">Promesses vs Formule</div>
+              <p className="text-[12px] text-white/70 mt-1 leading-snug">
+                Vérifie si la description marketing d&apos;un produit correspond vraiment à sa composition INCI.
+              </p>
+            </div>
+            <span aria-hidden className="opacity-60 group-hover:translate-x-1 transition">→</span>
+          </div>
+        </Link>
+      </div>
 
       <div className="mt-4">{trendingSlot}</div>
     </section>
