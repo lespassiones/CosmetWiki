@@ -53,20 +53,23 @@ export function PromisesBarChart({ promises }: { promises: CoherencePromise[] })
         <h2 className="text-[15px] lg:text-[17px] font-semibold">Détail par promesse</h2>
         <Tooltip
           placement="bottom"
-          maxWidth={320}
+          maxWidth={420}
           content={
             <>
               Chaque barre montre à quel point la formule soutient la promesse.
               <br /><br />
-              <b>Échelle</b> : 0 % = rien · 35-60 % = présent mais en trace (≤ 1 %)
-              · 80-100 % = présent et bien dosé.
+              <b>Échelle</b> : 0 % = rien · 35-60 % = présent mais en trace
+              (≤ 1 %) · 80-100 % = présent et bien dosé.
+              {(exampleTenue || examplePartielle || exampleNon) && (
+                <><br /><br /><b>Ici</b> :</>
+              )}
               {exampleTenue && (
-                <><br /><br /><b>Ici</b>, <i>{exampleTenue.label}</i> à{" "}
+                <><br /><i>{exampleTenue.label}</i> à{" "}
                 <b>{exampleTenue.score} %</b> = au moins un actif bien dosé.</>
               )}
               {examplePartielle && (
                 <><br /><i>{examplePartielle.label}</i> à{" "}
-                <b>{examplePartielle.score} %</b> = actifs présents mais en trace.</>
+                <b>{examplePartielle.score} %</b> = actif présent mais en trace.</>
               )}
               {exampleNon && (
                 <><br /><i>{exampleNon.label}</i> à <b>{exampleNon.score} %</b> =

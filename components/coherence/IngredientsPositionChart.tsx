@@ -52,7 +52,7 @@ export function IngredientsPositionChart({
         </h2>
         <Tooltip
           placement="bottom"
-          maxWidth={340}
+          maxWidth={420}
           content={
             <>
               En INCI, les ingrédients sont listés <b>du plus concentré au moins concentré</b>.

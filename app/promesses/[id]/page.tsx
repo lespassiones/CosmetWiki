@@ -13,6 +13,7 @@ import { MarketingIndexCard } from "@/components/coherence/MarketingIndexCard";
 import { Reveal } from "@/components/Reveal";
 import { computeMetrics } from "@/lib/coherence/engine";
 import type { CoherenceResult } from "@/lib/coherence/types";
+import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 export const metadata = { title: "Promesses vs Formule · Cosme Check" };
 
@@ -31,7 +32,10 @@ export default async function PromesseDetailPage({
     .schema("cosme_check")
     .from("coherence_analyses")
     .select(
-      "id, analysis_id, description, result_json, created_at, analyses(name, product_label)",
+      // The parent analysis's result_json is needed to colour the active
+      // ingredient dots in the coherence table (vert/jaune/orange/rouge from
+      // the per-item safety rating). One JSONB column extra, same round-trip.
+      "id, analysis_id, description, result_json, created_at, analyses(name, product_label, result_json)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -44,8 +48,13 @@ export default async function PromesseDetailPage({
     description: string;
     result_json: CoherenceResult;
     created_at: string;
-    analyses: { name: string | null; product_label: string | null } | null;
+    analyses: {
+      name: string | null;
+      product_label: string | null;
+      result_json: AnalyseResponse | null;
+    } | null;
   };
+  const parentItems = row.analyses?.result_json?.items ?? [];
 
   const productName
     = row.analyses?.product_label
@@ -110,7 +119,7 @@ export default async function PromesseDetailPage({
       {/* Coherence table + conclusion */}
       <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.5fr)_minmax(0,1fr)] gap-4 lg:gap-5 items-center">
         <Reveal delayMs={350}>
-          <CoherenceTable promises={result.promises} />
+          <CoherenceTable promises={result.promises} items={parentItems} />
         </Reveal>
         <Reveal delayMs={450}>
           <ConclusionCard conclusion={result.conclusion} />

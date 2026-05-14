@@ -68,7 +68,7 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
         </div>
         <Tooltip
           placement="bottom"
-          maxWidth={320}
+          maxWidth={420}
           content={
             <>
               <b>{pct} %</b> = part des promesses qui ont au moins un{" "}

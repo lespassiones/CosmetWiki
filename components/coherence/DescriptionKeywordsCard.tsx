@@ -32,7 +32,7 @@ export function DescriptionKeywordsCard({
         </h2>
         <Tooltip
           placement="bottom"
-          maxWidth={320}
+          maxWidth={420}
           content={
             <>
               À <b>gauche</b> : les promesses extraites de la description, colorées

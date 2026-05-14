@@ -29,7 +29,7 @@ export function MarketingIndexCard({
           </div>
           <Tooltip
             placement="bottom"
-            maxWidth={320}
+            maxWidth={420}
             content={
               <>
                 <b>Indice marketing</b> = % de promesses sans <b>aucun</b> ingrédient
