@@ -1,11 +1,6 @@
-import Link from "next/link";
 import { cookies } from "next/headers";
-import { Logo } from "@/components/Logo";
-import { Footer } from "@/components/Footer";
-import { BackgroundGlow } from "@/components/BackgroundGlow";
-import { MobileMenu } from "@/components/MobileMenu";
 import { HomeShell } from "@/components/HomeShell";
-import { InstallPWAButton } from "@/components/InstallPWAButton";
+import { LandingHero } from "@/components/LandingHero";
 import { HomeDashboard, type DashboardData } from "@/components/home/HomeDashboard";
 import { DailyPicksCard } from "@/components/home/DailyPicksCard";
 import { getProfile, getUser } from "@/lib/auth";
@@ -120,46 +115,22 @@ export default async function Home({ searchParams }: Props) {
   // dashboard chrome itself.
   const showDashboard = signedIn && !initialInci;
 
+  // ─── Guest path ───────────────────────────────────────────────────────
+  // Single-section image landing — no header / footer / chrome on top.
+  // The CTA inside <LandingHero /> sends the user to /auth/sign-in.
+  // (If a guest somehow lands on /?inci=... we still want HomeShell to
+  // gate-and-redirect them through its existing AuthGate logic, so that
+  // path falls through below.)
+  if (!signedIn && !initialInci) {
+    return <LandingHero />;
+  }
+
   return (
     <div
       className={`relative isolate flex flex-col bg-bg ${
         showDashboard ? "" : "min-h-screen"
       }`}
     >
-      {/* AppShell paints its own BackgroundGlow + chrome (sidebar / bottom nav)
-          for signed-in users — we only render the public landing chrome
-          (BackgroundGlow + header) for guests. */}
-      {!signedIn && (
-        <>
-          <BackgroundGlow />
-          <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
-            <Logo size="md" />
-            <nav className="hidden items-center gap-1 text-sm text-ink-muted sm:flex">
-              <Link
-                href="/comment-ca-marche"
-                className="rounded-full px-3 py-1.5 transition-colors hover:text-ink"
-              >
-                Comment ça marche
-              </Link>
-              <Link
-                href="/about"
-                className="rounded-full px-3 py-1.5 transition-colors hover:text-ink"
-              >
-                À propos
-              </Link>
-              <InstallPWAButton className="ml-2" />
-              <Link
-                href="/auth/sign-in"
-                className="ml-2 rounded-full px-3 py-1.5 font-medium text-ink transition-colors hover:bg-black/[0.04]"
-              >
-                Se connecter
-              </Link>
-            </nav>
-            <MobileMenu />
-          </header>
-        </>
-      )}
-
       {showDashboard && (
         <HomeDashboard
           data={dashboard}
@@ -172,8 +143,6 @@ export default async function Home({ searchParams }: Props) {
         initialMode={initialMode}
         signedIn={signedIn}
       />
-
-      {!signedIn && <Footer />}
     </div>
   );
 }
