@@ -32,11 +32,15 @@ const BLOB_TEXT: Record<ColorKey, string> = {
   rouge: "text-[#C73523]",
 };
 
+// Penalty labels — same wording as the mobile CountsStrip strips so the
+// vocabulary stays consistent between mobile (pill bento) and desktop (blob
+// legend). Colour info is already conveyed by the mini-blob swatch + the
+// number's text colour above, so we use the slot for the *meaning* instead.
 const BLOB_LABEL: Record<ColorKey, string> = {
-  vert: "ingrédients verts",
-  jaune: "ingrédients jaunes",
-  orange: "ingrédients oranges",
-  rouge: "ingrédients rouges",
+  vert: "sans pénalité",
+  jaune: "pénalité faible",
+  orange: "pénalité moyenne",
+  rouge: "pénalité forte",
 };
 
 const SEEDS: Record<ColorKey, number> = {
@@ -349,7 +353,7 @@ export function IngredientBlob({
                 {counts[color]}
                 <span className="text-[#9CA3AF]">/{total}</span>
               </div>
-              <div className="text-[11px] leading-tight text-[#6B7280]">
+              <div className={`text-[11px] italic leading-tight ${BLOB_TEXT[color]}`}>
                 {BLOB_LABEL[color]}
               </div>
             </div>

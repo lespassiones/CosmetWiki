@@ -229,11 +229,23 @@ function BigScoreCard({
   matched: number;
   total: number;
 }) {
+  // Share of recognised ingredients flagged as "no penalty" (vert). Computed
+  // against `matched` (not `total`) — non-recognised ingredients aren't
+  // classified, so it would be misleading to count them as either safe or
+  // penalising.
+  const pctSansPenalite =
+    matched > 0 ? Math.round((counts.vert / matched) * 100) : null;
+
   return (
     <article className="rounded-2xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
-      {/* MOBILE — compact stacked: blob (no legend) + ratio. */}
-      <div className="flex flex-col items-center gap-3 lg:hidden">
+      {/* MOBILE — compact stacked: blob (no legend) + "% sans pénalité" + ratio. */}
+      <div className="flex flex-col items-center gap-2 lg:hidden">
         <IngredientBlob counts={counts} variant="md" showCenter animate />
+        {pctSansPenalite !== null && (
+          <p className="text-[13px] italic text-emerald-700">
+            <span className="font-semibold not-italic">{pctSansPenalite} %</span> sans pénalité
+          </p>
+        )}
         <p className="text-[11px] text-ink-subtle">
           <span className="font-semibold text-ink">{matched}</span> / {total} ingrédients reconnus
         </p>
@@ -1145,10 +1157,42 @@ function ItemsTable({
                   </td>
                   <td className={cellPad}>
                     <ColorChip rating={i.colorRating} />
-                    {i.thresholdLabel && !compact ? (
-                      <span className="ml-2 inline-flex items-center rounded-full bg-[#F3F4F6] px-2 py-0.5 text-[10px] font-medium text-[#6B7280] align-middle">
-                        {i.thresholdLabel}
-                      </span>
+                    {/*
+                      "≤ 1 %" badge — only when the ingredient sits *after* the
+                      first fragrance or first preservative in the list. In INCI
+                      regulation, fragrance/preservative are required at ≤1 %,
+                      and the list is ordered by descending concentration above
+                      1 %. So anything past that point is necessarily ≤1 %. That
+                      doesn't change the safety rating, but it tells the user
+                      the ingredient is unlikely to be the one driving the
+                      product's *efficacy* — useful to spot "actif marketing"
+                      claims (e.g. niacinamide listed but in trace amounts).
+                    */}
+                    {(i.thresholdContext === "after_fragrance"
+                      || i.thresholdContext === "after_preservative") ? (
+                      <Tooltip
+                        maxWidth={280}
+                        content={
+                          <>
+                            Cet ingrédient apparaît <b>après</b>
+                            {i.thresholdContext === "after_fragrance"
+                              ? " le premier parfum"
+                              : " le premier conservateur"}{" "}
+                            dans la liste INCI. Sa concentration est donc{" "}
+                            <b>≤ 1 %</b> — il est peu probable qu&apos;il soit
+                            l&apos;élément principal responsable de
+                            l&apos;efficacité du produit.
+                          </>
+                        }
+                      >
+                        <button
+                          type="button"
+                          aria-label={`${i.name ?? i.input} : présent en trace (≤ 1 %)`}
+                          className="ml-2 inline-flex items-center rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-700 ring-1 ring-sky-200 align-middle hover:bg-sky-100 transition"
+                        >
+                          ≤ 1 %
+                        </button>
+                      </Tooltip>
                     ) : null}
                   </td>
                   <td className={`${cellPad} text-right`}>

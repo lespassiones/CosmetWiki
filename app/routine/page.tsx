@@ -9,7 +9,7 @@ import { RoutineSuggestions } from "@/components/routine/RoutineSuggestions";
 import { TagExposureBar } from "@/components/routine/TagExposureBar";
 import { AddProductButton } from "@/components/routine/AddProductButton";
 import { RoutineSimulationModal } from "@/components/routine/RoutineSimulationModal";
-import { Tooltip } from "@/components/Tooltip";
+import { InfoBadge, Tooltip } from "@/components/Tooltip";
 import { GLASS_CARD, GLASS_CARD_AMBER, GLASS_CARD_ROSE } from "@/lib/ui/glass";
 
 export const metadata = { title: "Ma routine · Cosme Check" };
@@ -234,7 +234,41 @@ export default async function RoutinePage() {
       <section className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-3 lg:gap-4 mb-6">
         {/* Left: exposition par catégorie d'ingrédients */}
         <div className={`${GLASS_CARD} p-5`}>
-          <h2 className="text-[15px] font-semibold mb-1">Exposition cumulée par catégorie d&apos;ingrédients</h2>
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-[15px] font-semibold">Exposition cumulée par catégorie d&apos;ingrédients</h2>
+            <Tooltip
+              maxWidth={320}
+              content={
+                <>
+                  Cette section regarde tous tes produits ensemble et compte combien
+                  de fois chaque <b>famille d&apos;ingrédients</b> revient dans ta
+                  routine, en tenant compte de la fréquence d&apos;usage (un produit
+                  quotidien pèse plus qu&apos;un hebdo).
+                  <br />
+                  <br />
+                  Exemples de familles : <b>conservateurs</b> (Phenoxyethanol,
+                  Sodium Benzoate…), <b>sulfates</b> (SLS, SLES…),{" "}
+                  <b>parfums de synthèse</b>, <b>silicones</b>,{" "}
+                  <b>allergènes parfumants</b> (Limonene, Linalool…).
+                  <br />
+                  <br />
+                  Plus une barre est longue, plus tu es exposé·e à cette famille
+                  au quotidien. Ce n&apos;est pas un verdict de danger : c&apos;est
+                  juste une mesure de présence, utile pour repérer les doublons
+                  (par exemple : 3 produits qui contiennent tous des allergènes
+                  parfumants).
+                </>
+              }
+            >
+              <button
+                type="button"
+                aria-label="À quoi sert cette section ?"
+                className="inline-flex items-center"
+              >
+                <InfoBadge />
+              </button>
+            </Tooltip>
+          </div>
           <p className="text-[11px] text-[#9CA3AF] mb-4">
             Plus la barre est longue, plus la catégorie est présente dans ta routine.
           </p>

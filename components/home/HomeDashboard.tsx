@@ -99,7 +99,6 @@ function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
       </div>
     );
   }
-  const tone = scoreTone(last.score);
   const title = last.product_label ?? last.name ?? "Analyse";
   const counts = last.counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 };
   return (
@@ -114,7 +113,6 @@ function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
       <div className="mt-3 flex items-center gap-4">
         <div className="min-w-0 flex-1">
           <div className="font-semibold text-[#111111] truncate">{title}</div>
-          <div className={`mt-0.5 text-[12px] font-medium ${tone.fg}`}>{tone.label}</div>
         </div>
         <div className="w-[140px] shrink-0">
           <IngredientBlob counts={counts} variant="md" />
@@ -147,7 +145,6 @@ function RoutineCard({
       </Link>
     );
   }
-  const tone = scoreTone(avgScore);
   const safeCounts = counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 };
   return (
     <Link
@@ -162,9 +159,6 @@ function RoutineCard({
         <div className="min-w-0 flex-1">
           <div className="font-semibold text-[#111111]">
             {count} produit{count > 1 ? "s" : ""} actif{count > 1 ? "s" : ""}
-          </div>
-          <div className={`mt-0.5 text-[12px] font-medium ${tone.fg}`}>
-            Exposition {tone.label.toLowerCase()}
           </div>
         </div>
         <div className="w-[140px] shrink-0">

@@ -162,8 +162,8 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold text-[#111111] truncate">{displayName}</div>
-                    <div className={`text-[12px] ${tone.text}`}>
-                      {tone.label} · <span className="text-[#6B7280]">{formatDate(a.created_at)}</span>
+                    <div className="text-[12px] text-[#6B7280]">
+                      {formatDate(a.created_at)}
                     </div>
                   </div>
                 </button>
@@ -185,8 +185,8 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-[#111111] truncate">{displayName}</div>
-                  <div className={`text-[12px] ${tone.text}`}>
-                    {tone.label} · <span className="text-[#6B7280]">{formatDate(a.created_at)}</span>
+                  <div className="text-[12px] text-[#6B7280]">
+                    {formatDate(a.created_at)}
                   </div>
                 </div>
               </Link>
