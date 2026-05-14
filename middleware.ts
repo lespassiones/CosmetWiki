@@ -5,28 +5,50 @@ const SUSPICIOUS_UA_RE =
   /(curl|wget|python-requests|go-http|scrapy|httpx|libwww|java\/|axios\/|node-fetch|aiohttp|okhttp|MJ12bot|PetalBot|SemrushBot|AhrefsBot|DotBot|MegaIndex|GPTBot|ClaudeBot|anthropic-ai|CCBot|Bytespider)/i;
 
 const BOT_TRAP_PATHS = ["/admin-bot-trap", "/wp-admin", "/wp-login.php"];
+
 // Pages that require an authenticated session. Public pages stay accessible.
 const PROTECTED_PREFIXES = ["/history", "/routine", "/profile", "/compare"];
 
-export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+// Pages where calling Supabase auth at all is pure waste — they don't read the
+// session server-side and they're not gated. Skip the round-trip entirely.
+const SKIP_AUTH_PREFIXES = [
+  "/auth/sign-in",
+  "/auth/sign-up",
+  "/auth/callback",
+  "/about",
+  "/comment-ca-marche",
+  "/offre",
+  "/i/",
+];
 
-  if (BOT_TRAP_PATHS.includes(pathname)) {
-    return new NextResponse("Not found", {
-      status: 404,
-      headers: { "X-Bot-Trapped": "1" },
-    });
-  }
+function isSkipAuthPath(pathname: string): boolean {
+  return SKIP_AUTH_PREFIXES.some((p) => pathname === p || pathname.startsWith(p));
+}
 
-  const ua = req.headers.get("user-agent") ?? "";
-  if (!ua) {
-    return new NextResponse("Forbidden", { status: 403 });
+function hasSupabaseAuthCookie(req: NextRequest): boolean {
+  // Supabase-ssr stores auth as sb-<project-ref>-auth-token (sometimes split
+  // into .0 / .1 chunks). A cheap presence check lets us bail before spinning
+  // up a Supabase client when the user clearly has no session at all.
+  for (const cookie of req.cookies.getAll()) {
+    if (cookie.name.startsWith("sb-") && cookie.name.includes("auth-token")) {
+      return true;
+    }
   }
-  if (SUSPICIOUS_UA_RE.test(ua) && pathname.startsWith("/api/")) {
-    return new NextResponse("Forbidden", { status: 403 });
-  }
+  return false;
+}
 
-  // Refresh the Supabase session cookie on every request and gate protected routes.
+function isProtectedPath(pathname: string): boolean {
+  return PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
+function redirectToSignIn(req: NextRequest, pathname: string): NextResponse {
+  const url = req.nextUrl.clone();
+  url.pathname = "/auth/sign-in";
+  url.searchParams.set("next", pathname);
+  return NextResponse.redirect(url);
+}
+
+async function refreshSession(req: NextRequest): Promise<NextResponse> {
   const res = NextResponse.next();
   const sb = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -45,22 +67,60 @@ export async function middleware(req: NextRequest) {
       },
     },
   );
+  await sb.auth.getUser();
+  return res;
+}
 
-  const isProtected = PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
-  if (isProtected) {
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) {
-      const url = req.nextUrl.clone();
-      url.pathname = "/auth/sign-in";
-      url.searchParams.set("next", pathname);
-      return NextResponse.redirect(url);
-    }
-  } else {
-    // Even on public routes, hit getUser() once so the cookie is refreshed.
-    await sb.auth.getUser();
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // ── Always-on security checks ─────────────────────────────────────────
+  if (BOT_TRAP_PATHS.includes(pathname)) {
+    return new NextResponse("Not found", {
+      status: 404,
+      headers: { "X-Bot-Trapped": "1" },
+    });
   }
 
-  return res;
+  const ua = req.headers.get("user-agent") ?? "";
+  if (!ua) {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+  if (SUSPICIOUS_UA_RE.test(ua) && pathname.startsWith("/api/")) {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+
+  // ── Auth refresh / gating ─────────────────────────────────────────────
+  // Goal : avoid calling Supabase Auth (a network round-trip) when it can't
+  // possibly do anything useful. Three cheap exits before the Supabase client
+  // is ever instantiated.
+  const isProtected = isProtectedPath(pathname);
+  const isPrefetch =
+    req.headers.get("next-router-prefetch") === "1"
+    || req.headers.get("purpose") === "prefetch";
+  const hasSession = hasSupabaseAuthCookie(req);
+
+  if (isProtected) {
+    // Protected: a missing cookie is enough to redirect — no need to ask
+    // Supabase. The page server component will validate the cookie itself
+    // via lib/auth.getUser() (cached for the request).
+    if (!hasSession) return redirectToSignIn(req, pathname);
+    // Prefetch on a protected route : let the RSC payload through without
+    // refreshing the session. The real navigation will trigger its own
+    // middleware run that does the refresh.
+    if (isPrefetch) return NextResponse.next();
+    return refreshSession(req);
+  }
+
+  // Public route : refresh the session only when there's something to refresh
+  // and the request is a real navigation. Skips:
+  //   - prefetches (hover may never become a click)
+  //   - users with no session at all
+  //   - sign-in / sign-up / static info pages where the cookie isn't read
+  if (!hasSession || isPrefetch || isSkipAuthPath(pathname)) {
+    return NextResponse.next();
+  }
+  return refreshSession(req);
 }
 
 export const config = {

@@ -7,6 +7,7 @@ import { BackgroundGlow } from "../BackgroundGlow";
 import { ScanSheet } from "./ScanSheet";
 import { MobileBurgerMenu } from "./MobileBurgerMenu";
 import { PremiumCard } from "./PremiumCard";
+import { SidebarProfileMenu } from "./SidebarProfileMenu";
 import { CameraIcon, ClockIcon, DiamondIcon, HomeIcon, LayersIcon, PromisesIcon, SparklesIcon, UserIcon } from "./NavIcons";
 
 const NAV_ITEMS = [
@@ -234,17 +235,7 @@ function DesktopSidebar({
 
       <div className={`${signedIn && !pathname.startsWith("/offre") ? "mt-3" : "mt-auto"} pt-6 border-t border-white/60`}>
         {signedIn ? (
-          <div className="flex items-center gap-3 rounded-full bg-white/55 ring-1 ring-white/80 backdrop-blur-xl shadow-[0_8px_22px_-8px_rgba(15,23,42,0.14),inset_0_1px_0_rgba(255,255,255,0.9)] px-2.5 py-2">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#1F2937] to-[#0A0A0A] text-white flex items-center justify-center text-xs font-semibold ring-1 ring-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]">
-              {(firstName ?? "U").slice(0, 1).toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <div className="text-sm font-semibold truncate">{firstName ?? "Utilisateur"}</div>
-              <Link href="/profile" className="text-[11px] text-[#6B7280] hover:text-black">
-                Mon compte
-              </Link>
-            </div>
-          </div>
+          <SidebarProfileMenu firstName={firstName} />
         ) : (
           <div className="space-y-2">
             <Link
