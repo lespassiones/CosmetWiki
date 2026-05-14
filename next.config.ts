@@ -19,6 +19,19 @@ const config: NextConfig = {
     formats: ["image/webp"],
   },
   compress: true,
+  experimental: {
+    // Tree-shake barrel exports of these packages so we only ship the
+    // functions actually imported, not the whole module. @supabase/* is the
+    // big one client-side ; openai is server-only here but tagging it
+    // doesn't hurt and protects against future client imports.
+    // Doc: https://nextjs.org/docs/app/api-reference/next-config-js/optimizePackageImports
+    optimizePackageImports: [
+      "@supabase/supabase-js",
+      "@supabase/ssr",
+      "openai",
+      "@vercel/analytics",
+    ],
+  },
   async headers() {
     return [
       { source: "/(.*)", headers: securityHeaders },

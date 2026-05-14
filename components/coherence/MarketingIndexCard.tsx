@@ -21,8 +21,8 @@ export function MarketingIndexCard({
   const total = metrics.totalPromises;
 
   return (
-    <article className="rounded-2xl bg-rose-50/70 ring-1 ring-rose-100 p-5 lg:p-6 flex flex-col gap-3 lg:flex-row lg:items-start lg:gap-6">
-      <div className="lg:flex-[0_0_180px]">
+    <article className="rounded-2xl bg-rose-50/70 ring-1 ring-rose-100 p-5 lg:p-6 flex flex-wrap items-start gap-x-6 gap-y-3">
+      <div className="flex-[0_0_180px]">
         <div className="flex items-center gap-2 mb-1">
           <div className="text-[11px] font-semibold uppercase tracking-wider text-rose-600">
             Indice marketing
@@ -59,7 +59,7 @@ export function MarketingIndexCard({
           {noActiveCount} promesse{noActiveCount > 1 ? "s" : ""} sur {total} sans actif documenté
         </div>
       </div>
-      <div className="min-w-0 flex-1 space-y-3">
+      <div className="min-w-[16rem] flex-1 space-y-3">
         <p className="text-[13px] leading-relaxed text-rose-900/85">
           {total === 0 ? (
             <>

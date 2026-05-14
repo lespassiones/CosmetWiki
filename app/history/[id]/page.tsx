@@ -21,23 +21,28 @@ export default async function HistoryDetailPage({
 
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
-  const { data, error } = await sb
-    .schema("cosme_check")
-    .from("analyses")
-    .select("id, name, product_label, score, input_text, result_json, created_at")
-    .eq("id", id)
-    .maybeSingle();
+  // Run the two queries in parallel — analyses + routine_items don't depend
+  // on each other, so we don't need to wait for the first to finish before
+  // firing the second. Saves ~80-150ms per page load (one full Supabase RTT).
+  const [analysisResult, routineResult] = await Promise.all([
+    sb
+      .schema("cosme_check")
+      .from("analyses")
+      .select("id, name, product_label, score, input_text, result_json, created_at")
+      .eq("id", id)
+      .maybeSingle(),
+    sb
+      .schema("cosme_check")
+      .from("routine_items")
+      .select("id")
+      .eq("analysis_id", id)
+      .maybeSingle(),
+  ]);
 
+  const { data, error } = analysisResult;
   if (error || !data) notFound();
 
-  // Is this analysis already pinned to the user's routine?
-  const { data: routineRow } = await sb
-    .schema("cosme_check")
-    .from("routine_items")
-    .select("id")
-    .eq("analysis_id", id)
-    .maybeSingle();
-  const inRoutine = Boolean(routineRow);
+  const inRoutine = Boolean(routineResult.data);
 
   const displayName =
     data.product_label
