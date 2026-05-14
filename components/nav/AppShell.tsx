@@ -6,7 +6,8 @@ import { usePathname } from "next/navigation";
 import { BackgroundGlow } from "../BackgroundGlow";
 import { ScanSheet } from "./ScanSheet";
 import { MobileBurgerMenu } from "./MobileBurgerMenu";
-import { CameraIcon, ClockIcon, HomeIcon, LayersIcon, PromisesIcon, SparklesIcon, UserIcon } from "./NavIcons";
+import { PremiumCard } from "./PremiumCard";
+import { CameraIcon, ClockIcon, DiamondIcon, HomeIcon, LayersIcon, PromisesIcon, SparklesIcon, UserIcon } from "./NavIcons";
 
 const NAV_ITEMS = [
   { href: "/", label: "Accueil", icon: HomeIcon },
@@ -14,6 +15,7 @@ const NAV_ITEMS = [
   { href: "/promesses", label: "Promesses", icon: PromisesIcon },
   { href: "/advisor", label: "Skin advisor", icon: SparklesIcon },
   { href: "/history", label: "Historique", icon: ClockIcon },
+  { href: "/offre", label: "Offre", icon: DiamondIcon },
   { href: "/profile", label: "Profil", icon: UserIcon },
 ] as const;
 
@@ -121,7 +123,7 @@ function MobileBottomNav({ pathname, onScanClick }: { pathname: string; onScanCl
         >
           <CameraIcon className="h-5 w-5 drop-shadow-sm" />
           <span className="text-[10px] font-semibold leading-none tracking-tight drop-shadow-sm">
-            Analyse-moi
+            Décode
           </span>
         </button>
       </div>
@@ -221,7 +223,16 @@ function DesktopSidebar({
         })}
       </ul>
 
-      <div className="mt-auto pt-6 border-t border-white/60">
+      {/* Premium upsell sits right above the avatar, hidden when the user is
+          already on /offre (no point pitching to someone who's looking at
+          the offer). */}
+      {signedIn && !pathname.startsWith("/offre") && (
+        <div className="mt-auto pt-6">
+          <PremiumCard />
+        </div>
+      )}
+
+      <div className={`${signedIn && !pathname.startsWith("/offre") ? "mt-3" : "mt-auto"} pt-6 border-t border-white/60`}>
         {signedIn ? (
           <div className="flex items-center gap-3 rounded-full bg-white/55 ring-1 ring-white/80 backdrop-blur-xl shadow-[0_8px_22px_-8px_rgba(15,23,42,0.14),inset_0_1px_0_rgba(255,255,255,0.9)] px-2.5 py-2">
             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#1F2937] to-[#0A0A0A] text-white flex items-center justify-center text-xs font-semibold ring-1 ring-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]">

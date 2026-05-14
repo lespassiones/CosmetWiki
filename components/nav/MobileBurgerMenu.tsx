@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CloseIcon, MenuIcon } from "./NavIcons";
+import { PremiumCard } from "./PremiumCard";
 
 type NavItem = {
   href: string;
@@ -97,7 +98,7 @@ export function MobileBurgerMenu({
               </button>
             </div>
 
-            <nav className="flex-1 overflow-y-auto px-3 py-4">
+            <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col">
               <ul className="space-y-1">
                 {items.map(({ href, label, icon: Icon }) => {
                   const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -119,6 +120,14 @@ export function MobileBurgerMenu({
                   );
                 })}
               </ul>
+
+              {/* Premium upsell pinned to the bottom of the drawer scroll
+                  area (above the safe area). Hidden when already on /offre. */}
+              {!pathname.startsWith("/offre") && (
+                <div className="mt-auto pt-4">
+                  <PremiumCard />
+                </div>
+              )}
             </nav>
           </aside>
 

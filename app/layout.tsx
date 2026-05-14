@@ -19,9 +19,9 @@ const inter = Inter({
 });
 
 const SITE_NAME = "Cosme Check";
-const DEFAULT_TITLE = "Cosme Check — Le moteur de recherche public d'ingrédients cosmétiques";
+const DEFAULT_TITLE = "Cosme Check — Une beauté consciente, au-delà des simples notes";
 const DEFAULT_DESCRIPTION =
-  "Recherchez plus de 15 000 ingrédients cosmétiques. Classification couleur, fonctions, prévalence et produits qui en contiennent. Analysez la composition INCI d'un produit en quelques secondes.";
+  "L'application qui décode tes cosmétiques : composition, promesses marketing, ingrédients clefs. Une beauté consciente, vraiment.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

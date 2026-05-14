@@ -122,3 +122,16 @@ export function CloseIcon({ className }: Props) {
     </svg>
   );
 }
+
+/** Diamond icon — for the Premium offer entry point. */
+export function DiamondIcon({ className }: Props) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M6 3h12l4 6-10 12L2 9z" />
+      <path d="M2 9h20" />
+      <path d="m6 3 4 6" />
+      <path d="m18 3-4 6" />
+      <path d="M10 9 12 21 14 9" />
+    </svg>
+  );
+}
