@@ -384,12 +384,16 @@ export function computeMetrics(promises: CoherencePromise[]): CoherenceResult["m
   const partielleCount = promises.filter((p) => p.verdict === "partielle").length;
   const marketingCount = promises.filter((p) => p.verdict === "marketing").length;
   const nonDemontreeCount = promises.filter((p) => p.verdict === "non_demontree").length;
-  const tenuePct = total === 0 ? 0 : Math.round((tenueCount / total) * 100);
-  // "Marketing index" = promises with NO documented active at all (marketing
-  // verdict OR non_demontree). Partielle verdicts are deliberately excluded —
-  // those have actives, just under-dosed, so they aren't pure marketing.
+  // "Marketing index" = promises with NO documented active at all (verdict
+  // marketing or non_demontree).
   const noActiveCount = marketingCount + nonDemontreeCount;
   const marketingIndex = total === 0 ? 100 : Math.round((noActiveCount / total) * 100);
+  // "Verdict global" (tenuePct) is the symmetrical opposite: % of promises
+  // that DO have at least one documented active in the formula (verdict tenue
+  // OR partielle). It's literally 100 − marketingIndex, so the green / rose
+  // donut tells one consistent story (kept = green, marketing = rose).
+  const supportedCount = tenueCount + partielleCount;
+  const tenuePct = total === 0 ? 0 : Math.round((supportedCount / total) * 100);
   return {
     tenuePct,
     tenueCount,

@@ -8,7 +8,7 @@ import { VERDICT_TONE } from "./tone";
  *   - "Promesses analysées" : promises the LLM extracted from the description.
  *     Colour-coded by the engine's verdict so the user sees at a glance
  *     which were tenue / partielle / marketing / non démontrée.
- *   - "Mentions hors analyse" : description fragments that aren't actionable
+ *   - "Promesses non analysées" : description fragments that aren't actionable
  *     (composition / certification / sensoriel / marketing général).
  *
  * Renamed from "Vérifié dans la formule" → "Promesses analysées" because the
@@ -31,6 +31,7 @@ export function DescriptionKeywordsCard({
           Ce qu&apos;on a lu sur l&apos;emballage
         </h2>
         <Tooltip
+          placement="bottom"
           maxWidth={320}
           content={
             <>
@@ -40,10 +41,10 @@ export function DescriptionKeywordsCard({
               <br /><br />
               À <b>droite</b> : les phrases qu&apos;on n&apos;a pas pu vérifier
               côté formule (ex : « 96 % naturel » = composition, « odeur sucrée »
-              = sensoriel). Pas un défaut, juste hors champ d&apos;analyse.
+              = sensoriel). Pas un défaut, juste pas analysable côté formule.
               <br /><br />
               <b>Ici</b> : {promises.length} promesse{promises.length > 1 ? "s" : ""} analysée{promises.length > 1 ? "s" : ""},{" "}
-              {unverifiable.length} mention{unverifiable.length > 1 ? "s" : ""} hors analyse.
+              {unverifiable.length} non analysée{unverifiable.length > 1 ? "s" : ""}.
             </>
           }
         >
@@ -83,7 +84,7 @@ export function DescriptionKeywordsCard({
         </section>
         <section>
           <div className="text-[11px] font-semibold uppercase tracking-wider text-[#6B7280] mb-2">
-            Mentions hors analyse
+            Promesses non analysées
           </div>
           {unverifiable.length === 0 ? (
             <p className="text-[12px] text-[#9CA3AF]">

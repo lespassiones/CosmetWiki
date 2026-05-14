@@ -21,6 +21,7 @@ export function PromisesBarChart({ promises }: { promises: CoherencePromise[] })
       <div className="flex items-center gap-2 mb-1">
         <h2 className="text-[15px] lg:text-[17px] font-semibold">Détail par promesse</h2>
         <Tooltip
+          placement="bottom"
           maxWidth={320}
           content={
             <>

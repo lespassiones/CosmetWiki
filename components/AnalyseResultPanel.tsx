@@ -251,9 +251,23 @@ function BigScoreCard({
         </p>
       </div>
 
-      {/* DESKTOP — full blob with legend, then ratio. */}
+      {/* DESKTOP — full blob with "% sans pénalité" injected between the
+          centre count and the colour legend, then the ratio at the bottom. */}
       <div className="hidden lg:flex lg:flex-col lg:items-center">
-        <IngredientBlob counts={counts} variant="lg" showCenter showLegend animate />
+        <IngredientBlob
+          counts={counts}
+          variant="lg"
+          showCenter
+          showLegend
+          animate
+          subtitle={
+            pctSansPenalite !== null ? (
+              <p className="text-[14px] italic text-emerald-700">
+                <span className="font-semibold not-italic">{pctSansPenalite} %</span> sans pénalité
+              </p>
+            ) : null
+          }
+        />
         <p className="mt-3 text-[12px] text-ink-subtle">
           <span className="font-semibold text-ink">{matched}</span> / {total} ingrédients reconnus
         </p>

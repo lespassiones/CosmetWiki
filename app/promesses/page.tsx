@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { GLASS_CARD, GLASS_CARD_HOVER, GLASS_PILL_DARK } from "@/lib/ui/glass";
+import { computeMetrics } from "@/lib/coherence/engine";
+import { CoherenceItemActions } from "@/components/coherence/CoherenceItemActions";
 import type { CoherenceResult } from "@/lib/coherence/types";
 
 export const metadata = { title: "Promesses · Cosme Check" };
@@ -82,40 +84,38 @@ export default async function PromessesPage() {
               = r.analyses?.product_label
               ?? r.analyses?.name
               ?? `Analyse du ${formatDate(r.created_at)}`;
-            const m = r.result_json.metrics;
+            // Recompute on read so analyses saved before the metrics formula
+            // changed are still displayed with the current logic.
+            const m = computeMetrics(r.result_json.promises);
+            const supported = m.tenueCount + m.partielleCount;
             return (
-              <li key={r.id}>
+              <li key={r.id} className="relative">
                 <Link
                   href={`/promesses/${r.id}`}
-                  className={`${GLASS_CARD} ${GLASS_CARD_HOVER} flex items-center gap-4 p-4`}
+                  className={`${GLASS_CARD} ${GLASS_CARD_HOVER} flex items-center gap-4 p-4 pr-16`}
                 >
                   <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
                     <span className="text-base font-bold leading-none">
                       {m.tenuePct}
                     </span>
-                    <span className="text-[10px] mt-0.5">% tenu</span>
+                    <span className="text-[10px] mt-0.5">%</span>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold text-[#111111] truncate">{productName}</div>
                     <div className="text-[12px] text-[#6B7280]">
-                      {m.tenueCount} / {m.totalPromises} promesse
-                      {m.totalPromises > 1 ? "s" : ""} tenue
-                      {m.tenueCount > 1 ? "s" : ""} · indice marketing {m.marketingIndex} %
+                      {supported} / {m.totalPromises} promesse
+                      {m.totalPromises > 1 ? "s" : ""} soutenue
+                      {supported > 1 ? "s" : ""} · indice marketing {m.marketingIndex} %
                       <span className="mx-1">·</span>
                       {formatDate(r.created_at)}
                     </div>
                   </div>
-                  <svg
-                    className="h-4 w-4 text-[#9CA3AF]"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    aria-hidden
-                  >
-                    <path d="m9 6 6 6-6 6" />
-                  </svg>
                 </Link>
+                {/* The 3-dot menu sits in absolute on top of the row so the
+                    <Link> wrapper stays clickable everywhere else. */}
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
+                  <CoherenceItemActions id={r.id} />
+                </div>
               </li>
             );
           })}

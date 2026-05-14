@@ -10,6 +10,7 @@ import { ConclusionCard } from "@/components/coherence/ConclusionCard";
 import { IngredientsPositionChart } from "@/components/coherence/IngredientsPositionChart";
 import { DescriptionKeywordsCard } from "@/components/coherence/DescriptionKeywordsCard";
 import { MarketingIndexCard } from "@/components/coherence/MarketingIndexCard";
+import { computeMetrics } from "@/lib/coherence/engine";
 import type { CoherenceResult } from "@/lib/coherence/types";
 
 export const metadata = { title: "Promesses vs Formule · Cosme Check" };
@@ -50,7 +51,15 @@ export default async function PromesseDetailPage({
     ?? row.analyses?.name
     ?? `Analyse du ${new Date(row.created_at).toLocaleDateString("fr-FR")}`;
 
-  const result = row.result_json;
+  // Recompute metrics from the stored promises so changes to the metric
+  // formulas (e.g. moving from "tenue-only" to "tenue+partielle") apply
+  // retroactively to analyses already saved in the DB. Stored `metrics` are
+  // ignored — they're a snapshot from compute time.
+  const storedResult = row.result_json;
+  const result: CoherenceResult = {
+    ...storedResult,
+    metrics: computeMetrics(storedResult.promises),
+  };
 
   return (
     <div className="mx-auto max-w-[90rem] px-5 lg:px-10 xl:px-14 py-6 lg:py-10 space-y-4 lg:space-y-5">
@@ -88,11 +97,11 @@ export default async function PromesseDetailPage({
         <PromisesBarChart promises={result.promises} />
       </section>
 
-      {/* Coherence table (wide) + conclusion (narrow, right) — like the mock.
-          items-stretch + h-full inside ConclusionCard makes the conclusion
-          card match the table's height; the conclusion text scales up + is
-          vertically centred so the card never looks empty. */}
-      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.5fr)_minmax(0,1fr)] gap-4 lg:gap-5 items-stretch">
+      {/* Coherence table (wide) + conclusion (narrow, vertically centred).
+          items-center makes the conclusion card sit at the vertical centre
+          of the table column instead of stretching to match its height — the
+          conclusion is short, no need to inflate it. */}
+      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.5fr)_minmax(0,1fr)] gap-4 lg:gap-5 items-center">
         <CoherenceTable promises={result.promises} />
         <ConclusionCard conclusion={result.conclusion} />
       </section>

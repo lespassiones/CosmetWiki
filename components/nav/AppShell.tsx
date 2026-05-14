@@ -5,14 +5,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BackgroundGlow } from "../BackgroundGlow";
 import { ScanSheet } from "./ScanSheet";
+import { MobileBurgerMenu } from "./MobileBurgerMenu";
 import { CameraIcon, ClockIcon, HomeIcon, LayersIcon, PromisesIcon, SparklesIcon, UserIcon } from "./NavIcons";
 
 const NAV_ITEMS = [
   { href: "/", label: "Accueil", icon: HomeIcon },
   { href: "/routine", label: "Routine", icon: LayersIcon },
-  { href: "/history", label: "Historique", icon: ClockIcon },
   { href: "/promesses", label: "Promesses", icon: PromisesIcon },
   { href: "/advisor", label: "Skin advisor", icon: SparklesIcon },
+  { href: "/history", label: "Historique", icon: ClockIcon },
   { href: "/profile", label: "Profil", icon: UserIcon },
 ] as const;
 
@@ -69,6 +70,11 @@ export function AppShell({
       {/* Mobile bottom nav */}
       <MobileBottomNav pathname={pathname} onScanClick={() => setScanOpen(true)} />
 
+      {/* Mobile burger menu (top-right) — opens a drawer mirroring the
+          desktop sidebar so the user can reach pages that don't fit in the
+          5-slot bottom nav (Profil, Skin advisor). */}
+      <MobileBurgerMenu pathname={pathname} items={NAV_ITEMS} />
+
       {/* Mobile floating Skin Advisor button — sits above the bottom nav,
           hidden when already on /advisor to avoid redundancy. */}
       {!pathname.startsWith("/advisor") && (
@@ -102,7 +108,7 @@ function MobileBottomNav({ pathname, onScanClick }: { pathname: string; onScanCl
           <NavBtnMobile href="/routine" label="Routine" icon={LayersIcon} active={pathname.startsWith("/routine")} />
           <div className="w-16 h-16" aria-hidden />
           <NavBtnMobile href="/history" label="Historique" icon={ClockIcon} active={pathname.startsWith("/history")} />
-          <NavBtnMobile href="/profile" label="Profil" icon={UserIcon} active={pathname.startsWith("/profile")} />
+          <NavBtnMobile href="/promesses" label="Promesses" icon={PromisesIcon} active={pathname.startsWith("/promesses")} />
         </div>
         {/* Center FAB — rose gradient matching the "Installer l'app" CTA.
             Sized at 64px (15% bigger than the original 56px) so the

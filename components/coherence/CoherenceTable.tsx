@@ -36,6 +36,7 @@ export function CoherenceTable({ promises }: { promises: CoherencePromise[] }) {
       <div className="flex items-center gap-2 mb-4">
         <h2 className="text-[15px] lg:text-[17px] font-semibold">Tableau de cohérence</h2>
         <Tooltip
+          placement="bottom"
           maxWidth={340}
           content={
             <>

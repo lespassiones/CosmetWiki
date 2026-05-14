@@ -51,6 +51,7 @@ export function IngredientsPositionChart({
           Où se trouvent les ingrédients clés ?
         </h2>
         <Tooltip
+          placement="bottom"
           maxWidth={340}
           content={
             <>
@@ -178,17 +179,20 @@ function PositionBubble({
 }) {
   return (
     <li
-      className={`inline-flex flex-col items-center gap-0.5 rounded-full bg-white px-3 py-1.5 ring-1 ring-black/[0.06] shadow-[0_4px_10px_-4px_rgba(15,23,42,0.18),inset_0_1px_0_rgba(255,255,255,0.95)] max-w-[150px] ${
+      className={`inline-flex flex-col items-center gap-0.5 rounded-full bg-white px-2 py-1 lg:px-3 lg:py-1.5 ring-1 ring-black/[0.06] shadow-[0_4px_10px_-4px_rgba(15,23,42,0.18),inset_0_1px_0_rgba(255,255,255,0.95)] max-w-[110px] lg:max-w-[150px] ${
         muted ? "opacity-90" : ""
       }`}
     >
+      {/* Text shrinks aggressively on mobile (down to 9px) so long INCI
+          names like DEHYDROXANTHAN GUM still fit inside the bubble's
+          allocated zone instead of being cut off. */}
       <span
-        className="text-[12px] font-medium text-ink leading-tight text-center truncate max-w-full"
+        className="text-[9px] lg:text-[12px] font-medium text-ink leading-tight text-center truncate max-w-full"
         title={name}
       >
         {name}
       </span>
-      <span className="text-[10px] text-[#9CA3AF] leading-none">pos. {position}</span>
+      <span className="text-[8px] lg:text-[10px] text-[#9CA3AF] leading-none">pos. {position}</span>
     </li>
   );
 }

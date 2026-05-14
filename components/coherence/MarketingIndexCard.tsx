@@ -28,6 +28,7 @@ export function MarketingIndexCard({
             Indice marketing
           </div>
           <Tooltip
+            placement="bottom"
             maxWidth={320}
             content={
               <>

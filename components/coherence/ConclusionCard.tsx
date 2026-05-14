@@ -1,27 +1,17 @@
 /**
  * Light-blue pastel card with the LLM-written conclusion sentence.
  *
- * The card uses `h-full + flex flex-col + justify-center` so when its grid
- * sibling (the coherence table) is taller, the conclusion stretches to match
- * AND its text stays vertically centred — no sad ghost space at the bottom.
+ * Sized to its content (no stretching). Its grid parent uses items-center
+ * so the card sits at the vertical centre of the table column — visually
+ * floating in the middle of the dense table, never inflating to match.
  *
- * The text size scales by conclusion length so a short conclusion fills more
- * of the card visually. We can't measure the sibling card from here without
- * JS, but matching the conclusion's *type size* to its character count is a
- * cheap proxy that works well in practice.
+ * Icon + label sit on top of the body text (stacked) — chosen by the user
+ * over a side-by-side layout because it gives the body text full width.
  */
 export function ConclusionCard({ conclusion }: { conclusion: string }) {
   if (!conclusion) return null;
-
-  const len = conclusion.length;
-  // Short → big & airy ; medium → comfortable ; long → compact.
-  const textCls
-    = len < 180 ? "text-[16px] lg:text-[18px] leading-[1.6]"
-    : len < 320 ? "text-[14px] lg:text-[15px] leading-[1.65]"
-    : "text-[13px] lg:text-[14px] leading-[1.6]";
-
   return (
-    <article className="h-full rounded-2xl bg-sky-50/70 ring-1 ring-sky-100 p-5 lg:p-6 flex flex-col">
+    <article className="rounded-2xl bg-sky-50/70 ring-1 ring-sky-100 p-5 lg:p-6">
       <div className="flex items-center gap-2.5 mb-3">
         <span
           aria-hidden
@@ -43,9 +33,7 @@ export function ConclusionCard({ conclusion }: { conclusion: string }) {
           Conclusion
         </div>
       </div>
-      <div className="flex-1 flex flex-col justify-center">
-        <p className={`text-ink ${textCls}`}>{conclusion}</p>
-      </div>
+      <p className="text-[14px] leading-relaxed text-ink">{conclusion}</p>
     </article>
   );
 }

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { Logo } from "@/components/Logo";
 import { Footer } from "@/components/Footer";
@@ -8,7 +7,7 @@ import { MobileMenu } from "@/components/MobileMenu";
 import { HomeShell } from "@/components/HomeShell";
 import { InstallPWAButton } from "@/components/InstallPWAButton";
 import { HomeDashboard, type DashboardData } from "@/components/home/HomeDashboard";
-import { TrendingCard, TrendingCardSkeleton } from "@/components/home/TrendingCard";
+import { DailyPicksCard } from "@/components/home/DailyPicksCard";
 import { getProfile, getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { tipsForCarousel } from "@/lib/tips";
@@ -164,11 +163,7 @@ export default async function Home({ searchParams }: Props) {
       {showDashboard && (
         <HomeDashboard
           data={dashboard}
-          trendingSlot={
-            <Suspense fallback={<TrendingCardSkeleton />}>
-              <TrendingCard />
-            </Suspense>
-          }
+          trendingSlot={<DailyPicksCard />}
         />
       )}
 

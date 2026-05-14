@@ -119,6 +119,9 @@ function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
   }
   const title = last.product_label ?? last.name ?? "Analyse";
   const counts = last.counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 };
+  const matched = counts.vert + counts.jaune + counts.orange + counts.rouge;
+  const pctSansPenalite
+    = matched > 0 ? Math.round((counts.vert / matched) * 100) : null;
   return (
     <Link
       href={`/history/${last.id}`}
@@ -131,6 +134,11 @@ function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
       <div className="mt-3 flex items-center gap-4">
         <div className="min-w-0 flex-1">
           <div className="font-semibold text-[#111111] truncate">{title}</div>
+          {pctSansPenalite !== null && (
+            <div className="mt-1 text-[11px] italic text-emerald-700">
+              <span className="font-semibold not-italic">{pctSansPenalite} %</span> sans pénalité
+            </div>
+          )}
         </div>
         <div className="w-[140px] shrink-0">
           <IngredientBlob counts={counts} variant="md" />
@@ -164,6 +172,19 @@ function RoutineCard({
     );
   }
   const safeCounts = counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 };
+  // Aggregate ingredient distribution across all routine products. We turn
+  // each colour count into a % of the total recognised ingredients in the
+  // routine — same numerator definition as on the analyse page so the
+  // wording stays consistent ("X % sans pénalité").
+  const total
+    = safeCounts.vert + safeCounts.jaune + safeCounts.orange + safeCounts.rouge;
+  const pct = (n: number) => (total > 0 ? Math.round((n / total) * 100) : 0);
+  const breakdown = [
+    { pct: pct(safeCounts.vert), label: "sans pénalité", color: "text-emerald-700" },
+    { pct: pct(safeCounts.jaune), label: "pén. faible", color: "text-amber-700" },
+    { pct: pct(safeCounts.orange), label: "pén. moyenne", color: "text-orange-700" },
+    { pct: pct(safeCounts.rouge), label: "pén. forte", color: "text-rose-700" },
+  ].filter((b) => b.pct > 0);
   return (
     <Link
       href="/routine"
@@ -178,6 +199,15 @@ function RoutineCard({
           <div className="font-semibold text-[#111111]">
             {count} produit{count > 1 ? "s" : ""} actif{count > 1 ? "s" : ""}
           </div>
+          {breakdown.length > 0 && (
+            <ul className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] italic">
+              {breakdown.map((b) => (
+                <li key={b.label} className={b.color}>
+                  <span className="font-semibold not-italic">{b.pct} %</span> {b.label}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         <div className="w-[140px] shrink-0">
           <IngredientBlob counts={safeCounts} variant="md" />

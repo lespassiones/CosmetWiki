@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   blobPath,
   ringSectorPath,
@@ -190,6 +191,7 @@ export function IngredientBlob({
   showCenter = false,
   className = "",
   animate = false,
+  subtitle,
 }: {
   counts: BlobCounts;
   variant?: Variant;
@@ -202,6 +204,12 @@ export function IngredientBlob({
    * on every render — only the big card on the analyse page opts in.
    */
   animate?: boolean;
+  /**
+   * Optional slot rendered BETWEEN the SVG and the legend. Useful for an
+   * inline metric like "64 % sans pénalité" that should sit right under the
+   * centre count but above the colour legend.
+   */
+  subtitle?: ReactNode;
 }) {
   const geom = GEOMETRY[variant];
   const total = counts.vert + counts.jaune + counts.orange + counts.rouge;
@@ -338,6 +346,8 @@ export function IngredientBlob({
           </g>
         )}
       </svg>
+
+      {subtitle ? <div className="mt-2 w-full text-center">{subtitle}</div> : null}
 
       {showLegend && (
         <div className="mt-2 grid w-full grid-cols-4 gap-2 text-center">

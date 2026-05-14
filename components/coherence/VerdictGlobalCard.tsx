@@ -12,6 +12,10 @@ import type { CoherenceResult } from "@/lib/coherence/types";
  */
 export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metrics"] }) {
   const pct = metrics.tenuePct;
+  // Number of promises that have at least one documented active in the
+  // formula (verdict tenue OR partielle). Symmetrical opposite of the
+  // marketing index — together they sum to the total.
+  const supportedCount = metrics.tenueCount + metrics.partielleCount;
   // Donut geometry tuned for crisp rendering at 96-112px.
   const r = 38;
   const c = 2 * Math.PI * r;
@@ -24,12 +28,22 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
           Verdict global
         </div>
         <Tooltip
-          maxWidth={280}
+          placement="bottom"
+          maxWidth={320}
           content={
             <>
-              On a trouvé <b>{metrics.totalPromises} promesse{metrics.totalPromises > 1 ? "s" : ""}</b> dans la description.
-              Sur ces {metrics.totalPromises}, <b>{metrics.tenueCount}</b> {metrics.tenueCount > 1 ? "sont totalement tenues" : "est totalement tenue"} par la formule (verdict <b>Tenue</b>) — c&apos;est ce {pct} %.
-              Les autres ne sont pas zéro : elles peuvent être <b>partielles</b> (actifs présents mais en trace), <b>marketing</b> (effet visuel seulement) ou <b>non démontrées</b> (rien dans la formule).
+              <b>{pct} %</b> = part des promesses qui ont au moins un{" "}
+              <b>actif documenté</b> dans la formule pour les soutenir.
+              <br /><br />
+              <b>Sur cette analyse</b> : {supportedCount} sur{" "}
+              {metrics.totalPromises} (
+              {metrics.tenueCount > 0 && <>{metrics.tenueCount} totalement tenue{metrics.tenueCount > 1 ? "s" : ""}</>}
+              {metrics.tenueCount > 0 && metrics.partielleCount > 0 && <>, </>}
+              {metrics.partielleCount > 0 && <>{metrics.partielleCount} partielle{metrics.partielleCount > 1 ? "s" : ""} — actifs en trace ≤ 1 %</>}
+              ).
+              <br /><br />
+              C&apos;est l&apos;<b>opposé exact</b> de l&apos;indice marketing
+              ({metrics.marketingIndex} %) : les deux additionnent toujours à 100 %.
             </>
           }
         >
@@ -48,9 +62,15 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
             <span className="text-[32px] lg:text-[40px] font-bold">%</span>
           </div>
           <p className="mt-3 lg:mt-4 text-[14px] lg:text-[15px] text-[#6B7280] leading-snug">
-            Promesses tenues :{" "}
-            <span className="font-semibold text-ink">{metrics.tenueCount}</span>{" "}
+            Promesses soutenues :{" "}
+            <span className="font-semibold text-ink">{supportedCount}</span>{" "}
             sur <span className="font-semibold text-ink">{metrics.totalPromises}</span>
+            {metrics.tenueCount > 0 && metrics.partielleCount > 0 && (
+              <span className="block text-[12px] text-[#9CA3AF] mt-0.5">
+                {metrics.tenueCount} totalement, {metrics.partielleCount} partielle
+                {metrics.partielleCount > 1 ? "s" : ""}
+              </span>
+            )}
           </p>
         </div>
         <div className="relative shrink-0">
