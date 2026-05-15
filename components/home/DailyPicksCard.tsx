@@ -26,18 +26,23 @@ function todayKey(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function readLocalIndex(): number {
-  if (typeof window === "undefined") return 0;
+type DailyState = { index: number; score: number };
+
+function readLocalState(): DailyState {
+  if (typeof window === "undefined") return { index: 0, score: 0 };
   try {
     const raw = window.localStorage.getItem(`${STORAGE_PREFIX}:${todayKey()}`);
-    const n = raw === null ? 0 : Number.parseInt(raw, 10);
-    return Number.isFinite(n) && n >= 0 ? n : 0;
+    if (raw === null) return { index: 0, score: 0 };
+    const parsed = JSON.parse(raw) as Partial<DailyState>;
+    const idx = typeof parsed.index === "number" && parsed.index >= 0 ? parsed.index : 0;
+    const sc = typeof parsed.score === "number" && parsed.score >= 0 ? parsed.score : 0;
+    return { index: idx, score: sc };
   } catch {
-    return 0;
+    return { index: 0, score: 0 };
   }
 }
 
-function writeLocalIndex(n: number): void {
+function writeLocalState(state: DailyState): void {
   if (typeof window === "undefined") return;
   try {
     // Garbage-collect old keys (different days) so we don't accumulate
@@ -51,7 +56,7 @@ function writeLocalIndex(n: number): void {
         i = -1;
       }
     }
-    window.localStorage.setItem(`${STORAGE_PREFIX}:${today}`, String(n));
+    window.localStorage.setItem(`${STORAGE_PREFIX}:${today}`, JSON.stringify(state));
   } catch {
     // ignore (private mode, quota, …)
   }
@@ -61,13 +66,16 @@ export function DailyPicksCard() {
   const [items, setItems] = useState<DailyPickItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
+  const [score, setScore] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   // Hydration: read localStorage AFTER mount so we don't desync with SSR.
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     setHydrated(true);
-    setIndex(readLocalIndex());
+    const s = readLocalState();
+    setIndex(s.index);
+    setScore(s.score);
     void (async () => {
       try {
         const r = await fetch("/api/daily-picks", { cache: "no-store" });
@@ -80,16 +88,19 @@ export function DailyPicksCard() {
     })();
   }, []);
 
-  function next() {
+  function next(wasCorrect: boolean) {
     const newIndex = index + 1;
+    const newScore = wasCorrect ? score + 1 : score;
     setIndex(newIndex);
-    writeLocalIndex(newIndex);
+    setScore(newScore);
+    writeLocalState({ index: newIndex, score: newScore });
     setPicked(null);
   }
 
   function reset() {
     setIndex(0);
-    writeLocalIndex(0);
+    setScore(0);
+    writeLocalState({ index: 0, score: 0 });
     setPicked(null);
   }
 
@@ -125,16 +136,41 @@ export function DailyPicksCard() {
     );
   }
 
-  // All 10 done for today → friendly empty state with a reset escape hatch.
+  // All 10 done for today → friendly empty state with score + reset.
   if (index >= items.length) {
+    const total = items.length;
+    const ratio = score / total;
+    const scoreTone =
+      ratio >= 0.8
+        ? "bg-emerald-50 ring-emerald-200 text-emerald-700"
+        : ratio >= 0.5
+          ? "bg-amber-50 ring-amber-200 text-amber-700"
+          : "bg-rose-50 ring-rose-200 text-rose-700";
+    const scoreMessage =
+      ratio === 1
+        ? "Sans-faute, bravo ! 🎉"
+        : ratio >= 0.8
+          ? "Excellent score !"
+          : ratio >= 0.5
+            ? "Pas mal, continue comme ça."
+            : "Tu feras mieux la prochaine fois.";
     return (
       <article className={`${GLASS_CARD} p-5 lg:p-6 text-center`}>
         <div aria-hidden className="text-3xl mb-2">✨</div>
-        <h3 className="text-[15px] font-semibold mb-1">
+        <h3 className="text-[15px] font-semibold mb-2">
           C&apos;est tout pour aujourd&apos;hui !
         </h3>
+
+        <div
+          className={`inline-flex items-baseline gap-1 rounded-full ring-1 px-4 py-1.5 mb-2 ${scoreTone}`}
+        >
+          <span className="text-[20px] font-bold tabular-nums">{score}</span>
+          <span className="text-[13px] font-medium opacity-70">/ {total}</span>
+        </div>
+
+        <p className="text-[12px] text-[#6B7280] mb-1">{scoreMessage}</p>
         <p className="text-[12px] text-[#6B7280] mb-4">
-          Tu as fait tes 10 du jour. 10 nouveaux quizz et idées reçues t&apos;attendent demain.
+          10 nouveaux quizz et idées reçues t&apos;attendent demain.
         </p>
         <button
           type="button"
@@ -222,10 +258,10 @@ export function DailyPicksCard() {
           <p className="text-[13px] leading-relaxed text-ink">{item.reveal}</p>
           <button
             type="button"
-            onClick={next}
+            onClick={() => next(picked === correctIdx)}
             className={`${GLASS_PILL_DARK} mt-4 w-full text-[13px] font-semibold py-2.5`}
           >
-            {index + 1 < items.length ? "Suivant →" : "Terminer la série"}
+            {index + 1 < items.length ? "Suivant →" : "Voir mon score"}
           </button>
         </div>
       )}
