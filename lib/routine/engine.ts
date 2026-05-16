@@ -27,6 +27,9 @@ const PENALTY: Record<string, number> = {
   Rouge: 4.0,
 };
 
+const RATING_RANK: Record<string, number> = { Vert: 1, Jaune: 2, Orange: 3, Rouge: 4 };
+const COLOR_ORDER = ["Vert", "Jaune", "Orange", "Rouge"] as const;
+
 export type RoutineProduct = {
   id: string;            // analysis id
   name: string;
@@ -41,7 +44,7 @@ export type RoutineMetrics = {
   totalUseUnits: number;        // sum of frequency weights
   /** Count of routine products whose own score falls in orange/rose band (< 13/20). */
   penalizingProductsCount: number;
-  tagExposure: { tag: string; label: string; cumulativeCount: number }[];
+  tagExposure: { tag: string; label: string; cumulativeCount: number; colorSegments: { color: string; fraction: number }[] }[];
   topIngredients: {
     name: string;
     slug: string | null;
@@ -150,13 +153,23 @@ export function computeRoutineMetrics(products: RoutineProduct[]): RoutineMetric
   const exposureScore = scoreOf(products);
 
   // Tag exposure — weighted by frequency, sum across all products.
+  // Also track worst colorRating per unique ingredient per tag for multi-color bars.
   const tagMap = new Map<string, number>();
+  const tagIngColors = new Map<string, Map<string, string | null>>();
   for (const p of products) {
     const weight = FREQ_WEIGHT[p.frequency];
     const tagsInProduct = new Set<string>();
     for (const it of p.result.items) {
       for (const t of it.tags ?? []) {
         tagsInProduct.add(t);
+        const key = (it.slug ?? it.name ?? it.input).toUpperCase();
+        if (!tagIngColors.has(t)) tagIngColors.set(t, new Map());
+        const ingMap = tagIngColors.get(t)!;
+        const existingRank = RATING_RANK[ingMap.get(key) ?? ""] ?? 0;
+        const newRank = RATING_RANK[it.colorRating ?? ""] ?? 0;
+        if (newRank > existingRank || !ingMap.has(key)) {
+          ingMap.set(key, it.colorRating ?? null);
+        }
       }
     }
     for (const t of tagsInProduct) {
@@ -164,11 +177,25 @@ export function computeRoutineMetrics(products: RoutineProduct[]): RoutineMetric
     }
   }
   const tagExposure = Array.from(tagMap.entries())
-    .map(([tag, cumulativeCount]) => ({
-      tag,
-      label: TAG_LABELS[tag] ?? tag,
-      cumulativeCount: Number(cumulativeCount.toFixed(2)),
-    }))
+    .map(([tag, cumulativeCount]) => {
+      const ingColors = tagIngColors.get(tag) ?? new Map();
+      const counts: Record<string, number> = { Vert: 0, Jaune: 0, Orange: 0, Rouge: 0 };
+      for (const color of ingColors.values()) {
+        if (color && color in counts) counts[color]++;
+      }
+      const total = COLOR_ORDER.reduce((s, c) => s + counts[c], 0);
+      const colorSegments = total === 0
+        ? []
+        : COLOR_ORDER
+            .map((c) => ({ color: c, fraction: counts[c] / total }))
+            .filter((s) => s.fraction > 0);
+      return {
+        tag,
+        label: TAG_LABELS[tag] ?? tag,
+        cumulativeCount: Number(cumulativeCount.toFixed(2)),
+        colorSegments,
+      };
+    })
     .sort((a, b) => b.cumulativeCount - a.cumulativeCount);
 
   // Top ingredients — most cumulatively encountered, weighted by frequency × penalty.

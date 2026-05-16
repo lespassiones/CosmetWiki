@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Cosme Check — moteur de recherche d'ingrédients cosmétiques";
+export const alt = "Cosme Check — Une beauté consciente, au-delà des simples notes";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -53,7 +53,7 @@ export default async function Image() {
             maxWidth: 980,
           }}
         >
-          Le moteur de recherche public d'ingrédients cosmétiques
+          Une beauté consciente, au-delà des simples notes
         </div>
         <div
           style={{
@@ -63,7 +63,7 @@ export default async function Image() {
             maxWidth: 900,
           }}
         >
-          15 000+ ingrédients · classification couleur · analyse INCI
+          L'application qui décode tes cosmétiques : composition, promesses marketing, ingrédients clefs.
         </div>
       </div>
     ),

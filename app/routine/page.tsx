@@ -282,6 +282,7 @@ export default async function RoutinePage() {
                   label={t.label}
                   count={t.cumulativeCount}
                   max={tagsTop[0].cumulativeCount || 1}
+                  colorSegments={t.colorSegments}
                 />
               ))}
             </ul>
