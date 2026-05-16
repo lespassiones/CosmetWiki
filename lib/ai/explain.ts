@@ -11,6 +11,7 @@
  *      personal line is NOT cached (it depends on the caller).
  */
 import { AI_MODEL, callWithFallback, hasOpenAI, openai } from "./client";
+import { NO_LONG_DASHES_RULE, stripLongDashes } from "./sanitize";
 import { supabaseService } from "@/lib/supabase";
 
 export type ExplainContext = {
@@ -58,7 +59,9 @@ export async function explainIngredient(ctx: ExplainContext, userId?: string | n
     .maybeSingle();
   if (cached?.explanation) {
     return {
-      text: cached.explanation,
+      // Strip on read too: old cached entries written before the rule was
+      // added may still contain em-dashes.
+      text: stripLongDashes(cached.explanation),
       personalLine: buildPersonalLine(ctx),
       cached: true,
     };
@@ -76,7 +79,8 @@ export async function explainIngredient(ctx: ExplainContext, userId?: string | n
   // 3. Generate once, then store forever.
   const tags = (ctx.tags ?? []).join(", ") || "(aucun tag connu)";
   const system =
-    "Tu vulgarises un ingrédient INCI cosmétique pour un grand public francophone. Style: factuel, court, jamais alarmiste, jamais marketing. AUCUN conseil médical. Pas d'emoji. Tu rends en 3 phrases, séparées par des sauts de ligne :\n1) À quoi sert cet ingrédient (fonction principale).\n2) Pourquoi cette tolérance Vert/Jaune/Orange/Rouge selon la grille (impact santé, environnement, ou réglementaire).\n3) Une alternative ou une vigilance courte si pertinent. Si la note est Vert, dis simplement pourquoi il est considéré comme sûr.\nN'invente AUCUNE étude, AUCUNE marque, AUCUNE statistique.";
+    "Tu vulgarises un ingrédient INCI cosmétique pour un grand public francophone. Style: factuel, court, jamais alarmiste, jamais marketing. AUCUN conseil médical. Pas d'emoji. Tu rends en 3 phrases, séparées par des sauts de ligne :\n1) À quoi sert cet ingrédient (fonction principale).\n2) Pourquoi cette tolérance Vert/Jaune/Orange/Rouge selon la grille (impact santé, environnement, ou réglementaire).\n3) Une alternative ou une vigilance courte si pertinent. Si la note est Vert, dis simplement pourquoi il est considéré comme sûr.\nN'invente AUCUNE étude, AUCUNE marque, AUCUNE statistique. "
+    + NO_LONG_DASHES_RULE;
   const user = `Ingrédient : ${ctx.name}
 Fonction principale : ${ctx.primaryFunction ?? "non renseignée"}
 Tolérance : ${ctx.colorRating ?? "non classée"}
@@ -99,7 +103,8 @@ Réponds avec UNIQUEMENT le texte de l'explication (3 phrases sur 3 lignes).`;
             { role: "user", content: user },
           ],
         });
-        const value = r.choices?.[0]?.message?.content?.trim() ?? "";
+        const raw = r.choices?.[0]?.message?.content?.trim() ?? "";
+        const value = stripLongDashes(raw);
         return {
           value,
           tokensIn: r.usage?.prompt_tokens,

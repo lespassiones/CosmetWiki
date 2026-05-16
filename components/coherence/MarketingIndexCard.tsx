@@ -60,7 +60,7 @@ export function MarketingIndexCard({
         </div>
       </div>
       <div className="min-w-[16rem] flex-1 space-y-3">
-        <p className="text-[13px] leading-relaxed text-rose-900/85">
+        <div className="text-[13px] leading-relaxed text-rose-900/85">
           {total === 0 ? (
             <>
               La description ne contient aucune promesse d&apos;effet vérifiable —
@@ -78,10 +78,24 @@ export function MarketingIndexCard({
               </span>{" "}
               sur {total} n&apos;{noActiveCount > 1 ? "ont " : "a "}aucun ingrédient
               documenté dans la formule pour {noActiveCount > 1 ? "les" : "la"} soutenir.
-              Ce sont des promesses purement marketing, sans support biologique réel.
+              Ce sont :
+              <ul className="mt-2 space-y-1 list-none">
+                <li className="flex gap-2">
+                  <span aria-hidden className="text-rose-700/70 shrink-0">•</span>
+                  <span>
+                    soit des promesses purement marketing, sans support biologique réel ;
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span aria-hidden className="text-rose-700/70 shrink-0">•</span>
+                  <span>
+                    soit des promesses qui découlent indirectement des autres promesses.
+                  </span>
+                </li>
+              </ul>
             </>
           )}
-        </p>
+        </div>
 
         {/* Breakdown of the 4 verdicts so the gap between marketing index and
             verdict global is explicit. */}

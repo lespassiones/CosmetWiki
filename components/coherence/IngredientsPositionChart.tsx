@@ -100,7 +100,12 @@ export function IngredientsPositionChart({
           ) : (
             <ul className="flex flex-wrap items-center justify-center gap-2">
               {before.map((k) => (
-                <PositionBubble key={`b-${k.position}-${k.name}`} name={k.name} position={k.position} />
+                <PositionBubble
+                  key={`b-${k.position}-${k.name}`}
+                  name={k.name}
+                  position={k.position}
+                  colorRating={k.colorRating}
+                />
               ))}
             </ul>
           )}
@@ -123,7 +128,13 @@ export function IngredientsPositionChart({
           ) : (
             <ul className="flex flex-wrap items-center justify-center gap-2">
               {after.map((k) => (
-                <PositionBubble key={`a-${k.position}-${k.name}`} name={k.name} position={k.position} muted />
+                <PositionBubble
+                  key={`a-${k.position}-${k.name}`}
+                  name={k.name}
+                  position={k.position}
+                  colorRating={k.colorRating}
+                  muted
+                />
               ))}
             </ul>
           )}
@@ -164,22 +175,63 @@ export function IngredientsPositionChart({
   );
 }
 
+type ColorRating = "Vert" | "Jaune" | "Orange" | "Rouge" | null | undefined;
+
+/** Pill tone tokens keyed by the ingredient's color rating. */
+const BUBBLE_TONE: Record<"Vert" | "Jaune" | "Orange" | "Rouge", { bg: string; ring: string; text: string; posText: string }> = {
+  Vert: {
+    bg: "bg-emerald-50",
+    ring: "ring-emerald-200",
+    text: "text-emerald-800",
+    posText: "text-emerald-600/80",
+  },
+  Jaune: {
+    bg: "bg-amber-50",
+    ring: "ring-amber-200",
+    text: "text-amber-800",
+    posText: "text-amber-700/80",
+  },
+  Orange: {
+    bg: "bg-orange-50",
+    ring: "ring-orange-200",
+    text: "text-orange-800",
+    posText: "text-orange-700/80",
+  },
+  Rouge: {
+    bg: "bg-rose-50",
+    ring: "ring-rose-200",
+    text: "text-rose-800",
+    posText: "text-rose-700/80",
+  },
+};
+
 /**
- * Chunky pill with the ingredient name + position. Soft white background,
- * fine ring + drop shadow → the "neumorphic / pill" look from the mock.
+ * Chunky pill with the ingredient name + position. Tinted by the ingredient's
+ * Vert/Jaune/Orange/Rouge rating so the user sees at a glance whether the key
+ * actives are safe ones or penalising ones. Falls back to plain white for
+ * unrated ingredients (shouldn't happen in practice but keeps the UI safe).
  */
 function PositionBubble({
   name,
   position,
+  colorRating,
   muted = false,
 }: {
   name: string;
   position: number;
+  colorRating: ColorRating;
   muted?: boolean;
 }) {
+  const tone = colorRating ? BUBBLE_TONE[colorRating] : null;
+  const surface = tone
+    ? `${tone.bg} ring-1 ${tone.ring}`
+    : "bg-white ring-1 ring-black/[0.06]";
+  const nameClass = tone ? tone.text : "text-ink";
+  const posClass = tone ? tone.posText : "text-[#9CA3AF]";
+
   return (
     <li
-      className={`inline-flex flex-col items-center gap-0.5 rounded-full bg-white px-2 py-1 lg:px-3 lg:py-1.5 ring-1 ring-black/[0.06] shadow-[0_4px_10px_-4px_rgba(15,23,42,0.18),inset_0_1px_0_rgba(255,255,255,0.95)] max-w-[110px] lg:max-w-[150px] ${
+      className={`inline-flex flex-col items-center gap-0.5 rounded-full px-2 py-1 lg:px-3 lg:py-1.5 shadow-[0_4px_10px_-4px_rgba(15,23,42,0.18),inset_0_1px_0_rgba(255,255,255,0.95)] max-w-[110px] lg:max-w-[150px] ${surface} ${
         muted ? "opacity-90" : ""
       }`}
     >
@@ -187,12 +239,12 @@ function PositionBubble({
           names like DEHYDROXANTHAN GUM still fit inside the bubble's
           allocated zone instead of being cut off. */}
       <span
-        className="text-[9px] lg:text-[12px] font-medium text-ink leading-tight text-center truncate max-w-full"
+        className={`text-[9px] lg:text-[12px] font-medium leading-tight text-center truncate max-w-full ${nameClass}`}
         title={name}
       >
         {name}
       </span>
-      <span className="text-[8px] lg:text-[10px] text-[#9CA3AF] leading-none">pos. {position}</span>
+      <span className={`text-[8px] lg:text-[10px] leading-none ${posClass}`}>pos. {position}</span>
     </li>
   );
 }

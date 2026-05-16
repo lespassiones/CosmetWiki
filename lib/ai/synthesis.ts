@@ -4,6 +4,7 @@
  */
 import crypto from "node:crypto";
 import { AI_MODEL, callWithFallback, getCached, hasMistral, hasOpenAI, openai, setCached } from "./client";
+import { NO_LONG_DASHES_RULE, stripLongDashes } from "./sanitize";
 import type { ColorRating } from "@/lib/supabase";
 
 export type SynthesisInput = {
@@ -27,7 +28,7 @@ export type SynthesisInput = {
 
 // Bump this any time `buildPrompt()` changes meaningfully — old cached
 // outputs keyed on the previous version will no longer be served.
-const PROMPT_VERSION = 3;
+const PROMPT_VERSION = 4;
 
 function makeCacheKey(input: SynthesisInput): string {
   const list = input.enriched
@@ -65,52 +66,54 @@ function buildPrompt(input: SynthesisInput): { system: string; user: string } {
   const greenWithFunction = green
     .filter((r) => r.primary_function && r.name)
     .slice(0, 6)
-    .map((r) => `- ${r.name} — ${r.primary_function}`);
+    .map((r) => `- ${r.name} : ${r.primary_function}`);
 
   // Helper: full data per ingredient with position hint when available.
   const fmt = (r: SynthesisInput["enriched"][number]) =>
-    `- ${r.name ?? r.input_raw} — ${r.primary_function ?? "fonction inconnue"}${r.tags && r.tags.length ? ` [tags: ${r.tags.slice(0, 3).join(", ")}]` : ""}${r.threshold_label ? ` [position: ${r.threshold_label}]` : ""}`;
+    `- ${r.name ?? r.input_raw} : ${r.primary_function ?? "fonction inconnue"}${r.tags && r.tags.length ? ` [tags: ${r.tags.slice(0, 3).join(", ")}]` : ""}${r.threshold_label ? ` [position: ${r.threshold_label}]` : ""}`;
 
   const system =
-    "Tu écris la synthèse d'une analyse cosmétique INCI pour un consommateur français. Style : comme un pote bien informé qui prend 30 secondes pour t'expliquer ce qu'il y a dans le produit. Accessible à un lecteur de 15 ans — phrases courtes, vocabulaire simple, jamais enfantin. Tu peux mentionner brièvement ce qu'est un ingrédient (sa famille : 'alcool dénaturé', 'tensioactif', 'huile minérale', 'silicone', 'conservateur', 'actif hydratant'…) et à quoi il sert généralement en cosmétique — c'est de la connaissance produit, pas de l'invention. Tu peux ajouter UN détail intéressant ou utile par ingrédient flaggé pour que ça ne soit pas un listing sec. Tu n'évalues JAMAIS le produit dans son ensemble ('bon', 'mauvais', 'à éviter', 'à acheter'). Tu attires l'attention, tu laisses décider. Pas de marketing ('idéal', 'généreux', 'rassurant', 'agréable'…), pas de description sensorielle (texture, odeur, fini), pas d'emoji, pas de conseil médical. Tu utilises **gras** uniquement pour les noms INCI.";
+    "Tu écris la synthèse d'une analyse cosmétique INCI pour un consommateur français. Style : comme un pote bien informé qui prend 30 secondes pour t'expliquer ce qu'il y a dans le produit. Accessible à un lecteur de 15 ans : phrases courtes, vocabulaire simple, jamais enfantin. Tu peux mentionner brièvement ce qu'est un ingrédient (sa famille : 'alcool dénaturé', 'tensioactif', 'huile minérale', 'silicone', 'conservateur', 'actif hydratant'...) et à quoi il sert généralement en cosmétique. C'est de la connaissance produit, pas de l'invention. Tu peux ajouter UN détail intéressant ou utile par ingrédient flaggé pour que ça ne soit pas un listing sec. Tu n'évalues JAMAIS le produit dans son ensemble ('bon', 'mauvais', 'à éviter', 'à acheter'). Tu attires l'attention, tu laisses décider. Pas de marketing ('idéal', 'généreux', 'rassurant', 'agréable'...), pas de description sensorielle (texture, odeur, fini), pas d'emoji, pas de conseil médical. Tu utilises **gras** uniquement pour les noms INCI. "
+    + NO_LONG_DASHES_RULE;
 
-  const user = `Rédige la synthèse de l'analyse INCI ci-dessous. Le but : que le lecteur trouve ça intéressant à lire ET concret — pas un résumé sec des chiffres.
+  const user = `Rédige la synthèse de l'analyse INCI ci-dessous. Le but : que le lecteur trouve ça intéressant à lire ET concret, pas un résumé sec des chiffres.
 
-STRUCTURE — deux blocs séparés par une ligne vide.
+STRUCTURE : deux blocs séparés par une ligne vide.
 
-BLOC 1 — Paragraphe d'intro (2 à 3 phrases, prose, pas de puce)
-- Phrase 1 : caractérise la formule en t'appuyant sur les 3 premiers ingrédients listés ci-dessous. Donne au lecteur une idée de "à quoi il a affaire" sans juger. Ex : "Cette formule est dominée par l'eau et le glycérine — un duo classique pour rester légère et hydratante." OU "Le produit s'ouvre sur une base d'huile minérale et de silicone, profil typique d'un soin gainant." Pas de mention de note, pas de "bon signal", pas de "rassurant".
+BLOC 1 : paragraphe d'intro (2 à 3 phrases, prose, pas de puce)
+- Phrase 1 : caractérise la formule en t'appuyant sur les 3 premiers ingrédients listés ci-dessous. Donne au lecteur une idée de "à quoi il a affaire" sans juger. Ex : "Cette formule est dominée par l'eau et la glycérine, un duo classique pour rester légère et hydratante." OU "Le produit s'ouvre sur une base d'huile minérale et de silicone, profil typique d'un soin gainant." Pas de mention de note, pas de "bon signal", pas de "rassurant".
 - Phrase 2 : le constat chiffré, naturel. Ex : "Sur les ${total} ingrédients identifiés, ${input.counts.Vert ?? 0} sont sans risque connu et ${(input.counts.Jaune ?? 0) + (input.counts.Orange ?? 0) + (input.counts.Rouge ?? 0)} demandent un coup d'œil."
 - Phrase 3 (transition) : courte, vers les puces. Ex : "Voici ce qui mérite ton attention :" ou "Les points à connaître :".
 
-BLOC 2 — Puces (chaque ligne commence par "- "). Vise 4 à 6 puces qui apportent vraiment quelque chose.
+BLOC 2 : puces (chaque ligne commence par "- "). Vise 4 à 6 puces qui apportent vraiment quelque chose.
 
 Pour CHAQUE ingrédient ROUGE et ORANGE (limite combinée : 4 puces, garde les plus parlants si plus) :
 "- **NOM** (famille simple + rôle) : un petit fait sur ce qu'il est ou pourquoi il est utilisé, puis l'effet/le souci concret. Si une position [avant/après parfum/conservateur] est dispo, glisse-la EN FIN de phrase pour donner un indice de quantité, sans expliquer la règle."
 
 Exemple de bonne puce :
-"- **Alcohol Denat.** (alcool dénaturé, sert à fluidifier la texture et accélérer la pénétration) : courant dans les soins légers, mais peut tirailler les peaux sensibles à l'usage répété — et ici il apparaît avant le parfum, donc présent en bonne quantité."
+"- **Alcohol Denat.** (alcool dénaturé, sert à fluidifier la texture et accélérer la pénétration) : courant dans les soins légers, mais peut tirailler les peaux sensibles à l'usage répété. Ici il apparaît avant le parfum, donc présent en bonne quantité."
 
 JAUNES :
 - Si 1 à 3 jaunes notables, fais 1 puce par jaune (format identique mais plus court).
-- Si plus de 3 jaunes, regroupe-les en UNE puce : "- À surveiller selon les peaux sensibles : **NOM1**, **NOM2**, **NOM3**…"
+- Si plus de 3 jaunes, regroupe-les en UNE puce : "- À surveiller selon les peaux sensibles : **NOM1**, **NOM2**, **NOM3**..."
 
-BONUS — Ajoute si pertinent :
-- UNE puce "Bon à savoir" sur UN ingrédient VERT vraiment notable (pas l'eau, pas la glycérine — choisis un actif intéressant comme **Niacinamide**, **Acide Hyaluronique**, **Panthénol**, **Centella Asiatica**…). Ex : "- Bon à savoir : le **Niacinamide** présent ici est un actif populaire pour resserrer les pores et apaiser les rougeurs."
-- UNE puce d'absences si la liste 'Absences réelles' n'est pas vide : "- Sans **parabens**, sans **sulfates**, sans **silicones**…" — uniquement les absences fournies, ne pas inventer.
+BONUS, ajoute si pertinent :
+- UNE puce "Bon à savoir" sur UN ingrédient VERT vraiment notable (pas l'eau, pas la glycérine, choisis un actif intéressant comme **Niacinamide**, **Acide Hyaluronique**, **Panthénol**, **Centella Asiatica**...). Ex : "- Bon à savoir : le **Niacinamide** présent ici est un actif populaire pour resserrer les pores et apaiser les rougeurs."
+- UNE puce d'absences si la liste 'Absences réelles' n'est pas vide : "- Sans **parabens**, sans **sulfates**, sans **silicones**...". Uniquement les absences fournies, ne pas inventer.
 
-CLOSING — TERMINE par UNE puce qui invite à la réflexion. Ex : "- À toi de voir si ces ingrédients te conviennent — ça dépend aussi de ta peau et de la fréquence d'usage." OU "- Au final, tout dépend de comment tu utilises le produit et de la sensibilité de ta peau."
+CLOSING : TERMINE par UNE puce qui invite à la réflexion. Ex : "- À toi de voir si ces ingrédients te conviennent, ça dépend aussi de ta peau et de la fréquence d'usage." OU "- Au final, tout dépend de comment tu utilises le produit et de la sensibilité de ta peau."
 
 CONTRAINTES STRICTES
 - Total puces (bloc 2) : 4 à 7 maximum.
 - Chaque puce : 1 à 2 phrases courtes max. Pas de pavé.
 - Pas de jugement global du produit. Pas de "à éviter", "recommandé", "à acheter".
 - Pas de "vous devez", "il faut". Préfère "tu peux", "à toi de voir", "selon ta peau".
-- Pas de jargon médical (dermatite, eczéma, comédogène, sébo-régulateur…). Préfère "peut irriter", "peut boucher les pores", "régule l'excès de sébum".
+- Pas de jargon médical (dermatite, eczéma, comédogène, sébo-régulateur...). Préfère "peut irriter", "peut boucher les pores", "régule l'excès de sébum".
 - Pas d'emoji, pas d'astérisque autre que ceux du **gras INCI**.
+- AUCUN tiret cadratin (—) ni demi-cadratin (–) nulle part. Utilise une virgule, un deux-points ou une nouvelle phrase.
 - Si un ingrédient n'a aucune raison concrète d'être flaggé (fonction inconnue, aucun tag), passe-le.
 - Si rouge + orange + jaune sont tous vides : bloc 2 = puce "Bon à savoir" (si possible) + puce d'absences (si possible) + puce de closing.
-- VARIE l'attaque du bloc 1 d'une analyse à l'autre — ne réutilise pas une phrase type.
+- VARIE l'attaque du bloc 1 d'une analyse à l'autre. Ne réutilise pas une phrase type.
 
 DONNÉES
 ${input.productLabel ? `Produit : ${input.productLabel}` : "Produit : liste collée par l'utilisateur, pas de nom de produit fourni."}
@@ -129,7 +132,7 @@ ${orange.length ? orange.map(fmt).join("\n") : "(aucun)"}
 JAUNES (jusqu'à 8 cités) :
 ${yellow.length ? yellow.slice(0, 8).map(fmt).join("\n") + (yellow.length > 8 ? `\n- et ${yellow.length - 8} autres` : "") : "(aucun)"}
 
-VERTS notables (utilise UN seul pour la puce "Bon à savoir" si pertinent — ignore eau / glycérine / propanediol / sodium hydroxide / les pH ajusteurs) :
+VERTS notables (utilise UN seul pour la puce "Bon à savoir" si pertinent. Ignore eau / glycérine / propanediol / sodium hydroxide / les pH ajusteurs) :
 ${greenWithFunction.length ? greenWithFunction.join("\n") : "(aucun avec fonction connue)"}
 
 Absences réelles à mentionner si tu fais la puce d'absences : ${positives.join(", ") || "(aucune)"}
@@ -191,21 +194,27 @@ export async function generateSynthesis(input: SynthesisInput): Promise<string |
             { role: "user", content: user },
           ],
         });
-        const value = resp.choices?.[0]?.message?.content?.trim() ?? null;
+        const raw = resp.choices?.[0]?.message?.content?.trim() ?? null;
+        // Post-process safety net: strip em/en-dashes the model may sneak in
+        // despite the instruction.
+        const value = raw ? stripLongDashes(raw) : null;
         return {
           value,
           tokensIn: resp.usage?.prompt_tokens,
           tokensOut: resp.usage?.completion_tokens,
         };
       },
-      fallback: async () => ({
-        value: await callMistralFallback(input),
-        provider: "mistral",
-      }),
+      fallback: async () => {
+        const raw = await callMistralFallback(input);
+        return {
+          value: raw ? stripLongDashes(raw) : null,
+          provider: "mistral" as const,
+        };
+      },
     });
 
     if (text) {
-      // Cache asynchronously — don't block the response on it
+      // Cache asynchronously, don't block the response on it.
       void setCached(cacheKey, { text });
     }
     return text;

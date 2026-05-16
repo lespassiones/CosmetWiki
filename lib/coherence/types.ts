@@ -126,7 +126,13 @@ export type CoherenceResult = {
     /** Total number of ingredients in the formula. */
     totalPositions: number;
     /** Key ingredients (the foundActives flattened, deduped, sorted by position). */
-    keyIngredients: { name: string; position: number; inTrace: boolean }[];
+    keyIngredients: {
+      name: string;
+      position: number;
+      inTrace: boolean;
+      /** Vert / Jaune / Orange / Rouge of the parent analysis, or null if unknown. */
+      colorRating: "Vert" | "Jaune" | "Orange" | "Rouge" | null;
+    }[];
   };
 };
 

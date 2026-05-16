@@ -866,9 +866,20 @@ function SynthesisCard({
               <ul key={i} className="space-y-1.5 pl-1">
                 {block.items.map((item, j) => {
                   const lastItem = j === block.items.length - 1;
+                  // Use the rating of the first bold INCI name in the bullet
+                  // to colour the dot, so a jaune ingredient gets an amber
+                  // dot instead of the previously hard-coded rose. Falls back
+                  // to muted when no rating can be resolved.
+                  const firstBold = /\*\*([^*]+)\*\*/.exec(item);
+                  const bulletRating = firstBold
+                    ? colorByName.get(normaliseSynthesisToken(firstBold[1]))
+                    : undefined;
                   return (
                     <li key={j} className="flex gap-2">
-                      <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-400" />
+                      <span
+                        aria-hidden
+                        className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${bulletBgForRating(bulletRating)}`}
+                      />
                       <span className="flex-1">
                         {renderBoldMarkdown(item, colorByName)}
                         {showCursor && lastItem ? <StreamCursor /> : null}
@@ -985,6 +996,21 @@ function colorForRating(r: ColorRating): string {
       return "text-orange-600";
     case "Rouge":
       return "text-rose-600";
+  }
+}
+
+function bulletBgForRating(r: ColorRating | undefined): string {
+  switch (r) {
+    case "Vert":
+      return "bg-emerald-500";
+    case "Jaune":
+      return "bg-amber-500";
+    case "Orange":
+      return "bg-orange-500";
+    case "Rouge":
+      return "bg-rose-500";
+    default:
+      return "bg-ink-subtle/60";
   }
 }
 

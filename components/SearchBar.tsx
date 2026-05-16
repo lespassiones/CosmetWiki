@@ -38,6 +38,15 @@ export function SearchBar({
     active: false,
     budget: 0,
   });
+  /**
+   * Sticky "list mode" flag set whenever the user pastes content that's clearly
+   * more than a single ingredient (≥ 3 words or > 30 chars). It bypasses the
+   * regex heuristic so weird formats (no separators, spaces-only, unusual
+   * punctuation) still route to the AI parser instead of the autocomplete.
+   * Resets when the user clears the field or shrinks it back to a short
+   * single-word search.
+   */
+  const [pastedAsList, setPastedAsList] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
   const listboxId = useId();
@@ -57,6 +66,18 @@ export function SearchBar({
     el.style.overflowY = el.scrollHeight > TEXTAREA_MAX_PX ? "auto" : "hidden";
   }, [query]);
 
+  // Drop the sticky paste-list flag when the user clears the field, or when
+  // they shrink it back to a short single-word search (so autocomplete kicks
+  // back in for normal one-ingredient queries).
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setPastedAsList(false);
+    } else if (pastedAsList && trimmed.length < 15 && !/\s/.test(trimmed)) {
+      setPastedAsList(false);
+    }
+  }, [query, pastedAsList]);
+
   useEffect(() => {
     const trimmed = query.trim();
     if (!trimmed) {
@@ -65,7 +86,7 @@ export function SearchBar({
       setLoading(false);
       return;
     }
-    if (looksLikeIngredientList(trimmed)) {
+    if (pastedAsList || looksLikeIngredientList(trimmed)) {
       setResults([]);
       setIsOpen(false);
       setLoading(false);
@@ -143,12 +164,25 @@ export function SearchBar({
     }
   }
 
+  function onPaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
+    // Force list mode for any paste that's clearly more than a single
+    // ingredient token. The AI parser in /api/analyser then handles the format
+    // (commas, periods, no separator, OCR noise, etc.) without us having to
+    // guess up-front. We don't preventDefault — the textarea still receives
+    // the pasted text normally.
+    const pasted = e.clipboardData.getData("text") ?? "";
+    const wordCount = pasted.trim().split(/\s+/).filter(Boolean).length;
+    if (pasted.length > 30 || wordCount >= 3) {
+      setPastedAsList(true);
+    }
+  }
+
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     // Shift+Enter / Alt+Enter inserts a newline (default behaviour)
     if (e.key === "Enter" && !e.shiftKey && !e.altKey) {
       e.preventDefault();
       const trimmed = query.trim();
-      if (looksLikeIngredientList(trimmed)) {
+      if (pastedAsList || looksLikeIngredientList(trimmed)) {
         submitList(trimmed);
         return;
       }
@@ -174,7 +208,7 @@ export function SearchBar({
   }
 
   const hasResults = results.length > 0;
-  const isList = looksLikeIngredientList(query);
+  const isList = pastedAsList || looksLikeIngredientList(query);
   const showDropdown =
     !isList && isOpen && (hasResults || (query.trim().length > 0 && !loading));
 
@@ -232,6 +266,7 @@ export function SearchBar({
             setTimeout(() => setIsOpen(false), 150);
           }}
           onKeyDown={onKeyDown}
+          onPaste={onPaste}
           maxLength={6000}
           className={`flex-1 resize-none bg-transparent ${inputCls} font-normal leading-6 text-ink placeholder:text-ink-subtle outline-none scrollbar-soft sm:leading-7`}
         />
@@ -347,6 +382,8 @@ export function SearchBar({
  *   - line breaks
  *   - long single-comma string
  *   - several semicolons / bullets
+ *   - several "period + capital" patterns (some labels use periods as separators,
+ *     ex: "AQUA. GLYCERIN. PROPANEDIOL.")
  */
 export function looksLikeIngredientList(text: string): boolean {
   if (!text) return false;
@@ -358,6 +395,10 @@ export function looksLikeIngredientList(text: string): boolean {
   if (commaCount === 1 && trimmed.length > 30) return true;
   const sepCount = (trimmed.match(/[;•·]| - /g) || []).length;
   if (sepCount >= 2) return true;
+  // Period-separator format: count "<letter or ')'>. <capital>" occurrences.
+  // Two or more = the user pasted a list using periods (mirrors the parser).
+  const periodSepCount = (trimmed.match(/[A-Za-z)]\.\s+[A-Z]/g) || []).length;
+  if (periodSepCount >= 2) return true;
   return false;
 }
 

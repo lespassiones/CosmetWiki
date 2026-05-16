@@ -21,6 +21,7 @@ import {
   hasOpenAI,
   openai,
 } from "./client";
+import { NO_LONG_DASHES_RULE, stripLongDashes } from "./sanitize";
 import { categoriesForPrompt } from "@/lib/coherence/claims";
 import type { CoherencePromise } from "@/lib/coherence/types";
 import type { LlmPromiseProposal, OpenLlmMatch } from "@/lib/coherence/engine";
@@ -513,7 +514,9 @@ Style : direct, factuel, accessible à un consommateur français lambda. Pas de 
 
 Structure attendue : "[ce que la formule tient] mais [ce qu'elle ne tient pas]. Effet attendu : [ce que l'utilisateur peut réellement ressentir]."
 
-NE CITE QUE LES VERDICTS QUE JE TE DONNE — n'invente jamais d'ingrédient ni de verdict.`;
+NE CITE QUE LES VERDICTS QUE JE TE DONNE. N'invente jamais d'ingrédient ni de verdict.
+
+${NO_LONG_DASHES_RULE}`;
 
   const user = `${productLabel ? `Produit : ${productLabel}\n\n` : ""}Verdicts (déjà calculés mécaniquement) :
 - Promesses TENUES : ${tenue.length ? tenue.join(", ") : "(aucune)"}
@@ -594,17 +597,21 @@ export async function generateConclusion(
             { role: "user", content: user },
           ],
         });
-        const value = resp.choices?.[0]?.message?.content?.trim() ?? null;
+        const raw = resp.choices?.[0]?.message?.content?.trim() ?? null;
+        const value = raw ? stripLongDashes(raw) : null;
         return {
           value,
           tokensIn: resp.usage?.prompt_tokens,
           tokensOut: resp.usage?.completion_tokens,
         };
       },
-      fallback: async () => ({
-        value: await mistralConclusion(promises, productLabel),
-        provider: "mistral",
-      }),
+      fallback: async () => {
+        const raw = await mistralConclusion(promises, productLabel);
+        return {
+          value: raw ? stripLongDashes(raw) : null,
+          provider: "mistral" as const,
+        };
+      },
     });
     return text ?? fallbackConclusion(promises);
   } catch {

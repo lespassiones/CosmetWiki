@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { supabaseServer } from "@/lib/supabase";
 import { openai, hasOpenAI, logAI } from "@/lib/ai/client";
+import { NO_LONG_DASHES_RULE } from "@/lib/ai/sanitize";
 import { readSkinProfile, SKIN_CONCERN_LABEL, SKIN_TYPE_LABEL } from "@/lib/skin/profile";
 import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
@@ -125,16 +126,18 @@ export async function POST(req: NextRequest) {
   const routineSummary = routineFacts.length === 0
     ? "Routine : (aucune)"
     : "Routine :\n" + routineFacts
-        .map((r) => `- ${r.name} (${r.score?.toFixed(1) ?? "?"}/20, ${r.frequency}, tags: ${r.tags.join(", ") || "—"})`)
+        .map((r) => `- ${r.name} (${r.score?.toFixed(1) ?? "?"}/20, ${r.frequency}, tags: ${r.tags.join(", ") || "(aucun)"})`)
         .join("\n");
 
   const system = `Tu es un assistant cosmétique factuel pour Cosme Check. Tu réponds à un consommateur français à partir de FAITS et UNIQUEMENT à partir de faits. RÈGLES STRICTES :
 - AUCUN conseil médical, AUCUN diagnostic, AUCUNE mention de marque.
-- Si la question relève du soin médical (acné sévère, rosacée diagnostiquée, eczéma…), oriente vers un dermatologue.
+- Si la question relève du soin médical (acné sévère, rosacée diagnostiquée, eczéma...), oriente vers un dermatologue.
 - Tu peux mentionner des ingrédients (par leur nom INCI) connus pour une catégorie (ex. niacinamide, acide salicylique, panthénol) mais sans recommander un produit précis.
 - Tu cites les FAITS PERSONNELS de l'utilisateur (type de peau, routine actuelle) si pertinents, en restant factuel.
 - Style : phrases courtes, ton calme, pas d'emoji, pas de marketing.
 - Si la question n'a rien à voir avec la cosmétique, redirige poliment.
+
+${NO_LONG_DASHES_RULE}
 
 CONTEXTE UTILISATEUR :
 ${profileSummary}
@@ -161,7 +164,12 @@ ${routineSummary}`;
         for await (const part of completion) {
           const delta = part.choices?.[0]?.delta?.content;
           if (delta) {
-            controller.enqueue(enc.encode(delta));
+            // Safety net for the streaming path: strip any em/en-dash that
+            // sneaks through despite the instruction. Done per-chunk; this
+            // covers the common case where GPT emits the dash as a single
+            // token. The rare cross-chunk split is acceptable collateral.
+            const clean = delta.replace(/\s*[—–]\s*/g, ", ");
+            controller.enqueue(enc.encode(clean));
           }
           const usage = (part as unknown as { usage?: { prompt_tokens?: number; completion_tokens?: number } }).usage;
           if (usage) {

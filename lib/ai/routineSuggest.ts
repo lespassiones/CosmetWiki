@@ -13,6 +13,7 @@
  */
 import crypto from "node:crypto";
 import { AI_MODEL, callWithFallback, getCached, hasOpenAI, openai, setCached } from "./client";
+import { NO_LONG_DASHES_RULE, stripLongDashes } from "./sanitize";
 import type { RoutineMetrics, RoutineProduct } from "@/lib/routine/engine";
 
 export type RoutineSuggestion = {
@@ -95,6 +96,7 @@ export async function generateRoutineSuggestions(
     "- N'invente AUCUN ingrédient. Si tu cites un ingrédient, il doit venir des faits fournis. " +
     "- Pas d'emoji. Pas de marketing. Pas de conseil médical. " +
     "- Encadre les noms d'ingrédients ou de catégories cités avec ** (markdown gras). " +
+    NO_LONG_DASHES_RULE + " " +
     "Réponds en JSON STRICT : { \"suggestions\": [\"<phrase 1>\", \"<phrase 2>\", \"<phrase 3>\"] }";
 
   const user = `FAITS :
@@ -122,7 +124,7 @@ Donne 2-3 suggestions concrètes.`;
         const out: RoutineSuggestion[] = Array.isArray(parsed.suggestions)
           ? (parsed.suggestions as unknown[])
               .filter((s): s is string => typeof s === "string")
-              .map((s) => ({ text: s.trim() }))
+              .map((s) => ({ text: stripLongDashes(s.trim()) }))
               .filter((s) => s.text.length > 0)
               .slice(0, 3)
           : [];

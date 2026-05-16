@@ -435,13 +435,24 @@ export function computePositionSnapshot(
 
   // Deduplicate key ingredients across promises (same active can support
   // multiple claims). Sort by position ascending for the linear chart.
+  // We hydrate each entry with its colorRating from the parent analysis so
+  // the chart can tint pills by Vert/Jaune/Orange/Rouge.
+  const colorByPos = new Map<number, "Vert" | "Jaune" | "Orange" | "Rouge" | null>();
+  for (const it of parent.items) {
+    colorByPos.set(it.position, it.colorRating);
+  }
   const seen = new Set<number>();
   const keyIngredients: CoherenceResult["positionSnapshot"]["keyIngredients"] = [];
   for (const p of promises) {
     for (const f of p.foundActives) {
       if (seen.has(f.position)) continue;
       seen.add(f.position);
-      keyIngredients.push({ name: f.name, position: f.position, inTrace: f.inTrace });
+      keyIngredients.push({
+        name: f.name,
+        position: f.position,
+        inTrace: f.inTrace,
+        colorRating: colorByPos.get(f.position) ?? null,
+      });
     }
     for (const c of p.cosmeticActives) {
       if (seen.has(c.position)) continue;
@@ -449,7 +460,12 @@ export function computePositionSnapshot(
       // Cosmetic actives flagged as in-trace if past threshold (deterministic).
       const item = parent.items.find((it) => it.position === c.position);
       const inTrace = item ? isInTrace(item) : false;
-      keyIngredients.push({ name: c.name, position: c.position, inTrace });
+      keyIngredients.push({
+        name: c.name,
+        position: c.position,
+        inTrace,
+        colorRating: colorByPos.get(c.position) ?? null,
+      });
     }
   }
   keyIngredients.sort((a, b) => a.position - b.position);

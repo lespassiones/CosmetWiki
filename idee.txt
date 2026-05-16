@@ -6,6 +6,90 @@ Dès que je suis en train de vraiment développer mon application CosmicX, j'ava
 
 
 
+Le souci avec "identifier depuis l'INCI seule"
+Une liste INCI ne suffit généralement pas à identifier un produit. Plusieurs produits
+ (parfois sous des marques différentes) partagent exactement la même formule. Et l'IA ne 
+ connaît pas les INCI par cœur — il faudrait qu'elle fasse une recherche web sur quelque 
+ chose comme "produit cosmétique contenant aqua, glycerin, niacinamide…" → résultat 
+ souvent vague, voire faux.
+
+Ce qui marche mieux : on a déjà 80 % de l'info quand l'utilisateur prend une photo 
+(le nom du produit est visible juste à côté de la liste). Notre OCR actuel 
+(lib/ai/ocr.ts) extrait uniquement l'INCI — on peut lui demander d'extraire AUSSI 
+le nom + la marque dans le même appel, coût zéro.
+
+Architecture que je proposerais
+Phase 1 — OCR enrichi (gros gain, gratuit)
+
+Étendre le prompt OCR pour retourner { inci, productName, brand, productType } 
+au lieu de juste inci.
+~80 % des analyses photo auront un nom propre.
+L'historique affiche "Cerave Foaming Cleanser" au lieu de "Analyse du 15 mai".
+Phase 2 — Identification manuelle pour les cas INCI collée
+
+Champ optionnel "C'est quel produit ?" à côté de la zone de paste.
+Pas d'IA, l'utilisateur tape ou rien. C'est simple, c'est fiable.
+Phase 3 — Identification web (en fallback uniquement, sur demande)
+
+Bouton "Identifier ce produit" sur les analyses sans nom.
+Recherche web (Brave Search API ou Serper, ~0,001 $/recherche) + GPT pour extraire le 
+candidat le plus probable.
+Marquer la confiance ("identifié automatiquement, confirmer ?") + permettre à l'user 
+de corriger.
+Hit rate réaliste : 40-60 %.
+Phase 4 — Récupération de la promesse
+
+Seulement si on a un nom propre (Phase 1 ou 2 ou 3).
+Recherche web ciblée sur la fiche officielle (site marque, Sephora, etc.) → GPT résume 
+la promesse marketing.
+Stocker dans une colonne product_description sur analyses.
+Phase 5 — Bouton "Analyser la promesse"
+
+Apparaît sur la page d'analyse + dans la card historique uniquement si on a product_label
+ + product_description.
+Ne PAS auto-générer la cohérence à chaque analyse : c'est cher et l'utilisateur 
+ne veut pas forcément. Le bouton donne le contrôle.
+Tu as déjà toute l'infra de cohérence (app/promesses/nouvelle/page.tsx) — 
+on pré-remplit la description et le wizard saute en étape 2.
+Tradeoffs à connaître
+Phase	Coût/analyse	Valeur	Risque
+1 OCR enrichi	0 $ (même appel)	Haute	Faible
+2 Saisie manuelle	0 $	Haute	—
+3 Recherche web	~0,01 $	Moyenne	Mauvaise identification
+4 Promesse auto	~0,01 $	Haute	Hallucination
+Risques principaux :
+
+Mauvaise identification = toute l'expérience derrière (promesse, comparaison) 
+devient fausse. Toujours afficher la source et permettre à l'utilisateur de dire 
+"Ce n'est pas ce produit".
+Hallucination des descriptions marketing : si la recherche n'aboutit pas, 
+GPT peut inventer une promesse plausible. Mitigation : exiger une URL source 
+dans la réponse, refuser sinon.
+Légal : citer marques + descriptions est OK tant qu'on ne prétend pas affilié. 
+À surveiller mais pas bloquant.
+Ma recommandation
+Commencer par Phase 1 + 2 ensemble. C'est ~1 jour de boulot, 
+zéro coût d'API additionnel, et ça résout 90 % du problème "historique illisible". Voir ensuite si on a besoin de la Phase 3 (recherche web) — souvent on n'en a pas besoin.
+
+Pour la promesse : Phase 4 + 5 ensemble, en évitant l'auto-génération. 
+Le bouton "Analyser la promesse" qui apparaît seulement quand on a un 
+produit identifié est un design plus simple et plus contrôlé.
+
+Une alternative que tu n'as pas mentionnée : ne pas chercher de description du 
+tout, et à la place laisser l'utilisateur taper sa promesse perçue 
+("Ce produit prétend hydrater en profondeur") — c'est ce que ton wizard 
+CoherenceWizard fait déjà. La valeur de l'auto-récupération est de gagner 
+du temps à l'utilisateur, mais pas tellement de fiabilité. Ça vaut peut-être de 
+garder l'humain dans la boucle.
+
+Dis-moi par où tu veux commencer :
+
+Phase 1 + 2 (OCR enrichi + saisie manuelle) — gros gain, 1 journée.
+Tout d'un coup avec recherche web (1-2 jours, coût IA additionnel).
+Autre chose / je me suis trompé quelque part.
+
+
+
 
 
 

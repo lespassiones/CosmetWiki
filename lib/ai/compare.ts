@@ -15,9 +15,10 @@ import {
   openai,
   setCached,
 } from "./client";
+import { NO_LONG_DASHES_RULE, stripLongDashes } from "./sanitize";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
-const PROMPT_VERSION = 2;
+const PROMPT_VERSION = 3;
 
 export type CompareSideInput = {
   name: string;
@@ -58,17 +59,6 @@ function flagged(side: CompareSideInput, color: "Rouge" | "Orange" | "Jaune", ma
     .map((i) => `${i.name ?? i.input}${i.primaryFunction ? ` (${i.primaryFunction})` : ""}`);
 }
 
-// Strip em-dashes (—) and en-dashes (–) from generated text. GPT loves them
-// in French prose, but they read as a stylistic tic — we want plain commas
-// and colons instead. We also collapse the doubled spaces this can leave.
-function stripLongDashes(s: string): string {
-  return s
-    .replace(/\s*[—–]\s*/g, ", ")
-    .replace(/,\s*,/g, ",")
-    .replace(/\s{2,}/g, " ")
-    .replace(/\s+([.,;:!?])/g, "$1")
-    .trim();
-}
 
 function buildPrompt(a: CompareSideInput, b: CompareSideInput): { system: string; user: string } {
   const sideBlock = (label: string, side: CompareSideInput) => {
@@ -91,9 +81,7 @@ function buildPrompt(a: CompareSideInput, b: CompareSideInput): { system: string
     "Tu n'écris JAMAIS \"X est mieux que Y\", \"X est meilleur\", \"recommandé\", \"à éviter\", " +
     "\"premier choix\", \"vainqueur\" : tu décris ce que chaque produit est et à qui il s'adresse, " +
     "le lecteur déduit lui-même celui qui lui convient. " +
-    "INTERDIT : aucun tiret cadratin (—) ni demi-cadratin (–) nulle part. Utilise une virgule, " +
-    "un deux-points, ou découpe en deux phrases. Tirets normaux \"-\" autorisés uniquement à " +
-    "l'intérieur d'un mot composé (ex : sous-jacent). " +
+    NO_LONG_DASHES_RULE + " " +
     "Pas de marketing (idéal, généreux, agréable...), pas de description sensorielle, pas d'emoji, " +
     "pas de conseil médical. Tu peux mentionner une famille d'ingrédient simple (tensioactif, " +
     "alcool, conservateur, silicone, actif hydratant) si ça aide à comprendre. Tu retournes UNIQUEMENT " +

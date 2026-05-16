@@ -72,6 +72,12 @@ export function parseInciList(text: string): ParsedToken[] {
   work = work.replace(/\([^)]{20,}\)/g, " ");
   // Remove asterisks (mention notes)
   work = work.replace(/\*+/g, " ");
+  // Some lists use periods as separators instead of commas (ex: "AQUA. GLYCERIN.
+  // PROPANEDIOL."). We detect this pattern — period preceded by a letter or
+  // closing paren and followed by whitespace + an uppercase letter — and turn
+  // it into a comma. Intra-name periods like "F.I.L. 12345" or "2.5%" are NOT
+  // matched (no whitespace, or not followed by a letter).
+  work = work.replace(/(?<=[A-Za-z)])\.\s+(?=[A-Z])/g, ", ");
   // Final period at end-of-list
   work = work.replace(/\.+$/g, " ");
   // Split synonyms separated by " / " (spaces on both sides) into separate tokens.

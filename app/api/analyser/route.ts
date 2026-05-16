@@ -63,9 +63,12 @@ const TAG_LABELS: Record<string, string> = {
   "colorant-synthese": "Colorants de synthèse",
   "ammonium-quaternaire": "Ammoniums quaternaires",
   "allergene-parfumant": "Allergènes parfum",
+  "allergene-reglemente": "Allergènes réglementés",
   conservateur: "Conservateurs",
   "parfum-synthese": "Parfums de synthèse",
   "huile-essentielle": "Huiles essentielles",
+  "filtre-uv": "Filtres UV",
+  cmr: "CMR",
   ogm: "OGM",
 };
 
@@ -76,10 +79,13 @@ const ABSENCE_REPORTED = new Set([
   "huile-minerale",
   "silicone",
   "allergene-parfumant",
+  "allergene-reglemente",
   "ethoxyle",
   "colorant-synthese",
   "ammonium-quaternaire",
   "parfum-synthese",
+  "filtre-uv",
+  "cmr",
 ]);
 
 // Names that count as "water" when found in position 0 (first ingredient).
