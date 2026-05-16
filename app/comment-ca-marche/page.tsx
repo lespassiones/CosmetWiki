@@ -26,8 +26,6 @@ export const metadata: Metadata = {
   },
 };
 
-const SOURCE_URL = "https://incibeauty.com/blog/396-comment-les-produits-sont-ils-notes";
-
 const RATINGS = [
   {
     label: "Vert",
@@ -151,31 +149,15 @@ export default function HowItWorksPage() {
             </li>
           </ul>
 
-          <h2 className="pt-6 text-xl font-semibold text-ink">Aller plus loin</h2>
+          <h2 className="pt-6 text-xl font-semibold text-ink">Notre méthodologie</h2>
           <p>
-            Les classifications utilisées sur Cosme Check proviennent
-            d&apos;
-            <a
-              href="https://incibeauty.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-rose-700 hover:underline"
-            >
-              incibeauty.com
-            </a>
-            . Pour la méthodologie complète et les nuances entre les sous-niveaux
-            (orange éclatée, jaune réglementé, etc.), consulte l&apos;article
-            source&nbsp;:
+            La classification des ingrédients sur Cosme Check est établie à
+            partir de la réglementation cosmétique européenne (Règlement (CE)
+            n°&nbsp;1223/2009, Annexes II et III), des études scientifiques
+            publiques et des données toxicologiques de référence. Le système
+            évolue à mesure que de nouvelles études paraissent et que la
+            réglementation change.
           </p>
-          <a
-            href={SOURCE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700"
-          >
-            Lire l&apos;article complet sur INCI Beauty
-            <span aria-hidden>→</span>
-          </a>
         </section>
       </main>
 

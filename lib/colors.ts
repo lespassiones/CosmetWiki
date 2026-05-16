@@ -8,7 +8,7 @@ export const RATING_LABEL: Record<ColorRating, string> = {
 };
 
 export const RATING_DESCRIPTION: Record<ColorRating, string> = {
-  Vert: "Aucune restriction connue. Considéré comme sûr selon la classification INCI Beauty.",
+  Vert: "Aucune restriction connue. Considéré comme sûr aux usages cosmétiques courants.",
   Jaune: "Tolérance variable. À surveiller selon la concentration ou le profil cutané.",
   Orange: "Pénalité significative. Préférer les alternatives quand c'est possible.",
   Rouge: "Substance fortement déconseillée ou réglementée.",

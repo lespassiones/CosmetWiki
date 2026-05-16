@@ -131,7 +131,6 @@ function buildIngredientJsonLd(ing: Ingredient): object {
   const name = prettyName(ing.name);
   const url = `${SITE_URL}/i/${ing.slug}`;
   const sameAs: string[] = [];
-  if (ing.source_url) sameAs.push(ing.source_url);
 
   const chemical: Record<string, unknown> = {
     "@type": "ChemicalSubstance",
@@ -335,14 +334,9 @@ export default async function IngredientPage({ params, searchParams }: Props) {
 
           {hasFunctions ? (
             <Reveal delayMs={500}>
-              <StatCard
-                label="Fonctions principales"
-                cta={`Voir tout (${ing.functions!.length})`}
-                href={ing.source_url}
-                external
-              >
+              <StatCard label="Fonctions principales">
                 <ul className="space-y-0.5">
-                  {ing.functions!.slice(0, 2).map((f, i) => (
+                  {ing.functions!.slice(0, 3).map((f, i) => (
                     <li key={i} className="text-base font-medium text-ink">
                       {f.name}
                     </li>
@@ -354,12 +348,7 @@ export default async function IngredientPage({ params, searchParams }: Props) {
 
           {hasRegulated ? (
             <Reveal delayMs={650}>
-              <StatCard
-                label="Statut réglementaire"
-                cta="Plus de détails"
-                href={ing.source_url}
-                external
-              >
+              <StatCard label="Statut réglementaire">
                 <p className="text-sm leading-relaxed text-ink">
                   Réglementé dans&nbsp;: {ing.regulated_zones!.join(", ")}.
                 </p>
@@ -367,12 +356,7 @@ export default async function IngredientPage({ params, searchParams }: Props) {
             </Reveal>
           ) : (
             <Reveal delayMs={650}>
-              <StatCard
-                label="Statut réglementaire"
-                cta="Vérifier sur incibeauty"
-                href={ing.source_url}
-                external
-              >
+              <StatCard label="Statut réglementaire">
                 <p className="text-sm leading-relaxed text-ink">
                   Aucune restriction connue dans nos données.
                 </p>
@@ -390,14 +374,6 @@ export default async function IngredientPage({ params, searchParams }: Props) {
                 <p className="mt-3 text-[15px] leading-relaxed text-ink">
                   {ing.description}
                 </p>
-                <a
-                  href={ing.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-violet-700 hover:text-violet-900"
-                >
-                  Voir la fiche complète <span aria-hidden>→</span>
-                </a>
               </section>
             ) : (
               <section>
@@ -511,16 +487,6 @@ export default async function IngredientPage({ params, searchParams }: Props) {
                   ? `Présent dans ${products.length} produit${products.length > 1 ? "s" : ""}`
                   : "Produits"}
               </h2>
-              {products.length > 0 ? (
-                <a
-                  href={ing.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-medium text-violet-700 hover:text-violet-900"
-                >
-                  Voir tout
-                </a>
-              ) : null}
             </div>
 
             {products.length === 0 ? (
@@ -544,17 +510,10 @@ export default async function IngredientPage({ params, searchParams }: Props) {
                 </ul>
 
                 {moreProductsCount > 0 ? (
-                  <a
-                    href={ing.source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 flex items-center justify-center gap-1.5 rounded-2xl bg-white/50 px-4 py-2.5 text-sm font-medium text-violet-700 ring-1 ring-white/60 backdrop-blur-md transition-colors hover:bg-white/70"
-                  >
-                    Voir {moreProductsCount} autre
-                    {moreProductsCount > 1 ? "s" : ""} produit
-                    {moreProductsCount > 1 ? "s" : ""} sur incibeauty
-                    <span aria-hidden>→</span>
-                  </a>
+                  <p className="mt-3 text-center text-[12px] text-ink-subtle">
+                    +{moreProductsCount} autre{moreProductsCount > 1 ? "s" : ""} produit
+                    {moreProductsCount > 1 ? "s" : ""} dans notre base
+                  </p>
                 ) : null}
               </>
             )}
@@ -570,7 +529,7 @@ export default async function IngredientPage({ params, searchParams }: Props) {
 
 const RATING_DESCRIPTION: Record<ColorRating, (n: string) => string> = {
   Vert: (n) =>
-    `${n} ne présente pas de pénalité connue dans la classification INCI Beauty. Considéré comme sûr aux usages cosmétiques courants.`,
+    `${n} ne présente pas de pénalité connue. Considéré comme sûr aux usages cosmétiques courants.`,
   Jaune: (n) =>
     `${n} présente une tolérance variable selon la concentration ou le profil cutané. Souvent réglementé en Annexe III pour limiter sa concentration. À surveiller en cas de peau sensible.`,
   Orange: (n) =>
@@ -587,13 +546,14 @@ function StatCard({
   children,
 }: {
   label: string;
-  cta: string;
-  href: string;
+  cta?: string;
+  href?: string;
   external?: boolean;
   children: React.ReactNode;
 }) {
   const linkCls =
     "mt-4 inline-flex items-center gap-1 text-[13px] font-medium text-violet-700 hover:text-violet-900";
+  const showLink = Boolean(cta && href);
   return (
     <article className="flex flex-col rounded-2xl bg-white/70 p-5 shadow-[0_2px_24px_-6px_rgba(15,23,42,0.06)] ring-1 ring-white/70 backdrop-blur-xl">
       <p className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
@@ -601,15 +561,15 @@ function StatCard({
         {label}
       </p>
       <div className="mt-3 flex-1">{children}</div>
-      {external ? (
+      {showLink && external ? (
         <a href={href} target="_blank" rel="noopener noreferrer" className={linkCls}>
           {cta} <span aria-hidden>→</span>
         </a>
-      ) : (
-        <Link href={href} className={linkCls}>
+      ) : showLink ? (
+        <Link href={href!} className={linkCls}>
           {cta} <span aria-hidden>→</span>
         </Link>
-      )}
+      ) : null}
     </article>
   );
 }

@@ -9,8 +9,7 @@ import { matchesQuery } from "./relevance";
 const SEARCH_URL = "https://html.duckduckgo.com/html/?q=";
 
 // Domains that historically respond to a browser-style fetch and tend to
-// expose a full INCI list. Skinsort, INCI Beauty etc. block bots so we
-// don't even try.
+// expose a full INCI list. Bot-blocked domains are skipped.
 const FETCHABLE_DOMAINS = [
   "incidecoder.com",
   "cosdna.com",

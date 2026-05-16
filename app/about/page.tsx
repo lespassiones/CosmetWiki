@@ -68,19 +68,13 @@ export default function AboutPage() {
             résumé de la classification, de la prévalence dans les produits, et
             des produits qui en contiennent.
           </p>
-          <h2 className="pt-4 text-lg font-semibold text-ink">Source des données</h2>
+          <h2 className="pt-4 text-lg font-semibold text-ink">Notre approche</h2>
           <p>
-            Les données proviennent d&apos;
-            <a
-              href="https://incibeauty.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-rose-700 hover:underline"
-            >
-              incibeauty.com
-            </a>
-            , une base publique de référence en France. Cosme Check les rend
-            simplement plus rapides à parcourir.
+            Cosme Check s&apos;appuie sur sa propre base d&apos;ingrédients,
+            construite à partir de la réglementation cosmétique européenne et de
+            sources scientifiques publiques. Notre objectif&nbsp;: rendre cette
+            information plus rapide à parcourir et plus claire à comprendre,
+            sans jargon.
           </p>
           <h2 className="pt-4 text-lg font-semibold text-ink">Limites</h2>
           <p>
