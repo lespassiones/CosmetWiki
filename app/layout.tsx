@@ -73,6 +73,9 @@ export const metadata: Metadata = {
   },
   formatDetection: { telephone: false, email: false, address: false },
   manifest: "/manifest.webmanifest",
+  verification: {
+    google: "10RWq8WwaV_uRyXbnsrotJlbtInqhUfnha8-FkqKZc4",
+  },
   appleWebApp: {
     capable: true,
     title: SITE_NAME,

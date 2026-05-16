@@ -69,6 +69,24 @@ export function LandingHero() {
           <Headline mobile />
         </div>
       </div>
+
+      {/* Mini footer légal — visible depuis la home (requis par Google OAuth). */}
+      <nav
+        aria-label="Liens légaux"
+        className="absolute inset-x-0 bottom-0 z-10 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-5 pb-3 text-[11px] text-ink-subtle"
+      >
+        <Link href="/confidentialite" className="hover:text-ink transition-colors">
+          Confidentialité
+        </Link>
+        <span aria-hidden>·</span>
+        <Link href="/cgu" className="hover:text-ink transition-colors">
+          CGU
+        </Link>
+        <span aria-hidden>·</span>
+        <Link href="/mentions-legales" className="hover:text-ink transition-colors">
+          Mentions légales
+        </Link>
+      </nav>
     </section>
   );
 }
