@@ -8,7 +8,8 @@ export const revalidate = 86400;
 const STATIC_ROUTES: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "/", priority: 1.0, changeFrequency: "daily" },
   { path: "/comment-ca-marche", priority: 0.7, changeFrequency: "monthly" },
-  { path: "/about", priority: 0.5, changeFrequency: "yearly" },
+  { path: "/blog", priority: 0.7, changeFrequency: "weekly" },
+  { path: "/contact", priority: 0.5, changeFrequency: "yearly" },
 ];
 
 type SlugRow = { slug: string };

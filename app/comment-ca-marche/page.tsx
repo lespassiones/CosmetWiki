@@ -1,9 +1,7 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import { Logo } from "@/components/Logo";
 import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
-import { MobileMenu } from "@/components/MobileMenu";
+import { PublicHeader } from "@/components/PublicHeader";
 
 const TITLE = "Comment ça marche";
 const DESCRIPTION =
@@ -65,27 +63,9 @@ export default function HowItWorksPage() {
   return (
     <div className="relative isolate flex min-h-screen flex-col bg-bg">
       <BackgroundGlow />
+      <PublicHeader />
 
-      <header className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-6">
-        <Logo size="md" />
-        <nav className="hidden items-center gap-1 text-sm text-ink-muted sm:flex">
-          <Link
-            href="/comment-ca-marche"
-            className="rounded-full bg-white/60 px-3 py-1.5 font-medium text-ink ring-1 ring-white/70 backdrop-blur-md"
-          >
-            Comment ça marche
-          </Link>
-          <Link
-            href="/about"
-            className="rounded-full px-3 py-1.5 transition-colors hover:text-ink"
-          >
-            À propos
-          </Link>
-        </nav>
-        <MobileMenu />
-      </header>
-
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16 pt-28 sm:pt-32">
         <p className="text-[13px] font-medium uppercase tracking-wider text-ink-subtle">
           Comment ça marche
         </p>

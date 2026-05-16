@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { signOut } from "@/app/auth/actions";
 import { CloseIcon, MenuIcon } from "./NavIcons";
 import { PremiumCard } from "./PremiumCard";
 
@@ -121,13 +122,35 @@ export function MobileBurgerMenu({
                 })}
               </ul>
 
-              {/* Premium upsell pinned to the bottom of the drawer scroll
-                  area (above the safe area). Hidden when already on /offre. */}
-              {!pathname.startsWith("/offre") && (
-                <div className="mt-auto pt-4">
-                  <PremiumCard />
-                </div>
-              )}
+              {/* Bottom block — Premium upsell + sign-out button, pinned to
+                  the bottom of the drawer (above the safe area). The sign-out
+                  button is intentionally placed here so it's reachable in one
+                  tap from any page, instead of buried under /profile. */}
+              <div className="mt-auto pt-4 space-y-3">
+                {!pathname.startsWith("/offre") && <PremiumCard />}
+                <form action={signOut}>
+                  <button
+                    type="submit"
+                    className="w-full flex items-center justify-center gap-2 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 ring-1 ring-rose-200 transition hover:bg-rose-100 active:scale-[0.98]"
+                  >
+                    <svg
+                      aria-hidden
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.8}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                      <path d="m16 17 5-5-5-5" />
+                      <path d="M21 12H9" />
+                    </svg>
+                    Se déconnecter
+                  </button>
+                </form>
+              </div>
             </nav>
           </aside>
 

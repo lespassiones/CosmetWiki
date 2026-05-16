@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { PublicHeader } from "@/components/PublicHeader";
 
 /**
  * Public landing hero — full-bleed image with the headline + CTA layered
@@ -37,19 +38,7 @@ export function LandingHero() {
         className="lg:hidden object-cover object-center"
       />
 
-      {/* Tiny top chrome — wordmark left, sign-in shortcut right */}
-      <div className="relative z-10 flex items-center justify-between px-5 pt-5 lg:px-10 lg:pt-7">
-        <span className="text-[18px] lg:text-[20px] font-bold tracking-tight">
-          <span className="text-[#111111]">Cosme </span>
-          <span className="text-[#F43F5E]">Check</span>
-        </span>
-        <Link
-          href="/auth/sign-in"
-          className="rounded-full bg-white/70 backdrop-blur-md ring-1 ring-white/80 px-3.5 py-1.5 text-[12px] lg:text-[13px] font-medium text-ink hover:bg-white transition shadow-[0_4px_14px_-4px_rgba(15,23,42,0.10),inset_0_1px_0_rgba(255,255,255,0.95)]"
-        >
-          Se connecter
-        </Link>
-      </div>
+      <PublicHeader />
 
       {/*
         Content layer.
@@ -58,7 +47,7 @@ export function LandingHero() {
         Mobile  : sits at the BOTTOM (the empty zone of landingportrait.png),
                   horizontally centred.
       */}
-      <div className="relative z-10 flex flex-col h-[calc(100vh-4.5rem)] lg:h-[calc(100vh-6rem)]">
+      <div className="relative z-10 flex h-screen flex-col pt-20">
         <div className="hidden lg:flex flex-1 items-center">
           <div className="px-10 xl:px-16 max-w-[44%]">
             <Headline />

@@ -8,7 +8,6 @@ import { InstallPWAMenuItem } from "@/components/InstallPWAButton";
 const NAV_ITEMS = [
   { href: "/", label: "Accueil" },
   { href: "/comment-ca-marche", label: "Comment ça marche" },
-  { href: "/about", label: "À propos" },
 ];
 
 export function MobileMenu() {

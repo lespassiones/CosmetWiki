@@ -211,12 +211,6 @@ export default async function IngredientPage({ params, searchParams }: Props) {
           >
             Comment ça marche
           </Link>
-          <Link
-            href="/about"
-            className="hidden rounded-full px-3 py-1.5 text-sm text-ink-muted transition-colors hover:text-ink sm:inline"
-          >
-            À propos
-          </Link>
           <SearchTrigger />
           <MobileMenu />
         </div>
