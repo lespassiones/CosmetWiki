@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { signIn } from "@/app/auth/actions";
+import { AuthDivider, GoogleAuthButton } from "./GoogleAuthButton";
 
 export function SignInForm({ next = "/" }: { next?: string }) {
   const [error, setError] = useState<string | null>(null);
@@ -9,6 +10,9 @@ export function SignInForm({ next = "/" }: { next?: string }) {
   const [showPwd, setShowPwd] = useState(false);
 
   return (
+    <div>
+      <GoogleAuthButton next={next} label="Se connecter avec Google" />
+      <AuthDivider />
     <form
       action={(fd) => {
         setError(null);
@@ -65,5 +69,6 @@ export function SignInForm({ next = "/" }: { next?: string }) {
         {pending ? "Connexion…" : "Se connecter"}
       </button>
     </form>
+    </div>
   );
 }

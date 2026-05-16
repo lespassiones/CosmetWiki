@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { signUp } from "@/app/auth/actions";
+import { AuthDivider, GoogleAuthButton } from "./GoogleAuthButton";
 
 export function SignUpForm({ next = "/" }: { next?: string }) {
   const [error, setError] = useState<string | null>(null);
@@ -9,6 +10,9 @@ export function SignUpForm({ next = "/" }: { next?: string }) {
   const [showPwd, setShowPwd] = useState(false);
 
   return (
+    <div>
+      <GoogleAuthButton next={next} label="S'inscrire avec Google" />
+      <AuthDivider />
     <form
       action={(fd) => {
         setError(null);
@@ -59,6 +63,7 @@ export function SignUpForm({ next = "/" }: { next?: string }) {
         En continuant tu acceptes nos CGU et notre politique de confidentialité.
       </p>
     </form>
+    </div>
   );
 }
 

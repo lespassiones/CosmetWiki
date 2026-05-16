@@ -25,9 +25,9 @@ export default async function SignUpPage({ searchParams }: Props) {
 
   return (
     <main className="min-h-svh flex items-center justify-center px-5 py-10 bg-[#FAFAFA]">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-[28px] leading-[36px] font-bold tracking-tight">
+      <section className="w-full max-w-md rounded-2xl border border-[#E5E7EB] bg-white p-6 sm:p-8 shadow-[0_8px_24px_-12px_rgba(17,17,17,0.08)]">
+        <div className="text-center mb-6">
+          <h1 className="text-[24px] sm:text-[28px] leading-[32px] sm:leading-[36px] font-bold tracking-tight">
             Crée <span className="relative inline-block">ton compte
               <span aria-hidden className="absolute left-0 right-0 -bottom-1 h-[3px] bg-[#F43F5E] rounded-full" />
             </span>
@@ -45,7 +45,7 @@ export default async function SignUpPage({ searchParams }: Props) {
             Se connecter
           </Link>
         </p>
-      </div>
+      </section>
     </main>
   );
 }

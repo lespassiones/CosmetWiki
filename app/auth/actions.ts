@@ -1,10 +1,23 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase";
+import { SITE_URL } from "@/lib/siteUrl";
 
 export type AuthResult = { ok: true } | { ok: false; error: string };
+
+async function resolveOrigin(): Promise<string> {
+  try {
+    const h = await headers();
+    const host = h.get("x-forwarded-host") ?? h.get("host");
+    const proto = h.get("x-forwarded-proto") ?? "https";
+    if (host) return `${proto}://${host}`;
+  } catch {
+    // ignored
+  }
+  return SITE_URL;
+}
 
 /**
  * Accept only same-origin, absolute-path redirect targets so a hostile `next`
@@ -60,4 +73,26 @@ export async function signOut(): Promise<void> {
   const sb = supabaseServer(cookieStore);
   await sb.auth.signOut();
   redirect("/");
+}
+
+export async function signInWithGoogle(formData: FormData): Promise<void> {
+  const next = safeNext(formData.get("next"));
+  const cookieStore = await cookies();
+  const sb = supabaseServer(cookieStore);
+
+  const origin = await resolveOrigin();
+  const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(next)}`;
+
+  const { data, error } = await sb.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo,
+      queryParams: { access_type: "offline", prompt: "consent" },
+    },
+  });
+
+  if (error || !data?.url) {
+    redirect(`/auth/sign-in?error=oauth`);
+  }
+  redirect(data.url);
 }
