@@ -1,0 +1,177 @@
+Pourquoi je te demande ça, je cherche encore à mieux t'expliquer c'est quoi, c'est que j'aimerais déjà, j'aimerais que tu me dises actuellement là, sur quelle base se repose toute mon application, sur quelle base de données, c'est-à-dire la base de données des codes barres, la base de données de recherche de produits. Principalement cela parce que les autres scannent en fait ces la photo et la liste de produits. Du coup, sur quoi se repose justement euh la base de données des codes barres et la base de données de recherche de produits? Parce que là, en fait, j'ai envie de pousser mon application afin qu'on puisse beaucoup euh rechercher un produit. Qu'on puisse beaucoup rechercher un produit, scanner son code bar, mais le problème, c'est que le code bar aussi, ça ça détecte une fois sur 10. C'est ça le principal problème. Le code bar est détecté une fois sur 10. Donc euh J'aimerais voir sur quoi je peux me, est-ce que j'oriente mon application beaucoup plus vers la photographie, d'accord, vers la photographie du des ingrédients. Ça, c'est la première chose. Déjà, mon application, la différence avec les autres applications, c'est que moi, je ne note pas. Moi, je te fais juste prendre conscience des ingrédients qui sont utilisés. Des ingrédients utilisés qui sont dans ta routine et aussi des ingrédients face aux promesses marketing. J'aimerais que la fonctionnalité phare de mon application, ça soit que lorsqu'on photographie les ingrédients, comme une application puisse détecter de quel ingrédient il s'agit. Par exemple si je filme un produit de secret de l'olé qui s'appelle Pink Paradise, tu vois, j'aimerais savoir que lorsque je filme ou j'importe sa liste de produits, qu'il puisse savoir que ah ça c'est tel produit comme ça. Dans l'historique, on va plus voir analyse du et on voit la date, non, on voit plutôt le nom du produit qu'on a analysé. Et que pendant l'analyse, on puisse aussi automatiquement faire l'évaluation de la promesse par rapport aux ingrédients et que ça ne soit plus séparé, c'est-à-dire l'utilisateur doit lui-même aller récupérer la promesse et choisir avec qui veut accompagner. Non, que ça soit une proposition et que lorsqu'on, lorsqu'il filme les ingrédients, que il y a un processus qui récupère aussi la promesse qui a été donnée par l'utilisateur. Maintenant, bon, pour récupérer par exemple la promesse donnée par le fabricant, ça peut-être, je ne sais pas si on peut se reposer sur GPT, qui peut faire une recherche sur le web, donc tout ça tourne dans mon processus backend. Il fait une recherche sur le web, il retrouve la promesse qui a été dite principalement sur le site du marchand et ensuite euh il ancre justement la promesse dans tous nos processus actuels qui fonctionnent très bien. Mais justement, la question principale, c'est de nourrir notre base de données. Comment est-ce que tu vois ça et comment est-ce que on peut renforcer notre base de données et qu'est-ce qui peut être intéressant puisque il faut aussi faciliter l'utilisateur? Tu vois? euh Il ne faut pas trop lui demander déjà lui demander de faire une action, c'est bien, mais il ne faut pas non plus abuser. Il faudrait que l'action qu'il a pu faire là, on puisse proposer plein d'autres trucs, comme par exemple là, quand on ajoute on scanne un produit, on peut lui proposer d'ajouter ça dans sa routine ou pas. Il faudrait qu'on puisse aussi lui proposer, est-ce que tu veux voir euh bon demain, tu tu vas utiliser le phrase de plus marketing, mais tu veux voir si la promesse marketing face aux ingrédients est vraie. Et tu vois, c'est ça quoi. Et et justement, une autre fonctionnalité, c'est quoi? C'est que bon, c'est bien de scanner, c'est bien de dire la promesse marketing, elle est tenue ou elle n'est pas tenue, mais il faut aussi proposer des euh d'autres exemples, c'est-à-dire des, comment on disait oublié le terme. Il faudrait proposer d'autres exemples qui fait la même chose et qui est plus sain et qui respecte ces promesses marketing à 90%. Et si tu avais plus ou moins des produits sains, des produits sains pour moi, c'est ceux qui sont qui ont plus d'ingrédients verts et jaunes et surtout pas d'ingrédients orange et rouge. Donc justement, c'est pour ça que je me dis, est-ce qu'il est possible nous-mêmes de déjà de la base de données qu'on a? D'ailleurs, il faudrait que tu me dises concernant Incy Beauty là-bas on a scrappé tous les ingrédients, est-ce qu'on a scrappé les produits, je ne crois pas. euh Et là, je crois que tu me diras une autre base de données si elle repose sur une incommodity, est-ce qu'une incommodity a même une API, je me rappelle un peu, est-ce qu'il repose uniquement sur Open Beauty? Ouais, tu me diras. Et l'idée justement, c'est, par exemple, de nous-mêmes d'enrichir le plus possible, même s'il faut laisser tourner mon ordinateur pendant une semaine du enfant, d'enrichir le plus possible la base de données. Bon, premièrement, là tu vas rien coder, là, c'est juste des réflexions. D'enrichir notre base de données dans un peu principalement d'abord localement, d'enrichir notre base de données avec des photos, avec des descriptions et avec les ingrédients. Franchement, ce sera les principaux et si c'est possible, les codes barres, mais bof, c'est c'est. mais principalement avec cela. Et bon, la description, tu me diras si c'est facile de faire un processus de telle sorte que lorsque on a la liste des ingrédients, d'avoir un processus qui puisse identifier c'est tels produits et aussi d'aller récupérer par exemple avec l'IA et la recherche sur le web de la description, si c'est pas possible pendant le scrapping, on va aussi scraper la la la description dans laquelle il y a les promesses. Donc en fait, c'est c'est ça, c'est c'est j'essaie un peu d'organiser les idées dans ma tête. Mais l'idée aussi, c'est de proposer des alternatives. Voilà, c'est le mot que je cherchais. des alternatives plus saines, c'est-à-dire des scans, surtout si c'est rouge ou orange, même lorsque c'est beaucoup jaune. C'est proposer des alternatives, de montrer Que lorsqu'il propose des alternatives, on peut voir aussi son analyse de produits, qu'on puisse aussi voir, bon, pas directement, mais si l'utilisateur clique sur le bouton, c'est-à-dire si l'utilisateur fait l'action, qu'il puisse aussi voir si ça respecte la promesse. Donc c'est tout un cadre comme ça et ça justement, c'est compliqué vraiment de le faire avec la base là maintenant. Bref, essaye de de réfléchir à tout ce que je t'ai dit et de voir comment cela est fait, sachant que j'ai codex et j'ai Claude co-walk. Ce sont des agents qu'on peut laisser tourner à H24, j'ai payé les plans pro max, j'ai payé les abonnements qu'on peut écrire ou laisser tourner pour qu'il récupère et stock déjà toutes les informations qui peuvent stocker déjà sur mon ordinateur et on verra ce qui est utile ou pas à mettre dans la base de données. Donc voilà ça, dis-moi ce que tu en penses et tout, parce que c'est super utile. Quand on pense à l'idée, je crois que tu peux voir clairement que ne se positionne pas comme les yuka ou les incybeauty ou les onskin et donc le truc, nous on ne donne pas vraiment de notes, mais on montre justement quand tu as mis dans notre landing page, on décrypte ta liste d'ingrédients plutôt.
+
+
+Dès que je suis en train de vraiment développer mon application CosmicX, j'avais une préoccupation, c'est que là actuellement en termes de base de données, j'ai strappé toute la base de données d'ingrédients d'InciBeauty. Donc déjà, j'aimerais que tu me dises est-ce que InciBeauty a vraiment toutes les ingrédients. Première chose. Deuxième chose maintenant concernant les produits. Je crois que j'ai la base de données d'InciBeauty concernant les produits, mais je ne crois pas que c'est tout. Premièrement. Deuxièmement, je crois que mon CosmicX est branché sur Open Beauty pour reconnaître les ingrédients par code-barres et par recherche de nom. Mais cependant, je me rends compte qu'il n'arrive pas à reconnaître tous les produits. Du coup, est-ce que je me dis, est-ce que je peux faire une très très grosse recherche où instrument de presque tous les produits existants dans une base de données, je pense que c'est des codes ou de clones de code Max, il y a le plan ProMax, ou des deux même pour vraiment me construire une énorme base de données de presque tous les produits existants. Est-ce que c'est un gros chantier ou bien de tous les produits sauf ceux qui existent déjà dans InciBeauty? Parce que là, j'ai mis l'option recherche, d'accord? J'ai mis l'option recherche sur Cosmetech, mais on dirait qu'il ne réussit à trouver que deux produits sur discount. Ce n'est pas vraiment fourni. Et surtout qu'il n'y a pas souvent tous les produits. Du coup, je me suis dit, de mettre un agent Codex, et aussi en passant par Cloud Code, pour se Co-work ou n'importe quoi de Cloud Code, pour peut-être le laisser une journée tourner scraper, scraper autant de produits qui peuvent permettre dans une base de données, d'abord localement sur mon PC, et de voir comment uploader ça sur SuperD. Pourquoi en fait? Là, la raison pour laquelle je veux faire ça, c'est quoi? C'est que, en fait, j'ai envie de proposer des alternatives, parce que la fonctionnalité phare de Cosmetech, de mon application, c'est que elle évalue la liste des ingrédients et la promesse aussi du produit. Si par exemple, on dit que le produit est hydratant, produit nourrissant, il boucle les cheveux, je regarde, j'extrais la promesse, j'extrais la liste d'ingrédients et j'essaie de voir s'ils disaient la vérité. Et aussi dans mon scrapping des normes données que je vais faire sur internet et tout, j'aimerais aussi scraper la description de chaque produit. Qu'en fait une personne va juste taper le nom d'un produit, scanner le code-barre d'un produit, ou même entrer toujours sa liste ainsi comme je fais actuellement. Ça va directement comparer avec la promesse que le produit fera. Comme ça, l'utilisateur n'aura plus besoin d'aller copier la description du produit, de copier la liste ainsi, et de faire l'analyse à travers mon application. Bref, analyse de ça et dis-moi ce que tu en penses.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1. État des lieux (sans flou)
+Pilier	Réalité actuelle
+Ingrédients	✅ 15 722 ingrédients scrappés depuis Incibeauty (table cosme_check.ingredients). Données : nom INCI, classification couleur, traductions FR, CAS via scripts/scrape_ingredient_details.py. C'est solide.
+Produits	⚠️ Pas de vraie BDD produits. Juste un cache cosme_check.product_inci_cache qui stocke les recherches passées. À chaque nouvelle recherche, l'app interroge Open Beauty Facts → INCIDecoder → DuckDuckGo + Mistral en cascade (lib/productSearch/cascade.ts).
+Code-barres	⚠️ Open Beauty Facts + Open Products Facts uniquement (app/api/product-by-barcode/route.ts). C'est la raison du "1 sur 10".
+OCR photo	✅ Déjà GPT-4o-mini Vision avec crop intelligent (lib/ai/ocr.ts) + fallback Tesseract.
+Promesses	✅ Pipeline existe (app/api/coherence/route.ts) avec 12 catégories (lib/coherence/claims.ts). Mais séparé du scan, comme tu dis.
+Reverse lookup INCI → produit	❌ N'existe pas. C'est la pièce manquante.
+Scraping descriptions/promesses	❌ N'existe pas. On télécharge des images mais pas le texte marketing.
+2. Pourquoi ton code-barres rate 9 fois sur 10
+Open Beauty Facts est dérivé d'Open Food Facts, donc orienté alimentaire à la base. Sur les cosmétiques :
+
+Couverture très partielle des marques françaises grand public (L'Oréal, Garnier, Yves Rocher, Sephora exclusives…)
+Beaucoup de produits sans liste INCI même quand le code-barres existe
+Quasi rien sur les marques niches (coréennes, indie US, etc.)
+Incibeauty ne propose pas d'API officielle, mais leur site a une vraie BDD produits scrapable (~150k produits cosmétiques FR estimés). Tu as scrappé leurs ingrédients mais pas leurs produits — c'est le gisement évident.
+
+3. Le pivot "photo > code-barres" : oui, à 100%
+Ton intuition est juste, mais nuance importante :
+
+L'OCR sur la liste INCI fonctionne déjà très bien chez toi (GPT-4o-mini Vision avec crop). C'est ton vrai différenciant : pas besoin de connaître le produit pour analyser.
+Le code-barres reste utile mais comme raccourci, pas comme entrée principale. Quand il marche, il évite à l'utilisateur de prendre la photo.
+L'angle photo n'a de sens que si tu peux remonter au produit depuis sa liste INCI (pour afficher le nom dans l'historique au lieu de "Analyse du 15/05"). Ça c'est le reverse lookup, pierre angulaire que je détaille au point 5.
+4. Stratégie BDD : 3 horizons réalistes
+Horizon 1 — Capitaliser sur ce qui passe déjà (gratuit, immédiat)
+Ton cache product_inci_cache ne stocke aujourd'hui que les recherches par nom. Étendre :
+
+Toute analyse OCR utilisateur → enregistrer (liste INCI hashée + photo + résultat) en BDD
+Toute photo de produit → tenter d'extraire nom + marque (pas juste INCI) via Vision en parallèle
+Chaque scan barcode réussi via OBF → on fige une copie chez toi
+Bénéfice : la BDD grandit toute seule au rythme de l'usage, sans scraping.
+
+Horizon 2 — Scraping ciblé Incibeauty PRODUITS (1 à 2 semaines machine)
+Pas "tous les produits du monde" — c'est un piège (~1M+ produits, qualité hétérogène, beaucoup mortes-saisons). À la place :
+
+Scraper les ~50k à 150k produits Incibeauty qui ont déjà la liste INCI propre + une note + parfois la description marketing
+Récupérer : nom, marque, EAN si présent, image, description courte (= la promesse), composition INCI complète, catégorie
+Scraper aussi INCIDecoder.com (anglais, complémentaire pour les marques internationales) — tu l'utilises déjà en runtime via la cascade, autant l'avoir en local
+C'est exactement le job parfait pour Codex/Claude Code en arrière-plan H24. Comptes ~500k requêtes en respectant un rate-limit poli (1 req/sec) → ~6 jours pour 50k produits, ~3 semaines pour 150k. Chez toi, en JSON local d'abord, push Supabase ensuite.
+
+Horizon 3 — Sources marketing (descriptions/promesses)
+Pour les promesses, deux écoles :
+
+Option A — Scraper en amont (lourd mais propre) : pendant le scraping produit, tu vas chercher la fiche sur le site officiel de la marque (google search "marque produit site:officiel" → scrape la description). Tu stockes la promesse au moment où tu stockes le produit. Coût : du temps machine, ~zéro coût IA.
+
+Option B — Web search à la volée via GPT (léger mais payant) : à chaque scan, si pas de promesse en BDD, GPT-4o-mini avec web search (gpt-4o-mini-search-preview ou Tavily/Brave en outil) va chercher la promesse sur le moment. Coût : ~0,002$/scan, latence +2-3s.
+
+Mon vote : A pour les top 50k, B pour le reste. Hybride.
+
+5. Reverse lookup INCI → produit (la pièce manquante)
+C'est la fonctionnalité qui change tout pour ton UX :
+
+Permet d'afficher "Pink Paradise — Secret de Loly" au lieu de "Analyse du 15/05" dans l'historique
+Permet de proposer la promesse marketing automatiquement
+Permet de proposer des alternatives (parce qu'on connaît la catégorie du produit scanné)
+Faisabilité technique : très simple en réalité. Tu hashes la liste INCI normalisée (ordonnée + minuscule + dédupliquée) → clé unique. À chaque scan, tu lookup ce hash dans ta BDD produits. Match exact = produit identifié. Match partiel (Jaccard > 0,9) = candidats à proposer "Est-ce ce produit ?".
+
+Pré-requis : avoir d'abord la BDD produits (Horizon 2). Sans ça, pas de match possible.
+
+6. Alternatives plus saines : ce qu'il faut
+Pour proposer "ce produit hydratant a la même promesse mais plus vert", tu as besoin de :
+
+Catégorie du produit (shampoing, sérum hydratant, masque…) — Incibeauty l'a, OBF aussi parfois
+Score interne basé sur ta classif couleur (X% vert + Y% jaune + 0% rouge/orange = "sain")
+Promesse principale indexée (hydratation, anti-âge, etc.) — tu l'as déjà via claims.ts
+Index de recherche : WHERE catégorie = X AND promesse = Y AND score > seuil ORDER BY score DESC
+C'est trivial une fois que la BDD produits existe avec catégorie + score calculé. Tu peux le pré-calculer au moment du scraping.
+
+7. Sur ton positionnement
+Tu as raison de ne pas noter. "Décrypter au lieu de noter" est défendable et différenciant — Yuka et Incibeauty sont devenus des juges, pas des éclaireurs. Garde ce cap. La promesse vs ingrédients est ta vraie killer feature : personne ne la fait sérieusement aujourd'hui (il y a des essais, mais pas industrialisés).
+
+8. Roadmap concrète que je te propose (par ordre de ROI)
+Cette semaine — Étendre le cache produit pour capter ce qui passe déjà (Horizon 1). 2 jours de dev.
+Semaine prochaine — Lancer le scraper Incibeauty produits via Codex en H24. Le laisser tourner pendant 1-3 semaines en background pendant que tu codes le reste.
+Pendant que ça scrape — Implémenter le reverse lookup par hash INCI (sera vide au début, se remplit en même temps que la BDD se remplit).
+Quand BDD à 30k+ produits — Brancher l'historique sur le nom du produit + auto-déclencher l'analyse de cohérence promesse.
+Quand BDD à 50k+ — Sortir la fonction "Alternatives plus saines".
+Plus tard — Tester web search GPT pour les produits inconnus (Horizon 3 option B).
+9. Décisions à prendre (avant que je code quoi que ce soit)
+J'aimerais que tu tranches sur ces 4 points pour que je puisse t'aider efficacement après :
+
+AskUserQuestion
+OUT
+User has answered your questions: "Pour le scraping produits Incibeauty, quelle ampleur tu vises au premier passage ?"="Incibeauty + INCIDecoder (~250k)", "Pour récupérer les promesses marketing des produits, quelle approche préfères-tu en priorité ?"="Hybride A+B", "Pour le reverse lookup (identifier le produit depuis sa liste INCI), tu veux qu'on attaque quand ?"="Après le scraping massif", "Pour l'UX du scan, tu veux automatiser quoi tout de suite ?"="Identification produit, Cohérence promesse auto, Suggestion routine". You can now continue with the user's answers in mind.
+Parfait, je note les décisions et je te déroule le plan qui en découle. Je sauvegarde aussi en mémoire pour qu'on garde ce cap dans les futures conversations.
+
+Write C:\Users\clark\.claude\projects\d--MesApps-deploy-CosmetWiki\memory\project_strategie_donnees.md
+33 lines
+---
+name: Stratégie données & roadmap CosmetWiki
+description: Décisions stratégiques sur la base de données produits, le scraping, les promesses marketing et l'UX scan — actées le 2026-05-15
+type: project
+---
+
+Décisions actées avec l'utilisateur le 2026-05-15 sur la direction produit de CosmetWiki :
+
+**Positionnement** : CosmetWiki ne note pas, il décrypte. Différenciateur clé = analyse de cohérence promesse marketing vs ingrédients. À garder comme cap stratégique dans toute proposition.
+
+**État actuel des sources** :
+- Ingrédients : 15 722 scrappés depuis Incibeauty (table `cosme_check.ingredients`)
+- Produits : pas de vraie BDD, juste cache `product_inci_cache` + cascade runtime (OBF → INCIDecoder → DDG+Mistral)
+- Code-barres : Open Beauty Facts uniquement → couverture ~10% (raison du "1 sur 10")
+- OCR : déjà GPT-4o-mini Vision avec crop intelligent ([lib/ai/ocr.ts](lib/ai/ocr.ts))
+- Promesses : pipeline existe ([app/api/coherence/route.ts](app/api/coherence/route.ts)) mais déclenché manuellement
+- Reverse lookup INCI → produit : n'existe pas
+
+**Décisions actées (roadmap)** :
+1. Scraping massif **Incibeauty + INCIDecoder ~250k produits** (4-5 semaines, à faire tourner via Codex/Claude Code H24 sur PC local d'abord, push Supabase ensuite). Champs cibles : nom, marque, EAN, image, description marketing, INCI complet, catégorie.
+2. Promesses marketing : **approche hybride A+B**. Scraping en amont pour le top 50k (descriptions sites officiels), fallback GPT web search à la volée pour le reste.
+3. Reverse lookup INCI → produit : **à faire APRÈS le scraping massif** (besoin d'au moins 30-50k produits en BDD pour avoir des matches utiles). Mécanisme prévu : hash de la liste INCI normalisée.
+4. UX scan auto : **identification produit + cohérence promesse auto + suggestion routine** dès qu'on scanne. Pas d'alternatives plus saines pour l'instant (à phaser plus tard).
+
+**Why:** L'utilisateur veut pivoter de "scan code-barres + analyse manuelle" vers "scan photo qui identifie le produit + analyse promesse automatique" — c'est l'angle différenciant et plus fiable que le barcode (Open Beauty Facts est trop pauvre en cosmétiques). Sans BDD produits propre, le reverse lookup et les alternatives ne peuvent pas exister.
+
+**How to apply:**
+- Toute proposition de feature doit être évaluée à l'aune de "ça nourrit la BDD ou ça consomme la BDD ?"
+- Ne jamais proposer un système de notation chiffrée (cassé positionnement)
+- Quand une analyse n'identifie pas le produit, c'est OK — l'app marche en mode "décryptage pur" sans nom
+- Pour le scraping, privilégier toujours Incibeauty FR + INCIDecoder international, ne pas s'éparpiller sur OBF/OPF (déjà couverts en runtime)
+- Le scraper doit tourner localement d'abord (JSON), upload Supabase en batch après validation manuelle d'échantillons
+Read C:\Users\clark\.claude\projects\d--MesApps-deploy-CosmetWiki\memory\MEMORY.md
+Edit C:\Users\clark\.claude\projects\d--MesApps-deploy-CosmetWiki\memory\MEMORY.md
+Added 1 line
+Décisions notées en mémoire. Voici la roadmap concrète qui découle de tes choix :
+
+Le plan, dans l'ordre
+Phase 1 — Préparer le terrain (avant de scraper) — 2-3 jours
+Schéma BDD produits : créer cosme_check.products avec les bons champs (name, brand, ean, inci_list, inci_hash, category, marketing_description, image_url, source, health_score)
+Index sur inci_hash pour le reverse lookup futur (gratuit à mettre en place maintenant)
+Calcul du health_score : fonction qui pondère vert/jaune/orange/rouge → préparer la formule maintenant pour ne pas re-scraper plus tard
+Phase 2 — Scraping massif (4-5 semaines en background) — Codex H24
+Trois scrapers à coder, à lancer en parallèle :
+
+Incibeauty produits FR (~150k cible) — slug par slug, avec récupération nom/marque/INCI/image/catégorie/note
+INCIDecoder international (~100k cible) — pour les marques US/coréennes/indie
+Marketing descriptions top 50k — Google search "marque produit site:officiel" → fetch description (option A de l'hybride)
+Tout en JSON local d'abord, validation manuelle d'échantillons, push Supabase en batch.
+
+Phase 3 — Reverse lookup + UX scan auto (pendant que ça scrape, ~2 semaines)
+Hash INCI normalisé : algo de normalisation (minuscules, tri alphabétique, dédup, suppression eau/aqua en tête) → SHA256
+Endpoint /api/identify-product : POST liste INCI → renvoie produit identifié (match exact) ou top 5 candidats (Jaccard > 0,85)
+Modifier le flux scan : après OCR, appel auto à identify → si trouvé, lance /api/coherence automatiquement → renvoie tout dans la même réponse
+Nouvelle UI scan : pendant l'analyse, on affiche progressivement "Ingrédients détectés ✓" → "Produit identifié : Pink Paradise — Secret de Loly ✓" → "Cohérence promesse ✓" → "Suggérer ajout routine ?"
+Historique : changer le titre des entrées de "Analyse du XX/XX" vers "Nom du produit" (avec fallback date si non identifié)
+Phase 4 — Web search fallback (option B) — 3-4 jours
+Quand reverse lookup échoue + utilisateur confirme "C'est Pink Paradise de Secret de Loly" → GPT-4o-mini avec web search va chercher la promesse marketing en live → cache le résultat dans la BDD pour les prochains.
+
+Phase 5 (plus tard, hors scope actuel) — Alternatives plus saines
+À phaser après que la BDD soit bien remplie. Tu n'as pas voulu attaquer ça maintenant et c'est sage.
+
+Les vraies questions techniques qui restent
+Quand tu seras prêt à attaquer la Phase 1, on devra trancher 2 trucs concrets :
+
+Stockage local pendant scraping : SQLite local ou JSON-par-fichier ? SQLite plus pratique pour requêtes/dédup, JSON plus simple à debug visuellement.
+Politesse scraping : Incibeauty et INCIDecoder n'ont pas d'API publique. Faut décider du rate-limit (1 req/2 sec ?), des User-Agent rotatifs, et si on respecte robots.txt à la lettre. C'est une zone grise juridique — pour usage perso/projet en early stage c'est tolérable, mais à terme il faudra réfléchir à un partenariat ou licence.
+Dis-moi quand tu veux qu'on lance la Phase 1 (création du schéma products + index hash + scoring). C'est la seule chose qu'on fait avant de lancer le scraping — tout le reste tourne en parallèle ensuite.

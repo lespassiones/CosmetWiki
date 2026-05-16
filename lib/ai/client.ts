@@ -36,7 +36,8 @@ export type AIFeature =
   | "validate"
   | "product_search"
   | "explain"
-  | "parse_inci";
+  | "parse_inci"
+  | "compare";
 
 export type AIProvider = "openai" | "mistral" | "tesseract" | "cache";
 

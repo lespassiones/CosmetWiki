@@ -58,7 +58,7 @@ export default async function PromessesPage() {
         </p>
         <Link
           href="/promesses/nouvelle"
-          className={`${GLASS_PILL_DARK} text-[12px] font-semibold px-3 py-2`}
+          className={`${GLASS_PILL_DARK} inline-flex items-center justify-center text-center text-[12px] font-semibold px-3 py-2`}
         >
           + Nouvelle analyse
         </Link>

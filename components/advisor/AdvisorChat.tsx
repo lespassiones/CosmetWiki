@@ -151,7 +151,9 @@ export function AdvisorChat({ firstName }: { firstName: string }) {
   const showSuggestions = messages.length === 0;
 
   return (
-    <div className={`${GLASS_CARD} flex flex-col overflow-hidden`} style={{ height: "min(70vh, 640px)" }}>
+    <div
+      className={`${GLASS_CARD} flex flex-col overflow-hidden h-[min(calc(100dvh-19rem),640px)] lg:h-[min(70vh,640px)]`}
+    >
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
         {messages.length === 0 ? (
           <div className="text-center py-6">
@@ -193,14 +195,19 @@ export function AdvisorChat({ firstName }: { firstName: string }) {
       {showSuggestions && (
         <div className="border-t border-[#E5E7EB] bg-[#FAFAFA] px-5 py-3">
           <p className="text-[10px] uppercase tracking-wide text-[#6B7280] mb-2">Suggestions</p>
-          <div className="flex flex-wrap gap-2">
+          {/* Horizontal carousel — single row, snap-scroll, hidden scrollbar.
+              The negative-mx + same px bleeds the pills to the card edges so
+              the user sees there's more to swipe. */}
+          <div
+            className="-mx-5 flex gap-2 overflow-x-auto snap-x snap-mandatory px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
             {SUGGESTED_PROMPTS.map((p) => (
               <button
                 key={p}
                 type="button"
                 onClick={() => send(p)}
                 disabled={streaming}
-                className={`${GLASS_PILL} px-3 py-1.5 text-[12px] disabled:opacity-50`}
+                className={`${GLASS_PILL} shrink-0 snap-start whitespace-nowrap px-3 py-1.5 text-[12px] disabled:opacity-50`}
               >
                 {p}
               </button>
