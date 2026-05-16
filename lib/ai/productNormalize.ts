@@ -41,7 +41,7 @@ export async function normalizeProductQuery(
   if (!hasOpenAI()) return { kind: "unchanged" };
 
   const system =
-    "Tu normalises une requête de recherche produit cosmétique en français pour un moteur de recherche. " +
+    "Tu normalises une requête de recherche produit cosmétique en français pour une application de décodage cosmétique. " +
     "L'utilisateur a tapé un nom de produit éventuellement imparfait (faute d'orthographe, abréviation, " +
     "marque manquante). Tu retournes en JSON STRICT l'une des formes suivantes : " +
     "{ \"kind\": \"query\", \"query\": \"<Marque Produit>\", \"confidence\": <0..1> } si tu peux reconstituer un nom unique probable, " +

@@ -1,6 +1,6 @@
 # Cosme Check
 
-Moteur de recherche d'ingrédients cosmétiques inspiré de Google et Perplexity. **15 722 ingrédients** indexés depuis incibeauty.com, classés par tolérance (vert / jaune / orange / rouge), avec autocomplete fuzzy et fiches détaillées.
+Application qui décode les cosmétiques : composition, promesses marketing, ingrédients clefs. **15 722 ingrédients** indexés depuis incibeauty.com, classés par tolérance (vert / jaune / orange / rouge), avec autocomplete fuzzy et fiches détaillées.
 
 > **Stack** : Next.js 15 + React 19 + Tailwind CSS 3 + Supabase free tier.
 > **Aucun service payant.** Light mode strict.
@@ -12,7 +12,7 @@ npm install
 npm run dev
 ```
 
-Le site démarre sur http://localhost:3000. Le moteur de recherche est immédiatement opérationnel sur les 15 722 ingrédients déjà chargés dans Supabase.
+Le site démarre sur http://localhost:3000. L'application est immédiatement opérationnelle sur les 15 722 ingrédients déjà chargés dans Supabase.
 
 ## Variables d'environnement
 

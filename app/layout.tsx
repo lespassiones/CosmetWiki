@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     "ingrédients cosmétiques",
     "composition cosmétique",
     "analyse INCI",
-    "moteur de recherche cosmétique",
+    "décoder cosmétiques",
     "perturbateurs endocriniens",
     "parabens",
     "silicones",

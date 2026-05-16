@@ -7,7 +7,7 @@
 
 ## 1. Vision produit
 
-Un moteur de recherche d'ingrédients cosmétiques type Google :
+Une application de décodage d'ingrédients cosmétiques :
 
 - **Page d'accueil épurée** avec une seule barre de recherche.
 - **Autocomplétion** ultra-rapide tolérante aux fautes (fuzzy).

@@ -8,7 +8,7 @@
 
 ## 1. Vision
 
-**Cosme Check** est un moteur de recherche d'ingrédients cosmétiques inspiré de Google et de Perplexity :
+**Cosme Check** est une application qui décode les cosmétiques pour une beauté consciente :
 
 - **Page d'accueil minimaliste** : une barre de recherche, c'est tout.
 - **Autocomplétion ultra-rapide** : on tape "MEA", la liste filtre en temps réel.
@@ -179,7 +179,7 @@ Cosme Check/
 
 ## 6. Prochaine étape immédiate
 
-Le MVP est en place. L'utilisateur peut lancer `npm run dev` et utiliser le moteur de recherche dès maintenant.
+Le MVP est en place. L'utilisateur peut lancer `npm run dev` et utiliser l'application dès maintenant.
 
 Étapes optionnelles à enchaîner quand voulu :
 
