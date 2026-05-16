@@ -28,7 +28,7 @@ export type SynthesisInput = {
 
 // Bump this any time `buildPrompt()` changes meaningfully — old cached
 // outputs keyed on the previous version will no longer be served.
-const PROMPT_VERSION = 4;
+const PROMPT_VERSION = 5;
 
 function makeCacheKey(input: SynthesisInput): string {
   const list = input.enriched

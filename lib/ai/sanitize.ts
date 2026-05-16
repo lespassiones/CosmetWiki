@@ -20,15 +20,24 @@ export const NO_LONG_DASHES_RULE =
 
 /**
  * Replace every em-dash (—) and en-dash (–) with a comma + collapse the
- * doubled spaces / spurious whitespace that can leave behind. Safe to apply
- * blindly on any AI output.
+ * doubled inline spaces / spurious whitespace that can leave behind.
+ *
+ * IMPORTANT: we only touch SPACES and TABS, never newlines. The synthesis
+ * formatter relies on `\n\n` to split paragraphs and `\n` to split bullet
+ * lines — collapsing them merges the whole synthesis into a single blob.
  */
 export function stripLongDashes(s: string): string {
   if (!s) return s;
   return s
-    .replace(/\s*[—–]\s*/g, ", ")
-    .replace(/,\s*,/g, ",")
-    .replace(/\s{2,}/g, " ")
-    .replace(/\s+([.,;:!?])/g, "$1")
+    // Em / en dash with adjacent INLINE whitespace only — preserve newlines
+    // even if the model put a dash at end of line.
+    .replace(/[ \t]*[—–][ \t]*/g, ", ")
+    .replace(/,[ \t]*,/g, ",")
+    // Collapse doubled spaces/tabs but keep \n / \r intact.
+    .replace(/[ \t]{2,}/g, " ")
+    // Strip whitespace before punctuation but only horizontal whitespace —
+    // a newline before "." is unusual but legal and we don't want to fuse
+    // a list item's last char with the punctuation of the next line.
+    .replace(/[ \t]+([.,;:!?])/g, "$1")
     .trim();
 }
