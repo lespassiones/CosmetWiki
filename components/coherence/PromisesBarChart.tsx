@@ -57,9 +57,6 @@ export function PromisesBarChart({ promises }: { promises: CoherencePromise[] })
           content={
             <>
               Chaque barre montre à quel point la formule soutient la promesse.
-              <br /><br />
-              <b>Échelle</b> : 0 % = rien · 35-60 % = présent mais en trace
-              (≤ 1 %) · 80-100 % = présent et bien dosé.
               {(exampleTenue || examplePartielle || exampleNon) && (
                 <><br /><br /><b>Ici</b> :</>
               )}
