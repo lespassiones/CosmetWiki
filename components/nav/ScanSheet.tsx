@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { BarcodeScannerInput } from "../BarcodeScannerInput";
+import { ProcessingOverlay, randomProcessingTotal } from "../ProcessingOverlay";
 import { ProductSearchInput } from "../ProductSearchInput";
 import { SearchBar } from "../SearchBar";
 import { BarcodeIcon, CameraIcon, ClipboardIcon, SearchIcon } from "./NavIcons";
@@ -20,6 +21,11 @@ type FoundPayload = {
 // Same key HomeShell reads on mount to render the ProductHero (brand + name)
 // on top of the analysis result. We bridge across navigation via sessionStorage.
 const PENDING_SOURCE_KEY = "cw:pendingProductSource";
+// Authoritative INCI handoff. AnalysisRunner reads this on mount and trusts
+// it over the URL searchParam — necessary because Next.js can serve a
+// prefetched `/analyse` shell where `searchParams.inci` is undefined, which
+// otherwise bounces the user back to the home page mid-analyse.
+const PENDING_INCI_KEY = "cw:pendingInci";
 
 type TileAction =
   | { kind: "view"; view: Exclude<View, "picker"> }
@@ -40,8 +46,21 @@ const TILES: {
 
 export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [view, setView] = useState<View>("picker");
   const sheetRef = useRef<HTMLDivElement>(null);
+  // Soft-nav bridge: when the user submits, we paint the ProcessingOverlay
+  // RIGHT AWAY (before router.push resolves). Without this, the 1–2 s Next.js
+  // round-trip to /analyse leaves the user staring at the still-open sheet
+  // with no feedback. AnalysisRunner picks up with its own overlay on mount,
+  // so the transition is seamless.
+  const [navigating, setNavigating] = useState<{ active: boolean; budget: number }>({
+    active: false,
+    budget: 0,
+  });
+  // Pathname when the sheet was opened. When it changes, the nav has landed
+  // and we can fold the sheet (and our bridge overlay) away.
+  const openedAtRef = useRef<string | null>(null);
 
   // Reset the inner view to the tile picker each time the sheet opens fresh.
   // Also prefetch /analyse so when the user submits a flow (barcode lookup,
@@ -70,6 +89,25 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
     };
   }, [open, onClose]);
 
+  // Auto-close the sheet once the route has changed (= AnalysisRunner has
+  // mounted and is rendering its own overlay). Until then we keep the bridge
+  // overlay on screen so the user never sees the underlying page flash through.
+  useEffect(() => {
+    if (!open) {
+      openedAtRef.current = null;
+      return;
+    }
+    if (openedAtRef.current === null) {
+      openedAtRef.current = pathname;
+      return;
+    }
+    if (pathname !== openedAtRef.current) {
+      openedAtRef.current = null;
+      setNavigating({ active: false, budget: 0 });
+      onClose();
+    }
+  }, [pathname, open, onClose]);
+
   function pickTile(tile: (typeof TILES)[number]) {
     if (tile.action.kind === "route") {
       onClose();
@@ -83,6 +121,14 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
   function submitForAnalysis(input: FoundPayload | { ingredientsText: string }) {
     const ingredientsText = input.ingredientsText.trim();
     if (!ingredientsText) return;
+    // Stash the INCI in sessionStorage BEFORE navigating. This is the
+    // authoritative handoff — the URL searchParam is kept as a secondary
+    // hint but can be dropped by Next.js when serving a prefetched shell.
+    try {
+      sessionStorage.setItem(PENDING_INCI_KEY, ingredientsText);
+    } catch {
+      /* ignore */
+    }
     if ("brand" in input && (input.brand || input.productName)) {
       try {
         sessionStorage.setItem(
@@ -98,7 +144,11 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
         /* ignore */
       }
     }
-    onClose();
+    // Paint the overlay BEFORE the navigation kicks off, so the user sees
+    // "On décode la composition…" in the same frame they pressed the button.
+    // Don't call onClose() here — the route-change effect above will fold the
+    // sheet once /analyse has actually taken over.
+    setNavigating({ active: true, budget: randomProcessingTotal() });
     // Dedicated analysis page — AnalysisRunner picks up the payload (and the
     // optional product source from sessionStorage), runs analyse, then
     // renders the result panel full-width without the dashboard underneath.
@@ -106,6 +156,18 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
   }
 
   if (!open) return null;
+
+  // Soft-nav in flight: cover the sheet with the same overlay AnalysisRunner
+  // will paint once it mounts. The two share an identical look so the user
+  // can't tell where one ends and the other begins.
+  if (navigating.active) {
+    return (
+      <ProcessingOverlay
+        totalMs={navigating.budget}
+        headline="On décode la composition…"
+      />
+    );
+  }
 
   const isPicker = view === "picker";
   const heading = isPicker

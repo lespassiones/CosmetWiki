@@ -2,9 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ProcessingOverlay, randomProcessingTotal } from "../ProcessingOverlay";
 import { GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
 
-type Step = "capture" | "processing" | "review" | "error";
+// Bridge between "user clicked Analyser" and "AnalysisRunner has mounted on
+// /analyse". Without this bridge the user sees the review page for the 1-2 s
+// it takes Next.js to fetch the RSC payload for the destination.
+type Step = "capture" | "processing" | "review" | "error" | "navigating";
 
 export function PhotoOcrFlow() {
   const router = useRouter();
@@ -14,6 +18,7 @@ export function PhotoOcrFlow() {
   const [uncertain, setUncertain] = useState<string[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [usingFallback, setUsingFallback] = useState(false);
+  const [navBudget, setNavBudget] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -78,11 +83,36 @@ export function PhotoOcrFlow() {
   function analyse() {
     const t = text.trim();
     if (t.length === 0) return;
+    // Stash the INCI in sessionStorage BEFORE navigating. AnalysisRunner
+    // reads this key first and only falls back to the URL searchParam if
+    // it's missing — without this, Next.js can serve a prefetched `/analyse`
+    // shell with no inci and bounce the user back to the home page.
+    try {
+      sessionStorage.setItem("cw:pendingInci", t);
+    } catch {
+      /* ignore */
+    }
+    // Bridge the 1-2 s Next.js round-trip with the same overlay AnalysisRunner
+    // will paint on mount. Without this the review page sits idle while
+    // /analyse loads, which feels like the click didn't register.
+    setNavBudget(randomProcessingTotal());
+    setStep("navigating");
     // Hand off to the dedicated /analyse page. AnalysisRunner derives its
     // loading state from `initialInci` on the FIRST render, so the processing
     // overlay paints immediately — no blank frame like we'd get if we routed
     // back to "/" (which only flips processing on inside a useEffect).
     router.push(`/analyse?inci=${encodeURIComponent(t.slice(0, 6000))}`);
+  }
+
+  // Soft-nav bridge: paint the same overlay AnalysisRunner will show on mount,
+  // so the user gets immediate feedback while Next.js fetches the /analyse RSC.
+  if (step === "navigating") {
+    return (
+      <ProcessingOverlay
+        totalMs={navBudget}
+        headline="On décode la composition…"
+      />
+    );
   }
 
   return (

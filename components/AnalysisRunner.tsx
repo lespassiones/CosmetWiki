@@ -9,10 +9,23 @@ import { PENDING_ADD_TO_ROUTINE_KEY } from "./routine/AddProductButton";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 const PENDING_SOURCE_KEY = "cw:pendingProductSource";
+// Authoritative INCI handoff: callers (ScanSheet, PhotoOcrFlow, …) write the
+// list to this key right before `router.push("/analyse?inci=…")`. Without
+// this we relied solely on the URL searchParam, which Next.js can serve
+// EMPTY when its router cache hits a prefetched `/analyse` shell. That's the
+// bug where users hit "Décode → Analyser" and end up bounced back to the
+// home page while the analyse silently lands in /history.
+const PENDING_INCI_KEY = "cw:pendingInci";
 // Stale-flag cutoff for the pending "add to routine" stamp. If the user clicks
 // the routine button, cancels the ScanSheet, then analyses something else 30
 // min later, we should NOT secretly add that analyse to their routine.
 const PENDING_FLAG_TTL_MS = 30 * 60 * 1000;
+// Last-completed analyse cache. Lets us re-hydrate the result panel if the
+// component unmounts mid-flight (mobile swipe-back, accidental reload, or
+// Next.js re-evaluating the server component with empty searchParams after
+// we've stripped `?inci=` from the URL).
+const RUN_CACHE_KEY = "cw:analyseRunnerCache";
+const RUN_CACHE_TTL_MS = 10 * 60 * 1000;
 
 type ProductSource = {
   source: string;
@@ -21,6 +34,47 @@ type ProductSource = {
   productName: string | null;
 };
 
+type CachedRun = {
+  inci: string;
+  text: string;
+  result: AnalyseResponse;
+  productSource: ProductSource | null;
+  addedToRoutine: boolean;
+  ts: number;
+};
+
+function readRunCache(): CachedRun | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(RUN_CACHE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw) as CachedRun;
+    if (!data?.result || !data.inci) return null;
+    if (Date.now() - data.ts > RUN_CACHE_TTL_MS) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function writeRunCache(data: CachedRun) {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(RUN_CACHE_KEY, JSON.stringify(data));
+  } catch {
+    /* ignore */
+  }
+}
+
+function clearRunCache() {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem(RUN_CACHE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 /**
  * Dedicated analysis page client. Owns the analyse → result lifecycle on
  * `/analyse?inci=…` so the dashboard never bleeds underneath. Receives the
@@ -28,12 +82,47 @@ type ProductSource = {
  * sessionStorage by the ScanSheet, calls /api/analyser, and renders the
  * result panel full-width.
  *
- * Loading is a DERIVED state, not a boolean we toggle late inside an effect.
- * On the first render — before the effect even fires — we already know we
- * have `initialInci` and no result, so we render the ProcessingOverlay
- * immediately. Without this, the user saw a blank page for a frame between
- * mount and the effect kicking the fetch off.
+ * IMPORTANT — why we keep an `inciRef` instead of trusting `initialInci`:
+ * the effect below strips `?inci=` from the URL via `replaceState` so that
+ * a reload doesn't relaunch the analyse. If Next.js then re-evaluates the
+ * server component for any reason (auth cookie refresh, middleware run,
+ * partial re-render), the new `initialInci` prop comes back EMPTY — the URL
+ * no longer carries the payload. Treating that empty value as authoritative
+ * caused the dreaded "the loading screen closes and I have to open the
+ * history to see my result" bug: we'd redirect to "/" or fall through to
+ * `return null` mid-fetch, while the server-side save still succeeded.
+ *
+ * The fix: capture the INCI in `inciRef` on first render, and only update
+ * it when a new non-empty value arrives (= a fresh analyse pushed onto the
+ * same route). Empty incoming props are IGNORED — we keep working on the
+ * frozen ref. As a second line of defence, we also write the completed
+ * result to sessionStorage so an actual remount can restore it.
  */
+/**
+ * Resolve the INCI to analyse, in order of priority:
+ *   1. `initialInci` prop from the URL searchParam (works on the happy path)
+ *   2. `cw:pendingInci` in sessionStorage (set by the caller right before
+ *      router.push — covers the case where Next.js served a prefetched
+ *      `/analyse` shell with empty searchParams)
+ * Removes the sessionStorage entry on read so a stale value can never leak
+ * into the next mount.
+ */
+function bootInci(propInci: string): string {
+  const fromProp = propInci.trim();
+  if (typeof window !== "undefined") {
+    try {
+      const stored = sessionStorage.getItem(PENDING_INCI_KEY);
+      if (stored) {
+        sessionStorage.removeItem(PENDING_INCI_KEY);
+        if (!fromProp) return stored.trim();
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  return fromProp;
+}
+
 export function AnalysisRunner({ initialInci }: { initialInci: string }) {
   const router = useRouter();
   const [result, setResult] = useState<AnalyseResponse | null>(null);
@@ -43,72 +132,95 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
   const [error, setError] = useState<string | null>(null);
   const inFlightRef = useRef<AbortController | null>(null);
 
+  // Frozen INCI for the currently-running analyse. useState lazy init runs
+  // exactly once per mount: that's where we look the INCI up from the prop
+  // and, failing that, from sessionStorage. After that, inciRef is the
+  // single source of truth for which analyse this component is running.
+  const [bootInciValue] = useState<string>(() => bootInci(initialInci));
+  const inciRef = useRef<string>(bootInciValue);
+  // Track which INCI we've already kicked off, so StrictMode double-effect
+  // (or a redundant useEffect run from an empty-prop re-render) doesn't
+  // launch the same analyse twice.
+  const launchedForRef = useRef<string>("");
+
   // Lazy init: pick the overlay duration once, on mount. Refreshed when the
   // user re-triggers an analyse with a new `initialInci` (see effect below).
   // Using a ref means re-renders during the analyse don't restart the
   // step-by-step animation inside the overlay.
   const budgetRef = useRef<number>(randomProcessingTotal());
 
-  // React StrictMode (dev) runs useEffect TWICE per mount: Effect 1 fires,
-  // its cleanup aborts the in-flight fetch, then Effect 2 fires. The
-  // sessionStorage flag consumed by Effect 1 is already gone when Effect 2
-  // runs → Effect 2 would see addToRoutine=false and complete successfully
-  // without adding to routine.
-  //
-  // Fix: use refs that survive across both effect executions for the same
-  // `initialInci`. Effect 1 reads sessionStorage and stores the result in
-  // the refs. Effect 2 sees the same `initialInci` → skips the storage read
-  // → reuses the value set by Effect 1. New `initialInci` → refs reset.
-  // Both `src` (product source / name) and `addToRoutine` are consumed from
-  // sessionStorage inside useEffect. React StrictMode runs the effect TWICE:
-  // Effect 1 reads and removes the keys, Effect 2 finds empty storage and
-  // loses both values. Fix: read once (guarded by initialInci) and persist in
-  // refs so Effect 2 reuses what Effect 1 already found.
-  const pendingSourceRef = useRef<ProductSource | null>(null);
-  const pendingAddToRoutineRef = useRef<boolean>(false);
-  const pendingSeenInciRef = useRef<string>("");
-
   useEffect(() => {
-    const trimmed = initialInci.trim();
+    const incoming = initialInci.trim();
+
+    // A truly new analyse pushed onto /analyse (soft nav, e.g. "Décode" again
+    // with a different list). Reset state and re-launch.
+    if (incoming && incoming !== inciRef.current) {
+      inciRef.current = incoming;
+      launchedForRef.current = "";
+      setResult(null);
+      setError(null);
+      setOriginalText("");
+      setProductSource(null);
+      setAddedToRoutine(false);
+      budgetRef.current = randomProcessingTotal();
+      clearRunCache();
+    }
+
+    const trimmed = inciRef.current;
+
+    // No INCI at all (genuine empty mount). Try to restore the last result
+    // from sessionStorage — covers the case where the component unmounted
+    // mid-flight on the previous visit (mobile swipe-back, refresh) and we
+    // managed to write the cache before being torn down. Falls back to "/".
     if (!trimmed) {
-      // Landed on /analyse with no payload — bounce back home.
+      const cached = readRunCache();
+      if (cached) {
+        inciRef.current = cached.inci;
+        launchedForRef.current = cached.inci;
+        setResult(cached.result);
+        setOriginalText(cached.text);
+        setProductSource(cached.productSource);
+        setAddedToRoutine(cached.addedToRoutine);
+        return;
+      }
       router.replace("/");
       return;
     }
 
-    // Reset state when a NEW analyse is triggered (e.g. user came back and
-    // navigated to /analyse?inci=B while a previous /analyse?inci=A result
-    // was still in state). Without this we'd keep showing the old result.
-    setResult(null);
-    setError(null);
-    setOriginalText("");
-    setProductSource(null);
-    setAddedToRoutine(false);
-    budgetRef.current = randomProcessingTotal();
+    // Already launched for this INCI (StrictMode double-effect, or this
+    // useEffect re-fired because `initialInci` flipped to "" after the
+    // replaceState below — see the "IMPORTANT" comment on the component).
+    if (launchedForRef.current === trimmed) return;
+    launchedForRef.current = trimmed;
 
+    // Same INCI already analysed in this tab → re-hydrate from cache instead
+    // of paying for a second /api/analyser round-trip (also covers F5
+    // refresh on /analyse just after a successful run).
+    const cached = readRunCache();
+    if (cached && cached.inci === trimmed) {
+      setResult(cached.result);
+      setOriginalText(cached.text);
+      setProductSource(cached.productSource);
+      setAddedToRoutine(cached.addedToRoutine);
+      return;
+    }
+
+    let pendingSrc: ProductSource | null = null;
+    let pendingAddToRoutine = false;
     if (typeof window !== "undefined") {
       try {
-        if (pendingSeenInciRef.current !== trimmed) {
-          // First pass for this initialInci: read sessionStorage and cache in refs.
-          // Effect 2 (StrictMode) will see pendingSeenInciRef.current === trimmed
-          // and skip straight to using the cached values.
-          pendingSeenInciRef.current = trimmed;
-          pendingSourceRef.current = null;
-          pendingAddToRoutineRef.current = false;
+        const stored = sessionStorage.getItem(PENDING_SOURCE_KEY);
+        if (stored) {
+          pendingSrc = JSON.parse(stored) as ProductSource;
+          sessionStorage.removeItem(PENDING_SOURCE_KEY);
+        }
 
-          const stored = sessionStorage.getItem(PENDING_SOURCE_KEY);
-          if (stored) {
-            pendingSourceRef.current = JSON.parse(stored) as ProductSource;
-            sessionStorage.removeItem(PENDING_SOURCE_KEY);
-          }
-
-          const stamp = sessionStorage.getItem(PENDING_ADD_TO_ROUTINE_KEY);
-          if (stamp) {
-            sessionStorage.removeItem(PENDING_ADD_TO_ROUTINE_KEY);
-            const ts = Number(stamp);
-            if (Number.isFinite(ts) && Date.now() - ts < PENDING_FLAG_TTL_MS) {
-              pendingAddToRoutineRef.current = true;
-            }
+        const stamp = sessionStorage.getItem(PENDING_ADD_TO_ROUTINE_KEY);
+        if (stamp) {
+          sessionStorage.removeItem(PENDING_ADD_TO_ROUTINE_KEY);
+          const ts = Number(stamp);
+          if (Number.isFinite(ts) && Date.now() - ts < PENDING_FLAG_TTL_MS) {
+            pendingAddToRoutine = true;
           }
         }
       } catch {
@@ -120,7 +232,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
       window.history.replaceState({}, "", url.pathname + (url.search || ""));
     }
 
-    void runAnalyse(trimmed, pendingSourceRef.current, pendingAddToRoutineRef.current);
+    void runAnalyse(trimmed, pendingSrc, pendingAddToRoutine);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialInci]);
 
@@ -157,7 +269,8 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
         return;
       }
       const data = (await r.json()) as AnalyseResponse & { addedToRoutine?: boolean };
-      if (data.addedToRoutine) setAddedToRoutine(true);
+      const addedFlag = data.addedToRoutine === true;
+      if (addedFlag) setAddedToRoutine(true);
       const elapsed = Date.now() - startedAt;
       // Always honour the minimum animation budget so the user has time to
       // read the "On décode la composition…" steps. The fetch itself is
@@ -168,6 +281,18 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
       setProductSource(src);
       setResult(data);
       setOriginalText(trimmed);
+      // Persist BEFORE updating state would race a tear-down: even if the
+      // component is already unmounted (state setters become no-ops), the
+      // sessionStorage write still lands, so a later mount can re-hydrate
+      // instead of leaving the user staring at a blank page.
+      writeRunCache({
+        inci: trimmed,
+        text: trimmed,
+        result: data,
+        productSource: src,
+        addedToRoutine: addedFlag,
+        ts: Date.now(),
+      });
     } catch (err) {
       if ((err as DOMException).name === "AbortError") return;
       setError((err as Error).message ?? "Erreur réseau");
@@ -175,16 +300,20 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
   }
 
   function resetHome() {
+    clearRunCache();
     setResult(null);
     setOriginalText("");
     setProductSource(null);
     router.push("/");
   }
 
-  // Loading is derived: we asked for an analyse (initialInci has content) and
-  // we have neither a result nor an error yet. This is true on the very first
-  // render — before useEffect runs — so the overlay shows without a blank frame.
-  const isLoading = Boolean(initialInci.trim()) && !result && !error;
+  // Loading is derived: we asked for an analyse (inciRef has content) and
+  // we have neither a result nor an error yet. We read from `inciRef` (frozen
+  // at mount) NOT from `initialInci` (the prop), because the prop flips to
+  // an empty string the moment Next.js re-evaluates the server component
+  // after our replaceState — and we don't want that to flicker the overlay
+  // off mid-fetch.
+  const isLoading = Boolean(inciRef.current) && !result && !error;
 
   if (isLoading) {
     return (
