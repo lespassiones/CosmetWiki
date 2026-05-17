@@ -7,6 +7,7 @@ import { ProcessingOverlay, randomProcessingTotal } from "./ProcessingOverlay";
 import { AnalyseResultPanel } from "./AnalyseResultPanel";
 import { PENDING_ADD_TO_ROUTINE_KEY } from "./routine/AddProductButton";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
+import { apiFetch } from "@/lib/clientApi";
 
 const PENDING_SOURCE_KEY = "cw:pendingProductSource";
 // Authoritative INCI handoff: callers (ScanSheet, PhotoOcrFlow, …) write the
@@ -266,7 +267,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
     const productType = src?.productType?.trim() || undefined;
 
     try {
-      const r = await fetch("/api/analyser", {
+      const r = await apiFetch("/api/analyser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

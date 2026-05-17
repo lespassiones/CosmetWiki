@@ -18,7 +18,7 @@ export type ProductSearchHit = {
 
 export type ProductSearchMiss = {
   found: false;
-  reason: "too_short" | "not_found";
+  reason: "too_short" | "not_found" | "timeout";
   message: string;
 };
 

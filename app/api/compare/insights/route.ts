@@ -1,10 +1,9 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { getUser } from "@/lib/auth";
-import { supabaseServer } from "@/lib/supabase";
+import { NextResponse, type NextRequest } from "next/server";
 import { generateCompareInsights } from "@/lib/ai/compare";
 import { shortenProductName } from "@/lib/text/shortenProductName";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
+import { apiGate } from "@/lib/apiGate";
+import { logError } from "@/lib/log";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,11 +14,10 @@ export const dynamic = "force-dynamic";
  * Returns the AI-generated portraits + "how to choose" for the pair.
  * Auth required; both analyses must belong to the current user.
  */
-export async function GET(req: Request) {
-  const user = await getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Auth required" }, { status: 401 });
-  }
+export async function GET(req: NextRequest) {
+  const gate = await apiGate(req, { feature: "compare.insights" });
+  if (!gate.ok) return gate.response;
+  const { user, supabase: sb } = gate;
 
   const url = new URL(req.url);
   const aId = url.searchParams.get("a");
@@ -28,8 +26,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Invalid ids" }, { status: 400 });
   }
 
-  const cookieStore = await cookies();
-  const sb = supabaseServer(cookieStore);
+  try {
   const { data } = await sb
     .schema("cosme_check")
     .from("analyses")
@@ -80,4 +77,8 @@ export async function GET(req: Request) {
       "Cache-Control": "private, max-age=3600",
     },
   });
+  } catch (err) {
+    logError("compare.insights", err, { userId: user.id });
+    return NextResponse.json({ error: "Erreur lors de la comparaison." }, { status: 500 });
+  }
 }

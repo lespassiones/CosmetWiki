@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BackgroundGlow } from "../BackgroundGlow";
+import { CreditsPill } from "../CreditsPill";
+import { CreditsExhaustedModal } from "../CreditsExhaustedModal";
 import { ScanSheet } from "./ScanSheet";
 import { MobileBurgerMenu } from "./MobileBurgerMenu";
 import { PremiumCard } from "./PremiumCard";
@@ -91,7 +93,16 @@ export function AppShell({
         </Link>
       )}
 
+      {/* Mobile credits pill — top-left, opposite the burger menu on top-right. */}
+      <div
+        className="lg:hidden fixed left-4 z-40 pointer-events-none"
+        style={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
+      >
+        <CreditsPill className="pointer-events-auto shadow-[0_4px_12px_-2px_rgba(15,23,42,0.08)]" />
+      </div>
+
       <ScanSheet open={scanOpen} onClose={() => setScanOpen(false)} />
+      <CreditsExhaustedModal />
     </div>
   );
 }
@@ -180,18 +191,21 @@ function DesktopSidebar({
       className="hidden lg:flex fixed left-0 top-0 w-60 h-screen flex-col bg-white/60 backdrop-blur-2xl backdrop-saturate-150 ring-1 ring-white/70 shadow-[8px_0_30px_-12px_rgba(15,23,42,0.10),inset_-1px_0_0_rgba(255,255,255,0.65)] p-5"
       aria-label="Navigation latérale"
     >
-      <Link href="/" className="flex items-center gap-2 mb-8">
-        <span aria-hidden className="w-5 h-5 inline-block">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#111111]">
-            <path d="M9 2v6L3 18a3 3 0 0 0 3 4h12a3 3 0 0 0 3-4L15 8V2" />
-            <path d="M9 2h6" />
-          </svg>
-        </span>
-        <span className="text-[15px] font-bold tracking-tight">
-          <span className="text-[#111111]">Cosme </span>
-          <span className="text-[#F43F5E]">Check</span>
-        </span>
-      </Link>
+      <div className="flex items-center justify-between mb-8">
+        <Link href="/" className="flex items-center gap-2">
+          <span aria-hidden className="w-5 h-5 inline-block">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#111111]">
+              <path d="M9 2v6L3 18a3 3 0 0 0 3 4h12a3 3 0 0 0 3-4L15 8V2" />
+              <path d="M9 2h6" />
+            </svg>
+          </span>
+          <span className="text-[15px] font-bold tracking-tight">
+            <span className="text-[#111111]">Cosme </span>
+            <span className="text-[#F43F5E]">Check</span>
+          </span>
+        </Link>
+        {signedIn && <CreditsPill />}
+      </div>
 
       <button
         type="button"

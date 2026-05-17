@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProcessingOverlay, randomProcessingTotal } from "../ProcessingOverlay";
 import { GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
+import { apiFetch } from "@/lib/clientApi";
 
 // Bridge between "user clicked Analyser" and "AnalysisRunner has mounted on
 // /analyse". Without this bridge the user sees the review page for the 1-2 s
@@ -82,7 +83,7 @@ export function PhotoOcrFlow() {
       const fd = new FormData();
       fd.append("image_back", backFile);
       if (frontFile) fd.append("image_front", frontFile);
-      const r = await fetch("/api/ocr", { method: "POST", body: fd });
+      const r = await apiFetch("/api/ocr", { method: "POST", body: fd });
       if (r.ok) {
         const data = (await r.json()) as {
           found: boolean;

@@ -12,10 +12,9 @@
  * — we trust RLS to gate the update to the row owner.
  */
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { extractJsonObject, webSearchComplete } from "@/lib/ai/webSearch";
-import { supabaseServer } from "@/lib/supabase";
-import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { apiGate } from "@/lib/apiGate";
+import { logError, logWarn } from "@/lib/log";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,14 +40,8 @@ const MIN_DESC_LEN = 60;
 const MAX_DESC_LEN = 4000;
 
 export async function POST(req: NextRequest) {
-  const ip = getClientIp(req.headers);
-  const rl = checkRateLimit(ip, 6, 60_000);
-  if (!rl.ok) {
-    return NextResponse.json(
-      { error: "Trop de requêtes. Réessaye dans une minute." },
-      { status: 429, headers: { "Retry-After": Math.ceil(rl.retryAfter / 1000).toString() } },
-    );
-  }
+  const gate = await apiGate(req, { feature: "promesse.fetch_description" });
+  if (!gate.ok) return gate.response;
 
   let body: FetchPayload;
   try {
@@ -147,7 +140,7 @@ Cherche la promesse marketing officielle (claims, bénéfices, actifs mis en ava
     if (msg.includes("timeout")) {
       return NextResponse.json({ error: "La recherche a pris trop de temps. Réessaie." }, { status: 504 });
     }
-    console.error("[promesse/fetch-description] failed:", msg);
+    logError("promesse.fetch_description", err, { userId: gate.user.id });
     return NextResponse.json({ error: "Erreur lors de la récupération." }, { status: 500 });
   }
 
@@ -170,20 +163,18 @@ Cherche la promesse marketing officielle (claims, bénéfices, actifs mis en ava
     && Object.keys(updates).length > 0
   ) {
     try {
-      const cookieStore = await cookies();
-      const sb = supabaseServer(cookieStore);
-      const { error: updateErr } = await sb
+      const { error: updateErr } = await gate.supabase
         .schema("cosme_check")
         .from("analyses")
         .update(updates)
         .eq("id", body.analysisId);
       if (updateErr) {
-        console.warn("[promesse/fetch-description] persist failed:", updateErr.message);
+        logWarn("[promesse.fetch_description] persist failed", { error: updateErr.message });
       } else {
         persisted = true;
       }
     } catch (err) {
-      console.warn("[promesse/fetch-description] persist threw:", (err as Error).message);
+      logWarn("[promesse.fetch_description] persist threw", { error: (err as Error).message });
     }
   }
 

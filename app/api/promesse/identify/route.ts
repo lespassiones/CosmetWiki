@@ -14,7 +14,8 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { extractJsonObject, webSearchComplete } from "@/lib/ai/webSearch";
-import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { apiGate } from "@/lib/apiGate";
+import { logError } from "@/lib/log";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,15 +42,8 @@ export type IdentifyResponse =
 const MAX_INCI_LEN = 4000;
 
 export async function POST(req: NextRequest) {
-  const ip = getClientIp(req.headers);
-  // Web search is the costly bit — keep this tighter than the other AI calls.
-  const rl = checkRateLimit(ip, 6, 60_000);
-  if (!rl.ok) {
-    return NextResponse.json(
-      { error: "Trop de recherches récentes. Réessaye dans une minute." },
-      { status: 429, headers: { "Retry-After": Math.ceil(rl.retryAfter / 1000).toString() } },
-    );
-  }
+  const gate = await apiGate(req, { feature: "promesse.identify" });
+  if (!gate.ok) return gate.response;
 
   let body: IdentifyPayload;
   try {
@@ -178,7 +172,7 @@ Cherche sur le web et propose jusqu'à 3 candidats. Réponds en JSON strict, san
     if (msg.includes("timeout")) {
       return NextResponse.json({ error: "La recherche a pris trop de temps. Réessaie." }, { status: 504 });
     }
-    console.error("[promesse/identify] failed:", msg);
+    logError("promesse.identify", err, { userId: gate.user.id });
     return NextResponse.json({ error: "Erreur lors de la recherche." }, { status: 500 });
   }
 }

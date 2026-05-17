@@ -1,6 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { cookies } from "next/headers";
-import { supabaseServer } from "@/lib/supabase";
 import {
   exploreOpenPromise,
   extractPromisesFromDescription,
@@ -16,7 +14,9 @@ import {
 import { findCategoryBySlug, isAbsenceCategory } from "@/lib/coherence/claims";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 import type { CoherencePromise } from "@/lib/coherence/types";
-import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { apiGate } from "@/lib/apiGate";
+import { idempotencyKey, idempotencyLookup, idempotencyStore } from "@/lib/idempotency";
+import { logError } from "@/lib/log";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,18 +41,6 @@ type Body = {
  * Returns: { id, result }
  */
 export async function POST(req: NextRequest) {
-  const ip = getClientIp(req.headers);
-  const rl = checkRateLimit(ip, 5, 60_000);
-  if (!rl.ok) {
-    return NextResponse.json(
-      { error: "Trop d'analyses récentes. Réessaye dans une minute." },
-      {
-        status: 429,
-        headers: { "Retry-After": Math.ceil(rl.retryAfter / 1000).toString() },
-      },
-    );
-  }
-
   let body: Body;
   try {
     body = (await req.json()) as Body;
@@ -78,15 +66,21 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const cookieStore = await cookies();
-  const sb = supabaseServer(cookieStore);
-  const {
-    data: { user },
-  } = await sb.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Non connecté." }, { status: 401 });
-  }
+  // Auth + IP rate-limit (no credit yet — idempotency lookup first to avoid
+  // double-billing duplicate clicks).
+  const gate = await apiGate(req, { feature: "coherence", costCredits: 0 });
+  if (!gate.ok) return gate.response;
+  const { user, supabase: sb } = gate;
 
+  const idemKey = idempotencyKey(user.id, "coherence", { analysisId, description });
+  const cached = await idempotencyLookup(idemKey);
+  if (cached) return cached;
+
+  // Now consume 1 credit. On exhaustion → 429.
+  const charge = await gate.consumeCredit("coherence");
+  if (!charge.ok) return charge.response;
+
+  try {
   // Look up the parent analysis. RLS already restricts to the user's own
   // rows; we add an explicit user_id check as belt-and-braces.
   const { data: analysisRow, error: analysisErr } = await sb
@@ -200,5 +194,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  return NextResponse.json({ id: saved.id, result });
+    const response = NextResponse.json({ id: saved.id, result });
+    await idempotencyStore(idemKey, response);
+    return response;
+  } catch (err) {
+    logError("coherence", err, { userId: user.id });
+    return NextResponse.json(
+      { error: "Erreur lors de l'analyse de cohérence." },
+      { status: 500 },
+    );
+  }
 }

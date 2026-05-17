@@ -15,9 +15,24 @@ import type { ProductSearchResult } from "./types";
 const NOT_FOUND_MESSAGE =
   "Nous n'avons pas pu trouver la composition de ce produit sur nos sources publiques. Tu peux coller la liste INCI manuellement ci-dessous.";
 
-export async function searchProductCascade(
-  rawQuery: string,
-): Promise<ProductSearchResult> {
+// Vercel Hobby kills the function at 10 s with no usable response. We cap the
+// whole cascade at 8 s and surface a clean "not_found" so the user gets the
+// "paste INCI manually" fallback instead of a generic gateway error.
+const CASCADE_TIMEOUT_MS = 8_000;
+
+export async function searchProductCascade(rawQuery: string): Promise<ProductSearchResult> {
+  return await Promise.race([
+    runCascade(rawQuery),
+    new Promise<ProductSearchResult>((resolve) => {
+      setTimeout(
+        () => resolve({ found: false, reason: "timeout", message: NOT_FOUND_MESSAGE }),
+        CASCADE_TIMEOUT_MS,
+      );
+    }),
+  ]);
+}
+
+async function runCascade(rawQuery: string): Promise<ProductSearchResult> {
   const query = rawQuery.trim().slice(0, 200);
   if (query.length < 3) {
     return {

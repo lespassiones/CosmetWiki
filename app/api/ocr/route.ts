@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { ocrFromImageBase64, ocrFrontFromImageBase64 } from "@/lib/ai/ocr";
-import { supabaseServer } from "@/lib/supabase";
-import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { apiGate } from "@/lib/apiGate";
+import { logError } from "@/lib/log";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,16 +20,8 @@ async function readImage(file: unknown): Promise<{ ok: true; image: ImagePayload
 }
 
 export async function POST(req: NextRequest) {
-  const ip = getClientIp(req.headers);
-  // Rate-limited on the URL, not the field count — sending front+back counts
-  // as one scan from the user's perspective.
-  const rl = checkRateLimit(ip, 10, 60_000);
-  if (!rl.ok) {
-    return NextResponse.json(
-      { error: "Trop de scans récents. Réessaye dans une minute." },
-      { status: 429, headers: { "Retry-After": Math.ceil(rl.retryAfter / 1000).toString() } },
-    );
-  }
+  const gate = await apiGate(req, { feature: "ocr" });
+  if (!gate.ok) return gate.response;
 
   const formData = await req.formData().catch(() => null);
   if (!formData) {
@@ -60,36 +51,39 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const cookieStore = await cookies();
-  const { data: { user } } = await supabaseServer(cookieStore).auth.getUser();
-  const userId = user?.id ?? null;
+  const userId = gate.user.id;
 
-  // Run the two OCR passes in parallel — they hit independent caches and
-  // independent OpenAI calls, no shared state.
-  const [back, front] = await Promise.all([
-    ocrFromImageBase64(backRead.image.base64, backRead.image.mimeType, userId),
-    frontImage
-      ? ocrFrontFromImageBase64(frontImage.base64, frontImage.mimeType, userId)
-      : Promise.resolve(null),
-  ]);
+  try {
+    // Run the two OCR passes in parallel — they hit independent caches and
+    // independent OpenAI calls, no shared state.
+    const [back, front] = await Promise.all([
+      ocrFromImageBase64(backRead.image.base64, backRead.image.mimeType, userId),
+      frontImage
+        ? ocrFrontFromImageBase64(frontImage.base64, frontImage.mimeType, userId)
+        : Promise.resolve(null),
+    ]);
 
-  // Keep the response shape back-compat with the previous single-image
-  // contract: top-level `found`/`text`/`uncertain`/`reason` mirror the back
-  // OCR. New consumers can read `back` and `front` explicitly.
-  if (back.found) {
+    // Keep the response shape back-compat with the previous single-image
+    // contract: top-level `found`/`text`/`uncertain`/`reason` mirror the back
+    // OCR. New consumers can read `back` and `front` explicitly.
+    if (back.found) {
+      return NextResponse.json({
+        found: true,
+        text: back.text,
+        uncertain: back.uncertain,
+        validation: back.validation,
+        back,
+        front,
+      });
+    }
     return NextResponse.json({
-      found: true,
-      text: back.text,
-      uncertain: back.uncertain,
-      validation: back.validation,
+      found: false,
+      reason: back.reason,
       back,
       front,
     });
+  } catch (err) {
+    logError("ocr", err, { userId });
+    return NextResponse.json({ error: "Erreur lors du scan." }, { status: 500 });
   }
-  return NextResponse.json({
-    found: false,
-    reason: back.reason,
-    back,
-    front,
-  });
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
+import { apiFetch } from "@/lib/clientApi";
 import type { IdentifyCandidate, IdentifyResponse } from "@/app/api/promesse/identify/route";
 import type { FetchDescriptionResponse } from "@/app/api/promesse/fetch-description/route";
 
@@ -63,7 +64,7 @@ export function PromesseFlowModal({
 
   async function identify() {
     try {
-      const r = await fetch("/api/promesse/identify", {
+      const r = await apiFetch("/api/promesse/identify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ inci, productLabel, brand, productType }),
@@ -92,7 +93,7 @@ export function PromesseFlowModal({
     setStep("fetchingDescription");
     setError(null);
     try {
-      const r = await fetch("/api/promesse/fetch-description", {
+      const r = await apiFetch("/api/promesse/fetch-description", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { supabaseAnon, supabaseServer } from "@/lib/supabase";
+import { supabaseAnon } from "@/lib/supabase";
 import { parseInciList, computeScore, scoreLabel, type ColorRating } from "@/lib/inciParser";
-import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { apiGate } from "@/lib/apiGate";
+import { idempotencyKey, idempotencyLookup, idempotencyStore } from "@/lib/idempotency";
+import { logError, logWarn } from "@/lib/log";
 import { generateSynthesis } from "@/lib/ai/synthesis";
 import { categorizeProduct, type ProductCategory } from "@/lib/ai/categorize";
 import { correctTypo } from "@/lib/ai/typo";
@@ -106,19 +107,6 @@ const TOP_LIST_WINDOW = 5;
 const DIACRITICS_RE = new RegExp("[\\u0300-\\u036f]", "g");
 
 export async function POST(req: NextRequest) {
-  const ip = getClientIp(req.headers);
-  // Tighter limit on the analyser API : 5/min/IP, 50/day/IP
-  const rl = checkRateLimit(ip, 5, 60_000);
-  if (!rl.ok) {
-    return NextResponse.json(
-      { error: "Trop d'analyses récentes. Réessaye dans une minute." },
-      {
-        status: 429,
-        headers: { "Retry-After": Math.ceil(rl.retryAfter / 1000).toString() },
-      },
-    );
-  }
-
   let body: AnalysePayload;
   try {
     body = (await req.json()) as AnalysePayload;
@@ -126,8 +114,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Requête invalide." }, { status: 400 });
   }
 
+  // Honey-pot anti-bot field — reject before touching Supabase.
   if (body.hp && body.hp.length > 0) {
-    blacklistIp(ip);
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -135,6 +123,26 @@ export async function POST(req: NextRequest) {
   if (!rawText.trim()) {
     return NextResponse.json({ error: "Liste vide." }, { status: 400 });
   }
+
+  // Auth + IP rate-limit only. Credit charged AFTER idempotency lookup so a
+  // double-click doesn't double-bill.
+  const gate = await apiGate(req, { feature: "analyser", costCredits: 0 });
+  if (!gate.ok) return gate.response;
+  const { user, supabase: sbAuth } = gate;
+
+  const idemKey = idempotencyKey(user.id, "analyser", {
+    text: rawText,
+    productLabel: body.productLabel ?? null,
+    brand: body.brand ?? null,
+    productType: body.productType ?? null,
+    withSynthesis: body.withSynthesis !== false,
+    addToRoutine: body.addToRoutine === true,
+  });
+  const cached = await idempotencyLookup(idemKey);
+  if (cached) return cached;
+
+  const charge = await gate.consumeCredit("analyser");
+  if (!charge.ok) return charge.response;
 
   // AI-powered INCI parser cascade: Mistral (gratuit, primary) → OpenAI (fallback)
   // → regex (final fallback below). Handles lists pasted without separators,
@@ -542,8 +550,6 @@ export async function POST(req: NextRequest) {
   // Optional AI synthesis (GPT-4o-mini primary, Mistral fallback, cached)
   let synthesis: string | null = null;
   if (body.withSynthesis !== false) {
-    const cookieStore = await cookies();
-    const { data: { user } } = await supabaseServer(cookieStore).auth.getUser();
     synthesis = await generateSynthesis({
       enriched: enriched.map((r) => ({
         input_raw: r.input_raw,
@@ -559,7 +565,7 @@ export async function POST(req: NextRequest) {
       scoreLabel: scoreLabelText,
       observations,
       productLabel: body.productLabel?.slice(0, 200) ?? null,
-      userId: user?.id ?? null,
+      userId: user.id,
     });
   }
 
@@ -617,71 +623,61 @@ export async function POST(req: NextRequest) {
   let savedAnalysisId: string | null = null;
   let addedToRoutine = false;
   try {
-    const cookieStore = await cookies();
-    const sb = supabaseServer(cookieStore);
-    const { data: { user } } = await sb.auth.getUser();
-    if (user) {
-      const top5 = byPosition
-        .slice(0, 5)
-        .map((r) => r.effective_name ?? r.input_raw)
-        .filter(Boolean);
-      let category: ProductCategory | null = null;
-      try {
-        category = await categorizeProduct(top5, user.id);
-      } catch (catErr) {
-        console.warn("[analyser] categorize failed:", (catErr as Error).message);
-        category = null;
-      }
-      const autoName = body.productLabel?.slice(0, 200)
-        ?? `Analyse du ${new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
-      // We need the inserted row id when the caller wants the analysis pushed
-      // to their routine, so use .select().single() instead of a bare insert.
-      const { data: inserted, error: insertError } = await sb
-        .schema("cosme_check")
-        .from("analyses")
-        .insert({
-          user_id: user.id,
-          name: autoName,
-          product_label: body.productLabel?.slice(0, 200) ?? null,
-          brand: body.brand?.slice(0, 120) ?? null,
-          product_type: body.productType?.slice(0, 120) ?? null,
-          category,
-          input_text: text,
-          result_json: responsePayload,
-          score: Number(score.toFixed(2)),
-        })
-        .select("id")
-        .single();
-      if (insertError) {
-        // Surface the error so RLS / column-mismatch regressions are obvious
-        // in the server logs instead of being silently swallowed.
-        console.error(
-          "[analyser] history insert failed:",
-          insertError.message,
-          insertError.code ? `(${insertError.code})` : "",
-        );
-      } else if (inserted?.id) {
-        savedAnalysisId = inserted.id as string;
-        if (body.addToRoutine === true) {
-          const { error: routineErr } = await sb
-            .schema("cosme_check")
-            .from("routine_items")
-            .upsert(
-              { user_id: user.id, analysis_id: inserted.id, frequency: "daily" },
-              { onConflict: "user_id,analysis_id" },
-            );
-          if (routineErr) {
-            console.error("[analyser] routine insert failed:", routineErr.message);
-          } else {
-            addedToRoutine = true;
-          }
+    const top5 = byPosition
+      .slice(0, 5)
+      .map((r) => r.effective_name ?? r.input_raw)
+      .filter(Boolean);
+    let category: ProductCategory | null = null;
+    try {
+      category = await categorizeProduct(top5, user.id);
+    } catch (catErr) {
+      logWarn("[analyser] categorize failed", { error: (catErr as Error).message });
+      category = null;
+    }
+    const autoName = body.productLabel?.slice(0, 200)
+      ?? `Analyse du ${new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
+    // We need the inserted row id when the caller wants the analysis pushed
+    // to their routine, so use .select().single() instead of a bare insert.
+    const { data: inserted, error: insertError } = await sbAuth
+      .schema("cosme_check")
+      .from("analyses")
+      .insert({
+        user_id: user.id,
+        name: autoName,
+        product_label: body.productLabel?.slice(0, 200) ?? null,
+        brand: body.brand?.slice(0, 120) ?? null,
+        product_type: body.productType?.slice(0, 120) ?? null,
+        category,
+        input_text: text,
+        result_json: responsePayload,
+        score: Number(score.toFixed(2)),
+      })
+      .select("id")
+      .single();
+    if (insertError) {
+      logError("analyser.history_insert", insertError, { userId: user.id, code: insertError.code });
+    } else if (inserted?.id) {
+      savedAnalysisId = inserted.id as string;
+      if (body.addToRoutine === true) {
+        const { error: routineErr } = await sbAuth
+          .schema("cosme_check")
+          .from("routine_items")
+          .upsert(
+            { user_id: user.id, analysis_id: inserted.id, frequency: "daily" },
+            { onConflict: "user_id,analysis_id" },
+          );
+        if (routineErr) {
+          logError("analyser.routine_insert", routineErr, { userId: user.id });
+        } else {
+          addedToRoutine = true;
         }
       }
     }
   } catch (err) {
-    console.error("[analyser] history save threw:", (err as Error).message);
-    // still don't propagate — the analysis response must reach the client
+    logError("analyser.history_save", err, { userId: user.id });
   }
 
-  return NextResponse.json({ ...responsePayload, analysisId: savedAnalysisId, addedToRoutine });
+  const response = NextResponse.json({ ...responsePayload, analysisId: savedAnalysisId, addedToRoutine });
+  await idempotencyStore(idemKey, response);
+  return response;
 }

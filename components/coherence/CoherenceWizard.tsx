@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GLASS_CARD, GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
+import { apiFetch } from "@/lib/clientApi";
 
 export type AnalysisOption = {
   id: string;
@@ -132,7 +133,7 @@ export function CoherenceWizard({
     setStep("running");
     setError(null);
     try {
-      const r = await fetch("/api/coherence", {
+      const r = await apiFetch("/api/coherence", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
