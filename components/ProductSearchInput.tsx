@@ -232,34 +232,51 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
 
   return (
     <form onSubmit={submit} className="w-full">
-      <div className="flex w-full items-center gap-2 rounded-2xl bg-white/80 p-1.5 shadow-[0_2px_24px_-6px_rgba(15,23,42,0.06)] ring-1 ring-white/70 backdrop-blur-xl focus-within:ring-black/[0.18]">
-        <input
-          type="text"
-          autoComplete="off"
-          spellCheck={false}
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            if (error) setError(null);
-          }}
-          placeholder="Ex : Effaclar Duo+ La Roche-Posay"
-          className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-base text-ink placeholder:text-ink-subtle focus:outline-none"
-          disabled={busy}
-          maxLength={200}
-        />
-        <button
-          type="submit"
-          disabled={busy || query.trim().length < 3}
-          className="shrink-0 rounded-xl bg-gradient-to-b from-rose-400 to-pink-400 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(251, 113, 133,0.55),inset_0_1px_0_0_rgba(255,255,255,0.30)] transition-all hover:from-rose-500 hover:to-pink-500 disabled:cursor-not-allowed disabled:from-rose-200 disabled:to-pink-200 disabled:shadow-none"
-        >
-          {busy ? "Recherche…" : "Rechercher"}
-        </button>
+      <div className="rounded-2xl bg-[#EEF3FB] border border-[#DDE5F0] p-3">
+        <div className="flex w-full items-center gap-2 rounded-xl bg-white border border-[#DDE5F0] p-1.5 shadow-sm transition-all focus-within:border-[#6189C9] focus-within:ring-2 focus-within:ring-[#BFD2EE]">
+          <span aria-hidden className="pl-2.5 text-[#1E3A8A]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </span>
+          <input
+            type="text"
+            autoComplete="off"
+            spellCheck={false}
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              if (error) setError(null);
+            }}
+            placeholder="Ex : Effaclar Duo+ La Roche-Posay"
+            className="min-w-0 flex-1 bg-transparent px-2 py-2.5 text-[14px] text-ink placeholder:text-[#9CA3AF] focus:outline-none"
+            disabled={busy}
+            maxLength={200}
+          />
+          <button
+            type="submit"
+            disabled={busy || query.trim().length < 3}
+            className="shrink-0 rounded-xl bg-gradient-to-b from-rose-500 to-pink-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(244,63,94,0.45),inset_0_1px_0_0_rgba(255,255,255,0.30)] transition-all hover:from-rose-600 hover:to-pink-600 disabled:cursor-not-allowed disabled:from-rose-200 disabled:to-pink-200 disabled:text-white/80 disabled:shadow-none"
+          >
+            {busy ? "Recherche…" : "Rechercher"}
+          </button>
+        </div>
       </div>
 
       {!searched ? (
-        <p className="mt-3 text-[13px] text-ink-subtle">
-          Tape la marque, le nom du produit, ou les deux. Ex&nbsp;: «&nbsp;baume L&apos;Oréal&nbsp;» ou «&nbsp;Effaclar Duo+&nbsp;».
-        </p>
+        <div className="mt-3 rounded-2xl bg-[#EEF3FB] border border-[#DDE5F0] p-4">
+          <div className="flex items-start gap-3">
+            <span aria-hidden className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#DDE5F0] text-[#1E3A8A] text-[12px] font-bold italic">
+              i
+            </span>
+            <p className="text-[13px] leading-relaxed text-[#475569]">
+              Tape la marque, le nom du produit, ou les deux.
+              <br />
+              <span className="font-semibold text-[#1E3A8A]">Ex :</span> «&nbsp;baume L&apos;Oréal&nbsp;» ou «&nbsp;Effaclar Duo+&nbsp;».
+            </p>
+          </div>
+        </div>
       ) : null}
 
       {error ? (
@@ -294,7 +311,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
                   type="button"
                   onClick={loadMore}
                   disabled={loadingMore}
-                  className="rounded-full bg-white/80 px-4 py-2 text-[13px] font-medium text-ink ring-1 ring-black/[0.06] transition-colors hover:bg-white disabled:opacity-60"
+                  className="rounded-full bg-white px-4 py-2 text-[13px] font-medium text-ink ring-1 ring-[#D1D5DB] shadow-sm transition-colors hover:bg-[#F9FAFB] disabled:opacity-60"
                 >
                   {loadingMore ? "Chargement…" : "Voir encore plus de produits"}
                 </button>
@@ -317,7 +334,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
       ) : null}
 
       {deepResult ? (
-        <div className="mt-5 rounded-2xl bg-white/65 p-5 ring-1 ring-white/70">
+        <div className="mt-5 rounded-2xl bg-white p-5 ring-1 ring-[#E5E7EB] shadow-sm">
           <p className="mb-3 text-[13px] text-ink-muted">
             Produit trouvé via{" "}
             <span className="font-medium text-ink">
@@ -328,7 +345,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
           <button
             type="button"
             onClick={() => selectDeepResult(deepResult)}
-            className="group flex w-full items-center gap-3 rounded-2xl bg-white/75 p-3 text-left ring-1 ring-white/70 shadow-[0_2px_18px_-8px_rgba(15,23,42,0.10)] backdrop-blur-xl transition-all hover:bg-white hover:ring-black/[0.10] hover:shadow-[0_6px_22px_-8px_rgba(15,23,42,0.16)]"
+            className="group flex w-full items-center gap-3 rounded-2xl bg-white p-3 text-left ring-1 ring-[#E5E7EB] shadow-sm transition-all hover:ring-rose-300 hover:shadow-md"
           >
             <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-rose-50/70 ring-1 ring-black/[0.04]">
               <span className="text-xs font-medium text-rose-400">INCI</span>
@@ -351,7 +368,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
       ) : null}
 
       {showEmpty ? (
-        <div className="mt-5 rounded-2xl bg-white/65 p-5 ring-1 ring-white/70">
+        <div className="mt-5 rounded-2xl bg-white p-5 ring-1 ring-[#E5E7EB] shadow-sm">
           <p className="text-[14px] text-ink">
             Aucun produit trouvé sur Open Beauty Facts pour «&nbsp;
             <span className="font-medium">{query.trim()}</span>&nbsp;».
@@ -372,7 +389,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
             <button
               type="button"
               onClick={() => onFallbackToManual()}
-              className="rounded-xl bg-white/80 px-4 py-2 text-sm font-medium text-ink ring-1 ring-black/[0.06] transition-colors hover:bg-white"
+              className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-ink ring-1 ring-[#D1D5DB] shadow-sm transition-colors hover:bg-[#F9FAFB]"
             >
               Coller la liste INCI
             </button>
@@ -431,7 +448,7 @@ function CandidateCard({
       type="button"
       onClick={() => onSelect(candidate)}
       disabled={loading || disabled}
-      className={`group flex w-full items-center gap-3 rounded-2xl bg-white/75 p-3 text-left ring-1 ring-white/70 shadow-[0_2px_18px_-8px_rgba(15,23,42,0.10)] backdrop-blur-xl transition-all hover:bg-white hover:ring-black/[0.10] hover:shadow-[0_6px_22px_-8px_rgba(15,23,42,0.16)] disabled:cursor-not-allowed ${disabled && !loading ? "opacity-40" : ""}`}
+      className={`group flex w-full items-center gap-3 rounded-2xl bg-white p-3 text-left ring-1 ring-[#E5E7EB] shadow-sm transition-all hover:ring-rose-300 hover:shadow-md disabled:cursor-not-allowed ${disabled && !loading ? "opacity-40" : ""}`}
     >
       <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-rose-50 to-rose-100/60 ring-1 ring-black/[0.04]">
         {loading ? (

@@ -228,12 +228,12 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
               type="button"
               onClick={() => setView("picker")}
               aria-label="Retour aux options"
-              className="absolute left-5 grid h-8 w-8 place-items-center rounded-full text-[#6B7280] hover:bg-black/[0.04] hover:text-ink"
+              className="absolute left-5 grid h-10 w-10 place-items-center rounded-full bg-[#EEF2F8] text-[#1E3A8A] hover:bg-[#DDE5F0] transition"
             >
               <span aria-hidden className="text-lg leading-none">←</span>
             </button>
           )}
-          <h2 className="text-center text-[17px] font-semibold">{heading}</h2>
+          <h2 className="text-center text-[20px] font-bold text-[#1E3A8A]">{heading}</h2>
         </div>
 
         <div className="px-5">
@@ -259,43 +259,53 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
             </div>
           ) : view === "paste" ? (
             <div className="space-y-3">
-              <p className="text-[13px] text-[#6B7280]">
+              <p className="text-[13px] text-[#475569]">
                 Colle la liste d&apos;ingrédients (INCI) telle qu&apos;elle apparaît sur l&apos;emballage.
               </p>
-              <div>
-                <label
-                  htmlFor="paste-product-name"
-                  className="block text-[12px] font-medium text-[#374151] mb-1"
-                >
-                  C&apos;est quel produit ?{" "}
-                  <span className="text-[#9CA3AF] font-normal">— optionnel mais recommandé</span>
-                </label>
+
+              <div className="rounded-2xl bg-[#ECFDF4] border border-[#BBF7D0] p-4">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <LeafIcon className="h-4 w-4 text-[#047857] shrink-0" />
+                  <span className="text-[14px] font-semibold text-[#047857]">
+                    Colle ta liste d&apos;ingrédients (INCI)
+                  </span>
+                </div>
+                <SearchBar
+                  size="md"
+                  onAnalyseList={(text) =>
+                    submitForAnalysis({
+                      ingredientsText: text,
+                      productNameHint: pasteProductName || null,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="rounded-2xl bg-[#EEF3FB] border border-[#DDE5F0] p-4">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <TagIcon className="h-4 w-4 text-[#1E3A8A] shrink-0" />
+                  <label htmlFor="paste-product-name" className="text-[14px] font-semibold text-[#1E3A8A]">
+                    C&apos;est quel produit&nbsp;?
+                    <span className="text-[#6B7280] font-normal ml-1">— optionnel mais recommandé</span>
+                  </label>
+                </div>
                 <input
                   id="paste-product-name"
                   type="text"
                   value={pasteProductName}
                   onChange={(e) => setPasteProductName(e.target.value.slice(0, 200))}
                   placeholder="Ex : CeraVe Foaming Cleanser"
-                  className="w-full rounded-xl bg-white ring-1 ring-[#E5E7EB] px-3 py-2.5 text-[13px] outline-none transition focus:ring-2 focus:ring-rose-300"
+                  className="w-full rounded-xl bg-white border border-[#DDE5F0] px-4 py-3 text-[14px] text-ink placeholder:text-[#9CA3AF] outline-none transition shadow-sm focus:border-[#6189C9] focus:ring-2 focus:ring-[#BFD2EE]"
                   autoComplete="off"
                 />
-                <p className="mt-1 text-[11px] text-[#9CA3AF]">
+                <p className="mt-2 text-[12px] text-[#475569]">
                   Le nom permet d&apos;identifier le produit et de récupérer sa promesse marketing.
                 </p>
               </div>
-              <SearchBar
-                size="lg"
-                onAnalyseList={(text) =>
-                  submitForAnalysis({
-                    ingredientsText: text,
-                    productNameHint: pasteProductName || null,
-                  })
-                }
-              />
             </div>
           ) : view === "search" ? (
             <div className="space-y-3">
-              <p className="text-[13px] text-[#6B7280]">
+              <p className="text-[13px] text-[#475569]">
                 Tape la marque et le nom du produit. On retrouve sa composition.
               </p>
               <ProductSearchInput
@@ -320,7 +330,7 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
         <button
           type="button"
           onClick={onClose}
-          className="block mx-auto mt-4 text-sm text-[#6B7280] hover:text-black px-4 py-2"
+          className="block mx-auto mt-5 rounded-full bg-[#F3F4F6] px-5 py-2 text-[13px] font-medium text-[#6B7280] hover:bg-[#E5E7EB] transition"
         >
           {isPicker ? "Annuler" : "Fermer"}
         </button>
@@ -330,5 +340,23 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
         @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
       `}</style>
     </div>
+  );
+}
+
+function TagIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+      <line x1="7" y1="7" x2="7.01" y2="7" />
+    </svg>
+  );
+}
+
+function LeafIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19.2 2.96c1.4-.96 2.43-2.04 2.5-2.46.36 6.05-2.32 12.46-7.5 14.5A7 7 0 0 1 11 20Z" />
+      <path d="M2 21c0-3 1.85-5.36 5.08-6" />
+    </svg>
   );
 }
