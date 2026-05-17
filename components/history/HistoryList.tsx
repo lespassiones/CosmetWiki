@@ -18,6 +18,9 @@ type Row = {
    *  this analyse — the per-card CTA links straight to that result instead
    *  of relaunching the modal. */
   latestCoherenceId?: string | null;
+  /** Lowercased ingredient names + raw INCI inputs, used by the search bar
+   *  to match analyses containing a given ingredient. */
+  ingredientTokens?: string[];
 };
 
 function scoreTone(score: number | null) {
@@ -41,10 +44,22 @@ function formatDate(iso: string): string {
 export function HistoryList({ rows }: { rows: Row[] }) {
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [query, setQuery] = useState("");
   const router = useRouter();
 
   const selectedCount = selected.size;
   const canCompare = selectedCount === 2;
+
+  const filteredRows = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((r) => {
+      const label = (r.product_label ?? r.name ?? "").toLowerCase();
+      if (label.includes(q)) return true;
+      const tokens = r.ingredientTokens ?? [];
+      return tokens.some((t) => t.includes(q));
+    });
+  }, [rows, query]);
 
   function toggle(id: string) {
     setSelected((prev) => {
@@ -129,8 +144,47 @@ export function HistoryList({ rows }: { rows: Row[] }) {
         )}
       </div>
 
+      {!selectMode && rows.length > 0 && (
+        <div className="mt-3">
+          <label htmlFor="history-search" className="sr-only">
+            Rechercher dans l&apos;historique
+          </label>
+          <div className="relative">
+            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
+            <input
+              id="history-search"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Rechercher un produit ou un ingrédient…"
+              className="w-full rounded-full bg-white/85 backdrop-blur-md ring-1 ring-black/[0.08] focus:ring-black/30 focus:outline-none pl-9 pr-9 py-2 text-sm placeholder:text-[#9CA3AF] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Effacer la recherche"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 inline-flex items-center justify-center rounded-full text-[#6B7280] hover:bg-black/5"
+              >
+                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+          {query.trim() && (
+            <p className="mt-2 text-[12px] text-[#6B7280]">
+              {filteredRows.length === 0
+                ? "Aucune analyse ne correspond."
+                : `${filteredRows.length} résultat${filteredRows.length > 1 ? "s" : ""}.`}
+            </p>
+          )}
+        </div>
+      )}
+
       <ul className="mt-6 space-y-3">
-        {rows.map((a) => {
+        {filteredRows.map((a) => {
           const tone = scoreTone(a.score);
           const displayName =
             a.product_label ?? a.name ?? `Analyse du ${formatDate(a.created_at)}`;
@@ -253,6 +307,24 @@ function SwapHorizontalIcon({ className }: { className?: string }) {
       <path d="M3 8h14" />
       <path d="m17 20 4-4-4-4" />
       <path d="M21 16H7" />
+    </svg>
+  );
+}
+
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
     </svg>
   );
 }

@@ -21,6 +21,15 @@ type AnalysisRow = {
    *  "Voir l'analyse de la promesse" and routes straight to /promesses/{id}
    *  instead of relaunching the whole identification + fetch flow. */
   latestCoherenceId: string | null;
+  /** Lowercased ingredient tokens (name + raw input) used by the search bar
+   *  on the client to match analyses by ingredient. Kept short — duplicates
+   *  removed, empty values filtered out. */
+  ingredientTokens: string[];
+};
+
+type RawItem = {
+  input?: string | null;
+  name?: string | null;
 };
 
 type RawRow = {
@@ -29,7 +38,12 @@ type RawRow = {
   product_label: string | null;
   score: number | null;
   created_at: string;
-  result_json: { counts?: { vert?: number; jaune?: number; orange?: number; rouge?: number } } | null;
+  result_json:
+    | {
+        counts?: { vert?: number; jaune?: number; orange?: number; rouge?: number };
+        items?: RawItem[];
+      }
+    | null;
 };
 
 type CoherenceRow = { id: string; analysis_id: string; created_at: string };
@@ -69,22 +83,33 @@ export default async function HistoryPage() {
     }
   }
 
-  const analyses: AnalysisRow[] = raw.map((r) => ({
-    id: r.id,
-    name: r.name,
-    product_label: r.product_label,
-    score: r.score,
-    created_at: r.created_at,
-    counts: r.result_json?.counts
-      ? {
-          vert: r.result_json.counts.vert ?? 0,
-          jaune: r.result_json.counts.jaune ?? 0,
-          orange: r.result_json.counts.orange ?? 0,
-          rouge: r.result_json.counts.rouge ?? 0,
-        }
-      : null,
-    latestCoherenceId: latestCoherenceByAnalysis.get(r.id) ?? null,
-  }));
+  const analyses: AnalysisRow[] = raw.map((r) => {
+    const items = r.result_json?.items ?? [];
+    const tokenSet = new Set<string>();
+    for (const it of items) {
+      const n = (it?.name ?? "").trim().toLowerCase();
+      const i = (it?.input ?? "").trim().toLowerCase();
+      if (n) tokenSet.add(n);
+      if (i && i !== n) tokenSet.add(i);
+    }
+    return {
+      id: r.id,
+      name: r.name,
+      product_label: r.product_label,
+      score: r.score,
+      created_at: r.created_at,
+      counts: r.result_json?.counts
+        ? {
+            vert: r.result_json.counts.vert ?? 0,
+            jaune: r.result_json.counts.jaune ?? 0,
+            orange: r.result_json.counts.orange ?? 0,
+            rouge: r.result_json.counts.rouge ?? 0,
+          }
+        : null,
+      latestCoherenceId: latestCoherenceByAnalysis.get(r.id) ?? null,
+      ingredientTokens: Array.from(tokenSet),
+    };
+  });
 
   return (
     <div className="mx-auto max-w-4xl px-5 lg:px-8 py-8 lg:py-12">

@@ -81,9 +81,11 @@ export function AnalyseResultPanel({
   /**
    * Override the breadcrumb trail. Last item is the current page (not
    * clickable). When omitted, defaults to `[Accueil, Nouvelle analyse]`
-   * with the home item wired to `onResetHome` if provided.
+   * with the home item wired to `onResetHome` if provided. Pass `null`
+   * to hide the breadcrumb entirely — used by the history detail page
+   * which renders its own back button instead.
    */
-  breadcrumb?: BreadcrumbItem[];
+  breadcrumb?: BreadcrumbItem[] | null;
 }) {
   const title = productLabel?.trim() || "Analyse de votre liste";
   // The "Analyser la promesse" CTA is always offered — the flow handles
@@ -102,10 +104,15 @@ export function AnalyseResultPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoOpenPromesse]);
 
-  const trail: BreadcrumbItem[] = breadcrumb ?? [
-    { label: "Accueil", href: "/", onClick: onResetHome },
-    { label: "Nouvelle analyse" },
-  ];
+  // `null` → caller explicitly hides the breadcrumb (history detail page).
+  // `undefined` → fall back to the default [Accueil, Nouvelle analyse].
+  const trail: BreadcrumbItem[] | null =
+    breadcrumb === null
+      ? null
+      : (breadcrumb ?? [
+          { label: "Accueil", href: "/", onClick: onResetHome },
+          { label: "Nouvelle analyse" },
+        ]);
 
   return (
     <section id="analyse-results" className="pt-2">
@@ -213,34 +220,36 @@ function TitleBar({
   onAnalysePromesse: () => void;
   existingCoherenceId: string | null;
   onShare: () => void;
-  breadcrumb: BreadcrumbItem[];
+  breadcrumb: BreadcrumbItem[] | null;
 }) {
   const brand = productSource?.brand ?? null;
   // Standard convention: last item is the current location (not clickable).
-  const trail = breadcrumb.slice(0, -1);
-  const current = breadcrumb[breadcrumb.length - 1];
+  const trail = breadcrumb ? breadcrumb.slice(0, -1) : [];
+  const current = breadcrumb ? breadcrumb[breadcrumb.length - 1] : undefined;
   return (
     <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0">
-        <nav className="flex flex-wrap items-center gap-1.5 text-[12px] text-ink-subtle" aria-label="Fil d'Ariane">
-          {trail.map((item, i) => (
-            <span key={`${item.label}-${i}`} className="inline-flex items-center gap-1.5">
-              {item.onClick ? (
-                <button type="button" onClick={item.onClick} className="rounded-md px-0.5 hover:text-ink">
-                  {item.label}
-                </button>
-              ) : item.href ? (
-                <Link href={item.href} className="hover:text-ink">{item.label}</Link>
-              ) : (
-                <span>{item.label}</span>
-              )}
-              <span aria-hidden>›</span>
-            </span>
-          ))}
-          {current ? (
-            <span className="text-ink-muted truncate max-w-[16rem]">{current.label}</span>
-          ) : null}
-        </nav>
+        {breadcrumb ? (
+          <nav className="flex flex-wrap items-center gap-1.5 text-[12px] text-ink-subtle" aria-label="Fil d'Ariane">
+            {trail.map((item, i) => (
+              <span key={`${item.label}-${i}`} className="inline-flex items-center gap-1.5">
+                {item.onClick ? (
+                  <button type="button" onClick={item.onClick} className="rounded-md px-0.5 hover:text-ink">
+                    {item.label}
+                  </button>
+                ) : item.href ? (
+                  <Link href={item.href} className="hover:text-ink">{item.label}</Link>
+                ) : (
+                  <span>{item.label}</span>
+                )}
+                <span aria-hidden>›</span>
+              </span>
+            ))}
+            {current ? (
+              <span className="text-ink-muted truncate max-w-[16rem]">{current.label}</span>
+            ) : null}
+          </nav>
+        ) : null}
         {brand ? (
           <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-pink-500/80">
             {brand}

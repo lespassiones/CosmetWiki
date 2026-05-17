@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
@@ -82,11 +83,25 @@ export default async function HistoryDetailPage({
 
   return (
     <div className="w-full px-3 lg:px-6 pt-4 pb-16">
-      {/* Action buttons floating above the title bar — rename / delete /
-          add-to-routine. The title + breadcrumb live inside the panel below. */}
-      <div className="flex items-center justify-end gap-2 mb-2">
-        <AddToRoutineButton analysisId={data.id} alreadyInRoutine={inRoutine} />
-        <HistoryItemActions id={data.id} currentName={data.name ?? displayName} />
+      {/* Top bar — back-to-history pill on the left, action buttons on the
+          right. The product name is rendered as the H1 inside the panel below,
+          so the breadcrumb (which used to repeat that name as its last item)
+          is hidden via `breadcrumb={null}`. */}
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <Link
+          href="/history"
+          aria-label="Retour à l'historique"
+          className="inline-flex items-center gap-1.5 rounded-full bg-white/85 hover:bg-white text-[#111111] ring-1 ring-black/[0.08] hover:ring-black/20 backdrop-blur-md px-3 py-1.5 text-[12px] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] transition"
+        >
+          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+          Retour
+        </Link>
+        <div className="flex items-center gap-2">
+          <AddToRoutineButton analysisId={data.id} alreadyInRoutine={inRoutine} />
+          <HistoryItemActions id={data.id} currentName={data.name ?? displayName} />
+        </div>
       </div>
 
       <AnalyseResultPanel
@@ -98,11 +113,7 @@ export default async function HistoryDetailPage({
         productType={(data as { product_type?: string | null }).product_type ?? null}
         existingCoherenceId={existingCoherenceId}
         autoOpenPromesse={sp.promesse === "auto"}
-        breadcrumb={[
-          { label: "Accueil", href: "/" },
-          { label: "Mon historique", href: "/history" },
-          { label: displayName },
-        ]}
+        breadcrumb={null}
       />
 
       <p className="mt-3 text-[11px] text-ink-subtle">Analysé le {analysedAt}</p>
