@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { signIn } from "@/app/auth/actions";
 import { AuthDivider, GoogleAuthButton } from "./GoogleAuthButton";
@@ -35,7 +36,15 @@ export function SignInForm({ next = "/" }: { next?: string }) {
         />
       </label>
       <label className="block">
-        <span className="text-xs font-medium text-[#6B7280] mb-1.5 block">Mot de passe</span>
+        <div className="flex items-baseline justify-between mb-1.5">
+          <span className="text-xs font-medium text-[#6B7280]">Mot de passe</span>
+          <Link
+            href="/auth/forgot-password"
+            className="text-xs text-[#F43F5E] hover:underline"
+          >
+            Mot de passe oublié&nbsp;?
+          </Link>
+        </div>
         <div className="relative">
           <input
             name="password"

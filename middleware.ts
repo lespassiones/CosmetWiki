@@ -14,6 +14,7 @@ const PROTECTED_PREFIXES = ["/history", "/routine", "/profile", "/compare"];
 const SKIP_AUTH_PREFIXES = [
   "/auth/sign-in",
   "/auth/sign-up",
+  "/auth/forgot-password",
   "/auth/callback",
   "/about",
   "/comment-ca-marche",

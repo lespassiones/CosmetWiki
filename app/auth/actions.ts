@@ -37,7 +37,10 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
 
   if (firstName.length < 1) return { ok: false, error: "Prénom requis." };
   if (!email.includes("@")) return { ok: false, error: "Email invalide." };
-  if (password.length < 6) return { ok: false, error: "Mot de passe trop court (6 caractères minimum)." };
+  if (password.length < 8) return { ok: false, error: "Mot de passe trop court (8 caractères minimum)." };
+  if (!/[a-z]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins une minuscule." };
+  if (!/[A-Z]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins une majuscule." };
+  if (!/[0-9]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins un chiffre." };
 
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
@@ -73,6 +76,53 @@ export async function signOut(): Promise<void> {
   const sb = supabaseServer(cookieStore);
   await sb.auth.signOut();
   redirect("/");
+}
+
+/**
+ * Sends a password-reset email. Always returns `ok: true` to avoid leaking
+ * whether the email exists in our user base (anti-enumeration).
+ */
+export async function requestPasswordReset(formData: FormData): Promise<AuthResult> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!email.includes("@")) return { ok: false, error: "Email invalide." };
+
+  const cookieStore = await cookies();
+  const sb = supabaseServer(cookieStore);
+  const origin = await resolveOrigin();
+
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/callback?next=/auth/reset-password`,
+  });
+
+  if (error) {
+    console.warn("[auth] resetPasswordForEmail:", error.message);
+  }
+  return { ok: true };
+}
+
+/**
+ * Updates the password of the currently signed-in user. Used by the
+ * /auth/reset-password page, which requires a fresh recovery session set by
+ * the email callback. Same complexity rules as signUp.
+ */
+export async function updatePassword(formData: FormData): Promise<AuthResult> {
+  const password = String(formData.get("password") ?? "");
+
+  if (password.length < 8) return { ok: false, error: "Mot de passe trop court (8 caractères minimum)." };
+  if (!/[a-z]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins une minuscule." };
+  if (!/[A-Z]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins une majuscule." };
+  if (!/[0-9]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins un chiffre." };
+
+  const cookieStore = await cookies();
+  const sb = supabaseServer(cookieStore);
+
+  const { data: userData } = await sb.auth.getUser();
+  if (!userData.user) return { ok: false, error: "Session expirée. Demandez un nouveau lien de réinitialisation." };
+
+  const { error } = await sb.auth.updateUser({ password });
+  if (error) return { ok: false, error: error.message };
+
+  return { ok: true };
 }
 
 export async function signInWithGoogle(formData: FormData): Promise<void> {
