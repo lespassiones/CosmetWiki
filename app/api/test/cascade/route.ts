@@ -9,9 +9,9 @@
  * and remove this whole folder when we're done.
  *
  * Usage:
- *   curl "https://www.cosme-check.com/api/_test/cascade?q=Nivea+Q10&token=Tk_a9f3c2bd5e1842f0"
+ *   curl "https://www.cosme-check.com/api/test/cascade?q=Nivea+Q10&token=Tk_a9f3c2bd5e1842f0"
  *
- * REMOVE: app/api/_test/cascade/ folder once cascade is validated.
+ * REMOVE: app/api/test/cascade/ folder once cascade is validated.
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { searchProductCascade } from "@/lib/productSearch/cascade";

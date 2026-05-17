@@ -9,11 +9,11 @@
  * Protected by the same token as the cascade test endpoint.
  *
  * Usage:
- *   curl -X POST "https://www.cosme-check.com/api/_test/ocr-logic?token=Tk_a9f3c2bd5e1842f0" \
+ *   curl -X POST "https://www.cosme-check.com/api/test/ocr-logic?token=Tk_a9f3c2bd5e1842f0" \
  *     -H 'Content-Type: application/json' \
  *     -d '{"text":"Aqua, Glycerin, Cetearyl Alcohol, Tocopherol"}'
  *
- * REMOVE: app/api/_test/ocr-logic/ folder once OCR logic is validated.
+ * REMOVE: app/api/test/ocr-logic/ folder once OCR logic is validated.
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { parseInciList } from "@/lib/inciParser";
