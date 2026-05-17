@@ -35,7 +35,12 @@ export async function GET(req: NextRequest) {
     { hits: data ?? [] },
     {
       headers: {
-        "Cache-Control": "private, max-age=10",
+        // s-maxage = Vercel Edge CDN caches by URL (incl. ?q=…) for 60 s.
+        // Popular autocomplete queries ("glycerin", "niacinamide"…) collapse
+        // into ONE Postgres roundtrip per minute per region instead of
+        // hitting the RPC on every keystroke. stale-while-revalidate keeps
+        // serving the cached payload up to 5 min while a fresh one is fetched.
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
       },
     },
   );

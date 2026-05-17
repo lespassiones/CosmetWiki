@@ -74,12 +74,11 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
     inFlightRef.current = ctrl;
 
     try {
-      const r = await fetch("/api/product-suggest", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: q, page: 1 }),
-        signal: ctrl.signal,
-      });
+      // GET so Vercel Edge CDN can cache popular queries.
+      const r = await fetch(
+        `/api/product-suggest?query=${encodeURIComponent(q)}&page=1`,
+        { signal: ctrl.signal },
+      );
       if (!r.ok) {
         const j = (await r.json().catch(() => ({}))) as { error?: string };
         setError(j.error ?? `Erreur ${r.status}`);
@@ -108,12 +107,10 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
     inFlightRef.current = ctrl;
 
     try {
-      const r = await fetch("/api/product-suggest", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: query.trim(), page: nextPage }),
-        signal: ctrl.signal,
-      });
+      const r = await fetch(
+        `/api/product-suggest?query=${encodeURIComponent(query.trim())}&page=${nextPage}`,
+        { signal: ctrl.signal },
+      );
       if (!r.ok) return;
       const data = (await r.json()) as SuggestResponse;
       // Dedupe on id in case OBF returns overlapping entries.

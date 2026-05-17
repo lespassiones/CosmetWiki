@@ -64,16 +64,32 @@ export async function POST(req: NextRequest) {
     return new Response(JSON.stringify({ error: "Non connecté." }), { status: 401 });
   }
 
-  // Daily per-user cap on advisor usage to keep cost predictable.
+  // Three independent reads — fan them out in parallel so the chat doesn't
+  // wait 3× the network roundtrip. The daily cap check still gates the
+  // response, but profile + routine are fetched concurrently for free.
   const since = new Date();
   since.setHours(0, 0, 0, 0);
-  const { count: usedToday } = await sb
-    .schema("cosme_check")
-    .from("ai_logs")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .eq("feature", "synthesis")    // we'll log advisor under "synthesis" feature for now
-    .gte("created_at", since.toISOString());
+  const [usedTodayRes, profileRes, routineRes] = await Promise.all([
+    sb
+      .schema("cosme_check")
+      .from("ai_logs")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("feature", "synthesis")
+      .gte("created_at", since.toISOString()),
+    sb
+      .schema("cosme_check")
+      .from("user_profiles")
+      .select("first_name, preferences")
+      .eq("id", user.id)
+      .maybeSingle(),
+    sb
+      .schema("cosme_check")
+      .from("routine_items")
+      .select("frequency, analyses(name, product_label, score, result_json)"),
+  ]);
+
+  const usedToday = usedTodayRes.count;
   if ((usedToday ?? 0) > MAX_MESSAGES_PER_DAY) {
     return new Response(
       JSON.stringify({ error: `Limite quotidienne atteinte (${MAX_MESSAGES_PER_DAY}/jour). À demain !` }),
@@ -81,19 +97,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Pull the user's skin profile + a compact routine summary.
-  const { data: profileRow } = await sb
-    .schema("cosme_check")
-    .from("user_profiles")
-    .select("first_name, preferences")
-    .eq("id", user.id)
-    .maybeSingle();
+  const profileRow = profileRes.data;
   const skin = readSkinProfile((profileRow?.preferences ?? null) as Record<string, unknown> | null);
 
-  const { data: routineRows } = await sb
-    .schema("cosme_check")
-    .from("routine_items")
-    .select("frequency, analyses(name, product_label, score, result_json)");
+  const routineRows = routineRes.data;
   const routineFacts = ((routineRows ?? []) as unknown as {
     frequency: string;
     analyses: { name: string | null; product_label: string | null; score: number | null; result_json: AnalyseResponse } | null;

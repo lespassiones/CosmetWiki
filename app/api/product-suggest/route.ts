@@ -41,7 +41,10 @@ function dedupeKey(brand: string | null, name: string | null): string {
   return normalize(all).split(/\s+/).filter(Boolean).sort().slice(0, 6).join(" ");
 }
 
-export async function POST(req: NextRequest) {
+// Migrated from POST to GET so Vercel Edge CDN can cache by URL. The body
+// fields (query, page, hp) are now query params — same semantics, but the
+// top 100 search terms collapse to a handful of Lambda calls per 5 min.
+export async function GET(req: NextRequest) {
   const ip = getClientIp(req.headers);
   const rl = checkRateLimit(ip, 30, 60_000);
   if (!rl.ok) {
@@ -51,24 +54,20 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let body: RequestBody;
-  try {
-    body = (await req.json()) as RequestBody;
-  } catch {
-    return NextResponse.json({ error: "Requête invalide." }, { status: 400 });
-  }
-
-  if (body.hp && body.hp.length > 0) {
+  const url = new URL(req.url);
+  const hp = url.searchParams.get("hp") ?? "";
+  if (hp && hp.length > 0) {
     blacklistIp(ip);
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const query = (body.query ?? "").trim().slice(0, 200);
+  const query = (url.searchParams.get("query") ?? "").trim().slice(0, 200);
   if (query.length < 3) {
     return NextResponse.json({ error: "Tape au moins 3 caractères." }, { status: 400 });
   }
 
-  const page = Math.max(1, Math.min(20, Math.floor(body.page ?? 1)));
+  const pageParam = url.searchParams.get("page");
+  const page = Math.max(1, Math.min(20, Math.floor(Number(pageParam ?? 1) || 1)));
   const isFirstPage = page === 1;
 
   // Cache + INCIDecoder only contribute on page 1 (they're fixed-size sets,
@@ -99,11 +98,20 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({
-    candidates: merged,
-    hasMore: obf.hasMore,
-    page,
-  });
+  return NextResponse.json(
+    {
+      candidates: merged,
+      hasMore: obf.hasMore,
+      page,
+    },
+    {
+      headers: {
+        // Vercel Edge CDN caches by URL — popular queries collapse to one
+        // upstream call per 5 min per region.
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+      },
+    },
+  );
 }
 
 async function fetchCachedCandidates(

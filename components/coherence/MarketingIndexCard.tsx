@@ -2,12 +2,16 @@ import { InfoBadge, Tooltip } from "../Tooltip";
 import type { CoherenceResult } from "@/lib/coherence/types";
 
 /**
- * "Indice marketing" card — % of promises with NO documented active behind
- * them (verdicts: marketing OR non_demontree). High value = the description
- * over-promises relative to the formula.
+ * "Indice marketing" card — % of promises NOT supported by the formula:
+ * verdicts `marketing` (cosmetic-only actives), `non_demontree` (no
+ * documented active at all) AND `contredite` (the formula actively
+ * contradicts an "absence" claim — e.g. "sans sulfate" but a sulfate is
+ * listed). This must match what `computeMetrics` puts in
+ * `metrics.marketingIndex` (cf. lib/coherence/engine.ts), otherwise the
+ * big "17 %" headline diverges from the sub-count text below it.
  *
- * The body explicitly nuances the metric: it shows the breakdown across the
- * 4 verdicts so the user understands why "0/2 tenues" can coexist with
+ * The body explicitly nuances the metric: it shows the breakdown across all
+ * verdicts so the user understands why "0/2 tenues" can coexist with
  * "indice marketing 50 %" (the missing 50 % are partial verdicts — actives
  * present but in trace ≤ 1 %).
  */
@@ -17,7 +21,12 @@ export function MarketingIndexCard({
   metrics: CoherenceResult["metrics"];
 }) {
   const idx = metrics.marketingIndex;
-  const noActiveCount = metrics.marketingCount + metrics.nonDemontreeCount;
+  // Same formula as engine.computeMetrics → guarantees the headline % and
+  // the sub-count never disagree.
+  const unsupportedCount
+    = metrics.marketingCount
+    + metrics.nonDemontreeCount
+    + metrics.contrediteCount;
   const total = metrics.totalPromises;
 
   return (
@@ -32,18 +41,20 @@ export function MarketingIndexCard({
             maxWidth={420}
             content={
               <>
-                <b>Indice marketing</b> = % de promesses sans <b>aucun</b> ingrédient
-                documenté (verdict <b>marketing</b> ou <b>non démontrée</b>).
+                <b>Indice marketing</b> = % de promesses <b>non soutenues</b> par la
+                formule. On y compte les verdicts <b>marketing</b> (effet visuel/
+                sensoriel uniquement), <b>non démontrée</b> (aucun actif documenté)
+                et <b>contredite</b> (la formule contient l&apos;ingrédient que
+                la promesse dit absent).
                 <br /><br />
                 C&apos;est <b>différent du verdict global</b> (qui ne compte que les
-                promesses <b>totalement tenues</b>). La différence : les promesses{" "}
+                promesses <b>totalement tenues</b>). Les promesses{" "}
                 <b>partielles</b> (actifs présents mais en trace ≤ 1 %) ne sont
                 comptées ni dans l&apos;un ni dans l&apos;autre — elles ont des
                 actifs, juste sous-dosés.
                 <br /><br />
-                <b>Ici</b> : {metrics.marketingCount + metrics.nonDemontreeCount}{" "}
-                promesse{metrics.marketingCount + metrics.nonDemontreeCount > 1 ? "s" : ""}{" "}
-                sans actif sur {metrics.totalPromises} = {idx} % marketing pur.
+                <b>Ici</b> : {unsupportedCount} promesse{unsupportedCount > 1 ? "s" : ""}{" "}
+                non soutenue{unsupportedCount > 1 ? "s" : ""} sur {total} = {idx} %.
               </>
             }
           >
@@ -56,7 +67,7 @@ export function MarketingIndexCard({
           {idx} %
         </div>
         <div className="text-[11px] text-rose-700/80 mt-1">
-          {noActiveCount} promesse{noActiveCount > 1 ? "s" : ""} sur {total} sans actif documenté
+          {unsupportedCount} promesse{unsupportedCount > 1 ? "s" : ""} sur {total} non soutenue{unsupportedCount > 1 ? "s" : ""} par la formule
         </div>
       </div>
       <div className="min-w-[16rem] flex-1 space-y-3">
@@ -66,7 +77,7 @@ export function MarketingIndexCard({
               La description ne contient aucune promesse d&apos;effet vérifiable —
               uniquement des mentions générales (composition, certification, sensorialité).
             </>
-          ) : noActiveCount === 0 ? (
+          ) : unsupportedCount === 0 ? (
             <>
               Toutes les promesses détectées ont au moins un actif documenté
               dans la formule pour les soutenir. C&apos;est cohérent.
@@ -74,31 +85,46 @@ export function MarketingIndexCard({
           ) : (
             <>
               <span className="font-semibold">
-                {noActiveCount} promesse{noActiveCount > 1 ? "s" : ""}
+                {unsupportedCount} promesse{unsupportedCount > 1 ? "s" : ""}
               </span>{" "}
-              sur {total} n&apos;{noActiveCount > 1 ? "ont " : "a "}aucun ingrédient
-              documenté dans la formule pour {noActiveCount > 1 ? "les" : "la"} soutenir.
-              Ce sont :
+              sur {total} n&apos;{unsupportedCount > 1 ? "ont " : "a "}pas de
+              support clair dans la formule. {unsupportedCount > 1 ? "Elles peuvent" : "Elle peut"} être :
               <ul className="mt-2 space-y-1 list-none">
-                <li className="flex gap-2">
-                  <span aria-hidden className="text-rose-700/70 shrink-0">•</span>
-                  <span>
-                    soit des promesses purement marketing, sans support biologique réel ;
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span aria-hidden className="text-rose-700/70 shrink-0">•</span>
-                  <span>
-                    soit des promesses qui découlent indirectement des autres promesses.
-                  </span>
-                </li>
+                {metrics.marketingCount > 0 && (
+                  <li className="flex gap-2">
+                    <span aria-hidden className="text-orange-500 shrink-0">•</span>
+                    <span>
+                      <b>marketing</b> : seul un effet visuel ou sensoriel est apporté,
+                      pas d&apos;action biologique documentée.
+                    </span>
+                  </li>
+                )}
+                {metrics.nonDemontreeCount > 0 && (
+                  <li className="flex gap-2">
+                    <span aria-hidden className="text-rose-500 shrink-0">•</span>
+                    <span>
+                      <b>non démontrée</b> : aucun actif documenté dans la formule
+                      pour soutenir la promesse.
+                    </span>
+                  </li>
+                )}
+                {metrics.contrediteCount > 0 && (
+                  <li className="flex gap-2">
+                    <span aria-hidden className="text-rose-700 shrink-0">•</span>
+                    <span>
+                      <b>contredite</b> : la formule contient un ingrédient que la
+                      promesse dit absent (ex&nbsp;: &laquo;&nbsp;sans sulfate&nbsp;&raquo;
+                      alors qu&apos;un sulfate est dans la liste).
+                    </span>
+                  </li>
+                )}
               </ul>
             </>
           )}
         </div>
 
-        {/* Breakdown of the 4 verdicts so the gap between marketing index and
-            verdict global is explicit. */}
+        {/* Breakdown across all verdicts so the gap between marketing index
+            and verdict global is explicit. */}
         {total > 0 && (
           <ul className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px]">
             {metrics.tenueCount > 0 && (
@@ -123,6 +149,12 @@ export function MarketingIndexCard({
               <li className="inline-flex items-center gap-1.5 text-rose-700">
                 <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-rose-500" />
                 {metrics.nonDemontreeCount} non démontrée{metrics.nonDemontreeCount > 1 ? "s" : ""}
+              </li>
+            )}
+            {metrics.contrediteCount > 0 && (
+              <li className="inline-flex items-center gap-1.5 text-rose-800">
+                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-rose-700" />
+                {metrics.contrediteCount} contredite{metrics.contrediteCount > 1 ? "s" : ""}
               </li>
             )}
           </ul>

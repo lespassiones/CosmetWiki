@@ -1,29 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { supabaseAnon, supabaseServer, supabaseService } from "@/lib/supabase";
+import { supabaseAnon } from "@/lib/supabase";
 import { explainIngredient } from "@/lib/ai/explain";
-import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import type { ColorRating } from "@/lib/supabase";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+// `force-dynamic` is intentionally NOT set: we want Next/Vercel to honour the
+// public `s-maxage` Cache-Control below and cache by URL at the Edge CDN.
 
-export async function POST(req: NextRequest, ctx: { params: Promise<{ slug: string }> }) {
+/**
+ * GET /api/ingredient/[slug]/explain
+ *
+ * Migrated from POST → GET (and from per-user → fully public) so Vercel Edge
+ * can cache the response. At scale, the same 100-200 popular ingredients
+ * generate ~80 % of the SEO traffic on /i/[slug] pages; caching for 24 h
+ * collapses thousands of Lambda invocations down to a handful per region.
+ *
+ * Trade-off: the "Tu as cet ingrédient dans X produits de ta routine" personal
+ * callout is no longer computed here. If we want it back, we'll add a
+ * separate uncached /api/ingredient/[slug]/exposure endpoint that the client
+ * can fetch in parallel and merge into the UI.
+ */
+export async function GET(_req: NextRequest, ctx: { params: Promise<{ slug: string }> }) {
   const { slug } = await ctx.params;
 
-  const ip = getClientIp(req.headers);
-  const rl = checkRateLimit(ip, 20, 60_000);
-  if (!rl.ok) {
-    return NextResponse.json(
-      { error: "Trop de demandes. Patiente une minute." },
-      { status: 429, headers: { "Retry-After": Math.ceil(rl.retryAfter / 1000).toString() } },
-    );
-  }
-
-  // Look up the ingredient via the anon client. We need its inci_id and
-  // metadata to feed the explanation. We deliberately do not call the
-  // existing `cosme_check_get_ingredient` RPC because it returns a lot of
-  // data we don't need; a direct select is cheaper.
   const sb = supabaseAnon();
   const { data, error } = await sb
     .schema("cosme_check")
@@ -43,47 +42,21 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ slug: stri
     tags: string[] | null;
   };
 
-  // If the user is signed in, gather personal-exposure context (cheap RPC-less query)
-  let userExposure: { routineCount: number; historyCount: number } | undefined;
-  let userId: string | null = null;
-  try {
-    const cookieStore = await cookies();
-    const { data: { user } } = await supabaseServer(cookieStore).auth.getUser();
-    if (user) {
-      userId = user.id;
-      const svc = supabaseService();
-      // Count routine analyses that contain this ingredient in their JSON items
-      // and history analyses that contain it.
-      const [routineRes, historyRes] = await Promise.all([
-        svc.rpc("cosme_check_count_ingredient_in_routine", {
-          p_user: user.id,
-          p_slug: slug,
-        }),
-        svc.rpc("cosme_check_count_ingredient_in_history", {
-          p_user: user.id,
-          p_slug: slug,
-        }),
-      ]);
-      userExposure = {
-        routineCount: Number(routineRes.data ?? 0),
-        historyCount: Number(historyRes.data ?? 0),
-      };
-    }
-  } catch {
-    // ignore — context is best-effort
-  }
+  const explanation = await explainIngredient({
+    inciId: ing.inci_id,
+    name: ing.name,
+    primaryFunction: ing.functions?.[0]?.name ?? null,
+    colorRating: ing.color_rating,
+    tags: ing.tags,
+    // No userExposure → personalLine will be null in the response.
+  });
 
-  const explanation = await explainIngredient(
-    {
-      inciId: ing.inci_id,
-      name: ing.name,
-      primaryFunction: ing.functions?.[0]?.name ?? null,
-      colorRating: ing.color_rating,
-      tags: ing.tags,
-      userExposure,
+  return NextResponse.json(explanation, {
+    headers: {
+      // 24 h on the Edge CDN, 7 d stale-while-revalidate. Once one user
+      // triggers this per region per day, every subsequent visitor gets it
+      // for free. Browser-side we let Next revalidate naturally.
+      "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
     },
-    userId,
-  );
-
-  return NextResponse.json(explanation);
+  });
 }
