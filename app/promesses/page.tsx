@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
-import { GLASS_CARD, GLASS_CARD_HOVER, GLASS_PILL_DARK } from "@/lib/ui/glass";
+import { GLASS_CARD, GLASS_PILL_CARD, GLASS_PILL_CARD_HOVER, GLASS_PILL_DARK } from "@/lib/ui/glass";
 import { computeMetrics } from "@/lib/coherence/engine";
 import { CoherenceItemActions } from "@/components/coherence/CoherenceItemActions";
 import type { CoherenceResult } from "@/lib/coherence/types";
@@ -95,7 +95,7 @@ export default async function PromessesPage() {
               <li key={r.id} className="relative">
                 <Link
                   href={`/promesses/${r.id}`}
-                  className={`${GLASS_CARD} ${GLASS_CARD_HOVER} flex items-center gap-4 p-4 pr-16`}
+                  className={`${GLASS_PILL_CARD} ${GLASS_PILL_CARD_HOVER} flex items-center gap-4 p-4 pr-16`}
                 >
                   <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
                     <span className="text-base font-bold leading-none">

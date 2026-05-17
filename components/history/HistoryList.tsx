@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { GLASS_CARD, GLASS_CARD_HOVER, GLASS_PILL_DARK } from "@/lib/ui/glass";
+import { GLASS_CARD, GLASS_CARD_HOVER, GLASS_PILL_CARD, GLASS_PILL_CARD_HOVER, GLASS_PILL_DARK } from "@/lib/ui/glass";
 import { HistoryItemActions } from "@/components/history/HistoryItemActions";
 import { IngredientBlob, type BlobCounts } from "@/components/blob/IngredientBlob";
 
@@ -143,7 +143,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                   type="button"
                   onClick={() => toggle(a.id)}
                   aria-pressed={isSelected}
-                  className={`${GLASS_CARD} ${GLASS_CARD_HOVER} w-full flex items-center gap-4 p-4 text-left ${
+                  className={`${GLASS_PILL_CARD} ${GLASS_PILL_CARD_HOVER} w-full flex items-center gap-4 p-4 text-left ${
                     isSelected ? "ring-2 ring-[#111111]" : ""
                   }`}
                 >
@@ -186,7 +186,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
           return (
             <li key={a.id} className="relative">
               <div
-                className={`${GLASS_CARD} ${GLASS_CARD_HOVER} relative flex items-center gap-4 p-4 pr-16`}
+                className={`${GLASS_PILL_CARD} ${GLASS_PILL_CARD_HOVER} relative flex items-center gap-4 p-4 pr-16`}
               >
                 {/* Card-wide click target — kept underneath the action buttons
                     so the dedicated "Analyser la promesse" link / kebab menu
