@@ -32,6 +32,17 @@ const config: NextConfig = {
       "@vercel/analytics",
     ],
   },
+  // Silence the "Serializing big strings (Nkib) impacts deserialization
+  // performance" webpack cache warning. The big strings come from bundled
+  // vendor SDKs (Supabase, OpenAI) — we can't refactor third-party code and
+  // it's a perf hint about dev cache only, not a runtime issue.
+  webpack: (config) => {
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings ?? []),
+      /Serializing big strings/,
+    ];
+    return config;
+  },
   async headers() {
     return [
       { source: "/(.*)", headers: securityHeaders },

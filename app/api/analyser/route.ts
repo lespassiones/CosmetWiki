@@ -4,6 +4,7 @@ import { parseInciList, computeScore, scoreLabel, type ColorRating } from "@/lib
 import { apiGate } from "@/lib/apiGate";
 import { idempotencyKey, idempotencyLookup, idempotencyStore } from "@/lib/idempotency";
 import { logError, logWarn } from "@/lib/log";
+import { safeError } from "@/lib/safeError";
 import { generateSynthesis } from "@/lib/ai/synthesis";
 import { categorizeProduct, type ProductCategory } from "@/lib/ai/categorize";
 import { correctTypo } from "@/lib/ai/typo";
@@ -191,7 +192,11 @@ export async function POST(req: NextRequest) {
     p_tokens: tokens.map((t) => t.normalized),
   });
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return safeError(error, {
+      route: "analyser.rpc_match_inci_batch",
+      publicMessage: "Erreur lors de l'analyse des ingrédients. Réessaye dans un instant.",
+      userId: user.id,
+    });
   }
   let rows = (data ?? []) as MatchRow[];
 

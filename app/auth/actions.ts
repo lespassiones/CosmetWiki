@@ -1,21 +1,17 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase";
 import { SITE_URL } from "@/lib/siteUrl";
 
 export type AuthResult = { ok: true } | { ok: false; error: string };
 
-async function resolveOrigin(): Promise<string> {
-  try {
-    const h = await headers();
-    const host = h.get("x-forwarded-host") ?? h.get("host");
-    const proto = h.get("x-forwarded-proto") ?? "https";
-    if (host) return `${proto}://${host}`;
-  } catch {
-    // ignored
-  }
+// SITE_URL is the canonical, env-driven origin (NEXT_PUBLIC_SITE_URL in prod,
+// VERCEL_PROJECT_PRODUCTION_URL / VERCEL_URL as fallbacks). Using a request
+// header here (x-forwarded-host) would let a forged Host send the OAuth /
+// password-reset redirect to an attacker-controlled domain → session theft.
+function authOrigin(): string {
   return SITE_URL;
 }
 
@@ -88,10 +84,9 @@ export async function requestPasswordReset(formData: FormData): Promise<AuthResu
 
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
-  const origin = await resolveOrigin();
 
   const { error } = await sb.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?next=/auth/reset-password`,
+    redirectTo: `${authOrigin()}/auth/callback?next=/auth/reset-password`,
   });
 
   if (error) {
@@ -130,8 +125,7 @@ export async function signInWithGoogle(formData: FormData): Promise<void> {
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
 
-  const origin = await resolveOrigin();
-  const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(next)}`;
+  const redirectTo = `${authOrigin()}/auth/callback?next=${encodeURIComponent(next)}`;
 
   const { data, error } = await sb.auth.signInWithOAuth({
     provider: "google",
