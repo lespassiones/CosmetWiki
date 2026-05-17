@@ -82,6 +82,8 @@ const TAG_LABELS: Record<string, string> = {
 };
 
 // Tags reported as "good when absent". The rest are reported only when present.
+// Extended on 2026-05 to cover `conservateur`, `propoxyle`, `ogm` — users asked
+// for an exhaustive observations panel rather than a curated subset.
 const ABSENCE_REPORTED = new Set([
   "paraben",
   "sulfate",
@@ -90,12 +92,24 @@ const ABSENCE_REPORTED = new Set([
   "allergene-parfumant",
   "allergene-reglemente",
   "ethoxyle",
+  "propoxyle",
   "colorant-synthese",
   "ammonium-quaternaire",
   "parfum-synthese",
   "filtre-uv",
   "cmr",
+  "conservateur",
+  "ogm",
 ]);
+
+// Tags whose absence is a NEUTRAL observation (not a "win"). Essential oils
+// are a deliberate inclusion in natural brands — absence isn't necessarily
+// good news, so we surface it as "info" instead of the green "absent" pill.
+// Anything in this set MUST also be in ABSENCE_REPORTED above for the absence
+// branch to fire.
+const NEUTRAL_WHEN_ABSENT = new Set(["huile-essentielle"]);
+// Keep huile-essentielle reported when absent (in the neutral form).
+ABSENCE_REPORTED.add("huile-essentielle");
 
 // Names that count as "water" when found in position 0 (first ingredient).
 const WATER_NAMES = new Set(["aqua", "water", "eau"]);
@@ -341,11 +355,14 @@ export async function POST(req: NextRequest) {
     message?: string;
   };
   const observations: Observation[] = [];
-  // Reported absences (good news)
+  // Reported absences (good news, except for NEUTRAL_WHEN_ABSENT tags which
+  // are reported as "info" to avoid implying that absence is automatically
+  // a win — essential oils are a legit ingredient in natural-brand products).
   for (const tag of ABSENCE_REPORTED) {
     const c = tagCounts[tag] || 0;
     if (c === 0) {
-      observations.push({ tag, label: TAG_LABELS[tag] ?? tag, status: "absent", count: 0, items: [] });
+      const status: "absent" | "info" = NEUTRAL_WHEN_ABSENT.has(tag) ? "info" : "absent";
+      observations.push({ tag, label: TAG_LABELS[tag] ?? tag, status, count: 0, items: [] });
     } else {
       observations.push({ tag, label: TAG_LABELS[tag] ?? tag, status: "present", count: c, items: tagItems[tag] ?? [] });
     }

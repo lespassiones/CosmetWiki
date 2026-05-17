@@ -12,6 +12,7 @@ import crypto from "node:crypto";
 import { AI_MODEL, callWithFallback, getCached, hasOpenAI, openai, setCached } from "./client";
 import { parseInciList } from "../inciParser";
 import { supabaseAnon } from "../supabase";
+import { logInfo, logWarn } from "../log";
 
 // Sharp is a transitive dep (used by next/image) — we lazy-load it so an
 // install miss on a fresh CI runner doesn't crash this module's import.
@@ -386,24 +387,45 @@ Format de réponse JSON :
     });
 
     // P3 — multi-pass: a single Vision call truncates 20+ item lists
-    // (Dove, L'Oréal…) to ~10-16 entries. If the first pass landed in the
-    // "looks incomplete" sweet spot, ask the model to find anything it
-    // missed and merge the two outputs.
-    if (value.found && shouldTriggerSecondPass(value.text)) {
-      try {
-        value.text = await ocrSecondPass(workingImage, workingMime, value.text);
-      } catch (err) {
-        console.error("[ocr] second pass failed:", (err as Error).message);
-      }
-    }
-
-    // Post-OCR validation against the INCI DB. Done AFTER the optional
-    // second pass so the match-rate reflects the final merged text.
+    // (Dove, L'Oréal…) to ~10-16 entries. We used to ALWAYS trigger pass 2
+    // when 6 < tokens < 18 (~80% of scans, half useless). Now we validate
+    // first and only re-run when validation says the OCR is clearly thin
+    // (rate < 0.70). Cuts ~$0.005 / scan and 2-4 s on ~half of all scans.
     if (value.found) {
       try {
         value.validation = await validateOcrText(value.text);
       } catch (err) {
-        console.error("[ocr] validation failed:", (err as Error).message);
+        logWarn("ocr.validation_failed", { error: (err as Error).message });
+      }
+
+      const tokensAfterPass1 = value.validation?.total ?? 0;
+      const ratePass1 = value.validation?.rate ?? 0;
+      const inSecondPassWindow = shouldTriggerSecondPass(value.text);
+      const needsSecondPass = inSecondPassWindow && ratePass1 < 0.70;
+
+      logInfo("ocr.pass1_result", {
+        tokens: tokensAfterPass1,
+        matchRate: Number(ratePass1.toFixed(2)),
+        secondPassWindow: inSecondPassWindow,
+        secondPassTriggered: needsSecondPass,
+      });
+
+      if (needsSecondPass) {
+        try {
+          value.text = await ocrSecondPass(workingImage, workingMime, value.text);
+          // Re-validate so the response carries the merged rate.
+          try {
+            value.validation = await validateOcrText(value.text);
+            logInfo("ocr.pass2_result", {
+              tokens: value.validation.total,
+              matchRate: Number(value.validation.rate.toFixed(2)),
+            });
+          } catch (err) {
+            logWarn("ocr.validation_failed_after_pass2", { error: (err as Error).message });
+          }
+        } catch (err) {
+          logWarn("ocr.second_pass_failed", { error: (err as Error).message });
+        }
       }
     }
 

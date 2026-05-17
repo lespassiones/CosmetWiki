@@ -10,6 +10,7 @@ import { ConclusionCard } from "@/components/coherence/ConclusionCard";
 import { IngredientsPositionChart } from "@/components/coherence/IngredientsPositionChart";
 import { DescriptionKeywordsCard } from "@/components/coherence/DescriptionKeywordsCard";
 import { MarketingIndexCard } from "@/components/coherence/MarketingIndexCard";
+import { OutOfScopePromisesCard } from "@/components/coherence/OutOfScopePromisesCard";
 import { Reveal } from "@/components/Reveal";
 import { computeMetrics } from "@/lib/coherence/engine";
 import type { CoherenceResult } from "@/lib/coherence/types";
@@ -125,6 +126,18 @@ export default async function PromesseDetailPage({
           <ConclusionCard conclusion={result.conclusion} />
         </Reveal>
       </section>
+
+      {/* Out-of-scope promises (claims that don't biologically apply to this
+          product type, e.g. anti-âge on a parfum). Renders nothing when
+          empty so legacy analyses without this field stay clean. */}
+      {result.outOfScope && result.outOfScope.length > 0 ? (
+        <Reveal delayMs={550}>
+          <OutOfScopePromisesCard
+            items={result.outOfScope}
+            productType={result.productType}
+          />
+        </Reveal>
+      ) : null}
 
       <Reveal delayMs={600}>
         <IngredientsPositionChart snapshot={result.positionSnapshot} />

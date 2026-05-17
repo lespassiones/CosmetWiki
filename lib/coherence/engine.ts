@@ -16,6 +16,8 @@ import type {
   CoherencePromise,
   CoherenceResult,
   CoherenceVerdict,
+  OutOfScopePromise,
+  ProductType,
   UnverifiableClaim,
 } from "./types";
 
@@ -167,6 +169,49 @@ export type LlmPromiseProposal = {
   /** Verbatim phrase from the description that triggered this promise. */
   excerpt: string;
 };
+
+/**
+ * Mechanical safety net for promise deduplication.
+ *
+ * The extraction prompt already asks the LLM to fuse equivalent claims
+ * ("hydrate" + "préserve l'hydratation" → 1 entry), but GPT-4o-mini drops
+ * the rule on long marketing texts and ships duplicates. This filter
+ * collapses the LLM output by:
+ *
+ *   - For catalogue slugs (anti_chute, hydratation, absence_*, …) :
+ *       1 entry per category_slug — kept = longest excerpt (most informative).
+ *   - For the "autre" / off-catalogue bucket :
+ *       1 entry per normalised label (lowercased, no diacritics, alphanums
+ *       only) — same tiebreaker. Prevents "Tenue 12h" / "Tenue longue durée"
+ *       / "tient toute la journée" from showing as 3 separate rows when
+ *       they're all the same intention.
+ *
+ * Pure function, called once at the start of /api/coherence right after
+ * extraction. No-op when the LLM already deduped properly.
+ */
+export function dedupProposals(proposals: LlmPromiseProposal[]): LlmPromiseProposal[] {
+  const byKey = new Map<string, LlmPromiseProposal>();
+  for (const p of proposals) {
+    const slug = (p.category_slug || "").trim();
+    if (!slug) continue;
+    // Catalogue slugs are unique on slug alone. Open-promise "autre" buckets
+    // are merged on a normalised label so wording variants collapse.
+    const key
+      = slug === "autre"
+        ? `autre::${(p.label || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "")}`
+        : `slug::${slug}`;
+    const existing = byKey.get(key);
+    if (!existing) {
+      byKey.set(key, p);
+      continue;
+    }
+    // Keep the longer excerpt — it's the more informative formulation.
+    if ((p.excerpt?.length ?? 0) > (existing.excerpt?.length ?? 0)) {
+      byKey.set(key, { ...p, label: existing.label || p.label });
+    }
+  }
+  return Array.from(byKey.values());
+}
 
 /**
  * Result of the "open promise" LLM exploration step. The LLM is given the
@@ -578,6 +623,8 @@ export function buildCoherenceResult(args: {
   unverifiable: UnverifiableClaim[];
   parent: AnalyseResponse;
   conclusion: string;
+  outOfScope?: OutOfScopePromise[];
+  productType?: ProductType;
 }): CoherenceResult {
   const metrics = computeMetrics(args.promises);
   const positionSnapshot = computePositionSnapshot(args.parent, args.promises);
@@ -586,6 +633,8 @@ export function buildCoherenceResult(args: {
     description: args.description,
     promises: args.promises,
     unverifiable: args.unverifiable,
+    outOfScope: args.outOfScope ?? [],
+    productType: args.productType,
     metrics,
     positionSnapshot,
     conclusion: args.conclusion,

@@ -98,6 +98,52 @@ export type UnverifiableClaim = {
   reason: string;
 };
 
+/**
+ * Product type used to gate which promises are biologically relevant.
+ * Detected automatically from the description by a lightweight LLM call
+ * (cf. `detectProductType` in lib/ai/coherence.ts) when no hint is
+ * provided via OCR / analysis metadata.
+ */
+export type ProductType =
+  | "cheveux"
+  | "peau_visage"
+  | "peau_corps"
+  | "levres"
+  | "parfum"
+  | "dents"
+  | "ongles"
+  | "maquillage"
+  | "autre";
+
+/** Human label for a product type — used in prompts and the UI. */
+export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
+  cheveux: "Cheveux",
+  peau_visage: "Peau visage",
+  peau_corps: "Peau corps",
+  levres: "Lèvres",
+  parfum: "Parfum",
+  dents: "Dents",
+  ongles: "Ongles",
+  maquillage: "Maquillage",
+  autre: "Autre",
+};
+
+/**
+ * A claim the description makes that is biologically irrelevant for the
+ * detected product type (e.g. "production de collagène" on a hair product —
+ * hair has no collagen to produce). Surfaced as a dedicated UI section so
+ * the user understands the marketing copy overreached, without being mixed
+ * into the regular verdict ladder.
+ */
+export type OutOfScopePromise = {
+  /** Verbatim phrase from the description, max ~160 chars. */
+  excerpt: string;
+  /** Effect the marketing copy claimed (e.g. "anti-âge", "régénération"). */
+  claimed_effect: string;
+  /** Short FR explanation of why it doesn't apply to this product type. */
+  reason: string;
+};
+
 export type CoherenceResult = {
   /** ISO timestamp at the moment the result was computed. */
   computedAt: string;
@@ -107,6 +153,20 @@ export type CoherenceResult = {
   promises: CoherencePromise[];
   /** Description fragments that aren't verifiable against the formula. */
   unverifiable: UnverifiableClaim[];
+  /**
+   * Promises that the marketing copy makes but that don't apply to the
+   * detected product type (e.g. collagen claim on a hair product). The
+   * engine doesn't score these — they get their own UI section.
+   * Optional: legacy rows (before this field existed) just have no entry.
+   */
+  outOfScope?: OutOfScopePromise[];
+  /**
+   * Product type used to gate the extraction. Stored so the UI can show
+   * "Analysé en tant que: Cheveux" and the user can correct if wrong.
+   * Optional for backwards compatibility with rows persisted before this
+   * field existed.
+   */
+  productType?: ProductType;
   /** Aggregate metrics. */
   metrics: {
     /** % of promises with verdict === "tenue". */

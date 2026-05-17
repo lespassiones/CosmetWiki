@@ -801,8 +801,21 @@ function ObservationLabel({ obs }: { obs: Observation }) {
       </span>
     );
   }
-  const suffix = obs.status === "absent" ? "absents" : "présents";
-  const suffixTone = obs.status === "absent" ? "text-emerald-700" : "text-ink-muted";
+  // Suffix follows the status: "absents" (green, good news), "non détectés"
+  // (sky blue, neutral — used for essential oils where absence is not
+  // automatically a win), "présents" (muted, factual).
+  const suffix
+    = obs.status === "absent"
+      ? "absents"
+      : obs.status === "info"
+        ? "non détectés"
+        : "présents";
+  const suffixTone
+    = obs.status === "absent"
+      ? "text-emerald-700"
+      : obs.status === "info"
+        ? "text-sky-700"
+        : "text-ink-muted";
   return (
     <span className="flex-1 text-ink">
       {obs.label}{" "}

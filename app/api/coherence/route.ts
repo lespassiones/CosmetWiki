@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import {
+  detectProductType,
   exploreOpenPromise,
   extractPromisesFromDescription,
   generateConclusion,
@@ -7,13 +8,14 @@ import {
 } from "@/lib/ai/coherence";
 import {
   buildCoherenceResult,
+  dedupProposals,
   resolveAbsencePromise,
   resolveOpenPromise,
   resolvePromise,
 } from "@/lib/coherence/engine";
 import { findCategoryBySlug, isAbsenceCategory } from "@/lib/coherence/claims";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
-import type { CoherencePromise } from "@/lib/coherence/types";
+import type { CoherencePromise, ProductType } from "@/lib/coherence/types";
 import { apiGate } from "@/lib/apiGate";
 import { idempotencyKey, idempotencyLookup, idempotencyStore } from "@/lib/idempotency";
 import { logError } from "@/lib/log";
@@ -83,10 +85,12 @@ export async function POST(req: NextRequest) {
   try {
   // Look up the parent analysis. RLS already restricts to the user's own
   // rows; we add an explicit user_id check as belt-and-braces.
+  // We also pull `product_type` (string hint from OCR / identification) and
+  // `brand` so we can give the type detector richer context.
   const { data: analysisRow, error: analysisErr } = await sb
     .schema("cosme_check")
     .from("analyses")
-    .select("id, user_id, name, product_label, result_json")
+    .select("id, user_id, name, product_label, product_type, brand, result_json")
     .eq("id", analysisId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -111,8 +115,33 @@ export async function POST(req: NextRequest) {
     ?? (analysisRow.name as string | null)
     ?? null;
 
+  // ─── Step 0: detect product type (silent LLM call). ─────────────────────
+  // The hint comes from the OCR'd front photo + the brand name. The detector
+  // returns one of 8 enums (+ "autre"). The full description is the strongest
+  // signal so we pass it as the primary input; the hint disambiguates when
+  // the description is short or generic.
+  const typeHint = [
+    analysisRow.product_type as string | null,
+    productLabel,
+    analysisRow.brand as string | null,
+  ]
+    .filter((s): s is string => Boolean(s && s.trim()))
+    .join(" — ");
+  const productType: ProductType = await detectProductType(
+    description,
+    typeHint || null,
+    user.id,
+  );
+
   // ─── Step 1: extract promises from the description (LLM, JSON schema strict) ─
-  const extraction = await extractPromisesFromDescription(description, user.id);
+  const extraction = await extractPromisesFromDescription(
+    description,
+    productType,
+    user.id,
+  );
+  // Mechanical safety net: collapse any duplicate proposals the LLM may have
+  // emitted despite the prompt rule (cf. dedupProposals docstring).
+  const dedupedProposals = dedupProposals(extraction.proposals);
 
   // ─── Step 2: split proposals between catalogue (effect), catalogue
   // (absence), and open ───────────────────────────────────────────────────
@@ -124,7 +153,7 @@ export async function POST(req: NextRequest) {
   //   picks active candidates *from the actual formula*.
   const cataloguePromises: CoherencePromise[] = [];
   const openProposals: typeof extraction.proposals = [];
-  for (const p of extraction.proposals) {
+  for (const p of dedupedProposals) {
     const cat = findCategoryBySlug(p.category_slug);
     if (cat && isAbsenceCategory(cat)) {
       cataloguePromises.push(resolveAbsencePromise(p, cat, parent.items));
@@ -170,6 +199,8 @@ export async function POST(req: NextRequest) {
     description,
     promises,
     unverifiable: extraction.unverifiable,
+    outOfScope: extraction.outOfScope,
+    productType,
     parent,
     conclusion,
   });
