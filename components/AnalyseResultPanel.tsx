@@ -196,7 +196,7 @@ export function AnalyseResultPanel({
         </Reveal>
 
         <Reveal delayMs={500} className="[grid-area:observations]">
-          <ObservationsCard observations={result.observations} aliasesUsed={result.aliasesUsed} />
+          <ObservationsCard observations={result.observations} />
         </Reveal>
 
         <Reveal delayMs={1000} className="[grid-area:items]">
@@ -608,10 +608,8 @@ function ScoreCard({
 // ============================================================
 function ObservationsCard({
   observations,
-  aliasesUsed,
 }: {
   observations: Observation[];
-  aliasesUsed: { from: string; to: string | null }[];
 }) {
   const [expanded, setExpanded] = useState(false);
   const [openTags, setOpenTags] = useState<Set<string>>(new Set());
@@ -707,21 +705,6 @@ function ObservationsCard({
           {expanded ? "Réduire" : `Voir le détail des observations`}{" "}
           <span aria-hidden>→</span>
         </button>
-      ) : null}
-
-      {aliasesUsed.length > 0 ? (
-        <div className="mt-5 border-t border-black/[0.06] pt-4">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
-            Doublons FR/EN détectés
-          </p>
-          <ul className="mt-2 space-y-1 text-[13px] text-ink-muted">
-            {aliasesUsed.map((a, i) => (
-              <li key={i} className="font-mono">
-                {prettyName(a.from)} → <span className="text-ink">{prettyName(a.to ?? "")}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
       ) : null}
     </article>
   );
