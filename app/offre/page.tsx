@@ -7,7 +7,7 @@ const FEATURES = [
   "Analyses INCI illimitées",
   "Analyses « Promesses vs Formule » illimitées",
   "Comparaison de produits illimitée",
-  "Skin advisor avancé (réponses personnalisées)",
+  "Beauty Advisor avancé (réponses personnalisées)",
   "Historique étendu, sans limite",
   "Export PDF illimité de tes analyses",
   "Accès en avant-première aux nouvelles fonctionnalités",

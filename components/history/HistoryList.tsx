@@ -101,9 +101,10 @@ export function HistoryList({ rows }: { rows: Row[] }) {
           <button
             type="button"
             onClick={startSelect}
-            className="text-[12px] text-[#F43F5E] font-medium hover:underline"
+            className="inline-flex items-center gap-1.5 rounded-full bg-white/85 hover:bg-rose-50 text-[#F43F5E] ring-1 ring-rose-200/70 hover:ring-rose-300 backdrop-blur-md px-3 py-1.5 text-[12px] font-semibold shadow-[0_6px_16px_-4px_rgba(244,63,94,0.20),inset_0_1px_0_rgba(255,255,255,0.85)] hover:shadow-[0_8px_20px_-4px_rgba(244,63,94,0.28),inset_0_1px_0_rgba(255,255,255,0.9)] transition"
           >
-            Comparer 2 analyses →
+            Comparer 2 analyses
+            <SwapHorizontalIcon className="h-3.5 w-3.5" />
           </button>
         )}
         {selectMode && (
@@ -233,5 +234,25 @@ export function HistoryList({ rows }: { rows: Row[] }) {
         })}
       </ul>
     </div>
+  );
+}
+
+function SwapHorizontalIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <path d="M7 4 3 8l4 4" />
+      <path d="M3 8h14" />
+      <path d="m17 20 4-4-4-4" />
+      <path d="M21 16H7" />
+    </svg>
   );
 }

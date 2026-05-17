@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   { href: "/", label: "Accueil", icon: HomeIcon },
   { href: "/routine", label: "Routine", icon: LayersIcon },
   { href: "/promesses", label: "Promesses", icon: PromisesIcon },
-  { href: "/advisor", label: "Skin advisor", icon: SparklesIcon },
+  { href: "/advisor", label: "Beauty Advisor", icon: SparklesIcon },
   { href: "/history", label: "Historique", icon: ClockIcon },
   { href: "/offre", label: "Offre", icon: DiamondIcon },
   { href: "/profile", label: "Profil", icon: UserIcon },
@@ -83,7 +83,7 @@ export function AppShell({
       {!pathname.startsWith("/advisor") && (
         <Link
           href="/advisor"
-          aria-label="Ouvrir Skin Advisor"
+          aria-label="Ouvrir Beauty Advisor"
           className="lg:hidden fixed right-4 z-40 h-12 w-12 rounded-full bg-gradient-to-br from-[#1F2937] via-[#111111] to-[#0A0A0A] text-white flex items-center justify-center ring-1 ring-white/[0.08] shadow-[0_10px_24px_-8px_rgba(15,23,42,0.45),inset_0_1px_0_rgba(255,255,255,0.18)] hover:brightness-110 active:scale-95 transition"
           style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 88px)" }}
         >

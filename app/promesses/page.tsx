@@ -56,11 +56,14 @@ export default async function PromessesPage() {
             ? "Aucune analyse de cohérence pour le moment."
             : `${rows.length} analyse${rows.length > 1 ? "s" : ""} de cohérence sauvegardée${rows.length > 1 ? "s" : ""}.`}
         </p>
+        {/* Pill horizontal — rose pastel sur fond clair pour cohérence
+            avec le bouton "+ Ajouter un produit" de la routine. Une seule
+            ligne grâce à whitespace-nowrap. */}
         <Link
           href="/promesses/nouvelle"
-          className={`${GLASS_PILL_DARK} inline-flex items-center justify-center text-center text-[12px] font-semibold px-3 py-2`}
+          className="inline-flex items-center gap-1.5 rounded-full bg-rose-100/70 hover:bg-rose-200/70 text-rose-700 ring-1 ring-rose-200/80 backdrop-blur-md px-4 py-2 text-[13px] font-semibold whitespace-nowrap shadow-[0_6px_18px_-6px_rgba(244,63,94,0.30),inset_0_1px_0_rgba(255,255,255,0.7)] transition"
         >
-          + Nouvelle analyse
+          <span aria-hidden>+</span> Nouvelle analyse
         </Link>
       </div>
 

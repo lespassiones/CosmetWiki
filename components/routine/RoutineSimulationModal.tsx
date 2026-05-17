@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import type { RoutineMetrics } from "@/lib/routine/engine";
-import { GLASS_CARD, GLASS_CARD_EMERALD } from "@/lib/ui/glass";
+import { GLASS_CARD_EMERALD } from "@/lib/ui/glass";
 
 type ColorTone = "Rouge" | "Orange" | "Jaune" | "Vert" | null;
 
@@ -23,23 +23,24 @@ const TAG_LABELS: Record<string, string> = {
 };
 
 /**
- * Generic "what to favour" guidance keyed by tag. Deliberately broad and
- * jargon-free — the previous version cited specific ingredients (sodium
- * benzoate, geogard, MIT/MCI, coco-glucoside…) which only resonate with
- * chemistry-literate users. Now the tips speak in product-shopping terms.
+ * What the user might EXPERIENCE if they keep using a product flagged for
+ * each tag. Plain-French, action-oriented, no chemistry jargon. Used to
+ * fill the "Conséquences possibles" section so the simulation reads as
+ * "if you keep using this, here's what could happen" rather than a dry
+ * list of categories.
  */
-const TAG_BROAD_TIPS: Record<string, string> = {
-  "allergene-parfumant": "Privilégier des soins sans parfum, ou marqués « peaux sensibles ».",
-  "parfum-synthese": "Privilégier des soins sans parfum, ou un parfum d'origine naturelle.",
-  conservateur: "Privilégier des soins avec conservateurs doux, ou des produits certifiés bio.",
-  paraben: "Privilégier des produits affichés « sans paraben ».",
-  sulfate: "Privilégier des shampoings et nettoyants moussants doux.",
-  silicone: "Privilégier des soins sans silicone si tes cheveux s'alourdissent vite.",
-  "huile-minerale": "Privilégier des huiles végétales aux huiles minérales / paraffine.",
-  ethoxyle: "Privilégier des formules courtes, idéalement certifiées clean ou bio.",
-  "ammonium-quaternaire": "Privilégier des après-shampoings doux, sans agents adoucissants agressifs.",
-  "colorant-synthese": "Privilégier des produits sans colorant ajouté.",
-  "huile-essentielle": "Si peau sensible, éviter les soins riches en huiles essentielles.",
+const TAG_CONSEQUENCES: Record<string, string> = {
+  sulfate: "Cuir chevelu desséché, cheveux qui ternissent et perdent en volume à long terme.",
+  silicone: "Cheveux plus lourds avec un effet « film » qui s'accumule lavage après lavage.",
+  paraben: "Conservateurs régulièrement pointés du doigt comme perturbateurs endocriniens présumés.",
+  "huile-minerale": "Pores qui s'obstruent et peau qui peine à respirer sur la durée.",
+  ethoxyle: "Procédé de fabrication qui peut laisser des traces de résidus indésirables.",
+  "colorant-synthese": "Risque d'allergie ou de sensibilisation cutanée, surtout sur peau réactive.",
+  "ammonium-quaternaire": "Effet doux immédiat mais irritation et accumulation possibles à long terme.",
+  "allergene-parfumant": "Risque accru d'allergie ou de réaction cutanée, surtout sur peau sensible.",
+  "parfum-synthese": "Fréquente source d'irritation, notamment chez les peaux réactives ou atopiques.",
+  conservateur: "Certains conservateurs sont irritants ou allergisants après un usage prolongé.",
+  "huile-essentielle": "Peut sensibiliser la peau, à éviter sur peaux fragiles ou pendant la grossesse.",
 };
 
 const RATING_RANK: Record<string, number> = {
@@ -53,16 +54,10 @@ type TagAggregate = {
   tag: string;
   /** Pire couleur trouvée parmi les ingrédients du produit qui portent ce tag. */
   worstColor: ColorTone;
-  /** Combien d'ingrédients du produit portent ce tag (utile pour le tri). */
+  /** Combien d'ingrédients du produit portent ce tag. */
   count: number;
 };
 
-/**
- * Roll the worst ingredients of a product into a list of (tag, worstColor,
- * count) so the UI can show coloured pills by role/function rather than by
- * raw INCI name. The pill takes the colour of the most severe ingredient
- * carrying that tag in this product.
- */
 function aggregateTagsByWorst(
   worstIngredients: { colorRating: ColorTone; tags: string[] }[],
 ): TagAggregate[] {
@@ -83,7 +78,6 @@ function aggregateTagsByWorst(
       }
     }
   }
-  // Sort by severity descending, then by count descending.
   return Array.from(map.values()).sort((a, b) => {
     const sa = RATING_RANK[a.worstColor ?? ""] ?? 0;
     const sb = RATING_RANK[b.worstColor ?? ""] ?? 0;
@@ -92,7 +86,6 @@ function aggregateTagsByWorst(
   });
 }
 
-/** Tailwind classes for a tag pill based on its worst-colour. */
 function tagPillClasses(color: ColorTone): string {
   switch (color) {
     case "Rouge":
@@ -108,8 +101,20 @@ function tagPillClasses(color: ColorTone): string {
   }
 }
 
-/** Build a deduplicated, scoped list of broad tips from all the worst tags
- *  seen across the products to remove. Returns up to 4 entries. */
+const TAG_BROAD_TIPS: Record<string, string> = {
+  "allergene-parfumant": "Privilégier des soins sans parfum, ou marqués « peaux sensibles ».",
+  "parfum-synthese": "Privilégier des soins sans parfum, ou un parfum d'origine naturelle.",
+  conservateur: "Privilégier des soins avec conservateurs doux, ou des produits certifiés bio.",
+  paraben: "Privilégier des produits affichés « sans paraben ».",
+  sulfate: "Privilégier des shampoings et nettoyants moussants doux.",
+  silicone: "Privilégier des soins sans silicone si tes cheveux s'alourdissent vite.",
+  "huile-minerale": "Privilégier des huiles végétales aux huiles minérales / paraffine.",
+  ethoxyle: "Privilégier des formules courtes, idéalement certifiées clean ou bio.",
+  "ammonium-quaternaire": "Privilégier des après-shampoings doux, sans agents adoucissants agressifs.",
+  "colorant-synthese": "Privilégier des produits sans colorant ajouté.",
+  "huile-essentielle": "Si peau sensible, éviter les soins riches en huiles essentielles.",
+};
+
 function buildBroadTips(allTags: Set<string>): string[] {
   const out: string[] = [];
   const seen = new Set<string>();
@@ -122,6 +127,21 @@ function buildBroadTips(allTags: Set<string>): string[] {
   }
   if (out.length === 0) {
     out.push("Cibler des formules courtes (< 20 ingrédients) avec une bonne note d'analyse.");
+  }
+  return out;
+}
+
+/** Pick up to 3 consequence sentences from the tags involved in this product. */
+function consequencesFor(tagAggregates: TagAggregate[]): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  // Iterate severity-first (aggregates are already sorted that way).
+  for (const t of tagAggregates) {
+    const c = TAG_CONSEQUENCES[t.tag];
+    if (!c || seen.has(c)) continue;
+    seen.add(c);
+    out.push(c);
+    if (out.length >= 3) break;
   }
   return out;
 }
@@ -153,7 +173,6 @@ export function RoutineSimulationModal({
   const delta = metrics.simulation.minus2.exposureScore - currentScore;
   const newScore = metrics.simulation.minus2.exposureScore;
 
-  // Aggregate all tag-buckets across the worst products → broad tips source.
   const allTagsInPlay = useMemo(() => {
     const s = new Set<string>();
     for (const p of worst) {
@@ -183,23 +202,38 @@ export function RoutineSimulationModal({
     </button>
   );
 
+  // ── Shared visual tokens for the modal — neutral white glassmorphism,
+  // no pink wash, lots of soft shadow so the cards feel raised.
+  const SHELL_CLASSES = [
+    "relative w-full max-w-xl max-h-[90vh] overflow-y-auto",
+    "rounded-3xl bg-white/85 backdrop-blur-2xl backdrop-saturate-150",
+    "ring-1 ring-white/70",
+    "shadow-[0_40px_100px_-20px_rgba(15,23,42,0.45),0_8px_24px_-8px_rgba(15,23,42,0.20),inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-1px_0_rgba(15,23,42,0.04)]",
+  ].join(" ");
+
+  // Pill-shaped product cards (rounded-[28px], deeper drop shadow, slight
+  // saturation lift on the translucent surface).
+  const PRODUCT_CARD = [
+    "rounded-[28px] bg-white/75 backdrop-blur-xl backdrop-saturate-150",
+    "ring-1 ring-white/80",
+    "shadow-[0_18px_36px_-14px_rgba(15,23,42,0.18),0_4px_10px_-2px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.9)]",
+    "p-4",
+  ].join(" ");
+
   const modal = open ? (
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Détails de la simulation"
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-3 sm:p-6 bg-gradient-to-br from-black/45 via-rose-950/30 to-pink-950/30 backdrop-blur-md"
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-3 sm:p-6 bg-slate-900/40 backdrop-blur-md"
       onClick={(e) => {
         if (e.target === e.currentTarget) setOpen(false);
       }}
     >
-      {/* Modal shell — proper glassmorphism: translucent surface over the
-          backdrop's blur, soft outer drop shadow, thin white ring + inner
-          highlight, with a discreet rose tint to keep the warm context. */}
-      <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl bg-gradient-to-br from-white/85 via-white/80 to-rose-50/75 backdrop-blur-2xl backdrop-saturate-150 ring-1 ring-white/70 shadow-[0_30px_80px_-20px_rgba(15,23,42,0.40),inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-1px_0_rgba(15,23,42,0.04)]">
+      <div className={SHELL_CLASSES}>
         {/* Sticky header — same glass as the body so close button stays
-            legible while scrolling. */}
-        <div className="sticky top-0 bg-white/75 backdrop-blur-xl backdrop-saturate-150 border-b border-white/60 px-5 py-4 flex items-start gap-3 z-10">
+            legible while scrolling. Neutre, plus de teinte rose. */}
+        <div className="sticky top-0 bg-white/85 backdrop-blur-xl backdrop-saturate-150 border-b border-white/70 px-5 py-4 flex items-start gap-3 z-10 rounded-t-3xl">
           <div className="flex-1 min-w-0">
             <h2 className="text-[17px] font-bold text-ink leading-tight">
               {isSingle
@@ -207,12 +241,12 @@ export function RoutineSimulationModal({
                 : "Retirer ces 2 produits pour gagner des points"}
             </h2>
             <div className="mt-2 flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-baseline gap-1 rounded-full bg-white/70 ring-1 ring-white/80 backdrop-blur-md px-2.5 py-0.5 text-[12px] text-[#6B7280] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+              <span className="inline-flex items-baseline gap-1 rounded-full bg-white/80 ring-1 ring-black/[0.06] backdrop-blur-md px-2.5 py-0.5 text-[12px] text-[#6B7280] shadow-[0_2px_6px_-1px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.9)]">
                 <span className="font-semibold text-ink tabular-nums">{currentScore.toFixed(1)}</span>
                 <span className="text-[10px]">/20</span>
               </span>
               <span aria-hidden className="text-[#9CA3AF] text-sm">→</span>
-              <span className="inline-flex items-baseline gap-1 rounded-full bg-emerald-100/80 ring-1 ring-emerald-200/80 backdrop-blur-md px-2.5 py-0.5 text-[12px] text-emerald-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
+              <span className="inline-flex items-baseline gap-1 rounded-full bg-emerald-100/80 ring-1 ring-emerald-200/80 backdrop-blur-md px-2.5 py-0.5 text-[12px] text-emerald-800 shadow-[0_2px_6px_-1px_rgba(5,150,105,0.18),inset_0_1px_0_rgba(255,255,255,0.6)]">
                 <span className="font-semibold tabular-nums">{newScore.toFixed(1)}</span>
                 <span className="text-[10px]">/20</span>
               </span>
@@ -225,7 +259,7 @@ export function RoutineSimulationModal({
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Fermer"
-            className="shrink-0 h-9 w-9 rounded-full text-[#6B7280] hover:text-ink hover:bg-white/60 backdrop-blur-md inline-flex items-center justify-center transition"
+            className="shrink-0 h-9 w-9 rounded-full text-[#6B7280] hover:text-ink hover:bg-black/[0.05] backdrop-blur-md inline-flex items-center justify-center transition"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden>
               <path d="m18 6-12 12M6 6l12 12" />
@@ -234,11 +268,12 @@ export function RoutineSimulationModal({
         </div>
 
         <div className="px-5 py-5 space-y-4">
-          <ul className="space-y-3">
+          <ul className="space-y-3.5">
             {worst.map((p) => {
               const tagAggregates = aggregateTagsByWorst(p.worstIngredients);
+              const consequences = consequencesFor(tagAggregates);
               return (
-                <li key={p.id} className={`${GLASS_CARD} p-4`}>
+                <li key={p.id} className={PRODUCT_CARD}>
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <Link
                       href={`/history/${p.id}`}
@@ -246,7 +281,7 @@ export function RoutineSimulationModal({
                     >
                       {p.name}
                     </Link>
-                    <span className="shrink-0 inline-flex items-baseline gap-1 rounded-full bg-rose-50/80 ring-1 ring-rose-200/80 backdrop-blur-md px-2 py-0.5 text-[11px] text-rose-700">
+                    <span className="shrink-0 inline-flex items-baseline gap-1 rounded-full bg-rose-50/80 ring-1 ring-rose-200/80 backdrop-blur-md px-2 py-0.5 text-[11px] text-rose-700 shadow-[0_2px_6px_-1px_rgba(244,63,94,0.15)]">
                       <span className="font-semibold tabular-nums">
                         {p.score !== null ? p.score.toFixed(1) : "—"}
                       </span>
@@ -267,6 +302,22 @@ export function RoutineSimulationModal({
                             >
                               {TAG_LABELS[t.tag] ?? t.tag}
                             </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {consequences.length > 0 && (
+                    <div className="mt-3 rounded-2xl bg-amber-50/60 ring-1 ring-amber-200/60 backdrop-blur-md px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
+                      <div className="text-[10px] uppercase tracking-wider text-amber-800/90 mb-1 font-semibold">
+                        Conséquences possibles à long terme
+                      </div>
+                      <ul className="space-y-1 text-[12px] text-amber-900 leading-relaxed">
+                        {consequences.map((c, i) => (
+                          <li key={i} className="flex items-start gap-1.5">
+                            <span aria-hidden className="mt-1 h-1 w-1 shrink-0 rounded-full bg-amber-600" />
+                            <span>{c}</span>
                           </li>
                         ))}
                       </ul>

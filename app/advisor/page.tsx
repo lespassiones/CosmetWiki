@@ -7,7 +7,7 @@ import { AdvisorOnboarding } from "@/components/advisor/AdvisorOnboarding";
 import { AdvisorChat } from "@/components/advisor/AdvisorChat";
 import { GLASS_CARD, GLASS_CARD_ROSE } from "@/lib/ui/glass";
 
-export const metadata = { title: "Skin advisor · Cosme Check" };
+export const metadata = { title: "Beauty Advisor · Cosme Check" };
 
 export default async function AdvisorPage() {
   const user = await getUser();
@@ -29,7 +29,7 @@ export default async function AdvisorPage() {
   return (
     <div className="mx-auto max-w-3xl px-5 lg:px-8 py-6 lg:py-10">
       <h1 className="text-2xl lg:text-3xl font-bold mb-2 flex items-center gap-2">
-        <span aria-hidden>✨</span> Skin advisor
+        <span aria-hidden>✨</span> Beauty Advisor
       </h1>
       <p className="text-sm text-[#6B7280] mb-6">
         Un assistant factuel qui s&apos;appuie sur ton profil et ta routine. Aucun conseil médical, aucune marque

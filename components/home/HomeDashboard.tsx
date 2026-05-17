@@ -75,7 +75,7 @@ export function HomeDashboard({
           <div className="flex items-center gap-4">
             <span aria-hidden className="text-2xl">✨</span>
             <div className="flex-1">
-              <div className="text-[15px] font-semibold">Skin advisor</div>
+              <div className="text-[15px] font-semibold">Beauty Advisor</div>
               <p className="text-[12px] text-white/70 mt-1 leading-snug">
                 Pose tes questions sur ta routine. L&apos;assistant s&apos;appuie sur ton profil et tes analyses.
               </p>

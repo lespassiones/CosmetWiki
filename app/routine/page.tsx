@@ -29,6 +29,39 @@ function exposureFg(label: string): string {
   return "text-rose-700";
 }
 
+/**
+ * Small decorative SVG leaf displayed beside the routine title on mobile.
+ * Pure decoration — the page works fine without it, but it warms up the
+ * "ma routine" header and matches the wellness vibe of the rest of the app.
+ */
+function LeafAccent({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 32 32"
+      aria-hidden
+      className={`h-7 w-7 shrink-0 ${className}`}
+    >
+      <defs>
+        <linearGradient id="leaf-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#86EFAC" />
+          <stop offset="100%" stopColor="#16A34A" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M27 5C19 5 11 9 8 17c-2 6 0 11 4 13 0-7 4-13 11-17-5 5-9 10-10 16 7 1 13-2 16-9 2-6 1-12-2-15z"
+        fill="url(#leaf-grad)"
+      />
+      <path
+        d="M9 28c2-5 5-9 10-12"
+        stroke="rgba(255,255,255,0.6)"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        fill="none"
+      />
+    </svg>
+  );
+}
+
 function ExposureGauge({ score, stroke }: { score: number; stroke: string }) {
   const radius = 50;
   const arcLength = Math.PI * radius;
@@ -172,11 +205,16 @@ export default async function RoutinePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 lg:px-8 pt-4 pb-8 lg:py-12">
-      {/* Header — mobile: title → separator → desc → button (stacked)
+      {/* Header — mobile: title (with leaf accent) → separator → desc → button (stacked)
                    desktop: title on top, separator under it, then desc + button row */}
       <header>
         <div className="lg:flex lg:items-baseline lg:justify-between lg:gap-4">
-          <h1 className="text-2xl lg:text-3xl font-bold">Ma routine quotidienne</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl lg:text-3xl font-bold">Ma routine quotidienne</h1>
+            {/* Decorative leaf — only on mobile so the desktop header stays
+                strictly informational. Matches the "Ma routine" mockup. */}
+            <LeafAccent className="lg:hidden" />
+          </div>
         </div>
 
         {/* Separator immediately under the title (both mobile and desktop) */}
@@ -193,8 +231,12 @@ export default async function RoutinePage() {
         </div>
       </header>
 
-      {/* 3 stat cards */}
-      <section className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4 mb-6">
+      {/* Stat cards
+          MOBILE : 1) Exposition full width  2) Actifs + Pénalisants side-by-side (compact)
+          DESKTOP : the 3 cards on a single row (Exposition, Actifs, Pénalisants).
+          `lg:contents` on the mobile-only wrapper lets the 2 small cards
+          re-join the parent grid on lg+. */}
+      <section className="mt-6 mb-6 grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4">
         <div className={`${GLASS_CARD} p-5 flex items-center gap-4`}>
           <div className="min-w-0 flex-1">
             <div className="text-[11px] uppercase tracking-wide text-[#6B7280] mb-1">Exposition cumulée</div>
@@ -209,54 +251,56 @@ export default async function RoutinePage() {
           <ExposureGauge score={metrics.exposureScore} stroke={exposureStrokeColor} />
         </div>
 
-        <div className={`${GLASS_CARD} p-5`}>
-          <div className="text-[11px] uppercase tracking-wide text-[#6B7280] mb-1">Produits actifs</div>
-          <div className="text-3xl font-bold tabular-nums">{productsCount}</div>
-          <p className="text-[11px] text-[#9CA3AF] mt-1">
-            {metrics.totalUseUnits.toFixed(1)} unités d&apos;usage / jour
-          </p>
-        </div>
-
-        <div className={`${GLASS_CARD} p-5`}>
-          <div className="text-[11px] uppercase tracking-wide text-[#6B7280] mb-1">Produits pénalisants</div>
-          <div className="flex items-baseline gap-2">
-            {metrics.penalizingProductsCount > 0 ? (
-              <Tooltip
-                placement="bottom"
-                maxWidth={300}
-                content={
-                  <div className="space-y-2.5">
-                    {penalizingDetails.map((p, i) => (
-                      <div key={i}>
-                        <div className="font-semibold text-white leading-tight truncate">
-                          {p.name} — {p.score?.toFixed(1)}/20
-                        </div>
-                        {p.worst.length > 0 && (
-                          <div className="text-[11px] text-white/70 mt-0.5 leading-snug">
-                            {p.worst.join(" · ")}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                }
-              >
-                <span className="inline-flex items-baseline gap-2 cursor-help">
-                  <span className="text-3xl font-bold tabular-nums text-rose-600">
-                    {metrics.penalizingProductsCount}
-                  </span>
-                  <span aria-hidden className="text-rose-500 text-xl">⚠</span>
-                </span>
-              </Tooltip>
-            ) : (
-              <span className="text-3xl font-bold tabular-nums">
-                {metrics.penalizingProductsCount}
-              </span>
-            )}
+        <div className="grid grid-cols-2 gap-3 lg:contents">
+          <div className={`${GLASS_CARD} p-3.5 lg:p-5`}>
+            <div className="text-[10px] lg:text-[11px] uppercase tracking-wide text-[#6B7280] mb-0.5 lg:mb-1">Produits actifs</div>
+            <div className="text-2xl lg:text-3xl font-bold tabular-nums leading-tight">{productsCount}</div>
+            <p className="text-[10px] lg:text-[11px] text-[#9CA3AF] mt-0.5 lg:mt-1 leading-snug">
+              {metrics.totalUseUnits.toFixed(1)} u/jour
+            </p>
           </div>
-          <p className="text-[11px] text-[#9CA3AF] mt-1">
-            score &lt; 13/20 (orange / rose)
-          </p>
+
+          <div className={`${GLASS_CARD} p-3.5 lg:p-5`}>
+            <div className="text-[10px] lg:text-[11px] uppercase tracking-wide text-[#6B7280] mb-0.5 lg:mb-1">Produits pénalisants</div>
+            <div className="flex items-baseline gap-1.5">
+              {metrics.penalizingProductsCount > 0 ? (
+                <Tooltip
+                  placement="bottom"
+                  maxWidth={300}
+                  content={
+                    <div className="space-y-2.5">
+                      {penalizingDetails.map((p, i) => (
+                        <div key={i}>
+                          <div className="font-semibold text-white leading-tight truncate">
+                            {p.name} — {p.score?.toFixed(1)}/20
+                          </div>
+                          {p.worst.length > 0 && (
+                            <div className="text-[11px] text-white/70 mt-0.5 leading-snug">
+                              {p.worst.join(" · ")}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  }
+                >
+                  <span className="inline-flex items-baseline gap-1.5 cursor-help">
+                    <span className="text-2xl lg:text-3xl font-bold tabular-nums text-rose-600 leading-tight">
+                      {metrics.penalizingProductsCount}
+                    </span>
+                    <span aria-hidden className="text-rose-500 text-base lg:text-xl">⚠</span>
+                  </span>
+                </Tooltip>
+              ) : (
+                <span className="text-2xl lg:text-3xl font-bold tabular-nums leading-tight">
+                  {metrics.penalizingProductsCount}
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] lg:text-[11px] text-[#9CA3AF] mt-0.5 lg:mt-1 leading-snug">
+              score &lt; 13/20
+            </p>
+          </div>
         </div>
       </section>
 

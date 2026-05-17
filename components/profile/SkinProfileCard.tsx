@@ -52,14 +52,14 @@ export function SkinProfileCard({ initial }: { initial: SkinProfile }) {
         ) : (
           <p className="text-[13px] text-[#6B7280] leading-relaxed">
             Renseigne ton type de peau, tes préoccupations et tes allergies
-            pour que le Skin Advisor adapte ses réponses à ta peau.
+            pour que le Beauty Advisor adapte ses réponses à ta peau.
           </p>
         )}
 
         <p className="mt-4 text-[11px] text-[#9CA3AF] leading-snug">
           Ces infos sont utilisées par le{" "}
           <Link href="/advisor" className="underline hover:text-[#F43F5E]">
-            Skin Advisor
+            Beauty Advisor
           </Link>
           {" "}
           pour personnaliser ses réponses.
