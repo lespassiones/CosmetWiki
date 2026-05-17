@@ -98,6 +98,21 @@ URL source : ${sourceUrl}
 ${hintsBlock ? `${hintsBlock}\n` : ""}
 Cherche la promesse marketing officielle (claims, bénéfices, actifs mis en avant) telle que présentée par la marque. Réponds en JSON strict.`;
 
+  // Updates we'll PATCH onto the analyses row at the end. We collect the
+  // identity bits (label/brand/type) up-front so the row gets renamed from
+  // the auto-generated "Analyse du 17 mai" to the actual product name the
+  // moment the user confirms a candidate, even if the marketing description
+  // fetch later fails. The description bits are added only if we manage to
+  // resolve them.
+  const updates: Record<string, string> = {};
+  // product_label is the human title shown everywhere (history list, detail
+  // page, analyse panel). Brand first if we have it, then the product name —
+  // mirrors the convention used by AnalysisRunner when joining productSource.
+  const newLabel = [brand, candidateName].filter(Boolean).join(" ").slice(0, 200);
+  if (newLabel) updates.product_label = newLabel;
+  if (brand) updates.brand = brand;
+  if (productType) updates.product_type = productType;
+
   let description = "";
   let finalUrl = sourceUrl;
   let notFoundReason: string | null = null;
@@ -136,29 +151,31 @@ Cherche la promesse marketing officielle (claims, bénéfices, actifs mis en ava
     return NextResponse.json({ error: "Erreur lors de la récupération." }, { status: 500 });
   }
 
-  if (!description) {
-    return NextResponse.json({
-      notFound: true,
-      reason: notFoundReason ?? "pas_de_description",
-    } satisfies FetchDescriptionResponse);
+  // Fold the description bits into the same PATCH payload when we got them
+  // — single round-trip to Supabase instead of two.
+  if (description) {
+    updates.product_description = description;
+    updates.promise_source_url = finalUrl;
   }
 
   // Best-effort persist on the analyses row. The analysisId is optional —
   // the modal might call this endpoint before the analyse has been saved
   // (anonymous user, or RLS row not yet visible). In that case we just
-  // return the description and let the caller proceed.
+  // return whatever we resolved and let the caller proceed.
   let persisted = false;
-  if (body.analysisId && typeof body.analysisId === "string" && body.analysisId.length > 8) {
+  if (
+    body.analysisId
+    && typeof body.analysisId === "string"
+    && body.analysisId.length > 8
+    && Object.keys(updates).length > 0
+  ) {
     try {
       const cookieStore = await cookies();
       const sb = supabaseServer(cookieStore);
       const { error: updateErr } = await sb
         .schema("cosme_check")
         .from("analyses")
-        .update({
-          product_description: description,
-          promise_source_url: finalUrl,
-        })
+        .update(updates)
         .eq("id", body.analysisId);
       if (updateErr) {
         console.warn("[promesse/fetch-description] persist failed:", updateErr.message);
@@ -168,6 +185,13 @@ Cherche la promesse marketing officielle (claims, bénéfices, actifs mis en ava
     } catch (err) {
       console.warn("[promesse/fetch-description] persist threw:", (err as Error).message);
     }
+  }
+
+  if (!description) {
+    return NextResponse.json({
+      notFound: true,
+      reason: notFoundReason ?? "pas_de_description",
+    } satisfies FetchDescriptionResponse);
   }
 
   return NextResponse.json({

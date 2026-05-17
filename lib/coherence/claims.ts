@@ -39,6 +39,13 @@ export type ClaimCategory = {
   actives: ActiveEntry[];
   /** Short hint shown if the LLM falls back to "non_demontree". */
   hint: string;
+  /**
+   * When set, this category represents an "absence" claim (sans paraben,
+   * sans sulfate…). The engine resolves it by checking every formula item
+   * for this tag rather than by matching positive actives. `actives` is
+   * empty in that case.
+   */
+  forbiddenTag?: string;
 };
 
 /**
@@ -227,6 +234,83 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
     ],
     hint: "Aucun actif éclaircissant ou anti-taches documenté trouvé.",
   },
+  // ─── Absence claims ───────────────────────────────────────────────────────
+  // "Sans X" promises. Resolved by scanning items[].tags for forbiddenTag
+  // rather than by matching positive actives. The tag names match what the
+  // INCI analyser pipeline already attaches to ingredients
+  // (cf. app/api/analyser/route.ts TAG_LABELS).
+  {
+    slug: "absence_sulfate",
+    label: "Sans sulfate",
+    keywords: ["sans sulfate", "sans sulfates", "sulfate-free", "no sulfate"],
+    actives: [],
+    forbiddenTag: "sulfate",
+    hint: "Aucun sulfate détecté dans la formule — promesse tenue.",
+  },
+  {
+    slug: "absence_silicone",
+    label: "Sans silicone",
+    keywords: ["sans silicone", "sans silicones", "silicone-free", "no silicone"],
+    actives: [],
+    forbiddenTag: "silicone",
+    hint: "Aucun silicone détecté dans la formule — promesse tenue.",
+  },
+  {
+    slug: "absence_paraben",
+    label: "Sans paraben",
+    keywords: ["sans paraben", "sans parabens", "paraben-free", "no paraben"],
+    actives: [],
+    forbiddenTag: "paraben",
+    hint: "Aucun paraben détecté dans la formule — promesse tenue.",
+  },
+  {
+    slug: "absence_huile_minerale",
+    label: "Sans huile minérale",
+    keywords: ["sans huile minérale", "sans huiles minérales", "sans paraffine", "sans petrolatum"],
+    actives: [],
+    forbiddenTag: "huile-minerale",
+    hint: "Aucune huile minérale détectée dans la formule — promesse tenue.",
+  },
+  {
+    slug: "absence_colorant_synthese",
+    label: "Sans colorant de synthèse",
+    keywords: ["sans colorant", "sans colorants", "sans colorant de synthèse", "sans colorants synthétiques"],
+    actives: [],
+    forbiddenTag: "colorant-synthese",
+    hint: "Aucun colorant de synthèse détecté dans la formule — promesse tenue.",
+  },
+  {
+    slug: "absence_parfum_synthese",
+    label: "Sans parfum de synthèse",
+    keywords: ["sans parfum", "sans parfum de synthèse", "sans parfum synthétique", "fragrance-free"],
+    actives: [],
+    forbiddenTag: "parfum-synthese",
+    hint: "Aucun parfum de synthèse détecté dans la formule — promesse tenue.",
+  },
+  {
+    slug: "absence_allergene_parfumant",
+    label: "Sans allergène parfumant",
+    keywords: ["sans allergène", "sans allergènes", "hypoallergénique"],
+    actives: [],
+    forbiddenTag: "allergene-parfumant",
+    hint: "Aucun allergène parfumant réglementé détecté — promesse tenue.",
+  },
+  {
+    slug: "absence_ethoxyle",
+    label: "Sans composés éthoxylés",
+    keywords: ["sans peg", "sans pegs", "sans éthoxylés", "sans ethoxyle"],
+    actives: [],
+    forbiddenTag: "ethoxyle",
+    hint: "Aucun composé éthoxylé (PEG…) détecté — promesse tenue.",
+  },
+  {
+    slug: "absence_ammonium_quaternaire",
+    label: "Sans ammonium quaternaire",
+    keywords: ["sans ammonium quaternaire", "sans quaternium", "sans quat"],
+    actives: [],
+    forbiddenTag: "ammonium-quaternaire",
+    hint: "Aucun ammonium quaternaire détecté — promesse tenue.",
+  },
 ];
 
 /** Lookup by slug. */
@@ -234,9 +318,15 @@ export function findCategoryBySlug(slug: string): ClaimCategory | undefined {
   return CLAIM_CATEGORIES.find((c) => c.slug === slug);
 }
 
-/** Compact list for the LLM prompt — slug + label + 1 example active per category. */
-export function categoriesForPrompt(): { slug: string; label: string; example_actives: string[] }[] {
-  return CLAIM_CATEGORIES.map((c) => ({
+/** True when this category is resolved by checking an absence of tag rather
+ *  than by matching positive actives. */
+export function isAbsenceCategory(cat: ClaimCategory): boolean {
+  return Boolean(cat.forbiddenTag);
+}
+
+/** Effect categories (everything except the "sans X" absence claims). */
+export function effectCategoriesForPrompt(): { slug: string; label: string; example_actives: string[] }[] {
+  return CLAIM_CATEGORIES.filter((c) => !c.forbiddenTag).map((c) => ({
     slug: c.slug,
     label: c.label,
     example_actives: c.actives
@@ -244,6 +334,24 @@ export function categoriesForPrompt(): { slug: string; label: string; example_ac
       .slice(0, 4)
       .map((a) => a.name),
   }));
+}
+
+/** Absence categories — used by the prompt to map "sans X" claims. */
+export function absenceCategoriesForPrompt(): { slug: string; label: string; keywords: string[] }[] {
+  return CLAIM_CATEGORIES.filter((c) => c.forbiddenTag).map((c) => ({
+    slug: c.slug,
+    label: c.label,
+    keywords: c.keywords,
+  }));
+}
+
+/**
+ * @deprecated Use {@link effectCategoriesForPrompt} — kept temporarily for
+ * any caller that hasn't migrated. Returns only effect categories (no
+ * absence claims) so existing prompts don't break.
+ */
+export function categoriesForPrompt(): { slug: string; label: string; example_actives: string[] }[] {
+  return effectCategoriesForPrompt();
 }
 
 /** All known active slugs (used by the engine to constrain matching). */

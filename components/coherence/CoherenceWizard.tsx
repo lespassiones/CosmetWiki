@@ -20,6 +20,13 @@ type Step = "description" | "pickProduct" | "confirm" | "running";
 const MIN_DESCRIPTION = 30;
 const MAX_DESCRIPTION = 6000;
 
+// Ordered list used to compute "is the user allowed to jump back/forward to
+// this step?". `running` isn't included — it's a transient state during the
+// API call, not a user-navigable step. Typed as Step[] (with the missing
+// "running" slot returning -1 from indexOf) so callers can pass any Step
+// without a narrow cast.
+const STEP_ORDER: Step[] = ["description", "pickProduct", "confirm"];
+
 export function CoherenceWizard({
   options,
   initialAnalysisId = null,
@@ -35,22 +42,28 @@ export function CoherenceWizard({
   initialDescription?: string | null;
 }) {
   const router = useRouter();
-  // Pre-fill flow: if we got both an analysis id (matching one of the
-  // user's analyses) AND a non-empty description, drop the user straight on
-  // "confirm". If only the description is provided, the user still has to
-  // pick the matching analyse first. If only the id, they still have to
-  // type the description.
+  // Pre-fill flow: when arriving from the PromesseFlowModal with both an
+  // analysis id (matching one of the user's analyses) AND a description, we
+  // still LAND on "description" — not "confirm" — so the user can sanity-
+  // check the web-search-fetched description before launching. Both prior
+  // steps are silently marked as "visited" (see maxStepReached below) so
+  // the user can also jump straight to Vérification via the stepper.
   const hasPrefilledDescription =
     typeof initialDescription === "string" && initialDescription.trim().length >= MIN_DESCRIPTION;
   const hasPrefilledAnalysis =
     typeof initialAnalysisId === "string" && options.some((o) => o.id === initialAnalysisId);
-  const initialStep: Step = hasPrefilledDescription && hasPrefilledAnalysis
+  const initialStep: Step = "description";
+  // Which step the user can jump to via the stepper. "confirm" when
+  // everything is pre-filled (both description and product), "pickProduct"
+  // when only the description is pre-filled, "description" otherwise.
+  const initialMaxStep: Step = hasPrefilledDescription && hasPrefilledAnalysis
     ? "confirm"
     : hasPrefilledDescription
       ? "pickProduct"
       : "description";
 
   const [step, setStep] = useState<Step>(initialStep);
+  const [maxStepReached, setMaxStepReached] = useState<Step>(initialMaxStep);
   const [description, setDescription] = useState(initialDescription?.trim() ?? "");
   const [selectedId, setSelectedId] = useState<string | null>(
     hasPrefilledAnalysis ? initialAnalysisId : null,
@@ -58,6 +71,20 @@ export function CoherenceWizard({
   const [error, setError] = useState<string | null>(null);
 
   const selected = options.find((o) => o.id === selectedId) ?? null;
+
+  function advanceTo(target: Step) {
+    setStep(target);
+    if (STEP_ORDER.indexOf(target) > STEP_ORDER.indexOf(maxStepReached)) {
+      setMaxStepReached(target);
+    }
+  }
+
+  /** Jump to any previously-visited step via the stepper. */
+  function jumpToStep(target: Step) {
+    if (STEP_ORDER.indexOf(target) > STEP_ORDER.indexOf(maxStepReached)) return;
+    setError(null);
+    setStep(target);
+  }
 
   function next() {
     setError(null);
@@ -67,7 +94,13 @@ export function CoherenceWizard({
         setError(`Colle une description un peu plus complète (au moins ${MIN_DESCRIPTION} caractères).`);
         return;
       }
-      setStep("pickProduct");
+      // Skip pickProduct entirely if we arrived with a pre-selected analyse —
+      // re-picking it would be pure friction.
+      if (selected && STEP_ORDER.indexOf(maxStepReached) >= STEP_ORDER.indexOf("confirm")) {
+        advanceTo("confirm");
+        return;
+      }
+      advanceTo("pickProduct");
       return;
     }
     if (step === "pickProduct") {
@@ -75,7 +108,7 @@ export function CoherenceWizard({
         setError("Choisis le produit à comparer.");
         return;
       }
-      setStep("confirm");
+      advanceTo("confirm");
       return;
     }
     if (step === "confirm") {
@@ -86,7 +119,12 @@ export function CoherenceWizard({
   function back() {
     setError(null);
     if (step === "pickProduct") setStep("description");
-    else if (step === "confirm") setStep("pickProduct");
+    else if (step === "confirm") {
+      // If pickProduct was originally skipped (pre-selected), go all the way
+      // back to description rather than dumping the user on a step they
+      // didn't see on the way in.
+      setStep(maxStepReached === "confirm" && hasPrefilledAnalysis ? "description" : "pickProduct");
+    }
   }
 
   async function launch() {
@@ -118,7 +156,7 @@ export function CoherenceWizard({
 
   return (
     <div>
-      <Stepper step={step} />
+      <Stepper step={step} maxStepReached={maxStepReached} onJump={jumpToStep} />
 
       {step === "description" && (
         <article className={`${GLASS_CARD} p-5 lg:p-6 mt-6`}>
@@ -285,38 +323,69 @@ function Dot({ color }: { color: string }) {
   );
 }
 
-function Stepper({ step }: { step: Step }) {
+function Stepper({
+  step,
+  maxStepReached,
+  onJump,
+}: {
+  step: Step;
+  maxStepReached: Step;
+  onJump: (s: Exclude<Step, "running">) => void;
+}) {
   const steps = [
     { key: "description" as const, label: "Description" },
     { key: "pickProduct" as const, label: "Produit" },
     { key: "confirm" as const, label: "Vérification" },
   ];
   const idx = steps.findIndex((s) => s.key === step);
+  const maxIdx = steps.findIndex((s) => s.key === maxStepReached);
   return (
     <ol className="flex items-center gap-2">
       {steps.map((s, i) => {
         const active = i === idx;
-        const done = i < idx;
-        return (
-          <li key={s.key} className="flex items-center gap-2">
+        // "Reached" = the user has at least visited this step on the way to
+        // their current position. The pre-fill flow marks steps as reached
+        // up-front so the user can jump directly into Vérification without
+        // having to walk through the wizard.
+        const reached = i <= maxIdx;
+        const done = i < idx && reached;
+        const clickable = reached && !active;
+        const Cell = (
+          <>
             <span
-              className={`grid h-6 w-6 place-items-center rounded-full text-[11px] font-semibold ${
+              className={`grid h-6 w-6 place-items-center rounded-full text-[11px] font-semibold transition ${
                 active
                   ? "bg-[#111111] text-white"
-                  : done
+                  : reached
                     ? "bg-emerald-500 text-white"
                     : "bg-[#F3F4F6] text-[#6B7280]"
               }`}
             >
-              {done ? "✓" : i + 1}
+              {done || (reached && !active) ? "✓" : i + 1}
             </span>
             <span
-              className={`text-[12px] font-medium ${
-                active ? "text-ink" : done ? "text-emerald-700" : "text-[#9CA3AF]"
+              className={`text-[12px] font-medium transition ${
+                active ? "text-ink" : reached ? "text-emerald-700" : "text-[#9CA3AF]"
               }`}
             >
               {s.label}
             </span>
+          </>
+        );
+        return (
+          <li key={s.key} className="flex items-center gap-2">
+            {clickable ? (
+              <button
+                type="button"
+                onClick={() => onJump(s.key)}
+                className="flex items-center gap-2 rounded-full hover:bg-black/[0.04] -mx-1 px-1 py-0.5 transition"
+                aria-label={`Revenir à l'étape ${s.label}`}
+              >
+                {Cell}
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 -mx-1 px-1 py-0.5">{Cell}</div>
+            )}
             {i < steps.length - 1 && (
               <span aria-hidden className="mx-1 h-px w-6 bg-[#E5E7EB]" />
             )}

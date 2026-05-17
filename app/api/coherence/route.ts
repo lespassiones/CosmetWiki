@@ -9,10 +9,11 @@ import {
 } from "@/lib/ai/coherence";
 import {
   buildCoherenceResult,
+  resolveAbsencePromise,
   resolveOpenPromise,
   resolvePromise,
 } from "@/lib/coherence/engine";
-import { findCategoryBySlug } from "@/lib/coherence/claims";
+import { findCategoryBySlug, isAbsenceCategory } from "@/lib/coherence/claims";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 import type { CoherencePromise } from "@/lib/coherence/types";
 import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
@@ -119,15 +120,21 @@ export async function POST(req: NextRequest) {
   // ─── Step 1: extract promises from the description (LLM, JSON schema strict) ─
   const extraction = await extractPromisesFromDescription(description, user.id);
 
-  // ─── Step 2: split proposals between catalogue and open ───────────────────
-  // - catalogue: slug ∈ CLAIM_CATEGORIES → resolved by the engine using the
-  //   static claim → actives mapping.
-  // - open: slug = "autre" or unknown → resolved via a per-promise LLM
-  //   exploration that picks active candidates *from the actual formula*.
+  // ─── Step 2: split proposals between catalogue (effect), catalogue
+  // (absence), and open ───────────────────────────────────────────────────
+  // - catalogue effect: slug ∈ CLAIM_CATEGORIES without forbiddenTag → engine
+  //   matches catalogue actives against parent.items.
+  // - catalogue absence: slug ∈ CLAIM_CATEGORIES with forbiddenTag → engine
+  //   scans parent.items[].tags for the forbidden tag (no LLM step needed).
+  // - open: slug = "autre" or unknown → per-promise LLM exploration that
+  //   picks active candidates *from the actual formula*.
   const cataloguePromises: CoherencePromise[] = [];
   const openProposals: typeof extraction.proposals = [];
   for (const p of extraction.proposals) {
-    if (findCategoryBySlug(p.category_slug)) {
+    const cat = findCategoryBySlug(p.category_slug);
+    if (cat && isAbsenceCategory(cat)) {
+      cataloguePromises.push(resolveAbsencePromise(p, cat, parent.items));
+    } else if (cat) {
       cataloguePromises.push(resolvePromise(p, parent.items));
     } else {
       openProposals.push(p);

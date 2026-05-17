@@ -4,8 +4,10 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase";
 import {
+  HAIR_CONCERNS,
   SKIN_CONCERNS,
   SKIN_TYPES,
+  type HairConcern,
   type SkinConcern,
   type SkinProfile,
   type SkinType,
@@ -27,16 +29,25 @@ export async function saveSkinProfile(form: FormData): Promise<SkinProfileResult
   const concerns = form
     .getAll("concerns")
     .map(String)
-    .filter((c): c is SkinConcern => SKIN_CONCERNS.includes(c as SkinConcern));
+    .filter((c): c is SkinConcern =>
+      SKIN_CONCERNS.includes(c as (typeof SKIN_CONCERNS)[number]),
+    );
   if (concerns.length === 0) {
     return { ok: false, error: "Choisis au moins une préoccupation." };
   }
+
+  // Hair section is optional — empty is fine.
+  const hairConcerns = form
+    .getAll("hair_concerns")
+    .map(String)
+    .filter((c): c is HairConcern => HAIR_CONCERNS.includes(c as HairConcern));
 
   const allergiesFreeform = String(form.get("allergies") ?? "").slice(0, 500).trim();
 
   const profile: SkinProfile = {
     skinType: skinType as SkinType,
     concerns,
+    hairConcerns: hairConcerns.length > 0 ? hairConcerns : undefined,
     allergiesFreeform: allergiesFreeform || undefined,
   };
 

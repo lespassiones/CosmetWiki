@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { generateCompareInsights } from "@/lib/ai/compare";
+import { shortenProductName } from "@/lib/text/shortenProductName";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 export const runtime = "nodejs";
@@ -51,9 +52,18 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  // Use the SHORT name in the prompt so the LLM-generated narrative reads
+  // naturally ("L'Oréal Curl Expression pourrait te convenir" instead of
+  // a 60-character mouthful). The frontend uses the same short name in
+  // titles and as the highlight key, so substrings match without effort.
+  const rawA = a.product_label ?? a.name ?? "Produit A";
+  const rawB = b.product_label ?? b.name ?? "Produit B";
+  const shortA = shortenProductName(rawA);
+  const shortB = shortenProductName(rawB);
+
   const insights = await generateCompareInsights(
-    { name: a.product_label ?? a.name ?? "Produit A", result: a.result_json },
-    { name: b.product_label ?? b.name ?? "Produit B", result: b.result_json },
+    { name: shortA, result: a.result_json },
+    { name: shortB, result: b.result_json },
     { userId: user.id },
   );
 

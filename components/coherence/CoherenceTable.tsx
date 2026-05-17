@@ -52,6 +52,7 @@ export function CoherenceTable({
     partielle: promises.filter((p) => p.verdict === "partielle").length,
     marketing: promises.filter((p) => p.verdict === "marketing").length,
     non_demontree: promises.filter((p) => p.verdict === "non_demontree").length,
+    contredite: promises.filter((p) => p.verdict === "contredite").length,
   };
 
   return (
@@ -72,7 +73,8 @@ export function CoherenceTable({
               {verdictCounts.tenue > 0 && <>{verdictCounts.tenue} tenue{verdictCounts.tenue > 1 ? "s" : ""}</>}
               {verdictCounts.partielle > 0 && <>{verdictCounts.tenue > 0 ? ", " : ""}{verdictCounts.partielle} partielle{verdictCounts.partielle > 1 ? "s" : ""}</>}
               {verdictCounts.marketing > 0 && <>, {verdictCounts.marketing} marketing</>}
-              {verdictCounts.non_demontree > 0 && <>, {verdictCounts.non_demontree} non démontrée{verdictCounts.non_demontree > 1 ? "s" : ""}</>}.
+              {verdictCounts.non_demontree > 0 && <>, {verdictCounts.non_demontree} non démontrée{verdictCounts.non_demontree > 1 ? "s" : ""}</>}
+              {verdictCounts.contredite > 0 && <>, {verdictCounts.contredite} contredite{verdictCounts.contredite > 1 ? "s" : ""}</>}.
             </>
           }
         >
@@ -213,6 +215,34 @@ function FoundList({
   promise: CoherencePromise;
   colorMap: Map<string, ColorRating | null>;
 }) {
+  // "Contredite" verdicts swap semantics: instead of listing actives that
+  // SUPPORT the promise, we list ingredients that CONTRADICT it (the
+  // product claims "sans sulfate" but here are the sulfates). Visually
+  // marked with a red ⚠ so it's clearly different from a "tenue" row.
+  if (promise.verdict === "contredite" && promise.contradictingActives && promise.contradictingActives.length > 0) {
+    return (
+      <span className="inline-flex flex-wrap items-center gap-x-1 gap-y-1 text-red-700">
+        <span aria-hidden className="mr-1">⚠</span>
+        {promise.contradictingActives.map((c, i) => (
+          <Fragment key={`${c.slug ?? c.name}-${i}`}>
+            {i > 0 && <span aria-hidden className="text-red-300 mx-1">·</span>}
+            <span className="inline-flex items-center gap-1">
+              <span className="font-medium">{c.name}</span>
+              <span className="text-[11px] text-red-500/80">pos. {c.position}</span>
+            </span>
+          </Fragment>
+        ))}
+      </span>
+    );
+  }
+
+  // "Tenue" absence promises (e.g. "sans paraben" → no paraben found): no
+  // ingredient to list, but say so explicitly so the row doesn't look
+  // empty/broken.
+  if (promise.verdict === "tenue" && promise.foundActives.length === 0 && promise.cosmeticActives.length === 0) {
+    return <span className="text-emerald-700">Aucun ingrédient de ce type détecté.</span>;
+  }
+
   const entries = [
     ...promise.foundActives.map((f) => ({ name: f.name, slug: f.slug })),
     ...promise.cosmeticActives.map((c) => ({ name: c.name, slug: c.slug })),

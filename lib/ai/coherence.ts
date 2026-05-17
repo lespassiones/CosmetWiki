@@ -22,7 +22,10 @@ import {
   openai,
 } from "./client";
 import { NO_LONG_DASHES_RULE, stripLongDashes } from "./sanitize";
-import { categoriesForPrompt } from "@/lib/coherence/claims";
+import {
+  absenceCategoriesForPrompt,
+  effectCategoriesForPrompt,
+} from "@/lib/coherence/claims";
 import type { CoherencePromise } from "@/lib/coherence/types";
 import type { LlmPromiseProposal, OpenLlmMatch } from "@/lib/coherence/engine";
 
@@ -44,68 +47,74 @@ const UNVERIFIABLE_REASONS = [
 ] as const;
 
 function buildExtractionPrompt(description: string) {
-  const cats = categoriesForPrompt();
-  const catList = cats
+  const effectCats = effectCategoriesForPrompt();
+  const absenceCats = absenceCategoriesForPrompt();
+  const effectList = effectCats
     .map(
       (c) =>
         `- ${c.slug} (${c.label}) — actifs typiques : ${c.example_actives.join(", ")}`,
     )
     .join("\n");
+  const absenceList = absenceCats
+    .map((c) => `- ${c.slug} (${c.label}) — mots-clés : ${c.keywords.join(", ")}`)
+    .join("\n");
 
   const system = `Tu es un assistant qui analyse les descriptions marketing de produits cosmétiques en français.
 
-Ta mission : identifier TOUTES les PROMESSES D'EFFET sur la peau ou les cheveux, et les classer.
+Ta mission : identifier TOUTES les PROMESSES VÉRIFIABLES (effets ET absences d'ingrédients) et les classer.
 
-CATÉGORIES PRIORITAIRES (utilise-les en premier si la promesse correspond) :
-${catList}
+═══ CATÉGORIES D'EFFETS (promesses positives sur la peau/cheveux) ═══
+${effectList}
+
+═══ CATÉGORIES D'ABSENCE (promesses "sans X") ═══
+${absenceList}
 
 CATÉGORIE "autre" :
-Si une promesse décrit un effet attendu sur la peau/cheveux MAIS ne tombe dans AUCUNE catégorie ci-dessus, utilise category_slug="autre" avec un label descriptif clair (ex: "Fixation des boucles", "Définition des boucles", "Fortification capillaire", "Régulation du sébum", "Renforcement de la barrière cutanée"…).
+Si une promesse décrit un effet attendu sur la peau/cheveux MAIS ne tombe dans AUCUNE catégorie d'effet ci-dessus, utilise category_slug="autre" avec un label descriptif clair (ex: "Fixation des boucles", "Régulation du sébum", "Renforcement de la barrière cutanée"…).
 
 ═══ RÈGLES IMPORTANTES ═══
 
-1. EXHAUSTIVITÉ : Sois EXHAUSTIF dans la détection. Une description marketing contient typiquement 3 à 6 promesses distinctes. Si tu n'en trouves qu'une seule sur un texte de 5+ phrases, tu en oublies sûrement.
+1. EXHAUSTIVITÉ : Sois EXHAUSTIF. Une description marketing contient typiquement 3 à 8 promesses distinctes (effets + absences). Si tu n'en trouves qu'une seule sur un texte de 5+ phrases, tu en oublies sûrement.
 
-2. promesse vs unverifiable — LA RÈGLE CRITIQUE :
-   ✓ EST UNE PROMESSE (catégorie ou "autre") = un EFFET attendu sur cheveux/peau :
-     - "fixe les boucles" → autre / Fixation des boucles
-     - "définit les boucles" → autre / Définition des boucles
-     - "fortifie les cheveux" → autre / Fortification capillaire
-     - "limite les frisottis" → anti_frisottis
-     - "hydrate / préserve l'hydratation" → hydratation
-     - "revitalise" → autre / Revitalisation
-     - "préserve la couleur" → autre / Protection couleur
-     - "donne du volume aux racines" → autre / Volume racine
+2. CLAIMS "SANS X" SONT DES PROMESSES VÉRIFIABLES :
+   "sans sulfate", "sans paraben", "sans silicone", "sans huile minérale", "sans colorant", "sans parfum" → catégorie absence_* correspondante. Ce sont des promesses, PAS des unverifiable. Le système vérifie ces absences mécaniquement via les tags des ingrédients.
 
-   ✗ EST UNVERIFIABLE = pas un effet, juste une mention :
-     - composition : "97 % d'origine naturelle", "sans paraben", "à base d'eau et de B5"
-     - certification : "Ecocert", "vegan", "cruelty-free"
-     - sensoriel : "odeur sucrée", "sans effet carton", "texture fondante"
-     - marketing_general : "véritable soin", "efficacité prouvée", "résultats visibles"
+3. promesse vs unverifiable — LA RÈGLE CRITIQUE :
+   ✓ EST UNE PROMESSE = un EFFET attendu OU une absence d'ingrédient :
+     - Effets : "hydrate", "fortifie", "anti-frisottis", "définit les boucles"…
+     - Absences (catégories absence_*) : "sans sulfate", "sans paraben"…
 
-3. RÈGLE D'OR : si une phrase dit qu'un ingrédient FAIT quelque chose ("la provitamine B5 fortifie les cheveux"), c'est une PROMESSE (catégorie ou autre), PAS de l'unverifiable. Le test mental : "est-ce qu'un ingrédient peut justifier ou non cette phrase ?". Si oui → promesse.
+   ✗ EST UNVERIFIABLE = ni effet ni absence d'ingrédient identifiable :
+     - composition générale non vérifiable : "97 % d'origine naturelle", "à base de B5",
+       "100 % naturel", "formule clean" (calcul indisponible — pas dans le périmètre)
+     - certification : "Ecocert", "Cosmos Organic", "vegan", "cruelty-free", "bio"
+     - sensoriel : "odeur sucrée", "texture fondante", "goût citronné", "mousse rapidement"
+     - marketing_general : "véritable soin", "efficacité prouvée", "résultats visibles", "économique", "packaging recyclable"
 
-4. DÉDUPLICATION : Une même catégorie n'apparaît qu'UNE seule fois (excerpt = la formulation la plus claire). "hydrate" + "préserve l'hydratation" + "intensément hydratant" = 1 seule promesse hydratation.
+4. RÈGLE D'OR : si une phrase dit qu'un ingrédient FAIT quelque chose ("la provitamine B5 fortifie les cheveux"), c'est une PROMESSE d'effet. Si elle dit qu'un ingrédient N'EST PAS dedans ("sans sulfate"), c'est une PROMESSE d'absence. Sinon c'est unverifiable.
 
-5. EXCERPT : verbatim exact, max 80 caractères.
+5. DÉDUPLICATION : Une même catégorie n'apparaît qu'UNE seule fois (excerpt = la formulation la plus claire). "hydrate" + "préserve l'hydratation" = 1 seule promesse hydratation. "sans sulfate ni silicone" → 2 promesses absence (absence_sulfate + absence_silicone), excerpt commun.
 
-6. La description peut être en français ou en anglais.
+6. EXCERPT : verbatim exact (ou fragment fidèle), max 80 caractères.
+
+7. La description peut être en français ou en anglais.
 
 ═══ EXEMPLE COMPLET ═══
 
-Description : "Cette gelée hydrate les cheveux, fixe les boucles, limite les frisottis et fortifie la fibre. Formulée à 96 % naturel, elle a une odeur de vanille."
+Description : "Cette gelée hydrate les cheveux, fixe les boucles et limite les frisottis. Sans sulfate ni silicone, formulée à 96 % naturel, odeur de vanille."
 
 Tu dois extraire :
 - promises:
   · {category_slug: "hydratation", label: "Hydratation", excerpt: "hydrate les cheveux"}
   · {category_slug: "autre", label: "Fixation des boucles", excerpt: "fixe les boucles"}
   · {category_slug: "anti_frisottis", label: "Anti-frisottis", excerpt: "limite les frisottis"}
-  · {category_slug: "autre", label: "Fortification capillaire", excerpt: "fortifie la fibre"}
+  · {category_slug: "absence_sulfate", label: "Sans sulfate", excerpt: "sans sulfate"}
+  · {category_slug: "absence_silicone", label: "Sans silicone", excerpt: "ni silicone"}
 - unverifiable:
-  · {excerpt: "Formulée à 96 % naturel", reason: "composition"}
+  · {excerpt: "formulée à 96 % naturel", reason: "composition"}
   · {excerpt: "odeur de vanille", reason: "sensoriel"}
 
-→ 4 promesses, 2 mentions non vérifiables. PAS 2 promesses, PAS 6 promesses.`;
+→ 5 promesses (3 effets + 2 absences), 2 mentions non vérifiables.`;
 
   const user = `Description du produit (à analyser) :
 """
@@ -507,12 +516,15 @@ function buildConclusionPrompt(
   const partielle = promises.filter((p) => p.verdict === "partielle").map((p) => p.label);
   const marketing = promises.filter((p) => p.verdict === "marketing").map((p) => p.label);
   const non = promises.filter((p) => p.verdict === "non_demontree").map((p) => p.label);
+  const contredite = promises.filter((p) => p.verdict === "contredite").map((p) => p.label);
 
   const system = `Tu rédiges UNE phrase de conclusion (50-120 mots maximum) pour une analyse de cohérence entre les promesses d'un produit cosmétique et sa formule.
 
 Style : direct, factuel, accessible à un consommateur français lambda. Pas de jugement moral, pas d'emoji, pas de marketing inversé ("trompeur"). Tu décris ce que la formule fait probablement vs ce qui est promis.
 
-Structure attendue : "[ce que la formule tient] mais [ce qu'elle ne tient pas]. Effet attendu : [ce que l'utilisateur peut réellement ressentir]."
+Si des promesses sont CONTREDITES (le produit dit "sans X" mais contient X), mentionne-les en priorité — c'est l'info la plus actionnable pour l'utilisateur.
+
+Structure attendue : "[ce que la formule tient] mais [ce qu'elle ne tient pas / ce qui est contredit]. Effet attendu : [ce que l'utilisateur peut réellement ressentir]."
 
 NE CITE QUE LES VERDICTS QUE JE TE DONNE. N'invente jamais d'ingrédient ni de verdict.
 
@@ -523,6 +535,7 @@ ${NO_LONG_DASHES_RULE}`;
 - Cohérence PARTIELLE : ${partielle.length ? partielle.join(", ") : "(aucune)"}
 - Effet MARKETING uniquement : ${marketing.length ? marketing.join(", ") : "(aucun)"}
 - Promesses NON DÉMONTRÉES : ${non.length ? non.join(", ") : "(aucune)"}
+- Promesses CONTREDITES par la formule : ${contredite.length ? contredite.join(", ") : "(aucune)"}
 
 Écris la phrase de conclusion. Pas de préambule, juste la phrase.`;
 

@@ -21,7 +21,14 @@ export type CoherenceVerdict =
   | "tenue" // green — actives present and well dosed
   | "partielle" // amber — actives present but in trace (≤1%) or only some present
   | "marketing" // orange — only cosmetic/visual support, no biological actives
-  | "non_demontree"; // rose — no documented active found
+  | "non_demontree" // rose — no documented active found
+  // Reserved for "absence" promises ("sans sulfate", "sans paraben"…). Set
+  // when the product claims to be free of a category of ingredients but the
+  // formula contains at least one item with the corresponding tag. Rendered
+  // in deep red so it's clearly worse than non_demontree (which is just
+  // "couldn't prove it" — contredite is "the formula actively contradicts
+  // the claim").
+  | "contredite";
 
 export type CoherencePromise = {
   /** Standardised slug from the catalogue (anti_chute, hydratation, ...). */
@@ -65,6 +72,16 @@ export type CoherencePromise = {
    */
   missingActives: string[];
   /**
+   * Ingredients that CONTRADICT an "absence" promise — i.e. the product
+   * says "sans sulfate" but the formula contains Sodium Laureth Sulfate.
+   * Only populated when verdict === "contredite". Otherwise empty / omitted.
+   */
+  contradictingActives?: {
+    name: string;
+    slug: string | null;
+    position: number;
+  }[];
+  /**
    * Score 0-100. Ratio of expected actives that are present AND well dosed.
    * Drives the per-promise progress bar in the UI.
    */
@@ -102,6 +119,8 @@ export type CoherenceResult = {
     marketingCount: number;
     /** Count of promises with no documented active (verdict === "non_demontree"). */
     nonDemontreeCount: number;
+    /** Count of "sans X" promises actively contradicted by the formula. */
+    contrediteCount: number;
     /** Total promises analysed. */
     totalPromises: number;
     /**

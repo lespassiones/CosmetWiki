@@ -18,7 +18,10 @@ import {
 import { NO_LONG_DASHES_RULE, stripLongDashes } from "./sanitize";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
-const PROMPT_VERSION = 3;
+// Bumped to 4 when we taught the prompt to use real product names instead
+// of "produit A" / "produit B" — old cache entries can't be reused since
+// the text content now changes per pair (was previously canonical with A/B).
+const PROMPT_VERSION = 4;
 
 export type CompareSideInput = {
   name: string;
@@ -81,25 +84,37 @@ function buildPrompt(a: CompareSideInput, b: CompareSideInput): { system: string
     "Tu n'écris JAMAIS \"X est mieux que Y\", \"X est meilleur\", \"recommandé\", \"à éviter\", " +
     "\"premier choix\", \"vainqueur\" : tu décris ce que chaque produit est et à qui il s'adresse, " +
     "le lecteur déduit lui-même celui qui lui convient. " +
+    "Tu utilises TOUJOURS les vrais noms des produits (ceux qui te sont donnés entre guillemets) " +
+    "et JAMAIS les mots \"produit A\", \"produit B\", \"A\", \"B\" comme étiquettes — " +
+    "ça parle bien plus à l'utilisateur final. " +
     NO_LONG_DASHES_RULE + " " +
     "Pas de marketing (idéal, généreux, agréable...), pas de description sensorielle, pas d'emoji, " +
     "pas de conseil médical. Tu peux mentionner une famille d'ingrédient simple (tensioactif, " +
     "alcool, conservateur, silicone, actif hydratant) si ça aide à comprendre. Tu retournes UNIQUEMENT " +
     "un objet JSON valide, sans markdown, sans texte autour.";
 
+  // Inject the real names directly in the user message so the model has them
+  // front-and-centre — and back them up with the explicit "use these names"
+  // instruction in the system prompt. The JSON KEY names stay portraitA /
+  // portraitB (machine-stable) but the TEXT inside refers to the real
+  // product names.
   const user = `Voici les données de deux produits à comparer. Rédige 4 champs courts.
 
-${sideBlock("PRODUIT A", a)}
+${sideBlock("PRODUIT 1", a)}
 
-${sideBlock("PRODUIT B", b)}
+${sideBlock("PRODUIT 2", b)}
 
-Rends un JSON avec exactement ces 4 clés (toutes en français) :
+NOMS À UTILISER DANS LE TEXTE (verbatim, ne les modifie pas) :
+- Pour le produit 1 : "${a.name}"
+- Pour le produit 2 : "${b.name}"
+
+Rends un JSON avec exactement ces 4 clés :
 
 {
-  "portraitA": "1 à 2 phrases qui décrivent la formule de A : son caractère (eau-glycérine, huileux, moussant, à base d'alcool…), ce qu'elle apporte, son point d'attention principal si pertinent. Ne dis jamais qu'elle est bonne ou mauvaise.",
-  "portraitB": "Idem pour B.",
-  "common": "1 phrase concrète qui résume ce que les deux ont en commun (type de formule, point de vigilance partagé, ou rien de notable si c'est le cas). Si rien d'intéressant en commun, dis 'Les deux suivent des logiques de formulation très différentes.'",
-  "howToChoose": "1 à 2 phrases qui aident le lecteur à choisir SANS trancher. Ex : 'Si tu cherches un soin doux pour peau réactive, A correspond à ce profil. Si tu privilégies un nettoyant moussant efficace, B est conçu pour ça.' Pas de 'meilleur', pas de 'préfère X'."
+  "portraitA": "1 à 2 phrases qui décrivent la formule de \"${a.name}\" : son caractère (eau-glycérine, huileux, moussant, à base d'alcool…), ce qu'elle apporte, son point d'attention principal si pertinent. Cite \"${a.name}\" par son nom au moins une fois. Ne dis jamais qu'elle est bonne ou mauvaise.",
+  "portraitB": "Idem pour \"${b.name}\". Cite \"${b.name}\" par son nom au moins une fois.",
+  "common": "1 phrase concrète qui résume ce que les deux produits ont en commun (type de formule, point de vigilance partagé, ou rien de notable). Si rien d'intéressant en commun, dis 'Les deux suivent des logiques de formulation très différentes.' Tu peux écrire \"les deux produits\" ou citer les noms.",
+  "howToChoose": "1 à 2 phrases qui aident le lecteur à choisir SANS trancher. Ex : 'Si tu cherches un soin doux pour peau réactive, ${a.name} correspond à ce profil. Si tu privilégies un nettoyant moussant efficace, ${b.name} est conçu pour ça.' Pas de 'meilleur', pas de 'préfère X'. JAMAIS \"A\" / \"B\" / \"produit A\" / \"produit B\" — toujours les vrais noms."
 }
 
 CONTRAINTES
@@ -108,7 +123,8 @@ CONTRAINTES
 - Ne cite pas les notes /20.
 - Ne mentionne pas le mot "score" ou "note".
 - Ne dis pas qu'un produit est meilleur, gagnant, recommandé, déconseillé.
-- Tu peux citer un ingrédient INCI en **gras** (avec doubles astérisques) si ça enrichit, max 2 par champ.`;
+- Tu peux citer un ingrédient INCI en **gras** (avec doubles astérisques) si ça enrichit, max 2 par champ.
+- INTERDIT : "produit A", "produit B", "le produit A", "le produit B", "A pourrait...", "B est conçu...". Utilise toujours les vrais noms ci-dessus.`;
 
   return { system, user };
 }

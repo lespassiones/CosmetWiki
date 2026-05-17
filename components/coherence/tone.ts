@@ -53,6 +53,17 @@ export const VERDICT_TONE: Record<
     text: "text-rose-700",
     hex: "#F43F5E",
   },
+  // Deeper red than non_demontree — this is "the formula actively contradicts
+  // the absence claim", which is a much stronger negative signal than "we
+  // couldn't find a documented active". Different hue so the two never blur.
+  contredite: {
+    label: "Contredite",
+    bg: "bg-red-600",
+    bgSoft: "bg-red-50",
+    ringSoft: "ring-red-300",
+    text: "text-red-800",
+    hex: "#DC2626",
+  },
 };
 
 /** Friendly French label for the unverifiable claim "reason" enum. */

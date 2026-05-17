@@ -8,6 +8,7 @@ import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { GLASS_CARD, GLASS_CARD_ROSE } from "@/lib/ui/glass";
 import { IngredientBlob } from "@/components/blob/IngredientBlob";
 import { CompareInsights } from "@/components/compare/CompareInsights";
+import { shortenProductName } from "@/lib/text/shortenProductName";
 
 type Flagged = { name: string; fn: string | null; color: "Orange" | "Rouge" };
 
@@ -154,8 +155,17 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
         })}
       </div>
 
-      {/* AI portraits + "what they share" + "how to choose" */}
-      <CompareInsights aId={a.id} bId={b.id} nameA={a.name} nameB={b.name} />
+      {/* AI portraits + "what they share" + "how to choose". The short
+          names match what we feed the LLM so highlight substring lookups
+          land cleanly inside the generated copy. */}
+      <CompareInsights
+        aId={a.id}
+        bId={b.id}
+        nameA={a.name}
+        nameB={b.name}
+        shortNameA={shortenProductName(a.name)}
+        shortNameB={shortenProductName(b.name)}
+      />
 
       {/* À surveiller — appears for each product that has orange/red ingredients.
           Renders one warning card per product so the user can quickly see which

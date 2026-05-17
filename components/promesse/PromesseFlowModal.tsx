@@ -229,15 +229,21 @@ export function PromesseFlowModal({
                   </li>
                 ))}
               </ul>
+              {/* Restyled as a clearly clickable green pill — the previous
+                  flat phrase read like body copy and users missed it. Uses
+                  emerald-50/200 so it doesn't compete visually with the
+                  primary emerald-500 "Analyser la promesse" button outside
+                  the modal. */}
               <button
                 type="button"
                 onClick={() => {
                   setNotFoundReason("user_rejected_candidates");
                   setStep("manualPromise");
                 }}
-                className={`${GLASS_PILL} w-full py-2.5 text-[13px] font-medium`}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold ring-1 ring-emerald-200 hover:ring-emerald-300 py-2.5 px-4 text-[13px] transition"
               >
-                Aucun de ceux-ci → décrire la promesse moi-même
+                <span aria-hidden>✎</span>
+                Aucun de ceux-ci — décrire la promesse moi-même
               </button>
             </div>
           )}

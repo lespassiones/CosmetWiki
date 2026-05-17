@@ -64,13 +64,25 @@ export default async function RoutinePage() {
 
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
-  const { data } = await sb
-    .schema("cosme_check")
-    .from("routine_items")
-    .select("id, frequency, added_at, analysis_id, analyses(id, name, product_label, score, result_json)")
-    .order("added_at", { ascending: false });
+  // Two parallel queries: routine items (with their parent analyses joined)
+  // + all analyses for the user. The second feeds the "Already scanned"
+  // sub-modal of the AddProductButton — we trim out analyses already in the
+  // routine so the user doesn't pick a duplicate.
+  const [routineRes, analysesRes] = await Promise.all([
+    sb
+      .schema("cosme_check")
+      .from("routine_items")
+      .select("id, frequency, added_at, analysis_id, analyses(id, name, product_label, score, result_json)")
+      .order("added_at", { ascending: false }),
+    sb
+      .schema("cosme_check")
+      .from("analyses")
+      .select("id, name, product_label, score, created_at")
+      .order("created_at", { ascending: false })
+      .limit(50),
+  ]);
 
-  const items = (data ?? []) as unknown as {
+  const items = (routineRes.data ?? []) as unknown as {
     id: string;
     frequency: Frequency;
     added_at: string;
@@ -83,6 +95,24 @@ export default async function RoutinePage() {
       result_json: AnalyseResponse;
     } | null;
   }[];
+
+  const allAnalyses = (analysesRes.data ?? []) as Array<{
+    id: string;
+    name: string | null;
+    product_label: string | null;
+    score: number | null;
+    created_at: string;
+  }>;
+  const routineAnalysisIds = new Set(items.map((it) => it.analysis_id));
+  const eligibleAnalyses = allAnalyses
+    .filter((a) => !routineAnalysisIds.has(a.id))
+    .map((a) => ({
+      id: a.id,
+      name: a.name,
+      product_label: a.product_label,
+      score: a.score,
+      created_at: a.created_at,
+    }));
 
   const products: RoutineProduct[] = items
     .filter((it) => it.analyses)
@@ -124,11 +154,11 @@ export default async function RoutinePage() {
               Ta routine est vide. Ajoute des produits pour voir ton exposition cumulée.
             </p>
           </div>
-          <AddProductButton />
+          <AddProductButton eligibleAnalyses={eligibleAnalyses} />
         </header>
 
         <div className={`${GLASS_CARD_ROSE} p-8 text-center`}>
-          <AddProductButton variant="ghost" label="+ Ajouter un produit à ma routine" className="text-[15px]" />
+          <AddProductButton eligibleAnalyses={eligibleAnalyses} variant="ghost" label="+ Ajouter un produit à ma routine" className="text-[15px]" />
           <p className="text-xs text-[#6B7280] mt-2">
             Cherche un produit, scanne un code-barres ou colle une liste INCI — il sera analysé et ajouté à ta routine.
           </p>
@@ -158,7 +188,7 @@ export default async function RoutinePage() {
           </p>
 
           <div className="mt-4 lg:mt-0">
-            <AddProductButton />
+            <AddProductButton eligibleAnalyses={eligibleAnalyses} />
           </div>
         </div>
       </header>

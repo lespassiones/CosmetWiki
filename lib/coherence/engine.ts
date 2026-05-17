@@ -11,7 +11,7 @@
  */
 
 import type { AnalyseItem, AnalyseResponse } from "@/lib/analyseTypes";
-import { findCategoryBySlug, type ActiveEntry } from "./claims";
+import { findCategoryBySlug, type ActiveEntry, type ClaimCategory } from "./claims";
 import type {
   CoherencePromise,
   CoherenceResult,
@@ -271,6 +271,80 @@ export function resolvePromise(
 }
 
 /**
+ * Resolve an "absence" promise (sans sulfate, sans paraben…) by scanning
+ * every formula item for the forbidden tag.
+ *
+ * Verdict :
+ *   - No item carries the tag → "tenue" (score 100). The promise holds.
+ *   - At least one item carries the tag → "contredite" (score 0). The
+ *     contradicting ingredients go into `contradictingActives` so the UI
+ *     can name and shame them.
+ *
+ * Purely deterministic — no LLM call, no fuzzy matching. The tags were
+ * computed once when the INCI list was first analysed, we just reread them
+ * here.
+ */
+export function resolveAbsencePromise(
+  proposal: LlmPromiseProposal,
+  cat: ClaimCategory,
+  items: AnalyseItem[],
+): CoherencePromise {
+  // Defensive: this function is only meant to be called on absence
+  // categories. If misrouted, fall back to a non-démontrée verdict rather
+  // than silently green-lighting the claim.
+  if (!cat.forbiddenTag) {
+    return {
+      slug: cat.slug,
+      label: cat.label,
+      excerpt: proposal.excerpt,
+      verdict: "non_demontree",
+      expectedActives: [],
+      foundActives: [],
+      cosmeticActives: [],
+      missingActives: [],
+      score: 0,
+    };
+  }
+
+  const tag = cat.forbiddenTag;
+  const offenders = items.filter((it) => (it.tags ?? []).includes(tag));
+
+  if (offenders.length === 0) {
+    return {
+      slug: cat.slug,
+      label: cat.label,
+      excerpt: proposal.excerpt,
+      verdict: "tenue",
+      expectedActives: [],
+      foundActives: [],
+      cosmeticActives: [],
+      missingActives: [],
+      score: 100,
+    };
+  }
+
+  // Sort offenders by position so the UI shows the most prominent (= most
+  // concentrated, earlier in the INCI list) first.
+  const sorted = offenders.slice().sort((a, b) => a.position - b.position);
+  return {
+    slug: cat.slug,
+    label: cat.label,
+    excerpt: proposal.excerpt,
+    verdict: "contredite",
+    expectedActives: [],
+    foundActives: [],
+    cosmeticActives: [],
+    missingActives: [],
+    contradictingActives: sorted.slice(0, 5).map((it) => ({
+      name: it.name ?? it.input,
+      slug: it.slug,
+      position: it.position,
+    })),
+    score: 0,
+  };
+}
+
+/**
  * Resolve a promise that's NOT in the static catalogue, using LLM-proposed
  * matches against the actual formula's items.
  *
@@ -384,10 +458,14 @@ export function computeMetrics(promises: CoherencePromise[]): CoherenceResult["m
   const partielleCount = promises.filter((p) => p.verdict === "partielle").length;
   const marketingCount = promises.filter((p) => p.verdict === "marketing").length;
   const nonDemontreeCount = promises.filter((p) => p.verdict === "non_demontree").length;
-  // "Marketing index" = promises with NO documented active at all (verdict
-  // marketing or non_demontree).
-  const noActiveCount = marketingCount + nonDemontreeCount;
-  const marketingIndex = total === 0 ? 100 : Math.round((noActiveCount / total) * 100);
+  const contrediteCount = promises.filter((p) => p.verdict === "contredite").length;
+  // "Marketing / unsupported index" = % of promises that are NOT actively
+  // honoured by the formula. Contredite promises absolutely count here —
+  // they're worse than non_demontree (the product actively lied about an
+  // absence). Tenue absences (e.g. "sans paraben" → no paraben found) lift
+  // the index DOWN, which is the right signal.
+  const unsupportedCount = marketingCount + nonDemontreeCount + contrediteCount;
+  const marketingIndex = total === 0 ? 100 : Math.round((unsupportedCount / total) * 100);
   // "Verdict global" (tenuePct) is the symmetrical opposite: % of promises
   // that DO have at least one documented active in the formula (verdict tenue
   // OR partielle). It's literally 100 − marketingIndex, so the green / rose
@@ -400,6 +478,7 @@ export function computeMetrics(promises: CoherencePromise[]): CoherenceResult["m
     partielleCount,
     marketingCount,
     nonDemontreeCount,
+    contrediteCount,
     totalPromises: total,
     marketingIndex,
   };

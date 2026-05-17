@@ -32,6 +32,7 @@ export function AnalyseResultPanel({
   analysisId = null,
   brand = null,
   productType = null,
+  existingCoherenceId = null,
   autoOpenPromesse = false,
   onResetHome,
   breadcrumb,
@@ -59,9 +60,17 @@ export function AnalyseResultPanel({
   brand?: string | null;
   /** Product type from front-OCR. Disambiguates similar formulas. */
   productType?: string | null;
+  /** Id of the existing coherence (promise) analysis attached to this
+   *  analyse, if any. When set, the "Analyser la promesse" button becomes
+   *  "Voir l'analyse de la promesse" and links to /promesses/{id} instead
+   *  of opening the modal — so the user doesn't pay for a second web
+   *  search round-trip on the same product. */
+  existingCoherenceId?: string | null;
   /** When true, the PromesseFlowModal opens automatically on mount. Used by
    *  the history list "Analyser la promesse" button which routes to
-   *  /history/[id]?promesse=auto so the user lands directly on the flow. */
+   *  /history/[id]?promesse=auto so the user lands directly on the flow.
+   *  Ignored when existingCoherenceId is set (the parent route has already
+   *  redirected to the existing result). */
   autoOpenPromesse?: boolean;
   /**
    * Optional handler fired when the user clicks "Accueil" in the default
@@ -77,17 +86,17 @@ export function AnalyseResultPanel({
   breadcrumb?: BreadcrumbItem[];
 }) {
   const title = productLabel?.trim() || "Analyse de votre liste";
-  // The "Analyser la promesse" button is the only way into the coherence
-  // flow from here, and it only makes sense once we know what the product is.
-  // Without a label we have nothing to feed the web-search identification
-  // step that wouldn't be redundant with the INCI itself.
-  const canAnalysePromesse = Boolean(productLabel?.trim());
-  const [promesseOpen, setPromesseOpen] = useState(autoOpenPromesse && canAnalysePromesse);
-  // If the page arrives with ?promesse=auto on a row that doesn't have a
-  // product_label yet (older analyse, photo without front shot), we silently
-  // ignore the autoOpen — the user has to identify the product first.
+  // The "Analyser la promesse" CTA is always offered — the flow handles
+  // the "no product name" case gracefully: the web-search step tries the
+  // INCI alone, and if nothing crédible comes back the modal falls through
+  // to the "décris la promesse toi-même" textarea. Earlier we required a
+  // productLabel before enabling the button, which was inconsistent with
+  // the history page (where the fallback "Analyse du 17 mai" always made
+  // the button active) and surprising for users who pasted an INCI without
+  // a name.
+  const [promesseOpen, setPromesseOpen] = useState(autoOpenPromesse);
   useEffect(() => {
-    if (autoOpenPromesse && canAnalysePromesse) {
+    if (autoOpenPromesse) {
       setPromesseOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -104,19 +113,21 @@ export function AnalyseResultPanel({
         title={title}
         productSource={productSource}
         onAnalysePromesse={() => setPromesseOpen(true)}
-        canAnalysePromesse={canAnalysePromesse}
+        existingCoherenceId={existingCoherenceId}
         onShare={() => shareReport(originalText)}
         breadcrumb={trail}
       />
-      <PromesseFlowModal
-        open={promesseOpen}
-        onClose={() => setPromesseOpen(false)}
-        inci={originalText}
-        productLabel={productLabel}
-        brand={brand}
-        productType={productType}
-        analysisId={analysisId}
-      />
+      {!existingCoherenceId && (
+        <PromesseFlowModal
+          open={promesseOpen}
+          onClose={() => setPromesseOpen(false)}
+          inci={originalText}
+          productLabel={productLabel}
+          brand={brand}
+          productType={productType}
+          analysisId={analysisId}
+        />
+      )}
 
       {/*
         Layout via grid-template-areas — same DOM order regardless of
@@ -193,14 +204,14 @@ function TitleBar({
   title,
   productSource,
   onAnalysePromesse,
-  canAnalysePromesse,
+  existingCoherenceId,
   onShare,
   breadcrumb,
 }: {
   title: string;
   productSource: { source: string; sourceUrl: string | null; brand: string | null } | null;
   onAnalysePromesse: () => void;
-  canAnalysePromesse: boolean;
+  existingCoherenceId: string | null;
   onShare: () => void;
   breadcrumb: BreadcrumbItem[];
 }) {
@@ -257,15 +268,24 @@ function TitleBar({
         ) : null}
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
-        <button
-          type="button"
-          onClick={onAnalysePromesse}
-          disabled={!canAnalysePromesse}
-          title={canAnalysePromesse ? undefined : "Identifie d'abord le produit (photo de devant ou nom dans la vue 'Coller la composition') pour pouvoir analyser sa promesse."}
-          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)] disabled:cursor-not-allowed disabled:bg-emerald-500/40 disabled:shadow-none"
-        >
-          <PromesseIcon className="h-3.5 w-3.5" /> Analyser la promesse
-        </button>
+        {existingCoherenceId ? (
+          // Coherence already exists for this analyse — short-circuit to it
+          // instead of re-running the (paid) web search + LLM round-trip.
+          <Link
+            href={`/promesses/${existingCoherenceId}`}
+            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
+          >
+            <PromesseIcon className="h-3.5 w-3.5" /> Voir l&apos;analyse de la promesse
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={onAnalysePromesse}
+            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
+          >
+            <PromesseIcon className="h-3.5 w-3.5" /> Analyser la promesse
+          </button>
+        )}
         <ToolbarButton onClick={onShare}>
           <ShareIcon className="h-3.5 w-3.5" /> Partager
         </ToolbarButton>

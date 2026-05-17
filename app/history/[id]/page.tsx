@@ -24,10 +24,12 @@ export default async function HistoryDetailPage({
 
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
-  // Run the two queries in parallel — analyses + routine_items don't depend
-  // on each other, so we don't need to wait for the first to finish before
-  // firing the second. Saves ~80-150ms per page load (one full Supabase RTT).
-  const [analysisResult, routineResult] = await Promise.all([
+  // Three parallel queries — analyses + routine + most-recent coherence —
+  // none depend on each other. Pulling the coherence id lets the
+  // "Analyser la promesse" CTA short-circuit to the existing result instead
+  // of relaunching the whole identification + fetch flow when the user has
+  // already run one.
+  const [analysisResult, routineResult, coherenceResult] = await Promise.all([
     sb
       .schema("cosme_check")
       .from("analyses")
@@ -42,12 +44,28 @@ export default async function HistoryDetailPage({
       .select("id")
       .eq("analysis_id", id)
       .maybeSingle(),
+    sb
+      .schema("cosme_check")
+      .from("coherence_analyses")
+      .select("id")
+      .eq("analysis_id", id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   const { data, error } = analysisResult;
   if (error || !data) notFound();
 
   const inRoutine = Boolean(routineResult.data);
+  const existingCoherenceId = (coherenceResult.data as { id?: string } | null)?.id ?? null;
+
+  // If the user arrived from the history "Analyser la promesse" CTA with
+  // ?promesse=auto but a coherence already exists, send them straight to
+  // the existing result rather than re-running the modal.
+  if (sp.promesse === "auto" && existingCoherenceId) {
+    redirect(`/promesses/${existingCoherenceId}`);
+  }
 
   const displayName =
     data.product_label
@@ -78,6 +96,7 @@ export default async function HistoryDetailPage({
         analysisId={data.id}
         brand={(data as { brand?: string | null }).brand ?? null}
         productType={(data as { product_type?: string | null }).product_type ?? null}
+        existingCoherenceId={existingCoherenceId}
         autoOpenPromesse={sp.promesse === "auto"}
         breadcrumb={[
           { label: "Accueil", href: "/" },

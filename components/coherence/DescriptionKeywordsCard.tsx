@@ -37,7 +37,7 @@ export function DescriptionKeywordsCard({
             <>
               À <b>gauche</b> : les promesses extraites de la description, colorées
               par leur verdict (vert = tenue, jaune = partielle, orange = marketing,
-              rose = non démontrée).
+              rose = non démontrée, rouge foncé = contredite par la formule).
               <br /><br />
               À <b>droite</b> : les phrases qu&apos;on n&apos;a pas pu vérifier
               côté formule (ex : « 96 % naturel » = composition, « odeur sucrée »

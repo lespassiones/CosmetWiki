@@ -46,6 +46,7 @@ export function PromisesBarChart({ promises }: { promises: CoherencePromise[] })
   const exampleTenue = promises.find((p) => p.verdict === "tenue");
   const examplePartielle = promises.find((p) => p.verdict === "partielle");
   const exampleNon = promises.find((p) => p.verdict === "non_demontree");
+  const exampleContredite = promises.find((p) => p.verdict === "contredite");
 
   return (
     <article className={`${GLASS_CARD} p-5 lg:p-6`}>
@@ -71,6 +72,10 @@ export function PromisesBarChart({ promises }: { promises: CoherencePromise[] })
               {exampleNon && (
                 <><br /><i>{exampleNon.label}</i> à <b>{exampleNon.score} %</b> =
                 aucun ingrédient connu trouvé.</>
+              )}
+              {exampleContredite && (
+                <><br /><i>{exampleContredite.label}</i> à <b>0 %</b> = la formule contient
+                un ingrédient que la promesse exclut.</>
               )}
             </>
           }

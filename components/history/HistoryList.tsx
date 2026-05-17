@@ -14,6 +14,10 @@ type Row = {
   score: number | null;
   created_at: string;
   counts: BlobCounts | null;
+  /** When set, the user has already run a coherence (promise) analysis on
+   *  this analyse — the per-card CTA links straight to that result instead
+   *  of relaunching the modal. */
+  latestCoherenceId?: string | null;
 };
 
 function scoreTone(score: number | null) {
@@ -171,7 +175,13 @@ export function HistoryList({ rows }: { rows: Row[] }) {
             );
           }
 
-          const canAnalysePromesse = Boolean(a.product_label?.trim());
+          // The pill is shown on every card now — earlier we hid it when no
+          // product_label was set, which was inconsistent: on the detail
+          // page the same analyse showed "Voir l'analyse de la promesse"
+          // (because of the "Analyse du …" fallback title). Always visible
+          // here too — the modal handles the "no name" case by searching
+          // on the INCI alone and falling back to manual description.
+          const canAnalysePromesse = true;
           return (
             <li key={a.id} className="relative">
               <div
@@ -197,12 +207,21 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                     {formatDate(a.created_at)}
                   </div>
                   {canAnalysePromesse && (
-                    <Link
-                      href={`/history/${a.id}?promesse=auto`}
-                      className="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 text-[11px] font-semibold px-2.5 py-1 transition pointer-events-auto"
-                    >
-                      <span aria-hidden>✨</span> Analyser la promesse
-                    </Link>
+                    a.latestCoherenceId ? (
+                      <Link
+                        href={`/promesses/${a.latestCoherenceId}`}
+                        className="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 text-[11px] font-semibold px-2.5 py-1 transition pointer-events-auto"
+                      >
+                        <span aria-hidden>✨</span> Voir l&apos;analyse de la promesse
+                      </Link>
+                    ) : (
+                      <Link
+                        href={`/history/${a.id}?promesse=auto`}
+                        className="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 text-[11px] font-semibold px-2.5 py-1 transition pointer-events-auto"
+                      >
+                        <span aria-hidden>✨</span> Analyser la promesse
+                      </Link>
+                    )
                   )}
                 </div>
               </div>

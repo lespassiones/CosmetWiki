@@ -5,10 +5,13 @@ import Link from "next/link";
 import { saveSkinProfile } from "@/app/advisor/actions";
 import { GLASS_CARD, GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
 import {
+  HAIR_CONCERN_LABEL,
+  HAIR_CONCERNS,
   SKIN_CONCERN_LABEL,
   SKIN_CONCERNS,
   SKIN_TYPE_LABEL,
   SKIN_TYPES,
+  type HairConcern,
   type SkinConcern,
   type SkinProfile,
   type SkinType,
@@ -87,6 +90,7 @@ export function SkinProfileCard({ initial }: { initial: SkinProfile }) {
 
 function ReadView({ profile }: { profile: SkinProfile }) {
   const concerns = profile.concerns ?? [];
+  const hairConcerns = profile.hairConcerns ?? [];
   return (
     <dl className="space-y-3 text-sm">
       <div>
@@ -120,6 +124,28 @@ function ReadView({ profile }: { profile: SkinProfile }) {
         </dd>
       </div>
 
+      {/* Cheveux only shown in the read view when at least one is set —
+          empty stays hidden to keep the card tidy. */}
+      {hairConcerns.length > 0 && (
+        <div>
+          <dt className="text-[11px] uppercase tracking-wide text-[#6B7280] mb-1.5">
+            Cheveux
+          </dt>
+          <dd>
+            <ul className="flex flex-wrap gap-1.5">
+              {hairConcerns.map((c) => (
+                <li
+                  key={c}
+                  className="inline-flex items-center rounded-full bg-sky-50 px-2.5 py-0.5 text-[12px] font-medium text-sky-700 ring-1 ring-sky-100"
+                >
+                  {HAIR_CONCERN_LABEL[c]}
+                </li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+      )}
+
       <div>
         <dt className="text-[11px] uppercase tracking-wide text-[#6B7280] mb-1">
           Allergies / intolérances
@@ -143,12 +169,24 @@ function SkinProfileForm({
   const [concerns, setConcerns] = useState<Set<SkinConcern>>(
     new Set(initial.concerns ?? []),
   );
+  const [hairConcerns, setHairConcerns] = useState<Set<HairConcern>>(
+    new Set(initial.hairConcerns ?? []),
+  );
   const [allergies, setAllergies] = useState(initial.allergiesFreeform ?? "");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function toggleConcern(c: SkinConcern) {
     setConcerns((prev) => {
+      const next = new Set(prev);
+      if (next.has(c)) next.delete(c);
+      else next.add(c);
+      return next;
+    });
+  }
+
+  function toggleHair(c: HairConcern) {
+    setHairConcerns((prev) => {
       const next = new Set(prev);
       if (next.has(c)) next.delete(c);
       else next.add(c);
@@ -169,6 +207,7 @@ function SkinProfileForm({
     const fd = new FormData();
     fd.set("skin_type", skinType);
     for (const c of concerns) fd.append("concerns", c);
+    for (const c of hairConcerns) fd.append("hair_concerns", c);
     if (allergies.trim()) fd.set("allergies", allergies.trim());
     startTransition(async () => {
       const r = await saveSkinProfile(fd);
@@ -234,6 +273,32 @@ function SkinProfileForm({
                 }`}
               >
                 {SKIN_CONCERN_LABEL[c]}
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
+
+      <fieldset className={SECTION}>
+        <legend className="text-[13px] font-semibold text-ink mb-0.5 px-1 -ml-1">
+          Cheveux{" "}
+          <span className="text-[11px] font-normal text-[#9CA3AF]">(facultatif)</span>
+        </legend>
+        <p className="text-[11px] text-[#6B7280] mb-2.5">Plusieurs choix possibles.</p>
+        <div className="flex flex-wrap gap-1.5">
+          {HAIR_CONCERNS.map((c) => {
+            const active = hairConcerns.has(c);
+            return (
+              <button
+                key={c}
+                type="button"
+                onClick={() => toggleHair(c)}
+                aria-pressed={active ? "true" : "false"}
+                className={`rounded-full px-3 py-1.5 text-[12px] font-medium transition ${
+                  active ? "bg-sky-500 text-white" : PILL_INACTIVE
+                }`}
+              >
+                {HAIR_CONCERN_LABEL[c]}
               </button>
             );
           })}
