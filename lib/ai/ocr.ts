@@ -53,6 +53,21 @@ export type OcrResult =
   | { found: false; reason: string };
 
 /**
+ * Identity extracted from the FRONT of the packaging. All fields optional —
+ * a poorly lit photo may yield only the brand, or only the product line. The
+ * downstream pipeline uses whatever it gets as `productLabel` for the
+ * analysis title and as input to the web-search identification call.
+ */
+export type OcrFrontResult =
+  | {
+      found: true;
+      productName: string | null;
+      brand: string | null;
+      productType: string | null;
+    }
+  | { found: false; reason: string };
+
+/**
  * Validates an OCR-extracted INCI text against the live INCI database. Returns
  * how many tokens matched exactly / via alias and a confidence level. Anything
  * below 70 % match strongly suggests Vision hallucinated ingredients (a
@@ -391,6 +406,122 @@ Format de réponse JSON :
         console.error("[ocr] validation failed:", (err as Error).message);
       }
     }
+
+    void setCached(cacheKey, value);
+    return value;
+  } catch {
+    return { found: false, reason: "openai_failed" };
+  }
+}
+
+/**
+ * OCR of the FRONT of a cosmetic package. Extracts the product identity
+ * (name + brand + type) so we can identify the product via web search later.
+ * No INCI extraction here — the back-label call (ocrFromImageBase64) is the
+ * authoritative source for ingredients.
+ *
+ * The photo is read once and discarded; only the extracted fields are returned.
+ * Cached by image SHA-256 hash so reuploading the same photo is free.
+ */
+export async function ocrFrontFromImageBase64(
+  imageBase64: string,
+  mimeType: string,
+  userId?: string | null,
+): Promise<OcrFrontResult> {
+  const hash = crypto.createHash("sha256").update(imageBase64).digest("hex").slice(0, 32);
+  const cacheKey = `ocr-front:${hash}`;
+  const cached = await getCached<OcrFrontResult>(cacheKey);
+  if (cached) return cached;
+
+  if (!hasOpenAI()) {
+    return { found: false, reason: "openai_unavailable" };
+  }
+
+  const system = [
+    "Tu analyses la face avant d'un produit cosmétique. Tu extrais l'identité du produit telle qu'elle est imprimée sur le packaging.",
+    "",
+    "RÈGLES :",
+    "1. N'INVENTE RIEN. Si un champ n'est pas lisible avec certitude, mets-le à null.",
+    "2. `brand` : la marque (souvent en haut, en gros — ex. `L'Oréal`, `CeraVe`, `The Ordinary`, `Yves Rocher`). Garde la casse d'origine.",
+    "3. `productName` : le nom de la gamme/produit (ex. `Effaclar Duo+`, `Foaming Cleanser`, `Niacinamide 10 % + Zinc 1 %`). Exclus la marque, les claims marketing (`hydrate 24h`), les volumes (`200 mL`) et les certifications (`bio`).",
+    "4. `productType` : le type de produit en français court (ex. `nettoyant visage`, `crème hydratante`, `sérum`, `shampoing`, `gel douche`, `démaquillant`, `huile capillaire`). Choisis le terme le plus précis visible sur le packaging ; si non précisé, déduis-le des claims (mais reste prudent).",
+    "5. Si la photo est floue, trop sombre, ou ne montre pas la face avant : renvoie `{ \"found\": false, \"reason\": \"<brève raison>\" }`.",
+    "6. Réponds en JSON strict.",
+  ].join("\n");
+
+  const userMsg = `Extrais l'identité du produit visible sur cette photo de packaging (face avant).
+
+Format de réponse JSON :
+- Si lisible : { "found": true, "brand": "...", "productName": "...", "productType": "..." } (mets null pour les champs non lisibles)
+- Si illisible : { "found": false, "reason": "<brève raison>" }`;
+
+  try {
+    const value = await callWithFallback<OcrFrontResult>({
+      feature: "ocr",
+      userId: userId ?? null,
+      timeoutMs: 15_000,
+      primary: async () => {
+        const r = await openai().chat.completions.create({
+          model: AI_MODEL,
+          temperature: 0,
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: system },
+            {
+              role: "user",
+              content: [
+                { type: "text", text: userMsg },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:${mimeType};base64,${imageBase64}`,
+                    detail: "high",
+                  },
+                },
+              ],
+            },
+          ],
+        });
+        const raw = r.choices?.[0]?.message?.content ?? "{}";
+        const parsed = JSON.parse(raw) as Partial<{
+          found: boolean;
+          brand: string | null;
+          productName: string | null;
+          productType: string | null;
+          reason: string;
+        }>;
+        const cleanField = (v: unknown): string | null => {
+          if (typeof v !== "string") return null;
+          const t = v.trim();
+          if (t.length === 0 || t.toLowerCase() === "null" || t === "—") return null;
+          return t.slice(0, 200);
+        };
+        let result: OcrFrontResult;
+        if (parsed.found === true) {
+          result = {
+            found: true,
+            brand: cleanField(parsed.brand),
+            productName: cleanField(parsed.productName),
+            productType: cleanField(parsed.productType),
+          };
+          // Treat all-null as a failure so the caller knows to ignore it.
+          if (!result.brand && !result.productName && !result.productType) {
+            result = { found: false, reason: "no_text_extracted" };
+          }
+        } else {
+          result = { found: false, reason: parsed.reason ?? "front_not_detected" };
+        }
+        return {
+          value: result,
+          tokensIn: r.usage?.prompt_tokens,
+          tokensOut: r.usage?.completion_tokens,
+        };
+      },
+      fallback: async () => ({
+        value: { found: false, reason: "openai_failed" } as OcrFrontResult,
+        provider: "tesseract",
+      }),
+    });
 
     void setCached(cacheKey, value);
     return value;

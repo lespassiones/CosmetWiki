@@ -149,26 +149,4 @@
     }
   }
 
-  /* PDF capture mode (html2canvas) — neutralise effects the canvas
-     renderer can't reproduce so the snapshot matches the live view. */
-  .pdf-capturing,
-  .pdf-capturing * {
-    animation: none !important;
-    transition: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-  .pdf-capturing .reveal-on-mount {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  /* Translucent glass surfaces become solid white so the content stays
-     readable against the PDF background. */
-  .pdf-capturing .bg-white\/65,
-  .pdf-capturing .bg-white\/70,
-  .pdf-capturing .bg-white\/75,
-  .pdf-capturing .bg-white\/80,
-  .pdf-capturing .bg-white\/35 {
-    background-color: #ffffff !important;
-  }
 }

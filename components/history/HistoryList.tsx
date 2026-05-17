@@ -171,25 +171,41 @@ export function HistoryList({ rows }: { rows: Row[] }) {
             );
           }
 
+          const canAnalysePromesse = Boolean(a.product_label?.trim());
           return (
             <li key={a.id} className="relative">
-              <Link
-                href={`/history/${a.id}`}
-                className={`${GLASS_CARD} ${GLASS_CARD_HOVER} flex items-center gap-4 p-4 pr-16`}
+              <div
+                className={`${GLASS_CARD} ${GLASS_CARD_HOVER} relative flex items-center gap-4 p-4 pr-16`}
               >
-                <div className="h-12 w-16 shrink-0">
+                {/* Card-wide click target — kept underneath the action buttons
+                    so the dedicated "Analyser la promesse" link / kebab menu
+                    receive their own clicks. */}
+                <Link
+                  href={`/history/${a.id}`}
+                  aria-label={`Ouvrir ${displayName}`}
+                  className="absolute inset-0 z-0"
+                />
+                <div className="relative z-[1] h-12 w-16 shrink-0 pointer-events-none">
                   <IngredientBlob
                     counts={a.counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 }}
                     variant="sm"
                   />
                 </div>
-                <div className="min-w-0 flex-1">
+                <div className="relative z-[1] min-w-0 flex-1 pointer-events-none">
                   <div className="font-semibold text-[#111111] truncate">{displayName}</div>
                   <div className="text-[12px] text-[#6B7280]">
                     {formatDate(a.created_at)}
                   </div>
+                  {canAnalysePromesse && (
+                    <Link
+                      href={`/history/${a.id}?promesse=auto`}
+                      className="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 text-[11px] font-semibold px-2.5 py-1 transition pointer-events-auto"
+                    >
+                      <span aria-hidden>✨</span> Analyser la promesse
+                    </Link>
+                  )}
                 </div>
-              </Link>
+              </div>
               <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
                 <HistoryItemActions id={a.id} currentName={a.name ?? displayName} />
               </div>

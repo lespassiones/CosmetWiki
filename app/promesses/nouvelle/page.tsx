@@ -18,7 +18,16 @@ type AnalysisRow = {
   result_json: AnalyseResponse | null;
 };
 
-export default async function NouvellePromessePage() {
+type SP = {
+  analysisId?: string;
+  description?: string;
+};
+
+export default async function NouvellePromessePage({
+  searchParams,
+}: {
+  searchParams: Promise<SP>;
+}) {
   const user = await getUser();
   if (!user) redirect("/auth/sign-in?next=/promesses/nouvelle");
 
@@ -65,6 +74,15 @@ export default async function NouvellePromessePage() {
       };
     });
 
+  // Pre-fill flow: PromesseFlowModal (and the future history "Analyser la
+  // promesse" buttons) route here with the analyse id + description already
+  // chosen. We pass them as initial state to the wizard so it skips straight
+  // to the confirmation step instead of asking the user to retype everything.
+  const sp = await searchParams;
+  const initialAnalysisId =
+    sp.analysisId && options.some((o) => o.id === sp.analysisId) ? sp.analysisId : null;
+  const initialDescription = sp.description ? sp.description.slice(0, 6000) : null;
+
   return (
     <div className="mx-auto max-w-3xl px-5 lg:px-8 py-8 lg:py-12">
       <Link
@@ -95,7 +113,11 @@ export default async function NouvellePromessePage() {
         </article>
       ) : (
         <div className="mt-6">
-          <CoherenceWizard options={options} />
+          <CoherenceWizard
+            options={options}
+            initialAnalysisId={initialAnalysisId}
+            initialDescription={initialDescription}
+          />
         </div>
       )}
     </div>

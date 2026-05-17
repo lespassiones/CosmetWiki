@@ -9,7 +9,8 @@
       "Bash(Select-Object -Property Name, FullName)",
       "Bash(git show *)",
       "Read(//tmp/**)",
-      "PowerShell(Get-NetTCPConnection -State Listen | Where-Object { $_.LocalAddress -eq '127.0.0.1' -or $_.LocalAddress -eq '::1' -or $_.LocalAddress -eq '0.0.0.0' } | Select-Object LocalAddress, LocalPort, OwningProcess, @{Name='ProcessName';Expression={\\(Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue\\).ProcessName}} | Sort-Object LocalPort | Format-Table -AutoSize)"
+      "PowerShell(Get-NetTCPConnection -State Listen | Where-Object { $_.LocalAddress -eq '127.0.0.1' -or $_.LocalAddress -eq '::1' -or $_.LocalAddress -eq '0.0.0.0' } | Select-Object LocalAddress, LocalPort, OwningProcess, @{Name='ProcessName';Expression={\\(Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue\\).ProcessName}} | Sort-Object LocalPort | Format-Table -AutoSize)",
+      "Bash(findstr /R \"\\\\\"openai\\\\\"\" package.json)"
     ]
   }
 }

@@ -61,8 +61,10 @@ const ARTICLES: Article[] = [
     category: "Marques",
     date: "28 avril 2026",
     readingTime: "7 min",
+    // Bouteilles cosmétiques minimalistes — Unsplash, libre d'usage commercial.
+    // L'ancienne URL (photo-1570194065650-d99fb4bedf0a) renvoyait 404.
     image:
-      "https://images.unsplash.com/photo-1570194065650-d99fb4bedf0a?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&w=900&q=80",
   },
   {
     id: "double-nettoyage",

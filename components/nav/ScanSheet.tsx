@@ -49,6 +49,11 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
   const pathname = usePathname();
   const [view, setView] = useState<View>("picker");
   const sheetRef = useRef<HTMLDivElement>(null);
+  // Optional "C'est quel produit ?" — collected on the paste view so the
+  // analyser can use it as productLabel and the post-analysis "Analyser la
+  // promesse" button can hit the web-search identification step with a real
+  // hint instead of just the INCI.
+  const [pasteProductName, setPasteProductName] = useState("");
   // Soft-nav bridge: when the user submits, we paint the ProcessingOverlay
   // RIGHT AWAY (before router.push resolves). Without this, the 1–2 s Next.js
   // round-trip to /analyse leaves the user staring at the still-open sheet
@@ -71,6 +76,7 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
   useEffect(() => {
     if (open) {
       setView("picker");
+      setPasteProductName("");
       router.prefetch("/analyse");
     }
   }, [open, router]);
@@ -118,7 +124,11 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
   }
 
   /** Submit the INCI text + optional product source, then close. */
-  function submitForAnalysis(input: FoundPayload | { ingredientsText: string }) {
+  function submitForAnalysis(
+    input:
+      | FoundPayload
+      | { ingredientsText: string; productNameHint?: string | null },
+  ) {
     const ingredientsText = input.ingredientsText.trim();
     if (!ingredientsText) return;
     // Stash the INCI in sessionStorage BEFORE navigating. This is the
@@ -138,6 +148,25 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
             sourceUrl: input.sourceUrl,
             brand: input.brand,
             productName: input.productName,
+          }),
+        );
+      } catch {
+        /* ignore */
+      }
+    } else if ("productNameHint" in input && input.productNameHint && input.productNameHint.trim()) {
+      // Paste flow with a manual "C'est quel produit ?" hint — we stash it
+      // under the same key so AnalysisRunner picks it up as productLabel and
+      // the post-analysis "Analyser la promesse" button can feed it to the
+      // identification step.
+      const hint = input.productNameHint.trim().slice(0, 200);
+      try {
+        sessionStorage.setItem(
+          PENDING_SOURCE_KEY,
+          JSON.stringify({
+            source: "manual",
+            sourceUrl: null,
+            brand: null,
+            productName: hint,
           }),
         );
       } catch {
@@ -233,10 +262,35 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
               <p className="text-[13px] text-[#6B7280]">
                 Colle la liste d&apos;ingrédients (INCI) telle qu&apos;elle apparaît sur l&apos;emballage.
               </p>
+              <div>
+                <label
+                  htmlFor="paste-product-name"
+                  className="block text-[12px] font-medium text-[#374151] mb-1"
+                >
+                  C&apos;est quel produit ?{" "}
+                  <span className="text-[#9CA3AF] font-normal">— optionnel mais recommandé</span>
+                </label>
+                <input
+                  id="paste-product-name"
+                  type="text"
+                  value={pasteProductName}
+                  onChange={(e) => setPasteProductName(e.target.value.slice(0, 200))}
+                  placeholder="Ex : CeraVe Foaming Cleanser"
+                  className="w-full rounded-xl bg-white ring-1 ring-[#E5E7EB] px-3 py-2.5 text-[13px] outline-none transition focus:ring-2 focus:ring-rose-300"
+                  autoComplete="off"
+                />
+                <p className="mt-1 text-[11px] text-[#9CA3AF]">
+                  Le nom permet d&apos;identifier le produit et de récupérer sa promesse marketing.
+                </p>
+              </div>
               <SearchBar
-                autoFocus
                 size="lg"
-                onAnalyseList={(text) => submitForAnalysis({ ingredientsText: text })}
+                onAnalyseList={(text) =>
+                  submitForAnalysis({
+                    ingredientsText: text,
+                    productNameHint: pasteProductName || null,
+                  })
+                }
               />
             </div>
           ) : view === "search" ? (

@@ -327,7 +327,7 @@ export function HomeShell({
       : null;
     return (
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-16 lg:px-8">
-        <div id="pdf-root" className="mt-4">
+        <div id="analyse-root" className="mt-4">
           {result ? (
             <AnalyseResultPanel
               result={result}
@@ -338,6 +338,8 @@ export function HomeShell({
                 sourceUrl: productSource.sourceUrl,
                 brand: productSource.brand,
               } : null}
+              brand={productSource?.brand ?? null}
+              productType={(productSource as { productType?: string | null } | null)?.productType ?? null}
               onResetHome={reset}
             />
           ) : null}

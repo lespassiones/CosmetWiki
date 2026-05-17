@@ -12,10 +12,13 @@ export const dynamic = "force-dynamic";
 
 export default async function HistoryDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ promesse?: string }>;
 }) {
   const { id } = await params;
+  const sp = await searchParams;
   const user = await getUser();
   if (!user) redirect(`/auth/sign-in?next=/history/${id}`);
 
@@ -28,7 +31,9 @@ export default async function HistoryDetailPage({
     sb
       .schema("cosme_check")
       .from("analyses")
-      .select("id, name, product_label, score, input_text, result_json, created_at")
+      .select(
+        "id, name, product_label, brand, product_type, product_description, score, input_text, result_json, created_at",
+      )
       .eq("id", id)
       .maybeSingle(),
     sb
@@ -70,6 +75,10 @@ export default async function HistoryDetailPage({
         result={result}
         originalText={data.input_text ?? ""}
         productLabel={displayName}
+        analysisId={data.id}
+        brand={(data as { brand?: string | null }).brand ?? null}
+        productType={(data as { product_type?: string | null }).product_type ?? null}
+        autoOpenPromesse={sp.promesse === "auto"}
         breadcrumb={[
           { label: "Accueil", href: "/" },
           { label: "Mon historique", href: "/history" },

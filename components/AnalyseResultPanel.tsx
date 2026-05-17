@@ -9,6 +9,8 @@ import { IngredientSpectrum } from "./analyse/IngredientSpectrum";
 import { MobileExpander } from "./analyse/MobileExpander";
 import { IngredientBlob, type BlobCounts } from "./blob/IngredientBlob";
 import { InfoBadge, Tooltip } from "./Tooltip";
+import { PromesseFlowModal } from "./promesse/PromesseFlowModal";
+import { commonNameFor, prettyInci } from "@/lib/inciCommonNames";
 
 // Delay (ms) after panel mount before each block becomes visible.
 // Synthesis streaming and score animation start at the same time as their
@@ -27,6 +29,10 @@ export function AnalyseResultPanel({
   originalText,
   productLabel = null,
   productSource = null,
+  analysisId = null,
+  brand = null,
+  productType = null,
+  autoOpenPromesse = false,
   onResetHome,
   breadcrumb,
 }: {
@@ -43,6 +49,21 @@ export function AnalyseResultPanel({
     brand: string | null;
   } | null;
   /**
+   * Supabase id of the persisted analyses row. When present, the
+   * "Analyser la promesse" flow can PATCH the row with the marketing
+   * description it fetches from the web. When null, the flow still works
+   * but the description isn't persisted.
+   */
+  analysisId?: string | null;
+  /** Brand from front-OCR / product-search. Fed to the web-search identification step. */
+  brand?: string | null;
+  /** Product type from front-OCR. Disambiguates similar formulas. */
+  productType?: string | null;
+  /** When true, the PromesseFlowModal opens automatically on mount. Used by
+   *  the history list "Analyser la promesse" button which routes to
+   *  /history/[id]?promesse=auto so the user lands directly on the flow. */
+  autoOpenPromesse?: boolean;
+  /**
    * Optional handler fired when the user clicks "Accueil" in the default
    * breadcrumb. Used by HomeShell to clear cached result state. Ignored
    * when `breadcrumb` is provided.
@@ -56,6 +77,21 @@ export function AnalyseResultPanel({
   breadcrumb?: BreadcrumbItem[];
 }) {
   const title = productLabel?.trim() || "Analyse de votre liste";
+  // The "Analyser la promesse" button is the only way into the coherence
+  // flow from here, and it only makes sense once we know what the product is.
+  // Without a label we have nothing to feed the web-search identification
+  // step that wouldn't be redundant with the INCI itself.
+  const canAnalysePromesse = Boolean(productLabel?.trim());
+  const [promesseOpen, setPromesseOpen] = useState(autoOpenPromesse && canAnalysePromesse);
+  // If the page arrives with ?promesse=auto on a row that doesn't have a
+  // product_label yet (older analyse, photo without front shot), we silently
+  // ignore the autoOpen — the user has to identify the product first.
+  useEffect(() => {
+    if (autoOpenPromesse && canAnalysePromesse) {
+      setPromesseOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpenPromesse]);
 
   const trail: BreadcrumbItem[] = breadcrumb ?? [
     { label: "Accueil", href: "/", onClick: onResetHome },
@@ -67,9 +103,19 @@ export function AnalyseResultPanel({
       <TitleBar
         title={title}
         productSource={productSource}
-        onDownload={() => downloadPdf(result, originalText)}
+        onAnalysePromesse={() => setPromesseOpen(true)}
+        canAnalysePromesse={canAnalysePromesse}
         onShare={() => shareReport(originalText)}
         breadcrumb={trail}
+      />
+      <PromesseFlowModal
+        open={promesseOpen}
+        onClose={() => setPromesseOpen(false)}
+        inci={originalText}
+        productLabel={productLabel}
+        brand={brand}
+        productType={productType}
+        analysisId={analysisId}
       />
 
       {/*
@@ -146,13 +192,15 @@ export function AnalyseResultPanel({
 function TitleBar({
   title,
   productSource,
-  onDownload,
+  onAnalysePromesse,
+  canAnalysePromesse,
   onShare,
   breadcrumb,
 }: {
   title: string;
   productSource: { source: string; sourceUrl: string | null; brand: string | null } | null;
-  onDownload: () => void;
+  onAnalysePromesse: () => void;
+  canAnalysePromesse: boolean;
   onShare: () => void;
   breadcrumb: BreadcrumbItem[];
 }) {
@@ -208,10 +256,16 @@ function TitleBar({
           </p>
         ) : null}
       </div>
-      <div data-pdf-hide className="flex flex-wrap items-center gap-2 sm:shrink-0">
-        <ToolbarButton onClick={onDownload}>
-          <DownloadIcon className="h-3.5 w-3.5" /> Télécharger en PDF
-        </ToolbarButton>
+      <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
+        <button
+          type="button"
+          onClick={onAnalysePromesse}
+          disabled={!canAnalysePromesse}
+          title={canAnalysePromesse ? undefined : "Identifie d'abord le produit (photo de devant ou nom dans la vue 'Coller la composition') pour pouvoir analyser sa promesse."}
+          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)] disabled:cursor-not-allowed disabled:bg-emerald-500/40 disabled:shadow-none"
+        >
+          <PromesseIcon className="h-3.5 w-3.5" /> Analyser la promesse
+        </button>
         <ToolbarButton onClick={onShare}>
           <ShareIcon className="h-3.5 w-3.5" /> Partager
         </ToolbarButton>
@@ -965,8 +1019,22 @@ function renderBoldMarkdown(
   return parts.map((p, i) => {
     if (/^\*\*[^*]+\*\*$/.test(p)) {
       const inner = p.slice(2, -2);
-      const rating = colorByName?.get(normaliseSynthesisToken(inner));
+      const normalised = normaliseSynthesisToken(inner);
+      const rating = colorByName?.get(normalised);
       const tone = rating ? colorForRating(rating) : "text-ink";
+      // Grand-public translation: if we know "AQUA" as "eau", render
+      // "**eau** (Aqua)" so the body copy reads naturally while keeping the
+      // INCI token visible for label cross-reference. Only triggered when
+      // the mapping has an entry — other tokens render unchanged.
+      const common = commonNameFor(normalised);
+      if (common) {
+        return (
+          <span key={i}>
+            <strong className={`font-semibold ${tone}`}>{common}</strong>
+            <span className="text-ink-subtle"> ({prettyInci(inner)})</span>
+          </span>
+        );
+      }
       return (
         <strong key={i} className={`font-semibold ${tone}`}>
           {inner}
@@ -987,15 +1055,22 @@ function normaliseSynthesisToken(s: string): string {
 }
 
 function colorForRating(r: ColorRating): string {
+  // Jaune / Orange / Rouge get a coloured highlight (background) on top of
+  // the text colour because the raw text-amber-600 / text-orange-600 hues
+  // are hard to tell apart in body copy — users were misreading "Jaune"
+  // ingredients as "Orange". Vert stays text-only since it's the default
+  // "safe" state and a highlight would over-emphasise it. The horizontal
+  // negative margin tucks the highlight back so it doesn't push neighbouring
+  // words apart, while px-1 keeps the colour pad legible around the term.
   switch (r) {
     case "Vert":
-      return "text-emerald-600";
+      return "text-emerald-700";
     case "Jaune":
-      return "text-amber-600";
+      return "rounded bg-amber-200/70 px-1 -mx-0.5 text-amber-900 decoration-amber-500";
     case "Orange":
-      return "text-orange-600";
+      return "rounded bg-orange-200/70 px-1 -mx-0.5 text-orange-900 decoration-orange-500";
     case "Rouge":
-      return "text-rose-600";
+      return "rounded bg-rose-200/70 px-1 -mx-0.5 text-rose-900 decoration-rose-500";
   }
 }
 
@@ -1322,98 +1397,6 @@ function ColorChip({ rating }: { rating: ColorRating | null }) {
 }
 
 // ============================================================
-// PDF download — captures the rendered result panel (DOM) so the PDF matches
-// the on-screen layout pixel-for-pixel rather than re-rendering with custom
-// jsPDF primitives.
-// ============================================================
-async function downloadPdf(result: AnalyseResponse, originalText: string) {
-  // Capture the whole pdf-root (product hero + analyse panel), not just the
-  // analyse section — the hero shows the product name and source.
-  const el =
-    document.getElementById("pdf-root") ??
-    document.getElementById("analyse-results");
-  if (!el) return;
-
-  // Hide elements flagged as PDF-irrelevant (toolbar buttons) during capture.
-  const hidden = Array.from(el.querySelectorAll<HTMLElement>("[data-pdf-hide]"));
-  const restore = hidden.map((h) => ({ el: h, prev: h.style.display }));
-  hidden.forEach((h) => {
-    h.style.display = "none";
-  });
-  // Mark the section as capturing — the .pdf-capturing CSS rule (in
-  // globals.css) forces all Reveal animations to their final state and
-  // disables backdrop-filter, transitions and translucent surfaces — none
-  // of which html2canvas can render reliably.
-  el.classList.add("pdf-capturing");
-  // Wait two frames so the browser commits the style change before
-  // html2canvas reads computed styles.
-  await new Promise<void>((resolve) =>
-    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-  );
-
-  try {
-    const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-      import("html2canvas"),
-      import("jspdf"),
-    ]);
-
-    const canvas = await html2canvas(el, {
-      scale: 2,
-      backgroundColor: "#FAFAFA",
-      logging: false,
-      useCORS: true,
-      // Mirror the in-place state in the clone html2canvas builds in its
-      // hidden iframe — this is what guarantees all Reveal blocks render
-      // visible in the snapshot.
-      onclone: (clonedDoc, clonedEl) => {
-        clonedEl.classList.add("pdf-capturing");
-        clonedDoc
-          .querySelectorAll<HTMLElement>(".reveal-on-mount")
-          .forEach((node) => {
-            node.style.opacity = "1";
-            node.style.transform = "none";
-            node.style.animation = "none";
-          });
-      },
-    });
-
-    const doc = new jsPDF({
-      unit: "pt",
-      format: "a4",
-      orientation: "portrait",
-      compress: true,
-    });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-
-    // Leave a small margin for breathing room.
-    const margin = 24;
-    const imgWidth = pageWidth - margin * 2;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    const imgData = canvas.toDataURL("image/jpeg", 0.95);
-
-    let yOffset = 0;
-    let pageIdx = 0;
-    while (yOffset < imgHeight) {
-      if (pageIdx > 0) doc.addPage();
-      doc.addImage(imgData, "JPEG", margin, margin - yOffset, imgWidth, imgHeight);
-      yOffset += pageHeight - margin * 2;
-      pageIdx++;
-    }
-
-    const filename = `cosme-check-analyse-${new Date().toISOString().slice(0, 10)}.pdf`;
-    doc.save(filename);
-  } finally {
-    el.classList.remove("pdf-capturing");
-    restore.forEach(({ el: h, prev }) => {
-      h.style.display = prev;
-    });
-  }
-  void result;
-  void originalText;
-}
-
-// ============================================================
 // Helpers
 // ============================================================
 function pct(n: number, total: number): string {
@@ -1483,12 +1466,10 @@ function DotIcon({ className }: { className?: string }) {
   return <span className={`block rounded-full ${className}`} aria-hidden />;
 }
 
-function DownloadIcon({ className }: { className?: string }) {
+function PromesseIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" y1="15" x2="12" y2="3" />
+      <path d="M12 2 15 8l6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z" />
     </svg>
   );
 }

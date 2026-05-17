@@ -47,6 +47,14 @@ type AnalysePayload = {
   /** Optional human label of the analysed product (e.g. "La Roche-Posay Effaclar Duo+"),
    *  used to vary the AI synthesis. Sent by the product search frontend. */
   productLabel?: string;
+  /** Brand name extracted from the front-photo OCR (e.g. "CeraVe"). Persisted
+   *  separately from productLabel so the web-search identification step can
+   *  use it as a strong filter. */
+  brand?: string;
+  /** Product type extracted from the front-photo OCR (e.g. "nettoyant visage").
+   *  Lets the identification step disambiguate "CeraVe Foaming" → cleanser
+   *  vs lotion. */
+  productType?: string;
   /** When true, the resulting analysis is also pushed to the signed-in user's
    *  routine (`routine_items`). Set by the "+ Ajouter un produit" button on
    *  /routine via sessionStorage → AnalysisRunner. */
@@ -635,6 +643,8 @@ export async function POST(req: NextRequest) {
           user_id: user.id,
           name: autoName,
           product_label: body.productLabel?.slice(0, 200) ?? null,
+          brand: body.brand?.slice(0, 120) ?? null,
+          product_type: body.productType?.slice(0, 120) ?? null,
           category,
           input_text: text,
           result_json: responsePayload,

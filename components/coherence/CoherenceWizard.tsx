@@ -20,11 +20,41 @@ type Step = "description" | "pickProduct" | "confirm" | "running";
 const MIN_DESCRIPTION = 30;
 const MAX_DESCRIPTION = 6000;
 
-export function CoherenceWizard({ options }: { options: AnalysisOption[] }) {
+export function CoherenceWizard({
+  options,
+  initialAnalysisId = null,
+  initialDescription = null,
+}: {
+  options: AnalysisOption[];
+  /** When provided (via ?analysisId on the URL), the wizard skips the
+   *  product-picker step and lands the user directly on "confirm". */
+  initialAnalysisId?: string | null;
+  /** When provided (via ?description), the wizard pre-fills the description
+   *  textarea so the "Analyser la promesse" flow can hand off the
+   *  web-search-derived promise without forcing the user to retype it. */
+  initialDescription?: string | null;
+}) {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("description");
-  const [description, setDescription] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Pre-fill flow: if we got both an analysis id (matching one of the
+  // user's analyses) AND a non-empty description, drop the user straight on
+  // "confirm". If only the description is provided, the user still has to
+  // pick the matching analyse first. If only the id, they still have to
+  // type the description.
+  const hasPrefilledDescription =
+    typeof initialDescription === "string" && initialDescription.trim().length >= MIN_DESCRIPTION;
+  const hasPrefilledAnalysis =
+    typeof initialAnalysisId === "string" && options.some((o) => o.id === initialAnalysisId);
+  const initialStep: Step = hasPrefilledDescription && hasPrefilledAnalysis
+    ? "confirm"
+    : hasPrefilledDescription
+      ? "pickProduct"
+      : "description";
+
+  const [step, setStep] = useState<Step>(initialStep);
+  const [description, setDescription] = useState(initialDescription?.trim() ?? "");
+  const [selectedId, setSelectedId] = useState<string | null>(
+    hasPrefilledAnalysis ? initialAnalysisId : null,
+  );
   const [error, setError] = useState<string | null>(null);
 
   const selected = options.find((o) => o.id === selectedId) ?? null;

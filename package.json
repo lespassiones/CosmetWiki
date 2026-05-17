@@ -13,8 +13,6 @@
     "@vercel/analytics": "^2.0.1",
     "@zxing/browser": "^0.2.0",
     "@zxing/library": "^0.22.0",
-    "html2canvas": "^1.4.1",
-    "jspdf": "^4.2.1",
     "next": "^15.0.3",
     "openai": "^6.37.0",
     "react": "^19.0.0",

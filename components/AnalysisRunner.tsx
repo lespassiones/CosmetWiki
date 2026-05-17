@@ -32,6 +32,9 @@ type ProductSource = {
   sourceUrl: string | null;
   brand: string | null;
   productName: string | null;
+  /** Optional product type ("crème hydratante", "sérum"…). Filled by the
+   *  front-photo OCR; absent on barcode / product-search / paste flows. */
+  productType?: string | null;
 };
 
 type CachedRun = {
@@ -40,6 +43,10 @@ type CachedRun = {
   result: AnalyseResponse;
   productSource: ProductSource | null;
   addedToRoutine: boolean;
+  /** Persisted analyses row id (when the user was signed in at save time).
+   *  Cached so a refresh / re-hydrate still lets "Analyser la promesse" PATCH
+   *  the right row. */
+  analysisId?: string | null;
   ts: number;
 };
 
@@ -129,6 +136,10 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
   const [originalText, setOriginalText] = useState("");
   const [productSource, setProductSource] = useState<ProductSource | null>(null);
   const [addedToRoutine, setAddedToRoutine] = useState(false);
+  // Persisted Supabase row id returned by /api/analyser. Used by the
+  // "Analyser la promesse" flow to PATCH the analyses row with the
+  // marketing description once the user picks a candidate.
+  const [analysisId, setAnalysisId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const inFlightRef = useRef<AbortController | null>(null);
 
@@ -181,6 +192,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
         setOriginalText(cached.text);
         setProductSource(cached.productSource);
         setAddedToRoutine(cached.addedToRoutine);
+        setAnalysisId(cached.analysisId ?? null);
         return;
       }
       router.replace("/");
@@ -250,6 +262,8 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
     const productLabel = src
       ? [src.brand, src.productName].filter(Boolean).join(" ").trim() || undefined
       : undefined;
+    const brand = src?.brand?.trim() || undefined;
+    const productType = src?.productType?.trim() || undefined;
 
     try {
       const r = await fetch("/api/analyser", {
@@ -259,6 +273,8 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
           text: trimmed,
           withSynthesis: true,
           ...(productLabel ? { productLabel } : {}),
+          ...(brand ? { brand } : {}),
+          ...(productType ? { productType } : {}),
           ...(addToRoutine ? { addToRoutine: true } : {}),
         }),
         signal: ctrl.signal,
@@ -268,9 +284,14 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
         setError(j?.error ?? `Erreur ${r.status}`);
         return;
       }
-      const data = (await r.json()) as AnalyseResponse & { addedToRoutine?: boolean };
+      const data = (await r.json()) as AnalyseResponse & {
+        addedToRoutine?: boolean;
+        analysisId?: string | null;
+      };
       const addedFlag = data.addedToRoutine === true;
       if (addedFlag) setAddedToRoutine(true);
+      const savedId = typeof data.analysisId === "string" ? data.analysisId : null;
+      setAnalysisId(savedId);
       const elapsed = Date.now() - startedAt;
       // Always honour the minimum animation budget so the user has time to
       // read the "On décode la composition…" steps. The fetch itself is
@@ -291,6 +312,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
         result: data,
         productSource: src,
         addedToRoutine: addedFlag,
+        analysisId: savedId,
         ts: Date.now(),
       });
     } catch (err) {
@@ -361,7 +383,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
           </Link>
         </div>
       )}
-      <div id="pdf-root">
+      <div id="analyse-root">
         <AnalyseResultPanel
           result={result}
           originalText={originalText}
@@ -371,6 +393,9 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
             sourceUrl: productSource.sourceUrl,
             brand: productSource.brand,
           } : null}
+          analysisId={analysisId}
+          brand={productSource?.brand ?? null}
+          productType={productSource?.productType ?? null}
           onResetHome={resetHome}
         />
       </div>

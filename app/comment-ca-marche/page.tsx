@@ -29,7 +29,11 @@ const RATINGS = [
     label: "Vert",
     title: "Sans risque connu",
     dot: "bg-emerald-500",
-    soft: "bg-emerald-50/70",
+    // Badge styling for the "Pas de pénalité" pill : strong-tinted bg,
+    // matching text colour, ring of the same hue. Accentué pour que la
+    // sévérité du verdict soit lisible d'un coup d'œil — la version "soft"
+    // précédente se perdait dans le fond clair de la card.
+    badge: "bg-emerald-100 text-emerald-800 ring-emerald-300",
     desc: "Aucun problème de santé connu et impact environnemental moindre. La plupart des extraits naturels sont en vert tant qu'ils ne sont pas réglementés.",
     pen: "Pas de pénalité",
   },
@@ -37,7 +41,7 @@ const RATINGS = [
     label: "Jaune",
     title: "Pénalité légère",
     dot: "bg-amber-400",
-    soft: "bg-amber-50/70",
+    badge: "bg-amber-100 text-amber-800 ring-amber-300",
     desc: "Ingrédient réglementé, plutôt irritant ou allergène. Référencé en Annexe III de la réglementation européenne 1223/2009 — souvent avec une limite de concentration imposée par l'Europe.",
     pen: "Pénalité faible",
   },
@@ -45,7 +49,7 @@ const RATINGS = [
     label: "Orange",
     title: "Pénalité moyenne",
     dot: "bg-orange-500",
-    soft: "bg-orange-50/70",
+    badge: "bg-orange-100 text-orange-800 ring-orange-300",
     desc: "Ingrédient issu de la pétrochimie ou de la chimie lourde, peu écologique du fait de son procédé de fabrication. Impact non négligeable sur l'environnement et possible effet indirect sur la santé.",
     pen: "Pénalité moyenne",
   },
@@ -53,7 +57,7 @@ const RATINGS = [
     label: "Rouge",
     title: "Pénalité forte",
     dot: "bg-rose-500",
-    soft: "bg-rose-50/70",
+    badge: "bg-rose-100 text-rose-800 ring-rose-300",
     desc: "Ingrédient controversé ou potentiellement à risque. Une controverse suffisamment sérieuse existe autour de cet ingrédient. Les substances interdites en Annexe II de la réglementation cosmétique sont aussi en rouge.",
     pen: "Pénalité forte",
   },
@@ -96,7 +100,7 @@ export default function HowItWorksPage() {
                 {r.desc}
               </p>
               <p
-                className={`mt-3 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-ink-muted ${r.soft} ring-1 ring-white/60`}
+                className={`mt-3 inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ring-1 ${r.badge}`}
               >
                 {r.pen}
               </p>
