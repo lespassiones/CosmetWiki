@@ -70,7 +70,17 @@ export function PromesseFlowModal({
         body: JSON.stringify({ inci, productLabel, brand, productType }),
       });
       if (!r.ok) {
-        const j = (await r.json().catch(() => ({}))) as { error?: string };
+        const j = (await r.json().catch(() => ({}))) as {
+          error?: string;
+          credits?: { used?: number; limit?: number; remaining?: number };
+        };
+        // Quota exhausted: the global CreditsExhaustedModal is already showing
+        // (apiFetch dispatches the event on 429-with-credits). Fold this sheet
+        // away so the user isn't staring at two stacked dialogs.
+        if (r.status === 429 && j?.credits) {
+          onClose();
+          return;
+        }
         setError(j.error ?? `Erreur ${r.status}`);
         setStep("error");
         return;
@@ -105,7 +115,14 @@ export function PromesseFlowModal({
         }),
       });
       if (!r.ok) {
-        const j = (await r.json().catch(() => ({}))) as { error?: string };
+        const j = (await r.json().catch(() => ({}))) as {
+          error?: string;
+          credits?: { used?: number; limit?: number; remaining?: number };
+        };
+        if (r.status === 429 && j?.credits) {
+          onClose();
+          return;
+        }
         setError(j.error ?? `Erreur ${r.status}`);
         setStep("error");
         return;

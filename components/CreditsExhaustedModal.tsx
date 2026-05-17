@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type Detail = { used?: number; limit?: number };
@@ -16,10 +17,20 @@ type Detail = { used?: number; limit?: number };
  *       detail: data.credits,
  *     }));
  *   }
+ *
+ * Closing the modal (backdrop click, Escape, "Plus tard") always navigates
+ * the user back to "/" — the dashboard is the only sensible landing when
+ * every action that follows would 429 again.
  */
 export function CreditsExhaustedModal() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<Detail>({});
+
+  const close = useCallback(() => {
+    setOpen(false);
+    router.push("/");
+  }, [router]);
 
   useEffect(() => {
     const onShow = (e: Event) => {
@@ -28,7 +39,7 @@ export function CreditsExhaustedModal() {
       setOpen(true);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") close();
     };
     window.addEventListener("cosmecheck:credits-exhausted", onShow as EventListener);
     document.addEventListener("keydown", onKey);
@@ -36,7 +47,7 @@ export function CreditsExhaustedModal() {
       window.removeEventListener("cosmecheck:credits-exhausted", onShow as EventListener);
       document.removeEventListener("keydown", onKey);
     };
-  }, []);
+  }, [close]);
 
   if (!open) return null;
 
@@ -48,7 +59,7 @@ export function CreditsExhaustedModal() {
       role="dialog"
       aria-modal="true"
       aria-labelledby="credits-exhausted-title"
-      onClick={() => setOpen(false)}
+      onClick={close}
     >
       <div
         className="relative w-full max-w-sm rounded-2xl bg-white p-6 shadow-[0_24px_48px_-12px_rgba(15,23,42,0.25)]"
@@ -78,7 +89,7 @@ export function CreditsExhaustedModal() {
           </Link>
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={close}
             className="block w-full rounded-xl bg-white py-3 text-center text-sm font-medium text-[#6B7280] hover:text-[#111111] transition"
           >
             Plus tard

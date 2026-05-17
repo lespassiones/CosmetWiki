@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BackgroundGlow } from "../BackgroundGlow";
@@ -36,14 +36,61 @@ export function AppShell({
 }) {
   const pathname = usePathname() ?? "/";
   const [scanOpen, setScanOpen] = useState(false);
+  // Last-known credits state for the "Décode" guard. Refreshed on mount, on
+  // window focus, and whenever a credit-consuming call dispatches
+  // `cosmecheck:credits-updated`. We only need it to decide whether the scan
+  // button should open the sheet or pop the exhausted modal.
+  const [credits, setCredits] = useState<{ used: number; limit: number; remaining: number } | null>(null);
+
+  useEffect(() => {
+    if (!signedIn) return;
+    let aborted = false;
+    const refresh = async () => {
+      try {
+        const r = await fetch("/api/credits", { cache: "no-store" });
+        if (!r.ok) return;
+        const data = await r.json();
+        if (!aborted && data?.ok && typeof data.remaining === "number") {
+          setCredits({ used: data.used, limit: data.limit, remaining: data.remaining });
+        }
+      } catch {
+        /* ignore — guard falls back to opening the sheet */
+      }
+    };
+    void refresh();
+    const onUpdate = () => void refresh();
+    window.addEventListener("focus", onUpdate);
+    window.addEventListener("cosmecheck:credits-updated", onUpdate as EventListener);
+    return () => {
+      aborted = true;
+      window.removeEventListener("focus", onUpdate);
+      window.removeEventListener("cosmecheck:credits-updated", onUpdate as EventListener);
+    };
+  }, [signedIn]);
+
+  // Guarded scan trigger: if the user has 0 credits left, short-circuit the
+  // ScanSheet and open the credits-exhausted modal instead — clicking the
+  // "Décode" FAB shouldn't even let them paint an analyse they can't run.
+  const handleScanClick = useCallback(() => {
+    if (credits && credits.remaining <= 0) {
+      window.dispatchEvent(
+        new CustomEvent("cosmecheck:credits-exhausted", {
+          detail: { used: credits.used, limit: credits.limit },
+        }),
+      );
+      return;
+    }
+    setScanOpen(true);
+  }, [credits]);
 
   // Allow any client component anywhere in the tree (e.g. /routine's "Ajouter un
   // produit" button) to open the scan sheet by dispatching a custom DOM event.
+  // We route it through the same credits guard.
   useEffect(() => {
-    const handler = () => setScanOpen(true);
+    const handler = () => handleScanClick();
     window.addEventListener("cosmecheck:open-scan", handler);
     return () => window.removeEventListener("cosmecheck:open-scan", handler);
-  }, []);
+  }, [handleScanClick]);
 
   const hidden = hideOnPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   if (hidden) return <>{children}</>;
@@ -62,7 +109,7 @@ export function AppShell({
       {/* Desktop sidebar */}
       <DesktopSidebar
         pathname={pathname}
-        onScanClick={() => setScanOpen(true)}
+        onScanClick={handleScanClick}
         signedIn={signedIn}
         firstName={firstName}
       />
@@ -73,7 +120,7 @@ export function AppShell({
       </div>
 
       {/* Mobile bottom nav */}
-      <MobileBottomNav pathname={pathname} onScanClick={() => setScanOpen(true)} />
+      <MobileBottomNav pathname={pathname} onScanClick={handleScanClick} />
 
       {/* Mobile burger menu (top-right) — opens a drawer mirroring the
           desktop sidebar so the user can reach pages that don't fit in the

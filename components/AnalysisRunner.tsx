@@ -281,7 +281,18 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
         signal: ctrl.signal,
       });
       if (!r.ok) {
-        const j = await r.json().catch(() => ({}));
+        const j = (await r.json().catch(() => ({}))) as {
+          error?: string;
+          credits?: { used?: number; limit?: number; remaining?: number };
+        };
+        // 429 with a credits payload = quota exhausted. apiFetch has already
+        // dispatched `cosmecheck:credits-exhausted` so the global modal is
+        // showing — kick the user back to "/" so they don't also see this
+        // page's inline error stripe behind the modal.
+        if (r.status === 429 && j?.credits) {
+          router.replace("/");
+          return;
+        }
         setError(j?.error ?? `Erreur ${r.status}`);
         return;
       }
