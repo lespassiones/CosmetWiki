@@ -78,7 +78,10 @@ export function DailyPicksCard() {
     setScore(s.score);
     void (async () => {
       try {
-        const r = await fetch("/api/daily-picks", { cache: "no-store" });
+        // Let the browser cache honour /api/daily-picks' Cache-Control
+        // (public, max-age=3600, stale-while-revalidate=300) — the daily
+        // catalog only changes at the UTC day flip.
+        const r = await fetch("/api/daily-picks");
         if (!r.ok) throw new Error(`Erreur ${r.status}`);
         const data = (await r.json()) as { items: DailyPickItem[] };
         setItems(data.items);

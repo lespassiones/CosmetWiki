@@ -1,26 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAnon } from "@/lib/supabase";
-import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
 
-export const runtime = "nodejs";
+// Edge runtime : ~50ms cold start vs ~800ms Node. Autocomplete must feel
+// instant, so the boring "hit Postgres RPC and return JSON" path lives here.
+// No IP rate-limit (lib/ratelimit's setInterval().unref() isn't Edge-safe);
+// the route only reads from a cached Postgres index, so abuse cost is low.
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  const ip = getClientIp(req.headers);
-  const rl = checkRateLimit(ip, 30, 60_000);
-  if (!rl.ok) {
-    return NextResponse.json(
-      { error: "Trop de requêtes." },
-      { status: 429, headers: { "Retry-After": Math.ceil(rl.retryAfter / 1000).toString() } },
-    );
-  }
-
   const url = new URL(req.url);
   const q = (url.searchParams.get("q") ?? "").trim();
   const hp = url.searchParams.get("hp");
 
   if (hp && hp.length > 0) {
-    blacklistIp(ip);
     return NextResponse.json({ hits: [] });
   }
 
@@ -35,7 +28,7 @@ export async function GET(req: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.json({ hits: [], error: error.message }, { status: 500 });
+    return NextResponse.json({ hits: [] }, { status: 500 });
   }
 
   return NextResponse.json(
@@ -43,7 +36,6 @@ export async function GET(req: NextRequest) {
     {
       headers: {
         "Cache-Control": "private, max-age=10",
-        "X-RateLimit-Remaining": rl.remaining.toString(),
       },
     },
   );

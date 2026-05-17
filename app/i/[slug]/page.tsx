@@ -198,7 +198,12 @@ export default async function IngredientPage({ params, searchParams }: Props) {
     <div className="relative isolate flex min-h-screen flex-col bg-bg">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        // Escape `<` (and `>` for symmetry) so an ingredient name like
+        // "Foo </script><x>" can't break out of the JSON-LD script tag.
+        // Standard mitigation — JSON.stringify alone does not escape these.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c").replace(/>/g, "\\u003e"),
+        }}
       />
       <BackgroundGlow />
 

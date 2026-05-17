@@ -19,16 +19,20 @@ import { PublicHeader } from "@/components/PublicHeader";
 export function LandingHero() {
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-[#FAFAFA]">
-      {/* Background image — desktop variant (lg+) */}
+      {/* Two background images, one per viewport. We can't conditionally
+          render based on viewport in SSR, so both ship in the DOM with CSS
+          visibility toggled at `lg`. Only the MOBILE variant has `priority`
+          because mobile traffic dominates and Google LCP weighs mobile heavier.
+          The desktop image still loads eagerly (Next default for images
+          above the fold), just without the <link rel="preload"> hint, so we
+          don't waste ~1.7 MB on mobile users who never see it. */}
       <Image
         src="/image/landing/landing.png"
         alt=""
         fill
-        priority
         sizes="100vw"
         className="hidden lg:block object-cover object-center"
       />
-      {/* Background image — mobile portrait variant (< lg) */}
       <Image
         src="/image/landing/landingportrait.png"
         alt=""

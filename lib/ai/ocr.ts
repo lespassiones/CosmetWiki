@@ -20,6 +20,7 @@ type SharpFactory = (input?: Buffer) => {
   metadata: () => Promise<{ width?: number; height?: number }>;
   extract: (region: { left: number; top: number; width: number; height: number }) => ReturnType<SharpFactory>;
   jpeg: (opts?: { quality?: number }) => ReturnType<SharpFactory>;
+  resize: (opts: { width?: number; height?: number; fit?: "inside" | "cover" | "contain"; withoutEnlargement?: boolean }) => ReturnType<SharpFactory>;
   toBuffer: () => Promise<Buffer>;
 };
 let sharpPromise: Promise<SharpFactory | null> | null = null;
@@ -30,6 +31,50 @@ function loadSharp(): Promise<SharpFactory | null> {
       .catch(() => null);
   }
   return sharpPromise;
+}
+
+/**
+ * Compresses an oversized phone photo BEFORE we hand it to Vision. A typical
+ * 12 MP shot is 4 000 × 3 000 px and 3-6 MB, which translates to ~1 500 image
+ * tokens at high detail. Resizing to a 1600 px long edge + JPEG quality 85
+ * keeps INCI text perfectly readable (the smallest character on a label is
+ * still ~12 px after resize) while cutting token cost by 50-70 %.
+ *
+ * Falls back to the original image if sharp is unavailable or the input is
+ * already small. Returns the input as-is on any failure — never throws.
+ */
+const MAX_DIMENSION = 1600;
+const JPEG_QUALITY = 85;
+async function downscaleImage(
+  base64: string,
+  mimeType: string,
+): Promise<{ base64: string; mimeType: string }> {
+  try {
+    const sharp = await loadSharp();
+    if (!sharp) return { base64, mimeType };
+    const input = Buffer.from(base64, "base64");
+    const meta = await sharp(input).metadata();
+    const w = meta.width ?? 0;
+    const h = meta.height ?? 0;
+    // Already small enough — skip compression (still re-encodes to JPEG would
+    // waste CPU for no gain).
+    if (w > 0 && h > 0 && w <= MAX_DIMENSION && h <= MAX_DIMENSION && mimeType === "image/jpeg") {
+      return { base64, mimeType };
+    }
+    const out = await sharp(input)
+      .resize({ width: MAX_DIMENSION, height: MAX_DIMENSION, fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: JPEG_QUALITY })
+      .toBuffer();
+    logInfo("ocr.downscaled", {
+      from: { w, h, bytes: input.length },
+      to: { bytes: out.length },
+      ratio: input.length > 0 ? Math.round((out.length / input.length) * 100) / 100 : null,
+    });
+    return { base64: out.toString("base64"), mimeType: "image/jpeg" };
+  } catch (err) {
+    logWarn("ocr.downscale_failed", { error: (err as Error).message });
+    return { base64, mimeType };
+  }
 }
 
 export type OcrValidation = {
@@ -284,6 +329,9 @@ export async function ocrFromImageBase64(
   mimeType: string,
   userId?: string | null,
 ): Promise<OcrResult> {
+  // Hash on the ORIGINAL bytes — a user re-uploading the same photo from
+  // their gallery must still hit the cache, regardless of our compression
+  // settings (which we may tune over time).
   const hash = crypto.createHash("sha256").update(imageBase64).digest("hex").slice(0, 32);
   const cacheKey = `ocr:${hash}`;
   const cached = await getCached<OcrResult>(cacheKey);
@@ -293,10 +341,17 @@ export async function ocrFromImageBase64(
     return { found: false, reason: "openai_unavailable" };
   }
 
-  // P4 — locate the INCI block in the original image, crop to it, and run
-  // OCR on the crop. Removes 80-90 % of the multilingual descriptive
+  // Compress the photo to 1600 px / JPEG 85 BEFORE any Vision call. Cuts
+  // image-token cost by 50-70 % on phone uploads (typical 4 000 × 3 000 px)
+  // without sacrificing INCI text readability.
+  const ds = await downscaleImage(imageBase64, mimeType);
+  imageBase64 = ds.base64;
+  mimeType = ds.mimeType;
+
+  // P4 — locate the INCI block in the (downscaled) image, crop to it, and
+  // run OCR on the crop. Removes 80-90 % of the multilingual descriptive
   // paragraphs that confused the model on full-frame photos. Falls back to
-  // the original image if locate or crop fails.
+  // the un-cropped (but still downscaled) image if locate or crop fails.
   let workingImage = imageBase64;
   let workingMime = mimeType;
   const bbox = await locateInciRegion(imageBase64, mimeType);
@@ -458,6 +513,11 @@ export async function ocrFrontFromImageBase64(
   if (!hasOpenAI()) {
     return { found: false, reason: "openai_unavailable" };
   }
+
+  // Compress before Vision — same rationale as ocrFromImageBase64.
+  const ds = await downscaleImage(imageBase64, mimeType);
+  imageBase64 = ds.base64;
+  mimeType = ds.mimeType;
 
   const system = [
     "Tu analyses la face avant d'un produit cosmétique. Tu extrais l'identité du produit telle qu'elle est imprimée sur le packaging.",

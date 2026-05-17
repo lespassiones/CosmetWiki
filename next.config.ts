@@ -16,7 +16,9 @@ const config: NextConfig = {
       { protocol: "https", hostname: "**.incibeauty.com" },
       { protocol: "https", hostname: "**.supabase.co" },
     ],
-    formats: ["image/webp"],
+    // AVIF first (best compression, ~50% smaller than WebP on photos), then
+    // WebP fallback for browsers that don't support AVIF (<5% in 2026).
+    formats: ["image/avif", "image/webp"],
   },
   compress: true,
   experimental: {

@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { supabaseAnon } from "@/lib/supabase";
 import { pickTodaysItems, type DailyPickItem } from "@/lib/dailyPicks/select";
 
-export const runtime = "nodejs";
+// Edge runtime : ~50ms cold start. Catalog read + deterministic slice — no
+// Node-specific deps. Daily picks are also CDN-cached 1h via Cache-Control,
+// so the function only runs once per hour per edge region in practice.
+export const runtime = "edge";
 // Force dynamic so the response always reflects "today" (otherwise Next would
 // statically render once and serve the same picks until redeploy).
 export const dynamic = "force-dynamic";
