@@ -5,6 +5,7 @@ import Link from "next/link";
 import { signOut } from "@/app/auth/actions";
 import { CloseIcon, MenuIcon } from "./NavIcons";
 import { PremiumCard } from "./PremiumCard";
+import { CreditsPill } from "../CreditsPill";
 
 type NavItem = {
   href: string;
@@ -122,11 +123,17 @@ export function MobileBurgerMenu({
                 })}
               </ul>
 
-              {/* Bottom block — Premium upsell + sign-out button, pinned to
-                  the bottom of the drawer (above the safe area). The sign-out
-                  button is intentionally placed here so it's reachable in one
-                  tap from any page, instead of buried under /profile. */}
+              {/* Bottom block — Credits pill + Premium upsell + sign-out button,
+                  pinned to the bottom of the drawer (above the safe area). The
+                  sign-out button is intentionally placed here so it's reachable
+                  in one tap from any page, instead of buried under /profile. */}
               <div className="mt-auto pt-4 space-y-3">
+                <div className="flex items-center justify-between rounded-2xl bg-white/70 ring-1 ring-black/[0.04] px-3.5 py-2.5">
+                  <span className="text-[12px] font-medium text-[#6B7280]">
+                    Vos crédits restants
+                  </span>
+                  <CreditsPill />
+                </div>
                 {!pathname.startsWith("/offre") && <PremiumCard />}
                 <form action={signOut}>
                   <button

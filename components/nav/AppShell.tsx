@@ -93,14 +93,6 @@ export function AppShell({
         </Link>
       )}
 
-      {/* Mobile credits pill — top-left, opposite the burger menu on top-right. */}
-      <div
-        className="lg:hidden fixed left-4 z-40 pointer-events-none"
-        style={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
-      >
-        <CreditsPill className="pointer-events-auto shadow-[0_4px_12px_-2px_rgba(15,23,42,0.08)]" />
-      </div>
-
       <ScanSheet open={scanOpen} onClose={() => setScanOpen(false)} />
       <CreditsExhaustedModal />
     </div>
@@ -191,21 +183,18 @@ function DesktopSidebar({
       className="hidden lg:flex fixed left-0 top-0 w-60 h-screen flex-col bg-white/60 backdrop-blur-2xl backdrop-saturate-150 ring-1 ring-white/70 shadow-[8px_0_30px_-12px_rgba(15,23,42,0.10),inset_-1px_0_0_rgba(255,255,255,0.65)] p-5"
       aria-label="Navigation latérale"
     >
-      <div className="flex items-center justify-between mb-8">
-        <Link href="/" className="flex items-center gap-2">
-          <span aria-hidden className="w-5 h-5 inline-block">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#111111]">
-              <path d="M9 2v6L3 18a3 3 0 0 0 3 4h12a3 3 0 0 0 3-4L15 8V2" />
-              <path d="M9 2h6" />
-            </svg>
-          </span>
-          <span className="text-[15px] font-bold tracking-tight">
-            <span className="text-[#111111]">Cosme </span>
-            <span className="text-[#F43F5E]">Check</span>
-          </span>
-        </Link>
-        {signedIn && <CreditsPill />}
-      </div>
+      <Link href="/" className="flex items-center gap-2 mb-8">
+        <span aria-hidden className="w-5 h-5 inline-block">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#111111]">
+            <path d="M9 2v6L3 18a3 3 0 0 0 3 4h12a3 3 0 0 0 3-4L15 8V2" />
+            <path d="M9 2h6" />
+          </svg>
+        </span>
+        <span className="text-[15px] font-bold tracking-tight">
+          <span className="text-[#111111]">Cosme </span>
+          <span className="text-[#F43F5E]">Check</span>
+        </span>
+      </Link>
 
       <button
         type="button"
@@ -238,11 +227,25 @@ function DesktopSidebar({
         })}
       </ul>
 
+      {/* Credits status — same labelled card as on mobile (in the burger
+          drawer), positioned just above the Premium upsell for visual
+          continuity. */}
+      {signedIn && (
+        <div className="mt-auto pt-6">
+          <div className="flex items-center justify-between rounded-2xl bg-white/70 ring-1 ring-black/[0.04] px-3.5 py-2.5 mb-3">
+            <span className="text-[12px] font-medium text-[#6B7280]">
+              Vos crédits restants
+            </span>
+            <CreditsPill />
+          </div>
+        </div>
+      )}
+
       {/* Premium upsell sits right above the avatar, hidden when the user is
           already on /offre (no point pitching to someone who's looking at
           the offer). */}
       {signedIn && !pathname.startsWith("/offre") && (
-        <div className="mt-auto pt-6">
+        <div>
           <PremiumCard />
         </div>
       )}
