@@ -92,7 +92,7 @@ function InfoCard({
 }) {
   return (
     <li className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-[0_4px_16px_-8px_rgba(17,17,17,0.06)] ring-1 ring-black/[0.04]">
-      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-rose-50 text-[#F43F5E]">
+      <span className="grid h-12 w-12 shrink-0 place-items-center text-[#F43F5E]">
         {icon}
       </span>
       <div className="flex-1">

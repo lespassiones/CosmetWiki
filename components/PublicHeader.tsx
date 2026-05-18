@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 const NAV_ITEMS = [
   { href: "/comment-ca-marche", label: "Fonctionnalités" },
   { href: "/blog", label: "Blog" },
+  { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
 ];
 
