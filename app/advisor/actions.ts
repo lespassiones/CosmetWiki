@@ -21,8 +21,15 @@ export async function saveSkinProfile(form: FormData): Promise<SkinProfileResult
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return { ok: false, error: "Non connecté." };
 
-  const skinType = String(form.get("skin_type") ?? "");
-  if (!SKIN_TYPES.includes(skinType as SkinType)) {
+  // skin_type can be either a preset value OR the literal string "autre" when
+  // the user picked the free-text option. The custom label lives in
+  // other_skin_type.
+  const skinTypeRaw = String(form.get("skin_type") ?? "");
+  const otherSkinType = String(form.get("other_skin_type") ?? "").slice(0, 120).trim();
+  const skinType: SkinType | undefined = SKIN_TYPES.includes(skinTypeRaw as SkinType)
+    ? (skinTypeRaw as SkinType)
+    : undefined;
+  if (!skinType && !otherSkinType) {
     return { ok: false, error: "Type de peau requis." };
   }
 
@@ -32,8 +39,9 @@ export async function saveSkinProfile(form: FormData): Promise<SkinProfileResult
     .filter((c): c is SkinConcern =>
       SKIN_CONCERNS.includes(c as (typeof SKIN_CONCERNS)[number]),
     );
-  if (concerns.length === 0) {
-    return { ok: false, error: "Choisis au moins une préoccupation." };
+  const otherConcerns = String(form.get("other_concerns") ?? "").slice(0, 300).trim();
+  if (concerns.length === 0 && !otherConcerns) {
+    return { ok: false, error: "Choisis au moins une préoccupation (ou décris-la dans 'Autre')." };
   }
 
   // Hair section is optional - empty is fine.
@@ -41,14 +49,20 @@ export async function saveSkinProfile(form: FormData): Promise<SkinProfileResult
     .getAll("hair_concerns")
     .map(String)
     .filter((c): c is HairConcern => HAIR_CONCERNS.includes(c as HairConcern));
+  const otherHair = String(form.get("other_hair") ?? "").slice(0, 200).trim();
 
   const allergiesFreeform = String(form.get("allergies") ?? "").slice(0, 500).trim();
+  const otherNotes = String(form.get("other_notes") ?? "").slice(0, 500).trim();
 
   const profile: SkinProfile = {
-    skinType: skinType as SkinType,
-    concerns,
+    skinType,
+    concerns: concerns.length > 0 ? concerns : undefined,
     hairConcerns: hairConcerns.length > 0 ? hairConcerns : undefined,
     allergiesFreeform: allergiesFreeform || undefined,
+    otherSkinType: otherSkinType || undefined,
+    otherConcerns: otherConcerns || undefined,
+    otherHair: otherHair || undefined,
+    otherNotes: otherNotes || undefined,
   };
 
   // Merge into existing preferences (don't clobber other future settings).

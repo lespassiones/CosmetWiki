@@ -810,6 +810,7 @@ export async function exploreOpenPromise(
 function buildConclusionPrompt(
   promises: CoherencePromise[],
   productLabel: string | null,
+  profileBlock?: string | null,
 ) {
   const tenue = promises.filter((p) => p.verdict === "tenue").map((p) => p.label);
   const partielle = promises.filter((p) => p.verdict === "partielle").map((p) => p.label);
@@ -817,7 +818,7 @@ function buildConclusionPrompt(
   const non = promises.filter((p) => p.verdict === "non_demontree").map((p) => p.label);
   const contredite = promises.filter((p) => p.verdict === "contredite").map((p) => p.label);
 
-  const system = `Tu rédiges UNE phrase de conclusion (50-120 mots maximum) pour une analyse de cohérence entre les promesses d'un produit cosmétique et sa formule.
+  const baseSystem = `Tu rédiges UNE phrase de conclusion (50-120 mots maximum) pour une analyse de cohérence entre les promesses d'un produit cosmétique et sa formule.
 
 Style : direct, factuel, accessible à un consommateur français lambda. Pas de jugement moral, pas d'emoji, pas de marketing inversé ("trompeur"). Tu décris ce que la formule fait probablement vs ce qui est promis.
 
@@ -828,6 +829,9 @@ Structure attendue : "[ce que la formule tient] mais [ce qu'elle ne tient pas / 
 NE CITE QUE LES VERDICTS QUE JE TE DONNE. N'invente jamais d'ingrédient ni de verdict.
 
 ${NO_LONG_DASHES_RULE}`;
+  const system = profileBlock
+    ? `${baseSystem}\n\n${profileBlock}\n\nQuand l'effet attendu peut affecter spécifiquement ce profil (peau sensible / sèche, allergie connue à un ingrédient présent...), glisse-le brièvement dans la phrase. Pas de paragraphe en plus.`
+    : baseSystem;
 
   const user = `${productLabel ? `Produit : ${productLabel}\n\n` : ""}Verdicts (déjà calculés mécaniquement) :
 - Promesses TENUES : ${tenue.length ? tenue.join(", ") : "(aucune)"}
@@ -844,9 +848,10 @@ ${NO_LONG_DASHES_RULE}`;
 async function mistralConclusion(
   promises: CoherencePromise[],
   productLabel: string | null,
+  profileBlock?: string | null,
 ): Promise<string | null> {
   if (!hasMistral()) return null;
-  const { system, user } = buildConclusionPrompt(promises, productLabel);
+  const { system, user } = buildConclusionPrompt(promises, productLabel, profileBlock);
   const r = await fetch("https://api.mistral.ai/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -888,10 +893,11 @@ export async function generateConclusion(
   promises: CoherencePromise[],
   productLabel: string | null,
   userId?: string | null,
+  profileBlock?: string | null,
 ): Promise<string> {
   if (!hasOpenAI() && !hasMistral()) return fallbackConclusion(promises);
 
-  const { system, user } = buildConclusionPrompt(promises, productLabel);
+  const { system, user } = buildConclusionPrompt(promises, productLabel, profileBlock);
 
   try {
     const text = await callWithFallback<string | null>({
@@ -918,7 +924,7 @@ export async function generateConclusion(
         };
       },
       fallback: async () => {
-        const raw = await mistralConclusion(promises, productLabel);
+        const raw = await mistralConclusion(promises, productLabel, profileBlock);
         return {
           value: raw ? stripLongDashes(raw) : null,
           provider: "mistral" as const,

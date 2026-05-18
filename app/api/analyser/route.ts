@@ -6,6 +6,7 @@ import { idempotencyKey, idempotencyLookup, idempotencyStore } from "@/lib/idemp
 import { logError, logWarn } from "@/lib/log";
 import { safeError } from "@/lib/safeError";
 import { generateSynthesis } from "@/lib/ai/synthesis";
+import { loadProfileForPrompt } from "@/lib/skin/promptFormat";
 import { categorizeProduct, type ProductCategory } from "@/lib/ai/categorize";
 import { correctTypo } from "@/lib/ai/typo";
 import { parseInciWithAI } from "@/lib/ai/parseInci";
@@ -569,9 +570,14 @@ export async function POST(req: NextRequest) {
     return r ? r.effective_color : null;
   });
 
-  // Optional AI synthesis (GPT-4o-mini primary, Mistral fallback, cached)
+  // Optional AI synthesis (GPT-4o-mini primary, Mistral fallback, cached).
+  // Personalised: the user's skin profile (if any) is injected into the
+  // system prompt so the LLM tailors the puces to what's relevant for this
+  // person. The profile block also enters the cache key, so two users with
+  // different profiles get distinct synthèses on the same INCI list.
   let synthesis: string | null = null;
   if (body.withSynthesis !== false) {
+    const profileBlock = await loadProfileForPrompt(user.id);
     synthesis = await generateSynthesis({
       enriched: enriched.map((r) => ({
         input_raw: r.input_raw,
@@ -588,6 +594,7 @@ export async function POST(req: NextRequest) {
       observations,
       productLabel: body.productLabel?.slice(0, 200) ?? null,
       userId: user.id,
+      profileBlock,
     });
   }
 

@@ -6,76 +6,76 @@
  * pool cycles in about two days.
  */
 export const DAILY_TIPS: string[] = [
-  // INCI list basics
-  "Les 5 premiers ingrédients d'une liste INCI représentent environ 75 % de la formule.",
-  "L'ordre INCI correspond à l'ordre décroissant de concentration jusqu'à environ 1 %.",
-  "Si AQUA est en 1ère position, c'est une formule à base d'eau.",
-  "Un actif placé après le 1er conservateur est généralement présent à moins de 1 %.",
-  "Au-dessous d'1 %, les ingrédients peuvent être listés dans n'importe quel ordre.",
-  "Un ingrédient placé après PARFUM ou FRAGRANCE est généralement présent à moins de 1 % - son impact réel reste limité même s'il est pénalisé.",
-  "Avant PARFUM dans la liste = concentration ≥ 1 %, à surveiller. Après PARFUM = traces, plus rassurant.",
-  "Le mot \"parfum\" ou \"fragrance\" peut cacher des dizaines de molécules non déclarées individuellement.",
-  "Les colorants apparaissent souvent en fin de liste sous la forme \"CI 12345\".",
-  "Un nom en italique sur l'étiquette physique indique souvent un actif issu de la nomenclature INCI.",
-  "Une note basse ne signifie pas \"dangereux\" : c'est une grille de tolérance, pas un verdict toxicologique.",
-  "La liste INCI est obligatoire en UE : si elle manque, c'est un signal à fuir.",
+  // Lire l'étiquette
+  "Les 5 premiers ingrédients d'un produit représentent environ 75 % de la formule. Le reste, c'est surtout du détail.",
+  "Sur une étiquette, les ingrédients sont rangés du plus présent au moins présent. Plus c'est haut, plus il y en a.",
+  "Si « Aqua » (l'eau) est en 1er, le produit est avant tout… de l'eau. Normal pour une crème, plus surprenant pour un sérum « ultra concentré ».",
+  "Quand un ingrédient arrive après le 1er conservateur, il y en a en général moins de 1 % dans le produit.",
+  "Sous 1 %, les marques peuvent écrire les ingrédients dans l'ordre qu'elles veulent — la fin de liste n'est plus un classement fiable.",
+  "Un ingrédient placé après « Parfum » est présent en toute petite quantité : son effet sur la peau reste limité.",
+  "Avant « Parfum » = ingrédient bien présent, à surveiller. Après « Parfum » = traces, plus rassurant.",
+  "Le mot « Parfum » sur une étiquette peut cacher des dizaines de molécules différentes que la marque n'est pas obligée de détailler.",
+  "Les codes du type « CI 12345 » à la fin d'une liste, ce sont juste les colorants. Rien d'inquiétant en soi.",
+  "Sur l'emballage, les noms en italique sont souvent des ingrédients d'origine végétale (le nom scientifique de la plante).",
+  "Une note un peu basse ne veut pas dire « dangereux ». C'est une note de tolérance, pas un verdict médical.",
+  "En Europe, la liste des ingrédients est obligatoire sur tous les cosmétiques. Si elle manque, repose le produit.",
 
-  // Allergens & sensitive ingredients
-  "Les allergènes parfumants UE sont 26 composés à déclarer dès 0,001 % en leave-on.",
-  "Limonene, Linalool, Citronellol et Geraniol sont les allergènes parfumants les plus fréquents.",
-  "Methylisothiazolinone (MIT) est l'un des conservateurs les plus allergisants - vérifie son absence en leave-on.",
-  "Les parabens longs (butyl-, propyl-) sont restreints depuis 2014 mais les courts (methyl-, ethyl-) restent autorisés.",
-  "Le formaldéhyde libre est interdit, mais certains conservateurs en libèrent lentement (DMDM Hydantoin, Quaternium-15…).",
-  "Les huiles essentielles sont des cocktails d'allergènes : doses faibles = irritation cumulée possible.",
-  "Si tu as la peau réactive, surveille Phenoxyethanol, Sodium Benzoate et les EOs en haut de liste.",
-  "Les huiles essentielles photo-sensibilisantes (bergamote, citron) sont à éviter avant exposition solaire.",
+  // Allergies & ingrédients sensibles
+  "Il existe 26 ingrédients parfumants connus pour provoquer des allergies. Les marques doivent les écrire dès qu'il y en a un tout petit peu.",
+  "Limonene, Linalool, Citronellol, Geraniol : 4 noms qu'on retrouve souvent dans les parfums et qui peuvent faire réagir les peaux sensibles.",
+  "Le « Methylisothiazolinone » (parfois écrit MI ou MIT) est un conservateur qui déclenche beaucoup d'allergies. À éviter dans une crème qui reste sur la peau.",
+  "Tous les parabens ne se valent pas : les longs sont aujourd'hui très encadrés, les courts (methyl-, ethyl-) sont toujours autorisés et plutôt bien tolérés.",
+  "Le vrai formaldéhyde est interdit dans les cosmétiques, mais quelques conservateurs en libèrent un peu avec le temps. À éviter si tu as une peau réactive.",
+  "Les huiles essentielles, même « naturelles », sont des concentrés très puissants. Plusieurs en même temps = plus de risque d'irritation.",
+  "Si tu as la peau qui rougit ou pique facilement, regarde les conservateurs en haut de liste et limite les produits avec beaucoup d'huiles essentielles.",
+  "Certaines huiles essentielles (bergamote, citron, agrumes en général) rendent la peau plus sensible au soleil. Évite-les le matin avant de sortir.",
 
-  // Solaires & UV
-  "Un SPF 30 bloque ~97 % des UVB, un SPF 50 ~98 %. La différence est marginale, l'application régulière est plus importante.",
-  "PA+++ et PA++++ indiquent la protection UVA - toujours regarder ce critère, pas que le SPF.",
-  "Un solaire perd son efficacité après 2 ans ouvert : note la date sur le tube.",
-  "Octocrylene peut se dégrader en benzophénone avec le temps - un solaire vieilli n'est pas neutre.",
-  "Les filtres minéraux (Zinc Oxide, Titanium Dioxide) sont moins susceptibles d'allergie que les filtres chimiques.",
+  // Soleil & protection solaire
+  "Un SPF 30 arrête environ 97 % des UV, un SPF 50 environ 98 %. La vraie différence, c'est surtout d'en remettre toutes les 2 heures.",
+  "Sur ta crème solaire, regarde aussi « UVA » dans un cercle ou « PA+++ ». C'est ce qui protège la peau du vieillissement, pas seulement des coups de soleil.",
+  "Une crème solaire perd de son efficacité après 1 à 2 ans une fois ouverte. Note la date d'ouverture au marqueur sur le tube.",
+  "Une vieille crème solaire mal conservée peut moins bien protéger. Si elle a passé un été dans la voiture, mieux vaut en racheter une.",
+  "Les filtres « minéraux » (oxyde de zinc, dioxyde de titane) sont en général mieux tolérés par les peaux sensibles que les filtres chimiques.",
 
   // Routine & application
-  "Sur peau humide les actifs pénètrent mieux - applique tes sérums sur peau légèrement tamponnée.",
-  "Plus la molécule est petite, mieux elle pénètre : la niacinamide passe, le collagène en topique non.",
-  "L'acide hyaluronique hydrate la couche cornée mais ne remplace pas une bonne barrière lipidique.",
-  "La rétine (rétinol, rétinal) est photosensibilisante : applique-la le soir et SPF le matin obligatoire.",
-  "Vitamine C + SPF le matin = combo synergique pour les UV et les taches pigmentaires.",
-  "N'empile pas acides exfoliants + rétinol le même soir sur peau sensible : risque d'irritation.",
-  "Les actifs anti-âge demandent 8 à 12 semaines pour un résultat visible - patience.",
+  "Sur peau légèrement humide, les soins pénètrent un peu mieux. Tamponne ta peau avec une serviette plutôt que de la frotter à sec.",
+  "Plus une molécule est petite, mieux elle entre dans la peau. C'est pour ça que tout ce qui est « collagène » dans une crème ne passe presque pas la surface.",
+  "L'acide hyaluronique attire l'eau et hydrate la surface de la peau. Mais sans une crème par-dessus, l'effet ne tient pas longtemps.",
+  "Le rétinol rend la peau plus sensible au soleil. Règle simple : rétinol le soir, crème solaire le matin, jamais l'inverse.",
+  "Vitamine C le matin + crème solaire = duo gagnant contre les taches et le vieillissement de la peau.",
+  "Évite d'utiliser un exfoliant (acide) et du rétinol le même soir, surtout sur peau sensible. Tu risques juste de l'irriter.",
+  "Les soins anti-âge mettent environ 2 à 3 mois à montrer un vrai résultat. Si tu arrêtes au bout de 2 semaines, tu ne sauras jamais s'ils marchent.",
 
-  // Tensioactifs & lavants
-  "SLS (Sodium Lauryl Sulfate) est plus décapant que SLES - pour les peaux sensibles, privilégie le second ou des tensioactifs doux.",
-  "Coco Glucoside, Decyl Glucoside : tensioactifs doux d'origine végétale, bonne tolérance.",
-  "Un shampooing qui mousse beaucoup n'est pas forcément plus efficace - c'est surtout cosmétique.",
-  "Sebum + sueur se nettoient bien avec un pH proche de 5,5 : un savon trop alcalin assèche.",
+  // Lavants & shampooings
+  "Le « SLS » (Sodium Lauryl Sulfate) est un agent lavant assez fort qui peut tirer la peau ou le cuir chevelu. Le « SLES » à côté est un peu plus doux.",
+  "« Coco Glucoside » et « Decyl Glucoside » : ce sont des agents lavants doux, faits à partir de noix de coco. En général très bien tolérés.",
+  "Un shampooing qui mousse beaucoup n'est pas forcément plus efficace. La grosse mousse, c'est surtout pour le plaisir sous la douche.",
+  "Pour la peau, un produit lavant proche du pH naturel (autour de 5,5) respecte mieux la barrière qu'un savon basique très alcalin.",
 
-  // Conservation & date
-  "Le PAO (Period After Opening) est le petit pot ouvert avec un chiffre : 6M, 12M… durée après ouverture.",
-  "Sans conservateur, un produit aqueux ne dépasse pas 1 mois avant contamination microbienne.",
-  "Stocker un solaire ou un sérum à plus de 30 °C accélère la dégradation des actifs.",
-  "Les produits sans eau (huiles pures, baumes) se conservent plus longtemps que les émulsions.",
+  // Conservation
+  "Le petit pot ouvert avec « 6M » ou « 12M » sur l'emballage = nombre de mois pendant lequel le produit reste bon après ouverture.",
+  "Un produit qui contient beaucoup d'eau et zéro conservateur ne tient pas longtemps : 1 mois max avant que des microbes s'y développent.",
+  "Garder une crème solaire ou un sérum à plus de 30 °C (soleil, voiture) abîme ses ingrédients actifs plus vite. Range-les à l'abri.",
+  "Les produits sans eau (huiles pures, baumes) se conservent en général plus longtemps que les crèmes, qui sont un mélange d'eau et d'huile.",
 
-  // Étiquettes & marketing
-  "\"Hypoallergénique\" n'est pas une mention encadrée par la loi - sans liste INCI claire, méfiance.",
-  "\"Sans parabens\" peut cacher d'autres conservateurs plus allergisants comme la MIT.",
-  "\"Naturel à 99 %\" inclut souvent l'eau dans le pourcentage - vérifie la liste, pas le claim.",
-  "Bio ne signifie pas non-allergisant : huiles essentielles bio = allergènes bio.",
-  "Les pictos écolos (feuille verte, etc.) sont rarement audités - la liste INCI reste l'arbitre.",
+  // Marketing & promesses
+  "« Hypoallergénique » n'est pas un mot encadré par une loi stricte. Regarde la liste des ingrédients, pas juste le mot sur le packaging.",
+  "« Sans parabens » peut juste vouloir dire que la marque les a remplacés par d'autres conservateurs, parfois plus allergisants.",
+  "« Naturel à 99 % » compte souvent l'eau dans le pourcentage. C'est techniquement vrai, mais ça ne dit pas grand-chose de la qualité du produit.",
+  "« Bio » ne veut pas dire « sans risque d'allergie ». Une huile essentielle bio peut faire réagir une peau sensible exactement comme la version non-bio.",
+  "Les petits logos verts (feuille, planète, etc.) sont rarement contrôlés par un organisme indépendant. Fie-toi d'abord à la liste des ingrédients.",
 
   // Catégories spécifiques
-  "Pour bébé, vise une liste INCI courte : moins de 10 ingrédients, sans parfum, sans alcool dénaturé.",
-  "Les déodorants sans sels d'aluminium existent mais sont moins efficaces sur la transpiration - différencier déodorant et anti-transpirant.",
-  "Les masques argile absorbent le sébum : à utiliser 1–2× par semaine max sur zones grasses.",
-  "Un démaquillant huileux retire mieux les écrans solaires résistants à l'eau qu'une eau micellaire.",
+  "Pour un bébé, choisis une liste d'ingrédients courte (moins de 10 si possible), sans parfum et sans alcool. Sa peau est beaucoup plus fragile que la nôtre.",
+  "Un « déodorant » réduit les odeurs, un « anti-transpirant » bloque la transpiration. Ce ne sont pas les mêmes produits, et l'un n'est pas obligé de remplacer l'autre.",
+  "Les masques à l'argile absorbent l'excès de gras. 1 à 2 fois par semaine sur les zones grasses suffit — plus, ça assèche la peau.",
+  "Pour bien retirer une crème solaire résistante à l'eau, un démaquillant à l'huile fait beaucoup mieux qu'une eau micellaire seule.",
 
-  // Pratiques générales
-  "Tester un nouveau produit dans le pli du coude 48 h avant utilisation faciale réduit le risque de réaction.",
-  "Réduire le nombre de produits (8–10 max) limite l'exposition cumulée aux allergènes et conservateurs.",
-  "Lis la liste INCI avant le packaging : la formule fait le produit, pas la pub.",
-  "Garde une note de tes produits qui ont irrité ta peau pour identifier l'ingrédient commun.",
+  // Bonnes habitudes
+  "Avant de mettre un nouveau produit sur le visage, teste-le 48 h dans le pli du coude. Si ça rougit ou démange, n'insiste pas.",
+  "Mieux vaut 8 à 10 produits bien choisis qu'une étagère de 30. Plus tu cumules, plus tu exposes ta peau à des ingrédients qui peuvent te gêner.",
+  "Le vrai produit, c'est ce qu'il y a dedans, pas ce qui est marqué dessus. Apprends à lire la liste des ingrédients avant la pub.",
+  "Quand un produit te fait réagir, note son nom. Au bout de 2 ou 3 réactions, tu pourras repérer l'ingrédient en commun.",
 ];
 
 /**

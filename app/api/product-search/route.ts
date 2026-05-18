@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchProductCascade } from "@/lib/productSearch/cascade";
+import { collectDuckDuckGoCandidates } from "@/lib/productSearch/duckduckgo";
 import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import { normalizeProductQuery } from "@/lib/ai/productNormalize";
+
+// Hard cap for the multi-candidate UI: 12 web hits = 3 pages of 4 in the
+// frontend's "Voir plus" pager. More than that gets noisy and burns search-
+// engine budget.
+const MAX_WEB_CANDIDATES = 12;
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -73,8 +79,20 @@ export async function POST(req: NextRequest) {
 
   const refinedQuery = norm.kind === "query" ? norm.query : query;
   const result = await searchProductCascade(refinedQuery);
+
+  // When the cascade failed to identify a single canonical product, we ALSO
+  // fetch a wider list of web candidates so the UI can show "voir plus".
+  // The user picks one, then /api/deep-fetch lazy-pulls its INCI. Keeps the
+  // cost bounded: only one Mistral extraction per actual click instead of
+  // 12 up-front.
+  let webCandidates: Awaited<ReturnType<typeof collectDuckDuckGoCandidates>> = [];
+  if (!result.found) {
+    webCandidates = await collectDuckDuckGoCandidates(refinedQuery, MAX_WEB_CANDIDATES);
+  }
+
   return NextResponse.json({
     ...result,
+    webCandidates,
     normalization:
       norm.kind === "query"
         ? { kind: "query", original: query, refined: refinedQuery, confidence: norm.confidence }

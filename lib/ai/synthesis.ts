@@ -24,19 +24,27 @@ export type SynthesisInput = {
   observations: { label: string; status: "present" | "absent" | "info" | "warn"; count: number }[];
   productLabel: string | null;
   userId?: string | null;
+  /** Pre-formatted skin profile block (from loadProfileForPrompt). When
+   *  present, the LLM is asked to tailor the synthèse to this profile. The
+   *  cache key includes its hash so two users with different profiles don't
+   *  collide on the same cached output. */
+  profileBlock?: string | null;
 };
 
 // Bump this any time `buildPrompt()` changes meaningfully - old cached
 // outputs keyed on the previous version will no longer be served.
-const PROMPT_VERSION = 5;
+const PROMPT_VERSION = 8;
 
 function makeCacheKey(input: SynthesisInput): string {
   const list = input.enriched
     .map((r) => `${(r.name ?? r.input_raw).trim().toUpperCase()}:${r.color_rating ?? "?"}`)
     .join("|");
   const productKey = input.productLabel ? `|p=${input.productLabel.toLowerCase()}` : "";
+  const profileKey = input.profileBlock
+    ? `|prof=${crypto.createHash("sha256").update(input.profileBlock).digest("hex").slice(0, 12)}`
+    : "";
   const versionKey = `|v=${PROMPT_VERSION}`;
-  const hash = crypto.createHash("sha256").update(list + productKey + versionKey).digest("hex").slice(0, 32);
+  const hash = crypto.createHash("sha256").update(list + productKey + profileKey + versionKey).digest("hex").slice(0, 32);
   return `synthesis:${hash}`;
 }
 
@@ -72,9 +80,17 @@ function buildPrompt(input: SynthesisInput): { system: string; user: string } {
   const fmt = (r: SynthesisInput["enriched"][number]) =>
     `- ${r.name ?? r.input_raw} : ${r.primary_function ?? "fonction inconnue"}${r.tags && r.tags.length ? ` [tags: ${r.tags.slice(0, 3).join(", ")}]` : ""}${r.threshold_label ? ` [position: ${r.threshold_label}]` : ""}`;
 
-  const system =
+  const baseSystem =
     "Tu écris la synthèse d'une analyse cosmétique INCI pour un consommateur français. Style : comme un pote bien informé qui prend 30 secondes pour t'expliquer ce qu'il y a dans le produit. Accessible à un lecteur de 15 ans : phrases courtes, vocabulaire simple, jamais enfantin. Tu peux mentionner brièvement ce qu'est un ingrédient (sa famille : 'alcool dénaturé', 'tensioactif', 'huile minérale', 'silicone', 'conservateur', 'actif hydratant'...) et à quoi il sert généralement en cosmétique. C'est de la connaissance produit, pas de l'invention. Tu peux ajouter UN détail intéressant ou utile par ingrédient flaggé pour que ça ne soit pas un listing sec. Tu n'évalues JAMAIS le produit dans son ensemble ('bon', 'mauvais', 'à éviter', 'à acheter'). Tu attires l'attention, tu laisses décider. Pas de marketing ('idéal', 'généreux', 'rassurant', 'agréable'...), pas de description sensorielle (texture, odeur, fini), pas d'emoji, pas de conseil médical. Tu utilises **gras** uniquement pour les noms INCI. "
     + NO_LONG_DASHES_RULE;
+  // Personalisation block: when the user has a saved skin profile, tell the
+  // model to weight its puces and "Bon à savoir" toward what's relevant for
+  // this person (e.g. flag a sulfate for someone with sensible/sèche, mention
+  // niacinamide for someone with rougeurs). It still must not turn this into
+  // medical advice.
+  const system = input.profileBlock
+    ? `${baseSystem}\n\n${input.profileBlock}\n\nQuand un ingrédient est particulièrement pertinent (positif ou négatif) pour ce profil, mentionne-le brièvement dans la puce concernée. Pas de paragraphe dédié.`
+    : baseSystem;
 
   const user = `Rédige la synthèse de l'analyse INCI ci-dessous. Le but : que le lecteur trouve ça intéressant à lire ET concret, pas un résumé sec des chiffres.
 
@@ -82,6 +98,7 @@ STRUCTURE : deux blocs séparés par une ligne vide.
 
 BLOC 1 : paragraphe d'intro (2 à 3 phrases, prose, pas de puce)
 - Phrase 1 : caractérise la formule en t'appuyant sur les 3 premiers ingrédients listés ci-dessous. Donne au lecteur une idée de "à quoi il a affaire" sans juger. Ex : "Cette formule est dominée par l'eau et la glycérine, un duo classique pour rester légère et hydratante." OU "Le produit s'ouvre sur une base d'huile minérale et de silicone, profil typique d'un soin gainant." Pas de mention de note, pas de "bon signal", pas de "rassurant".
+- IMPORTANT anti-doublon : ne cite jamais deux fois le même ingrédient dans cette phrase. Si tu utilises la traduction française d'un INCI (ex : "l'eau" pour Aqua, "le beurre de karité" pour Butyrospermum Parkii), n'ajoute PAS le nom INCI entre parenthèses ou en gras derrière. Choisis UNE seule formulation par ingrédient : soit le mot français courant, soit le nom INCI en **gras**, jamais les deux à la suite.
 - Phrase 2 : le constat chiffré, naturel. Ex : "Sur les ${total} ingrédients identifiés, ${input.counts.Vert ?? 0} sont sans risque connu et ${(input.counts.Jaune ?? 0) + (input.counts.Orange ?? 0) + (input.counts.Rouge ?? 0)} demandent un coup d'œil."
 - Phrase 3 (transition) : courte, vers les puces. Ex : "Voici ce qui mérite ton attention :" ou "Les points à connaître :".
 

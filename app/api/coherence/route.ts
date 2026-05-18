@@ -19,6 +19,7 @@ import type { CoherencePromise, ProductType } from "@/lib/coherence/types";
 import { apiGate } from "@/lib/apiGate";
 import { idempotencyKey, idempotencyLookup, idempotencyStore } from "@/lib/idempotency";
 import { logError } from "@/lib/log";
+import { loadProfileForPrompt } from "@/lib/skin/promptFormat";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -194,7 +195,11 @@ export async function POST(req: NextRequest) {
 
   // ─── Step 4: build the full structured result (engine, deterministic) ────
   // ─── Step 5: write the conclusion sentence (LLM, only sees the verdicts)
-  const conclusion = await generateConclusion(promises, productLabel, user.id);
+  // Load skin profile so the conclusion can flag verdicts that specifically
+  // matter for this user (sensible peau, allergies, etc.). Best-effort: a
+  // missing profile just yields a generic conclusion.
+  const profileBlock = await loadProfileForPrompt(user.id);
+  const conclusion = await generateConclusion(promises, productLabel, user.id, profileBlock);
   const result = buildCoherenceResult({
     description,
     promises,

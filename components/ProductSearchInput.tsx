@@ -3,6 +3,11 @@
 import { useRef, useState } from "react";
 import type { ProductSearchResult, ProductSearchHit } from "@/lib/productSearch/types";
 import type { OpenBeautyFactsCandidate } from "@/lib/productSearch/openBeautyFacts";
+import type { DuckDuckGoCandidate } from "@/lib/productSearch/duckduckgo";
+
+/** "Voir plus" reveals 4 more candidates each click. With 12 candidates max
+ *  on the deep-search server side, that's 3 pages of 4. */
+const DEEP_PAGE_SIZE = 4;
 
 const SOURCE_LABEL: Record<string, string> = {
   cache: "notre base",
@@ -44,9 +49,14 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
   const [searched, setSearched] = useState(false);
   const [deepSearching, setDeepSearching] = useState(false);
   const [deepResult, setDeepResult] = useState<ProductSearchHit | null>(null);
-  /** When the user clicks an INCIDecoder candidate, we POST /api/incidecoder-fetch
-   *  to pull its INCI on demand. `lazyFetching` holds the candidate id while that
-   *  call is in flight so the card can show a spinner / dim itself. */
+  /** Web search candidates returned by /api/product-search when the cascade
+   *  failed to identify a single product. Displayed 4-at-a-time with a
+   *  "Voir plus" pager. INCI is extracted lazily on click via /api/deep-fetch. */
+  const [webCandidates, setWebCandidates] = useState<DuckDuckGoCandidate[]>([]);
+  const [webVisibleCount, setWebVisibleCount] = useState(DEEP_PAGE_SIZE);
+  /** When the user clicks an INCIDecoder OR web candidate, we POST a fetch
+   *  endpoint to pull its INCI on demand. `lazyFetching` holds the id of the
+   *  candidate while that call is in flight so the card can show a spinner. */
   const [lazyFetching, setLazyFetching] = useState<string | null>(null);
   const inFlightRef = useRef<AbortController | null>(null);
 
@@ -56,6 +66,8 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
     setPage(0);
     setSearched(false);
     setDeepResult(null);
+    setWebCandidates([]);
+    setWebVisibleCount(DEEP_PAGE_SIZE);
   }
 
   async function submit(e: React.FormEvent) {
@@ -190,12 +202,17 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
 
   // Last-resort: when the OBF suggest returned nothing, the user can ask for
   // the full cascade (INCIDecoder + DDG + Mistral). This is the original
-  // /api/product-search call.
+  // /api/product-search call. May return either:
+  //  - a single canonical hit (found=true) → show one card and exit
+  //  - a list of web candidates → show 4 with a "Voir plus" pager, lazy-fetch
+  //    INCI on click via /api/deep-fetch
   async function runDeepSearch() {
     const q = query.trim();
     if (q.length < 3) return;
     setDeepSearching(true);
     setError(null);
+    setWebCandidates([]);
+    setWebVisibleCount(DEEP_PAGE_SIZE);
 
     if (inFlightRef.current) inFlightRef.current.abort();
     const ctrl = new AbortController();
@@ -213,18 +230,62 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
         setError(j.error ?? `Erreur ${r.status}`);
         return;
       }
-      const data = (await r.json()) as ProductSearchResult;
-      if (!data.found) {
-        setError(data.message);
+      const data = (await r.json()) as ProductSearchResult & {
+        webCandidates?: DuckDuckGoCandidate[];
+      };
+      if (data.found) {
+        setDeepResult(data);
         return;
       }
-      // Show the result as a candidate card - never auto-analyse.
-      setDeepResult(data);
+      // Cascade missed: show whatever web candidates the server gathered.
+      if (data.webCandidates && data.webCandidates.length > 0) {
+        setWebCandidates(data.webCandidates);
+        return;
+      }
+      setError(data.message);
     } catch (err) {
       if ((err as DOMException)?.name === "AbortError") return;
       setError((err as Error).message ?? "Erreur réseau");
     } finally {
       setDeepSearching(false);
+    }
+  }
+
+  /** Lazy-fetch INCI from a web candidate URL via /api/deep-fetch. The card
+   *  shows a spinner while in flight; on success we hand off to the analyse
+   *  flow exactly like the other candidate types. */
+  async function selectWebCandidate(c: DuckDuckGoCandidate) {
+    setLazyFetching(c.url);
+    setError(null);
+    try {
+      const r = await fetch("/api/deep-fetch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: c.url,
+          label: [c.brand, c.productName].filter(Boolean).join(" ") || query.trim(),
+        }),
+      });
+      if (!r.ok) {
+        const j = (await r.json().catch(() => ({}))) as { error?: string };
+        setError(j.error ?? `Impossible de récupérer ce produit (${r.status})`);
+        return;
+      }
+      const data = (await r.json()) as {
+        ingredientsText: string;
+        sourceUrl: string;
+      };
+      onFound({
+        ingredientsText: data.ingredientsText,
+        brand: c.brand,
+        productName: c.productName ?? c.title,
+        source: "duckduckgo+mistral",
+        sourceUrl: data.sourceUrl ?? c.url,
+      });
+    } catch (err) {
+      setError((err as Error).message ?? "Erreur réseau");
+    } finally {
+      setLazyFetching(null);
     }
   }
 
@@ -333,6 +394,51 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
         </div>
       ) : null}
 
+      {/* Web candidates from the deep search — paginated "Voir plus" */}
+      {webCandidates.length > 0 ? (
+        <div className="mt-5">
+          <p className="mb-3 text-[13px] text-ink-muted">
+            {webCandidates.length} résultat{webCandidates.length > 1 ? "s" : ""} trouvé{webCandidates.length > 1 ? "s" : ""} sur le web — choisis ton produit&nbsp;:
+          </p>
+          <ul className="grid gap-2.5 sm:grid-cols-2">
+            {webCandidates.slice(0, webVisibleCount).map((c) => (
+              <li key={c.url}>
+                <WebCandidateCard
+                  candidate={c}
+                  onSelect={selectWebCandidate}
+                  loading={lazyFetching === c.url}
+                  disabled={lazyFetching !== null && lazyFetching !== c.url}
+                />
+              </li>
+            ))}
+          </ul>
+          {webVisibleCount < webCandidates.length ? (
+            <div className="mt-3 flex justify-center">
+              <button
+                type="button"
+                onClick={() =>
+                  setWebVisibleCount((v) => Math.min(v + DEEP_PAGE_SIZE, webCandidates.length))
+                }
+                className="rounded-full bg-white px-4 py-2 text-[13px] font-medium text-ink ring-1 ring-[#D1D5DB] shadow-sm transition-colors hover:bg-[#F9FAFB]"
+              >
+                Voir plus ({webCandidates.length - webVisibleCount} restant{webCandidates.length - webVisibleCount > 1 ? "s" : ""})
+              </button>
+            </div>
+          ) : null}
+          <p className="mt-4 text-[12px] text-ink-subtle">
+            Tu ne vois pas ton produit ?{" "}
+            <button
+              type="button"
+              onClick={() => onFallbackToManual()}
+              className="font-medium text-rose-600 underline underline-offset-2 hover:no-underline"
+            >
+              Colle la liste INCI manuellement
+            </button>
+            .
+          </p>
+        </div>
+      ) : null}
+
       {deepResult ? (
         <div className="mt-5 rounded-2xl bg-white p-5 ring-1 ring-[#E5E7EB] shadow-sm">
           <p className="mb-3 text-[13px] text-ink-muted">
@@ -368,14 +474,11 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
       ) : null}
 
       {showEmpty ? (
-        <div className="mt-5 rounded-2xl bg-white p-5 ring-1 ring-[#E5E7EB] shadow-sm">
-          <p className="text-[14px] text-ink">
-            Aucun produit trouvé sur Open Beauty Facts pour «&nbsp;
-            <span className="font-medium">{query.trim()}</span>&nbsp;».
-          </p>
-          <p className="mt-2 text-[13px] text-ink-muted">
-            Tu peux lancer une recherche approfondie (web + INCIDecoder), ou
-            coller directement la liste INCI.
+        <div className="mt-5 rounded-2xl bg-white p-4 ring-1 ring-[#E5E7EB] shadow-sm">
+          <p className="text-[13px] text-ink-muted">
+            Aucun produit trouvé pour «&nbsp;
+            <span className="font-medium text-ink">{query.trim()}</span>&nbsp;».
+            Vous pouvez faire une recherche approfondie ou coller la liste INCI.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
@@ -501,6 +604,66 @@ function titleCase(s: string): string {
   return s
     .toLowerCase()
     .replace(/(^|[\s\-/'])(\p{L})/gu, (_, sep, ch) => sep + ch.toUpperCase());
+}
+
+function WebCandidateCard({
+  candidate,
+  onSelect,
+  loading = false,
+  disabled = false,
+}: {
+  candidate: DuckDuckGoCandidate;
+  onSelect: (c: DuckDuckGoCandidate) => void;
+  loading?: boolean;
+  disabled?: boolean;
+}) {
+  const niceBrand = candidate.brand ? titleCase(candidate.brand) : null;
+  const niceName = candidate.productName ? titleCase(candidate.productName) : candidate.title;
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(candidate)}
+      disabled={loading || disabled}
+      className={`group flex w-full items-start gap-3 rounded-2xl bg-white p-3 text-left ring-1 ring-[#E5E7EB] shadow-sm transition-all hover:ring-rose-300 hover:shadow-md disabled:cursor-not-allowed ${
+        disabled && !loading ? "opacity-40" : ""
+      }`}
+    >
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-amber-50 to-amber-100/60 ring-1 ring-black/[0.04]">
+        {loading ? (
+          <svg className="h-5 w-5 animate-spin text-rose-500" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" opacity="0.25" />
+            <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-6 w-6 text-amber-500" aria-hidden>
+            <circle cx="12" cy="12" r="9" />
+            <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" strokeLinecap="round" />
+          </svg>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          {niceBrand ? (
+            <p className="truncate text-[11px] font-semibold uppercase tracking-[0.14em] text-pink-500/80">
+              {niceBrand}
+            </p>
+          ) : null}
+          <span className="shrink-0 inline-flex items-center rounded-full bg-amber-100 text-amber-700 ring-1 ring-amber-200 px-1.5 py-0.5 text-[8.5px] font-semibold tracking-wide">
+            WEB
+          </span>
+        </div>
+        <p className="line-clamp-2 text-[13px] font-medium text-ink leading-snug">
+          {niceName ?? "Produit sans nom"}
+        </p>
+        <p className="mt-0.5 truncate text-[11px] text-ink-subtle">
+          {candidate.domain}
+        </p>
+        <p className="mt-0.5 text-[11px] text-ink-subtle">
+          {loading ? "Récupération de la composition…" : "Cliquer pour récupérer la composition →"}
+        </p>
+      </div>
+    </button>
+  );
 }
 
 export function ProductHero({

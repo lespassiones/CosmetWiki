@@ -68,6 +68,16 @@ export type SkinProfile = {
    *  ReadView when empty. */
   hairConcerns?: HairConcern[];
   allergiesFreeform?: string;
+  /** Free-text values when the user picks "Autre" rather than a preset. The
+   *  prompt formatter joins them with the structured fields, so the LLM
+   *  sees both "Type de peau: Sèche" AND "Type de peau (autre): peau d'enfant
+   *  sensible au climat" if both are filled. */
+  otherSkinType?: string;
+  otherConcerns?: string;
+  otherHair?: string;
+  /** Free-text catch-all for anything the user wants to flag that doesn't
+   *  fit the buckets above. Surfaces in every AI prompt. */
+  otherNotes?: string;
 };
 
 export function readSkinProfile(prefs: Record<string, unknown> | null | undefined): SkinProfile {
@@ -103,14 +113,29 @@ export function readSkinProfile(prefs: Record<string, unknown> | null | undefine
   // Legacy "cheveux" is too vague (secs vs gras) - we drop it silently.
   if (rawConcerns.includes("cuir_chevelu")) hairSet.add("cuir_chevelu_sensible");
 
+  const readShort = (key: keyof SkinProfile, max: number): string | undefined => {
+    const v = r[key];
+    if (typeof v !== "string") return undefined;
+    const trimmed = v.trim();
+    return trimmed.length > 0 ? trimmed.slice(0, max) : undefined;
+  };
+
   return {
     skinType: SKIN_TYPES.includes(r.skinType as SkinType) ? (r.skinType as SkinType) : undefined,
     concerns: cleanedConcerns.length > 0 ? cleanedConcerns : undefined,
     hairConcerns: hairSet.size > 0 ? Array.from(hairSet) : undefined,
-    allergiesFreeform: typeof r.allergiesFreeform === "string" ? r.allergiesFreeform.slice(0, 500) : undefined,
+    allergiesFreeform: readShort("allergiesFreeform", 500),
+    otherSkinType: readShort("otherSkinType", 120),
+    otherConcerns: readShort("otherConcerns", 300),
+    otherHair: readShort("otherHair", 200),
+    otherNotes: readShort("otherNotes", 500),
   };
 }
 
 export function isProfileComplete(p: SkinProfile): boolean {
-  return Boolean(p.skinType && p.concerns && p.concerns.length > 0);
+  // A custom skin type or concern counts as "complete" — the user explicitly
+  // filled the form, just outside our preset buckets.
+  const hasType = Boolean(p.skinType) || Boolean(p.otherSkinType);
+  const hasConcern = (p.concerns && p.concerns.length > 0) || Boolean(p.otherConcerns);
+  return hasType && hasConcern;
 }
