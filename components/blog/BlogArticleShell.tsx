@@ -1,10 +1,15 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { PublicHeader } from "@/components/PublicHeader";
 import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { SITE_URL } from "@/lib/siteUrl";
-import { pickRelatedArticles, type Article } from "@/app/blog/articles";
+import {
+  getArticleDates,
+  pickRelatedArticles,
+  type Article,
+} from "@/app/blog/articles";
 
 export type BlogCategory =
   | "Ingrédients"
@@ -64,7 +69,13 @@ type Props = {
   title: string;
   description: string;
   url: string;
-  published: string;
+  /**
+   * Optionnel : si non fourni, les dates sont récupérées depuis le manifest
+   * `app/blog/articles.ts` via le slug extrait de `url`. C'est le mode
+   * recommandé pour centraliser la maintenance des `dateModified`.
+   */
+  published?: string;
+  modified?: string;
   heroImage: string;
   category: BlogCategory;
   date: string;
@@ -78,6 +89,7 @@ export function BlogArticleShell({
   description,
   url,
   published,
+  modified,
   heroImage,
   category,
   date,
@@ -86,6 +98,13 @@ export function BlogArticleShell({
   children,
 }: Props) {
   const theme = CATEGORY_THEME[category];
+
+  // Récupère les dates depuis le manifest si elles ne sont pas fournies en
+  // prop. Permet de centraliser tous les `dateModified` dans articles.ts.
+  const slug = url.replace(/^\/blog\//, "");
+  const manifestDates = getArticleDates(slug);
+  const publishedDate = published ?? manifestDates.published;
+  const modifiedDate = modified ?? manifestDates.modified;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -96,8 +115,8 @@ export function BlogArticleShell({
         headline: title,
         description,
         inLanguage: "fr",
-        datePublished: published,
-        dateModified: published,
+        datePublished: publishedDate,
+        dateModified: modifiedDate,
         author: { "@type": "Organization", name: "Cosme Check" },
         publisher: {
           "@type": "Organization",
@@ -132,12 +151,14 @@ export function BlogArticleShell({
         <section
           className={`relative h-[420px] w-full overflow-hidden sm:h-[520px] ${theme.heroGradient}`}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={heroImage}
             alt=""
             aria-hidden
-            className="absolute inset-0 h-full w-full object-cover"
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover"
           />
           <div
             aria-hidden
@@ -363,12 +384,12 @@ function RelatedArticleItem({ article }: { article: Article }) {
     <li>
       <Link href={`/blog/${article.id}`} className="group block">
         <div className="relative aspect-[16/10] overflow-hidden rounded-lg bg-black/[0.04]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={article.image}
             alt=""
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-            loading="lazy"
+            fill
+            sizes="240px"
+            className="object-cover transition duration-500 group-hover:scale-[1.04]"
           />
         </div>
         <p className="mt-2 text-[10.5px] font-semibold uppercase tracking-wider text-ink-subtle">

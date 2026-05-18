@@ -17,7 +17,10 @@ import {
   type ProductHit,
 } from "@/lib/supabase";
 
-export const revalidate = 86400;
+// 7 jours — les données ingrédient (description, couleur, fonctions) ne
+// changent quasiment jamais ; la réglementation EU est mise à jour ~1×/an.
+// Plus la fenêtre est large, moins on tape Supabase.
+export const revalidate = 604800;
 
 type Props = {
   params: Promise<{ slug: string }>;

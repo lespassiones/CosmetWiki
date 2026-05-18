@@ -19,7 +19,17 @@ export type Article = {
   title: string;
   excerpt: string;
   category: Category;
+  /** Date d'affichage pour les utilisateurs, ex. « 18 mai 2026 ». */
   date: string;
+  /** Date de publication au format ISO (YYYY-MM-DD) — utilisée par le JSON-LD. */
+  published: string;
+  /**
+   * Date de dernière modification au format ISO. Optionnel : si l'article
+   * n'a pas été modifié, on retombe sur `published` côté JSON-LD. Quand tu
+   * mets à jour le contenu d'un article (correction, ajout de paragraphe,
+   * MAJ chiffres), bumpe cette date ici. C'est l'unique endroit à toucher.
+   */
+  modified?: string;
   readingTime: string;
   image: string;
 };
@@ -32,6 +42,7 @@ export const ARTICLES: Article[] = [
       "Trois actifs stars, trois usages très différents. Le guide simple pour choisir son sérum visage selon son besoin (éclat, hydratation, anti-âge) et les combiner sans erreur.",
     category: "Ingrédients",
     date: "18 mai 2026",
+    published: "2026-05-18",
     readingTime: "5 min",
     image: "/image/blog/serums/hero.webp",
   },
@@ -42,6 +53,7 @@ export const ARTICLES: Article[] = [
       "Boom des masques LED en 2026 : ce que disent vraiment les études, à quoi sert chaque couleur de lumière, et les précautions à connaître avant d'investir.",
     category: "Routines",
     date: "17 mai 2026",
+    published: "2026-05-17",
     readingTime: "4 min",
     image: "/image/blog/led/hero.webp",
   },
@@ -52,6 +64,7 @@ export const ARTICLES: Article[] = [
       "Les perturbateurs endocriniens font peur, souvent pour de bonnes raisons. Mais il faut savoir lesquels surveiller vraiment, et comment les détecter dans tes produits sans tomber dans la psychose.",
     category: "Ingrédients",
     date: "16 mai 2026",
+    published: "2026-05-16",
     readingTime: "7 min",
     image: "/image/blog/perturbateurs-endocriniens/hero.webp",
   },
@@ -62,6 +75,7 @@ export const ARTICLES: Article[] = [
       "Les huiles à lèvres ont explosé sur les réseaux. Ce qui les différencie d'un gloss classique, comment lire l'INCI et les références qui tiennent vraiment leurs promesses.",
     category: "Routines",
     date: "14 mai 2026",
+    published: "2026-05-14",
     readingTime: "3 min",
     image: "/image/blog/lip-oils/hero.webp",
   },
@@ -72,6 +86,7 @@ export const ARTICLES: Article[] = [
       "Hydratation vs nutrition, actifs qui marchent vraiment, et la bonne crème pour chaque type de peau (grasse, sèche, mixte, sensible). Le guide simple pour ne plus se tromper.",
     category: "Routines",
     date: "13 mai 2026",
+    published: "2026-05-13",
     readingTime: "5 min",
     image: "/image/blog/cremes-hydratantes/hero.webp",
   },
@@ -82,6 +97,7 @@ export const ARTICLES: Article[] = [
       "Beauty of Joseon, Round Lab, Anua, COSRX... les SPF coréens explosent en France. Avantages, différences réglementaires avec l'EU et précautions à connaître.",
     category: "Marques",
     date: "11 mai 2026",
+    published: "2026-05-11",
     readingTime: "5 min",
     image: "/image/blog/k-beauty/hero.webp",
   },
@@ -92,10 +108,33 @@ export const ARTICLES: Article[] = [
       "80 % des gens appliquent leur crème solaire de la mauvaise façon, et le SPF devient presque inutile. On passe en revue les 7 erreurs les plus fréquentes et la bonne méthode pour vraiment protéger sa peau.",
     category: "Routines",
     date: "15 avril 2026",
+    published: "2026-04-15",
     readingTime: "5 min",
     image: "/image/landing/SPF.webp",
   },
 ];
+
+/** Récupère un article par son slug. */
+export function getArticleBySlug(slug: string): Article | undefined {
+  return ARTICLES.find((a) => a.id === slug);
+}
+
+/**
+ * Renvoie les dates ISO (published + modified) pour un article, prêtes à
+ * être injectées dans le JSON-LD Article. Fallback : `modified === published`.
+ */
+export function getArticleDates(slug: string): { published: string; modified: string } {
+  const article = getArticleBySlug(slug);
+  if (!article) {
+    // Fallback safe — date actuelle. Ne devrait jamais arriver en pratique.
+    const today = new Date().toISOString().slice(0, 10);
+    return { published: today, modified: today };
+  }
+  return {
+    published: article.published,
+    modified: article.modified ?? article.published,
+  };
+}
 
 /**
  * Sélectionne jusqu'à `limit` articles à recommander en regard d'un article

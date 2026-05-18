@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/siteUrl";
 import { supabaseAnon } from "@/lib/supabase";
+import { CATEGORIES, GLOSSARY_LETTERS } from "@/lib/glossary";
 
 // Cache the sitemap : Next will revalidate at most once per day.
 export const revalidate = 86400;
@@ -8,6 +9,7 @@ export const revalidate = 86400;
 const STATIC_ROUTES: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "/", priority: 1.0, changeFrequency: "daily" },
   { path: "/fonctionnalites", priority: 0.9, changeFrequency: "monthly" },
+  { path: "/glossaire", priority: 0.9, changeFrequency: "weekly" },
   { path: "/comment-ca-marche", priority: 0.6, changeFrequency: "monthly" },
   { path: "/blog", priority: 0.7, changeFrequency: "weekly" },
   { path: "/blog/spf-50-visage-7-erreurs", priority: 0.7, changeFrequency: "monthly" },
@@ -20,6 +22,21 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: Metadata
   { path: "/faq", priority: 0.8, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.5, changeFrequency: "yearly" },
 ];
+
+// 27 pages alphabétiques + pages catégorie : générées à partir des constantes
+// pour qu'un nouvel ajout dans `lib/glossary.ts` apparaisse automatiquement
+// dans le sitemap à la prochaine régénération (24 h max).
+const GLOSSARY_LETTER_ROUTES = GLOSSARY_LETTERS.map((letter) => ({
+  path: `/glossaire/${letter.toLowerCase()}`,
+  priority: 0.7,
+  changeFrequency: "monthly" as const,
+}));
+
+const CATEGORY_ROUTES = CATEGORIES.map((c) => ({
+  path: `/ingredients/${c.slug}`,
+  priority: 0.8,
+  changeFrequency: "monthly" as const,
+}));
 
 async function fetchIngredientSlugs(): Promise<string[]> {
   // Primary path : JSONB RPC returning every active slug in a single row.
@@ -64,12 +81,16 @@ async function fetchIngredientSlugs(): Promise<string[]> {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
-  const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map((r) => ({
+  const mapRoute = (r: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }) => ({
     url: `${SITE_URL}${r.path}`,
     lastModified: now,
     changeFrequency: r.changeFrequency,
     priority: r.priority,
-  }));
+  });
+
+  const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map(mapRoute);
+  const glossaryEntries: MetadataRoute.Sitemap = GLOSSARY_LETTER_ROUTES.map(mapRoute);
+  const categoryEntries: MetadataRoute.Sitemap = CATEGORY_ROUTES.map(mapRoute);
 
   const slugs = await fetchIngredientSlugs();
   const ingredientEntries: MetadataRoute.Sitemap = slugs.map((slug) => ({
@@ -79,5 +100,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticEntries, ...ingredientEntries];
+  return [
+    ...staticEntries,
+    ...glossaryEntries,
+    ...categoryEntries,
+    ...ingredientEntries,
+  ];
 }

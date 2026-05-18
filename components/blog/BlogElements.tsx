@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ReactNode } from "react";
 
 export function ArticleImage({
@@ -12,12 +13,12 @@ export function ArticleImage({
   return (
     <figure className="my-10">
       <div className="relative aspect-[21/9] w-full overflow-hidden rounded-2xl bg-black/[0.04] ring-1 ring-black/[0.04]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={src}
           alt={alt}
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover"
+          fill
+          sizes="(min-width: 1024px) 720px, 100vw"
+          className="object-cover"
         />
       </div>
       {caption ? (

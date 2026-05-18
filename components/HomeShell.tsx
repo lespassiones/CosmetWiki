@@ -1,14 +1,21 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SearchBar } from "./SearchBar";
 import { ProcessingOverlay, randomProcessingTotal } from "./ProcessingOverlay";
 import { AnalyseResultPanel } from "./AnalyseResultPanel";
 import { ProductSearchInput } from "./ProductSearchInput";
-import { BarcodeScannerInput } from "./BarcodeScannerInput";
 import { PENDING_ADD_TO_ROUTINE_KEY } from "./routine/AddProductButton";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
+
+// Lazy-load : le scanner code-barres embarque MediaStream + BarcodeDetector,
+// payload ~80 kb. N'est utile que si l'utilisateur ouvre l'onglet scan.
+const BarcodeScannerInput = dynamic(
+  () => import("./BarcodeScannerInput").then((m) => m.BarcodeScannerInput),
+  { ssr: false },
+);
 
 const STORAGE_KEY = "cw:lastAnalysis";
 const CACHE_VERSION = 3;

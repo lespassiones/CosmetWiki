@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AnalyseItem, AnalyseResponse, Observation } from "@/lib/analyseTypes";
@@ -9,8 +10,14 @@ import { IngredientSpectrum } from "./analyse/IngredientSpectrum";
 import { MobileExpander } from "./analyse/MobileExpander";
 import { IngredientBlob, type BlobCounts } from "./blob/IngredientBlob";
 import { InfoBadge, Tooltip } from "./Tooltip";
-import { PromesseFlowModal } from "./promesse/PromesseFlowModal";
 import { commonNameFor, prettyInci } from "@/lib/inciCommonNames";
+
+// Lazy-load : la modale n'est ouverte que sur clic utilisateur, on évite
+// d'embarquer son JS (et celui de ses dépendances OpenAI/Markdown) au LCP.
+const PromesseFlowModal = dynamic(
+  () => import("./promesse/PromesseFlowModal").then((m) => m.PromesseFlowModal),
+  { ssr: false },
+);
 
 // Delay (ms) after panel mount before each block becomes visible.
 // Synthesis streaming and score animation start at the same time as their

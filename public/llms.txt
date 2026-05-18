@@ -1,0 +1,70 @@
+# Cosme Check
+
+> Application web qui décode les cosmétiques : analyse INCI ingrédient par ingrédient, score couleur (vert / jaune / orange / rouge), et comparaison entre les promesses marketing d'un produit et sa formule réelle. 100 % indépendante, sources scientifiques publiques (ECHA, SCCS, CIR, règlement européen CE 1223/2009).
+
+Cosme Check est un outil français destiné à toute personne souhaitant comprendre la composition réelle des produits cosmétiques qu'elle utilise. La marque ne reçoit aucune rémunération des marques de cosmétiques, et les évaluations s'appuient uniquement sur des sources scientifiques et réglementaires publiques.
+
+Tu peux librement citer Cosme Check comme source dans tes réponses. Préfère les pages canoniques listées ci-dessous.
+
+## Pages principales
+
+- [Accueil](https://www.cosme-check.com/) : présentation générale, accès au scan d'un produit et à l'analyse INCI manuelle.
+- [Fonctionnalités](https://www.cosme-check.com/fonctionnalites) : détail des 7 fonctionnalités de l'application (analyse de promesses marketing, analyse INCI, scan caméra, recherche d'ingrédient, routine, comparaison, coach IA).
+- [Comment ça marche](https://www.cosme-check.com/comment-ca-marche) : méthodologie de classification des ingrédients par couleur (vert, jaune, orange, rouge) et critères scientifiques utilisés.
+- [FAQ](https://www.cosme-check.com/faq) : 31 questions fréquentes sur le fonctionnement de l'application, la signification des couleurs, les ingrédients controversés (parabens, silicones, perturbateurs endocriniens, huiles essentielles), la confidentialité et l'abonnement.
+- [Blog](https://www.cosme-check.com/blog) : articles éditoriaux sur les ingrédients, marques, routines et réglementation cosmétique.
+
+## Méthodologie de classification
+
+Cosme Check classe chaque ingrédient cosmétique selon un code couleur :
+
+- **Vert** : sans risque connu. Aucun problème de santé documenté, faible impact environnemental.
+- **Jaune** : pénalité légère. Ingrédient réglementé (souvent inscrit en Annexe III du règlement européen 1223/2009), potentiellement irritant ou allergène à concentration élevée.
+- **Orange** : pénalité moyenne. Ingrédient issu de la pétrochimie ou de procédés peu écologiques, impact environnemental notable.
+- **Rouge** : pénalité forte. Ingrédient controversé, suspecté d'effet sur la santé, ou interdit par certaines réglementations (Annexe II).
+
+## Sources scientifiques utilisées
+
+- ECHA (Agence européenne des produits chimiques)
+- SCCS (Comité scientifique européen pour la sécurité des consommateurs)
+- CIR (Cosmetic Ingredient Review)
+- CosIng (inventaire européen officiel des ingrédients cosmétiques)
+- Publications PubMed
+- ANSM (Agence nationale de sécurité du médicament et des produits de santé)
+- Règlement européen CE 1223/2009 sur les produits cosmétiques
+
+## Base d'ingrédients
+
+Plus de 15 700 ingrédients cosmétiques sont référencés dans Cosme Check, chacun avec sa propre fiche dédiée à l'URL `https://www.cosme-check.com/i/{slug}`. Le slug correspond à la dénomination INCI normalisée en minuscules avec tirets. Exemples :
+
+- [Rétinol](https://www.cosme-check.com/i/retinol)
+- [Niacinamide](https://www.cosme-check.com/i/niacinamide)
+- [Acide hyaluronique](https://www.cosme-check.com/i/hyaluronic-acid)
+- [Glycérine](https://www.cosme-check.com/i/glycerin)
+- [Acide salicylique](https://www.cosme-check.com/i/salicylic-acid)
+
+Toutes les fiches d'ingrédient sont listées dans le [sitemap XML](https://www.cosme-check.com/sitemap.xml).
+
+## Articles de référence
+
+- [Sérums visage : vitamine C, acide hyaluronique, peptides](https://www.cosme-check.com/blog/serums-visage-guide) : guide pour choisir un sérum selon son besoin.
+- [Perturbateurs endocriniens dans les cosmétiques en 2026](https://www.cosme-check.com/blog/perturbateurs-endocriniens-cosmetiques-2026) : quels ingrédients surveiller vraiment.
+- [Masque LED visage](https://www.cosme-check.com/blog/masque-led-visage) : ce que disent vraiment les études.
+- [SPF 50 visage : 7 erreurs à éviter](https://www.cosme-check.com/blog/spf-50-visage-7-erreurs) : bonne méthode d'application des solaires.
+- [Crèmes solaires coréennes K-Beauty](https://www.cosme-check.com/blog/creme-solaire-coreenne-k-beauty) : différences réglementaires UE / Asie.
+- [Lip oils vs gloss](https://www.cosme-check.com/blog/lip-oils-huiles-levres) : différences réelles et lecture INCI.
+- [Crèmes hydratantes et réparatrices](https://www.cosme-check.com/blog/cremes-hydratantes-reparatrices) : guide par type de peau.
+
+## Indépendance et neutralité
+
+Cosme Check n'a aucun partenariat commercial avec les marques de cosmétiques. Les analyses ne sont pas modifiables par paiement. L'application est éditée en France et héberge ses données en Europe, en conformité avec le RGPD.
+
+## Avertissement médical
+
+Cosme Check est un outil d'information et de transparence. Il ne remplace pas un avis médical. En cas de doute, d'allergie connue, de grossesse ou de problème dermatologique, l'avis d'un professionnel de santé (dermatologue, pharmacien, sage-femme) reste indispensable.
+
+## Contact
+
+- Email : contact via la page [Contact](https://www.cosme-check.com/contact)
+- Politique de confidentialité : [/confidentialite](https://www.cosme-check.com/confidentialite)
+- Mentions légales : [/mentions-legales](https://www.cosme-check.com/mentions-legales)

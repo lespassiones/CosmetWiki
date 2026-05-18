@@ -1,12 +1,19 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { BarcodeScannerInput } from "../BarcodeScannerInput";
 import { ProcessingOverlay, randomProcessingTotal } from "../ProcessingOverlay";
 import { ProductSearchInput } from "../ProductSearchInput";
 import { SearchBar } from "../SearchBar";
 import { BarcodeIcon, CameraIcon, ClipboardIcon, SearchIcon } from "./NavIcons";
+
+// Lazy-load : MediaStream + BarcodeDetector, payload ~80 kb. Pas utile tant
+// que l'utilisateur n'ouvre pas l'onglet « code-barres » dans la feuille scan.
+const BarcodeScannerInput = dynamic(
+  () => import("../BarcodeScannerInput").then((m) => m.BarcodeScannerInput),
+  { ssr: false },
+);
 
 type View = "picker" | "paste" | "search" | "barcode";
 

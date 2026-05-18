@@ -1,17 +1,28 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BackgroundGlow } from "../BackgroundGlow";
 import { CreditsPill } from "../CreditsPill";
-import { CreditsExhaustedModal } from "../CreditsExhaustedModal";
-import { FeedbackPromptModal } from "../FeedbackPromptModal";
 import { ScanSheet } from "./ScanSheet";
 import { MobileBurgerMenu } from "./MobileBurgerMenu";
 import { PremiumCard } from "./PremiumCard";
 import { SidebarProfileMenu } from "./SidebarProfileMenu";
 import { CameraIcon, ClockIcon, DiamondIcon, HomeIcon, LayersIcon, PromisesIcon, SparklesIcon, UserIcon } from "./NavIcons";
+
+// Lazy-load : les modales ne se montrent qu'en réponse à un event (crédits
+// épuisés ou prompt feedback). Inutile d'embarquer leur JS dans le bundle
+// initial qui charge sur chaque page authentifiée.
+const CreditsExhaustedModal = dynamic(
+  () => import("../CreditsExhaustedModal").then((m) => m.CreditsExhaustedModal),
+  { ssr: false },
+);
+const FeedbackPromptModal = dynamic(
+  () => import("../FeedbackPromptModal").then((m) => m.FeedbackPromptModal),
+  { ssr: false },
+);
 
 const NAV_ITEMS = [
   { href: "/", label: "Accueil", icon: HomeIcon },
