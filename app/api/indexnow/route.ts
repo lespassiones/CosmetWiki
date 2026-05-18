@@ -57,8 +57,11 @@ function isAuthorized(req: NextRequest): boolean {
 async function loadAllSitemapUrls(): Promise<string[]> {
   const staticUrls = [
     `${SITE_URL}/`,
+    `${SITE_URL}/fonctionnalites`,
     `${SITE_URL}/comment-ca-marche`,
     `${SITE_URL}/blog`,
+    `${SITE_URL}/blog/spf-50-visage-7-erreurs`,
+    `${SITE_URL}/blog/perturbateurs-endocriniens-cosmetiques-2026`,
     `${SITE_URL}/faq`,
     `${SITE_URL}/contact`,
   ];
