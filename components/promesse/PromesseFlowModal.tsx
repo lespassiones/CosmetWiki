@@ -236,7 +236,11 @@ export function PromesseFlowModal({
                             onClick={(e) => e.stopPropagation()}
                             className="inline-block mt-1.5 text-[11px] text-rose-500 hover:underline truncate max-w-full"
                           >
-                            {prettyHost(c.sourceUrl)} ↗
+                            <span aria-hidden className="inline-block blur-[4px] select-none align-middle">
+                              {prettyHost(c.sourceUrl)}
+                            </span>
+                            <span className="sr-only">{prettyHost(c.sourceUrl)}</span>
+                            {" "}↗
                           </a>
                         </div>
                         <div className="shrink-0 text-right">

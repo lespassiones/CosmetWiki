@@ -87,15 +87,18 @@ export function MarketingIndexCard({
               <span className="font-semibold">
                 {unsupportedCount} promesse{unsupportedCount > 1 ? "s" : ""}
               </span>{" "}
-              sur {total} n&apos;{unsupportedCount > 1 ? "ont " : "a "}pas de
-              support clair dans la formule. {unsupportedCount > 1 ? "Elles peuvent" : "Elle peut"} être :
+              sur {total} n&apos;{unsupportedCount > 1 ? "ont " : "a "}pas
+              d&apos;ingrédient clair dans la formule pour {unsupportedCount > 1 ? "les" : "la"} soutenir.
+              Cela ne veut pas forcément dire que c&apos;est faux —
+              {unsupportedCount > 1 ? " elles peuvent" : " elle peut"} simplement&nbsp;:
               <ul className="mt-2 space-y-1 list-none">
                 {metrics.marketingCount > 0 && (
                   <li className="flex gap-2">
                     <span aria-hidden className="text-orange-500 shrink-0">•</span>
                     <span>
-                      <b>marketing</b> : seul un effet visuel ou sensoriel est apporté,
-                      pas d&apos;action biologique documentée.
+                      être <b>purement marketing</b> : la promesse parle d&apos;un effet
+                      ressenti (texture, parfum, sensation) plutôt que d&apos;un effet
+                      biologique apporté par un ingrédient précis.
                     </span>
                   </li>
                 )}
@@ -103,8 +106,10 @@ export function MarketingIndexCard({
                   <li className="flex gap-2">
                     <span aria-hidden className="text-rose-500 shrink-0">•</span>
                     <span>
-                      <b>non démontrée</b> : aucun actif documenté dans la formule
-                      pour soutenir la promesse.
+                      être <b>non démontrée</b> par la formule : aucun ingrédient
+                      connu ne vient prouver cet effet ici. La promesse peut quand même
+                      découler indirectement d&apos;une autre (par exemple, un effet
+                      &laquo;&nbsp;éclat&nbsp;&raquo; qui vient d&apos;une bonne hydratation).
                     </span>
                   </li>
                 )}
@@ -112,9 +117,10 @@ export function MarketingIndexCard({
                   <li className="flex gap-2">
                     <span aria-hidden className="text-rose-700 shrink-0">•</span>
                     <span>
-                      <b>contredite</b> : la formule contient un ingrédient que la
-                      promesse dit absent (ex&nbsp;: &laquo;&nbsp;sans sulfate&nbsp;&raquo;
-                      alors qu&apos;un sulfate est dans la liste).
+                      être <b>contredite</b> par la formule : un ingrédient que la
+                      promesse dit absent est en fait dans la liste (ex&nbsp;:
+                      &laquo;&nbsp;sans sulfate&nbsp;&raquo; alors qu&apos;un sulfate
+                      y figure).
                     </span>
                   </li>
                 )}

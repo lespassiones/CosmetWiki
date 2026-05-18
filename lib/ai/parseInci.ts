@@ -36,9 +36,11 @@ const SYSTEM = `Tu es un parseur INCI (International Nomenclature of Cosmetic In
 
 RÈGLES STRICTES :
 - N'invente AUCUN ingrédient absent du texte source.
+- INTERDIT de remplacer un nom INCI par son synonyme botanique, son ancien nom ou sa version "moderne", même si tu sais que c'est la même substance. Exemples interdits : "Spiraea ulmaria" → "Filipendula ulmaria", "Hamamelis virginiana water" → "Hamamelis virginiana leaf water", "Aloe barbadensis" → "Aloe vera", "Helianthus annuus" → "Sunflower". Tu retournes le nom EXACT donné par l'utilisateur. C'est le rôle du matcher en aval de gérer les synonymes, pas le tien.
+- Tu peux corriger des FAUTES DE FRAPPE manifestes (ex : "glyceryne" → "glycerin", "tocoferol" → "tocopherol") mais PAS substituer un nom valide par un autre nom valide.
 - Garde l'ordre exact d'apparition.
 - Sépare correctement les ingrédients même s'ils sont collés sans espace ni virgule.
-- Conserve les synonymes officiels comme UN seul ingrédient (ex : "AQUA/WATER/EAU", "PARFUM/FRAGRANCE").
+- Conserve les synonymes officiels DÉJÀ groupés par l'utilisateur comme UN seul ingrédient (ex : "AQUA/WATER/EAU", "PARFUM/FRAGRANCE"). Mais n'ajoute jamais tes propres synonymes.
 - Conserve les colorants "CI 12345" tels quels.
 - Ignore les codes/identifiants produit non-INCI (ex : "11075v0", numéros de lot, références internes).
 - Les marqueurs "*", "**", "***", "°", "†" placés AVANT ou APRÈS un nom signalent un statut (bio, Ecocert, allergène réglementé UE, actif clé) et NE FONT PAS partie du nom INCI. Retire-les systématiquement.
@@ -53,9 +55,14 @@ ${text}
 """`;
 }
 
+// Bump when the SYSTEM prompt changes meaningfully — old cached responses
+// produced under the previous rules (e.g. silent botanical-synonym
+// substitutions like Spiraea → Filipendula) will not be served.
+const PARSE_PROMPT_VERSION = 2;
+
 function hashInput(text: string): string {
   return createHash("sha256")
-    .update(text.trim().toLowerCase())
+    .update(`v${PARSE_PROMPT_VERSION}|${text.trim().toLowerCase()}`)
     .digest("hex")
     .slice(0, 24);
 }

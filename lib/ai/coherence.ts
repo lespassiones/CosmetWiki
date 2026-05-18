@@ -830,7 +830,12 @@ NE CITE QUE LES VERDICTS QUE JE TE DONNE. N'invente jamais d'ingrédient ni de v
 
 ${NO_LONG_DASHES_RULE}`;
   const system = profileBlock
-    ? `${baseSystem}\n\n${profileBlock}\n\nQuand l'effet attendu peut affecter spécifiquement ce profil (peau sensible / sèche, allergie connue à un ingrédient présent...), glisse-le brièvement dans la phrase. Pas de paragraphe en plus.`
+    ? `${baseSystem}\n\n${profileBlock}\n\nIMPORTANT — Personnalisation :
+1. Repère les promesses NON TENUES, PARTIELLES ou CONTREDITES qui correspondent DIRECTEMENT à une préoccupation du profil ci-dessus (ex : profil "cheveux secs, longueur affectée" + promesse "hydratation" non tenue, OU profil "rougeurs / sensibilité" + promesse "apaisant" non démontrée, OU une allergie listée présente dans la formule).
+2. Si tu en trouves une, AJOUTE EN FIN DE CONCLUSION une phrase courte de rappel doux à la 2e personne : "Sachant que tu cherches X, cette promesse de Y n'est pas vraiment tenue ici." (adapte au profil et au verdict).
+3. Reste factuel : tu signales, tu ne juges pas le produit en bloc. PAS de "à éviter", "déconseillé", "pas pour toi" — préfère "ne répond pas à ton besoin de Y", "ne couvre pas ta préoccupation Z".
+4. Si AUCUNE promesse négative ne touche le profil, n'ajoute RIEN. Ne fabrique pas un lien forcé.
+5. Si une promesse TENUE répond exactement à une préoccupation, tu peux le souligner en positif au lieu : "Bon point pour toi : la promesse de Y est tenue, ce qui correspond à ce que tu cherches."`
     : baseSystem;
 
   const user = `${productLabel ? `Produit : ${productLabel}\n\n` : ""}Verdicts (déjà calculés mécaniquement) :
