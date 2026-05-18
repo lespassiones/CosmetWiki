@@ -473,12 +473,12 @@ function FeatureSection({ section }: { section: Section }) {
   } = section;
   return (
     <section id={id} className="scroll-mt-28">
-      <div className="flex items-center gap-3">
-        <span className="font-mono text-[12px] font-semibold tabular-nums text-[#F43F5E]">
+      <div className="flex items-center gap-4">
+        <span className="font-mono text-[36px] font-semibold leading-none tabular-nums text-[#F43F5E] sm:text-[44px]">
           {number}
         </span>
-        <span aria-hidden className="h-px w-10 bg-rose-200" />
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#F43F5E]">
+        <span aria-hidden className="h-px w-12 bg-rose-300" />
+        <p className="text-[14px] font-semibold uppercase tracking-[0.2em] text-[#F43F5E] sm:text-[15px]">
           {eyebrow}
         </p>
       </div>
