@@ -1,12 +1,21 @@
 // DuckDuckGo HTML search fallback : we hit html.duckduckgo.com, parse the
-// result links, keep only domains we know we can fetch (others 403 us),
-// then run Mistral extraction on the first fetchable page.
+// result links, then run Mistral extraction on the candidate pages.
+//
+// No domain whitelist: any http(s) result the user could have clicked on in a
+// browser is fair game. The garde-fous are technical, not editorial — strict
+// timeout + content-type check in `fetchPageHtml`, and we never store or
+// expose raw HTML, only the INCI string Mistral extracts.
 
 import { fetchPageHtml } from "./httpFetch";
 import { extractInciFromHtml } from "./extractWithMistral";
 import { matchesQuery } from "./relevance";
 
 const SEARCH_URL = "https://html.duckduckgo.com/html/?q=";
+
+// Max candidates we'll deep-fetch automatically inside the cascade before
+// giving up. Each adds ~1 HTTP fetch + 1 Mistral call, but most niche brand
+// pages take 1-3 tries to land on the right product page.
+const CASCADE_AUTO_FETCH_LIMIT = 5;
 
 /** A web search candidate without its INCI list. The INCI is fetched lazily
  *  (via /api/deep-fetch) when the user clicks the card, the same pattern as
@@ -18,31 +27,6 @@ export type DuckDuckGoCandidate = {
   brand: string | null;
   productName: string | null;
 };
-
-// Domains that historically respond to a browser-style fetch and tend to
-// expose a full INCI list. Bot-blocked domains are skipped.
-const FETCHABLE_DOMAINS = [
-  "incidecoder.com",
-  "cosdna.com",
-  "m.cosdna.com",
-  "laroche-posay.fr",
-  "laroche-posay.com",
-  "loreal-paris.fr",
-  "loreal-paris.com",
-  "vichy.fr",
-  "vichy.com",
-  "avene.fr",
-  "avene.com",
-  "nivea.fr",
-  "nivea.com",
-  "yves-rocher.fr",
-  "garnier.fr",
-  "the-ordinary.com",
-  "cerave.fr",
-  "cerave.com",
-  "bioderma.fr",
-  "bioderma.com",
-];
 
 const RESULT_LINK_RE =
   /<a[^>]+class=["'][^"']*result__a[^"']*["'][^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/g;
@@ -57,10 +41,12 @@ function decodeUddg(href: string): string {
   }
 }
 
-function isFetchable(url: string): boolean {
+/** Accept any http(s) URL. The only filter is the URL parser rejecting
+ *  malformed strings and non-web schemes (file:, data:, javascript:). */
+function isWebUrl(url: string): boolean {
   try {
-    const host = new URL(url).hostname.toLowerCase();
-    return FETCHABLE_DOMAINS.some((d) => host === d || host.endsWith("." + d));
+    const proto = new URL(url).protocol;
+    return proto === "https:" || proto === "http:";
   } catch {
     return false;
   }
@@ -72,10 +58,11 @@ export async function searchDuckDuckGo(query: string): Promise<{
   ingredientsText: string;
   sourceUrl: string;
 } | null> {
-  // Legacy "find one and extract INCI" path used by the parallel cascade in
-  // `searchProductCascade`. We try the top-3 candidates and return the first
-  // one whose INCI we manage to extract.
-  const candidates = await collectDuckDuckGoCandidates(query, 3);
+  // "Find one and extract INCI" path used by the parallel cascade in
+  // `searchProductCascade`. We walk the top candidates and return the first
+  // one whose INCI we manage to extract — including small/indie brand sites
+  // now that the domain whitelist is gone.
+  const candidates = await collectDuckDuckGoCandidates(query, CASCADE_AUTO_FETCH_LIMIT);
   for (const c of candidates) {
     const pageHtml = await fetchPageHtml(c.url);
     if (!pageHtml) continue;
@@ -102,7 +89,10 @@ export async function collectDuckDuckGoCandidates(
   query: string,
   limit: number,
 ): Promise<DuckDuckGoCandidate[]> {
-  const searchQuery = `${query} INCI ingredients composition`;
+  // Query enrichment: bias DDG towards pages that expose a full ingredient
+  // list (FR + EN keywords). Without this, generic product pages and
+  // marketplaces rank above brand sites that actually publish INCI.
+  const searchQuery = `${query} INCI ingrédients composition ingredients`;
   const html = await fetchPageHtml(SEARCH_URL + encodeURIComponent(searchQuery));
   if (!html) return [];
 
@@ -114,12 +104,16 @@ export async function collectDuckDuckGoCandidates(
   while ((match = RESULT_LINK_RE.exec(html)) !== null) {
     const real = decodeUddg(match[1]!);
     const titleHtml = match[2] ?? "";
-    if (!isFetchable(real)) continue;
-    if (!matchesQuery(query, urlSearchableText(real))) continue;
+    // Sanity check only: must be a real http(s) URL. No domain whitelist.
+    if (!isWebUrl(real)) continue;
+    // Relevance check: title/URL must mention enough of the query to be
+    // plausibly the right product. This is NOT a brand filter — it just
+    // weeds out obvious mismatches like ads / unrelated pages.
+    const title = stripHtml(titleHtml).slice(0, 160);
+    if (!matchesQuery(query, `${title} ${urlSearchableText(real)}`)) continue;
     if (seen.has(real)) continue;
     seen.add(real);
 
-    const title = stripHtml(titleHtml).slice(0, 160);
     const domain = safeDomain(real);
     const { brand, productName } = guessBrandAndName(title, domain, query);
     out.push({ url: real, title, domain, brand, productName });

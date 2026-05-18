@@ -36,6 +36,8 @@ type Cached = {
   result: AnalyseResponse;
   ts: number;
   productSource?: ProductSource | null;
+  analysisId?: string | null;
+  addedToRoutine?: boolean;
 };
 
 function readCache(): Cached | null {
@@ -54,6 +56,8 @@ function writeCache(
   text: string,
   result: AnalyseResponse,
   productSource: ProductSource | null,
+  analysisId: string | null,
+  addedToRoutine: boolean,
 ) {
   if (typeof window === "undefined") return;
   try {
@@ -65,6 +69,8 @@ function writeCache(
         result,
         ts: Date.now(),
         productSource,
+        analysisId,
+        addedToRoutine,
       } satisfies Cached),
     );
   } catch {
@@ -97,6 +103,8 @@ export function HomeShell({
   const [productSource, setProductSource] = useState<ProductSource | null>(
     null,
   );
+  const [analysisId, setAnalysisId] = useState<string | null>(null);
+  const [addedToRoutine, setAddedToRoutine] = useState(false);
   const [processing, setProcessing] = useState<{ active: boolean; budget: number }>({
     active: false,
     budget: 0,
@@ -139,6 +147,8 @@ export function HomeShell({
         setResult(cached.result);
         setOriginalText(cached.text);
         setProductSource(cached.productSource ?? null);
+        setAnalysisId(cached.analysisId ?? null);
+        setAddedToRoutine(cached.addedToRoutine ?? false);
         setHydrated(true);
         return;
       }
@@ -154,6 +164,8 @@ export function HomeShell({
       setResult(cached.result);
       setOriginalText(cached.text);
       setProductSource(cached.productSource ?? null);
+      setAnalysisId(cached.analysisId ?? null);
+      setAddedToRoutine(cached.addedToRoutine ?? false);
     }
     setHydrated(true);
     // We depend on `initialInci` so that staying on `/` while the search-param
@@ -219,7 +231,12 @@ export function HomeShell({
         setProcessing({ active: false, budget: 0 });
         return;
       }
-      const data = (await r.json()) as AnalyseResponse;
+      const data = (await r.json()) as AnalyseResponse & {
+        analysisId?: string | null;
+        addedToRoutine?: boolean;
+      };
+      const savedId = typeof data.analysisId === "string" ? data.analysisId : null;
+      const addedFlag = data.addedToRoutine === true;
       const elapsed = Date.now() - startedAt;
       if (elapsed < budget) {
         await new Promise((res) => setTimeout(res, budget - elapsed));
@@ -227,7 +244,9 @@ export function HomeShell({
       setProductSource(src);
       setResult(data);
       setOriginalText(trimmed);
-      writeCache(trimmed, data, src);
+      setAnalysisId(savedId);
+      setAddedToRoutine(addedFlag);
+      writeCache(trimmed, data, src, savedId, addedFlag);
     } catch (err) {
       if ((err as DOMException).name === "AbortError") return;
       setError((err as Error).message ?? "Erreur réseau");
@@ -252,6 +271,8 @@ export function HomeShell({
     setResult(null);
     setOriginalText("");
     setProductSource(null);
+    setAnalysisId(null);
+    setAddedToRoutine(false);
     setError(null);
   }
 
@@ -345,6 +366,8 @@ export function HomeShell({
                 sourceUrl: productSource.sourceUrl,
                 brand: productSource.brand,
               } : null}
+              analysisId={analysisId}
+              alreadyInRoutine={addedToRoutine}
               brand={productSource?.brand ?? null}
               productType={(productSource as { productType?: string | null } | null)?.productType ?? null}
               onResetHome={reset}

@@ -10,6 +10,10 @@
  * Light rate-limit (per-IP) since this triggers a Mistral call and a remote
  * HTTP fetch each time. No credits consumed: the credit was already taken
  * when the user pressed "Recherche approfondie" on the prior step.
+ *
+ * No domain whitelist: any http(s) URL is accepted. Garde-fous are technical
+ * (8 s timeout, content-type check, never echoing raw HTML back), not
+ * editorial — small/indie brands need to work too.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { fetchPageHtml } from "@/lib/productSearch/httpFetch";
@@ -19,33 +23,11 @@ import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const FETCHABLE_DOMAINS = [
-  "incidecoder.com",
-  "cosdna.com",
-  "m.cosdna.com",
-  "laroche-posay.fr",
-  "laroche-posay.com",
-  "loreal-paris.fr",
-  "loreal-paris.com",
-  "vichy.fr",
-  "vichy.com",
-  "avene.fr",
-  "avene.com",
-  "nivea.fr",
-  "nivea.com",
-  "yves-rocher.fr",
-  "garnier.fr",
-  "the-ordinary.com",
-  "cerave.fr",
-  "cerave.com",
-  "bioderma.fr",
-  "bioderma.com",
-];
-
-function isFetchable(url: string): boolean {
+/** Sanity check only: must be a real http(s) URL. */
+function isWebUrl(url: string): boolean {
   try {
-    const host = new URL(url).hostname.toLowerCase();
-    return FETCHABLE_DOMAINS.some((d) => host === d || host.endsWith("." + d));
+    const proto = new URL(url).protocol;
+    return proto === "https:" || proto === "http:";
   } catch {
     return false;
   }
@@ -79,9 +61,9 @@ export async function POST(req: NextRequest) {
   }
 
   const url = (body.url ?? "").trim();
-  if (!url || !isFetchable(url)) {
+  if (!url || !isWebUrl(url)) {
     return NextResponse.json(
-      { error: "URL non supportée pour l'extraction automatique." },
+      { error: "URL invalide." },
       { status: 400 },
     );
   }

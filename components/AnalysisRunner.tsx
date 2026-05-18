@@ -406,6 +406,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
             brand: productSource.brand,
           } : null}
           analysisId={analysisId}
+          alreadyInRoutine={addedToRoutine}
           brand={productSource?.brand ?? null}
           productType={productSource?.productType ?? null}
           onResetHome={resetHome}

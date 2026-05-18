@@ -6,7 +6,6 @@ import { supabaseServer } from "@/lib/supabase";
 import { AnalyseResultPanel } from "@/components/AnalyseResultPanel";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { HistoryItemActions } from "@/components/history/HistoryItemActions";
-import { AddToRoutineButton } from "@/components/routine/AddToRoutineButton";
 
 export const metadata = { title: "Analyse · Cosme Check" };
 export const dynamic = "force-dynamic";
@@ -99,7 +98,6 @@ export default async function HistoryDetailPage({
           Retour
         </Link>
         <div className="flex items-center gap-2">
-          <AddToRoutineButton analysisId={data.id} alreadyInRoutine={inRoutine} />
           <HistoryItemActions id={data.id} currentName={data.name ?? displayName} />
         </div>
       </div>
@@ -113,6 +111,7 @@ export default async function HistoryDetailPage({
         productType={(data as { product_type?: string | null }).product_type ?? null}
         existingCoherenceId={existingCoherenceId}
         autoOpenPromesse={sp.promesse === "auto"}
+        alreadyInRoutine={inRoutine}
         breadcrumb={null}
       />
 

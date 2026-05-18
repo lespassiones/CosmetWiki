@@ -11,6 +11,7 @@ import { MobileExpander } from "./analyse/MobileExpander";
 import { IngredientBlob, type BlobCounts } from "./blob/IngredientBlob";
 import { InfoBadge, Tooltip } from "./Tooltip";
 import { commonNameFor, prettyInci } from "@/lib/inciCommonNames";
+import { AddToRoutineButton } from "./routine/AddToRoutineButton";
 
 // Lazy-load : la modale n'est ouverte que sur clic utilisateur, on évite
 // d'embarquer son JS (et celui de ses dépendances OpenAI/Markdown) au LCP.
@@ -41,6 +42,7 @@ export function AnalyseResultPanel({
   productType = null,
   existingCoherenceId = null,
   autoOpenPromesse = false,
+  alreadyInRoutine = false,
   onResetHome,
   breadcrumb,
 }: {
@@ -79,6 +81,12 @@ export function AnalyseResultPanel({
    *  Ignored when existingCoherenceId is set (the parent route has already
    *  redirected to the existing result). */
   autoOpenPromesse?: boolean;
+  /**
+   * Whether this analyse is already in the user's routine. Used to pre-fill
+   * the "Ajouter à ma routine" button state so it shows "Dans ta routine"
+   * without an extra click.
+   */
+  alreadyInRoutine?: boolean;
   /**
    * Optional handler fired when the user clicks "Accueil" in the default
    * breadcrumb. Used by HomeShell to clear cached result state. Ignored
@@ -130,6 +138,8 @@ export function AnalyseResultPanel({
         existingCoherenceId={existingCoherenceId}
         onShare={() => shareReport(originalText)}
         breadcrumb={trail}
+        analysisId={analysisId}
+        alreadyInRoutine={alreadyInRoutine}
       />
       {!existingCoherenceId && (
         <PromesseFlowModal
@@ -221,6 +231,8 @@ function TitleBar({
   existingCoherenceId,
   onShare,
   breadcrumb,
+  analysisId,
+  alreadyInRoutine,
 }: {
   title: string;
   productSource: { source: string; sourceUrl: string | null; brand: string | null } | null;
@@ -228,6 +240,8 @@ function TitleBar({
   existingCoherenceId: string | null;
   onShare: () => void;
   breadcrumb: BreadcrumbItem[] | null;
+  analysisId: string | null;
+  alreadyInRoutine: boolean;
 }) {
   const brand = productSource?.brand ?? null;
   // Standard convention: last item is the current location (not clickable).
@@ -302,6 +316,9 @@ function TitleBar({
             <PromesseIcon className="h-3.5 w-3.5" /> Analyser la promesse
           </button>
         )}
+        {analysisId ? (
+          <AddToRoutineButton analysisId={analysisId} alreadyInRoutine={alreadyInRoutine} />
+        ) : null}
         <ToolbarButton onClick={onShare}>
           <ShareIcon className="h-3.5 w-3.5" /> Partager
         </ToolbarButton>
