@@ -33,7 +33,7 @@ export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Pr
         );
       }
     } catch {
-      // not JSON or no credits payload — fall through, caller handles
+      // not JSON or no credits payload - fall through, caller handles
     }
   }
 

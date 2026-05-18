@@ -13,7 +13,7 @@ type Insights = {
 /**
  * Renders the AI-generated comparison narrative (two portraits, what they
  * share, how to choose). Fetched client-side so the rest of the page can
- * paint immediately — the heavy hero (blobs + deterministic info) is already
+ * paint immediately - the heavy hero (blobs + deterministic info) is already
  * useful without these.
  *
  * Cached server-side per (a, b) pair, so subsequent visits are instant.
@@ -28,10 +28,10 @@ export function CompareInsights({
 }: {
   aId: string;
   bId: string;
-  /** Full names — used only in the loading skeleton + a11y. */
+  /** Full names - used only in the loading skeleton + a11y. */
   nameA: string;
   nameB: string;
-  /** Compact names — used as card titles AND as the substring we highlight
+  /** Compact names - used as card titles AND as the substring we highlight
    *  inside the narrative. Must match exactly what was sent to the LLM
    *  (api/compare/insights computes the same value with shortenProductName). */
   shortNameA: string;
@@ -84,7 +84,7 @@ export function CompareInsights({
   }, [data, nameA, nameB, shortNameA, shortNameB]);
 
   if (error) {
-    return null; // soft-fail — the rest of the page still works.
+    return null; // soft-fail - the rest of the page still works.
   }
 
   if (!cleaned) {
@@ -106,7 +106,7 @@ export function CompareInsights({
 
   return (
     <>
-      {/* Portraits — one card per product, no winner badge. */}
+      {/* Portraits - one card per product, no winner badge. */}
       <section className="mb-4">
         <h2 className="text-[15px] font-semibold mb-3 px-1">Portrait des deux produits</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -135,7 +135,7 @@ export function CompareInsights({
         </p>
       </section>
 
-      {/* How to choose — no verdict, just guidance */}
+      {/* How to choose - no verdict, just guidance */}
       <section className={`${GLASS_CARD} p-5 mb-4 bg-gradient-to-br from-sky-50/80 to-white/70`}>
         <h3 className="text-[13px] font-semibold uppercase tracking-wide text-sky-700 mb-2">
           Comment choisir ?
@@ -192,7 +192,7 @@ function PortraitSkeleton({ name }: { name: string }) {
 
 // ─── Rendering ────────────────────────────────────────────────────────────
 //
-// We DON'T colour-highlight ingredients here anymore — the user wanted the
+// We DON'T colour-highlight ingredients here anymore - the user wanted the
 // emphasis on product names instead. INCI tokens (still emitted by the LLM
 // as `**Name**`) stay rendered in plain bold so the eye lands on the product
 // references first.
@@ -206,7 +206,7 @@ function PortraitSkeleton({ name }: { name: string }) {
  * mentions the LLM may slip into the copy.
  *
  * The `forceTone` parameter biases the colour of the *first* mention in a
- * portrait — useful so the A-portrait's own name pops in blue even if the
+ * portrait - useful so the A-portrait's own name pops in blue even if the
  * regex would otherwise paint it neutral.
  */
 function renderWithProductHighlights(
@@ -309,7 +309,7 @@ function NameHighlight({
 // ─── Defensive A/B rewrite ────────────────────────────────────────────────
 //
 // The prompt strictly forbids "produit A", "A pourrait...", etc. but LLMs
-// occasionally slip — this turns any remaining occurrence into the actual
+// occasionally slip - this turns any remaining occurrence into the actual
 // product name. Patterns are word-bounded so we don't mangle real words.
 
 function rewriteAB(text: string, nameA: string, nameB: string): string {

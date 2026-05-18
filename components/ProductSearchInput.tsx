@@ -218,7 +218,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
         setError(data.message);
         return;
       }
-      // Show the result as a candidate card — never auto-analyse.
+      // Show the result as a candidate card - never auto-analyse.
       setDeepResult(data);
     } catch (err) {
       if ((err as DOMException)?.name === "AbortError") return;
@@ -287,11 +287,11 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
         <div className="mt-5">
           <div className="mb-3 flex items-baseline justify-between gap-3">
             <p className="text-[13px] text-ink-muted">
-              {candidates.length} produit{candidates.length > 1 ? "s" : ""} trouvé{candidates.length > 1 ? "s" : ""} — choisis le tien&nbsp;:
+              {candidates.length} produit{candidates.length > 1 ? "s" : ""} trouvé{candidates.length > 1 ? "s" : ""} - choisis le tien&nbsp;:
             </p>
             <span className="text-[11px] text-ink-subtle/70">défile pour voir plus</span>
           </div>
-          {/* Scrollable list — keeps the search input + footer in view while the
+          {/* Scrollable list - keeps the search input + footer in view while the
               user browses 30+ candidates. The pr-1 gives the scrollbar room
               without pushing cards under it. */}
           <ul className="grid gap-2.5 sm:grid-cols-2 max-h-[58vh] overflow-y-auto overscroll-contain pr-1 -mr-1">

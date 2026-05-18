@@ -44,7 +44,7 @@ function looksLikeAliasContent(inner: string): boolean {
   // Reject anything that looks like a sentence fragment (long sentences are
   // handled by the > 60 chars pattern below anyway).
   if (/[.;:!?]/.test(trimmed)) return false;
-  // Reject batch/CI codes — those are kept as part of the principal name.
+  // Reject batch/CI codes - those are kept as part of the principal name.
   if (/^CI\s*\d/i.test(trimmed)) return false;
   if (/^\d/.test(trimmed)) return false;
   // Accept tokens or token-lists separated by "/", "," or whitespace.
@@ -61,7 +61,7 @@ export function parseInciList(text: string): ParsedToken[] {
   for (const re of NOISE_PATTERNS) {
     work = work.replace(re, " ");
   }
-  // Drop parenthesized aliases like "(Water / Eau)" right after a token —
+  // Drop parenthesized aliases like "(Water / Eau)" right after a token -
   // we keep only the principal INCI name. This avoids "Aqua, Water, Eau"
   // being parsed as 3 separate ingredients.
   work = work.replace(PAREN_ALIAS_RE, (_match, inner: string) =>
@@ -73,8 +73,8 @@ export function parseInciList(text: string): ParsedToken[] {
   // Remove asterisks (mention notes)
   work = work.replace(/\*+/g, " ");
   // Some lists use periods as separators instead of commas (ex: "AQUA. GLYCERIN.
-  // PROPANEDIOL."). We detect this pattern — period preceded by a letter or
-  // closing paren and followed by whitespace + an uppercase letter — and turn
+  // PROPANEDIOL."). We detect this pattern - period preceded by a letter or
+  // closing paren and followed by whitespace + an uppercase letter - and turn
   // it into a comma. Intra-name periods like "F.I.L. 12345" or "2.5%" are NOT
   // matched (no whitespace, or not followed by a letter).
   work = work.replace(/(?<=[A-Za-z)])\.\s+(?=[A-Z])/g, ", ");
@@ -83,10 +83,10 @@ export function parseInciList(text: string): ParsedToken[] {
   // Split synonyms separated by " / " (spaces on both sides) into separate tokens.
   // ex : "AQUA / WATER" → "AQUA, WATER"
   // Do NOT split "CAPRYLIC/CAPRIC TRIGLYCERIDE" or "LEUCONOSTOC/RADISH ROOT FERMENT
-  // FILTRATE" — those are compound INCI names where the slash has no surrounding space.
+  // FILTRATE" - those are compound INCI names where the slash has no surrounding space.
   work = work.replace(/\s+\/\s+/g, ", ");
   // Replace hyphens used as separators by commas. Catch all asymmetric spacing
-  // patterns: "X - Y", "X -Y", "X- Y" (but NOT "X-Y", which is too risky — many
+  // patterns: "X - Y", "X -Y", "X- Y" (but NOT "X-Y", which is too risky - many
   // INCI names have intra-name hyphens like "PEG-100 Stearate" or "C12-15 Alkyl
   // Benzoate"). Bullets/middots can also be used as separators in pasted lists.
   work = work.replace(/(?<=\w)(?:\s+-+\s*|\s*-+\s+)(?=\w)/g, ", ");

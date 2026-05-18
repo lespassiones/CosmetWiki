@@ -51,6 +51,6 @@ export function logError(
       })
       .then(() => undefined);
   } catch {
-    // ignore — logging must never break the request
+    // ignore - logging must never break the request
   }
 }

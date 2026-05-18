@@ -31,7 +31,7 @@ export function ContactForm() {
             email: String(fd.get("email") ?? ""),
             subject: String(fd.get("subject") ?? ""),
             message: String(fd.get("message") ?? ""),
-            // Honey-pot — bots fill this hidden field, real users never do.
+            // Honey-pot - bots fill this hidden field, real users never do.
             hp: String(fd.get("hp") ?? ""),
           };
           startTransition(async () => {

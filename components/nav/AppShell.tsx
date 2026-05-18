@@ -55,7 +55,7 @@ export function AppShell({
           setCredits({ used: data.used, limit: data.limit, remaining: data.remaining });
         }
       } catch {
-        /* ignore — guard falls back to opening the sheet */
+        /* ignore - guard falls back to opening the sheet */
       }
     };
     void refresh();
@@ -70,7 +70,7 @@ export function AppShell({
   }, [signedIn]);
 
   // Guarded scan trigger: if the user has 0 credits left, short-circuit the
-  // ScanSheet and open the credits-exhausted modal instead — clicking the
+  // ScanSheet and open the credits-exhausted modal instead - clicking the
   // "Décode" FAB shouldn't even let them paint an analyse they can't run.
   const handleScanClick = useCallback(() => {
     if (credits && credits.remaining <= 0) {
@@ -96,13 +96,13 @@ export function AppShell({
   const hidden = hideOnPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   if (hidden) return <>{children}</>;
 
-  // Logged-out visitors get a chrome-less shell — the public home page renders
+  // Logged-out visitors get a chrome-less shell - the public home page renders
   // its own header / footer and gating happens via the search bar.
   if (!signedIn) return <>{children}</>;
 
   return (
     <div className="relative isolate min-h-svh bg-[#FAFAFA] overflow-x-hidden">
-      {/* Pastel orbs behind everything — gives the glass surfaces something to
+      {/* Pastel orbs behind everything - gives the glass surfaces something to
           refract and ties the signed-in pages to the public landing visual
           language. */}
       <BackgroundGlow />
@@ -123,12 +123,12 @@ export function AppShell({
       {/* Mobile bottom nav */}
       <MobileBottomNav pathname={pathname} onScanClick={handleScanClick} />
 
-      {/* Mobile burger menu (top-right) — opens a drawer mirroring the
+      {/* Mobile burger menu (top-right) - opens a drawer mirroring the
           desktop sidebar so the user can reach pages that don't fit in the
           5-slot bottom nav (Profil, Skin advisor). */}
       <MobileBurgerMenu pathname={pathname} items={NAV_ITEMS} />
 
-      {/* Mobile floating Skin Advisor button — sits above the bottom nav,
+      {/* Mobile floating Skin Advisor button - sits above the bottom nav,
           hidden when already on /advisor to avoid redundancy. */}
       {!pathname.startsWith("/advisor") && (
         <Link
@@ -149,7 +149,7 @@ export function AppShell({
 }
 
 function MobileBottomNav({ pathname, onScanClick }: { pathname: string; onScanClick: () => void }) {
-  // Pastel pill — floats above the safe area, with a layered liquid-glass
+  // Pastel pill - floats above the safe area, with a layered liquid-glass
   // background (gradient + backdrop blur) and a subtle inner highlight.
   return (
     <nav
@@ -157,7 +157,7 @@ function MobileBottomNav({ pathname, onScanClick }: { pathname: string; onScanCl
       aria-label="Navigation principale"
     >
       <div className="relative mx-auto max-w-md pointer-events-auto">
-        {/* The glass pill itself — rose/pink tint to match the site palette */}
+        {/* The glass pill itself - rose/pink tint to match the site palette */}
         <div className="relative flex items-end justify-between rounded-full bg-gradient-to-b from-[#FFE4E6]/85 to-[#FFD1DC]/75 backdrop-blur-2xl ring-1 ring-white/70 shadow-[0_10px_30px_-12px_rgba(244,63,94,0.25),inset_0_1px_0_rgba(255,255,255,0.75)] px-3 py-1.5">
           <NavBtnMobile href="/" label="Accueil" icon={HomeIcon} active={pathname === "/"} />
           <NavBtnMobile href="/routine" label="Routine" icon={LayersIcon} active={pathname.startsWith("/routine")} />
@@ -165,7 +165,7 @@ function MobileBottomNav({ pathname, onScanClick }: { pathname: string; onScanCl
           <NavBtnMobile href="/history" label="Historique" icon={ClockIcon} active={pathname.startsWith("/history")} />
           <NavBtnMobile href="/promesses" label="Promesses" icon={PromisesIcon} active={pathname.startsWith("/promesses")} />
         </div>
-        {/* Center FAB — rose gradient matching the "Installer l'app" CTA.
+        {/* Center FAB - rose gradient matching the "Installer l'app" CTA.
             Sized at 64px (15% bigger than the original 56px) so the
             "Analyse-moi" label has more breathing room. */}
         <button
@@ -276,7 +276,7 @@ function DesktopSidebar({
         })}
       </ul>
 
-      {/* Credits status — same labelled card as on mobile (in the burger
+      {/* Credits status - same labelled card as on mobile (in the burger
           drawer), positioned just above the Premium upsell for visual
           continuity. */}
       {signedIn && (

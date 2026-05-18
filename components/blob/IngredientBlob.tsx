@@ -33,7 +33,7 @@ const BLOB_TEXT: Record<ColorKey, string> = {
   rouge: "text-[#C73523]",
 };
 
-// Penalty labels — same wording as the mobile CountsStrip strips so the
+// Penalty labels - same wording as the mobile CountsStrip strips so the
 // vocabulary stays consistent between mobile (pill bento) and desktop (blob
 // legend). Colour info is already conveyed by the mini-blob swatch + the
 // number's text colour above, so we use the slot for the *meaning* instead.
@@ -70,7 +70,7 @@ type Geom = {
   /** Sample count for each radial boundary. */
   edgeSegments: number;
   /**
-   * Same-colour stroke with rounded line joins/caps — heavily smooths every
+   * Same-colour stroke with rounded line joins/caps - heavily smooths every
    * corner so each slice reads as a soft "blob" rather than a sharp angular
    * sector. Set generously: with a gap between slices, the stroke can spill
    * outwards without bleeding into a neighbour.
@@ -78,12 +78,12 @@ type Geom = {
   roundStroke: number;
   /**
    * Angular gap between adjacent slices (radians). Each internal junction
-   * loses `gapAngle` total — half taken from each side — leaving a clean
+   * loses `gapAngle` total - half taken from each side - leaving a clean
    * background-coloured groove between coloured sectors.
    */
   gapAngle: number;
   /**
-   * CSS drop-shadow applied per slice — gives every blob its own soft
+   * CSS drop-shadow applied per slice - gives every blob its own soft
    * "claymorphism" lift (now possible because slices no longer share radial
    * edges, so the shadows don't double-up at junctions).
    */
@@ -201,7 +201,7 @@ export function IngredientBlob({
   /**
    * When true, the SVG plays a "pop-in" animation on mount (scale + fade with
    * a small overshoot). Off by default so list/row variants don't all animate
-   * on every render — only the big card on the analyse page opts in.
+   * on every render - only the big card on the analyse page opts in.
    */
   animate?: boolean;
   /**
@@ -217,7 +217,7 @@ export function IngredientBlob({
 
   // Apply the inter-slice gap: each internal junction loses `gapAngle` total,
   // half from each side. The far-left and far-right ends of the half-ring
-  // stay on the flat base (no gap there — there's no neighbour).
+  // stay on the flat base (no gap there - there's no neighbour).
   const half = geom.gapAngle / 2;
   const gappedSlices = slices.map((s, i) => ({
     color: s.color,
@@ -226,7 +226,7 @@ export function IngredientBlob({
   }));
 
   // Each slice gets its OWN pair of radial edges (left + right). Adjacent
-  // slices no longer share an edge — that's what creates the visible gap.
+  // slices no longer share an edge - that's what creates the visible gap.
   // We seed the two edges of the same junction with the same JUNCTION_SEED
   // so their wavy silhouettes mirror each other (constant-width groove).
   const sliceEdges = gappedSlices.map((s, i) => {
@@ -309,7 +309,7 @@ export function IngredientBlob({
               fill={BLOB_COLORS[s.color]}
               // Same-colour stroke with rounded joins/caps softens every
               // corner (radial-edge ↔ inner/outer arc) and the wavy radial
-              // edges themselves — the "pill morphism" rounding. The gap
+              // edges themselves - the "pill morphism" rounding. The gap
               // between slices means a wide stroke can spill outwards
               // without bleeding into a neighbour.
               stroke={BLOB_COLORS[s.color]}

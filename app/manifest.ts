@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Cosme Check — Décrypte tes cosmétiques",
+    name: "Cosme Check - Décrypte tes cosmétiques",
     short_name: "Cosme Check",
     description:
       "Analyse INCI : tape un nom de produit ou colle sa liste d'ingrédients, on note la composition sur 20.",

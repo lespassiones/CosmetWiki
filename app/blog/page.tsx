@@ -23,46 +23,24 @@ export const metadata: Metadata = {
 
 const ARTICLES: Article[] = [
   {
-    id: "routine-skincare-2026",
-    title: "Qu'est-ce qu'une bonne routine skincare en 2026 ?",
+    id: "perturbateurs-endocriniens-cosmetiques-2026",
+    title: "Perturbateurs endocriniens dans les cosmétiques : ce qu'il faut vraiment surveiller en 2026",
     excerpt:
-      "Comprendre les étapes essentielles et les bons gestes pour une peau saine. On fait le point sur ce qui compte vraiment (et ce qui est optionnel).",
-    category: "Routines",
-    date: "12 mai 2026",
-    readingTime: "6 min",
-    image:
-      "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    id: "acide-hyaluronique",
-    title: "Acide hyaluronique : bienfaits et idées reçues",
-    excerpt:
-      "Hydratant star ou simple effet de mode ? On démêle le vrai du faux sur cet actif devenu incontournable.",
+      "Les perturbateurs endocriniens font peur, souvent pour de bonnes raisons. Mais il faut savoir lesquels surveiller vraiment, et comment les détecter dans tes produits sans tomber dans la psychose.",
     category: "Ingrédients",
-    date: "5 mai 2026",
-    readingTime: "4 min",
-    image:
-      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    id: "marques-clean",
-    title: "Typology, Minimalist, The Ordinary : que valent-ils ?",
-    excerpt: "Comparatif de 3 marques cultes et transparentes.",
-    category: "Marques",
-    date: "28 avril 2026",
+    date: "16 mai 2026",
     readingTime: "7 min",
-    image:
-      "https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&w=900&q=80",
+    image: "/image/blog/perturbateurs-endocriniens/hero.png",
   },
   {
-    id: "double-nettoyage",
-    title: "Double nettoyage : est-ce toujours nécessaire ?",
-    excerpt: "À qui s'adresse cette étape et quand l'adopter.",
+    id: "spf-50-visage-7-erreurs",
+    title: "SPF 50 visage : les 7 erreurs que tout le monde fait (et comment les éviter)",
+    excerpt:
+      "80 % des gens appliquent leur crème solaire de la mauvaise façon, et le SPF devient presque inutile. On passe en revue les 7 erreurs les plus fréquentes et la bonne méthode pour vraiment protéger sa peau.",
     category: "Routines",
-    date: "21 avril 2026",
+    date: "15 avril 2026",
     readingTime: "5 min",
-    image:
-      "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=900&q=80",
+    image: "/image/landing/SPF.png",
   },
 ];
 

@@ -3,7 +3,7 @@
  * a cosmetic product from its INCI list and to fetch its marketing promise
  * from the brand's official page.
  *
- * Model: gpt-4o-mini-search-preview — cheap inference + native web search.
+ * Model: gpt-4o-mini-search-preview - cheap inference + native web search.
  * The web search is billed separately by OpenAI (~$0.025/call as of 2025-Q4
  * for tier 1). We use search_context_size="medium" (the default sweet spot
  * between accuracy and cost).
@@ -14,7 +14,7 @@ const WEB_SEARCH_MODEL = "gpt-4o-mini-search-preview";
 
 export type WebSearchResult = {
   text: string;
-  /** Citations harvested from message.annotations — URLs the model
+  /** Citations harvested from message.annotations - URLs the model
    *  effectively used to ground its answer. */
   citations: { url: string; title: string | null }[];
 };
@@ -22,7 +22,7 @@ export type WebSearchResult = {
 /**
  * Ask the web-search model for a single completion. The system + user
  * messages are concatenated as a chat conversation. Always uses temperature
- * 0 and the small/cheap context window — the search-preview models don't
+ * 0 and the small/cheap context window - the search-preview models don't
  * accept the usual `temperature` override.
  */
 export async function webSearchComplete(
@@ -39,7 +39,7 @@ export async function webSearchComplete(
     openai().chat.completions.create({
       model: WEB_SEARCH_MODEL,
       // search-preview models reject `temperature`/`response_format`/`tools`
-      // — they ship with web search baked in and behave at temp 0 by default.
+      // - they ship with web search baked in and behave at temp 0 by default.
       messages: [
         { role: "system", content: system },
         { role: "user", content: userMsg },

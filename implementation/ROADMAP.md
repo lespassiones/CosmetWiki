@@ -1,21 +1,21 @@
-# Cosme Check — Roadmap d'implémentation
+# Cosme Check - Roadmap d'implémentation
 
 > Document de référence pour toutes les évolutions à venir, classées par phase et par priorité.
-> **Aucun code ici** — uniquement des spécifications fonctionnelles et techniques.
+> **Aucun code ici** - uniquement des spécifications fonctionnelles et techniques.
 > Chaque tâche indique : objectif, détails d'implémentation, fichiers/zones impactés, critères d'acceptation.
 
 ---
 
 ## Légende
 
-- 🔴 **Critique** — bloque la qualité ou la confiance utilisateur
-- 🟠 **Important** — fort impact UX/produit
-- 🟡 **Souhaitable** — améliore l'expérience sans être bloquant
-- ⚪ **Futur** — à activer plus tard / après retours utilisateurs
+- 🔴 **Critique** - bloque la qualité ou la confiance utilisateur
+- 🟠 **Important** - fort impact UX/produit
+- 🟡 **Souhaitable** - améliore l'expérience sans être bloquant
+- ⚪ **Futur** - à activer plus tard / après retours utilisateurs
 
 ---
 
-# PHASE 0 — Fiabilité backend (silencieuse)
+# PHASE 0 - Fiabilité backend (silencieuse)
 
 > **Objectif** : éliminer les défauts de parsing et de matching qui sapent la crédibilité de l'analyse.
 > **Aucune UI modifiée** dans cette phase. Tout le travail est sur le pipeline d'analyse.
@@ -28,10 +28,10 @@ Le parser INCI traite `Aqua (Water / Eau)` comme 3 ingrédients distincts (Aqua,
 **Implémentation**
 - Étape 1 : avant la tokenisation par virgule, retirer le contenu entre parenthèses si celui-ci ne contient pas de virgule terminale, OU le conserver uniquement comme métadonnée d'affichage.
 - Règle : `INCI_NAME (alias1 / alias2)` → token principal `INCI_NAME`, aliases ignorés pour le matching mais retournés comme `original_input` pour l'affichage.
-- Cas particulier : si l'utilisateur a réellement saisi `Aqua, Water, Eau` (3 entrées séparées par virgules), garder le comportement actuel (3 tokens) — la déduplication est gérée plus loin par déduplication sur `inci_id`.
+- Cas particulier : si l'utilisateur a réellement saisi `Aqua, Water, Eau` (3 entrées séparées par virgules), garder le comportement actuel (3 tokens) - la déduplication est gérée plus loin par déduplication sur `inci_id`.
 
 **Fichier impacté**
-- `lib/inciParser.ts` — fonction `parseInciList`
+- `lib/inciParser.ts` - fonction `parseInciList`
 
 **Critère d'acceptation**
 - Coller `Aqua (Water / Eau), Glycerin` → 2 ingrédients reconnus (Aqua + Glycerin), pas 4.
@@ -57,7 +57,7 @@ Le fuzzy match peut soit générer des faux positifs (matche un ingrédient inex
 
 **Fichiers impactés**
 - Migration Supabase : nouvelle migration `add_trigram_fuzzy_matching.sql`
-- `app/api/analyser/route.ts` — type `MatchRow` enrichi avec `suggested_name`, `confidence`
+- `app/api/analyser/route.ts` - type `MatchRow` enrichi avec `suggested_name`, `confidence`
 - Frontend : composant qui affiche un badge "Suggestion : X ?" sur les rows ambigus
 
 **Critère d'acceptation**
@@ -81,7 +81,7 @@ Différenciateur UX : montrer à l'utilisateur si un ingrédient apparaît avant
 - Si aucun parfum ni conservateur dans la liste : champ vide.
 
 **Fichier impacté**
-- `app/api/analyser/route.ts` — enrichissement de chaque `item` retourné
+- `app/api/analyser/route.ts` - enrichissement de chaque `item` retourné
 
 **Critère d'acceptation**
 - Liste `[A, B, Parfum, C, D]` → A, B = `before_threshold`, C, D = `after_threshold`.
@@ -89,7 +89,7 @@ Différenciateur UX : montrer à l'utilisateur si un ingrédient apparaît avant
 
 ---
 
-## 0.4 🟠 Spectre top 5 / top 10 — données
+## 0.4 🟠 Spectre top 5 / top 10 - données
 
 **Objectif**
 Fournir au frontend la structure pour afficher le spectre visuel des 5 et 10 premiers ingrédients.
@@ -113,7 +113,7 @@ Fournir au frontend la structure pour afficher le spectre visuel des 5 et 10 pre
 
 ---
 
-# PHASE 1 — Authentification
+# PHASE 1 - Authentification
 
 > **Objectif** : permettre à un utilisateur de créer un compte pour persister son historique et sa routine.
 
@@ -182,7 +182,7 @@ Tant qu'on n'est pas en phase de monétisation, **tous les utilisateurs créés 
 
 ---
 
-# PHASE 2 — Refonte du design
+# PHASE 2 - Refonte du design
 
 > **Objectif** : moderniser la navigation et unifier les modes d'entrée d'analyse.
 
@@ -196,7 +196,7 @@ Tant qu'on n'est pas en phase de monétisation, **tous les utilisateurs créés 
   4. 🕒 Historique
   5. 👤 Profil
 - Icônes inactives : grises (#6B7280). Icône active : noire + libellé en gras.
-- Le bouton central **ne navigue pas vers une page** — il **ouvre une bottom sheet**.
+- Le bouton central **ne navigue pas vers une page** - il **ouvre une bottom sheet**.
 - Hauteur de la nav : 64px. Le bouton central déborde de 12px au-dessus.
 
 **Sur desktop** (> 1024px)
@@ -214,7 +214,7 @@ Tant qu'on n'est pas en phase de monétisation, **tous les utilisateurs créés 
 
 ---
 
-## 2.2 🔴 Bottom sheet scan — 4 options
+## 2.2 🔴 Bottom sheet scan - 4 options
 
 **Spécification**
 - Modale plein-bas (50–65 % de la hauteur écran), fond blanc, coins haut arrondis 20px, drag handle gris au sommet.
@@ -303,7 +303,7 @@ La home actuelle propose déjà les 3 modes (Liste INCI / Nom de produit / Scann
 
 ---
 
-## 2.5 🟠 OCR de la composition — GPT-4o-mini Vision + fallback Tesseract.js
+## 2.5 🟠 OCR de la composition - GPT-4o-mini Vision + fallback Tesseract.js
 
 **Décision actée**
 GPT-4o-mini Vision est utilisé en **primaire** (meilleure robustesse sur photos floues, textes courbés, polices décoratives, multilingue). Tesseract.js est gardé en **fallback** uniquement (réseau down, quota OpenAI, latence > 10 s).
@@ -347,16 +347,16 @@ GPT-4o-mini Vision est utilisé en **primaire** (meilleure robustesse sur photos
 Centraliser tous les appels IA dans une seule lib, avec retry, fallback, cache et observabilité.
 
 **Architecture**
-- `lib/ai/client.ts` — wrapper autour de l'OpenAI SDK avec :
+- `lib/ai/client.ts` - wrapper autour de l'OpenAI SDK avec :
   - Retry exponentiel (3 tentatives, 200ms → 800ms → 3200ms)
   - Timeout configurable (défaut 10 s)
   - Logging des erreurs vers une table `ai_logs` Supabase
   - Fonction `callWithFallback(primary, fallback, args)` qui essaie OpenAI puis bascule sur le fallback fourni
-- `lib/ai/synthesis.ts` — génération de synthèse (GPT-4o-mini primary, Mistral fallback)
-- `lib/ai/ocr.ts` — OCR image (GPT-4o-mini Vision primary, Tesseract fallback)
-- `lib/ai/typo.ts` — correction d'ingrédient (GPT-4o-mini primary, pg_trgm seul fallback)
-- `lib/ai/categorize.ts` — catégorisation produit
-- `lib/ai/validate.ts` — détection de saisie farfelue avant analyse
+- `lib/ai/synthesis.ts` - génération de synthèse (GPT-4o-mini primary, Mistral fallback)
+- `lib/ai/ocr.ts` - OCR image (GPT-4o-mini Vision primary, Tesseract fallback)
+- `lib/ai/typo.ts` - correction d'ingrédient (GPT-4o-mini primary, pg_trgm seul fallback)
+- `lib/ai/categorize.ts` - catégorisation produit
+- `lib/ai/validate.ts` - détection de saisie farfelue avant analyse
 
 **Cache commun**
 Table Supabase `ai_cache`:
@@ -451,7 +451,7 @@ Réduire les faux négatifs sans introduire de faux positifs : quand pg_trgm est
 
 ---
 
-## 2.9 🟠 Synthèse rédactionnelle — switch Mistral → GPT-4o-mini
+## 2.9 🟠 Synthèse rédactionnelle - switch Mistral → GPT-4o-mini
 
 **Objectif**
 Améliorer la qualité de la prose française et la fidélité aux contraintes du prompt (interdictions de langage marketing, structure en 2 blocs).
@@ -508,14 +508,14 @@ Quand l'utilisateur tape un nom de produit imparfait ("effaclar duo", "loccitane
 
 ---
 
-# PHASE 3 — Résultat enrichi
+# PHASE 3 - Résultat enrichi
 
 ## 3.1 🟠 Affichage du Spectre top 5 / top 10
 
 **Spécification**
 - Sous le bloc "Note globale", ajouter une carte "Spectre" contenant deux rows :
-  - Row 1 : "Top 5" — 5 carrés colorés en ligne (24×24px, gap 6px), chacun étiqueté 1·2·3·4·5 en dessous.
-  - Row 2 : "Top 10" — 10 carrés plus petits (16×16px, gap 4px).
+  - Row 1 : "Top 5" - 5 carrés colorés en ligne (24×24px, gap 6px), chacun étiqueté 1·2·3·4·5 en dessous.
+  - Row 2 : "Top 10" - 10 carrés plus petits (16×16px, gap 4px).
 - Couleurs : Vert #10B981, Jaune #F59E0B, Orange #FB923C, Rouge #EF4444, Gris (#E5E7EB) pour position vide ou inconnue.
 - **Tap sur un carré** → scroll smooth jusqu'à la row de l'ingrédient correspondant dans la liste + flash background pendant 1 sec.
 - Petit texte d'aide en dessous : "Touche un carré pour voir l'ingrédient correspondant."
@@ -553,7 +553,7 @@ Quand l'utilisateur tape un nom de produit imparfait ("effaclar duo", "loccitane
 
 ---
 
-# PHASE 4 — Historique par utilisateur
+# PHASE 4 - Historique par utilisateur
 
 ## 4.1 🔴 Sauvegarde des analyses
 
@@ -623,11 +623,11 @@ analyses (
 - Nouveau : `app/compare/page.tsx`, `components/CompareView.tsx`
 - Helper : `lib/compareAnalyses.ts`
 
-**Priorité** : 🟡 — peut attendre la V2 si charge importante.
+**Priorité** : 🟡 - peut attendre la V2 si charge importante.
 
 ---
 
-# PHASE 5 — Architecture monétisation (préparée, non activée)
+# PHASE 5 - Architecture monétisation (préparée, non activée)
 
 > **Objectif** : poser les fondations DB et hooks pour pouvoir activer un paywall plus tard sans réécrire l'app.
 > **Aucune limitation utilisateur visible** dans cette phase.
@@ -657,7 +657,7 @@ usage_counters (
 **Helper**
 - `canAccess(feature: string, user)` : aujourd'hui retourne toujours `true`. Demain, retournera `false` pour `feature === 'photo-ocr'` si `tier === 'free'` et `analyses_count >= 5`.
 
-**Activation paywall — déclenché plus tard**
+**Activation paywall - déclenché plus tard**
 - Hook UI "Limite atteinte" sur l'écran de scan / d'analyse.
 - Page `/premium` avec tableau comparatif.
 - Intégration Stripe (Checkout + webhook → update `subscriptions.status`).
@@ -666,7 +666,7 @@ usage_counters (
 - Migration : `create_subscriptions_table.sql`
 - Nouveau : `lib/access.ts` (avec `canAccess` qui retourne `true` partout)
 
-**Priorité** : ⚪ — l'infra est créée, mais le paywall n'est **pas activé** tant que `tier === 'premium'` par défaut.
+**Priorité** : ⚪ - l'infra est créée, mais le paywall n'est **pas activé** tant que `tier === 'premium'` par défaut.
 
 ---
 
@@ -681,13 +681,13 @@ usage_counters (
 - InciBeauty Premium = 1,30 €/mois. On se positionne légèrement au-dessus parce qu'on offre **copier-coller, OCR, routine cumulée et comparaison** qu'ils n'ont pas.
 - Ne pas démarrer la monétisation avant **50 à 200 utilisateurs actifs** pour avoir un signal de rétention.
 
-**Priorité** : ⚪ — décision marché, pas dev.
+**Priorité** : ⚪ - décision marché, pas dev.
 
 ---
 
-# PHASE 6 — Fonctionnalités V2 (après retours users)
+# PHASE 6 - Fonctionnalités V2 (après retours users)
 
-## 6.1 🟡 Onglet Routine — analyse cumulée
+## 6.1 🟡 Onglet Routine - analyse cumulée
 
 **Spécification**
 - Page `/routine` :
@@ -712,7 +712,7 @@ routine_items (
 - Idée v1 : moyenne pondérée des scores des produits, ajustée par fréquence (poids quotidien × 1, hebdo × 0,3, mensuel × 0,07).
 - Idée v1bis : somme des tags pénalisants pondérés par fréquence, normalisée sur 20.
 
-**Priorité** : 🟡 — gros effort, attendre signal utilisateur.
+**Priorité** : 🟡 - gros effort, attendre signal utilisateur.
 
 ---
 
@@ -749,7 +749,7 @@ Augmenter massivement la base de données produits (~50 k via OBF vs base INCI B
 
 ---
 
-## 6.4 ⚪ Skin advisor — chatbot IA ciblé
+## 6.4 ⚪ Skin advisor - chatbot IA ciblé
 
 **Statut** : flou, à clarifier avec l'utilisateur.
 **Hypothèse** : page dédiée où l'utilisateur décrit sa peau / ses besoins, GPT-4o-mini répond en s'appuyant sur la base ingrédients pour suggérer des ingrédients à privilégier/éviter.
@@ -759,7 +759,7 @@ Augmenter massivement la base de données produits (~50 k via OBF vs base INCI B
 - Cache désactivé (chaque conversation est unique).
 - Prompt système strict : pas de conseil médical, pas de diagnostic, pas de recommandation de marque.
 
-**Priorité** : ⚪ — V3, gros effort UX + risque réglementaire (conseil santé).
+**Priorité** : ⚪ - V3, gros effort UX + risque réglementaire (conseil santé).
 
 ---
 
@@ -819,7 +819,7 @@ Sur la page détail d'un ingrédient, proposer un bouton "Expliquer simplement" 
 - Une routine de 4 produits avec 2 pénalisants → 2 suggestions concrètes en < 3 s.
 - Les suggestions sont basées uniquement sur les tags présents dans les analyses, jamais sur des opinions inventées.
 
-**Priorité** : 🟡 — dépend de la stabilité de la Phase 6.1 (Routine).
+**Priorité** : 🟡 - dépend de la stabilité de la Phase 6.1 (Routine).
 
 ---
 

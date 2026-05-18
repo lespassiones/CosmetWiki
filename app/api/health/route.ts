@@ -4,7 +4,7 @@
  * Lightweight liveness + DB connectivity probe for UptimeRobot or any external
  * monitor. Returns 200 with JSON if Supabase responds within 3 s, 503 otherwise.
  *
- * Intentionally NOT gated by apiGate — UptimeRobot is unauthenticated and we
+ * Intentionally NOT gated by apiGate - UptimeRobot is unauthenticated and we
  * want a flat 200/503 signal that's easy to alert on.
  */
 import { NextResponse } from "next/server";

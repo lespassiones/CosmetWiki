@@ -1,9 +1,9 @@
 /**
- * /api/indexnow — notifie Bing/Yandex/DuckDuckGo qu'une ou plusieurs URLs
+ * /api/indexnow - notifie Bing/Yandex/DuckDuckGo qu'une ou plusieurs URLs
  * doivent être (re-)crawlées immédiatement, via le protocole IndexNow.
  *
  * Protégé par le header `Authorization: Bearer <INDEXNOW_SECRET>` (env var
- * à définir dans Vercel). Sans ce secret, le endpoint renvoie 401 — sinon
+ * à définir dans Vercel). Sans ce secret, le endpoint renvoie 401 - sinon
  * n'importe qui pourrait spammer IndexNow en notre nom et faire blacklister
  * notre clé.
  *

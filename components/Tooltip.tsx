@@ -11,12 +11,12 @@ type Placement = "top" | "bottom";
 const SAFE_MARGIN = 14;
 
 /**
- * Minimal accessible tooltip — hover on desktop, tap-to-toggle on touch.
+ * Minimal accessible tooltip - hover on desktop, tap-to-toggle on touch.
  * The tooltip body is rendered through a portal so it escapes any clipping
  * or stacking-context issues created by ancestor cards/animations.
  *
  * Width is clamped to the viewport (minus SAFE_MARGIN on each side) so the
- * box never collides with the screen edges on phones — independently of the
+ * box never collides with the screen edges on phones - independently of the
  * configured `maxWidth`. The horizontal position is computed to keep the
  * tooltip fully visible, with the arrow re-anchored under the trigger center.
  *
@@ -51,7 +51,7 @@ export function Tooltip({
   }, []);
 
   // Reset the layout when the tooltip closes so the next opening is always
-  // hidden until a fresh measurement is done — avoids a flash at the previous
+  // hidden until a fresh measurement is done - avoids a flash at the previous
   // position when the trigger has scrolled.
   useEffect(() => {
     if (!open) setLayout(null);
@@ -66,14 +66,14 @@ export function Tooltip({
       const top = placement === "top" ? trig.top - 8 : trig.bottom + 8;
 
       // Cap the tooltip's max width to whatever fits inside the viewport
-      // safe area — guarantees a SAFE_MARGIN gap on both sides on phones.
+      // safe area - guarantees a SAFE_MARGIN gap on both sides on phones.
       const vw = window.innerWidth;
       const maxW = Math.min(maxWidth, Math.max(0, vw - 2 * SAFE_MARGIN));
 
       // Read the tooltip's actual rendered width (may be less than maxW when
       // content is short). We re-clamp to maxW because the first paint of
       // the tooltip used `maxWidth: maxWidth` (the prop), not yet our
-      // viewport-aware cap — so on very narrow screens the rect can briefly
+      // viewport-aware cap - so on very narrow screens the rect can briefly
       // exceed maxW.
       const tipRect = tooltipRef.current.getBoundingClientRect();
       const actualW = Math.min(tipRect.width, maxW);
@@ -179,7 +179,7 @@ export function Tooltip({
 }
 
 /**
- * Small (i) icon button — pair with `<Tooltip>` to add inline help next to
+ * Small (i) icon button - pair with `<Tooltip>` to add inline help next to
  * a section heading.
  */
 export function InfoBadge({ className = "" }: { className?: string }) {

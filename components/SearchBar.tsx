@@ -11,7 +11,7 @@ type Props = {
   size?: "lg" | "md";
   /**
    * Optional callback invoked when the user submits a multi-ingredient list.
-   * When provided, the SearchBar does NOT navigate away — the parent owns the
+   * When provided, the SearchBar does NOT navigate away - the parent owns the
    * processing overlay and the result rendering. This is what HomeShell uses
    * to keep the analyse on the home page.
    */
@@ -149,14 +149,14 @@ export function SearchBar({
 
   function submitList(trimmed: string) {
     if (onAnalyseList) {
-      // Parent (HomeShell) owns the overlay + result rendering — clear
+      // Parent (HomeShell) owns the overlay + result rendering - clear
       // the query and hand off.
       void onAnalyseList(trimmed);
       setQuery("");
       setIsOpen(false);
     } else {
       // Outside the home shell : send the list to the home page, which owns
-      // the analyser flow. No local overlay — HomeShell will show its own
+      // the analyser flow. No local overlay - HomeShell will show its own
       // once mounted, so we avoid playing the animation twice.
       const blob = encodeURIComponent(trimmed.slice(0, 6000));
       setIsOpen(false);
@@ -168,7 +168,7 @@ export function SearchBar({
     // Force list mode for any paste that's clearly more than a single
     // ingredient token. The AI parser in /api/analyser then handles the format
     // (commas, periods, no separator, OCR noise, etc.) without us having to
-    // guess up-front. We don't preventDefault — the textarea still receives
+    // guess up-front. We don't preventDefault - the textarea still receives
     // the pasted text normally.
     const pasted = e.clipboardData.getData("text") ?? "";
     const wordCount = pasted.trim().split(/\s+/).filter(Boolean).length;

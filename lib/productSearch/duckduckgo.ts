@@ -72,7 +72,7 @@ export async function searchDuckDuckGo(query: string): Promise<{
   RESULT_LINK_RE.lastIndex = 0;
   while ((match = RESULT_LINK_RE.exec(html)) !== null) {
     const real = decodeUddg(match[1]!);
-    // The URL path is our cheapest relevance signal — if no query token
+    // The URL path is our cheapest relevance signal - if no query token
     // appears anywhere in the candidate URL, it's almost certainly a generic
     // "list of all products" page and not the one we asked for.
     if (

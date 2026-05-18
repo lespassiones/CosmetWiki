@@ -51,7 +51,7 @@ export function AdvisorOnboarding({ initial }: { initial?: SkinProfile }) {
 
   return (
     <div className="space-y-7">
-      {/* Question 1 — skin type */}
+      {/* Question 1 - skin type */}
       <fieldset>
         <legend className="text-[14px] font-semibold text-[#111111] mb-3">
           1. Quel est ton type de peau ?
@@ -78,7 +78,7 @@ export function AdvisorOnboarding({ initial }: { initial?: SkinProfile }) {
         </div>
       </fieldset>
 
-      {/* Question 2 — concerns */}
+      {/* Question 2 - concerns */}
       <fieldset>
         <legend className="text-[14px] font-semibold text-[#111111] mb-1">
           2. Sur quoi veux-tu te concentrer ?
@@ -106,7 +106,7 @@ export function AdvisorOnboarding({ initial }: { initial?: SkinProfile }) {
         </div>
       </fieldset>
 
-      {/* Question 3 — allergies (optional, free text) */}
+      {/* Question 3 - allergies (optional, free text) */}
       <fieldset>
         <legend className="text-[14px] font-semibold text-[#111111] mb-1">
           3. Allergies ou intolérances connues ? <span className="text-[#9CA3AF] font-normal">(facultatif)</span>

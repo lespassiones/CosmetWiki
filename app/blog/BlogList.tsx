@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 export type Category =
@@ -206,8 +207,11 @@ function CategoryRow({
 
 function ArticleCard({ article }: { article: Article }) {
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_4px_16px_-8px_rgba(17,17,17,0.06)] ring-1 ring-black/[0.04] transition hover:shadow-[0_8px_24px_-10px_rgba(17,17,17,0.12)]">
-      <div className="relative aspect-[16/10] overflow-hidden">
+    <Link
+      href={`/blog/${article.id}`}
+      className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_4px_16px_-8px_rgba(17,17,17,0.06)] ring-1 ring-black/[0.04] transition hover:shadow-[0_8px_24px_-10px_rgba(17,17,17,0.12)] focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"
+    >
+      <div className="relative aspect-[16/10] overflow-hidden bg-black/[0.04]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={article.image}
@@ -244,7 +248,7 @@ function ArticleCard({ article }: { article: Article }) {
           </span>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
 

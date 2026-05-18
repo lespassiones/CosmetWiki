@@ -8,8 +8,8 @@ import type { CoherenceResult } from "@/lib/coherence/types";
  *
  * Visual layout (matches the reference mock):
  *   - Two coloured zones split by a vertical dashed marker
- *   - LEFT (green gradient)  : "Ingrédients efficaces"   — pos 1 .. threshold-1
- *   - RIGHT (blue gradient)  : "Ingrédients en trace ≤ 1 %" — pos threshold+1 ..
+ *   - LEFT (green gradient)  : "Ingrédients efficaces"   - pos 1 .. threshold-1
+ *   - RIGHT (blue gradient)  : "Ingrédients en trace ≤ 1 %" - pos threshold+1 ..
  *   - Each key ingredient is a CHUNKY white pill with a soft drop shadow,
  *     positioned by its `position`. They wrap into rows so long names breathe.
  *   - The threshold marker sits exactly between the two zones with the parfum
@@ -56,7 +56,7 @@ export function IngredientsPositionChart({
           content={
             <>
               En INCI, les ingrédients sont listés <b>du plus concentré au moins concentré</b>.
-              Réglementairement, parfums et conservateurs sont à <b>≤ 1 %</b> — donc tout ce
+              Réglementairement, parfums et conservateurs sont à <b>≤ 1 %</b> - donc tout ce
               qui est <b>après</b> dans la liste est aussi à ≤ 1 %.
               <br /><br />
               <b>Sur cette formule</b> : le seuil est à la <b>position {thresholdPos}</b> ({thresholdLabelTip}).
@@ -64,7 +64,7 @@ export function IngredientsPositionChart({
                 <> {beforeCount} ingrédient{beforeCount > 1 ? "s" : ""} clé{beforeCount > 1 ? "s sont" : " est"} bien dosé{beforeCount > 1 ? "s" : ""} (zone verte).</>
               )}
               {afterCount > 0 && (
-                <> {afterCount} ingrédient{afterCount > 1 ? "s" : ""} clé{afterCount > 1 ? "s sont" : " est"} en trace ≤ 1 % (zone bleue) — peu d&apos;effet réel.</>
+                <> {afterCount} ingrédient{afterCount > 1 ? "s" : ""} clé{afterCount > 1 ? "s sont" : " est"} en trace ≤ 1 % (zone bleue) - peu d&apos;effet réel.</>
               )}
             </>
           }
@@ -83,7 +83,7 @@ export function IngredientsPositionChart({
       <div className="relative grid grid-cols-[var(--left)_var(--right)] min-h-[160px] rounded-2xl overflow-hidden ring-1 ring-black/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]"
         style={{ ["--left" as string]: leftPct, ["--right" as string]: rightPct } as React.CSSProperties}
       >
-        {/* LEFT zone — green */}
+        {/* LEFT zone - green */}
         <div className="relative bg-gradient-to-br from-emerald-100/90 to-emerald-50/70 p-4 lg:p-5">
           <div className="text-center mb-3">
             <div className="text-[12px] font-bold text-emerald-700">
@@ -111,7 +111,7 @@ export function IngredientsPositionChart({
           )}
         </div>
 
-        {/* RIGHT zone — blue */}
+        {/* RIGHT zone - blue */}
         <div className="relative bg-gradient-to-bl from-sky-100/90 to-sky-50/70 p-4 lg:p-5">
           <div className="text-center mb-3">
             <div className="text-[12px] font-bold text-sky-700">
@@ -140,7 +140,7 @@ export function IngredientsPositionChart({
           )}
         </div>
 
-        {/* Threshold marker — vertical dashed line at the zone boundary */}
+        {/* Threshold marker - vertical dashed line at the zone boundary */}
         <div
           className="pointer-events-none absolute inset-y-0 w-px bg-sky-400"
           style={{

@@ -1,7 +1,7 @@
 import type { CoherenceVerdict } from "@/lib/coherence/types";
 
 /**
- * Visual tone for each verdict — kept in one place so all coherence
+ * Visual tone for each verdict - kept in one place so all coherence
  * components stay consistent. Aligned with the project's existing rating
  * palette (emerald / amber / orange / rose).
  */
@@ -53,7 +53,7 @@ export const VERDICT_TONE: Record<
     text: "text-rose-700",
     hex: "#F43F5E",
   },
-  // Deeper red than non_demontree — this is "the formula actively contradicts
+  // Deeper red than non_demontree - this is "the formula actively contradicts
   // the absence claim", which is a much stronger negative signal than "we
   // couldn't find a documented active". Different hue so the two never blur.
   contredite: {

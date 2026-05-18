@@ -10,7 +10,7 @@
  *
  *   if (error) return safeError(error, { route: "analyser.rpc_match" });
  *
- * Use this for INTERNAL errors only — for validation errors that should be
+ * Use this for INTERNAL errors only - for validation errors that should be
  * shown to the user verbatim ("Email invalide.", "Mot de passe trop court"),
  * keep the existing NextResponse.json({ error: "..." }) pattern.
  */

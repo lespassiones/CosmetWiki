@@ -7,7 +7,7 @@
  *   2. If absent, call GPT-4o-mini with structured context (name, function,
  *      color rating, tags) and store the result.
  *   3. Optionally append a one-line **personal context** when we know the
- *      user is exposed to this ingredient in their own routine — this
+ *      user is exposed to this ingredient in their own routine - this
  *      personal line is NOT cached (it depends on the caller).
  */
 import { AI_MODEL, callWithFallback, hasOpenAI, openai } from "./client";

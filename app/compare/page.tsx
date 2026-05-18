@@ -82,7 +82,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
 
   const diff = compareAnalyses(a, b, { routineIngredientSlugs: routineSlugs });
 
-  // "Bon à savoir" — a couple of concrete, non-judgmental facts derived from
+  // "Bon à savoir" - a couple of concrete, non-judgmental facts derived from
   // the data. We deliberately drop the "X is better than Y by N points" line.
   const bonASavoir: string[] = [];
   const aOverlap = Array.from(routineSlugs).filter((s) =>
@@ -93,12 +93,12 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
   ).length;
   if (aOverlap >= 3) {
     bonASavoir.push(
-      `${aOverlap} ingrédients de **${a.name}** se retrouvent déjà dans d'autres produits de ta routine — exposition cumulée à surveiller.`,
+      `${aOverlap} ingrédients de **${a.name}** se retrouvent déjà dans d'autres produits de ta routine - exposition cumulée à surveiller.`,
     );
   }
   if (bOverlap >= 3) {
     bonASavoir.push(
-      `${bOverlap} ingrédients de **${b.name}** se retrouvent déjà dans d'autres produits de ta routine — exposition cumulée à surveiller.`,
+      `${bOverlap} ingrédients de **${b.name}** se retrouvent déjà dans d'autres produits de ta routine - exposition cumulée à surveiller.`,
     );
   }
   // Fragrance allergens are a concrete heads-up that doesn't pick a side.
@@ -106,11 +106,11 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
   const allergensB = b.result.euFragranceAllergens?.total ?? 0;
   if (allergensA > 0 && allergensB === 0) {
     bonASavoir.push(
-      `**${a.name}** contient ${allergensA} allergène${allergensA > 1 ? "s" : ""} de parfum déclaré${allergensA > 1 ? "s" : ""} (UE) — à éviter en cas de peau réactive.`,
+      `**${a.name}** contient ${allergensA} allergène${allergensA > 1 ? "s" : ""} de parfum déclaré${allergensA > 1 ? "s" : ""} (UE) - à éviter en cas de peau réactive.`,
     );
   } else if (allergensB > 0 && allergensA === 0) {
     bonASavoir.push(
-      `**${b.name}** contient ${allergensB} allergène${allergensB > 1 ? "s" : ""} de parfum déclaré${allergensB > 1 ? "s" : ""} (UE) — à éviter en cas de peau réactive.`,
+      `**${b.name}** contient ${allergensB} allergène${allergensB > 1 ? "s" : ""} de parfum déclaré${allergensB > 1 ? "s" : ""} (UE) - à éviter en cas de peau réactive.`,
     );
   }
 
@@ -121,7 +121,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
       </Link>
       <h1 className="text-2xl lg:text-3xl font-bold mb-6">Comparer 2 produits</h1>
 
-      {/* Hero — two blobs side by side, no big score number, no winner badge. */}
+      {/* Hero - two blobs side by side, no big score number, no winner badge. */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-6">
         {[a, b].map((side) => {
           const pct = pctSansPenalite(side);
@@ -167,7 +167,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
         shortNameB={shortenProductName(b.name)}
       />
 
-      {/* À surveiller — appears for each product that has orange/red ingredients.
+      {/* À surveiller - appears for each product that has orange/red ingredients.
           Renders one warning card per product so the user can quickly see which
           side has irritants without scanning the full ingredient list. */}
       {(() => {
@@ -182,7 +182,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
         );
       })()}
 
-      {/* Bon à savoir — only when we actually have something concrete to say */}
+      {/* Bon à savoir - only when we actually have something concrete to say */}
       {bonASavoir.length > 0 && (
         <section className={`${GLASS_CARD} p-5`}>
           <h3 className="text-[13px] font-semibold uppercase tracking-wide text-ink-subtle mb-3">
@@ -202,7 +202,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
       {/* Keep the deterministic diff in the DOM (commented out) so we
           can re-enable it during the rollout if the AI output is missing
           or judged insufficient. We don't render the old "Différences
-          clés" list anymore — it duplicated what the portraits say. */}
+          clés" list anymore - it duplicated what the portraits say. */}
       {diff.uniqueToA.length + diff.uniqueToB.length === 0 && (
         <p className="mt-4 text-[12px] text-ink-subtle text-center">
           Les deux compositions ne diffèrent pas sur les ingrédients pénalisants.
@@ -224,7 +224,7 @@ function renderBold(text: string) {
 function AttentionCard({ name, items }: { name: string; items: Flagged[] }) {
   const nbRouge = items.filter((i) => i.color === "Rouge").length;
   const nbOrange = items.filter((i) => i.color === "Orange").length;
-  // Build the count phrasing — only mention the categories actually present.
+  // Build the count phrasing - only mention the categories actually present.
   const parts: string[] = [];
   if (nbRouge > 0) parts.push(`${nbRouge} ingrédient${nbRouge > 1 ? "s" : ""} en rouge`);
   if (nbOrange > 0) parts.push(`${nbOrange} ingrédient${nbOrange > 1 ? "s" : ""} en orange`);
@@ -263,7 +263,7 @@ function AttentionCard({ name, items }: { name: string; items: Flagged[] }) {
               }`}
             />
             <span className="font-medium text-rose-900">{it.name}</span>
-            {it.fn && <span className="text-[12px] text-rose-600 truncate">— {it.fn}</span>}
+            {it.fn && <span className="text-[12px] text-rose-600 truncate">- {it.fn}</span>}
           </li>
         ))}
         {extra > 0 && (

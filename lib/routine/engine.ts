@@ -3,11 +3,11 @@
  *
  * Inputs: an array of (analysis, frequency) tuples.
  * Outputs:
- *   - exposureScore /20 — weighted average penalty per use, normalized.
- *   - tagExposure   — cumulative occurrences per tag, weighted by use frequency.
- *   - topIngredients— ingredients most cumulatively encountered (frequency × penalty).
- *   - allergenOverlap — EU fragrance allergens present in 2+ products.
- *   - simulation    — projected exposure if the worst 1/2 products are removed.
+ *   - exposureScore /20 - weighted average penalty per use, normalized.
+ *   - tagExposure   - cumulative occurrences per tag, weighted by use frequency.
+ *   - topIngredients- ingredients most cumulatively encountered (frequency × penalty).
+ *   - allergenOverlap - EU fragrance allergens present in 2+ products.
+ *   - simulation    - projected exposure if the worst 1/2 products are removed.
  */
 import { EU_FRAGRANCE_ALLERGENS, isEuFragranceAllergen } from "@/lib/euAllergens";
 import type { AnalyseItem, AnalyseResponse } from "@/lib/analyseTypes";
@@ -39,7 +39,7 @@ export type RoutineProduct = {
 };
 
 export type RoutineMetrics = {
-  exposureScore: number;        // /20 — higher = safer
+  exposureScore: number;        // /20 - higher = safer
   exposureLabel: "Faible" | "Modérée" | "Élevée" | "Très élevée";
   totalUseUnits: number;        // sum of frequency weights
   /** Count of routine products whose own score falls in orange/rose band (< 13/20). */
@@ -152,7 +152,7 @@ export function computeRoutineMetrics(products: RoutineProduct[]): RoutineMetric
   }
   const exposureScore = scoreOf(products);
 
-  // Tag exposure — weighted by frequency, sum across all products.
+  // Tag exposure - weighted by frequency, sum across all products.
   // Also track worst colorRating per unique ingredient per tag for multi-color bars.
   const tagMap = new Map<string, number>();
   const tagIngColors = new Map<string, Map<string, string | null>>();
@@ -198,7 +198,7 @@ export function computeRoutineMetrics(products: RoutineProduct[]): RoutineMetric
     })
     .sort((a, b) => b.cumulativeCount - a.cumulativeCount);
 
-  // Top ingredients — most cumulatively encountered, weighted by frequency × penalty.
+  // Top ingredients - most cumulatively encountered, weighted by frequency × penalty.
   // We only consider non-green ingredients so the top list highlights what to address.
   type IngAccum = {
     name: string;
@@ -237,7 +237,7 @@ export function computeRoutineMetrics(products: RoutineProduct[]): RoutineMetric
     .slice(0, 5)
     .map((i) => ({ ...i, weightedExposure: Number(i.weightedExposure.toFixed(2)) }));
 
-  // EU fragrance allergens overlap — present in 2+ products.
+  // EU fragrance allergens overlap - present in 2+ products.
   const allergenCount = new Map<string, { label: string; products: Set<string> }>();
   for (const p of products) {
     for (const it of p.result.items) {
@@ -266,7 +266,7 @@ export function computeRoutineMetrics(products: RoutineProduct[]): RoutineMetric
   //   - its own score is in the orange/rose band (< 13/20)
   //   - it stacks a lot of irritants (>= 5 Orange + Jaune combined)
   // Sorted by impact: more Rouge first, then Orange, then Jaune, then lowest
-  // own score. Capped at 2 — proposing to remove every product in the routine
+  // own score. Capped at 2 - proposing to remove every product in the routine
   // (and pretending the user reaches 20/20) is dishonest.
   function ratingCounts(p: RoutineProduct) {
     let rouge = 0;
@@ -347,7 +347,7 @@ export function computeRoutineMetrics(products: RoutineProduct[]): RoutineMetric
   };
 
   // Products that are themselves "penalizing": their own score is < 13/20
-  // (i.e. orange/rose band — Bien threshold sits at 13).
+  // (i.e. orange/rose band - Bien threshold sits at 13).
   const penalizingProductsCount = products.filter(
     (p) => typeof p.score === "number" && p.score < 13,
   ).length;

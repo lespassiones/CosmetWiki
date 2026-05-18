@@ -70,7 +70,7 @@ Est-ce une liste INCI plausible ? Réponds en JSON.`;
           tokensOut: r.usage?.completion_tokens,
         };
       },
-      // If OpenAI fails, default to "valid" — don't block a real user.
+      // If OpenAI fails, default to "valid" - don't block a real user.
       fallback: async () => ({
         value: { valid: true, reason: null } as ValidateResult,
         provider: "openai",

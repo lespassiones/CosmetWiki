@@ -47,7 +47,7 @@ export default async function ProfilePage() {
         <dl className="space-y-2 text-sm">
           <div className="flex justify-between border-b border-white/60 py-2">
             <dt className="text-[#6B7280]">Prénom</dt>
-            <dd className="font-medium">{profile?.first_name ?? "—"}</dd>
+            <dd className="font-medium">{profile?.first_name ?? "-"}</dd>
           </div>
           <div className="flex justify-between py-2">
             <dt className="text-[#6B7280]">Email</dt>

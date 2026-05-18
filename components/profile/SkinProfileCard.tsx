@@ -25,7 +25,7 @@ import {
  *            complete the profile when empty)
  *  - edit  : the same form as the advisor onboarding, pre-filled from `initial`
  *
- * Persists via the existing `saveSkinProfile` server action — single source
+ * Persists via the existing `saveSkinProfile` server action - single source
  * of truth, no duplicate validation.
  */
 export function SkinProfileCard({ initial }: { initial: SkinProfile }) {
@@ -98,7 +98,7 @@ function ReadView({ profile }: { profile: SkinProfile }) {
           Type de peau
         </dt>
         <dd className="font-medium text-ink">
-          {profile.skinType ? SKIN_TYPE_LABEL[profile.skinType] : "—"}
+          {profile.skinType ? SKIN_TYPE_LABEL[profile.skinType] : "-"}
         </dd>
       </div>
 
@@ -108,7 +108,7 @@ function ReadView({ profile }: { profile: SkinProfile }) {
         </dt>
         <dd>
           {concerns.length === 0 ? (
-            <span className="text-ink-muted">—</span>
+            <span className="text-ink-muted">-</span>
           ) : (
             <ul className="flex flex-wrap gap-1.5">
               {concerns.map((c) => (
@@ -124,7 +124,7 @@ function ReadView({ profile }: { profile: SkinProfile }) {
         </dd>
       </div>
 
-      {/* Cheveux only shown in the read view when at least one is set —
+      {/* Cheveux only shown in the read view when at least one is set -
           empty stays hidden to keep the card tidy. */}
       {hairConcerns.length > 0 && (
         <div>

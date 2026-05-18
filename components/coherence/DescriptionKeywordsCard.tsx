@@ -71,7 +71,7 @@ export function DescriptionKeywordsCard({
                 return (
                   <li
                     key={p.slug + p.excerpt}
-                    title={`${p.label} — ${tone.label}`}
+                    title={`${p.label} - ${tone.label}`}
                     className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-medium ${tone.bgSoft} ${tone.text} ring-1 ${tone.ringSoft}`}
                   >
                     <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${tone.bg}`} />

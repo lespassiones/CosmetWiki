@@ -19,7 +19,7 @@ type Detail = { used?: number; limit?: number };
  *   }
  *
  * Closing the modal (backdrop click, Escape, "Plus tard") always navigates
- * the user back to "/" — the dashboard is the only sensible landing when
+ * the user back to "/" - the dashboard is the only sensible landing when
  * every action that follows would 429 again.
  */
 export function CreditsExhaustedModal() {

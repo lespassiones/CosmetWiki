@@ -91,7 +91,7 @@ function buildMetaDescription(ing: Ingredient): string {
       ? ` Présent dans ${Number(ing.prevalence_pct).toFixed(2)}% des produits.`
       : "";
   const desc = ing.description ? ` ${ing.description.slice(0, 120)}` : "";
-  return `${name}${fr} — ingrédient cosmétique INCI, ${rating}.${fns}${prev}${desc}`.slice(
+  return `${name}${fr} - ingrédient cosmétique INCI, ${rating}.${fns}${prev}${desc}`.slice(
     0,
     300,
   );
@@ -200,7 +200,7 @@ export default async function IngredientPage({ params, searchParams }: Props) {
         type="application/ld+json"
         // Escape `<` (and `>` for symmetry) so an ingredient name like
         // "Foo </script><x>" can't break out of the JSON-LD script tag.
-        // Standard mitigation — JSON.stringify alone does not escape these.
+        // Standard mitigation - JSON.stringify alone does not escape these.
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c").replace(/>/g, "\\u003e"),
         }}
@@ -534,7 +534,7 @@ const RATING_DESCRIPTION: Record<ColorRating, (n: string) => string> = {
   Orange: (n) =>
     `${n} fait l'objet d'une pénalité moyenne. Souvent issu de la pétrochimie ou de la chimie lourde, avec un impact non négligeable sur l'environnement. Préférer des alternatives quand la formule le permet.`,
   Rouge: (n) =>
-    `${n} est fortement déconseillé ou réglementé. Une controverse sérieuse existe autour de cet ingrédient — à éviter dans la mesure du possible.`,
+    `${n} est fortement déconseillé ou réglementé. Une controverse sérieuse existe autour de cet ingrédient - à éviter dans la mesure du possible.`,
 };
 
 function StatCard({

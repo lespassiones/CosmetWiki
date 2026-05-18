@@ -13,7 +13,7 @@
 export type EuAllergen = {
   inciName: string;          // canonical INCI, uppercase, no accents
   label: string;             // short display label
-  /** Optional human "why is it regulated?" — used by the UI on tap. */
+  /** Optional human "why is it regulated?" - used by the UI on tap. */
   note: string;
 };
 
@@ -33,7 +33,7 @@ export const EU_FRAGRANCE_ALLERGENS: EuAllergen[] = [
   { inciName: "ANISE ALCOHOL", label: "Anise alcohol", note: "Note anisée, sensibilisant." },
   { inciName: "BENZYL CINNAMATE", label: "Benzyl cinnamate", note: "Fixateur de parfum, sensibilisant." },
   { inciName: "FARNESOL", label: "Farnesol", note: "Note florale, sensibilisant." },
-  { inciName: "BUTYLPHENYL METHYLPROPIONAL", label: "Butylphenyl methylpropional", note: "Aussi appelé Lilial — restreint UE depuis 2022." },
+  { inciName: "BUTYLPHENYL METHYLPROPIONAL", label: "Butylphenyl methylpropional", note: "Aussi appelé Lilial - restreint UE depuis 2022." },
   { inciName: "LINALOOL", label: "Linalool", note: "Note florale (lavande, bergamote), sensibilisant après oxydation." },
   { inciName: "BENZYL BENZOATE", label: "Benzyl benzoate", note: "Fixateur de parfum, sensibilisant modéré." },
   { inciName: "CITRONELLOL", label: "Citronellol", note: "Note florale citronnée, sensibilisant léger." },
@@ -43,7 +43,7 @@ export const EU_FRAGRANCE_ALLERGENS: EuAllergen[] = [
   { inciName: "ALPHA-ISOMETHYL IONONE", label: "α-Isomethyl ionone", note: "Note florale, sensibilisant." },
   { inciName: "EVERNIA PRUNASTRI EXTRACT", label: "Evernia prunastri (mousse de chêne)", note: "Extrait naturel de mousse, fort sensibilisant." },
   { inciName: "EVERNIA FURFURACEA EXTRACT", label: "Evernia furfuracea (mousse d'arbre)", note: "Extrait naturel de mousse, fort sensibilisant." },
-  { inciName: "HYDROXYISOHEXYL 3-CYCLOHEXENE CARBOXALDEHYDE", label: "HICC (Lyral)", note: "Lyral — INTERDIT dans l'UE depuis 2021, signal d'alerte fort." },
+  { inciName: "HYDROXYISOHEXYL 3-CYCLOHEXENE CARBOXALDEHYDE", label: "HICC (Lyral)", note: "Lyral - INTERDIT dans l'UE depuis 2021, signal d'alerte fort." },
 ];
 
 const EU_NAMES_SET = new Set(EU_FRAGRANCE_ALLERGENS.map((a) => a.inciName));

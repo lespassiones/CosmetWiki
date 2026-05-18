@@ -2,16 +2,16 @@
  * LLM calls for the "Promesses vs Formule" feature.
  *
  * Two roles, two calls:
- *   1. extractPromisesFromDescription — reads the marketing copy, returns a
+ *   1. extractPromisesFromDescription - reads the marketing copy, returns a
  *      structured list of detected promises (constrained to a closed enum of
  *      category slugs from claims.ts) and unverifiable fragments.
- *   2. generateConclusion — writes a single sentence summarising the engine's
+ *   2. generateConclusion - writes a single sentence summarising the engine's
  *      verdicts. No invention possible: it's only allowed to rephrase the
  *      already-computed verdicts.
  *
  * Both calls use OpenAI's strict JSON schema mode so the model literally
  * cannot return free-form text. Mistral fallback uses prompt-only structure
- * (Mistral doesn't fully enforce JSON schemas) — the parser is defensive.
+ * (Mistral doesn't fully enforce JSON schemas) - the parser is defensive.
  */
 
 import {
@@ -80,7 +80,7 @@ const RELEVANT_EFFECT_BY_TYPE: Record<ProductType, "hair" | "skin" | "lips" | "f
  */
 const PRODUCT_TYPE_GUIDANCE: Record<ProductType, string> = {
   cheveux:
-    "Le produit agit sur la fibre capillaire et le cuir chevelu. Promesses pertinentes : hydratation, démêlage, brillance, anti-frisottis, anti-chute, densification, anti-pellicules, fixation/coiffage, protection thermique, fortification de la fibre. Le cheveu mort ne contient ni collagène ni cellules vivantes — toute promesse 'régénère les cellules du cheveu' / 'collagène capillaire' / 'jeunesse cellulaire' / 'anti-âge cellulaire' est HORS-SUJET biologiquement. Le cuir chevelu peut être apaisé / nourri (peau).",
+    "Le produit agit sur la fibre capillaire et le cuir chevelu. Promesses pertinentes : hydratation, démêlage, brillance, anti-frisottis, anti-chute, densification, anti-pellicules, fixation/coiffage, protection thermique, fortification de la fibre. Le cheveu mort ne contient ni collagène ni cellules vivantes - toute promesse 'régénère les cellules du cheveu' / 'collagène capillaire' / 'jeunesse cellulaire' / 'anti-âge cellulaire' est HORS-SUJET biologiquement. Le cuir chevelu peut être apaisé / nourri (peau).",
   peau_visage:
     "Le produit agit sur la peau du visage. Promesses pertinentes : hydratation, apaisement, anti-âge, éclat, exfoliation, raffermissement, anti-tache, anti-pores, anti-acné, protection UV. HORS-SUJET : promesses capillaires (démêlage, anti-frisottis…), olfactives (tenue parfum), dentaires.",
   peau_corps:
@@ -96,7 +96,7 @@ const PRODUCT_TYPE_GUIDANCE: Record<ProductType, string> = {
   maquillage:
     "Le produit est un maquillage (teint, yeux, lèvres). Promesses pertinentes : tenue, couvrance, fini (mat/satin/glow), confort de port, anti-transfert. Promesses soin parfois ajoutées (hydratation, anti-âge) à analyser comme bonus, mais le cœur reste maquillage. HORS-SUJET : promesses capillaires.",
   autre:
-    "Type de produit inconnu — analyse de façon permissive, n'envoie en hors-sujet que les claims manifestement absurdes (ex: 'régénère les cellules' sur un parfum).",
+    "Type de produit inconnu - analyse de façon permissive, n'envoie en hors-sujet que les claims manifestement absurdes (ex: 'régénère les cellules' sur un parfum).",
 };
 
 function buildExtractionPrompt(description: string, productType: ProductType) {
@@ -105,11 +105,11 @@ function buildExtractionPrompt(description: string, productType: ProductType) {
   const effectList = effectCats
     .map(
       (c) =>
-        `- ${c.slug} (${c.label}) — actifs typiques : ${c.example_actives.join(", ")}`,
+        `- ${c.slug} (${c.label}) - actifs typiques : ${c.example_actives.join(", ")}`,
     )
     .join("\n");
   const absenceList = absenceCats
-    .map((c) => `- ${c.slug} (${c.label}) — mots-clés : ${c.keywords.join(", ")}`)
+    .map((c) => `- ${c.slug} (${c.label}) - mots-clés : ${c.keywords.join(", ")}`)
     .join("\n");
 
   const typeLabel = PRODUCT_TYPE_LABELS[productType];
@@ -135,9 +135,9 @@ Si une promesse décrit un effet attendu sur la peau/cheveux MAIS ne tombe dans 
 
 ═══ MÉTHODE SYSTÉMATIQUE (suivre dans l'ordre) ═══
 
-Étape 1 — Découpage : lis la description et coupe-la mentalement EN PHRASES. N'ignore aucune phrase.
+Étape 1 - Découpage : lis la description et coupe-la mentalement EN PHRASES. N'ignore aucune phrase.
 
-Étape 2 — Pour chaque phrase, repère :
+Étape 2 - Pour chaque phrase, repère :
   (a) Un VERBE D'EFFET (liste indicative non exhaustive) :
       hydrate, nourrit, fortifie, renforce, raffermit, lisse, démêle, fixe, coiffe, définit,
       stimule, ralentit, prévient, élimine, réduit, atténue, apaise, calme, protège, régénère,
@@ -149,12 +149,12 @@ Si une promesse décrit un effet attendu sur la peau/cheveux MAIS ne tombe dans 
 
 Si une phrase ne contient aucun de (a), (b), (c) → pas une promesse, passe.
 
-Étape 3 — Filtre PERTINENCE selon le TYPE DE PRODUIT :
+Étape 3 - Filtre PERTINENCE selon le TYPE DE PRODUIT :
   Pour chaque promesse identifiée, vérifie qu'elle est BIOLOGIQUEMENT pertinente pour un produit de type "${typeLabel}".
-  Si la promesse décrit un effet qui n'a PAS de sens biologique sur ce type de produit (ex: "production de collagène" sur les cheveux — le cheveu mort ne produit pas de collagène),
+  Si la promesse décrit un effet qui n'a PAS de sens biologique sur ce type de produit (ex: "production de collagène" sur les cheveux - le cheveu mort ne produit pas de collagène),
   → mets-la dans le champ \`out_of_scope\` (pas dans \`promises\`), avec une explication courte (1 phrase).
 
-Étape 4 — DÉDUPLICATION FINALE : avant de retourner ton JSON, RELIS ta liste \`promises\`.
+Étape 4 - DÉDUPLICATION FINALE : avant de retourner ton JSON, RELIS ta liste \`promises\`.
   Si deux entrées partagent le même \`category_slug\` OU expriment la même intention reformulée
   (ex: "anti-chute" + "stoppe la chute" + "ralentit la chute" = 1 seule promesse),
   GARDE celle dont l'excerpt est le plus complet, SUPPRIME les autres.
@@ -208,8 +208,8 @@ Sortie :
   · {category_slug: "absence_paraben", label: "Sans paraben", excerpt: "Sans paraben"}
 - unverifiable: []
 - out_of_scope:
-  · {excerpt: "production de collagène dans le cheveu", claimed_effect: "anti-âge cellulaire", reason: "Le cheveu mort ne contient pas de cellules vivantes ni de collagène — la production de collagène n'a pas de support biologique sur un produit capillaire."}
-  · {excerpt: "régénère les cellules", claimed_effect: "régénération cellulaire", reason: "Les cellules du cheveu kératinisé ne se régénèrent pas — promesse biologiquement non applicable à un produit capillaire."}
+  · {excerpt: "production de collagène dans le cheveu", claimed_effect: "anti-âge cellulaire", reason: "Le cheveu mort ne contient pas de cellules vivantes ni de collagène - la production de collagène n'a pas de support biologique sur un produit capillaire."}
+  · {excerpt: "régénère les cellules", claimed_effect: "régénération cellulaire", reason: "Les cellules du cheveu kératinisé ne se régénèrent pas - promesse biologiquement non applicable à un produit capillaire."}
 
 ═══ EXEMPLE 3 (parfum, dédup) ═══
 
@@ -470,7 +470,7 @@ function isProductType(s: string): s is ProductType {
 /**
  * Classify a marketing description into one of the 8 product types (+ autre).
  * Used by /api/coherence when no `product_type` hint is provided by the
- * upstream analysis. Short prompt, low max_tokens — cheap.
+ * upstream analysis. Short prompt, low max_tokens - cheap.
  */
 export async function detectProductType(
   description: string,
@@ -588,7 +588,7 @@ Retourne JSON strict.`;
 //      For promises that don't map to a static catalogue category, we ask the
 //      LLM to look at the actual ingredients of the formula and pick the ones
 //      it considers active for that specific promise. The LLM is given the
-//      list of items by slug — it can ONLY cite slugs from that list, so it
+//      list of items by slug - it can ONLY cite slugs from that list, so it
 //      cannot invent ingredients. The engine re-validates every cited slug
 //      anyway as a defence-in-depth measure (see resolveOpenPromise).
 // -----------------------------------------------------------------------------
@@ -640,14 +640,14 @@ function buildOpenPromisePrompt(
   promiseExcerpt: string,
   items: FormulaItemForLlm[],
 ) {
-  // Compact list — only items with a slug (the only ones we can match back
+  // Compact list - only items with a slug (the only ones we can match back
   // mechanically). Truncate to 60 to control prompt size on long formulas.
   const itemsList = items
     .slice(0, 60)
     .map(
       (it, i) =>
         `${i + 1}. ${it.name} (slug: ${it.slug})${
-          it.primaryFunction ? ` — ${it.primaryFunction}` : ""
+          it.primaryFunction ? ` - ${it.primaryFunction}` : ""
         }`,
     )
     .join("\n");
@@ -821,7 +821,7 @@ function buildConclusionPrompt(
 
 Style : direct, factuel, accessible à un consommateur français lambda. Pas de jugement moral, pas d'emoji, pas de marketing inversé ("trompeur"). Tu décris ce que la formule fait probablement vs ce qui est promis.
 
-Si des promesses sont CONTREDITES (le produit dit "sans X" mais contient X), mentionne-les en priorité — c'est l'info la plus actionnable pour l'utilisateur.
+Si des promesses sont CONTREDITES (le produit dit "sans X" mais contient X), mentionne-les en priorité - c'est l'info la plus actionnable pour l'utilisateur.
 
 Structure attendue : "[ce que la formule tient] mais [ce qu'elle ne tient pas / ce qui est contredit]. Effet attendu : [ce que l'utilisateur peut réellement ressentir]."
 

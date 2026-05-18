@@ -83,7 +83,7 @@ const TAG_LABELS: Record<string, string> = {
 };
 
 // Tags reported as "good when absent". The rest are reported only when present.
-// Extended on 2026-05 to cover `conservateur`, `propoxyle`, `ogm` — users asked
+// Extended on 2026-05 to cover `conservateur`, `propoxyle`, `ogm` - users asked
 // for an exhaustive observations panel rather than a curated subset.
 const ABSENCE_REPORTED = new Set([
   "paraben",
@@ -104,7 +104,7 @@ const ABSENCE_REPORTED = new Set([
 ]);
 
 // Tags whose absence is a NEUTRAL observation (not a "win"). Essential oils
-// are a deliberate inclusion in natural brands — absence isn't necessarily
+// are a deliberate inclusion in natural brands - absence isn't necessarily
 // good news, so we surface it as "info" instead of the green "absent" pill.
 // Anything in this set MUST also be in ABSENCE_REPORTED above for the absence
 // branch to fire.
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Requête invalide." }, { status: 400 });
   }
 
-  // Honey-pot anti-bot field — reject before touching Supabase.
+  // Honey-pot anti-bot field - reject before touching Supabase.
   if (body.hp && body.hp.length > 0) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -294,7 +294,7 @@ export async function POST(req: NextRequest) {
     };
   });
 
-  // Capture FR/EN alias matches BEFORE we dedupe — the UI surfaces these as
+  // Capture FR/EN alias matches BEFORE we dedupe - the UI surfaces these as
   // "Doublons FR/EN détectés (Water → Aqua, Eau → Aqua)" so the user sees
   // why their pasted list shrank.
   const aliasesUsed = rawEnriched
@@ -305,7 +305,7 @@ export async function POST(req: NextRequest) {
   // pasting "AQUA, WATER, EAU" produces three identical "Aqua" rows in the
   // results table and triple-counts a single ingredient in score/spectrum/
   // observations. Suggestions and unmatched inputs (effective_inci_id null)
-  // pass through untouched — each user-typed token is unique on its own.
+  // pass through untouched - each user-typed token is unique on its own.
   // Positions are renumbered to stay contiguous so the spectrum and the
   // threshold-context computation downstream don't see gaps.
   const seenInciIds = new Set<string | number>();
@@ -320,7 +320,7 @@ export async function POST(req: NextRequest) {
     })
     .map((r, i) => ({ ...r, position_idx: i }));
 
-  // Counters (suggestions count as "Non reconnu" — they did not match)
+  // Counters (suggestions count as "Non reconnu" - they did not match)
   const counts: Record<string, number> = { Vert: 0, Jaune: 0, Orange: 0, Rouge: 0, "Non reconnu": 0 };
   for (const r of enriched) {
     if (r.effective_color) counts[r.effective_color]++;
@@ -362,7 +362,7 @@ export async function POST(req: NextRequest) {
   const observations: Observation[] = [];
   // Reported absences (good news, except for NEUTRAL_WHEN_ABSENT tags which
   // are reported as "info" to avoid implying that absence is automatically
-  // a win — essential oils are a legit ingredient in natural-brand products).
+  // a win - essential oils are a legit ingredient in natural-brand products).
   for (const tag of ABSENCE_REPORTED) {
     const c = tagCounts[tag] || 0;
     if (c === 0) {
@@ -442,7 +442,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Suggestions (fuzzy 0.55..0.90) — propose "Did you mean: X?" to the UI
+  // Suggestions (fuzzy 0.55..0.90) - propose "Did you mean: X?" to the UI
   const suggestions = enriched
     .filter((r) => r.match_kind === "suggestion" && r.suggested_name)
     .map((r) => ({
@@ -515,7 +515,7 @@ export async function POST(req: NextRequest) {
     }
   }
   // Add an observation when at least one is detected. Style matches existing
-  // observations — "X allergènes parfumants UE sur 26 listés."
+  // observations - "X allergènes parfumants UE sur 26 listés."
   if (allergensDetected.length > 0) {
     observations.push({
       tag: "eu-fragrance-allergens",
@@ -554,7 +554,7 @@ export async function POST(req: NextRequest) {
           slug: r.slug,
           colorRating: r.effective_color,
         })),
-        message: `${n} ingrédient${n > 1 ? "s" : ""} sensible${n > 1 ? "s" : ""} apparai${n > 1 ? "ssent" : "t"} après le parfum — concentration ≤ 1 %, impact réel limité.`,
+        message: `${n} ingrédient${n > 1 ? "s" : ""} sensible${n > 1 ? "s" : ""} apparai${n > 1 ? "ssent" : "t"} après le parfum - concentration ≤ 1 %, impact réel limité.`,
       });
     }
   }
@@ -640,7 +640,7 @@ export async function POST(req: NextRequest) {
   // Auto-save the analysis for signed-in users + AI categorize (fire-and-forget).
   // We do this AFTER preparing the response so a failure here never blocks
   // the user. Categorization runs in the background and is patched in later.
-  // Errors are logged server-side — they used to be swallowed silently, which
+  // Errors are logged server-side - they used to be swallowed silently, which
   // hid a months-long RLS misconfiguration (zero rows ever persisted).
   let savedAnalysisId: string | null = null;
   let addedToRoutine = false;

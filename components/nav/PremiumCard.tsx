@@ -2,12 +2,12 @@ import Link from "next/link";
 import { DiamondIcon } from "./NavIcons";
 
 /**
- * Pinky Premium upsell card — used in both the desktop sidebar and the mobile
+ * Pinky Premium upsell card - used in both the desktop sidebar and the mobile
  * burger drawer, slotted just above the Profil entry. Always links to
  * `/offre` so we have one entry point for the upsell.
  *
  * Hidden on the /offre page itself (no use trying to convert someone who's
- * already there) — the parent renders it conditionally based on pathname.
+ * already there) - the parent renders it conditionally based on pathname.
  */
 export function PremiumCard() {
   return (

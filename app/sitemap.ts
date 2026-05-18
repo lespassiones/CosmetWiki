@@ -7,8 +7,11 @@ export const revalidate = 86400;
 
 const STATIC_ROUTES: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "/", priority: 1.0, changeFrequency: "daily" },
-  { path: "/comment-ca-marche", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/fonctionnalites", priority: 0.9, changeFrequency: "monthly" },
+  { path: "/comment-ca-marche", priority: 0.6, changeFrequency: "monthly" },
   { path: "/blog", priority: 0.7, changeFrequency: "weekly" },
+  { path: "/blog/spf-50-visage-7-erreurs", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/blog/perturbateurs-endocriniens-cosmetiques-2026", priority: 0.7, changeFrequency: "monthly" },
   { path: "/faq", priority: 0.8, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.5, changeFrequency: "yearly" },
 ];
@@ -16,7 +19,7 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: Metadata
 async function fetchIngredientSlugs(): Promise<string[]> {
   // Primary path : JSONB RPC returning every active slug in a single row.
   // This bypasses PostgREST's `db.max_rows = 1000` cap, which would otherwise
-  // truncate the response (the cap is on row count, not payload size — so a
+  // truncate the response (the cap is on row count, not payload size - so a
   // single row holding a JSON array of all slugs is returned in full).
   try {
     const { data, error } = await supabaseAnon().rpc(

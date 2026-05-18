@@ -73,7 +73,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
         <div className="mb-5 flex items-baseline justify-between">
           <h1 className="text-xl font-semibold text-ink">
-            Résultats pour <span className="text-rose-700">« {q || "—"} »</span>
+            Résultats pour <span className="text-rose-700">« {q || "-"} »</span>
           </h1>
           <p className="text-sm text-ink-muted">
             {hits.length} ingrédient{hits.length > 1 ? "s" : ""}

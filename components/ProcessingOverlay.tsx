@@ -10,7 +10,7 @@ const DEFAULT_STEPS = [
   "Génération de la synthèse",
 ];
 
-/** Random duration between 5000 and 6000 ms — used for both list analysis and single-ingredient lookups. */
+/** Random duration between 5000 and 6000 ms - used for both list analysis and single-ingredient lookups. */
 export function randomProcessingTotal(): number {
   return Math.round(5000 + Math.random() * 1000);
 }

@@ -54,7 +54,7 @@ export function MobileBurgerMenu({
 
   return (
     <>
-      {/* Floating burger button — top-right, mobile only.
+      {/* Floating burger button - top-right, mobile only.
           Sits above the page content and below modals (z-40 vs ScanSheet at z-100). */}
       <button
         type="button"
@@ -73,7 +73,7 @@ export function MobileBurgerMenu({
           aria-modal="true"
           aria-label="Menu de navigation"
         >
-          {/* Dimmed backdrop — tap to close */}
+          {/* Dimmed backdrop - tap to close */}
           <button
             type="button"
             onClick={() => setOpen(false)}
@@ -81,7 +81,7 @@ export function MobileBurgerMenu({
             className="absolute inset-0 bg-black/45 animate-[fadeIn_180ms_ease-out]"
           />
 
-          {/* Drawer — slides in from the right */}
+          {/* Drawer - slides in from the right */}
           <aside
             className="absolute top-0 right-0 h-full w-[78%] max-w-[320px] bg-[#FAFAFA] shadow-[-12px_0_40px_-8px_rgba(15,23,42,0.30)] animate-[slideInRight_220ms_ease-out] flex flex-col"
           >
@@ -123,7 +123,7 @@ export function MobileBurgerMenu({
                 })}
               </ul>
 
-              {/* Bottom block — Credits pill + Premium upsell + sign-out button,
+              {/* Bottom block - Credits pill + Premium upsell + sign-out button,
                   pinned to the bottom of the drawer (above the safe area). The
                   sign-out button is intentionally placed here so it's reachable
                   in one tap from any page, instead of buried under /profile. */}

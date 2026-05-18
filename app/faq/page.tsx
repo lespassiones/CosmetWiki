@@ -6,7 +6,7 @@ import { FaqExplorer } from "@/components/faq/FaqExplorer";
 import { SITE_URL } from "@/lib/siteUrl";
 import { FAQ_CATEGORIES, FAQ_ITEMS } from "./data";
 
-const TITLE = "FAQ — Questions fréquentes";
+const TITLE = "FAQ - Questions fréquentes";
 const DESCRIPTION =
   "Tout ce que tu as toujours voulu savoir sur tes cosmétiques : composition INCI, score, ingrédients, confidentialité, abonnement. Les réponses claires de Cosme Check.";
 
@@ -46,7 +46,7 @@ function buildFaqJsonLd() {
         "@id": `${SITE_URL}/faq#faq`,
         url: `${SITE_URL}/faq`,
         inLanguage: "fr",
-        name: "Questions fréquentes — Cosme Check",
+        name: "Questions fréquentes - Cosme Check",
         description: DESCRIPTION,
         mainEntity: FAQ_ITEMS.map((it) => ({
           "@type": "Question",

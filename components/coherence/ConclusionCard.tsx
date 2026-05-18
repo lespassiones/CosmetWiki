@@ -2,10 +2,10 @@
  * Light-blue pastel card with the LLM-written conclusion sentence.
  *
  * Sized to its content (no stretching). Its grid parent uses items-center
- * so the card sits at the vertical centre of the table column — visually
+ * so the card sits at the vertical centre of the table column - visually
  * floating in the middle of the dense table, never inflating to match.
  *
- * Icon + label sit on top of the body text (stacked) — chosen by the user
+ * Icon + label sit on top of the body text (stacked) - chosen by the user
  * over a side-by-side layout because it gives the body text full width.
  */
 export function ConclusionCard({ conclusion }: { conclusion: string }) {

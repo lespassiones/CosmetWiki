@@ -29,7 +29,7 @@ export function RoutineSuggestions({
   const [suggestions, setSuggestions] = useState<Suggestion[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  // Avoid the unused warning — these props are reserved for future client-side
+  // Avoid the unused warning - these props are reserved for future client-side
   // recomputation (e.g. live preview when toggling products).
   void metrics; void products;
 

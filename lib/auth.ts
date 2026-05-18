@@ -80,7 +80,7 @@ export const getProfile = cache(async (): Promise<CosmetUserProfile | null> => {
         { onConflict: "id", ignoreDuplicates: true },
       );
   } catch {
-    // ignore — we'll still return a synthetic profile so the UI shows a name
+    // ignore - we'll still return a synthetic profile so the UI shows a name
   }
 
   return {

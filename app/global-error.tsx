@@ -3,9 +3,9 @@
 import { useEffect } from "react";
 
 /**
- * Root error boundary. Triggers when the RootLayout itself throws (rare —
+ * Root error boundary. Triggers when the RootLayout itself throws (rare -
  * font fetch failure, header crash…). Replaces <html> entirely, so we don't
- * have the AppShell available here — keep it minimal but still on-brand.
+ * have the AppShell available here - keep it minimal but still on-brand.
  */
 export default function GlobalError({
   error,

@@ -9,7 +9,7 @@
  * coherence wizard as the description input.
  *
  * The optional `analysisId` lets us PATCH the analyses row in the same call
- * — we trust RLS to gate the update to the row owner.
+ * - we trust RLS to gate the update to the row owner.
  */
 import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
@@ -40,7 +40,7 @@ function descriptionCacheKey(input: {
   return `promesse:description:${hash}`;
 }
 
-// What we cache in ai_cache. We DON'T cache the `persisted` flag — it depends
+// What we cache in ai_cache. We DON'T cache the `persisted` flag - it depends
 // on the analysisId the caller passes, which is user-specific. We re-PATCH on
 // every cache hit so each user's analyses row gets updated correctly.
 type CachedDescription = {
@@ -48,7 +48,7 @@ type CachedDescription = {
   sourceUrl: string;
 };
 
-// Shape the LLM may return. Validated at runtime via Zod — if the model
+// Shape the LLM may return. Validated at runtime via Zod - if the model
 // invents { description: ["array"] } or returns a non-object, we refuse the
 // response and treat it as "format_inattendu" instead of crashing on
 // `parsed.description.trim()`.
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Cache lookup BEFORE consuming the credit. The cached payload contains
-  // only {description, sourceUrl} — we re-PATCH the analyses row for the
+  // only {description, sourceUrl} - we re-PATCH the analyses row for the
   // current user below regardless of cache hit.
   const cacheKey = descriptionCacheKey({ sourceUrl, candidateName, brand, productType });
   const cachedDesc = await getCached<CachedDescription>(cacheKey);
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
     "RÈGLES :",
     "1. Cite la marque, pas tes propres mots. Reformule légèrement si nécessaire mais reste FIDÈLE au discours de la marque.",
     "2. N'INVENTE PAS de bénéfices. Si tu ne trouves pas de description marketing crédible, renvoie `{\"notFound\": true, \"reason\": \"…\"}`.",
-    "3. Pas de listing d'ingrédients INCI — ça vient de l'autre côté. Concentre-toi sur les promesses et les actifs marketing.",
+    "3. Pas de listing d'ingrédients INCI - ça vient de l'autre côté. Concentre-toi sur les promesses et les actifs marketing.",
     "4. Longueur cible : 200-600 caractères, format paragraphe (pas de liste à puces, pas de markdown).",
     "5. Renvoie en JSON STRICT, pas de markdown.",
     "",
@@ -162,7 +162,7 @@ Cherche la promesse marketing officielle (claims, bénéfices, actifs mis en ava
   // resolve them.
   const updates: Record<string, string> = {};
   // product_label is the human title shown everywhere (history list, detail
-  // page, analyse panel). Brand first if we have it, then the product name —
+  // page, analyse panel). Brand first if we have it, then the product name -
   // mirrors the convention used by AnalysisRunner when joining productSource.
   const newLabel = [brand, candidateName].filter(Boolean).join(" ").slice(0, 200);
   if (newLabel) updates.product_label = newLabel;
@@ -174,7 +174,7 @@ Cherche la promesse marketing officielle (claims, bénéfices, actifs mis en ava
   let notFoundReason: string | null = null;
 
   if (cachedDesc) {
-    // Cache hit — skip the LLM call entirely, reuse the cached payload.
+    // Cache hit - skip the LLM call entirely, reuse the cached payload.
     description = cachedDesc.description;
     finalUrl = cachedDesc.sourceUrl;
   } else {
@@ -208,7 +208,7 @@ Cherche la promesse marketing officielle (claims, bénéfices, actifs mis en ava
     }
 
     // Cache the successful result so the next user picking the same candidate
-    // gets it for free. We don't cache misses — OBF/INCIDecoder data improves
+    // gets it for free. We don't cache misses - OBF/INCIDecoder data improves
     // over time and a retry might succeed.
     if (description && !notFoundReason) {
       void setCached(cacheKey, { description, sourceUrl: finalUrl } satisfies CachedDescription);
@@ -218,13 +218,13 @@ Cherche la promesse marketing officielle (claims, bénéfices, actifs mis en ava
   void chargedFromMiss;
 
   // Fold the description bits into the same PATCH payload when we got them
-  // — single round-trip to Supabase instead of two.
+  // - single round-trip to Supabase instead of two.
   if (description) {
     updates.product_description = description;
     updates.promise_source_url = finalUrl;
   }
 
-  // Best-effort persist on the analyses row. The analysisId is optional —
+  // Best-effort persist on the analyses row. The analysisId is optional -
   // the modal might call this endpoint before the analyse has been saved
   // (anonymous user, or RLS row not yet visible). In that case we just
   // return whatever we resolved and let the caller proceed.

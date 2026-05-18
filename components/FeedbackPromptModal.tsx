@@ -58,7 +58,7 @@ export function FeedbackPromptModal({ signedIn }: { signedIn: boolean }) {
 
     // Only fire when we LEAVE a `/promesses/[id]` page (not when we land on it).
     if (!PROMESSE_PATH_RE.test(prev)) return;
-    if (PROMESSE_PATH_RE.test(pathname)) return; // moving between two promesse ids — wait
+    if (PROMESSE_PATH_RE.test(pathname)) return; // moving between two promesse ids - wait
     if (lockedRef.current) return;
     if (open) return;
 
@@ -79,7 +79,7 @@ export function FeedbackPromptModal({ signedIn }: { signedIn: boolean }) {
         setTrigger(t);
         setOpen(true);
       } catch {
-        /* silent — the popup is non-critical */
+        /* silent - the popup is non-critical */
       }
     })();
     return () => {
@@ -206,7 +206,7 @@ export function FeedbackPromptModal({ signedIn }: { signedIn: boolean }) {
             </div>
 
             <label htmlFor="feedback-comment" className="mt-4 block text-[12px] font-medium text-[#374151]">
-              Un mot à ajouter&nbsp;? <span className="text-[#9CA3AF] font-normal">— optionnel</span>
+              Un mot à ajouter&nbsp;? <span className="text-[#9CA3AF] font-normal">- optionnel</span>
             </label>
             <textarea
               id="feedback-comment"

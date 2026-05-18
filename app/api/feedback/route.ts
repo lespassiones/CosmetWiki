@@ -2,7 +2,7 @@
  * POST /api/feedback
  *
  * Submits a user feedback (rating 1-5 + optional comment). Auth required.
- * Idempotent per (user_id, trigger_source) — if the user has already submitted
+ * Idempotent per (user_id, trigger_source) - if the user has already submitted
  * for this trigger, we return `{ ok: true, alreadySubmitted: true }` instead
  * of 409 so the popup can quietly disarm itself.
  */

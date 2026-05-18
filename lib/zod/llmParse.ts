@@ -5,12 +5,12 @@
  * "return {description: string}" can come back as {description: ["array"]}
  * or {desc: "..."} or {description: null}. The naive `JSON.parse(text) as T`
  * accepts ANY shape, then the calling code reads a field that doesn't exist
- * and either crashes or — much worse — writes garbage to the DB via
+ * and either crashes or - much worse - writes garbage to the DB via
  * setProductCache / analyses inserts.
  *
  * `llmParse(schema, text)` runs the Zod schema against the parsed JSON and
  * returns null if it doesn't match. The caller decides what to do (retry,
- * skip cache, fall back to manual entry…) — explicitly, instead of letting
+ * skip cache, fall back to manual entry…) - explicitly, instead of letting
  * bad data leak into Supabase.
  */
 import type { ZodType } from "zod";

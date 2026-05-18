@@ -49,7 +49,7 @@ export function ExplainIngredient({ slug }: { slug: string }) {
             const e = (await exposureRes.json()) as Exposure;
             setPersonalLine(e.personalLine);
           } catch {
-            // ignore — keep personalLine null
+            // ignore - keep personalLine null
           }
         }
       } catch {

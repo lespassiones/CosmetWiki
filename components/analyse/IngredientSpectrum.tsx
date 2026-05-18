@@ -38,7 +38,7 @@ const EMPTY_COLOR = "#E5E7EB";
  *  - clicking scrolls the matching row into view (ids `ingredient-row-{N}`)
  *
  * Section titles carry an (i) tooltip explaining why the spectrum matters.
- * A warning chip is shown when any of the first 5 isn't green — those are the
+ * A warning chip is shown when any of the first 5 isn't green - those are the
  * ~75% of the formula, so a non-vert there is worth flagging.
  */
 export function IngredientSpectrum({
@@ -92,7 +92,7 @@ export function IngredientSpectrum({
         {top5.map((rating, i) => {
           const position = i + 1;
           const it = ingredientAt(position);
-          const name = it?.name ?? it?.input ?? "—";
+          const name = it?.name ?? it?.input ?? "-";
           return (
             <li key={i} className="flex flex-col items-center gap-1">
               <Tooltip
@@ -102,7 +102,7 @@ export function IngredientSpectrum({
                     <div className="font-semibold leading-tight">{name}</div>
                     <div className="mt-0.5 text-white/70">
                       Position {position}
-                      {rating ? ` · ${rating} — ${RATING_LABEL[rating]}` : " · non reconnu"}
+                      {rating ? ` · ${rating} - ${RATING_LABEL[rating]}` : " · non reconnu"}
                     </div>
                   </>
                 }
@@ -110,7 +110,7 @@ export function IngredientSpectrum({
                 <button
                   type="button"
                   onClick={() => scrollToPosition(position)}
-                  aria-label={`${name} — position ${position}${rating ? ` — ${rating}` : ""}`}
+                  aria-label={`${name} - position ${position}${rating ? ` - ${rating}` : ""}`}
                   className="h-9 w-9 rounded-md transition hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
                   style={{ background: rating ? COLOR_MAP[rating] : EMPTY_COLOR }}
                 />
@@ -125,11 +125,11 @@ export function IngredientSpectrum({
         <p className="mb-4 rounded-xl bg-rose-50/70 ring-1 ring-rose-100 px-3 py-2 text-[11px] leading-snug text-rose-700">
           <span className="font-semibold">Attention : </span>
           {nonGreenInTop5} ingrédient{nonGreenInTop5 > 1 ? "s" : ""} non-vert
-          {nonGreenInTop5 > 1 ? "s" : ""} dans le top 5 — c&apos;est l&apos;essentiel de la formule.
+          {nonGreenInTop5 > 1 ? "s" : ""} dans le top 5 - c&apos;est l&apos;essentiel de la formule.
         </p>
       ) : (
         <p className="mb-4 text-[11px] text-[#9CA3AF]">
-          Top 5 entièrement vert — la majorité de la formule est sans risque connu.
+          Top 5 entièrement vert - la majorité de la formule est sans risque connu.
         </p>
       )}
 
@@ -154,7 +154,7 @@ export function IngredientSpectrum({
         {top10.map((rating, i) => {
           const position = i + 1;
           const it = ingredientAt(position);
-          const name = it?.name ?? it?.input ?? "—";
+          const name = it?.name ?? it?.input ?? "-";
           return (
             <li key={i}>
               <Tooltip
@@ -172,7 +172,7 @@ export function IngredientSpectrum({
                 <button
                   type="button"
                   onClick={() => scrollToPosition(position)}
-                  aria-label={`${name} — position ${position}${rating ? ` — ${rating}` : ""}`}
+                  aria-label={`${name} - position ${position}${rating ? ` - ${rating}` : ""}`}
                   className="h-5 w-5 rounded-sm transition hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
                   style={{ background: rating ? COLOR_MAP[rating] : EMPTY_COLOR }}
                 />

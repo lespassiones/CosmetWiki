@@ -63,7 +63,7 @@ export function AnalyseResultPanel({
   /** Id of the existing coherence (promise) analysis attached to this
    *  analyse, if any. When set, the "Analyser la promesse" button becomes
    *  "Voir l'analyse de la promesse" and links to /promesses/{id} instead
-   *  of opening the modal — so the user doesn't pay for a second web
+   *  of opening the modal - so the user doesn't pay for a second web
    *  search round-trip on the same product. */
   existingCoherenceId?: string | null;
   /** When true, the PromesseFlowModal opens automatically on mount. Used by
@@ -82,13 +82,13 @@ export function AnalyseResultPanel({
    * Override the breadcrumb trail. Last item is the current page (not
    * clickable). When omitted, defaults to `[Accueil, Nouvelle analyse]`
    * with the home item wired to `onResetHome` if provided. Pass `null`
-   * to hide the breadcrumb entirely — used by the history detail page
+   * to hide the breadcrumb entirely - used by the history detail page
    * which renders its own back button instead.
    */
   breadcrumb?: BreadcrumbItem[] | null;
 }) {
   const title = productLabel?.trim() || "Analyse de votre liste";
-  // The "Analyser la promesse" CTA is always offered — the flow handles
+  // The "Analyser la promesse" CTA is always offered - the flow handles
   // the "no product name" case gracefully: the web-search step tries the
   // INCI alone, and if nothing crédible comes back the modal falls through
   // to the "décris la promesse toi-même" textarea. Earlier we required a
@@ -137,7 +137,7 @@ export function AnalyseResultPanel({
       )}
 
       {/*
-        Layout via grid-template-areas — same DOM order regardless of
+        Layout via grid-template-areas - same DOM order regardless of
         viewport, but the placement of each section differs:
 
         MOBILE (single column, user-requested order)
@@ -278,7 +278,7 @@ function TitleBar({
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
         {existingCoherenceId ? (
-          // Coherence already exists for this analyse — short-circuit to it
+          // Coherence already exists for this analyse - short-circuit to it
           // instead of re-running the (paid) web search + LLM round-trip.
           <Link
             href={`/promesses/${existingCoherenceId}`}
@@ -313,7 +313,7 @@ function BigScoreCard({
   total: number;
 }) {
   // Share of recognised ingredients flagged as "no penalty" (vert). Computed
-  // against `matched` (not `total`) — non-recognised ingredients aren't
+  // against `matched` (not `total`) - non-recognised ingredients aren't
   // classified, so it would be misleading to count them as either safe or
   // penalising.
   const pctSansPenalite =
@@ -321,7 +321,7 @@ function BigScoreCard({
 
   return (
     <article className="rounded-2xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
-      {/* MOBILE — compact stacked: blob (no legend) + "% sans pénalité" + ratio. */}
+      {/* MOBILE - compact stacked: blob (no legend) + "% sans pénalité" + ratio. */}
       <div className="flex flex-col items-center gap-2 lg:hidden">
         <IngredientBlob counts={counts} variant="md" showCenter animate />
         {pctSansPenalite !== null && (
@@ -334,7 +334,7 @@ function BigScoreCard({
         </p>
       </div>
 
-      {/* DESKTOP — full blob with "% sans pénalité" injected between the
+      {/* DESKTOP - full blob with "% sans pénalité" injected between the
           centre count and the colour legend, then the ratio at the bottom. */}
       <div className="hidden lg:flex lg:flex-col lg:items-center">
         <IngredientBlob
@@ -369,18 +369,18 @@ function CountsStrip({ counts }: { counts: AnalyseResponse["counts"] }) {
   const vert = colors[0];
   const penaltyColors = [colors[1], colors[2], colors[3]];
 
-  // Common card chrome (bg/blur/ring/shadow) — extracted so the mobile bento
+  // Common card chrome (bg/blur/ring/shadow) - extracted so the mobile bento
   // and the desktop strip stay visually consistent if we tweak it later.
   const CARD =
     "rounded-2xl bg-white/65 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl";
 
   return (
     <>
-      {/* MOBILE — asymmetric 2-col bento:
+      {/* MOBILE - asymmetric 2-col bento:
             LEFT  (1fr) : 2 stacked tall cards   → Identifiés + Vert
             RIGHT (1fr) : 3 stacked thin strips  → Jaune / Orange / Rouge
           Each tile gets a `stagger-up` animation with an incrementing delay
-          so the bento "fills up" cell-by-cell (~80ms apart) — playful and
+          so the bento "fills up" cell-by-cell (~80ms apart) - playful and
           guides the eye through the breakdown after the blob lands. */}
       <div className="grid grid-cols-2 gap-2.5 lg:hidden">
         <div className="flex flex-col gap-2.5">
@@ -435,7 +435,7 @@ function CountsStrip({ counts }: { counts: AnalyseResponse["counts"] }) {
         </div>
       </div>
 
-      {/* DESKTOP — compact 4-cell strip living under the score gauge in the
+      {/* DESKTOP - compact 4-cell strip living under the score gauge in the
           left column of the bento. */}
       <article className={`hidden lg:block ${CARD} p-3`}>
         <ul className="grid grid-cols-4 gap-2">
@@ -638,7 +638,7 @@ function ObservationsCard({
               {expandable ? (
                 // Rendered as a <div role="button"> instead of a real <button>
                 // because <ObservationLabel> embeds an inline tooltip whose
-                // trigger is itself a <button> — and HTML forbids nesting
+                // trigger is itself a <button> - and HTML forbids nesting
                 // <button> inside <button>. Keyboard accessibility is preserved
                 // via tabIndex + onKeyDown.
                 <div
@@ -742,7 +742,7 @@ function ObservationIcon({ obs }: { obs: Observation }) {
 
 function ObservationLabel({ obs }: { obs: Observation }) {
   // Some observations get an inline info tooltip when the topic needs a bit
-  // of pedagogy (e.g. "Conservateurs" — explaining that any water-based
+  // of pedagogy (e.g. "Conservateurs" - explaining that any water-based
   // formula needs a preservative system, what the colour means, etc.).
   const inlineTooltip =
     obs.label === "Conservateurs" ? (
@@ -785,7 +785,7 @@ function ObservationLabel({ obs }: { obs: Observation }) {
     );
   }
   // Suffix follows the status: "absents" (green, good news), "non détectés"
-  // (sky blue, neutral — used for essential oils where absence is not
+  // (sky blue, neutral - used for essential oils where absence is not
   // automatically a win), "présents" (muted, factual).
   const suffix
     = obs.status === "absent"
@@ -919,7 +919,7 @@ function SynthesisCard({
   }, [fullText, streamDelayMs]);
 
   const visible = fullText.slice(0, shown);
-  // While streaming we may be in the middle of a `**bold**` span — close it
+  // While streaming we may be in the middle of a `**bold**` span - close it
   // temporarily so the markdown renderer doesn't break on an unmatched `**`.
   const safeVisible = balanceBold(visible);
   const blocks = parseSynthesisBlocks(safeVisible);
@@ -1050,7 +1050,7 @@ function renderBoldMarkdown(
       // Grand-public translation: if we know "AQUA" as "eau", render
       // "**eau** (Aqua)" so the body copy reads naturally while keeping the
       // INCI token visible for label cross-reference. Only triggered when
-      // the mapping has an entry — other tokens render unchanged.
+      // the mapping has an entry - other tokens render unchanged.
       const common = commonNameFor(normalised);
       if (common) {
         return (
@@ -1082,7 +1082,7 @@ function normaliseSynthesisToken(s: string): string {
 function colorForRating(r: ColorRating): string {
   // Jaune / Orange / Rouge get a coloured highlight (background) on top of
   // the text colour because the raw text-amber-600 / text-orange-600 hues
-  // are hard to tell apart in body copy — users were misreading "Jaune"
+  // are hard to tell apart in body copy - users were misreading "Jaune"
   // ingredients as "Orange". Vert stays text-only since it's the default
   // "safe" state and a highlight would over-emphasise it. The horizontal
   // negative margin tucks the highlight back so it doesn't push neighbouring
@@ -1165,7 +1165,7 @@ function ItemsTable({
   mobileLimit?: number;
   /** When set, desktop also collapses to the first N rows behind a "Voir tout". */
   desktopLimit?: number;
-  /** Tighter typography / spacing — used when the table sits inside a narrow
+  /** Tighter typography / spacing - used when the table sits inside a narrow
    * column of the analysis grid. */
   compact?: boolean;
 }) {
@@ -1205,7 +1205,7 @@ function ItemsTable({
 
   return (
     <article className="rounded-2xl bg-white/65 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
-      {/* Header — in `compact` mode (narrow column on the analysis page) the
+      {/* Header - in `compact` mode (narrow column on the analysis page) the
           filter chips and the search bar are stacked vertically: a single
           row would otherwise wrap chaotically with 5+ chips beside the input.
           In the full-width case (history page etc.) we keep them on one row. */}
@@ -1305,19 +1305,19 @@ function ItemsTable({
                     ) : null}
                   </td>
                   <td className={`${cellPad} text-ink-muted max-md:hidden ${compact ? "hidden xl:table-cell" : ""}`}>
-                    {i.primaryFunction || "—"}
+                    {i.primaryFunction || "-"}
                   </td>
                   <td className={cellPad}>
                     <ColorChip rating={i.colorRating} />
                     {/*
-                      "≤ 1 %" badge — only when the ingredient sits *after* the
+                      "≤ 1 %" badge - only when the ingredient sits *after* the
                       first fragrance or first preservative in the list. In INCI
                       regulation, fragrance/preservative are required at ≤1 %,
                       and the list is ordered by descending concentration above
                       1 %. So anything past that point is necessarily ≤1 %. That
                       doesn't change the safety rating, but it tells the user
                       the ingredient is unlikely to be the one driving the
-                      product's *efficacy* — useful to spot "actif marketing"
+                      product's *efficacy* - useful to spot "actif marketing"
                       claims (e.g. niacinamide listed but in trace amounts).
                     */}
                     {(i.thresholdContext === "after_fragrance"
@@ -1331,7 +1331,7 @@ function ItemsTable({
                               ? " le premier parfum"
                               : " le premier conservateur"}{" "}
                             dans la liste INCI. Sa concentration est donc{" "}
-                            <b>≤ 1 %</b> — il est peu probable qu&apos;il soit
+                            <b>≤ 1 %</b> - il est peu probable qu&apos;il soit
                             l&apos;élément principal responsable de
                             l&apos;efficacité du produit.
                           </>
@@ -1358,7 +1358,7 @@ function ItemsTable({
                       </Link>
                     ) : (
                       <span className="inline-flex h-7 w-7 items-center justify-center text-ink-subtle">
-                        —
+                        -
                       </span>
                     )}
                   </td>
@@ -1403,7 +1403,7 @@ function ColorChip({ rating }: { rating: ColorRating | null }) {
   if (!rating) {
     return (
       <span className="inline-flex items-center gap-1.5 text-[13px] text-ink-subtle">
-        <span className="h-1.5 w-1.5 rounded-full bg-black/[0.2]" aria-hidden /> —
+        <span className="h-1.5 w-1.5 rounded-full bg-black/[0.2]" aria-hidden /> -
       </span>
     );
   }

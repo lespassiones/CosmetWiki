@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PublicHeader } from "@/components/PublicHeader";
 
 /**
- * Public landing hero — full-bleed image with the headline + CTA layered
+ * Public landing hero - full-bleed image with the headline + CTA layered
  * over its empty zone. Two source images switch at the lg breakpoint:
  *
  *   - landing.png         : 16:9, the empty zone is on the LEFT third
@@ -13,7 +13,7 @@ import { PublicHeader } from "@/components/PublicHeader";
  *
  * The text content is positioned absolutely over each image, anchored to
  * the matching empty zone (left on desktop, bottom on mobile). The image
- * is the actual background — no <BackgroundGlow>, no <header>, no <Footer>
+ * is the actual background - no <BackgroundGlow>, no <header>, no <Footer>
  * here. It's a single-section landing as the user asked.
  */
 export function LandingHero() {
@@ -63,7 +63,7 @@ export function LandingHero() {
         </div>
       </div>
 
-      {/* Mini footer légal — visible depuis la home (requis par Google OAuth). */}
+      {/* Mini footer légal - visible depuis la home (requis par Google OAuth). */}
       <nav
         aria-label="Liens légaux"
         className="absolute inset-x-0 bottom-0 z-10 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-5 pb-3 text-[11px] text-ink-subtle"
@@ -85,7 +85,7 @@ export function LandingHero() {
 }
 
 /**
- * Headline block — H1 with squiggle underline on "montre", subtitle, CTA.
+ * Headline block - H1 with squiggle underline on "montre", subtitle, CTA.
  * `mobile` prop centers everything and tightens the type sizes.
  */
 function Headline({ mobile = false }: { mobile?: boolean }) {
@@ -104,7 +104,7 @@ function Headline({ mobile = false }: { mobile?: boolean }) {
         on te le{" "}
         <span className="relative inline-block whitespace-nowrap">
           montre.
-          {/* Hand-drawn squiggle under "montre" — same SVG family as the
+          {/* Hand-drawn squiggle under "montre" - same SVG family as the
               tagline on the dashboard, kept in brand rose. */}
           <svg
             aria-hidden

@@ -9,7 +9,7 @@ import { signOut } from "@/app/auth/actions";
  * "Se déconnecter" action is reachable without leaving the current page.
  *
  * Closes on outside click and on Escape. Logout is a `<form action={...}>`
- * targeting the existing signOut server action — no client-side fetch needed.
+ * targeting the existing signOut server action - no client-side fetch needed.
  */
 export function SidebarProfileMenu({ firstName }: { firstName?: string | null }) {
   const [open, setOpen] = useState(false);

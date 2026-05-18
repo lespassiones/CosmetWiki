@@ -87,7 +87,7 @@ export function SparklesIcon({ className }: Props) {
 }
 
 /**
- * "Promesses" icon — a checklist with a tick, evokes the idea of "verifying
+ * "Promesses" icon - a checklist with a tick, evokes the idea of "verifying
  * what's claimed" without being too literal (a target / shield / contract
  * would carry too much positive or negative weight).
  */
@@ -102,7 +102,7 @@ export function PromisesIcon({ className }: Props) {
   );
 }
 
-/** Burger menu icon — three horizontal lines. */
+/** Burger menu icon - three horizontal lines. */
 export function MenuIcon({ className }: Props) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -113,7 +113,7 @@ export function MenuIcon({ className }: Props) {
   );
 }
 
-/** Close icon — used to dismiss the burger drawer. */
+/** Close icon - used to dismiss the burger drawer. */
 export function CloseIcon({ className }: Props) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -123,7 +123,7 @@ export function CloseIcon({ className }: Props) {
   );
 }
 
-/** Diamond icon — for the Premium offer entry point. */
+/** Diamond icon - for the Premium offer entry point. */
 export function DiamondIcon({ className }: Props) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>

@@ -36,7 +36,7 @@ const config: NextConfig = {
   },
   // Silence the "Serializing big strings (Nkib) impacts deserialization
   // performance" webpack cache warning. The big strings come from bundled
-  // vendor SDKs (Supabase, OpenAI) — we can't refactor third-party code and
+  // vendor SDKs (Supabase, OpenAI) - we can't refactor third-party code and
   // it's a perf hint about dev cache only, not a runtime issue.
   webpack: (config) => {
     config.ignoreWarnings = [
@@ -60,7 +60,7 @@ const config: NextConfig = {
   },
   async redirects() {
     return [
-      // Legacy : the standalone /analyser page was merged into the home — keep
+      // Legacy : the standalone /analyser page was merged into the home - keep
       // existing links and bookmarks working.
       { source: "/analyser", destination: "/", permanent: true },
     ];

@@ -90,11 +90,11 @@ function clearRunCache() {
  * sessionStorage by the ScanSheet, calls /api/analyser, and renders the
  * result panel full-width.
  *
- * IMPORTANT — why we keep an `inciRef` instead of trusting `initialInci`:
+ * IMPORTANT - why we keep an `inciRef` instead of trusting `initialInci`:
  * the effect below strips `?inci=` from the URL via `replaceState` so that
  * a reload doesn't relaunch the analyse. If Next.js then re-evaluates the
  * server component for any reason (auth cookie refresh, middleware run,
- * partial re-render), the new `initialInci` prop comes back EMPTY — the URL
+ * partial re-render), the new `initialInci` prop comes back EMPTY - the URL
  * no longer carries the payload. Treating that empty value as authoritative
  * caused the dreaded "the loading screen closes and I have to open the
  * history to see my result" bug: we'd redirect to "/" or fall through to
@@ -102,7 +102,7 @@ function clearRunCache() {
  *
  * The fix: capture the INCI in `inciRef` on first render, and only update
  * it when a new non-empty value arrives (= a fresh analyse pushed onto the
- * same route). Empty incoming props are IGNORED — we keep working on the
+ * same route). Empty incoming props are IGNORED - we keep working on the
  * frozen ref. As a second line of defence, we also write the completed
  * result to sessionStorage so an actual remount can restore it.
  */
@@ -110,7 +110,7 @@ function clearRunCache() {
  * Resolve the INCI to analyse, in order of priority:
  *   1. `initialInci` prop from the URL searchParam (works on the happy path)
  *   2. `cw:pendingInci` in sessionStorage (set by the caller right before
- *      router.push — covers the case where Next.js served a prefetched
+ *      router.push - covers the case where Next.js served a prefetched
  *      `/analyse` shell with empty searchParams)
  * Removes the sessionStorage entry on read so a stale value can never leak
  * into the next mount.
@@ -181,7 +181,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
     const trimmed = inciRef.current;
 
     // No INCI at all (genuine empty mount). Try to restore the last result
-    // from sessionStorage — covers the case where the component unmounted
+    // from sessionStorage - covers the case where the component unmounted
     // mid-flight on the previous visit (mobile swipe-back, refresh) and we
     // managed to write the cache before being torn down. Falls back to "/".
     if (!trimmed) {
@@ -202,7 +202,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
 
     // Already launched for this INCI (StrictMode double-effect, or this
     // useEffect re-fired because `initialInci` flipped to "" after the
-    // replaceState below — see the "IMPORTANT" comment on the component).
+    // replaceState below - see the "IMPORTANT" comment on the component).
     if (launchedForRef.current === trimmed) return;
     launchedForRef.current = trimmed;
 
@@ -287,7 +287,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
         };
         // 429 with a credits payload = quota exhausted. apiFetch has already
         // dispatched `cosmecheck:credits-exhausted` so the global modal is
-        // showing — kick the user back to "/" so they don't also see this
+        // showing - kick the user back to "/" so they don't also see this
         // page's inline error stripe behind the modal.
         if (r.status === 429 && j?.credits) {
           router.replace("/");
@@ -345,7 +345,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
   // we have neither a result nor an error yet. We read from `inciRef` (frozen
   // at mount) NOT from `initialInci` (the prop), because the prop flips to
   // an empty string the moment Next.js re-evaluates the server component
-  // after our replaceState — and we don't want that to flicker the overlay
+  // after our replaceState - and we don't want that to flicker the overlay
   // off mid-fetch.
   const isLoading = Boolean(inciRef.current) && !result && !error;
 
@@ -385,7 +385,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
         <div className="mx-auto max-w-6xl mb-4 flex items-center gap-3 rounded-2xl bg-emerald-50 ring-1 ring-emerald-200 px-4 py-3 text-[13px] text-emerald-800">
           <span aria-hidden className="text-base">✓</span>
           <span className="flex-1">
-            Produit ajouté à ta routine — il pèse maintenant dans ton exposition cumulée.
+            Produit ajouté à ta routine - il pèse maintenant dans ton exposition cumulée.
           </span>
           <Link
             href="/routine"

@@ -15,7 +15,7 @@ export type SynthesisInput = {
     primary_function: string | null;
     tags: string[] | null;
     position_idx: number;
-    /** Short human label like "avant parfum" / "après conservateur" — null when not applicable. */
+    /** Short human label like "avant parfum" / "après conservateur" - null when not applicable. */
     threshold_label?: string | null;
   }[];
   counts: Record<string, number>;
@@ -26,7 +26,7 @@ export type SynthesisInput = {
   userId?: string | null;
 };
 
-// Bump this any time `buildPrompt()` changes meaningfully — old cached
+// Bump this any time `buildPrompt()` changes meaningfully - old cached
 // outputs keyed on the previous version will no longer be served.
 const PROMPT_VERSION = 5;
 
@@ -52,7 +52,7 @@ function buildPrompt(input: SynthesisInput): { system: string; user: string } {
     (input.counts.Orange ?? 0) +
     (input.counts.Rouge ?? 0);
 
-  // Top 3 ingredients by position — these define the "character" of the
+  // Top 3 ingredients by position - these define the "character" of the
   // formula (water-based, oil-based, alcohol-heavy, etc.). The model uses
   // them to write the opening sentence with personality.
   const top3 = input.enriched
@@ -61,7 +61,7 @@ function buildPrompt(input: SynthesisInput): { system: string; user: string } {
     .slice(0, 3)
     .map((r) => `${r.name ?? r.input_raw}${r.primary_function ? ` (${r.primary_function})` : ""}`);
 
-  // A handful of green ingredients with a known function — the model picks
+  // A handful of green ingredients with a known function - the model picks
   // ONE if it has something genuinely interesting to say. Optional.
   const greenWithFunction = green
     .filter((r) => r.primary_function && r.name)
@@ -110,7 +110,7 @@ CONTRAINTES STRICTES
 - Pas de "vous devez", "il faut". Préfère "tu peux", "à toi de voir", "selon ta peau".
 - Pas de jargon médical (dermatite, eczéma, comédogène, sébo-régulateur...). Préfère "peut irriter", "peut boucher les pores", "régule l'excès de sébum".
 - Pas d'emoji, pas d'astérisque autre que ceux du **gras INCI**.
-- AUCUN tiret cadratin (—) ni demi-cadratin (–) nulle part. Utilise une virgule, un deux-points ou une nouvelle phrase.
+- AUCUN tiret cadratin (-) ni demi-cadratin (–) nulle part. Utilise une virgule, un deux-points ou une nouvelle phrase.
 - Si un ingrédient n'a aucune raison concrète d'être flaggé (fonction inconnue, aucun tag), passe-le.
 - Si rouge + orange + jaune sont tous vides : bloc 2 = puce "Bon à savoir" (si possible) + puce d'absences (si possible) + puce de closing.
 - VARIE l'attaque du bloc 1 d'une analyse à l'autre. Ne réutilise pas une phrase type.

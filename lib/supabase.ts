@@ -14,7 +14,7 @@ if (!url || !anonKey) {
 let _anon: SupabaseClient | undefined;
 let _service: SupabaseClient | undefined;
 
-/** Anonymous client — used for SELECT through RPCs in `public` schema. */
+/** Anonymous client - used for SELECT through RPCs in `public` schema. */
 export function supabaseAnon(): SupabaseClient {
   if (!_anon) {
     _anon = createClient(url!, anonKey!, {
@@ -25,10 +25,10 @@ export function supabaseAnon(): SupabaseClient {
   return _anon;
 }
 
-/** Service-role client — server-side only, full access. */
+/** Service-role client - server-side only, full access. */
 export function supabaseService(): SupabaseClient {
   if (!serviceKey) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY missing — server only.");
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY missing - server only.");
   }
   if (!_service) {
     _service = createClient(url!, serviceKey, {
@@ -38,12 +38,12 @@ export function supabaseService(): SupabaseClient {
   return _service;
 }
 
-/** Browser client — uses cookies for session, safe to import in client components. */
+/** Browser client - uses cookies for session, safe to import in client components. */
 export function supabaseBrowser() {
   return createBrowserClient(url!, anonKey!);
 }
 
-/** Server client — reads/writes the auth cookie via the Next 15 cookie API. */
+/** Server client - reads/writes the auth cookie via the Next 15 cookie API. */
 export function supabaseServer(cookieStore: {
   get(name: string): { value: string } | undefined;
   set?(name: string, value: string, options: CookieOptions): void;

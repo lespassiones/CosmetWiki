@@ -110,7 +110,7 @@ export default function ConfidentialitePage() {
       <ul>
         {LEGAL.dataProcessors.map((p) => (
           <li key={p.name}>
-            <strong>{p.name}</strong> — {p.role}. Localisation&nbsp;: {p.location}.{" "}
+            <strong>{p.name}</strong> - {p.role}. Localisation&nbsp;: {p.location}.{" "}
             <a href={p.website} target="_blank" rel="noopener noreferrer">
               Politique de confidentialité
             </a>

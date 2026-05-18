@@ -20,7 +20,7 @@
  */
 
 // Stopwords we'll happily drop when trimming. Lowercased for comparison.
-// Conservative — only words that genuinely add no identity ("Pro", "230°C",
+// Conservative - only words that genuinely add no identity ("Pro", "230°C",
 // "Anti-Casse" don't disambiguate two shampoos of the same product line).
 const LOW_SIGNAL_WORDS = new Set<string>([
   "professionnel",

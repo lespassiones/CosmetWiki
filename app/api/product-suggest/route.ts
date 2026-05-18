@@ -16,7 +16,7 @@ type RequestBody = {
 };
 
 const PAGE_SIZE = 24;
-// Cache and INCIDecoder only contribute on page 1 — page 2+ is pure OBF
+// Cache and INCIDecoder only contribute on page 1 - page 2+ is pure OBF
 // pagination since cache hits are a small fixed set and INCIDecoder lists
 // are also a single search-page extract.
 const CACHE_LIMIT = 16;
@@ -32,7 +32,7 @@ function normalize(s: string): string {
 }
 
 /**
- * Dedupe key — same brand+product (normalized) should not appear twice across
+ * Dedupe key - same brand+product (normalized) should not appear twice across
  * sources. We collapse on the first 6 tokens to absorb minor wording diffs
  * ("La Roche-Posay Effaclar Duo+" vs "Effaclar Duo+ La Roche Posay").
  */
@@ -42,7 +42,7 @@ function dedupeKey(brand: string | null, name: string | null): string {
 }
 
 // Migrated from POST to GET so Vercel Edge CDN can cache by URL. The body
-// fields (query, page, hp) are now query params — same semantics, but the
+// fields (query, page, hp) are now query params - same semantics, but the
 // top 100 search terms collapse to a handful of Lambda calls per 5 min.
 export async function GET(req: NextRequest) {
   const ip = getClientIp(req.headers);
@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
     },
     {
       headers: {
-        // Vercel Edge CDN caches by URL — popular queries collapse to one
+        // Vercel Edge CDN caches by URL - popular queries collapse to one
         // upstream call per 5 min per region.
         "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
       },

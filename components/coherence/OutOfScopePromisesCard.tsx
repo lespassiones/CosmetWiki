@@ -3,9 +3,9 @@
  *
  * Displays marketing claims that the product description makes but that have
  * no biological meaning given the detected product type (e.g. "production de
- * collagène" on a hair product — hair has no collagen-producing cells).
+ * collagène" on a hair product - hair has no collagen-producing cells).
  *
- * Visually deliberate: amber-ish neutral, not red — we don't accuse the
+ * Visually deliberate: amber-ish neutral, not red - we don't accuse the
  * brand of fraud, we explain why the claim is biologically irrelevant on
  * THIS type of product. Aligned with the "we decode, we don't judge"
  * positioning.
@@ -60,7 +60,7 @@ export function OutOfScopePromisesCard({
           </h2>
           <p className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">
             {typeLabel
-              ? `La description fait des promesses qui n'ont pas de sens biologique pour un produit de type "${typeLabel}". On les liste ici, hors du verdict global — la formule ne peut pas être jugée sur des effets qui ne s'appliquent pas à ce type de produit.`
+              ? `La description fait des promesses qui n'ont pas de sens biologique pour un produit de type "${typeLabel}". On les liste ici, hors du verdict global - la formule ne peut pas être jugée sur des effets qui ne s'appliquent pas à ce type de produit.`
               : "La description fait des promesses qui n'ont pas de sens biologique pour ce type de produit. On les liste ici, hors du verdict global."}
           </p>
         </div>

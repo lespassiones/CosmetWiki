@@ -101,7 +101,7 @@
 
   /* Pop-in for the ingredient blob (half-ring viz). The cubic-bezier easing
      overshoots slightly at the end (>1.0) so the blob "lands" with a small
-     bounce — playful without being silly. transform-box ensures the scale
+     bounce, playful without being silly. transform-box ensures the scale
      pivots from the SVG's centre regardless of viewBox dimensions. */
   .blob-pop-in {
     transform-origin: 50% 60%;

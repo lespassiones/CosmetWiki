@@ -22,7 +22,7 @@ const MIN_DESCRIPTION = 30;
 const MAX_DESCRIPTION = 6000;
 
 // Ordered list used to compute "is the user allowed to jump back/forward to
-// this step?". `running` isn't included — it's a transient state during the
+// this step?". `running` isn't included - it's a transient state during the
 // API call, not a user-navigable step. Typed as Step[] (with the missing
 // "running" slot returning -1 from indexOf) so callers can pass any Step
 // without a narrow cast.
@@ -45,7 +45,7 @@ export function CoherenceWizard({
   const router = useRouter();
   // Pre-fill flow: when arriving from the PromesseFlowModal with both an
   // analysis id (matching one of the user's analyses) AND a description, we
-  // still LAND on "description" — not "confirm" — so the user can sanity-
+  // still LAND on "description" - not "confirm" - so the user can sanity-
   // check the web-search-fetched description before launching. Both prior
   // steps are silently marked as "visited" (see maxStepReached below) so
   // the user can also jump straight to Vérification via the stepper.
@@ -95,7 +95,7 @@ export function CoherenceWizard({
         setError(`Colle une description un peu plus complète (au moins ${MIN_DESCRIPTION} caractères).`);
         return;
       }
-      // Skip pickProduct entirely if we arrived with a pre-selected analyse —
+      // Skip pickProduct entirely if we arrived with a pre-selected analyse -
       // re-picking it would be pure friction.
       if (selected && STEP_ORDER.indexOf(maxStepReached) >= STEP_ORDER.indexOf("confirm")) {
         advanceTo("confirm");
@@ -251,7 +251,7 @@ export function CoherenceWizard({
               <div className="flex items-baseline justify-between gap-3">
                 <dt className="text-[#6B7280] shrink-0">3 premiers ingrédients</dt>
                 <dd className="font-medium text-ink text-right truncate">
-                  {selected.top3.length > 0 ? selected.top3.join(", ") : "—"}
+                  {selected.top3.length > 0 ? selected.top3.join(", ") : "-"}
                 </dd>
               </div>
               <div className="flex items-baseline justify-between">

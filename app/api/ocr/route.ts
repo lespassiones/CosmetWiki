@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
   // Back-compat: the old single-image flow sent `image=<file>`. The new
   // two-photo flow sends `image_back=<file>` (required) and optionally
-  // `image_front=<file>`. Either shape works on this endpoint — we treat
+  // `image_front=<file>`. Either shape works on this endpoint - we treat
   // `image` as an alias for `image_back`.
   const backFile = formData.get("image_back") ?? formData.get("image");
   const frontFile = formData.get("image_front");
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   let frontImage: ImagePayload | null = null;
   if (frontFile) {
     const frontRead = await readImage(frontFile);
-    // A bad front photo shouldn't kill the whole request — the INCI on the
+    // A bad front photo shouldn't kill the whole request - the INCI on the
     // back is the hard requirement. Surface the warning and continue without
     // the front.
     if (frontRead.ok) {
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
   const userId = gate.user.id;
 
   try {
-    // Run the two OCR passes in parallel — they hit independent caches and
+    // Run the two OCR passes in parallel - they hit independent caches and
     // independent OpenAI calls, no shared state.
     const [back, front] = await Promise.all([
       ocrFromImageBase64(backRead.image.base64, backRead.image.mimeType, userId),

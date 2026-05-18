@@ -11,7 +11,7 @@ type TrendingItem = {
   primary_function: string | null;
 };
 
-// Same palette as IngredientSpectrum — aligned with the rest of the app's
+// Same palette as IngredientSpectrum - aligned with the rest of the app's
 // rating colours (amber-400 for Jaune, rose-500 for Rouge) so the same
 // ingredient looks identical here, in the spectrum, and in the result panel.
 const RATING_COLOR: Record<NonNullable<TrendingItem["color_rating"]>, string> = {
@@ -22,7 +22,7 @@ const RATING_COLOR: Record<NonNullable<TrendingItem["color_rating"]>, string> = 
 };
 
 /**
- * Async server component — wrapped in <Suspense> by the home page so the rest
+ * Async server component - wrapped in <Suspense> by the home page so the rest
  * of the dashboard can render while the trending RPC (the slowest query on the
  * dashboard) is still in flight.
  */
@@ -39,7 +39,7 @@ export async function TrendingCard() {
     <div className={`${GLASS_CARD} p-5`}>
       <h2 className="text-[15px] font-semibold mb-3">Ingrédients tendance cette semaine</h2>
       {items.length === 0 ? (
-        <p className="text-sm text-[#6B7280]">Pas encore de tendance — reviens bientôt.</p>
+        <p className="text-sm text-[#6B7280]">Pas encore de tendance - reviens bientôt.</p>
       ) : (
         <ul className="divide-y divide-[#F0F0F0]">
           {items.map((it) => (

@@ -79,7 +79,7 @@ export function DailyPicksCard() {
     void (async () => {
       try {
         // Let the browser cache honour /api/daily-picks' Cache-Control
-        // (public, max-age=3600, stale-while-revalidate=300) — the daily
+        // (public, max-age=3600, stale-while-revalidate=300) - the daily
         // catalog only changes at the UTC day flip.
         const r = await fetch("/api/daily-picks");
         if (!r.ok) throw new Error(`Erreur ${r.status}`);
@@ -252,7 +252,7 @@ export function DailyPicksCard() {
         })}
       </ul>
 
-      {/* Reveal panel — only after the user has picked */}
+      {/* Reveal panel - only after the user has picked */}
       {picked !== null && (
         <div className="mt-4 rounded-2xl bg-sky-50 ring-1 ring-sky-100 p-4">
           <div className="text-[11px] font-semibold uppercase tracking-wider text-sky-600 mb-1">

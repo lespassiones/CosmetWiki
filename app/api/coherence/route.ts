@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Auth + IP rate-limit (no credit yet — idempotency lookup first to avoid
+  // Auth + IP rate-limit (no credit yet - idempotency lookup first to avoid
   // double-billing duplicate clicks).
   const gate = await apiGate(req, { feature: "coherence", costCredits: 0 });
   if (!gate.ok) return gate.response;
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
     analysisRow.brand as string | null,
   ]
     .filter((s): s is string => Boolean(s && s.trim()))
-    .join(" — ");
+    .join(" - ");
   const productType: ProductType = await detectProductType(
     description,
     typeHint || null,
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // ─── Step 3: open promises — explore the formula via LLM in parallel ─────
+  // ─── Step 3: open promises - explore the formula via LLM in parallel ─────
   // The LLM only sees items with a slug (those we can match back) and is
   // constrained to cite slugs from the list it receives. resolveOpenPromise
   // re-validates every cited slug against the items as defence-in-depth.

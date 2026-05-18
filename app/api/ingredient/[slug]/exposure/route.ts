@@ -6,7 +6,7 @@
  *
  * Kept SEPARATE from /explain so /explain can stay fully CDN-cached. This
  * endpoint is per-user (private, no-store) and returns `{ personalLine: null }`
- * for anonymous visitors — the UI just doesn't render the rose callout.
+ * for anonymous visitors - the UI just doesn't render the rose callout.
  *
  * Cheap: two count RPCs (head-only), fired in parallel. ~50 ms warm.
  */
@@ -60,7 +60,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ slug: string }
       { headers: { "Cache-Control": "private, no-store" } },
     );
   } catch {
-    // Soft failure — UI just hides the callout, no error surfaced.
+    // Soft failure - UI just hides the callout, no error surfaced.
     return NextResponse.json(
       { personalLine: null } satisfies ExposureResponse,
       { headers: { "Cache-Control": "private, no-store" } },

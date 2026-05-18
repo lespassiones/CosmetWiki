@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     return new Response(JSON.stringify({ error: "Non connecté." }), { status: 401 });
   }
 
-  // Three independent reads — fan them out in parallel so the chat doesn't
+  // Three independent reads - fan them out in parallel so the chat doesn't
   // wait 3× the network roundtrip. The daily cap check still gates the
   // response, but profile + routine are fetched concurrently for free.
   const since = new Date();
@@ -175,7 +175,7 @@ ${routineSummary}`;
             // sneaks through despite the instruction. Done per-chunk; this
             // covers the common case where GPT emits the dash as a single
             // token. The rare cross-chunk split is acceptable collateral.
-            const clean = delta.replace(/\s*[—–]\s*/g, ", ");
+            const clean = delta.replace(/\s*[-–]\s*/g, ", ");
             controller.enqueue(enc.encode(clean));
           }
           const usage = (part as unknown as { usage?: { prompt_tokens?: number; completion_tokens?: number } }).usage;

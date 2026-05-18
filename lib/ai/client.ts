@@ -103,7 +103,7 @@ export async function setCached(cacheKey: string, result: unknown): Promise<void
       .from("ai_cache")
       .upsert({ cache_key: cacheKey, result }, { onConflict: "cache_key" });
   } catch {
-    // ignore — cache miss is acceptable
+    // ignore - cache miss is acceptable
   }
 }
 

@@ -129,7 +129,7 @@ export function PromesseFlowModal({
       }
       const data = (await r.json()) as FetchDescriptionResponse;
       if (data.notFound) {
-        // Couldn't fetch a description but we still know which product it is —
+        // Couldn't fetch a description but we still know which product it is -
         // jump straight to the manual entry with the candidate name as hint.
         setNotFoundReason(data.reason);
         setStep("manualPromise");
@@ -247,7 +247,7 @@ export function PromesseFlowModal({
                   </li>
                 ))}
               </ul>
-              {/* Restyled as a clearly clickable green pill — the previous
+              {/* Restyled as a clearly clickable green pill - the previous
                   flat phrase read like body copy and users missed it. Uses
                   emerald-50/200 so it doesn't compete visually with the
                   primary emerald-500 "Analyser la promesse" button outside
@@ -261,7 +261,7 @@ export function PromesseFlowModal({
                 className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold ring-1 ring-emerald-200 hover:ring-emerald-300 py-2.5 px-4 text-[13px] transition"
               >
                 <span aria-hidden>✎</span>
-                Aucun de ceux-ci — décrire la promesse moi-même
+                Aucun de ceux-ci - décrire la promesse moi-même
               </button>
             </div>
           )}
@@ -270,7 +270,7 @@ export function PromesseFlowModal({
             <div className="space-y-3">
               <div className="rounded-xl bg-amber-50 ring-1 ring-amber-200 px-3 py-2 text-[12px] text-amber-900">
                 {notFoundReason === "user_rejected_candidates"
-                  ? "Pas de problème — décris toi-même la promesse du produit telle qu'elle apparaît sur l'emballage."
+                  ? "Pas de problème - décris toi-même la promesse du produit telle qu'elle apparaît sur l'emballage."
                   : "On n'a pas pu retrouver le produit ou sa fiche officielle. Décris ce qu'il promet pour qu'on puisse analyser la cohérence."}
               </div>
               <label htmlFor="manual-desc" className="block text-[12px] font-medium text-[#374151]">

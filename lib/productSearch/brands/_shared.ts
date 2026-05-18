@@ -1,7 +1,7 @@
 // Shared search routine used by every brand handler: DuckDuckGo with a
 // `site:` filter pointed at the brand's own domain, then Mistral extracts
 // the INCI from the first fetchable result. Centralising this means a brand
-// file is just a tiny config — adding a new brand is ~6 lines.
+// file is just a tiny config - adding a new brand is ~6 lines.
 
 import { fetchPageHtml } from "../httpFetch";
 import { extractInciFromHtml } from "../extractWithMistral";
@@ -50,7 +50,7 @@ export async function searchBrandViaDDG(opts: {
   const { brand, domain, query } = opts;
   const maxCandidates = opts.maxCandidates ?? 3;
 
-  // DDG with site: filter — restricts results to the brand's own domain.
+  // DDG with site: filter - restricts results to the brand's own domain.
   // We append INCI hints so DDG ranks the actual product page (which
   // usually contains the word "ingrédients" or "composition") higher.
   const ddgQuery = `site:${domain} ${query} ingrédients`;

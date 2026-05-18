@@ -1,6 +1,6 @@
 // Orchestrates the product → INCI cascade. Strategy:
 //
-//   1. Cache (Supabase, sub-100 ms) — sequential, free, almost-always-fast.
+//   1. Cache (Supabase, sub-100 ms) - sequential, free, almost-always-fast.
 //   2. If cache miss, fire ALL remaining sources in parallel via
 //      Promise.allSettled (OBF, INCIDecoder, brand-specific if matched,
 //      DuckDuckGo+Mistral). Pick the first one that returns a *matching* hit

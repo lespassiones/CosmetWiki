@@ -202,7 +202,7 @@ export function RoutineSimulationModal({
     </button>
   );
 
-  // ── Shared visual tokens for the modal — neutral white glassmorphism,
+  // ── Shared visual tokens for the modal - neutral white glassmorphism,
   // no pink wash, lots of soft shadow so the cards feel raised.
   const SHELL_CLASSES = [
     "relative w-full max-w-xl max-h-[90vh] overflow-y-auto",
@@ -231,7 +231,7 @@ export function RoutineSimulationModal({
       }}
     >
       <div className={SHELL_CLASSES}>
-        {/* Sticky header — same glass as the body so close button stays
+        {/* Sticky header - same glass as the body so close button stays
             legible while scrolling. Neutre, plus de teinte rose. */}
         <div className="sticky top-0 bg-white/85 backdrop-blur-xl backdrop-saturate-150 border-b border-white/70 px-5 py-4 flex items-start gap-3 z-10 rounded-t-3xl">
           <div className="flex-1 min-w-0">
@@ -283,7 +283,7 @@ export function RoutineSimulationModal({
                     </Link>
                     <span className="shrink-0 inline-flex items-baseline gap-1 rounded-full bg-rose-50/80 ring-1 ring-rose-200/80 backdrop-blur-md px-2 py-0.5 text-[11px] text-rose-700 shadow-[0_2px_6px_-1px_rgba(244,63,94,0.15)]">
                       <span className="font-semibold tabular-nums">
-                        {p.score !== null ? p.score.toFixed(1) : "—"}
+                        {p.score !== null ? p.score.toFixed(1) : "-"}
                       </span>
                       <span className="text-[10px] opacity-80">/20</span>
                     </span>

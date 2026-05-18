@@ -7,7 +7,7 @@ export const SKIN_TYPES = ["seche", "mixte", "grasse", "sensible", "normale"] as
 export type SkinType = typeof SKIN_TYPES[number];
 
 // Concerns shown in the SKIN picker. "cuir_chevelu" + "cheveux" used to live
-// here too — they now have a dedicated "Cheveux" section (HAIR_CONCERNS).
+// here too - they now have a dedicated "Cheveux" section (HAIR_CONCERNS).
 // The values are kept in the SkinConcern union for backwards compatibility
 // with profiles saved before the split, but they no longer appear in the
 // picker. `readSkinProfile` migrates any leftover values into the new
@@ -23,8 +23,8 @@ export const SKIN_CONCERNS = [
 ] as const;
 export type SkinConcern =
   | typeof SKIN_CONCERNS[number]
-  | "cuir_chevelu"  // legacy — migrated to HairConcern.cuir_chevelu_sensible
-  | "cheveux";       // legacy — dropped (was too ambiguous between secs/gras)
+  | "cuir_chevelu"  // legacy - migrated to HairConcern.cuir_chevelu_sensible
+  | "cheveux";       // legacy - dropped (was too ambiguous between secs/gras)
 
 export const SKIN_TYPE_LABEL: Record<SkinType, string> = {
   seche: "Sèche",
@@ -64,7 +64,7 @@ export const HAIR_CONCERN_LABEL: Record<HairConcern, string> = {
 export type SkinProfile = {
   skinType?: SkinType;
   concerns?: SkinConcern[];
-  /** Hair-specific concerns. Optional — the picker stays hidden in the
+  /** Hair-specific concerns. Optional - the picker stays hidden in the
    *  ReadView when empty. */
   hairConcerns?: HairConcern[];
   allergiesFreeform?: string;
@@ -100,7 +100,7 @@ export function readSkinProfile(prefs: Record<string, unknown> | null | undefine
     : [];
   const hairSet = new Set<HairConcern>(rawHair);
   // Legacy "cuir_chevelu" in concerns → "cuir_chevelu_sensible" in hairConcerns.
-  // Legacy "cheveux" is too vague (secs vs gras) — we drop it silently.
+  // Legacy "cheveux" is too vague (secs vs gras) - we drop it silently.
   if (rawConcerns.includes("cuir_chevelu")) hairSet.add("cuir_chevelu_sensible");
 
   return {

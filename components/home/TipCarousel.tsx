@@ -7,7 +7,7 @@ const AUTO_ROTATE_MS = 10_000;
 const SWIPE_THRESHOLD_PX = 40;
 
 /**
- * Astuce du jour carousel — auto-rotates every 10 s, supports horizontal swipe
+ * Astuce du jour carousel - auto-rotates every 10 s, supports horizontal swipe
  * (touch + drag) and clickable dots. Auto-rotation pauses when the user interacts
  * and resumes on the next idle period.
  */

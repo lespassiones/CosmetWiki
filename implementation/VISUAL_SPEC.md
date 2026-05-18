@@ -1,4 +1,4 @@
-# Cosme Check — Spécification visuelle pixel-perfect
+# Cosme Check - Spécification visuelle pixel-perfect
 
 > Document de référence pour l'intégration UI. Décrit **exactement** ce qui doit être à l'écran, dans quel ordre, à quelle taille, avec quelle couleur.
 > Source : maquettes validées (mobile 6 écrans + desktop 6 fenêtres).
@@ -125,7 +125,7 @@ xl    1280px
 
 ---
 
-## 2. Mobile — système global
+## 2. Mobile - système global
 
 ### 2.1 Layout
 - Viewport target : `375px × 812px` (iPhone 14 Pro). Doit fonctionner de 360px à 430px de largeur.
@@ -153,13 +153,13 @@ xl    1280px
 
 ---
 
-## 3. Mobile — écran par écran
+## 3. Mobile - écran par écran
 
 ### 3.1 ACCUEIL (Home)
 
 **Hiérarchie verticale (de haut en bas, pas de padding entre)**
 
-1. **Header** (cf. §2.3) — `padding-top: 12px`.
+1. **Header** (cf. §2.3) - `padding-top: 12px`.
 2. **Greeting** : "Bonjour {firstName} 👋" en `display-hero`.
    - Source : `profiles.first_name`. Si invité : "Bonjour 👋".
 3. **Tagline** : "Décrypte tes cosmétiques en 3 secondes." en `body-lg`. **"en 3 secondes."** souligné par un trait ondulé corail (SVG inline, épaisseur 2px, couleur `--accent-coral`).
@@ -214,7 +214,7 @@ xl    1280px
   - Pill NEW : background `--accent-coral`, texte blanc 10px, padding 2px 8px, positionné top-right de la tuile.
 - Lien "Annuler" centré bas, `body` `--text-secondary`, padding 16px.
 
-### 3.3 RÉSULTAT D'ANALYSE — collapsed (mobile par défaut)
+### 3.3 RÉSULTAT D'ANALYSE - collapsed (mobile par défaut)
 
 **Hiérarchie verticale**
 
@@ -265,7 +265,7 @@ xl    1280px
    - Source : `result.items`.
 9. Padding bottom 96px (espace pour nav).
 
-### 3.4 RÉSULTAT D'ANALYSE — expanded (après tap "Voir plus")
+### 3.4 RÉSULTAT D'ANALYSE - expanded (après tap "Voir plus")
 
 Identique à 3.3 **sauf** :
 
@@ -285,7 +285,7 @@ Identique à 3.3 **sauf** :
 3. Sous-titre `body-secondary` : traduction FR (ex. "Eau florale d'ylang-ylang").
 4. **Carte couleur de tolérance** :
    - Si Jaune : `background: #FEF3C7` (jaune très pâle), border-left `4px solid --rate-jaune`.
-   - Pill "● Jaune — Pénalité légère" + paragraphe d'explication (`body`).
+   - Pill "● Jaune - Pénalité légère" + paragraphe d'explication (`body`).
 5. **Card "Fonction principale"** : titre `caption`, valeur `body`.
 6. **Card "Tags"** : titre `caption` + chips horizontales (chaque tag = pill `--bg-card`, border `--border`, padding 4px 12px, `body`).
 7. **Card "Numéro CAS"** : valeur + lien `link-accent` "↗ Source INCI Beauty".
@@ -320,7 +320,7 @@ Identique à 3.3 **sauf** :
 
 ---
 
-## 4. Desktop — système global
+## 4. Desktop - système global
 
 ### 4.1 Layout en deux zones
 
@@ -333,7 +333,7 @@ Identique à 3.3 **sauf** :
 └───────────┴──────────────────────────────────────────────┘
 ```
 
-### 4.2 Sidebar — spécification précise
+### 4.2 Sidebar - spécification précise
 
 - **Largeur fixe 240px**, hauteur 100vh, `position: fixed; left: 0; top: 0`.
 - `background: --bg-card`, `border-right: 1px solid --border`.
@@ -376,7 +376,7 @@ Identique à 3.3 **sauf** :
 
 ---
 
-## 5. Desktop — page par page
+## 5. Desktop - page par page
 
 ### 5.1 ACCUEIL
 
@@ -439,7 +439,7 @@ Identique à 3.3 **sauf** :
        - **Tableau** avec colonnes : `Pos.` · `INCI` · `Fonction` · `Éval.` · `Parfum` · (chevron).
        - Header en `caption` MAJUSCULES `--text-secondary`.
        - Lignes : 13 (toutes), séparées par `border-bottom: 1px solid --border-soft`.
-       - Colonne "Parfum" : badge `caption` "avant parfum" / "après parfum" / "—" si non applicable.
+       - Colonne "Parfum" : badge `caption` "avant parfum" / "après parfum" / "-" si non applicable.
        - Colonne "Éval." : pastille couleur seule (pas de texte, pour gagner de la place).
 
 4. **Section "Produits similaires analysés récemment"** :
@@ -497,7 +497,7 @@ Identique à 3.3 **sauf** :
 
 ---
 
-## 6. Composants UI partagés — pixel-perfect
+## 6. Composants UI partagés - pixel-perfect
 
 ### 6.1 Gauge circulaire
 
@@ -527,7 +527,7 @@ Identique à 3.3 **sauf** :
 - Conteneur scrollable horizontal sur mobile, fixe sur desktop.
 - Pill inactive : `background: --bg-card`, `border: 1px solid --border`, padding 8px 14px, `body`, `--radius-pill`, gap 6px (entre nom et count).
 - Pill active : `background: --cta-primary-bg`, `color: --cta-primary-fg`.
-- Count à côté du label, **couleur de la note** (vert, jaune, etc.) — fonctionne sur pill inactive comme active.
+- Count à côté du label, **couleur de la note** (vert, jaune, etc.) - fonctionne sur pill inactive comme active.
 
 ### 6.4 Card produit (utilisée dans Routine, Produits similaires, Historique)
 
@@ -572,7 +572,7 @@ Chaque carte avec données dynamiques doit gérer son état vide :
 |---|---|
 | Dernière analyse | "Lance ta première analyse" + CTA noir "Analyser maintenant" |
 | Ta routine | "Crée ta routine pour suivre ton exposition cumulée" + CTA |
-| Ingrédients tendance | "Pas encore de tendance — reviens demain" |
+| Ingrédients tendance | "Pas encore de tendance - reviens demain" |
 | Historique | "Aucune analyse pour l'instant. Lance-toi !" + CTA |
 | Routine produits | Carte CTA dashed coral "+ Ajouter un produit" seule |
 
@@ -588,7 +588,7 @@ Chaque carte avec données dynamiques doit gérer son état vide :
 
 ---
 
-## 8. Données réelles — règles strictes
+## 8. Données réelles - règles strictes
 
 ### 8.1 Toutes les analyses montrées dans la spec correspondent à des produits **réels**
 
@@ -599,8 +599,8 @@ Les noms cités (La Roche-Posay Effaclar Duo+, Bioderma Sébium Gel Moussant, Av
 - ❌ Pas de `Lorem ipsum`.
 - ❌ Pas de score arbitraire ("18.3/20" doit être le score retourné par l'API sur la vraie composition).
 - ❌ Pas de "Produit A / Produit B" comme noms.
-- ❌ Pas de synthèse IA hardcodée — toujours appeler `/api/analyser` (avec cache si la liste a déjà été analysée).
-- ❌ Pas d'ingrédients tendance figés — toujours requête sur la vraie table.
+- ❌ Pas de synthèse IA hardcodée - toujours appeler `/api/analyser` (avec cache si la liste a déjà été analysée).
+- ❌ Pas d'ingrédients tendance figés - toujours requête sur la vraie table.
 - ❌ Pas de gauges remplies "à 50 %" pour le décor.
 
 ### 8.3 Tests UI
@@ -645,7 +645,7 @@ Toutes les animations respectent `prefers-reduced-motion`.
 
 ---
 
-## Annexe — Mapping pages → routes
+## Annexe - Mapping pages → routes
 
 | Page | Route | Auth requise |
 |---|---|---|
@@ -663,7 +663,7 @@ Toutes les animations respectent `prefers-reduced-motion`.
 
 ---
 
-## Annexe — Checklist d'intégration
+## Annexe - Checklist d'intégration
 
 - [ ] Sidebar desktop 240px implémentée, sticky, avec sélection d'item actif.
 - [ ] Bottom nav mobile 64px avec FAB scan central surélevé.

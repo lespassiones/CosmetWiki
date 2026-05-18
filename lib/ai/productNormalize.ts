@@ -28,7 +28,7 @@ export async function normalizeProductQuery(
   const trimmed = raw.trim();
   if (trimmed.length < 2) return { kind: "unchanged" };
 
-  // 1) Local barcode detection — no need to call GPT, instant.
+  // 1) Local barcode detection - no need to call GPT, instant.
   const m = BARCODE_RE.exec(trimmed);
   if (m) return { kind: "barcode", barcode: m[1] };
 

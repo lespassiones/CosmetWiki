@@ -4,7 +4,7 @@ import { useState } from "react";
 import { GLASS_PILL_DARK } from "@/lib/ui/glass";
 import { AddProductChoiceModal, type EligibleAnalysis } from "./AddProductChoiceModal";
 
-/** sessionStorage key — consumed by AnalysisRunner to flip on `addToRoutine`
+/** sessionStorage key - consumed by AnalysisRunner to flip on `addToRoutine`
  *  when calling /api/analyser. Stamped with a timestamp so a stale flag (user
  *  cancels the ScanSheet then analyses something else 1h later) is ignored. */
 export const PENDING_ADD_TO_ROUTINE_KEY = "cw:pendingAddToRoutine";

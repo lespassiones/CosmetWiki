@@ -14,7 +14,7 @@ import { parseInciList } from "../inciParser";
 import { supabaseAnon } from "../supabase";
 import { logInfo, logWarn } from "../log";
 
-// Sharp is a transitive dep (used by next/image) — we lazy-load it so an
+// Sharp is a transitive dep (used by next/image) - we lazy-load it so an
 // install miss on a fresh CI runner doesn't crash this module's import.
 type SharpFactory = (input?: Buffer) => {
   metadata: () => Promise<{ width?: number; height?: number }>;
@@ -41,7 +41,7 @@ function loadSharp(): Promise<SharpFactory | null> {
  * still ~12 px after resize) while cutting token cost by 50-70 %.
  *
  * Falls back to the original image if sharp is unavailable or the input is
- * already small. Returns the input as-is on any failure — never throws.
+ * already small. Returns the input as-is on any failure - never throws.
  */
 const MAX_DIMENSION = 1600;
 const JPEG_QUALITY = 85;
@@ -56,7 +56,7 @@ async function downscaleImage(
     const meta = await sharp(input).metadata();
     const w = meta.width ?? 0;
     const h = meta.height ?? 0;
-    // Already small enough — skip compression (still re-encodes to JPEG would
+    // Already small enough - skip compression (still re-encodes to JPEG would
     // waste CPU for no gain).
     if (w > 0 && h > 0 && w <= MAX_DIMENSION && h <= MAX_DIMENSION && mimeType === "image/jpeg") {
       return { base64, mimeType };
@@ -99,7 +99,7 @@ export type OcrResult =
   | { found: false; reason: string };
 
 /**
- * Identity extracted from the FRONT of the packaging. All fields optional —
+ * Identity extracted from the FRONT of the packaging. All fields optional -
  * a poorly lit photo may yield only the brand, or only the product line. The
  * downstream pipeline uses whatever it gets as `productLabel` for the
  * analysis title and as input to the web-search identification call.
@@ -117,7 +117,7 @@ export type OcrFrontResult =
  * Validates an OCR-extracted INCI text against the live INCI database. Returns
  * how many tokens matched exactly / via alias and a confidence level. Anything
  * below 70 % match strongly suggests Vision hallucinated ingredients (a
- * recurring failure mode on small / curved labels) — surfacing this lets the
+ * recurring failure mode on small / curved labels) - surfacing this lets the
  * UI nudge the user to retake the photo before we score a phantom formula.
  */
 export async function validateOcrText(text: string): Promise<OcrValidation> {
@@ -136,7 +136,7 @@ export async function validateOcrText(text: string): Promise<OcrValidation> {
     });
     for (const row of (data ?? []) as MatchRow[]) {
       // Only confident matches count: a "suggestion" (fuzzy 0.55..0.90) is
-      // exactly the symptom of hallucination — a near-real ingredient name
+      // exactly the symptom of hallucination - a near-real ingredient name
       // that doesn't quite line up with the DB. We deliberately exclude it.
       if (row.match_kind === "exact" || row.match_kind === "alias") {
         matched += 1;
@@ -155,7 +155,7 @@ export async function validateOcrText(text: string): Promise<OcrValidation> {
       matched,
       rate,
       level: "low_match",
-      message: `Seulement ${matched}/${total} ingrédients reconnus. La photo est peut-être floue ou l'OCR a inventé des noms — vérifie le résultat ou reprends une photo plus nette.`,
+      message: `Seulement ${matched}/${total} ingrédients reconnus. La photo est peut-être floue ou l'OCR a inventé des noms - vérifie le résultat ou reprends une photo plus nette.`,
     };
   }
   return {
@@ -163,12 +163,12 @@ export async function validateOcrText(text: string): Promise<OcrValidation> {
     matched,
     rate,
     level: "very_low_match",
-    message: `Très peu d'ingrédients reconnus (${matched}/${total}). La photo est trop floue ou ne montre pas le bloc INGREDIENTS — reprends-la, cadrée et avec un bon éclairage.`,
+    message: `Très peu d'ingrédients reconnus (${matched}/${total}). La photo est trop floue ou ne montre pas le bloc INGREDIENTS - reprends-la, cadrée et avec un bon éclairage.`,
   };
 }
 
 /**
- * P4 — Locate the INCI block in the image and return a normalized bounding
+ * P4 - Locate the INCI block in the image and return a normalized bounding
  * box. Uses a low-detail Vision call (cheaper than the OCR call itself) and
  * returns null if the model can't find a clear block. The bbox values are in
  * [0, 1] : x0/y0 = top-left, x1/y1 = bottom-right.
@@ -222,7 +222,7 @@ async function locateInciRegion(
  * Crops the given JPEG/PNG/WebP base64 image to the supplied normalized bbox
  * (with a 5 % padding so we don't clip the first/last characters). Returns
  * the cropped JPEG base64 + mime, or null on any error (Sharp missing,
- * unsupported format, etc.) — callers should fall back to the original.
+ * unsupported format, etc.) - callers should fall back to the original.
  */
 async function cropToBbox(
   imageBase64: string,
@@ -315,7 +315,7 @@ async function ocrSecondPass(
 /**
  * Heuristic: trigger a second OCR pass when the first one looks suspiciously
  * short. Cosmetics with >20 ingredients (Dove, L'Oréal, Yves Rocher, Garnier)
- * are extremely common — when we get back 6-17 tokens we're almost always
+ * are extremely common - when we get back 6-17 tokens we're almost always
  * missing the tail end of the list. Below 6 it's likely a small list or a
  * non-cosmetic; above 17 the first pass is usually complete enough.
  */
@@ -329,7 +329,7 @@ export async function ocrFromImageBase64(
   mimeType: string,
   userId?: string | null,
 ): Promise<OcrResult> {
-  // Hash on the ORIGINAL bytes — a user re-uploading the same photo from
+  // Hash on the ORIGINAL bytes - a user re-uploading the same photo from
   // their gallery must still hit the cache, regardless of our compression
   // settings (which we may tune over time).
   const hash = crypto.createHash("sha256").update(imageBase64).digest("hex").slice(0, 32);
@@ -348,7 +348,7 @@ export async function ocrFromImageBase64(
   imageBase64 = ds.base64;
   mimeType = ds.mimeType;
 
-  // P4 — locate the INCI block in the (downscaled) image, crop to it, and
+  // P4 - locate the INCI block in the (downscaled) image, crop to it, and
   // run OCR on the crop. Removes 80-90 % of the multilingual descriptive
   // paragraphs that confused the model on full-frame photos. Falls back to
   // the un-cropped (but still downscaled) image if locate or crop fails.
@@ -366,10 +366,10 @@ export async function ocrFromImageBase64(
   const system = [
     "Tu es un OCR spécialisé compositions INCI cosmétiques. Tu reçois une photo du dos d'un emballage.",
     "",
-    "RÈGLES CRITIQUES — la fidélité prime sur la complétude :",
+    "RÈGLES CRITIQUES - la fidélité prime sur la complétude :",
     "1. N'INVENTE JAMAIS d'ingrédient. Si tu ne peux pas lire un mot avec certitude, omets-le ou écris `[?]` à sa place. Une liste incomplète mais fidèle vaut MILLE fois mieux qu'une liste complète mais hallucinée.",
     "2. Cherche le bloc qui commence explicitement par `INGREDIENTS:`, `INGRÉDIENTS:`, `INCI:`, `COMPOSITION:` ou équivalent. C'est UNIQUEMENT ce bloc qui contient la liste INCI.",
-    "3. IGNORE tous les paragraphes descriptifs multilingues (suédois, danois, néerlandais, allemand, italien, etc.). Des mots comme `KASTANJEMELK`, `BALSAM`, `HOITOAINE`, `BESCHERMENDE` NE SONT PAS des ingrédients INCI — ce sont des descriptions de produit traduites.",
+    "3. IGNORE tous les paragraphes descriptifs multilingues (suédois, danois, néerlandais, allemand, italien, etc.). Des mots comme `KASTANJEMELK`, `BALSAM`, `HOITOAINE`, `BESCHERMENDE` NE SONT PAS des ingrédients INCI - ce sont des descriptions de produit traduites.",
     "4. Les ingrédients INCI réels sont en MAJUSCULES (ou Title Case), en latin ou en anglais botanique (ex. `BUTYROSPERMUM PARKII`, `AQUA`, `GLYCERIN`, `TOCOPHEROL`), séparés par des virgules ou points-virgules.",
     "5. Ne corrige RIEN, ne traduis RIEN, ne remplace RIEN par un nom \"plausible\".",
     "6. Réponds en JSON strict.",
@@ -441,7 +441,7 @@ Format de réponse JSON :
       }),
     });
 
-    // P3 — multi-pass: a single Vision call truncates 20+ item lists
+    // P3 - multi-pass: a single Vision call truncates 20+ item lists
     // (Dove, L'Oréal…) to ~10-16 entries. We used to ALWAYS trigger pass 2
     // when 6 < tokens < 18 (~80% of scans, half useless). Now we validate
     // first and only re-run when validation says the OCR is clearly thin
@@ -494,7 +494,7 @@ Format de réponse JSON :
 /**
  * OCR of the FRONT of a cosmetic package. Extracts the product identity
  * (name + brand + type) so we can identify the product via web search later.
- * No INCI extraction here — the back-label call (ocrFromImageBase64) is the
+ * No INCI extraction here - the back-label call (ocrFromImageBase64) is the
  * authoritative source for ingredients.
  *
  * The photo is read once and discarded; only the extracted fields are returned.
@@ -514,7 +514,7 @@ export async function ocrFrontFromImageBase64(
     return { found: false, reason: "openai_unavailable" };
   }
 
-  // Compress before Vision — same rationale as ocrFromImageBase64.
+  // Compress before Vision - same rationale as ocrFromImageBase64.
   const ds = await downscaleImage(imageBase64, mimeType);
   imageBase64 = ds.base64;
   mimeType = ds.mimeType;
@@ -524,7 +524,7 @@ export async function ocrFrontFromImageBase64(
     "",
     "RÈGLES :",
     "1. N'INVENTE RIEN. Si un champ n'est pas lisible avec certitude, mets-le à null.",
-    "2. `brand` : la marque (souvent en haut, en gros — ex. `L'Oréal`, `CeraVe`, `The Ordinary`, `Yves Rocher`). Garde la casse d'origine.",
+    "2. `brand` : la marque (souvent en haut, en gros - ex. `L'Oréal`, `CeraVe`, `The Ordinary`, `Yves Rocher`). Garde la casse d'origine.",
     "3. `productName` : le nom de la gamme/produit (ex. `Effaclar Duo+`, `Foaming Cleanser`, `Niacinamide 10 % + Zinc 1 %`). Exclus la marque, les claims marketing (`hydrate 24h`), les volumes (`200 mL`) et les certifications (`bio`).",
     "4. `productType` : le type de produit en français court (ex. `nettoyant visage`, `crème hydratante`, `sérum`, `shampoing`, `gel douche`, `démaquillant`, `huile capillaire`). Choisis le terme le plus précis visible sur le packaging ; si non précisé, déduis-le des claims (mais reste prudent).",
     "5. Si la photo est floue, trop sombre, ou ne montre pas la face avant : renvoie `{ \"found\": false, \"reason\": \"<brève raison>\" }`.",
@@ -575,7 +575,7 @@ Format de réponse JSON :
         const cleanField = (v: unknown): string | null => {
           if (typeof v !== "string") return null;
           const t = v.trim();
-          if (t.length === 0 || t.toLowerCase() === "null" || t === "—") return null;
+          if (t.length === 0 || t.toLowerCase() === "null" || t === "-") return null;
           return t.slice(0, 200);
         };
         let result: OcrFrontResult;

@@ -55,7 +55,7 @@ export async function searchInciDecoder(query: string): Promise<{
 }
 
 /**
- * Lightweight INCIDecoder candidate — slug + display name + url, NO INCI
+ * Lightweight INCIDecoder candidate - slug + display name + url, NO INCI
  * pre-fetched. Used to populate the disambiguation list alongside OBF; the
  * actual INCI is loaded on click via fetchInciDecoderProduct().
  */
@@ -68,7 +68,7 @@ export type InciDecoderListCandidate = {
 
 /**
  * Returns up to `limit` product candidates from an INCIDecoder text search.
- * Performs a SINGLE HTTP request (the search page) — no per-product fetches,
+ * Performs a SINGLE HTTP request (the search page) - no per-product fetches,
  * so the call stays under ~1 s. INCI is loaded lazily when the user picks one.
  */
 export async function searchInciDecoderList(

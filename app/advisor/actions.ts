@@ -36,7 +36,7 @@ export async function saveSkinProfile(form: FormData): Promise<SkinProfileResult
     return { ok: false, error: "Choisis au moins une préoccupation." };
   }
 
-  // Hair section is optional — empty is fine.
+  // Hair section is optional - empty is fine.
   const hairConcerns = form
     .getAll("hair_concerns")
     .map(String)

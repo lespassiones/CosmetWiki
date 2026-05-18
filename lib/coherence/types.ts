@@ -6,27 +6,27 @@
  *   2. LLM proposes documented active ingredients for each promise (constrained
  *      to known categories from `claims.ts`).
  *   3. Engine matches proposed actives against the parent INCI analysis items
- *      by slug/name — purely mechanical, the LLM never decides.
+ *      by slug/name - purely mechanical, the LLM never decides.
  *   4. Engine reads each match's `thresholdContext` to decide if it's well
  *      dosed (above the 1% line) or in trace (after fragrance/preservative).
  *   5. Engine derives the verdict per promise from the match results.
  *   6. LLM writes a one-sentence conclusion based on the engine's verdicts.
  *
  * Steps 3-5 are deterministic. The LLM only proposes candidates and rephrases
- * — it cannot invent ingredients that aren't in the formula.
+ * - it cannot invent ingredients that aren't in the formula.
  */
 
 /** Verdict for a single promise. */
 export type CoherenceVerdict =
-  | "tenue" // green — actives present and well dosed
-  | "partielle" // amber — actives present but in trace (≤1%) or only some present
-  | "marketing" // orange — only cosmetic/visual support, no biological actives
-  | "non_demontree" // rose — no documented active found
+  | "tenue" // green - actives present and well dosed
+  | "partielle" // amber - actives present but in trace (≤1%) or only some present
+  | "marketing" // orange - only cosmetic/visual support, no biological actives
+  | "non_demontree" // rose - no documented active found
   // Reserved for "absence" promises ("sans sulfate", "sans paraben"…). Set
   // when the product claims to be free of a category of ingredients but the
   // formula contains at least one item with the corresponding tag. Rendered
   // in deep red so it's clearly worse than non_demontree (which is just
-  // "couldn't prove it" — contredite is "the formula actively contradicts
+  // "couldn't prove it" - contredite is "the formula actively contradicts
   // the claim").
   | "contredite";
 
@@ -57,7 +57,7 @@ export type CoherencePromise = {
   }[];
   /**
    * Cosmetic-only actives proposed by the LLM (e.g. polysaccharides for
-   * "densifies hair") — present in the formula but only provide visual /
+   * "densifies hair") - present in the formula but only provide visual /
    * sensory effect, not biological. Used for the "marketing" verdict.
    */
   cosmeticActives: {
@@ -72,7 +72,7 @@ export type CoherencePromise = {
    */
   missingActives: string[];
   /**
-   * Ingredients that CONTRADICT an "absence" promise — i.e. the product
+   * Ingredients that CONTRADICT an "absence" promise - i.e. the product
    * says "sans sulfate" but the formula contains Sodium Laureth Sulfate.
    * Only populated when verdict === "contredite". Otherwise empty / omitted.
    */
@@ -115,7 +115,7 @@ export type ProductType =
   | "maquillage"
   | "autre";
 
-/** Human label for a product type — used in prompts and the UI. */
+/** Human label for a product type - used in prompts and the UI. */
 export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
   cheveux: "Cheveux",
   peau_visage: "Peau visage",
@@ -130,7 +130,7 @@ export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
 
 /**
  * A claim the description makes that is biologically irrelevant for the
- * detected product type (e.g. "production de collagène" on a hair product —
+ * detected product type (e.g. "production de collagène" on a hair product -
  * hair has no collagen to produce). Surfaced as a dedicated UI section so
  * the user understands the marketing copy overreached, without being mixed
  * into the regular verdict ladder.
@@ -156,7 +156,7 @@ export type CoherenceResult = {
   /**
    * Promises that the marketing copy makes but that don't apply to the
    * detected product type (e.g. collagen claim on a hair product). The
-   * engine doesn't score these — they get their own UI section.
+   * engine doesn't score these - they get their own UI section.
    * Optional: legacy rows (before this field existed) just have no entry.
    */
   outOfScope?: OutOfScopePromise[];
@@ -200,7 +200,7 @@ export type CoherenceResult = {
     firstFragrancePos: number | null;
     /** First preservative position (or null). */
     firstPreservativePos: number | null;
-    /** The smaller of the two — the actual "1% threshold" position. */
+    /** The smaller of the two - the actual "1% threshold" position. */
     thresholdPos: number | null;
     /** Total number of ingredients in the formula. */
     totalPositions: number;

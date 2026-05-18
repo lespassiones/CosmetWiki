@@ -43,7 +43,7 @@ export default function OffrePage() {
           period="Annuel"
           price="24,99 €"
           unit="/an"
-          subline="Soit ≈ 2,08 € par mois — 2 mois offerts."
+          subline="Soit ≈ 2,08 € par mois - 2 mois offerts."
           highlight
         />
       </div>
@@ -118,7 +118,7 @@ function PlanCard({
         {subline}
       </p>
 
-      {/* Disabled CTA — payment not wired yet */}
+      {/* Disabled CTA - payment not wired yet */}
       <button
         type="button"
         disabled

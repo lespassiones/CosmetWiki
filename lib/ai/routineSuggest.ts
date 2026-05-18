@@ -6,7 +6,7 @@
  *
  * IMPORTANT: GPT never recommends a brand. It suggests a "profile to look for"
  * (e.g. "shampooing sans sulfates ni parfum"). The numerical impact is provided
- * BY THE ENGINE, not by GPT — we ask GPT only to phrase the advice based on
+ * BY THE ENGINE, not by GPT - we ask GPT only to phrase the advice based on
  * facts we already computed.
  *
  * Result cached by routine fingerprint so repeat visits are free.

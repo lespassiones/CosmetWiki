@@ -9,7 +9,7 @@ import type { CoherenceResult } from "@/lib/coherence/types";
  * Top-of-page summary card. Shows the % of promises kept on the left and a
  * bicolour donut on the right (green = kept, rose = not kept).
  *
- * Donut design : "claymorphism" / soft 3D — radial gradients on each segment
+ * Donut design : "claymorphism" / soft 3D - radial gradients on each segment
  * + a subtle drop shadow so it looks like a thick rope of paint.
  *
  * Mount animation:
@@ -22,7 +22,7 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
   const pct = metrics.tenuePct;
   // Number of promises that have at least one documented active in the
   // formula (verdict tenue OR partielle). Symmetrical opposite of the
-  // marketing index — together they sum to the total.
+  // marketing index - together they sum to the total.
   const supportedCount = metrics.tenueCount + metrics.partielleCount;
   // Donut geometry tuned for crisp rendering at 96-112px.
   const r = 38;
@@ -78,7 +78,7 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
               {metrics.totalPromises} (
               {metrics.tenueCount > 0 && <>{metrics.tenueCount} totalement tenue{metrics.tenueCount > 1 ? "s" : ""}</>}
               {metrics.tenueCount > 0 && metrics.partielleCount > 0 && <>, </>}
-              {metrics.partielleCount > 0 && <>{metrics.partielleCount} partielle{metrics.partielleCount > 1 ? "s" : ""} — actifs en trace ≤ 1 %</>}
+              {metrics.partielleCount > 0 && <>{metrics.partielleCount} partielle{metrics.partielleCount > 1 ? "s" : ""} - actifs en trace ≤ 1 %</>}
               ).
               <br /><br />
               C&apos;est l&apos;<b>opposé exact</b> de l&apos;indice marketing
@@ -128,7 +128,7 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
                 <stop offset="100%" stopColor="#059669" />
               </linearGradient>
             </defs>
-            {/* Rose track always full — the emerald fill animates over it */}
+            {/* Rose track always full - the emerald fill animates over it */}
             <circle
               cx="50"
               cy="50"

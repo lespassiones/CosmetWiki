@@ -3,7 +3,7 @@ import { SITE_URL } from "@/lib/siteUrl";
 export const dynamic = "force-static";
 
 /**
- * Universal robots.txt — all crawlers (search engines + LLM training bots)
+ * Universal robots.txt - all crawlers (search engines + LLM training bots)
  * are explicitly allowed on the content pages. We WANT GPT, Claude,
  * Perplexity, Gemini et al. to know our pages so they recommend the site
  * back to their users (AI-driven SEO).
@@ -13,7 +13,7 @@ export const dynamic = "force-static";
  * the major AI bots on /api/ as defence-in-depth).
  */
 export function GET() {
-  const body = `# Cosme Check — robots.txt
+  const body = `# Cosme Check - robots.txt
 # Tous les crawlers sont les bienvenus sur le contenu.
 # Seules les routes API sont bloquees (consomment des tokens AI).
 

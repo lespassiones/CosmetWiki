@@ -35,7 +35,7 @@ type ScannerState =
   | { kind: "not-found"; barcode: string };
 
 // Format list passed to the native BarcodeDetector. Same set is supported by
-// @zxing/browser (the fallback) automatically — no need to filter there.
+// @zxing/browser (the fallback) automatically - no need to filter there.
 const FORMATS = [
   "ean_13",
   "ean_8",
@@ -46,7 +46,7 @@ const FORMATS = [
 ] as const;
 
 // Mirrors the server-side check. A QR on a phone box typically encodes a URL
-// or an IMEI (15 digits) — neither matches, so we drop them client-side and
+// or an IMEI (15 digits) - neither matches, so we drop them client-side and
 // keep scanning instead of burning a request and the rate-limit budget.
 const BARCODE_RE = /^\d{8,14}$/;
 
@@ -160,7 +160,7 @@ export function BarcodeScannerInput({
       }
 
       // If the user has already denied camera permission for this origin,
-      // Chrome won't show a prompt again — getUserMedia just rejects with
+      // Chrome won't show a prompt again - getUserMedia just rejects with
       // NotAllowedError. Detect that state up-front so we can show the
       // unblock instructions instead of pretending we just got refused.
       try {
@@ -230,7 +230,7 @@ export function BarcodeScannerInput({
                 }
               }
             } catch {
-              /* transient decode error — keep going */
+              /* transient decode error - keep going */
             }
             raf = requestAnimationFrame(tick);
           };
@@ -245,7 +245,7 @@ export function BarcodeScannerInput({
 
         // Fallback : @zxing/browser (Safari iOS, Firefox). The reader's own
         // callback fires continuously, so resuming just means letting the
-        // detectedRef gate fall again — no explicit restart needed.
+        // detectedRef gate fall again - no explicit restart needed.
         const { BrowserMultiFormatReader } = await import("@zxing/browser");
         const reader = new BrowserMultiFormatReader();
         const controls = await reader.decodeFromVideoElement(

@@ -2,7 +2,7 @@ import { searchBrandViaDDG } from "./_shared";
 import type { BrandHandler } from "./types";
 
 // Note: vichy.fr returns 403 on direct fetch (Cloudflare). The DDG site:
-// search may still surface cached or rendered pages — we keep the handler
+// search may still surface cached or rendered pages - we keep the handler
 // registered so we benefit automatically if anti-bot loosens.
 export const vichy: BrandHandler = {
   name: "Vichy",

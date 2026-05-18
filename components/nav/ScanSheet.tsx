@@ -22,7 +22,7 @@ type FoundPayload = {
 // on top of the analysis result. We bridge across navigation via sessionStorage.
 const PENDING_SOURCE_KEY = "cw:pendingProductSource";
 // Authoritative INCI handoff. AnalysisRunner reads this on mount and trusts
-// it over the URL searchParam — necessary because Next.js can serve a
+// it over the URL searchParam - necessary because Next.js can serve a
 // prefetched `/analyse` shell where `searchParams.inci` is undefined, which
 // otherwise bounces the user back to the home page mid-analyse.
 const PENDING_INCI_KEY = "cw:pendingInci";
@@ -49,7 +49,7 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
   const pathname = usePathname();
   const [view, setView] = useState<View>("picker");
   const sheetRef = useRef<HTMLDivElement>(null);
-  // Optional "C'est quel produit ?" — collected on the paste view so the
+  // Optional "C'est quel produit ?" - collected on the paste view so the
   // analyser can use it as productLabel and the post-analysis "Analyser la
   // promesse" button can hit the web-search identification step with a real
   // hint instead of just the INCI.
@@ -70,7 +70,7 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
   // Reset the inner view to the tile picker each time the sheet opens fresh.
   // Also prefetch /analyse so when the user submits a flow (barcode lookup,
   // INCI paste, product search), the destination page is already in cache and
-  // its ProcessingOverlay paints in the same frame as `router.push` —
+  // its ProcessingOverlay paints in the same frame as `router.push` -
   // otherwise the user briefly sees the underlying page (home / dashboard)
   // before /analyse mounts, which feels like "the click did nothing".
   useEffect(() => {
@@ -132,7 +132,7 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
     const ingredientsText = input.ingredientsText.trim();
     if (!ingredientsText) return;
     // Stash the INCI in sessionStorage BEFORE navigating. This is the
-    // authoritative handoff — the URL searchParam is kept as a secondary
+    // authoritative handoff - the URL searchParam is kept as a secondary
     // hint but can be dropped by Next.js when serving a prefetched shell.
     try {
       sessionStorage.setItem(PENDING_INCI_KEY, ingredientsText);
@@ -154,7 +154,7 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
         /* ignore */
       }
     } else if ("productNameHint" in input && input.productNameHint && input.productNameHint.trim()) {
-      // Paste flow with a manual "C'est quel produit ?" hint — we stash it
+      // Paste flow with a manual "C'est quel produit ?" hint - we stash it
       // under the same key so AnalysisRunner picks it up as productLabel and
       // the post-analysis "Analyser la promesse" button can feed it to the
       // identification step.
@@ -175,10 +175,10 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
     }
     // Paint the overlay BEFORE the navigation kicks off, so the user sees
     // "On décode la composition…" in the same frame they pressed the button.
-    // Don't call onClose() here — the route-change effect above will fold the
+    // Don't call onClose() here - the route-change effect above will fold the
     // sheet once /analyse has actually taken over.
     setNavigating({ active: true, budget: randomProcessingTotal() });
-    // Dedicated analysis page — AnalysisRunner picks up the payload (and the
+    // Dedicated analysis page - AnalysisRunner picks up the payload (and the
     // optional product source from sessionStorage), runs analyse, then
     // renders the result panel full-width without the dashboard underneath.
     router.push(`/analyse?inci=${encodeURIComponent(ingredientsText.slice(0, 6000))}`);
@@ -286,7 +286,7 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
                   <TagIcon className="h-4 w-4 text-[#1E3A8A] shrink-0" />
                   <label htmlFor="paste-product-name" className="text-[14px] font-semibold text-[#1E3A8A]">
                     C&apos;est quel produit&nbsp;?
-                    <span className="text-[#6B7280] font-normal ml-1">— optionnel mais recommandé</span>
+                    <span className="text-[#6B7280] font-normal ml-1">- optionnel mais recommandé</span>
                   </label>
                 </div>
                 <input

@@ -31,7 +31,7 @@ const RATINGS = [
     dot: "bg-emerald-500",
     // Badge styling for the "Pas de pénalité" pill : strong-tinted bg,
     // matching text colour, ring of the same hue. Accentué pour que la
-    // sévérité du verdict soit lisible d'un coup d'œil — la version "soft"
+    // sévérité du verdict soit lisible d'un coup d'œil - la version "soft"
     // précédente se perdait dans le fond clair de la card.
     badge: "bg-emerald-100 text-emerald-800 ring-emerald-300",
     desc: "Aucun problème de santé connu et impact environnemental moindre. La plupart des extraits naturels sont en vert tant qu'ils ne sont pas réglementés.",
@@ -42,7 +42,7 @@ const RATINGS = [
     title: "Pénalité légère",
     dot: "bg-amber-400",
     badge: "bg-amber-100 text-amber-800 ring-amber-300",
-    desc: "Ingrédient réglementé, plutôt irritant ou allergène. Référencé en Annexe III de la réglementation européenne 1223/2009 — souvent avec une limite de concentration imposée par l'Europe.",
+    desc: "Ingrédient réglementé, plutôt irritant ou allergène. Référencé en Annexe III de la réglementation européenne 1223/2009 - souvent avec une limite de concentration imposée par l'Europe.",
     pen: "Pénalité faible",
   },
   {
@@ -77,7 +77,7 @@ export default function HowItWorksPage() {
           Comment les ingrédients sont-ils classifiés&nbsp;?
         </h1>
         <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-ink-muted">
-          Chaque ingrédient est identifié par une couleur — du vert au rouge —
+          Chaque ingrédient est identifié par une couleur - du vert au rouge -
           qui résume sa pénalité. Plus la couleur tire sur le rouge, plus
           l&apos;ingrédient est controversé. Plus elle tire sur le vert, moins
           il l&apos;est. Le système évolue en permanence selon les nouvelles
@@ -127,7 +127,7 @@ export default function HowItWorksPage() {
               paraissent ou que la réglementation change.
             </li>
             <li>
-              Une note 0/20 n&apos;est pas forcément un produit dangereux —
+              Une note 0/20 n&apos;est pas forcément un produit dangereux -
               c&apos;est l&apos;agrégation de pénalités d&apos;ingrédients qui
               ne sont pas tous critiques.
             </li>

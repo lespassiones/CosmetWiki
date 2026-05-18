@@ -2,17 +2,17 @@ import { InfoBadge, Tooltip } from "../Tooltip";
 import type { CoherenceResult } from "@/lib/coherence/types";
 
 /**
- * "Indice marketing" card — % of promises NOT supported by the formula:
+ * "Indice marketing" card - % of promises NOT supported by the formula:
  * verdicts `marketing` (cosmetic-only actives), `non_demontree` (no
  * documented active at all) AND `contredite` (the formula actively
- * contradicts an "absence" claim — e.g. "sans sulfate" but a sulfate is
+ * contradicts an "absence" claim - e.g. "sans sulfate" but a sulfate is
  * listed). This must match what `computeMetrics` puts in
  * `metrics.marketingIndex` (cf. lib/coherence/engine.ts), otherwise the
  * big "17 %" headline diverges from the sub-count text below it.
  *
  * The body explicitly nuances the metric: it shows the breakdown across all
  * verdicts so the user understands why "0/2 tenues" can coexist with
- * "indice marketing 50 %" (the missing 50 % are partial verdicts — actives
+ * "indice marketing 50 %" (the missing 50 % are partial verdicts - actives
  * present but in trace ≤ 1 %).
  */
 export function MarketingIndexCard({
@@ -50,7 +50,7 @@ export function MarketingIndexCard({
                 C&apos;est <b>différent du verdict global</b> (qui ne compte que les
                 promesses <b>totalement tenues</b>). Les promesses{" "}
                 <b>partielles</b> (actifs présents mais en trace ≤ 1 %) ne sont
-                comptées ni dans l&apos;un ni dans l&apos;autre — elles ont des
+                comptées ni dans l&apos;un ni dans l&apos;autre - elles ont des
                 actifs, juste sous-dosés.
                 <br /><br />
                 <b>Ici</b> : {unsupportedCount} promesse{unsupportedCount > 1 ? "s" : ""}{" "}
@@ -74,7 +74,7 @@ export function MarketingIndexCard({
         <div className="text-[13px] leading-relaxed text-rose-900/85">
           {total === 0 ? (
             <>
-              La description ne contient aucune promesse d&apos;effet vérifiable —
+              La description ne contient aucune promesse d&apos;effet vérifiable -
               uniquement des mentions générales (composition, certification, sensorialité).
             </>
           ) : unsupportedCount === 0 ? (

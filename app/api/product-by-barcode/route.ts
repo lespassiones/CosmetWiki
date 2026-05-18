@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 1. Open Beauty Facts — primary source for cosmetics.
+  // 1. Open Beauty Facts - primary source for cosmetics.
   const obf = await fetchOFFProduct("world.openbeautyfacts.org", barcode);
   if (obf && obf.inci.length >= 30) {
     return NextResponse.json({
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
     } satisfies ProductSearchResult);
   }
 
-  // 2. Open Products Facts — same API, covers more household/personal-care
+  // 2. Open Products Facts - same API, covers more household/personal-care
   // products that are not in OBF (shampoos, deodorants, cleaning products…).
   const opf = await fetchOFFProduct("world.openproductsfacts.org", barcode);
   if (opf && opf.inci.length >= 30) {

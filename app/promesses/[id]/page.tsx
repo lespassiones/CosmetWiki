@@ -65,7 +65,7 @@ export default async function PromesseDetailPage({
   // Recompute metrics from the stored promises so changes to the metric
   // formulas (e.g. moving from "tenue-only" to "tenue+partielle") apply
   // retroactively to analyses already saved in the DB. Stored `metrics` are
-  // ignored — they're a snapshot from compute time.
+  // ignored - they're a snapshot from compute time.
   const storedResult = row.result_json;
   const result: CoherenceResult = {
     ...storedResult,
@@ -102,7 +102,7 @@ export default async function PromesseDetailPage({
         </p>
       </header>
 
-      {/* Sections animated in cascade — top→bottom fade-up, with progressive
+      {/* Sections animated in cascade - top→bottom fade-up, with progressive
           delays. The donut and the per-promise bars also have their own
           inner animations (radial fill / width fill) that start once their
           card is visible (see VerdictGlobalCard / PromisesBarChart).        */}

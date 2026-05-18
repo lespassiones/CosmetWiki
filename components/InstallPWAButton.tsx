@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 // Chrome's standard installability event. Fires once the PWA criteria are met
 // (manifest + service worker + 192/512 icons + HTTPS) AND the user hasn't
 // already installed/dismissed too recently. Captured globally so both the
-// header button and the burger-menu entry share the same prompt instance —
+// header button and the burger-menu entry share the same prompt instance -
 // otherwise the second one would call prompt() on a used event and throw.
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -68,7 +68,7 @@ function usePWAInstall() {
       notify();
       return true;
     } catch {
-      // Event was already used or browser blocked it — fall back to manual
+      // Event was already used or browser blocked it - fall back to manual
       // instructions.
       cachedPrompt = null;
       notify();
@@ -233,7 +233,7 @@ function PlatformInstructions({ platform }: { platform: Platform }) {
         <li>Confirme. L&apos;app s&apos;ouvre ensuite en plein écran.</li>
         <li className="text-ink-subtle">
           Si tu ne vois pas l&apos;option, l&apos;app est peut-être déjà
-          installée, ou tu l&apos;as refusée récemment — réessaie dans quelques
+          installée, ou tu l&apos;as refusée récemment - réessaie dans quelques
           jours ou désinstalle-la d&apos;abord.
         </li>
       </ol>

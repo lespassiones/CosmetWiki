@@ -1,5 +1,5 @@
 /**
- * INCI → nom commun en français pour les ingrédients "grand public" — ceux
+ * INCI → nom commun en français pour les ingrédients "grand public" - ceux
  * qu'un consommateur reconnaît dans la salle de bain : eau, huiles
  * végétales, beurres, vitamines courantes, parfum, cires, argiles.
  *
@@ -10,7 +10,7 @@
  * Utilisé en post-traitement de la synthèse côté frontend pour rendre des
  * passages type "**AQUA**, suivi du **PERSEA GRATISSIMA OIL**" sous la
  * forme "eau (Aqua), suivi de l'huile d'avocat (Persea Gratissima Oil)".
- * Le LLM n'est pas au courant — c'est uniquement un overlay d'affichage.
+ * Le LLM n'est pas au courant - c'est uniquement un overlay d'affichage.
  *
  * Les clés sont normalisées (lowercase, sans diacritique, ponctuation
  * collapsée en espace) pour matcher la sortie de `normaliseSynthesisToken`
@@ -159,7 +159,7 @@ export function commonNameFor(normalisedToken: string): string | undefined {
 /**
  * Pretty-cases an INCI name for display inside the "(…)" suffix that
  * accompanies the common name. Goes from "PERSEA GRATISSIMA OIL" to
- * "Persea Gratissima Oil" — easier on the eye than ALLCAPS in body copy
+ * "Persea Gratissima Oil" - easier on the eye than ALLCAPS in body copy
  * but still recognisable as the on-label INCI token.
  */
 export function prettyInci(s: string): string {

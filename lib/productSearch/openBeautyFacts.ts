@@ -97,11 +97,11 @@ export type OpenBeautyFactsCandidate = {
   ingredientsText: string;
   imageUrl: string | null;
   sourceUrl: string;
-  /** Source tag — "openbeautyfacts" for OBF results, "cache" for cached
+  /** Source tag - "openbeautyfacts" for OBF results, "cache" for cached
    *  product_inci_cache rows, "incidecoder" for INCIDecoder list rows. The
    *  client uses this to decide whether INCI must be lazy-fetched on click. */
   source?: "openbeautyfacts" | "cache" | "incidecoder";
-  /** INCIDecoder slug — only set when source === "incidecoder". When present
+  /** INCIDecoder slug - only set when source === "incidecoder". When present
    *  and `ingredientsText` is empty, the client must POST /api/incidecoder-fetch
    *  to obtain the INCI before triggering an analyse. */
   slug?: string;
@@ -110,7 +110,7 @@ export type OpenBeautyFactsCandidate = {
 /**
  * Returns a paginated list of OBF candidates that already have a usable
  * INCI list. Used by the "show me 10 matches before analysing" disambiguation
- * flow — the user picks the right product, then we feed its INCI directly to
+ * flow - the user picks the right product, then we feed its INCI directly to
  * the analyser without re-running the full cascade.
  */
 export async function searchOpenBeautyFactsList(

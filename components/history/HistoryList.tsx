@@ -15,7 +15,7 @@ type Row = {
   created_at: string;
   counts: BlobCounts | null;
   /** When set, the user has already run a coherence (promise) analysis on
-   *  this analyse — the per-card CTA links straight to that result instead
+   *  this analyse - the per-card CTA links straight to that result instead
    *  of relaunching the modal. */
   latestCoherenceId?: string | null;
   /** Lowercased ingredient names + raw INCI inputs, used by the search bar
@@ -24,7 +24,7 @@ type Row = {
 };
 
 function scoreTone(score: number | null) {
-  if (score === null) return { text: "text-[#6B7280]", label: "—" };
+  if (score === null) return { text: "text-[#6B7280]", label: "-" };
   if (score >= 17) return { text: "text-emerald-700", label: "Très bien" };
   if (score >= 13) return { text: "text-amber-700", label: "Bien" };
   if (score >= 9) return { text: "text-orange-700", label: "Moyen" };
@@ -67,7 +67,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
       if (next.has(id)) next.delete(id);
       else if (next.size < 2) next.add(id);
       else {
-        // already 2 selected — replace the oldest
+        // already 2 selected - replace the oldest
         const first = Array.from(next)[0];
         next.delete(first);
         next.add(id);
@@ -101,11 +101,11 @@ export function HistoryList({ rows }: { rows: Row[] }) {
 
   return (
     <div>
-      {/* Separator first — sits right under the page title (which is rendered
+      {/* Separator first - sits right under the page title (which is rendered
           by the parent route), before the toolbar / count subline. */}
       <div className="-mx-5 h-[2px] bg-black/30 lg:mx-0 lg:h-px lg:bg-black/[0.08]" />
 
-      {/* Discrete toolbar — only the "Comparer" entry point is visible when idle */}
+      {/* Discrete toolbar - only the "Comparer" entry point is visible when idle */}
       <div className="mt-3 flex items-center justify-between">
         <p className="text-sm text-[#6B7280]">
           {rows.length === 0
@@ -230,11 +230,11 @@ export function HistoryList({ rows }: { rows: Row[] }) {
             );
           }
 
-          // The pill is shown on every card now — earlier we hid it when no
+          // The pill is shown on every card now - earlier we hid it when no
           // product_label was set, which was inconsistent: on the detail
           // page the same analyse showed "Voir l'analyse de la promesse"
           // (because of the "Analyse du …" fallback title). Always visible
-          // here too — the modal handles the "no name" case by searching
+          // here too - the modal handles the "no name" case by searching
           // on the INCI alone and falling back to manual description.
           const canAnalysePromesse = true;
           return (
@@ -242,7 +242,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
               <div
                 className={`${GLASS_PILL_CARD} ${GLASS_PILL_CARD_HOVER} relative flex items-center gap-4 p-4 pr-16`}
               >
-                {/* Card-wide click target — kept underneath the action buttons
+                {/* Card-wide click target - kept underneath the action buttons
                     so the dedicated "Analyser la promesse" link / kebab menu
                     receive their own clicks. */}
                 <Link

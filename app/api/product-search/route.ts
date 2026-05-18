@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (norm.kind === "candidates") {
-    // Ambiguous — return the candidates so the UI can let the user pick,
+    // Ambiguous - return the candidates so the UI can let the user pick,
     // without burning the deep cascade. The frontend can re-call this
     // route with the chosen candidate.
     return NextResponse.json({

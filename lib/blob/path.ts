@@ -28,7 +28,7 @@ export type Pt = { x: number; y: number };
 /**
  * Wavy radial edge from the inner ring to the outer ring at a given angle.
  * Each sample point's *angle* is jittered, with a sin(πt) envelope so the
- * jitter fades to zero at the ring boundaries — the ends always land on the
+ * jitter fades to zero at the ring boundaries - the ends always land on the
  * exact unjittered (rInner, angle) and (rOuter, angle) points so the edge
  * meets the inner/outer arcs perfectly.
  */
@@ -57,7 +57,7 @@ export function wavyRadialEdge(
   return pts;
 }
 
-/** Straight radial edge — used at the half-ring's left/right ends. */
+/** Straight radial edge - used at the half-ring's left/right ends. */
 export function straightRadialEdge(
   cx: number,
   cy: number,
@@ -111,7 +111,7 @@ export function ringSectorPath(
   return d + " Z";
 }
 
-/** Smooth closed Catmull-Rom blob — used for legend mini-shapes. */
+/** Smooth closed Catmull-Rom blob - used for legend mini-shapes. */
 export function organicBlob(
   cx: number,
   cy: number,

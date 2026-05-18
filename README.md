@@ -64,10 +64,10 @@ Cosme Check/
 
 Le scraping est **séparé** du site. Quatre phases :
 
-1. **Phase 1 — index alphabétique** ✅ (15 722 ingrédients en JSON).
-2. **Phase 2 — chargement Supabase** ✅ (table `cosme_check.ingredients` peuplée).
-3. **Phase 3 — enrichissement détaillé** ⏳ (CAS, fonctions, prévalence, produits scrapés progressivement).
-4. **Phase 4 — auto-hébergement images** ✅ activé : chaque image produit est convertie en WebP (≈ 4-15 KB) et uploadée dans le bucket Supabase Storage `cosmetwiki-products`. Le site **n'a plus aucune dépendance** vers incibeauty.com pour ses ressources.
+1. **Phase 1 - index alphabétique** ✅ (15 722 ingrédients en JSON).
+2. **Phase 2 - chargement Supabase** ✅ (table `cosme_check.ingredients` peuplée).
+3. **Phase 3 - enrichissement détaillé** ⏳ (CAS, fonctions, prévalence, produits scrapés progressivement).
+4. **Phase 4 - auto-hébergement images** ✅ activé : chaque image produit est convertie en WebP (≈ 4-15 KB) et uploadée dans le bucket Supabase Storage `cosmetwiki-products`. Le site **n'a plus aucune dépendance** vers incibeauty.com pour ses ressources.
 
 ### Lancer l'enrichissement détaillé
 
@@ -75,7 +75,7 @@ Le scraping est **séparé** du site. Quatre phases :
 # Test sur 50 (avec téléchargement + upload des images vers Storage)
 python scripts/scrape_ingredient_details.py --limit 50
 
-# Tout le reste — reprend automatiquement là où on s'était arrêté
+# Tout le reste - reprend automatiquement là où on s'était arrêté
 python scripts/scrape_ingredient_details.py
 
 # Mode rapide (skip download d'images, hotlink)

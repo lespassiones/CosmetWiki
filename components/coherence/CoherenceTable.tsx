@@ -12,7 +12,7 @@ import { VERDICT_TONE } from "./tone";
  * a 3-column table is unreadable below ~600px.
  *
  * Each found active is shown with a coloured dot matching its safety rating
- * (vert/jaune/orange/rouge) — bridges the coherence verdict and the per-
+ * (vert/jaune/orange/rouge) - bridges the coherence verdict and the per-
  * ingredient analysis the user already saw on the parent page.
  *
  * The "Manque" column was deliberately removed: a missing active in a
@@ -46,7 +46,7 @@ export function CoherenceTable({
   // (slug-based) and LLM-discovered open promises (name-based fallback).
   const colorMap = buildColorMap(items);
 
-  // Counts for the contextual tooltip — picks an example per verdict tier.
+  // Counts for the contextual tooltip - picks an example per verdict tier.
   const verdictCounts = {
     tenue: promises.filter((p) => p.verdict === "tenue").length,
     partielle: promises.filter((p) => p.verdict === "partielle").length,
@@ -84,7 +84,7 @@ export function CoherenceTable({
         </Tooltip>
       </div>
 
-      {/* DESKTOP TABLE — 3 columns (Manque dropped intentionally). */}
+      {/* DESKTOP TABLE - 3 columns (Manque dropped intentionally). */}
       <div className="hidden lg:block overflow-x-auto">
         <table className="w-full text-left text-[13px] table-fixed">
           <colgroup>
@@ -127,7 +127,7 @@ export function CoherenceTable({
         </table>
       </div>
 
-      {/* MOBILE CARDS — stacked */}
+      {/* MOBILE CARDS - stacked */}
       <ul className="space-y-2.5 lg:hidden">
         {promises.map((p) => {
           const tone = VERDICT_TONE[p.verdict];
@@ -249,7 +249,7 @@ function FoundList({
   ];
 
   if (entries.length === 0) {
-    return <span className="text-ink-subtle">—</span>;
+    return <span className="text-ink-subtle">-</span>;
   }
 
   return (

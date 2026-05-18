@@ -16,7 +16,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Surface to Vercel Runtime Logs at least — getting it into our error_log
+    // Surface to Vercel Runtime Logs at least - getting it into our error_log
     // table from the client side requires a separate API hop, which the
     // global-error.tsx variant handles.
     console.error("[app/error] caught:", error.message, error.digest);

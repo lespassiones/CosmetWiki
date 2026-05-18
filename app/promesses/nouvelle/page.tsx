@@ -42,7 +42,7 @@ export default async function NouvellePromessePage({
 
   const raw = (error ? [] : (data ?? [])) as AnalysisRow[];
 
-  // Build a lighter projection to send to the client — we only need what the
+  // Build a lighter projection to send to the client - we only need what the
   // wizard's confirmation step displays (top 3 ingredients + counts), not the
   // full INCI payload.
   const options: AnalysisOption[] = raw

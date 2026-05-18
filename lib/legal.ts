@@ -9,7 +9,7 @@ export const LEGAL = {
   siteUrl: "https://www.cosme-check.com",
   contactEmail: "contact@cosme-check.com",
 
-  // Éditeur du site — à compléter avec ta situation réelle.
+  // Éditeur du site - à compléter avec ta situation réelle.
   publisher: {
     name: "Brian Biendou",
     status: "Particulier", // ex: "Auto-entrepreneur", "SAS Cosme Check", etc.
@@ -18,14 +18,14 @@ export const LEGAL = {
     siret: null as string | null, // mets ton SIRET ici si tu es immatriculé
   },
 
-  // Hébergeur — déclaration obligatoire (LCEN, art. 6).
+  // Hébergeur - déclaration obligatoire (LCEN, art. 6).
   host: {
     name: "Vercel Inc.",
     address: "440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis",
     website: "https://vercel.com",
   },
 
-  // Base de données / Auth — pour la politique de confidentialité.
+  // Base de données / Auth - pour la politique de confidentialité.
   dataProcessors: [
     {
       name: "Supabase Inc.",

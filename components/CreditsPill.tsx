@@ -6,13 +6,13 @@ import Link from "next/link";
 type CreditsState = { used: number; limit: number; remaining: number } | null;
 
 /**
- * Gold-coin styled credits pill — fetches /api/credits on mount, on tab focus,
+ * Gold-coin styled credits pill - fetches /api/credits on mount, on tab focus,
  * and whenever a `cosmecheck:credits-updated` event fires (dispatched by the
  * apiFetch wrapper after a credit-consuming call).
  *
  * Renders nothing if the user isn't signed in (401 from the endpoint).
  *
- * Layout: [🪙 1390] [+] — the "+" links to /offre for the Premium upsell.
+ * Layout: [🪙 1390] [+] - the "+" links to /offre for the Premium upsell.
  */
 export function CreditsPill({ className = "" }: { className?: string }) {
   const [credits, setCredits] = useState<CreditsState>(null);
@@ -31,7 +31,7 @@ export function CreditsPill({ className = "" }: { className?: string }) {
         setCredits({ used: data.used, limit: data.limit, remaining: data.remaining });
       }
     } catch {
-      // ignore — pill stays in last known state
+      // ignore - pill stays in last known state
     }
   }, []);
 

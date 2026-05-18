@@ -25,7 +25,7 @@ export type DashboardData = {
 };
 
 function scoreTone(s: number | null) {
-  if (s === null) return { fg: "text-[#6B7280]", label: "—" };
+  if (s === null) return { fg: "text-[#6B7280]", label: "-" };
   if (s >= 17) return { fg: "text-emerald-700", label: "Très bien" };
   if (s >= 13) return { fg: "text-amber-700", label: "Bien" };
   if (s >= 9) return { fg: "text-orange-700", label: "Moyen" };
@@ -174,7 +174,7 @@ function RoutineCard({
   const safeCounts = counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 };
   // Aggregate ingredient distribution across all routine products. We turn
   // each colour count into a % of the total recognised ingredients in the
-  // routine — same numerator definition as on the analyse page so the
+  // routine - same numerator definition as on the analyse page so the
   // wording stays consistent ("X % sans pénalité").
   const total
     = safeCounts.vert + safeCounts.jaune + safeCounts.orange + safeCounts.rouge;

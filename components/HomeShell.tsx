@@ -100,7 +100,7 @@ export function HomeShell({
   const pendingProductSourceRef = useRef<ProductSource | null>(null);
 
   // Restore from sessionStorage on mount (e.g., after navigating to a fiche and
-  // back). If an `?inci=` param is present, prefer it — but reuse the cached
+  // back). If an `?inci=` param is present, prefer it - but reuse the cached
   // result when the text matches, to avoid relaunching the same analysis.
   useEffect(() => {
     const trimmed = initialInci.trim();
@@ -139,7 +139,7 @@ export function HomeShell({
       void runAnalyse(trimmed);
       return;
     }
-    // For signed-in users, never auto-restore a cached result on / — the
+    // For signed-in users, never auto-restore a cached result on / - the
     // analysis lives on /analyse now, and showing a ghost result under the
     // dashboard was confusing. Guests still get back-nav cache restoration
     // for the public landing flow.
@@ -250,7 +250,7 @@ export function HomeShell({
 
   // When a result is on screen, push a history entry so the browser/Android
   // back gesture returns to the search view instead of closing the tab/PWA.
-  // popstate clears the result state — clicking "Nouvelle analyse" calls
+  // popstate clears the result state - clicking "Nouvelle analyse" calls
   // history.back() to keep the stack tidy.
   useEffect(() => {
     if (!result || typeof window === "undefined") return;
@@ -298,7 +298,7 @@ export function HomeShell({
     return null;
   }
 
-  // Signed-in users never see the hero/search section — they have the
+  // Signed-in users never see the hero/search section - they have the
   // ScanSheet (sidebar / mobile FAB) to pick a flow, and the inputs render
   // inline inside that modal. HomeShell stays mounted only to handle the
   // ?inci= → analyse → result handoff: show the fixed-position overlay while
@@ -459,7 +459,7 @@ function AuthGate({
   children: React.ReactNode;
 }) {
   if (signedIn) return <>{children}</>;
-  // Block all interaction with the inner input — every click anywhere on top
+  // Block all interaction with the inner input - every click anywhere on top
   // of it bubbles up to the overlay link, which sends the user to sign-in
   // with ?next pointing back to the home page so they land back here after
   // authenticating.
@@ -508,7 +508,7 @@ function ModeToggle({
   );
 
   // Sliding pill that follows the active tab. We measure the active button
-  // every time the active tab or the container size changes — that handles
+  // every time the active tab or the container size changes - that handles
   // both user clicks and breakpoint changes (labels on mobile vs desktop
   // produce different button widths).
   const containerRef = useRef<HTMLDivElement>(null);

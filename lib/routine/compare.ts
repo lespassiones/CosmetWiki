@@ -109,7 +109,7 @@ export function compareAnalyses(
     }
   }
   if (bOverlapWithRoutine >= 3) {
-    insights.push(`Attention : **${b.name}** partage ${bOverlapWithRoutine} ingrédients avec d'autres produits de ta routine — switcher ne réduirait pas significativement ton exposition cumulée.`);
+    insights.push(`Attention : **${b.name}** partage ${bOverlapWithRoutine} ingrédients avec d'autres produits de ta routine - switcher ne réduirait pas significativement ton exposition cumulée.`);
   }
 
   return {

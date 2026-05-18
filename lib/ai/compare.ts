@@ -1,6 +1,6 @@
 /**
  * Side-by-side compare insights. Generates short, human portraits of two
- * products and a "comment choisir ?" hint. Never says "A est mieux que B" —
+ * products and a "comment choisir ?" hint. Never says "A est mieux que B" -
  * the reader infers the better fit themselves from the descriptions.
  *
  * Cached by hash of the (ordered) pair of ingredient lists.
@@ -19,7 +19,7 @@ import { NO_LONG_DASHES_RULE, stripLongDashes } from "./sanitize";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 // Bumped to 4 when we taught the prompt to use real product names instead
-// of "produit A" / "produit B" — old cache entries can't be reused since
+// of "produit A" / "produit B" - old cache entries can't be reused since
 // the text content now changes per pair (was previously canonical with A/B).
 const PROMPT_VERSION = 4;
 
@@ -85,7 +85,7 @@ function buildPrompt(a: CompareSideInput, b: CompareSideInput): { system: string
     "\"premier choix\", \"vainqueur\" : tu décris ce que chaque produit est et à qui il s'adresse, " +
     "le lecteur déduit lui-même celui qui lui convient. " +
     "Tu utilises TOUJOURS les vrais noms des produits (ceux qui te sont donnés entre guillemets) " +
-    "et JAMAIS les mots \"produit A\", \"produit B\", \"A\", \"B\" comme étiquettes — " +
+    "et JAMAIS les mots \"produit A\", \"produit B\", \"A\", \"B\" comme étiquettes - " +
     "ça parle bien plus à l'utilisateur final. " +
     NO_LONG_DASHES_RULE + " " +
     "Pas de marketing (idéal, généreux, agréable...), pas de description sensorielle, pas d'emoji, " +
@@ -94,7 +94,7 @@ function buildPrompt(a: CompareSideInput, b: CompareSideInput): { system: string
     "un objet JSON valide, sans markdown, sans texte autour.";
 
   // Inject the real names directly in the user message so the model has them
-  // front-and-centre — and back them up with the explicit "use these names"
+  // front-and-centre - and back them up with the explicit "use these names"
   // instruction in the system prompt. The JSON KEY names stay portraitA /
   // portraitB (machine-stable) but the TEXT inside refers to the real
   // product names.
@@ -114,7 +114,7 @@ Rends un JSON avec exactement ces 4 clés :
   "portraitA": "1 à 2 phrases qui décrivent la formule de \"${a.name}\" : son caractère (eau-glycérine, huileux, moussant, à base d'alcool…), ce qu'elle apporte, son point d'attention principal si pertinent. Cite \"${a.name}\" par son nom au moins une fois. Ne dis jamais qu'elle est bonne ou mauvaise.",
   "portraitB": "Idem pour \"${b.name}\". Cite \"${b.name}\" par son nom au moins une fois.",
   "common": "1 phrase concrète qui résume ce que les deux produits ont en commun (type de formule, point de vigilance partagé, ou rien de notable). Si rien d'intéressant en commun, dis 'Les deux suivent des logiques de formulation très différentes.' Tu peux écrire \"les deux produits\" ou citer les noms.",
-  "howToChoose": "1 à 2 phrases qui aident le lecteur à choisir SANS trancher. Ex : 'Si tu cherches un soin doux pour peau réactive, ${a.name} correspond à ce profil. Si tu privilégies un nettoyant moussant efficace, ${b.name} est conçu pour ça.' Pas de 'meilleur', pas de 'préfère X'. JAMAIS \"A\" / \"B\" / \"produit A\" / \"produit B\" — toujours les vrais noms."
+  "howToChoose": "1 à 2 phrases qui aident le lecteur à choisir SANS trancher. Ex : 'Si tu cherches un soin doux pour peau réactive, ${a.name} correspond à ce profil. Si tu privilégies un nettoyant moussant efficace, ${b.name} est conçu pour ça.' Pas de 'meilleur', pas de 'préfère X'. JAMAIS \"A\" / \"B\" / \"produit A\" / \"produit B\" - toujours les vrais noms."
 }
 
 CONTRAINTES

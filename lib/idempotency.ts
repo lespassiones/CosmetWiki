@@ -5,7 +5,7 @@
  * user a credit twice and double-bill the LLM.
  *
  * Key is derived from `{userId, route, sha256(normalized_body)}` so we don't
- * need the client to send an Idempotency-Key header — duplicates within 24h
+ * need the client to send an Idempotency-Key header - duplicates within 24h
  * automatically return the cached response.
  *
  *   const idemKey = idempotencyKey(user.id, "coherence", body);
@@ -69,6 +69,6 @@ export async function idempotencyStore(key: string, response: NextResponse): Pro
         { onConflict: "key" },
       );
   } catch {
-    // ignore — caching is best-effort
+    // ignore - caching is best-effort
   }
 }

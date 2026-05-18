@@ -22,7 +22,7 @@ type AnalysisRow = {
    *  instead of relaunching the whole identification + fetch flow. */
   latestCoherenceId: string | null;
   /** Lowercased ingredient tokens (name + raw input) used by the search bar
-   *  on the client to match analyses by ingredient. Kept short — duplicates
+   *  on the client to match analyses by ingredient. Kept short - duplicates
    *  removed, empty values filtered out. */
   ingredientTokens: string[];
 };
@@ -54,7 +54,7 @@ export default async function HistoryPage() {
 
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
-  // Two parallel queries — analyses (last 50) + every coherence row for this
+  // Two parallel queries - analyses (last 50) + every coherence row for this
   // user. RLS already restricts both to the signed-in user, no extra filter
   // needed. Pulling coherence in full lets us build the analysis → latest
   // coherence Map in memory without a per-row round-trip.

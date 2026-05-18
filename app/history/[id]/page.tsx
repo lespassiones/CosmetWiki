@@ -25,7 +25,7 @@ export default async function HistoryDetailPage({
 
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
-  // Three parallel queries — analyses + routine + most-recent coherence —
+  // Three parallel queries - analyses + routine + most-recent coherence -
   // none depend on each other. Pulling the coherence id lets the
   // "Analyser la promesse" CTA short-circuit to the existing result instead
   // of relaunching the whole identification + fetch flow when the user has
@@ -83,7 +83,7 @@ export default async function HistoryDetailPage({
 
   return (
     <div className="w-full px-3 lg:px-6 pt-4 pb-16">
-      {/* Top bar — back-to-history pill on the left, action buttons on the
+      {/* Top bar - back-to-history pill on the left, action buttons on the
           right. The product name is rendered as the H1 inside the panel below,
           so the breadcrumb (which used to repeat that name as its last item)
           is hidden via `breadcrumb={null}`. */}

@@ -8,7 +8,7 @@
  *
  * Returns an ordered list of ingredient strings as the AI extracted them,
  * keeping official synonyms grouped (e.g. "AQUA / WATER / EAU" as one).
- * On total failure, returns null — the caller falls back to the regex parser.
+ * On total failure, returns null - the caller falls back to the regex parser.
  */
 import { createHash } from "node:crypto";
 import {
@@ -191,6 +191,6 @@ export async function parseInciWithAI(
     }
   }
 
-  // 3) Total AI failure — caller falls back to regex parser.
+  // 3) Total AI failure - caller falls back to regex parser.
   return null;
 }

@@ -182,7 +182,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     dot: "rose",
     question: "Les huiles essentielles sont-elles toujours saines ?",
     answer:
-      "Naturelles, oui — inoffensives, non. Beaucoup contiennent des composés allergisants réglementés (linalool, limonene, géraniol…) que la loi européenne oblige à déclarer. Cosme Check pénalise les huiles essentielles à fort potentiel allergisant, surtout dans les produits sans rinçage.",
+      "Naturelles, oui - inoffensives, non. Beaucoup contiennent des composés allergisants réglementés (linalool, limonene, géraniol…) que la loi européenne oblige à déclarer. Cosme Check pénalise les huiles essentielles à fort potentiel allergisant, surtout dans les produits sans rinçage.",
   },
 
   // ── Compte & abonnement ──────────────────────────────────────────────────
@@ -235,7 +235,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     dot: "orange",
     question: "Mes données sont-elles confidentielles ?",
     answer:
-      "Oui. Tes scans, ton historique et ta routine te sont strictement personnels. Personne d'autre — y compris notre équipe — n'a accès à ton compte sans ton autorisation explicite. Les données sont hébergées en Europe, chiffrées au repos et en transit.",
+      "Oui. Tes scans, ton historique et ta routine te sont strictement personnels. Personne d'autre - y compris notre équipe - n'a accès à ton compte sans ton autorisation explicite. Les données sont hébergées en Europe, chiffrées au repos et en transit.",
     learnMore: { href: "/confidentialite", label: "Politique de confidentialité" },
   },
   {

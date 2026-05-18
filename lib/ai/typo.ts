@@ -36,7 +36,7 @@ export async function correctTypo(
   }
 
   const candidatesText = candidates
-    .map((c, i) => `${i + 1}. ${c.name}${c.primary_function ? ` — ${c.primary_function}` : ""}`)
+    .map((c, i) => `${i + 1}. ${c.name}${c.primary_function ? ` - ${c.primary_function}` : ""}`)
     .join("\n");
 
   const system =

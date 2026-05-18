@@ -6,7 +6,7 @@ import { useState, type CSSProperties } from "react";
  * Wraps content with a collapse + "Voir plus" toggle.
  *
  * By default the collapse is mobile-only (≥ lg the children are always shown
- * in full). Pass `desktopCollapsedMaxHeight` to also clamp on desktop — the
+ * in full). Pass `desktopCollapsedMaxHeight` to also clamp on desktop - the
  * button then shows on every viewport. Useful for the synthesis, which can
  * be a bit long on the analysis page even on desktop.
  */

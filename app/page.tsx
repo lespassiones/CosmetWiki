@@ -103,7 +103,7 @@ async function loadDashboard(firstName: string | null): Promise<DashboardData> {
   };
 }
 
-// Streamed dashboard — renders inside a Suspense boundary so the rest of the
+// Streamed dashboard - renders inside a Suspense boundary so the rest of the
 // page (HomeShell, analyse panel, footer chrome) doesn't wait on the two
 // Supabase queries below. Saves ~150-300 ms of perceived TTFB on signed-in
 // home loads.
@@ -146,13 +146,13 @@ export default async function Home({ searchParams }: Props) {
   const [user, profile] = await Promise.all([getUser(), getProfile()]);
   const signedIn = Boolean(user);
   // Signed-in users see the dashboard. When an analysis is in flight (via
-  // ?inci=…) HomeShell takes over rendering on top — it knows how to hide the
+  // ?inci=…) HomeShell takes over rendering on top - it knows how to hide the
   // dashboard chrome itself.
   const showDashboard = signedIn && !initialInci;
   const firstName = profile?.first_name ?? null;
 
   // ─── Guest path ───────────────────────────────────────────────────────
-  // Single-section image landing — no header / footer / chrome on top.
+  // Single-section image landing - no header / footer / chrome on top.
   // The CTA inside <LandingHero /> sends the user to /auth/sign-in.
   // (If a guest somehow lands on /?inci=... we still want HomeShell to
   // gate-and-redirect them through its existing AuthGate logic, so that

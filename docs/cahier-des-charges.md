@@ -1,4 +1,4 @@
-# Cosme Check — Cahier des charges technique (v2)
+# Cosme Check - Cahier des charges technique (v2)
 
 > Version révisée pour respecter la contrainte **« zéro service payant »**.
 > Stack imposée : **Next.js + Supabase free tier + Vercel free tier**.
@@ -28,7 +28,7 @@ Une application de décodage d'ingrédients cosmétiques :
 | **Hébergement** | Vercel **free tier** | Déploiement zero-config, CDN edge mondial, 100 GB bandwidth gratuit |
 | **Base de données** | Supabase **free tier**, PostgreSQL 15+ | Schéma isolé `cosme_check` dans une base déjà partagée avec une autre app |
 | **Stockage images** | Supabase Storage (free, 1 GB) | Optimisation WebP agressive pour rester sous le quota |
-| **Recherche** | PostgreSQL natif : `pg_trgm` + `tsvector` + `ts_rank` | Pas besoin d'Algolia/Meilisearch — Postgres gère 15k lignes en <50ms |
+| **Recherche** | PostgreSQL natif : `pg_trgm` + `tsvector` + `ts_rank` | Pas besoin d'Algolia/Meilisearch - Postgres gère 15k lignes en <50ms |
 | **Cache** | Vercel Edge Cache + ISR (revalidate 24 h) | Réduit drastiquement les hits Supabase |
 | **Anti-bot** | Middleware Next.js (in-memory rate limit) + hCaptcha free + honeypots | 100 % gratuit, pas de Cloudflare |
 | **CSS** | Tailwind CSS | JIT en prod = classes hashées (bonus anti-scraping) |
@@ -47,7 +47,7 @@ Une application de décodage d'ingrédients cosmétiques :
 
 ---
 
-## 3. Modèle de données — schéma `cosme_check`
+## 3. Modèle de données - schéma `cosme_check`
 
 > ⚠️ **Important :** la base Supabase est partagée avec une autre application. Toutes les tables Cosme Check vivent dans un **schéma PostgreSQL dédié `cosme_check`**. Le schéma `public` est intouchable.
 
@@ -235,11 +235,11 @@ GRANT EXECUTE ON FUNCTION cosme_check.search_ingredients(TEXT, INTEGER) TO anon,
 
 > Tous les scripts vivent dans `scripts/`. Ils sont **autonomes**, exécutés à la main ou via cron, et poussent dans Supabase via la connexion DB directe (pas le SDK).
 
-### 4.1 Phase 1 — index alphabétique ✅ DÉJÀ FAIT
+### 4.1 Phase 1 - index alphabétique ✅ DÉJÀ FAIT
 
-Voir [scripts/scrape_incibeauty.py](../scripts/scrape_incibeauty.py). Output : [data/ingredients_raw.json](../data/ingredients_raw.json) — 15 722 ingrédients.
+Voir [scripts/scrape_incibeauty.py](../scripts/scrape_incibeauty.py). Output : [data/ingredients_raw.json](../data/ingredients_raw.json) - 15 722 ingrédients.
 
-### 4.2 Phase 2 — détail des fiches ingrédient (à écrire)
+### 4.2 Phase 2 - détail des fiches ingrédient (à écrire)
 
 `scripts/scrape_ingredient_details.py`
 
@@ -263,7 +263,7 @@ Pour chaque ingrédient de `ingredients_raw.json` :
 
 **Estimation :** 15 722 × 1 s ≈ **4 h** sur une connexion correcte.
 
-### 4.3 Phase 3 — détail des produits
+### 4.3 Phase 3 - détail des produits
 
 `scripts/scrape_products.py`
 
@@ -279,7 +279,7 @@ Pour chaque URL produit collectée :
 
 **Estimation :** ~50 000 produits uniques × 1 s ≈ **14 h** (à découper en plusieurs sessions).
 
-### 4.4 Phase 4 — téléchargement des images
+### 4.4 Phase 4 - téléchargement des images
 
 `scripts/download_images.py`
 
@@ -376,7 +376,7 @@ web/
    ▓▓▓▓▓░░░░░░ Maquillage (28 %)
 
 🔬 Fonctions
-   • Conservateur — limite la prolifération bactérienne
+   • Conservateur - limite la prolifération bactérienne
    • Stabilisateur
 
 📦 Produits qui en contiennent (10)
@@ -404,7 +404,7 @@ web/
 
 ---
 
-## 6. Sécurité — uniquement gratuit
+## 6. Sécurité - uniquement gratuit
 
 ### 6.1 Rate limiting (middleware Next.js)
 
@@ -509,11 +509,11 @@ headers: [
 
 | Phase | Durée | Output |
 |---|---|---|
-| **A — Infra** | 2 h | Schéma `cosme_check` créé, 15 722 lignes de base chargées |
-| **B — Scraping** | 1 j dev + 18 h exécution | Toutes les fiches détaillées + produits + images |
-| **C — Site Next.js** | 2 j | Page d'accueil + fiche ingrédient + autocomplete fonctionnels |
-| **D — Sécurité** | ½ j | Rate limit + hCaptcha + honeypots + robots.txt |
-| **E — Déploiement** | 2 h | Site en production sur Vercel |
+| **A - Infra** | 2 h | Schéma `cosme_check` créé, 15 722 lignes de base chargées |
+| **B - Scraping** | 1 j dev + 18 h exécution | Toutes les fiches détaillées + produits + images |
+| **C - Site Next.js** | 2 j | Page d'accueil + fiche ingrédient + autocomplete fonctionnels |
+| **D - Sécurité** | ½ j | Rate limit + hCaptcha + honeypots + robots.txt |
+| **E - Déploiement** | 2 h | Site en production sur Vercel |
 
 **Total : ~5 jours de dev** pour un MVP complet.
 

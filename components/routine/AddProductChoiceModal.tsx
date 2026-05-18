@@ -31,7 +31,7 @@ export function AddProductChoiceModal({
 }: {
   open: boolean;
   onClose: () => void;
-  /** Called when the user picks "Nouveau produit" — caller opens the scan sheet. */
+  /** Called when the user picks "Nouveau produit" - caller opens the scan sheet. */
   onPickNew: () => void;
   eligibleAnalyses: EligibleAnalysis[];
 }) {
@@ -41,7 +41,7 @@ export function AddProductChoiceModal({
   const [isPending, startTransition] = useTransition();
   const [query, setQuery] = useState("");
 
-  // Reset internal state every time the modal re-opens — otherwise an
+  // Reset internal state every time the modal re-opens - otherwise an
   // ESC-then-reopen would land the user on the previous sub-step.
   useEffect(() => {
     if (open) {
@@ -193,7 +193,7 @@ export function AddProductChoiceModal({
                       a.product_label
                       ?? a.name
                       ?? `Analyse du ${formatDate(a.created_at)}`;
-                    const score = typeof a.score === "number" ? a.score.toFixed(1) : "—";
+                    const score = typeof a.score === "number" ? a.score.toFixed(1) : "-";
                     const isPendingThis = pendingId === a.id && isPending;
                     return (
                       <li key={a.id}>

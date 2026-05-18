@@ -2,7 +2,7 @@
  * Deterministic daily-picks selection.
  *
  * Every user gets the SAME 10 items on a given day (no per-user
- * personalisation — keeps it simple and predictable). The "day index"
+ * personalisation - keeps it simple and predictable). The "day index"
  * advances by 1 each day, and we slice 10 consecutive items from the
  * catalog. When we reach the end, we wrap back to the start.
  *

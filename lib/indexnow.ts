@@ -1,5 +1,5 @@
 /**
- * IndexNow — protocole gratuit qui notifie instantanément Bing, Yandex,
+ * IndexNow - protocole gratuit qui notifie instantanément Bing, Yandex,
  * Seznam, Naver et DuckDuckGo (via Bing) qu'une URL doit être crawlée.
  * Pas supporté par Google.
  *
@@ -13,7 +13,7 @@
 
 import { SITE_URL } from "./siteUrl";
 
-// Clé statique — doit correspondre au nom du fichier dans public/<KEY>.txt.
+// Clé statique - doit correspondre au nom du fichier dans public/<KEY>.txt.
 // Si tu changes cette clé, renomme aussi le fichier public/.
 export const INDEXNOW_KEY = "a7c4f8b2d9e3a16c5b8f2d4e7a1c9b3f";
 
@@ -44,7 +44,7 @@ function getKeyLocation(): string {
 /**
  * Soumet une liste d'URLs à IndexNow, en batchs de 10 000 URLs max.
  * Seules les URLs appartenant au domaine SITE_URL sont autorisées par
- * le protocole — on filtre côté client pour éviter un rejet 422 du serveur.
+ * le protocole - on filtre côté client pour éviter un rejet 422 du serveur.
  */
 export async function submitToIndexNow(urls: string[]): Promise<IndexNowResult> {
   const host = getHost();
@@ -87,9 +87,9 @@ export async function submitToIndexNow(urls: string[]): Promise<IndexNowResult> 
       });
       statuses.push(res.status);
       // IndexNow renvoie :
-      //   200 OK              — URLs reçues
-      //   202 Accepted        — clé en cours de vérification (1er appel)
-      //   400/403/422/429    — erreurs côté requête
+      //   200 OK              - URLs reçues
+      //   202 Accepted        - clé en cours de vérification (1er appel)
+      //   400/403/422/429    - erreurs côté requête
       if (res.ok || res.status === 202) {
         submitted += batch.length;
       } else {

@@ -56,7 +56,7 @@ export default async function PromessesPage() {
             ? "Aucune analyse de cohérence pour le moment."
             : `${rows.length} analyse${rows.length > 1 ? "s" : ""} de cohérence sauvegardée${rows.length > 1 ? "s" : ""}.`}
         </p>
-        {/* Pill horizontal — rose pastel sur fond clair pour cohérence
+        {/* Pill horizontal - rose pastel sur fond clair pour cohérence
             avec le bouton "+ Ajouter un produit" de la routine. Une seule
             ligne grâce à whitespace-nowrap. */}
         <Link

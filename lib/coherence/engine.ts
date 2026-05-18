@@ -1,5 +1,5 @@
 /**
- * Coherence engine — pure deterministic logic.
+ * Coherence engine - pure deterministic logic.
  *
  * The LLM proposes (in lib/ai/coherence.ts) which actives WOULD support a
  * given promise. This engine then *mechanically* checks whether those actives
@@ -74,7 +74,7 @@ function findItemForActive(
   });
   if (exactName) return exactName;
 
-  // 3. partial normalised match — only when the candidate is at least 5
+  // 3. partial normalised match - only when the candidate is at least 5
   //    characters long, otherwise we'd match noise (e.g. "C" inside "Cocoa")
   if (targetName.length >= 5) {
     const partial = items.find((it) => {
@@ -131,7 +131,7 @@ function deriveVerdict({
 }
 
 /**
- * Unified score 0–100 — same scale for catalogue AND open promises so the
+ * Unified score 0–100 - same scale for catalogue AND open promises so the
  * progress bars are visually comparable.
  *
  * Anchored on the verdict tier (predictable colour + rough position), with a
@@ -158,7 +158,7 @@ function unifiedScore({
 }
 
 // -----------------------------------------------------------------------------
-// Per-promise resolver — the main mechanical step
+// Per-promise resolver - the main mechanical step
 // -----------------------------------------------------------------------------
 
 export type LlmPromiseProposal = {
@@ -179,10 +179,10 @@ export type LlmPromiseProposal = {
  * collapses the LLM output by:
  *
  *   - For catalogue slugs (anti_chute, hydratation, absence_*, …) :
- *       1 entry per category_slug — kept = longest excerpt (most informative).
+ *       1 entry per category_slug - kept = longest excerpt (most informative).
  *   - For the "autre" / off-catalogue bucket :
  *       1 entry per normalised label (lowercased, no diacritics, alphanums
- *       only) — same tiebreaker. Prevents "Tenue 12h" / "Tenue longue durée"
+ *       only) - same tiebreaker. Prevents "Tenue 12h" / "Tenue longue durée"
  *       / "tient toute la journée" from showing as 3 separate rows when
  *       they're all the same intention.
  *
@@ -205,7 +205,7 @@ export function dedupProposals(proposals: LlmPromiseProposal[]): LlmPromisePropo
       byKey.set(key, p);
       continue;
     }
-    // Keep the longer excerpt — it's the more informative formulation.
+    // Keep the longer excerpt - it's the more informative formulation.
     if ((p.excerpt?.length ?? 0) > (existing.excerpt?.length ?? 0)) {
       byKey.set(key, { ...p, label: existing.label || p.label });
     }
@@ -216,7 +216,7 @@ export function dedupProposals(proposals: LlmPromiseProposal[]): LlmPromisePropo
 /**
  * Result of the "open promise" LLM exploration step. The LLM is given the
  * actual list of items in the formula and proposes which ones support the
- * promise — by slug. We validate every entry against the items list before
+ * promise - by slug. We validate every entry against the items list before
  * trusting it, so even if the LLM hallucinates a slug, we discard it.
  */
 export type OpenLlmMatch = {
@@ -325,7 +325,7 @@ export function resolvePromise(
  *     contradicting ingredients go into `contradictingActives` so the UI
  *     can name and shame them.
  *
- * Purely deterministic — no LLM call, no fuzzy matching. The tags were
+ * Purely deterministic - no LLM call, no fuzzy matching. The tags were
  * computed once when the INCI list was first analysed, we just reread them
  * here.
  */
@@ -395,7 +395,7 @@ export function resolveAbsencePromise(
  *
  * The LLM has already returned a list of items it considers active for this
  * promise (by slug, picked from the items we showed it). This function:
- *   1. Re-validates each match against the parent items (defence in depth —
+ *   1. Re-validates each match against the parent items (defence in depth -
  *      even if the LLM hallucinated a slug, we drop it here).
  *   2. Reads each matched item's `thresholdContext` to decide if well dosed
  *      vs in trace.
@@ -413,7 +413,7 @@ export function resolveOpenPromise(
   // slug that doesn't exist in the formula, drop the match silently.
   const validated = llmMatches
     .map((m) => {
-      // 1. Slug match (primary path — what we asked the LLM to use).
+      // 1. Slug match (primary path - what we asked the LLM to use).
       let item = m.item_slug
         ? items.find((it) => it.slug && it.slug === m.item_slug) ?? null
         : null;
@@ -437,7 +437,7 @@ export function resolveOpenPromise(
   const foundDocumented: CoherencePromise["foundActives"] = [];
   const foundCosmetic: CoherencePromise["cosmeticActives"] = [];
 
-  // De-dupe by item position — the LLM might cite the same item twice.
+  // De-dupe by item position - the LLM might cite the same item twice.
   const seenPositions = new Set<number>();
 
   for (const { match, item } of validated) {
@@ -468,7 +468,7 @@ export function resolveOpenPromise(
     marketingFound: foundCosmetic.length,
   });
 
-  // Same unified scale as catalogue path — keeps progress bars comparable
+  // Same unified scale as catalogue path - keeps progress bars comparable
   // across catalogue and open promises (a "partielle" verdict shows ~35-60 %
   // either way, instead of 6 % vs 40 %).
   const score = unifiedScore({
@@ -505,7 +505,7 @@ export function computeMetrics(promises: CoherencePromise[]): CoherenceResult["m
   const nonDemontreeCount = promises.filter((p) => p.verdict === "non_demontree").length;
   const contrediteCount = promises.filter((p) => p.verdict === "contredite").length;
   // "Marketing / unsupported index" = % of promises that are NOT actively
-  // honoured by the formula. Contredite promises absolutely count here —
+  // honoured by the formula. Contredite promises absolutely count here -
   // they're worse than non_demontree (the product actively lied about an
   // absence). Tenue absences (e.g. "sans paraben" → no paraben found) lift
   // the index DOWN, which is the right signal.

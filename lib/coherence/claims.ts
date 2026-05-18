@@ -84,7 +84,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
       { slug: "polyquaternium-10", name: "Polyquaternium-10", evidence: "marketing" },
       { slug: "algae-extract", name: "Polysaccharides d'algues", evidence: "marketing" },
     ],
-    hint: "Densification biologique non démontrée — la formule peut donner un effet visuel/sensoriel sans agir sur l'épaisseur réelle de la fibre.",
+    hint: "Densification biologique non démontrée - la formule peut donner un effet visuel/sensoriel sans agir sur l'épaisseur réelle de la fibre.",
   },
   {
     slug: "hydratation",
@@ -245,7 +245,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
     keywords: ["sans sulfate", "sans sulfates", "sulfate-free", "no sulfate"],
     actives: [],
     forbiddenTag: "sulfate",
-    hint: "Aucun sulfate détecté dans la formule — promesse tenue.",
+    hint: "Aucun sulfate détecté dans la formule - promesse tenue.",
   },
   {
     slug: "absence_silicone",
@@ -253,7 +253,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
     keywords: ["sans silicone", "sans silicones", "silicone-free", "no silicone"],
     actives: [],
     forbiddenTag: "silicone",
-    hint: "Aucun silicone détecté dans la formule — promesse tenue.",
+    hint: "Aucun silicone détecté dans la formule - promesse tenue.",
   },
   {
     slug: "absence_paraben",
@@ -261,7 +261,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
     keywords: ["sans paraben", "sans parabens", "paraben-free", "no paraben"],
     actives: [],
     forbiddenTag: "paraben",
-    hint: "Aucun paraben détecté dans la formule — promesse tenue.",
+    hint: "Aucun paraben détecté dans la formule - promesse tenue.",
   },
   {
     slug: "absence_huile_minerale",
@@ -269,7 +269,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
     keywords: ["sans huile minérale", "sans huiles minérales", "sans paraffine", "sans petrolatum"],
     actives: [],
     forbiddenTag: "huile-minerale",
-    hint: "Aucune huile minérale détectée dans la formule — promesse tenue.",
+    hint: "Aucune huile minérale détectée dans la formule - promesse tenue.",
   },
   {
     slug: "absence_colorant_synthese",
@@ -277,7 +277,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
     keywords: ["sans colorant", "sans colorants", "sans colorant de synthèse", "sans colorants synthétiques"],
     actives: [],
     forbiddenTag: "colorant-synthese",
-    hint: "Aucun colorant de synthèse détecté dans la formule — promesse tenue.",
+    hint: "Aucun colorant de synthèse détecté dans la formule - promesse tenue.",
   },
   {
     slug: "absence_parfum_synthese",
@@ -285,7 +285,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
     keywords: ["sans parfum", "sans parfum de synthèse", "sans parfum synthétique", "fragrance-free"],
     actives: [],
     forbiddenTag: "parfum-synthese",
-    hint: "Aucun parfum de synthèse détecté dans la formule — promesse tenue.",
+    hint: "Aucun parfum de synthèse détecté dans la formule - promesse tenue.",
   },
   {
     slug: "absence_allergene_parfumant",
@@ -293,7 +293,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
     keywords: ["sans allergène", "sans allergènes", "hypoallergénique"],
     actives: [],
     forbiddenTag: "allergene-parfumant",
-    hint: "Aucun allergène parfumant réglementé détecté — promesse tenue.",
+    hint: "Aucun allergène parfumant réglementé détecté - promesse tenue.",
   },
   {
     slug: "absence_ethoxyle",
@@ -301,7 +301,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
     keywords: ["sans peg", "sans pegs", "sans éthoxylés", "sans ethoxyle"],
     actives: [],
     forbiddenTag: "ethoxyle",
-    hint: "Aucun composé éthoxylé (PEG…) détecté — promesse tenue.",
+    hint: "Aucun composé éthoxylé (PEG…) détecté - promesse tenue.",
   },
   {
     slug: "absence_ammonium_quaternaire",
@@ -309,7 +309,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
     keywords: ["sans ammonium quaternaire", "sans quaternium", "sans quat"],
     actives: [],
     forbiddenTag: "ammonium-quaternaire",
-    hint: "Aucun ammonium quaternaire détecté — promesse tenue.",
+    hint: "Aucun ammonium quaternaire détecté - promesse tenue.",
   },
 ];
 
@@ -336,7 +336,7 @@ export function effectCategoriesForPrompt(): { slug: string; label: string; exam
   }));
 }
 
-/** Absence categories — used by the prompt to map "sans X" claims. */
+/** Absence categories - used by the prompt to map "sans X" claims. */
 export function absenceCategoriesForPrompt(): { slug: string; label: string; keywords: string[] }[] {
   return CLAIM_CATEGORIES.filter((c) => c.forbiddenTag).map((c) => ({
     slug: c.slug,
@@ -346,7 +346,7 @@ export function absenceCategoriesForPrompt(): { slug: string; label: string; key
 }
 
 /**
- * @deprecated Use {@link effectCategoriesForPrompt} — kept temporarily for
+ * @deprecated Use {@link effectCategoriesForPrompt} - kept temporarily for
  * any caller that hasn't migrated. Returns only effect categories (no
  * absence claims) so existing prompts don't break.
  */

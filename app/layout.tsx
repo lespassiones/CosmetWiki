@@ -19,7 +19,7 @@ const inter = Inter({
 });
 
 const SITE_NAME = "Cosme Check";
-const DEFAULT_TITLE = "Cosme Check — Une beauté consciente, au-delà des simples notes";
+const DEFAULT_TITLE = "Cosme Check - Une beauté consciente, au-delà des simples notes";
 const DEFAULT_DESCRIPTION =
   "L'application qui décode tes cosmétiques : composition, promesses marketing, ingrédients clefs. Une beauté consciente, vraiment.";
 

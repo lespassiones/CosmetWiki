@@ -109,7 +109,7 @@ export function PhotoOcrFlow() {
         }
       }
     } catch {
-      // ignore — go to fallback
+      // ignore - go to fallback
     }
 
     if (primaryOk) return;
@@ -139,7 +139,7 @@ export function PhotoOcrFlow() {
     if (t.length === 0) return;
     // Stash the INCI in sessionStorage BEFORE navigating. AnalysisRunner
     // reads this key first and only falls back to the URL searchParam if
-    // it's missing — without this, Next.js can serve a prefetched `/analyse`
+    // it's missing - without this, Next.js can serve a prefetched `/analyse`
     // shell with no inci and bounce the user back to the home page.
     try {
       sessionStorage.setItem(PENDING_INCI_KEY, t);

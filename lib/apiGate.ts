@@ -1,10 +1,10 @@
 /**
  * Single entry point for every protected API route. Does, in order:
  *
- *   1. Auth — must be a signed-in user (returns 401 otherwise).
- *   2. IP burst rate-limit — Postgres-backed (UNLOGGED table), shared across
+ *   1. Auth - must be a signed-in user (returns 401 otherwise).
+ *   2. IP burst rate-limit - Postgres-backed (UNLOGGED table), shared across
  *      Vercel instances. The legacy in-memory Map was broken on serverless.
- *   3. Credits — atomically decrements cosme_check.user_credits (1 credit
+ *   3. Credits - atomically decrements cosme_check.user_credits (1 credit
  *      per call by default; pass `costCredits: 0` to skip).
  *
  * Routes use it like this:
@@ -20,7 +20,7 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { supabaseServer, supabaseService } from "./supabase";
 
 export type GateOptions = {
-  /** Identifier for credits/logs — e.g. "promesse.identify". */
+  /** Identifier for credits/logs - e.g. "promesse.identify". */
   feature: string;
   /** Default 1. Pass 0 for cheap endpoints (search, suggest…). */
   costCredits?: 0 | 1;

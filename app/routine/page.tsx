@@ -31,7 +31,7 @@ function exposureFg(label: string): string {
 
 /**
  * Small decorative SVG leaf displayed beside the routine title on mobile.
- * Pure decoration — the page works fine without it, but it warms up the
+ * Pure decoration - the page works fine without it, but it warms up the
  * "ma routine" header and matches the wellness vibe of the rest of the app.
  */
 function LeafAccent({ className = "" }: { className?: string }) {
@@ -99,7 +99,7 @@ export default async function RoutinePage() {
   const sb = supabaseServer(cookieStore);
   // Two parallel queries: routine items (with their parent analyses joined)
   // + all analyses for the user. The second feeds the "Already scanned"
-  // sub-modal of the AddProductButton — we trim out analyses already in the
+  // sub-modal of the AddProductButton - we trim out analyses already in the
   // routine so the user doesn't pick a duplicate.
   const [routineRes, analysesRes] = await Promise.all([
     sb
@@ -176,7 +176,7 @@ export default async function RoutinePage() {
       return { name: p.name, score: p.score, worst };
     });
 
-  // Empty state — keep it inviting + make the CTA actually open the scan sheet.
+  // Empty state - keep it inviting + make the CTA actually open the scan sheet.
   if (products.length === 0) {
     return (
       <div className="mx-auto max-w-5xl px-5 lg:px-8 py-8 lg:py-12">
@@ -193,7 +193,7 @@ export default async function RoutinePage() {
         <div className={`${GLASS_CARD_ROSE} p-8 text-center`}>
           <AddProductButton eligibleAnalyses={eligibleAnalyses} variant="ghost" label="+ Ajouter un produit à ma routine" className="text-[15px]" />
           <p className="text-xs text-[#6B7280] mt-2">
-            Cherche un produit, scanne un code-barres ou colle une liste INCI — il sera analysé et ajouté à ta routine.
+            Cherche un produit, scanne un code-barres ou colle une liste INCI - il sera analysé et ajouté à ta routine.
           </p>
         </div>
       </div>
@@ -205,13 +205,13 @@ export default async function RoutinePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 lg:px-8 pt-4 pb-8 lg:py-12">
-      {/* Header — mobile: title (with leaf accent) → separator → desc → button (stacked)
+      {/* Header - mobile: title (with leaf accent) → separator → desc → button (stacked)
                    desktop: title on top, separator under it, then desc + button row */}
       <header>
         <div className="lg:flex lg:items-baseline lg:justify-between lg:gap-4">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl lg:text-3xl font-bold">Ma routine quotidienne</h1>
-            {/* Decorative leaf — only on mobile so the desktop header stays
+            {/* Decorative leaf - only on mobile so the desktop header stays
                 strictly informational. Matches the "Ma routine" mockup. */}
             <LeafAccent className="lg:hidden" />
           </div>
@@ -272,7 +272,7 @@ export default async function RoutinePage() {
                       {penalizingDetails.map((p, i) => (
                         <div key={i}>
                           <div className="font-semibold text-white leading-tight truncate">
-                            {p.name} — {p.score?.toFixed(1)}/20
+                            {p.name} - {p.score?.toFixed(1)}/20
                           </div>
                           {p.worst.length > 0 && (
                             <div className="text-[11px] text-white/70 mt-0.5 leading-snug">
@@ -395,7 +395,7 @@ export default async function RoutinePage() {
         </div>
       </section>
 
-      {/* Simulation — only rendered if there's at least one penalizing
+      {/* Simulation - only rendered if there's at least one penalizing
           product to remove. Otherwise the suggestion is dishonest: removing a
           well-scored product just to bump the average doesn't reflect a real
           improvement. */}

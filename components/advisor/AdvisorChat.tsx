@@ -15,7 +15,7 @@ const SUGGESTED_PROMPTS = [
 /**
  * Minimal inline markdown renderer for assistant messages. Handles the cases
  * the model actually produces (bold, italic, bullet lists, line breaks). Not a
- * full CommonMark parser — that would be overkill for a chat bubble.
+ * full CommonMark parser - that would be overkill for a chat bubble.
  */
 function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
   const nodes: React.ReactNode[] = [];
@@ -158,7 +158,7 @@ export function AdvisorChat({ firstName }: { firstName: string }) {
         {messages.length === 0 ? (
           <div className="text-center py-6">
             <p className="text-[14px] text-[#6B7280] mb-4">
-              Salut {firstName} 👋 — pose-moi une question sur ta routine ou tes ingrédients.
+              Salut {firstName} 👋 - pose-moi une question sur ta routine ou tes ingrédients.
             </p>
             <p className="text-[11px] text-[#9CA3AF]">
               Je n&apos;invente rien, je ne recommande pas de marque, et je n&apos;émets aucun conseil médical.
@@ -195,7 +195,7 @@ export function AdvisorChat({ firstName }: { firstName: string }) {
       {showSuggestions && (
         <div className="border-t border-[#E5E7EB] bg-[#FAFAFA] px-5 py-3">
           <p className="text-[10px] uppercase tracking-wide text-[#6B7280] mb-2">Suggestions</p>
-          {/* Horizontal carousel — single row, snap-scroll, hidden scrollbar.
+          {/* Horizontal carousel - single row, snap-scroll, hidden scrollbar.
               The negative-mx + same px bleeds the pills to the card edges so
               the user sees there's more to swipe. */}
           <div

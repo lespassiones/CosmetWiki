@@ -25,7 +25,7 @@ type Body = {
   email?: string;
   subject?: string;
   message?: string;
-  /** Honey-pot — bots fill it, real browsers don't. */
+  /** Honey-pot - bots fill it, real browsers don't. */
   hp?: string;
 };
 
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Best-effort: attach user_id if the sender happens to be signed in. Not
-  // required (contact form is public-facing) — purely so the admin sees the
+  // required (contact form is public-facing) - purely so the admin sees the
   // connection.
   let userId: string | null = null;
   try {
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
     const { data: userData } = await sb.auth.getUser();
     userId = userData.user?.id ?? null;
   } catch {
-    /* ignore — anonymous contact is fine */
+    /* ignore - anonymous contact is fine */
   }
 
   const { error } = await svc

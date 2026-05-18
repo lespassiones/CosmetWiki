@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAnon } from "@/lib/supabase";
 import { pickTodaysItems, type DailyPickItem } from "@/lib/dailyPicks/select";
 
-// Edge runtime : ~50ms cold start. Catalog read + deterministic slice — no
+// Edge runtime : ~50ms cold start. Catalog read + deterministic slice - no
 // Node-specific deps. Daily picks are also CDN-cached 1h via Cache-Control,
 // so the function only runs once per hour per edge region in practice.
 export const runtime = "edge";
@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/daily-picks
  *
- * Returns the 10 daily quizz/myth items for everyone today. No auth needed —
+ * Returns the 10 daily quizz/myth items for everyone today. No auth needed -
  * the catalog is public. We add a 1-hour CDN cache so we don't hit Supabase
  * on every page load (the 10 items only change at midnight UTC).
  */
