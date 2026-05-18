@@ -27,14 +27,14 @@ export function LandingHero() {
           above the fold), just without the <link rel="preload"> hint, so we
           don't waste ~1.7 MB on mobile users who never see it. */}
       <Image
-        src="/image/landing/landing.png"
+        src="/image/landing/landing.webp"
         alt=""
         fill
         sizes="100vw"
         className="hidden lg:block object-cover object-center"
       />
       <Image
-        src="/image/landing/landingportrait.png"
+        src="/image/landing/landingportrait.webp"
         alt=""
         fill
         priority

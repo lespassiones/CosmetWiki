@@ -12,7 +12,7 @@ const DESCRIPTION =
   "80 % des gens appliquent leur crème solaire de la mauvaise façon. Quantité, filtres, réapplication, hiver, parfum, minéral vs chimique : les 7 erreurs à éviter pour qu'un SPF 50 visage protège vraiment.";
 const URL = "/blog/spf-50-visage-7-erreurs";
 const PUBLISHED = "2026-04-15";
-const HERO_IMAGE = "/image/landing/SPF.png";
+const HERO_IMAGE = "/image/landing/SPF.webp";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -375,7 +375,7 @@ export default function SpfArticlePage() {
             </section>
 
             <ArticleImage
-              src="/image/blog/spf-50-erreurs/image1.png"
+              src="/image/blog/spf-50-erreurs/image1.webp"
               alt="Application d'une crème solaire SPF 50 sur le bout des doigts, illustrant la règle des deux doigts"
             />
 
@@ -481,7 +481,7 @@ export default function SpfArticlePage() {
             </section>
 
             <ArticleImage
-              src="/image/blog/spf-50-erreurs/image2.png"
+              src="/image/blog/spf-50-erreurs/image2.webp"
               alt="Femme appliquant une protection solaire visage SPF 50, illustration d'une routine quotidienne anti-UV"
             />
 

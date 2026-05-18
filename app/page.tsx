@@ -6,6 +6,7 @@ import { HomeDashboard, type DashboardData } from "@/components/home/HomeDashboa
 import { DailyPicksCard } from "@/components/home/DailyPicksCard";
 import { getProfile, getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
+import { SITE_URL } from "@/lib/siteUrl";
 import { tipsForCarousel } from "@/lib/tips";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
@@ -138,6 +139,71 @@ function DashboardSkeleton({ firstName }: { firstName: string | null }) {
   );
 }
 
+/**
+ * JSON-LD pour la racine du site. Couvre :
+ *  - Organization : identité, logo, description ; Google s'en sert pour
+ *    le Knowledge Panel et la fiche d'identité brand.
+ *  - WebSite + SearchAction : déclare la recherche interne. C'est ce qui
+ *    active la « sitelink searchbox » sous notre résultat Google quand
+ *    Google estime que cosme-check.com fait autorité sur sa marque.
+ */
+function buildHomeJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${SITE_URL}/#organization`,
+        name: "Cosme Check",
+        url: SITE_URL,
+        logo: {
+          "@type": "ImageObject",
+          url: `${SITE_URL}/icon.png`,
+          width: 512,
+          height: 512,
+        },
+        description:
+          "Cosme Check décode tes cosmétiques : composition INCI, promesses marketing, ingrédients clefs. Une beauté consciente, vraiment.",
+        inLanguage: "fr",
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${SITE_URL}/#website`,
+        url: SITE_URL,
+        name: "Cosme Check",
+        description:
+          "Décoder ses cosmétiques en quelques secondes : analyse INCI, score couleur, promesses vs formule.",
+        inLanguage: "fr",
+        publisher: { "@id": `${SITE_URL}/#organization` },
+        potentialAction: {
+          "@type": "SearchAction",
+          target: {
+            "@type": "EntryPoint",
+            urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
+          },
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ],
+  };
+}
+
+function HomeJsonLdScript() {
+  const jsonLd = buildHomeJsonLd();
+  return (
+    <script
+      type="application/ld+json"
+      // Escape `<` and `>` so brand or description content with HTML-like
+      // characters can't break out of the script tag.
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(jsonLd)
+          .replace(/</g, "\\u003c")
+          .replace(/>/g, "\\u003e"),
+      }}
+    />
+  );
+}
+
 export default async function Home({ searchParams }: Props) {
   const params = searchParams ? await searchParams : undefined;
   const initialInci = (params?.inci ?? "").slice(0, 6000);
@@ -158,7 +224,12 @@ export default async function Home({ searchParams }: Props) {
   // gate-and-redirect them through its existing AuthGate logic, so that
   // path falls through below.)
   if (!signedIn && !initialInci) {
-    return <LandingHero />;
+    return (
+      <>
+        <HomeJsonLdScript />
+        <LandingHero />
+      </>
+    );
   }
 
   return (
@@ -167,6 +238,7 @@ export default async function Home({ searchParams }: Props) {
         showDashboard ? "" : "min-h-screen"
       }`}
     >
+      <HomeJsonLdScript />
       {showDashboard && (
         <Suspense fallback={<DashboardSkeleton firstName={firstName} />}>
           <DashboardSection firstName={firstName} />

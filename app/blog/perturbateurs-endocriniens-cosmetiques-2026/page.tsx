@@ -12,7 +12,7 @@ const DESCRIPTION =
   "Les perturbateurs endocriniens font peur, souvent pour de bonnes raisons. Définition claire, substances vraiment documentées, cadre légal européen et populations à risque : le guide factuel et rassurant pour s'y retrouver sans psychose.";
 const URL = "/blog/perturbateurs-endocriniens-cosmetiques-2026";
 const PUBLISHED = "2026-05-16";
-const HERO_IMAGE = "/image/blog/perturbateurs-endocriniens/hero.png";
+const HERO_IMAGE = "/image/blog/perturbateurs-endocriniens/hero.webp";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -419,7 +419,7 @@ export default function PerturbateursArticlePage() {
             </section>
 
             <ArticleImage
-              src="/image/blog/perturbateurs-endocriniens/image1.png"
+              src="/image/blog/perturbateurs-endocriniens/image1.webp"
               alt="Femme appliquant sa routine de soins du visage, illustrant l'exposition quotidienne et répétée aux ingrédients cosmétiques"
             />
 
@@ -629,7 +629,7 @@ export default function PerturbateursArticlePage() {
             </section>
 
             <ArticleImage
-              src="/image/blog/perturbateurs-endocriniens/image2.png"
+              src="/image/blog/perturbateurs-endocriniens/image2.webp"
               alt="Femme enceinte examinant la composition d'un produit cosmétique, illustration de la vigilance pendant la grossesse"
             />
 

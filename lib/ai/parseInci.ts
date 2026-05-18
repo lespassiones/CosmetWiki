@@ -41,6 +41,8 @@ RÈGLES STRICTES :
 - Conserve les synonymes officiels comme UN seul ingrédient (ex : "AQUA/WATER/EAU", "PARFUM/FRAGRANCE").
 - Conserve les colorants "CI 12345" tels quels.
 - Ignore les codes/identifiants produit non-INCI (ex : "11075v0", numéros de lot, références internes).
+- Les marqueurs "*", "**", "***", "°", "†" placés AVANT ou APRÈS un nom signalent un statut (bio, Ecocert, allergène réglementé UE, actif clé) et NE FONT PAS partie du nom INCI. Retire-les systématiquement.
+- Quand la liste est collée sans virgule ni saut de ligne et que les ingrédients sont délimités uniquement par "*", "**" ou "***" (ex : "AQUA **AMMONIUM LAURYL SULFATE *PEG-40 GLYCERYL COCOATE"), traite chaque astérisque (simple, double ou triple) comme un séparateur d'ingrédient. Chaque suite de mots majuscules entre deux astérisques (ou entre le début/fin de chaîne et un astérisque) est UN ingrédient.
 - Réponds UNIQUEMENT en JSON : { "ingredients": ["AQUA / WATER / EAU", "ALCOHOL DENAT.", ...] }
 - Pas de commentaire, pas de markdown, juste le JSON.`;
 

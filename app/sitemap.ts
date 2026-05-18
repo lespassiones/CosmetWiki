@@ -12,6 +12,11 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: Metadata
   { path: "/blog", priority: 0.7, changeFrequency: "weekly" },
   { path: "/blog/spf-50-visage-7-erreurs", priority: 0.7, changeFrequency: "monthly" },
   { path: "/blog/perturbateurs-endocriniens-cosmetiques-2026", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/blog/serums-visage-guide", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/blog/masque-led-visage", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/blog/lip-oils-huiles-levres", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/blog/cremes-hydratantes-reparatrices", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/blog/creme-solaire-coreenne-k-beauty", priority: 0.7, changeFrequency: "monthly" },
   { path: "/faq", priority: 0.8, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.5, changeFrequency: "yearly" },
 ];

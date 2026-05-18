@@ -62,6 +62,11 @@ async function loadAllSitemapUrls(): Promise<string[]> {
     `${SITE_URL}/blog`,
     `${SITE_URL}/blog/spf-50-visage-7-erreurs`,
     `${SITE_URL}/blog/perturbateurs-endocriniens-cosmetiques-2026`,
+    `${SITE_URL}/blog/serums-visage-guide`,
+    `${SITE_URL}/blog/masque-led-visage`,
+    `${SITE_URL}/blog/lip-oils-huiles-levres`,
+    `${SITE_URL}/blog/cremes-hydratantes-reparatrices`,
+    `${SITE_URL}/blog/creme-solaire-coreenne-k-beauty`,
     `${SITE_URL}/faq`,
     `${SITE_URL}/contact`,
   ];

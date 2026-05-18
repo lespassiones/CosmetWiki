@@ -70,8 +70,18 @@ export function parseInciList(text: string): ParsedToken[] {
   // Drop parenthesized notes like "(en français)" but keep things like
   // "(i)", "(ii)" by collapsing them
   work = work.replace(/\([^)]{20,}\)/g, " ");
-  // Remove asterisks (mention notes)
-  work = work.replace(/\*+/g, " ");
+  // Asterisks (`*`, `**`, `***`) are status markers on labels (bio, Ecocert,
+  // allergènes UE, actifs clés). When a real separator exists in the input
+  // (comma, semicolon, newline) we just strip them. When the user pasted a
+  // mobile-flattened list without any other separator (ex: from iOS Notes,
+  // the newlines are turned into spaces on paste), the asterisks are the
+  // ONLY thing separating ingredients, so we turn them into commas instead.
+  const hasRealSeparator = /[,;\n]/.test(work);
+  if (hasRealSeparator) {
+    work = work.replace(/\*+/g, " ");
+  } else {
+    work = work.replace(/\s*\*+\s*/g, ", ");
+  }
   // Some lists use periods as separators instead of commas (ex: "AQUA. GLYCERIN.
   // PROPANEDIOL."). We detect this pattern - period preceded by a letter or
   // closing paren and followed by whitespace + an uppercase letter - and turn
@@ -110,7 +120,7 @@ export function parseInciList(text: string): ParsedToken[] {
       .trim();
     if (!cleaned) continue;
     if (cleaned.length < 2) continue;
-    if (cleaned.length > 120) continue; // likely garbage paragraph
+    if (cleaned.length > 260) continue; // likely garbage paragraph (longest real INCI ~255 chars)
 
     const upper = stripAccents(cleaned).toUpperCase();
     if (STOP_WORDS.has(upper)) continue;

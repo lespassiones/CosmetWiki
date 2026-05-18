@@ -2,22 +2,11 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import type { Article, Category } from "./articles";
 
-export type Category =
-  | "Ingrédients"
-  | "Marques"
-  | "Routines"
-  | "Réglementation";
-
-export type Article = {
-  id: string;
-  title: string;
-  excerpt: string;
-  category: Category;
-  date: string;
-  readingTime: string;
-  image: string;
-};
+// Re-export so existing imports `import { type Article } from "./BlogList"`
+// continue à fonctionner sans casser les call sites.
+export type { Article, Category };
 
 const CATEGORY_STYLES: Record<Category, string> = {
   Ingrédients: "bg-emerald-50 text-emerald-700 ring-emerald-100",

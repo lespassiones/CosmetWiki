@@ -1311,29 +1311,24 @@ function ItemsTable({
                     <ColorChip rating={i.colorRating} />
                     {/*
                       "≤ 1 %" badge - only when the ingredient sits *after* the
-                      first fragrance or first preservative in the list. In INCI
-                      regulation, fragrance/preservative are required at ≤1 %,
-                      and the list is ordered by descending concentration above
-                      1 %. So anything past that point is necessarily ≤1 %. That
-                      doesn't change the safety rating, but it tells the user
-                      the ingredient is unlikely to be the one driving the
-                      product's *efficacy* - useful to spot "actif marketing"
-                      claims (e.g. niacinamide listed but in trace amounts).
+                      first preservative in the list. In INCI regulation,
+                      preservatives are required at ≤1 % and the list is ordered
+                      by descending concentration above 1 %, so anything past
+                      the first preservative is necessarily ≤1 %. We deliberately
+                      DO NOT show this badge after the first fragrance because
+                      some brands (EDT, body sprays, etc.) put 2-3 % of parfum,
+                      so "after parfum" doesn't imply ≤1 %.
                     */}
-                    {(i.thresholdContext === "after_fragrance"
-                      || i.thresholdContext === "after_preservative") ? (
+                    {i.thresholdContext === "after_preservative" ? (
                       <Tooltip
                         maxWidth={280}
                         content={
                           <>
-                            Cet ingrédient apparaît <b>après</b>
-                            {i.thresholdContext === "after_fragrance"
-                              ? " le premier parfum"
-                              : " le premier conservateur"}{" "}
-                            dans la liste INCI. Sa concentration est donc{" "}
-                            <b>≤ 1 %</b> - il est peu probable qu&apos;il soit
-                            l&apos;élément principal responsable de
-                            l&apos;efficacité du produit.
+                            Cet ingrédient apparaît <b>après le premier
+                            conservateur</b> dans la liste INCI. Sa
+                            concentration est donc <b>≤ 1 %</b> - il est peu
+                            probable qu&apos;il soit l&apos;élément principal
+                            responsable de l&apos;efficacité du produit.
                           </>
                         }
                       >

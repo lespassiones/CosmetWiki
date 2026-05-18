@@ -407,7 +407,7 @@ export default function FonctionnalitesPage() {
         {/* ───────── Hero full-bleed ───────────────────────────────────── */}
         <section className="relative overflow-hidden">
           <Image
-            src="/image/landing/foctionnalite.png"
+            src="/image/landing/foctionnalite.webp"
             alt=""
             fill
             sizes="100vw"

@@ -3,7 +3,8 @@ import { Fragment } from "react";
 import { PublicHeader } from "@/components/PublicHeader";
 import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
-import { BlogList, type Article } from "./BlogList";
+import { BlogList } from "./BlogList";
+import { ARTICLES } from "./articles";
 
 const TITLE = "Blog";
 const DESCRIPTION =
@@ -21,29 +22,6 @@ export const metadata: Metadata = {
   },
 };
 
-const ARTICLES: Article[] = [
-  {
-    id: "perturbateurs-endocriniens-cosmetiques-2026",
-    title: "Perturbateurs endocriniens dans les cosmétiques : ce qu'il faut vraiment surveiller en 2026",
-    excerpt:
-      "Les perturbateurs endocriniens font peur, souvent pour de bonnes raisons. Mais il faut savoir lesquels surveiller vraiment, et comment les détecter dans tes produits sans tomber dans la psychose.",
-    category: "Ingrédients",
-    date: "16 mai 2026",
-    readingTime: "7 min",
-    image: "/image/blog/perturbateurs-endocriniens/hero.png",
-  },
-  {
-    id: "spf-50-visage-7-erreurs",
-    title: "SPF 50 visage : les 7 erreurs que tout le monde fait (et comment les éviter)",
-    excerpt:
-      "80 % des gens appliquent leur crème solaire de la mauvaise façon, et le SPF devient presque inutile. On passe en revue les 7 erreurs les plus fréquentes et la bonne méthode pour vraiment protéger sa peau.",
-    category: "Routines",
-    date: "15 avril 2026",
-    readingTime: "5 min",
-    image: "/image/landing/SPF.png",
-  },
-];
-
 const STATS = [
   { value: "2026", label: "Édition" },
   { value: `${ARTICLES.length}`, label: "Articles" },
@@ -60,7 +38,7 @@ export default function BlogPage() {
         <section className="relative overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/image/landing/blog.png"
+            src="/image/landing/blog.webp"
             alt=""
             aria-hidden
             className="absolute inset-0 -z-10 h-full w-full object-cover"
