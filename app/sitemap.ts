@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/siteUrl";
-import { supabaseAnon } from "@/lib/supabase";
 import { CATEGORIES, GLOSSARY_LETTERS } from "@/lib/glossary";
 
 // Cache the sitemap : Next will revalidate at most once per day.
@@ -38,47 +37,7 @@ const CATEGORY_ROUTES = CATEGORIES.map((c) => ({
   changeFrequency: "monthly" as const,
 }));
 
-async function fetchIngredientSlugs(): Promise<string[]> {
-  // Primary path : JSONB RPC returning every active slug in a single row.
-  // This bypasses PostgREST's `db.max_rows = 1000` cap, which would otherwise
-  // truncate the response (the cap is on row count, not payload size - so a
-  // single row holding a JSON array of all slugs is returned in full).
-  try {
-    const { data, error } = await supabaseAnon().rpc(
-      "cosme_check_list_active_slugs_json",
-    );
-    if (error) {
-      console.warn("[sitemap] JSON RPC failed:", error.message);
-    } else if (Array.isArray(data)) {
-      return data.filter((s): s is string => typeof s === "string");
-    }
-  } catch (err) {
-    console.warn("[sitemap] JSON RPC threw:", err);
-  }
-
-  // Fallback : legacy SETOF RPC (capped at 1000 rows by PostgREST, but still
-  // better than nothing if the JSONB function is unavailable for any reason).
-  try {
-    const { data, error } = await supabaseAnon().rpc(
-      "cosme_check_list_active_slugs",
-      { p_limit: 45_000 },
-    );
-    if (!error && Array.isArray(data)) {
-      return (data as { slug: string }[])
-        .map((row) => row.slug)
-        .filter((s): s is string => typeof s === "string");
-    }
-    if (error) {
-      console.warn("[sitemap] legacy RPC failed:", error.message);
-    }
-  } catch (err) {
-    console.warn("[sitemap] legacy RPC threw:", err);
-  }
-
-  return [];
-}
-
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
   const mapRoute = (r: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }) => ({
@@ -88,22 +47,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: r.priority,
   });
 
+  // We deliberately DO NOT include the 15 700 `/i/[slug]` URLs anymore.
+  // Crawlers were hammering Supabase (37k+ get_ingredient calls + 18k+
+  // products_for_ingredient calls observed in pg_stat_statements), which
+  // drained the project's Disk IO Budget. The pages stay reachable through
+  // internal links (glossary letter pages, category pages, search), so users
+  // and bots can still discover them at a sustainable pace.
   const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map(mapRoute);
   const glossaryEntries: MetadataRoute.Sitemap = GLOSSARY_LETTER_ROUTES.map(mapRoute);
   const categoryEntries: MetadataRoute.Sitemap = CATEGORY_ROUTES.map(mapRoute);
-
-  const slugs = await fetchIngredientSlugs();
-  const ingredientEntries: MetadataRoute.Sitemap = slugs.map((slug) => ({
-    url: `${SITE_URL}/i/${slug}`,
-    lastModified: now,
-    changeFrequency: "monthly" as const,
-    priority: 0.6,
-  }));
 
   return [
     ...staticEntries,
     ...glossaryEntries,
     ...categoryEntries,
-    ...ingredientEntries,
   ];
 }
