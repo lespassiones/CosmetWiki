@@ -103,17 +103,17 @@ export default function BlogPage() {
               Décoder les cosmétiques, un article à la fois. Ingrédients,
               marques, routines et réglementation, expliqués clairement.
             </p>
-            <div className="mx-auto mt-10 flex w-fit max-w-full flex-wrap items-center justify-center gap-x-8 gap-y-4 rounded-2xl bg-white/55 px-6 py-4 backdrop-blur-sm ring-1 ring-white/60 sm:gap-x-12">
+            <div className="mx-auto mt-10 flex w-fit max-w-full flex-nowrap items-center justify-center gap-x-4 rounded-2xl bg-white/55 px-4 py-4 backdrop-blur-sm ring-1 ring-white/60 sm:gap-x-12 sm:px-6">
               {STATS.map((s, i) => (
                 <Fragment key={s.label}>
                   {i > 0 && (
-                    <span aria-hidden className="h-8 w-px bg-black/10" />
+                    <span aria-hidden className="h-8 w-px shrink-0 bg-black/10" />
                   )}
                   <div className="text-center">
-                    <div className="text-[22px] font-bold tracking-tight text-ink sm:text-[26px]">
+                    <div className="text-[18px] font-bold tracking-tight text-ink sm:text-[26px]">
                       {s.value}
                     </div>
-                    <div className="mt-0.5 text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
+                    <div className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-ink-subtle sm:text-[11px]">
                       {s.label}
                     </div>
                   </div>

@@ -75,6 +75,9 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   verification: {
     google: "10RWq8WwaV_uRyXbnsrotJlbtInqhUfnha8-FkqKZc4",
+    other: {
+      "msvalidate.01": "38151B7223403B53B27A98A0ADCFCDD7",
+    },
   },
   appleWebApp: {
     capable: true,
