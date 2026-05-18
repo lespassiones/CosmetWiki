@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { BackgroundGlow } from "../BackgroundGlow";
 import { CreditsPill } from "../CreditsPill";
 import { CreditsExhaustedModal } from "../CreditsExhaustedModal";
+import { FeedbackPromptModal } from "../FeedbackPromptModal";
 import { ScanSheet } from "./ScanSheet";
 import { MobileBurgerMenu } from "./MobileBurgerMenu";
 import { PremiumCard } from "./PremiumCard";
@@ -142,6 +143,7 @@ export function AppShell({
 
       <ScanSheet open={scanOpen} onClose={() => setScanOpen(false)} />
       <CreditsExhaustedModal />
+      <FeedbackPromptModal signedIn={signedIn} />
     </div>
   );
 }

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"d:/MesApps/deploy\")",
+      "Read(//d/MesApps/deploy/**)"
+    ]
+  }
+}

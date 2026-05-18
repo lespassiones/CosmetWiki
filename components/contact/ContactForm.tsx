@@ -2,13 +2,14 @@
 
 import { useState, useTransition } from "react";
 
-type Status = "idle" | "sent";
+type Status = "idle" | "sent" | "error";
 
 const SUBJECTS = ["Question", "Bug", "Suggestion", "Partenariat"] as const;
 
 export function ContactForm() {
   const [pending, startTransition] = useTransition();
   const [status, setStatus] = useState<Status>("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const [message, setMessage] = useState("");
 
   return (
@@ -23,12 +24,36 @@ export function ContactForm() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          const form = e.currentTarget;
+          const fd = new FormData(form);
+          const payload = {
+            firstName: String(fd.get("first_name") ?? ""),
+            email: String(fd.get("email") ?? ""),
+            subject: String(fd.get("subject") ?? ""),
+            message: String(fd.get("message") ?? ""),
+            // Honey-pot — bots fill this hidden field, real users never do.
+            hp: String(fd.get("hp") ?? ""),
+          };
           startTransition(async () => {
-            // Simulation d'envoi — sera remplacé par une vraie integration plus tard.
-            await new Promise((r) => setTimeout(r, 800));
-            setStatus("sent");
-            (e.target as HTMLFormElement).reset();
-            setMessage("");
+            try {
+              const r = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              });
+              if (!r.ok) {
+                const j = (await r.json().catch(() => ({}))) as { error?: string };
+                setErrorMessage(j.error ?? "Échec de l'envoi. Réessaye dans un instant.");
+                setStatus("error");
+                return;
+              }
+              setStatus("sent");
+              form.reset();
+              setMessage("");
+            } catch {
+              setErrorMessage("Erreur réseau. Vérifie ta connexion.");
+              setStatus("error");
+            }
           });
         }}
         className="mt-5 space-y-4"
@@ -82,6 +107,16 @@ export function ContactForm() {
           </p>
         </label>
 
+        {/* Honey-pot: visually hidden but submitted with the form. */}
+        <input
+          type="text"
+          name="hp"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          className="absolute h-0 w-0 opacity-0 pointer-events-none"
+        />
+
         <button
           type="submit"
           disabled={pending}
@@ -96,6 +131,12 @@ export function ContactForm() {
             <p className="text-sm font-medium text-emerald-700">
               Message envoyé ✓
             </p>
+          </div>
+        ) : null}
+
+        {status === "error" ? (
+          <div role="alert" className="mt-3 rounded-xl bg-rose-50 px-4 py-3 ring-1 ring-rose-100">
+            <p className="text-sm font-medium text-rose-700">{errorMessage}</p>
           </div>
         ) : null}
       </form>
