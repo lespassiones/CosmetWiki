@@ -181,6 +181,16 @@ export function HomeShell({
     const ctrl = new AbortController();
     inFlightRef.current = ctrl;
 
+    // Timeout réseau côté client : si /api/analyser dépasse 30 s (au-delà
+    // du budget serverless Vercel) la promesse fetch peut rester pending
+    // pour toujours, l'overlay tourne indéfiniment et le finally n'est
+    // jamais atteint. On force l'abort pour libérer l'UI.
+    let timedOut = false;
+    const analyseTimeout = setTimeout(() => {
+      timedOut = true;
+      try { ctrl.abort(); } catch { /* noop */ }
+    }, 30000);
+
     // Consume the pending product source synchronously : whatever happens
     // next (success, network error, abort), this call owns it exactly once.
     const src = pendingProductSourceRef.current;
@@ -248,9 +258,18 @@ export function HomeShell({
       setAddedToRoutine(addedFlag);
       writeCache(trimmed, data, src, savedId, addedFlag);
     } catch (err) {
-      if ((err as DOMException).name === "AbortError") return;
-      setError((err as Error).message ?? "Erreur réseau");
+      if ((err as DOMException).name === "AbortError") {
+        if (timedOut) {
+          setError("La connexion a expiré. Réessaye dans un instant.");
+        } else {
+          // abort externe (navigation, nouvelle recherche) : sortir silencieusement
+          return;
+        }
+      } else {
+        setError((err as Error).message ?? "Erreur réseau");
+      }
     } finally {
+      clearTimeout(analyseTimeout);
       setProcessing({ active: false, budget: 0 });
       requestAnimationFrame(() => {
         // When the analysis came from a product search, scroll all the way
@@ -339,6 +358,23 @@ export function HomeShell({
           totalMs={processing.budget}
           headline="On décode la composition…"
         />
+      );
+    }
+    // Affichage d'erreur en mode connecté : sans cette branche, un échec
+    // de /api/analyser laissait l'utilisateur sur une page blanche (return
+    // null), incapable de comprendre ce qui s'est passé.
+    if (error) {
+      return (
+        <main className="mx-auto max-w-2xl px-4 py-16 text-center">
+          <p className="text-rose-700 font-semibold">{error}</p>
+          <button
+            type="button"
+            onClick={reset}
+            className="mt-4 text-rose-700 hover:underline"
+          >
+            ← Retour à l&apos;accueil
+          </button>
+        </main>
       );
     }
     return null;

@@ -35,7 +35,24 @@ export function logError(
   err: unknown,
   ctx?: LogContext & { userId?: string | null },
 ): void {
-  const message = err instanceof Error ? err.message : String(err);
+  // Sérialiser correctement les non-Error : PostgrestError, objets bruts,
+  // etc. donnaient "[object Object]" via String(...). On extrait au moins
+  // le `message` quand il y en a un, sinon on JSON-stringify.
+  let message: string;
+  if (err instanceof Error) {
+    message = err.message;
+  } else if (err && typeof err === "object" && "message" in err && typeof (err as { message: unknown }).message === "string") {
+    const e = err as { message: string; code?: string; details?: string; hint?: string };
+    message = [e.message, e.code && `code=${e.code}`, e.details && `details=${e.details}`, e.hint && `hint=${e.hint}`]
+      .filter(Boolean)
+      .join(" | ");
+  } else {
+    try {
+      message = JSON.stringify(err);
+    } catch {
+      message = String(err);
+    }
+  }
   const stack = err instanceof Error ? err.stack : undefined;
   emit("error", message, { route, ...ctx, stack });
 
