@@ -51,6 +51,11 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
   redirect(next);
 }
 
+/** Timeout dur sur l'appel Auth pour ne pas tenir une Server Action 25 s
+ *  quand Supabase Auth (pgbouncer / GoTrue) est indisponible. Renvoie un
+ *  message distinct du vrai "mauvais mot de passe". */
+const SIGNIN_TIMEOUT_MS = 8000;
+
 export async function signIn(formData: FormData): Promise<AuthResult> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
@@ -62,8 +67,39 @@ export async function signIn(formData: FormData): Promise<AuthResult> {
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
 
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) return { ok: false, error: "Email ou mot de passe incorrect." };
+  type SimplifiedError = { message: string; code?: string } | null;
+  const { error } = await Promise.race<{ error: SimplifiedError }>([
+    sb.auth.signInWithPassword({ email, password }) as Promise<{ error: SimplifiedError }>,
+    new Promise<{ error: SimplifiedError }>((resolve) =>
+      setTimeout(
+        () => resolve({ error: { message: "client_timeout", code: "timeout" } }),
+        SIGNIN_TIMEOUT_MS,
+      ),
+    ),
+  ]);
+
+  if (error) {
+    const msg = error.message?.toLowerCase() ?? "";
+    // Erreurs réseau / timeout : afficher un message distinct du vrai
+    // "mauvais mot de passe" pour ne pas désorienter l'utilisateur.
+    if (
+      msg.includes("client_timeout") ||
+      msg.includes("fetch") ||
+      msg.includes("network") ||
+      msg.includes("timeout") ||
+      msg.includes("upstream") ||
+      error.code === "timeout"
+    ) {
+      return {
+        ok: false,
+        error: "Service temporairement indisponible. Réessaye dans quelques secondes.",
+      };
+    }
+    if (msg.includes("not confirmed") || msg.includes("email_not_confirmed")) {
+      return { ok: false, error: "Email non confirmé. Vérifie ta boîte mail." };
+    }
+    return { ok: false, error: "Email ou mot de passe incorrect." };
+  }
   redirect(next);
 }
 
