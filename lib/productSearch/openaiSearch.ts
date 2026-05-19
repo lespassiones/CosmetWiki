@@ -48,6 +48,23 @@ function isWebUrl(url: string): boolean {
   }
 }
 
+/** Génère une clé de produit canonique pour dédup : minuscules, sans accents,
+ *  sans ponctuation, sans informations de volume (75ml, 3x75ml, etc.).
+ *  Garde les concentrations (0.12%) car elles distinguent des variantes
+ *  réellement différentes. */
+function normalizeProductKey(brand: string | null, productName: string | null): string {
+  const raw = [brand ?? "", productName ?? ""].join(" ").toLowerCase();
+  if (!raw.trim()) return "";
+  return raw
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/\b\d+\s*(?:ml|g|gr|kg|l)\b/g, "")
+    .replace(/\b\d+\s*[x×]\s*\d+\s*(?:ml|g|gr|kg|l)?\b/g, "")
+    .replace(/[^\w%]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export async function collectOpenAIWebCandidates(
   query: string,
   limit: number,
@@ -61,11 +78,12 @@ export async function collectOpenAIWebCandidates(
     "Tu reçois une saisie utilisateur (potentiellement mal orthographiée, abrégée ou avec marque manquante) et tu utilises la recherche web pour identifier les FICHES PRODUITS correspondantes.",
     "",
     "RÈGLES CRITIQUES :",
-    `1. Renvoie au maximum ${limit} candidats classés par pertinence décroissante.`,
-    "2. Chaque candidat DOIT avoir une URL HTTPS pointant vers une fiche produit réelle : site officiel de la marque, INCIDecoder, IncBeauty, Sephora/Marionnaud/Nocibé, ou marchand reconnu (Amazon, Auchan, Carrefour, pharmacies en ligne…). JAMAIS de YouTube, TikTok, Instagram, Pinterest, ou autre réseau social.",
-    "3. N'invente AUCUNE URL. Si tu n'es pas certain qu'une URL existe vraiment, omets ce candidat.",
-    "4. Pour chaque candidat, fournis : brand (marque exacte, sans accents perdus), productName (nom du produit sans répéter la marque), url (lien direct vers la fiche).",
-    "5. Réponse en JSON STRICT, sans markdown, sans commentaire.",
+    `1. Renvoie au maximum ${limit} candidats. UN SEUL candidat par produit unique — pas 5 URLs différentes du même produit chez 5 pharmacies. Si tu trouves un produit identique chez plusieurs marchands, ne le liste qu'UNE fois (préfère la source qui expose la composition INCI).`,
+    "2. PRIORITÉ ABSOLUE aux URLs qui exposent une liste INCI complète : INCIDecoder, INCIBeauty, Cosmétothèque, site officiel de la marque, fiche produit Sephora/Marionnaud/Nocibé. Ces sources sont MEILLEURES qu'une page marchande generique.",
+    "3. URLs autorisées ensuite : marchands reconnus avec fiche produit détaillée (Amazon, Auchan, Carrefour, pharmacies en ligne). INTERDIT : YouTube, TikTok, Instagram, Pinterest, réseaux sociaux.",
+    "4. N'invente AUCUNE URL. Si tu n'es pas certain qu'une URL existe vraiment, omets ce candidat.",
+    "5. Pour chaque candidat : brand (marque exacte), productName (nom sans répéter la marque), url (lien direct).",
+    "6. Réponse en JSON STRICT, sans markdown, sans commentaire.",
     "",
     'Format : {"candidates": [{"brand": "…", "productName": "…", "url": "https://…"}, …]}',
     'Si aucun résultat crédible : {"candidates": []}',
@@ -83,14 +101,21 @@ Cherche sur le web et propose les fiches produits cosmétiques qui correspondent
     if (!parsed || !Array.isArray(parsed.candidates)) return [];
 
     const out: DuckDuckGoCandidate[] = [];
-    const seen = new Set<string>();
+    const seenUrls = new Set<string>();
+    const seenProducts = new Set<string>();
     for (const c of parsed.candidates) {
       const url = (c.url ?? "").trim();
       if (!url || !isWebUrl(url)) continue;
-      if (seen.has(url)) continue;
-      seen.add(url);
+      if (seenUrls.has(url)) continue;
       const brand = c.brand ? c.brand.trim().slice(0, 80) || null : null;
       const productName = c.productName ? c.productName.trim().slice(0, 160) || null : null;
+      // Déduplication par produit (brand+productName normalisés) en plus de
+      // l'URL : sinon 8 pharmacies vendant le même "GUM Paroex 0,12%"
+      // ramènent 8 cartes identiques.
+      const productKey = normalizeProductKey(brand, productName);
+      if (productKey && seenProducts.has(productKey)) continue;
+      seenUrls.add(url);
+      if (productKey) seenProducts.add(productKey);
       const title = [brand, productName].filter(Boolean).join(" ").slice(0, 200);
       out.push({
         url,

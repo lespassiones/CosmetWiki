@@ -284,7 +284,16 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
       });
       if (!r.ok) {
         const j = (await r.json().catch(() => ({}))) as { error?: string };
-        setError(j.error ?? `Impossible de récupérer ce produit (${r.status})`);
+        // 404 = la page n'expose pas la composition extractible (typique des
+        // pages marchandes simples). On guide l'utilisateur vers une action
+        // utile plutôt qu'un simple message d'erreur.
+        if (r.status === 404) {
+          setError(
+            "Cette page ne contient pas la composition. Essaye un autre lien dans la liste, ou colle la composition manuellement plus bas.",
+          );
+        } else {
+          setError(j.error ?? `Impossible de récupérer ce produit (${r.status})`);
+        }
         return;
       }
       const data = (await r.json()) as {
