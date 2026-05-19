@@ -35,7 +35,9 @@ const EMPTY_COLOR = "#E5E7EB";
  * Each square is interactive:
  *  - hover (desktop) / tap (mobile) shows a tooltip with the ingredient name
  *    and its color rating
- *  - clicking scrolls the matching row into view (ids `ingredient-row-{N}`)
+ *  - clicking scrolls the matching row into view (ids `ingredient-row-{N}`),
+ *    or calls `onPositionClick` if provided (used by the analysis panel to
+ *    open the ingredients modal then scroll once it's mounted).
  *
  * Section titles carry an (i) tooltip explaining why the spectrum matters.
  * A warning chip is shown when any of the first 5 isn't green - those are the
@@ -45,12 +47,18 @@ export function IngredientSpectrum({
   items,
   top5,
   top10,
+  onPositionClick,
 }: {
   items: AnalyseItem[];
   top5: (ColorRating | null)[];
   top10: (ColorRating | null)[];
+  onPositionClick?: (position: number) => void;
 }) {
   function scrollToPosition(position: number) {
+    if (onPositionClick) {
+      onPositionClick(position);
+      return;
+    }
     if (typeof window === "undefined") return;
     const el = document.getElementById(`ingredient-row-${position}`);
     if (!el) return;

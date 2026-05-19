@@ -116,6 +116,10 @@ export function AnalyseResultPanel({
    *  ouverte sur clic d'un simple lien dans le panel d'analyse. Garde le
    *  panel principal léger (juste le score + la synthèse + les observations). */
   const [ingredientsModalOpen, setIngredientsModalOpen] = useState(false);
+  // When a square of the top 5/10 spectrum is tapped, we open the ingredients
+  // modal AND ask it to scroll to that ingredient once its DOM is mounted.
+  // `null` = just open the modal at the top of the list.
+  const [targetIngredientPosition, setTargetIngredientPosition] = useState<number | null>(null);
   useEffect(() => {
     if (autoOpenPromesse) {
       setPromesseOpen(true);
@@ -203,6 +207,10 @@ export function AnalyseResultPanel({
                 items={result.items}
                 top5={result.spectrum.top5}
                 top10={result.spectrum.top10}
+                onPositionClick={(position) => {
+                  setTargetIngredientPosition(position);
+                  setIngredientsModalOpen(true);
+                }}
               />
             </Reveal>
           ) : null}
@@ -233,7 +241,10 @@ export function AnalyseResultPanel({
         <Reveal delayMs={1000} className="[grid-area:items]">
           <IngredientsLinkCard
             count={result.counts.total}
-            onOpen={() => setIngredientsModalOpen(true)}
+            onOpen={() => {
+              setTargetIngredientPosition(null);
+              setIngredientsModalOpen(true);
+            }}
           />
         </Reveal>
       </div>
@@ -242,7 +253,11 @@ export function AnalyseResultPanel({
         <IngredientsModal
           items={result.items}
           counts={result.counts}
-          onClose={() => setIngredientsModalOpen(false)}
+          scrollToPosition={targetIngredientPosition}
+          onClose={() => {
+            setIngredientsModalOpen(false);
+            setTargetIngredientPosition(null);
+          }}
         />
       ) : null}
     </section>
@@ -295,11 +310,33 @@ function IngredientsModal({
   items,
   counts,
   onClose,
+  scrollToPosition,
 }: {
   items: AnalyseItem[];
   counts: AnalyseResponse["counts"];
   onClose: () => void;
+  /** When set, the modal scrolls to and flashes the ingredient row at that
+   *  position once the table is mounted. Used by the top 5/10 spectrum: tap
+   *  on a square should land you on the matching row inside the modal. */
+  scrollToPosition?: number | null;
 }) {
+  useEffect(() => {
+    if (!scrollToPosition) return;
+    // The table is rendered on the next paint - rAF + a tiny timeout gives
+    // the modal's open animation room to start before we scroll, otherwise
+    // the smooth scroll fights the slide-in.
+    const id = window.requestAnimationFrame(() => {
+      window.setTimeout(() => {
+        const el = document.getElementById(`ingredient-row-${scrollToPosition}`);
+        if (!el) return;
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("ring-2", "ring-[#F43F5E]");
+        window.setTimeout(() => el.classList.remove("ring-2", "ring-[#F43F5E]"), 1500);
+      }, 180);
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [scrollToPosition]);
+
   return (
     <div
       className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 backdrop-blur-sm lg:items-center animate-[fadeIn_180ms_ease-out]"
