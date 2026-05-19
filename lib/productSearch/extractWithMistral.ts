@@ -1,5 +1,8 @@
 // Reduces an HTML page to a token-cheap text excerpt focused on the INCI
-// section, then asks Mistral to EXTRACT (not generate) the ingredient list.
+// section, then asks GPT-4o-mini (primary) to EXTRACT (not generate) the
+// ingredient list. Mistral kept as a fallback in case OpenAI is unavailable.
+
+import { hasOpenAI, openai } from "@/lib/ai/client";
 
 function reduceHtmlForExtraction(html: string): string {
   const stripped = html
@@ -40,9 +43,6 @@ export async function extractInciFromHtml(input: {
   label: string;
   html: string;
 }): Promise<string | null> {
-  const apiKey = process.env.MISTRAL_API_KEY;
-  if (!apiKey) return null;
-
   const ctx = reduceHtmlForExtraction(input.html);
   if (ctx.length < 80) return null;
 
@@ -60,12 +60,35 @@ Texte brut :
 ${ctx}
 """`;
 
+  // Primary : GPT-4o-mini (cohérent avec le reste de la recherche produit
+  // qui utilise déjà GPT Web Search + GPT pour la promesse marketing).
+  if (hasOpenAI()) {
+    try {
+      const r = await openai().chat.completions.create({
+        model: "gpt-4o-mini",
+        temperature: 0,
+        max_tokens: 1500,
+        messages: [{ role: "user", content: prompt }],
+      });
+      const txt = (r.choices?.[0]?.message?.content ?? "").trim();
+      if (looksLikeInciList(txt)) return txt;
+    } catch {
+      // Tombe sur Mistral en fallback
+    }
+  }
+
+  // Fallback : Mistral. Utile si OpenAI est down ou que la clé n'est pas
+  // configurée. Coût similaire (mistral-small ~ gpt-4o-mini) mais on évite
+  // les misses utilisateur dûs à une panne ponctuelle d'un seul fournisseur.
+  const mistralKey = process.env.MISTRAL_API_KEY;
+  if (!mistralKey) return null;
+
   try {
     const r = await fetch("https://api.mistral.ai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${mistralKey}`,
       },
       body: JSON.stringify({
         model: "mistral-small-latest",

@@ -5,10 +5,12 @@ import { collectOpenAIWebCandidates } from "@/lib/productSearch/openaiSearch";
 import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import { normalizeProductQuery } from "@/lib/ai/productNormalize";
 
-// Hard cap for the multi-candidate UI: 12 web hits = 3 pages of 4 in the
-// frontend's "Voir plus" pager. More than that gets noisy and burns search-
-// engine budget.
-const MAX_WEB_CANDIDATES = 12;
+// Premier batch : 24 candidats demandés à OpenAI. L'UI en affiche 8 d'entrée
+// puis 8 de plus à chaque "Voir plus". Quand les 24 sont épuisés, l'UI peut
+// re-appeler cette route avec `exclude` = les déjà-vus pour ramener un
+// nouveau batch de 24 (pagination infinie).
+const FIRST_BATCH_LIMIT = 24;
+const LOAD_MORE_LIMIT = 24;
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,6 +18,10 @@ export const dynamic = "force-dynamic";
 type RequestBody = {
   query?: string;
   hp?: string;
+  /** Liste de "brand productName" déjà affichés côté UI, à exclure du
+   *  prochain batch retourné par OpenAI Web Search. Permet la pagination
+   *  infinie sans re-proposer les mêmes produits. */
+  exclude?: string[];
 };
 
 export async function POST(req: NextRequest) {
@@ -79,22 +85,42 @@ export async function POST(req: NextRequest) {
   }
 
   const refinedQuery = norm.kind === "query" ? norm.query : query;
+  const exclude = Array.isArray(body.exclude)
+    ? body.exclude.filter((e): e is string => typeof e === "string").slice(0, 30)
+    : [];
+  const isLoadMore = exclude.length > 0;
+
+  // Mode "Voir plus" : on saute la cascade catalogue (déjà passée au 1er hit)
+  // et on appelle directement OpenAI Web Search avec la liste d'exclusion.
+  if (isLoadMore) {
+    const more = await collectOpenAIWebCandidates(
+      refinedQuery,
+      LOAD_MORE_LIMIT,
+      exclude,
+    );
+    return NextResponse.json({
+      found: false,
+      reason: "load_more",
+      webCandidates: more,
+      normalization: { kind: "load_more" },
+    });
+  }
+
   const result = await searchProductCascade(refinedQuery);
 
   // When the cascade failed to identify a single canonical product, we ALSO
   // fetch a wider list of web candidates so the UI can show "voir plus".
-  // The user picks one, then /api/deep-fetch lazy-pulls its INCI. Keeps the
-  // cost bounded: only one Mistral extraction per actual click instead of
-  // 12 up-front.
+  // L'UI affiche 8 par défaut, "Voir plus" affiche 8 de plus jusqu'à 24.
+  // Au-delà, l'UI appelle cette route avec `exclude` pour un nouveau batch.
   //
   // Primary: OpenAI web search — reliable from Vercel IPs. Fallback: DDG
   // HTML scrape, used only when OpenAI returns nothing (key missing, quota,
   // timeout). DDG is free but bot-walled on datacenter IPs, hence the order.
   let webCandidates: Awaited<ReturnType<typeof collectDuckDuckGoCandidates>> = [];
   if (!result.found) {
-    webCandidates = await collectOpenAIWebCandidates(refinedQuery, MAX_WEB_CANDIDATES);
+    webCandidates = await collectOpenAIWebCandidates(refinedQuery, FIRST_BATCH_LIMIT);
     if (webCandidates.length === 0) {
-      webCandidates = await collectDuckDuckGoCandidates(refinedQuery, MAX_WEB_CANDIDATES);
+      webCandidates = await collectDuckDuckGoCandidates(refinedQuery, FIRST_BATCH_LIMIT);
     }
   }
 

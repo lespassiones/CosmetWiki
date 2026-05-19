@@ -68,10 +68,20 @@ function normalizeProductKey(brand: string | null, productName: string | null): 
 export async function collectOpenAIWebCandidates(
   query: string,
   limit: number,
+  excludeProducts: string[] = [],
 ): Promise<DuckDuckGoCandidate[]> {
   if (!hasOpenAI()) return [];
   const q = query.trim();
   if (q.length < 3) return [];
+
+  // Liste d'exclusion pour la pagination "Voir plus" : on demande à OpenAI
+  // de NE PAS re-proposer les produits déjà ramenés au premier call.
+  const excludeBlock = excludeProducts.length > 0
+    ? `\n\nÀ EXCLURE absolument (déjà proposés à l'utilisateur) : ${excludeProducts
+        .slice(0, 30)
+        .map((p) => `"${p}"`)
+        .join(", ")}.`
+    : "";
 
   const system = [
     "Tu es un assistant de recherche de produits cosmétiques.",
@@ -89,7 +99,7 @@ export async function collectOpenAIWebCandidates(
     'Si aucun résultat crédible : {"candidates": []}',
   ].join("\n");
 
-  const userMsg = `Saisie utilisateur : """${q.slice(0, 200)}"""
+  const userMsg = `Saisie utilisateur : """${q.slice(0, 200)}"""${excludeBlock}
 
 Cherche sur le web et propose les fiches produits cosmétiques qui correspondent. Réponds en JSON strict.`;
 

@@ -5,9 +5,11 @@ import type { ProductSearchResult, ProductSearchHit } from "@/lib/productSearch/
 import type { OpenBeautyFactsCandidate } from "@/lib/productSearch/openBeautyFacts";
 import type { DuckDuckGoCandidate } from "@/lib/productSearch/duckduckgo";
 
-/** "Voir plus" reveals 4 more candidates each click. With 12 candidates max
- *  on the deep-search server side, that's 3 pages of 4. */
-const DEEP_PAGE_SIZE = 4;
+/** "Voir plus" affiche 8 candidats supplémentaires à chaque clic. Le 1er
+ *  call backend ramène jusqu'à 24 candidats (= 3 pages locales de 8). Une
+ *  fois épuisé, l'UI re-appelle /api/product-search avec `exclude` pour
+ *  obtenir un nouveau batch de 24 (pagination infinie). */
+const DEEP_PAGE_SIZE = 8;
 
 /** Below this many catalogue hits, we proactively offer the deep web search
  *  so niche/indie products that aren't on OBF or INCIDecoder still have a
@@ -64,6 +66,12 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
    *  "Voir plus" pager. INCI is extracted lazily on click via /api/deep-fetch. */
   const [webCandidates, setWebCandidates] = useState<DuckDuckGoCandidate[]>([]);
   const [webVisibleCount, setWebVisibleCount] = useState(DEEP_PAGE_SIZE);
+  /** Loading + exhaustion state pour le re-call API quand on a affiché tous
+   *  les candidats locaux et qu'on veut un nouveau batch (exclude des
+   *  déjà-vus). `exhaustedWeb` empêche les re-call inutiles après une
+   *  réponse vide. */
+  const [loadingMoreWeb, setLoadingMoreWeb] = useState(false);
+  const [exhaustedWeb, setExhaustedWeb] = useState(false);
   /** When the user clicks an INCIDecoder OR web candidate, we POST a fetch
    *  endpoint to pull its INCI on demand. `lazyFetching` holds the id of the
    *  candidate while that call is in flight so the card can show a spinner. */
@@ -78,6 +86,61 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
     setDeepResult(null);
     setWebCandidates([]);
     setWebVisibleCount(DEEP_PAGE_SIZE);
+    setLoadingMoreWeb(false);
+    setExhaustedWeb(false);
+  }
+
+  /** Bouton "Voir plus" sous la liste de candidats web :
+   *  - Si on a encore des candidats locaux non affichés, on les révèle (gratuit).
+   *  - Sinon, on appelle /api/product-search avec `exclude` pour ramener un
+   *    nouveau batch de 24 candidats inédits via OpenAI Web Search. */
+  async function loadMoreWebCandidates() {
+    // Phase 1 : pagination locale tant qu'on a du stock.
+    if (webVisibleCount < webCandidates.length) {
+      setWebVisibleCount((v) => Math.min(v + DEEP_PAGE_SIZE, webCandidates.length));
+      return;
+    }
+    // Phase 2 : tous les candidats locaux affichés → re-call OpenAI.
+    if (loadingMoreWeb || exhaustedWeb) return;
+    const q = query.trim();
+    if (q.length < 3) return;
+    setLoadingMoreWeb(true);
+    setError(null);
+    try {
+      const exclude = webCandidates
+        .map((c) => [c.brand, c.productName].filter(Boolean).join(" ").trim())
+        .filter((s) => s.length > 0);
+      const r = await fetch("/api/product-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: q, exclude }),
+      });
+      if (!r.ok) {
+        const j = (await r.json().catch(() => ({}))) as { error?: string };
+        setError(j.error ?? "Impossible de charger plus de produits.");
+        return;
+      }
+      const data = (await r.json()) as { webCandidates?: DuckDuckGoCandidate[] };
+      const incoming = data.webCandidates ?? [];
+      if (incoming.length === 0) {
+        setExhaustedWeb(true);
+        return;
+      }
+      // Dédup par URL contre les déjà affichés au cas où OpenAI n'aurait
+      // pas parfaitement respecté la consigne d'exclusion.
+      const existingUrls = new Set(webCandidates.map((c) => c.url));
+      const fresh = incoming.filter((c) => !existingUrls.has(c.url));
+      if (fresh.length === 0) {
+        setExhaustedWeb(true);
+        return;
+      }
+      setWebCandidates((prev) => [...prev, ...fresh]);
+      setWebVisibleCount((v) => v + DEEP_PAGE_SIZE);
+    } catch (err) {
+      setError((err as Error).message ?? "Erreur réseau");
+    } finally {
+      setLoadingMoreWeb(false);
+    }
   }
 
   async function submit(e: React.FormEvent) {
@@ -481,16 +544,19 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
               </li>
             ))}
           </ul>
-          {webVisibleCount < webCandidates.length ? (
+          {(webVisibleCount < webCandidates.length || !exhaustedWeb) ? (
             <div className="mt-3 flex justify-center">
               <button
                 type="button"
-                onClick={() =>
-                  setWebVisibleCount((v) => Math.min(v + DEEP_PAGE_SIZE, webCandidates.length))
-                }
-                className="rounded-full bg-white px-4 py-2 text-[13px] font-medium text-ink ring-1 ring-[#D1D5DB] shadow-sm transition-colors hover:bg-[#F9FAFB]"
+                onClick={loadMoreWebCandidates}
+                disabled={loadingMoreWeb}
+                className="rounded-full bg-white px-4 py-2 text-[13px] font-medium text-ink ring-1 ring-[#D1D5DB] shadow-sm transition-colors hover:bg-[#F9FAFB] disabled:opacity-50"
               >
-                Voir plus ({webCandidates.length - webVisibleCount} restant{webCandidates.length - webVisibleCount > 1 ? "s" : ""})
+                {loadingMoreWeb
+                  ? "Recherche…"
+                  : webVisibleCount < webCandidates.length
+                    ? `Voir plus (${webCandidates.length - webVisibleCount} restant${webCandidates.length - webVisibleCount > 1 ? "s" : ""})`
+                    : "Charger plus de résultats"}
               </button>
             </div>
           ) : null}
