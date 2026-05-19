@@ -18,7 +18,7 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req.headers);
   // Hard per-IP rate limit to keep the cost bounded.
-  const rl = checkRateLimit(ip, 12, 60_000);
+  const rl = checkRateLimit(ip, 20, 60_000);
   if (!rl.ok) {
     return new Response(
       JSON.stringify({ error: "Trop de messages récents. Patiente une minute." }),

@@ -90,26 +90,40 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
     setExhaustedWeb(false);
   }
 
-  /** Bouton "Voir plus" sous la liste de candidats web :
-   *  - Si on a encore des candidats locaux non affichés, on les révèle (gratuit).
-   *  - Sinon, on appelle /api/product-search avec `exclude` pour ramener un
-   *    nouveau batch de 24 candidats inédits via OpenAI Web Search. */
+  /** Bouton universel "Charger plus de résultats" qui complète la liste
+   *  catalogue (OBF/INCIDecoder/cache) avec de nouveaux candidats web via
+   *  GPT Search :
+   *
+   *  - Phase 1 : si on a encore des candidats web non affichés en local, on
+   *    les révèle (gratuit, juste UI).
+   *  - Phase 2 : on appelle /api/product-search avec `exclude` = catalogue
+   *    + web déjà affichés, pour ne JAMAIS re-proposer ce qui est en haut
+   *    de l'écran. OpenAI Web Search complète la liste avec des produits
+   *    inédits.
+   */
   async function loadMoreWebCandidates() {
-    // Phase 1 : pagination locale tant qu'on a du stock.
+    // Phase 1 : pagination locale tant qu'on a du stock côté web.
     if (webVisibleCount < webCandidates.length) {
       setWebVisibleCount((v) => Math.min(v + DEEP_PAGE_SIZE, webCandidates.length));
       return;
     }
-    // Phase 2 : tous les candidats locaux affichés → re-call OpenAI.
+    // Phase 2 : tous les candidats web locaux affichés → re-call OpenAI.
     if (loadingMoreWeb || exhaustedWeb) return;
     const q = query.trim();
     if (q.length < 3) return;
     setLoadingMoreWeb(true);
     setError(null);
     try {
-      const exclude = webCandidates
+      // Exclusion = catalogue (CandidateCard) + web (WebCandidateCard) déjà
+      // affichés. Sans le catalogue dans l'exclude, OpenAI re-propose les
+      // mêmes produits que ceux qu'on a en haut → frustrant pour l'user.
+      const catalogueExclude = candidates
         .map((c) => [c.brand, c.productName].filter(Boolean).join(" ").trim())
         .filter((s) => s.length > 0);
+      const webExclude = webCandidates
+        .map((c) => [c.brand, c.productName].filter(Boolean).join(" ").trim())
+        .filter((s) => s.length > 0);
+      const exclude = [...catalogueExclude, ...webExclude];
       const r = await fetch("/api/product-search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -135,7 +149,9 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
         return;
       }
       setWebCandidates((prev) => [...prev, ...fresh]);
-      setWebVisibleCount((v) => v + DEEP_PAGE_SIZE);
+      // Si c'est le premier batch web (webCandidates était vide), afficher
+      // dès la première page (DEEP_PAGE_SIZE). Sinon, augmenter le count.
+      setWebVisibleCount((v) => (webCandidates.length === 0 ? DEEP_PAGE_SIZE : v + DEEP_PAGE_SIZE));
     } catch (err) {
       setError((err as Error).message ?? "Erreur réseau");
     } finally {
@@ -332,8 +348,22 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
 
   /** Lazy-fetch INCI from a web candidate URL via /api/deep-fetch. The card
    *  shows a spinner while in flight; on success we hand off to the analyse
-   *  flow exactly like the other candidate types. */
+   *  flow exactly like the other candidate types.
+   *
+   *  Optimisation : si le candidat a déjà été pré-validé côté serveur
+   *  (`ingredientsText` rempli), on saute /api/deep-fetch et on passe
+   *  directement à l'analyse. Évite un second appel GPT + un fetch HTTP. */
   async function selectWebCandidate(c: DuckDuckGoCandidate) {
+    if (c.ingredientsText && c.ingredientsText.trim().length > 20) {
+      onFound({
+        ingredientsText: c.ingredientsText,
+        brand: c.brand,
+        productName: c.productName ?? c.title,
+        source: "duckduckgo+mistral",
+        sourceUrl: c.url,
+      });
+      return;
+    }
     setLazyFetching(c.url);
     setError(null);
     try {
@@ -488,6 +518,23 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
               </li>
             ) : null}
           </ul>
+
+          {/* Bouton universel "Charger plus de résultats" : visible dès qu'on
+              a du catalogue affiché et qu'on n'a pas encore basculé sur web.
+              Permet à l'utilisateur de compléter la liste avec GPT Web
+              Search sans avoir à attendre que le catalogue soit "scarce". */}
+          {webCandidates.length === 0 && !exhaustedWeb ? (
+            <div className="mt-3 flex justify-center">
+              <button
+                type="button"
+                onClick={loadMoreWebCandidates}
+                disabled={loadingMoreWeb}
+                className="rounded-full bg-white px-4 py-2 text-[13px] font-medium text-ink ring-1 ring-[#D1D5DB] shadow-sm transition-colors hover:bg-[#F9FAFB] disabled:opacity-50"
+              >
+                {loadingMoreWeb ? "Recherche web…" : "Charger plus de résultats"}
+              </button>
+            </div>
+          ) : null}
 
           <p className="mt-4 text-[12px] text-ink-subtle">
             Tu ne vois pas ton produit ?{" "}

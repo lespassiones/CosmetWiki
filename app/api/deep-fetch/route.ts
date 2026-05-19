@@ -42,7 +42,10 @@ export async function POST(req: NextRequest) {
   const ip = getClientIp(req.headers);
   // Tight: 6 deep-fetches per minute is plenty for normal use and protects
   // us from someone clicking through 12 candidates in a loop.
-  const rl = checkRateLimit(ip, 6, 60_000);
+  // 20 / min : un utilisateur qui clique plusieurs candidats successifs
+  // (le scénario "le 1er ne marche pas, j'essaie le 2e") dépassait 6.
+  // Chaque extraction = 1 fetch HTTP + 1 call GPT-4o-mini (~$0.001).
+  const rl = checkRateLimit(ip, 20, 60_000);
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Trop de récupérations récentes. Patiente une minute." },

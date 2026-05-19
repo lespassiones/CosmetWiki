@@ -17,15 +17,17 @@ const SEARCH_URL = "https://html.duckduckgo.com/html/?q=";
 // pages take 1-3 tries to land on the right product page.
 const CASCADE_AUTO_FETCH_LIMIT = 5;
 
-/** A web search candidate without its INCI list. The INCI is fetched lazily
- *  (via /api/deep-fetch) when the user clicks the card, the same pattern as
- *  INCIDecoder candidates. Keeps the deep-search endpoint cheap. */
+/** A web search candidate. When `ingredientsText` est présent, l'INCI a déjà
+ *  été extraite côté serveur lors de la pré-validation — le frontend peut
+ *  directement passer à l'analyse sans rappeler `/api/deep-fetch`. Sinon
+ *  (legacy/DDG fallback), l'INCI sera extraite lazily au clic. */
 export type DuckDuckGoCandidate = {
   url: string;
   title: string;
   domain: string;
   brand: string | null;
   productName: string | null;
+  ingredientsText?: string;
 };
 
 const RESULT_LINK_RE =
