@@ -13,7 +13,10 @@ import { supabaseService } from "@/lib/supabase";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const DB_TIMEOUT_MS = 3000;
+// 8 s : assez généreux pour absorber un cold-start Supabase ou un pool qui
+// chauffe (typiquement <1 s en steady state). Si on dépasse 8 s c'est qu'il
+// y a un vrai problème — UptimeRobot doit alors recevoir 503.
+const DB_TIMEOUT_MS = 8000;
 
 export async function GET() {
   const startedAt = Date.now();
