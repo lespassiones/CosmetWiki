@@ -1,3 +1,4 @@
+import { cache } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -17,10 +18,32 @@ import {
   type ProductHit,
 } from "@/lib/supabase";
 
-// 7 jours — les données ingrédient (description, couleur, fonctions) ne
-// changent quasiment jamais ; la réglementation EU est mise à jour ~1×/an.
-// Plus la fenêtre est large, moins on tape Supabase.
-export const revalidate = 604800;
+// Forcé dynamique : on utilise `Promise.race` pour borner les RPCs Supabase
+// (cf. lib/glossary.ts) et Next.js refuse de cacher une page ISR dont les
+// fetchs ne complètent pas tous → `DYNAMIC_SERVER_USAGE`. Le cache CDN
+// optimisera ça plus tard via `Cache-Control`.
+export const dynamic = "force-dynamic";
+
+/** Timeout dur par RPC : sous le timeout serverless Vercel Hobby (10 s)
+ *  avec marge pour le rendering. Ingrédient + produits = 2 RPCs séquentielles
+ *  donc max 2 × 4 s = 8 s. */
+const RPC_TIMEOUT_MS = 4000;
+
+type RpcResult<T> = { data: T | null; error: string | null };
+
+async function rpcWithTimeout<T>(
+  rpc: PromiseLike<{ data: T | null; error: { message: string } | null }>,
+  ms: number,
+): Promise<RpcResult<T>> {
+  const timeout = new Promise<RpcResult<T>>((resolve) =>
+    setTimeout(() => resolve({ data: null, error: "client_timeout" }), ms),
+  );
+  const wrapped = Promise.resolve(rpc).then<RpcResult<T>>((r) => ({
+    data: r.data ?? null,
+    error: r.error ? r.error.message : null,
+  }));
+  return Promise.race([wrapped, timeout]);
+}
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -54,21 +77,32 @@ const RATING_BAR: Record<ColorRating, string> = {
 
 const PRODUCTS_VISIBLE = 3;
 
-async function loadIngredient(slug: string): Promise<Ingredient | null> {
-  const { data, error } = await supabaseAnon().rpc("cosme_check_get_ingredient", {
-    p_slug: slug,
-  });
-  if (error || !data || data.length === 0) return null;
-  return data[0] as Ingredient;
-}
+// `cache()` partage l'appel entre `generateMetadata` et le render de la page
+// dans la MÊME requête : sans ça on payait 2 RPCs par hit (la metadata d'abord,
+// puis le composant page) pour les mêmes données.
+const loadIngredient = cache(async (slug: string): Promise<Ingredient | null> => {
+  const { data, error } = await rpcWithTimeout<Ingredient[]>(
+    supabaseAnon().rpc("cosme_check_get_ingredient", { p_slug: slug }),
+    RPC_TIMEOUT_MS,
+  );
+  if (error) {
+    console.warn(`[ingredient] get_ingredient slug=${slug} failed:`, error);
+    return null;
+  }
+  if (!data || data.length === 0) return null;
+  return data[0] ?? null;
+});
 
 async function loadProducts(ingredientId: number): Promise<ProductHit[]> {
-  const { data, error } = await supabaseAnon().rpc(
-    "cosme_check_products_for_ingredient",
-    { p_ingredient_id: ingredientId, p_limit: 12 },
+  const { data, error } = await rpcWithTimeout<ProductHit[]>(
+    supabaseAnon().rpc("cosme_check_products_for_ingredient", {
+      p_ingredient_id: ingredientId,
+      p_limit: 12,
+    }),
+    RPC_TIMEOUT_MS,
   );
-  if (error) return [];
-  return (data ?? []) as ProductHit[];
+  if (error || !data) return [];
+  return data;
 }
 
 const RATING_META_LABEL: Record<ColorRating, string> = {
