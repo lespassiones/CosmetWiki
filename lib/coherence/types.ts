@@ -86,6 +86,15 @@ export type CoherencePromise = {
    * Drives the per-promise progress bar in the UI.
    */
   score: number;
+  /**
+   * True if this promise was inferred from an unmatched ingredient rather
+   * than extracted directly from the description. Inferred promises are
+   * always "tenue" by construction (the ingredient is present AND the
+   * description supports the effect verbatim) and are surfaced in a
+   * dedicated UI section so users see them as "found in addition to" the
+   * directly-extracted ones. Optional - omitted on legacy rows.
+   */
+  inferred?: boolean;
 };
 
 /**

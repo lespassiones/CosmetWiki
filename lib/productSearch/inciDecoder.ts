@@ -11,6 +11,25 @@ const PRODUCT_LINK_GLOBAL_RE = /href=["']\/products\/([a-z0-9\-]+)["'][^>]*>([^<
 const TITLE_RE = /<h1[^>]*>([^<]+)<\/h1>/i;
 const BRAND_LINK_RE = /<a[^>]+href=["']\/brands\/([^"']+)["'][^>]*>([^<]+)<\/a>/i;
 
+/**
+ * Decode the handful of HTML entities INCIDecoder ships inside anchor text:
+ * `&amp;` `&#39;` `&quot;` `&nbsp;` `&lt;` `&gt;`. Without this, names like
+ * "Not Your Mother&#39;s" or "Foo &amp; Bar" leak the raw entities into the
+ * UI (visible to the user as literal &#39; / &amp; strings).
+ */
+function decodeHtmlEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, "&")
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    // Numeric refs (e.g. &#233; for é) - safety net for accents.
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)));
+}
+
 export async function searchInciDecoder(query: string): Promise<{
   brand: string | null;
   productName: string | null;
@@ -31,9 +50,9 @@ export async function searchInciDecoder(query: string): Promise<{
   if (!productHtml) return null;
 
   const titleMatch = TITLE_RE.exec(productHtml);
-  const productName = titleMatch ? titleMatch[1]!.trim() : null;
+  const productName = titleMatch ? decodeHtmlEntities(titleMatch[1]!.trim()) : null;
   const brandMatch = BRAND_LINK_RE.exec(productHtml);
-  const brand = brandMatch ? brandMatch[2]!.trim() : null;
+  const brand = brandMatch ? decodeHtmlEntities(brandMatch[2]!.trim()) : null;
 
   // Reject loose matches : INCIDecoder returns "did you mean" type results
   // that have no token in common with the original query.
@@ -85,7 +104,7 @@ export async function searchInciDecoderList(
   while ((m = re.exec(html)) !== null) {
     if (out.length >= limit) break;
     const slug = m[1];
-    const rawLabel = m[2].trim();
+    const rawLabel = decodeHtmlEntities(m[2].trim());
     if (!slug || seen.has(slug)) continue;
     // INCIDecoder anchor text is `<brand> <product>` separated by a · or space.
     // It's usually "Brand · Product Name" or "Brand Product Name". We split on
@@ -128,9 +147,9 @@ export async function fetchInciDecoderProduct(slug: string): Promise<{
   if (!productHtml) return null;
 
   const titleMatch = TITLE_RE.exec(productHtml);
-  const productName = titleMatch ? titleMatch[1]!.trim() : null;
+  const productName = titleMatch ? decodeHtmlEntities(titleMatch[1]!.trim()) : null;
   const brandMatch = BRAND_LINK_RE.exec(productHtml);
-  const brand = brandMatch ? brandMatch[2]!.trim() : null;
+  const brand = brandMatch ? decodeHtmlEntities(brandMatch[2]!.trim()) : null;
 
   const inci = await extractInciFromHtml({
     label: productName ?? safe,

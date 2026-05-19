@@ -1,10 +1,14 @@
-import { Fragment } from "react";
+"use client";
+
+import { Fragment, useState } from "react";
 import { GLASS_CARD } from "@/lib/ui/glass";
 import { InfoBadge, Tooltip } from "../Tooltip";
 import type { CoherencePromise } from "@/lib/coherence/types";
 import type { AnalyseItem } from "@/lib/analyseTypes";
 import type { ColorRating } from "@/lib/supabase";
 import { VERDICT_TONE } from "./tone";
+
+const MOBILE_PROMISES_PREVIEW = 2;
 
 /**
  * The dense reference table. Desktop: real <table> with 3 columns. Mobile:
@@ -27,7 +31,14 @@ export function CoherenceTable({
   promises: CoherencePromise[];
   items?: AnalyseItem[];
 }) {
-  if (promises.length === 0) {
+  // Inferred promises are surfaced in a dedicated card ("Promesses déduites
+  // de la formule") rather than mixed into this main table - they come from
+  // the bidirectional reinforcement layer, not from direct extraction.
+  // Filter them out so the main table stays focused on what the description
+  // explicitly claimed.
+  const directPromises = promises.filter((p) => !p.inferred);
+
+  if (directPromises.length === 0) {
     return (
       <article className={`${GLASS_CARD} p-6 text-center`}>
         <p className="text-[14px] text-[#6B7280]">
@@ -46,13 +57,23 @@ export function CoherenceTable({
   // (slug-based) and LLM-discovered open promises (name-based fallback).
   const colorMap = buildColorMap(items);
 
+  // Mobile-only collapse state: the table is dense on small screens and the
+  // ingredients per row are noise for most users — they care first about
+  // *which* promises are kept. Desktop keeps the full table since horizontal
+  // space is not a constraint there.
+  const [showAllMobile, setShowAllMobile] = useState(false);
+  const mobileHiddenCount = Math.max(0, directPromises.length - MOBILE_PROMISES_PREVIEW);
+  const mobileVisible = showAllMobile
+    ? directPromises
+    : directPromises.slice(0, MOBILE_PROMISES_PREVIEW);
+
   // Counts for the contextual tooltip - picks an example per verdict tier.
   const verdictCounts = {
-    tenue: promises.filter((p) => p.verdict === "tenue").length,
-    partielle: promises.filter((p) => p.verdict === "partielle").length,
-    marketing: promises.filter((p) => p.verdict === "marketing").length,
-    non_demontree: promises.filter((p) => p.verdict === "non_demontree").length,
-    contredite: promises.filter((p) => p.verdict === "contredite").length,
+    tenue: directPromises.filter((p) => p.verdict === "tenue").length,
+    partielle: directPromises.filter((p) => p.verdict === "partielle").length,
+    marketing: directPromises.filter((p) => p.verdict === "marketing").length,
+    non_demontree: directPromises.filter((p) => p.verdict === "non_demontree").length,
+    contredite: directPromises.filter((p) => p.verdict === "contredite").length,
   };
 
   return (
@@ -100,14 +121,24 @@ export function CoherenceTable({
             </tr>
           </thead>
           <tbody>
-            {promises.map((p) => {
+            {directPromises.map((p) => {
               const tone = VERDICT_TONE[p.verdict];
               return (
                 <tr key={p.slug + p.excerpt} className="border-t border-black/[0.04]">
                   <td className="py-3 pr-4 align-top">
                     <div className="flex items-start gap-2">
-                      <span aria-hidden className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${tone.bg}`} />
-                      <span className="font-medium text-ink leading-snug">{p.label}</span>
+                      {p.verdict !== "tenue" && (
+                        <span aria-hidden className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${tone.bg}`} />
+                      )}
+                      <span
+                        className={
+                          p.verdict === "tenue"
+                            ? "font-medium text-emerald-900 leading-snug bg-emerald-200/70 rounded-[3px] px-1 -mx-0.5 box-decoration-clone"
+                            : "font-medium text-ink leading-snug"
+                        }
+                      >
+                        {p.label}
+                      </span>
                     </div>
                   </td>
                   <td className="py-3 pr-4 align-top">
@@ -127,38 +158,102 @@ export function CoherenceTable({
         </table>
       </div>
 
-      {/* MOBILE CARDS - stacked */}
-      <ul className="space-y-2.5 lg:hidden">
-        {promises.map((p) => {
-          const tone = VERDICT_TONE[p.verdict];
-          return (
-            <li
+      {/* MOBILE CARDS - stacked, collapsed by default */}
+      <div className="lg:hidden">
+        <ul className="space-y-2.5">
+          {mobileVisible.map((p) => (
+            <MobilePromiseCard
               key={p.slug + p.excerpt}
-              className="rounded-2xl bg-white p-3.5 ring-1 ring-black/[0.06]"
-            >
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="flex items-start gap-2 min-w-0">
-                  <span
-                    aria-hidden
-                    className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${tone.bg}`}
-                  />
-                  <span className="font-semibold text-ink leading-tight">{p.label}</span>
-                </div>
-                <span
-                  className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${tone.bgSoft} ${tone.text} ring-1 ${tone.ringSoft}`}
-                >
-                  {tone.label}
-                </span>
-              </div>
-              <div className="text-[12px]">
-                <span className="text-[#9CA3AF]">Trouvé : </span>
-                <FoundList promise={p} colorMap={colorMap} />
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+              promise={p}
+              colorMap={colorMap}
+            />
+          ))}
+        </ul>
+        {(mobileHiddenCount > 0 || showAllMobile) && (
+          <button
+            type="button"
+            onClick={() => setShowAllMobile((v) => !v)}
+            className="mt-3 w-full rounded-xl bg-emerald-50 px-3 py-2 text-[12px] font-medium text-emerald-700 ring-1 ring-emerald-200 hover:bg-emerald-100 transition-colors"
+            aria-expanded={showAllMobile}
+          >
+            {showAllMobile
+              ? "Voir moins"
+              : `Voir plus (${mobileHiddenCount} ${mobileHiddenCount > 1 ? "autres" : "autre"})`}
+          </button>
+        )}
+      </div>
     </article>
+  );
+}
+
+function MobilePromiseCard({
+  promise,
+  colorMap,
+}: {
+  promise: CoherencePromise;
+  colorMap: Map<string, ColorRating | null>;
+}) {
+  const [showIngredients, setShowIngredients] = useState(false);
+  const tone = VERDICT_TONE[promise.verdict];
+  return (
+    <li className="rounded-2xl bg-white p-3.5 ring-1 ring-black/[0.06]">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start gap-2 min-w-0">
+          {promise.verdict !== "tenue" && (
+            <span
+              aria-hidden
+              className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${tone.bg}`}
+            />
+          )}
+          <span
+            className={
+              promise.verdict === "tenue"
+                ? "font-semibold text-emerald-900 leading-tight bg-emerald-200/70 rounded-[3px] px-1 -mx-0.5 box-decoration-clone"
+                : "font-semibold text-ink leading-tight"
+            }
+          >
+            {promise.label}
+          </span>
+        </div>
+        <span
+          className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${tone.bgSoft} ${tone.text} ring-1 ${tone.ringSoft}`}
+        >
+          {tone.label}
+        </span>
+      </div>
+      <button
+        type="button"
+        onClick={() => setShowIngredients((v) => !v)}
+        className="mt-2 inline-flex items-center gap-1 text-[11px] text-ink-subtle hover:text-ink transition-colors"
+        aria-expanded={showIngredients}
+      >
+        <span>
+          {showIngredients ? "Masquer les ingrédients" : "Voir les ingrédients"}
+        </span>
+        <svg
+          aria-hidden
+          width="10"
+          height="10"
+          viewBox="0 0 10 10"
+          className={`transition-transform ${showIngredients ? "rotate-180" : ""}`}
+        >
+          <path
+            d="M1.5 3.5 L5 7 L8.5 3.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      {showIngredients && (
+        <div className="mt-2 text-[12px]">
+          <span className="text-[#9CA3AF]">Trouvé : </span>
+          <FoundList promise={promise} colorMap={colorMap} />
+        </div>
+      )}
+    </li>
   );
 }
 

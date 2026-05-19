@@ -224,7 +224,11 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
     >
       <div
         ref={sheetRef}
-        className="w-full lg:max-w-lg bg-white rounded-t-3xl lg:rounded-3xl shadow-xl pb-6 lg:pb-6 pt-3 lg:pt-6 animate-[slideUp_220ms_ease-out]"
+        // max-h + overflow-y-auto so a tall result list (e.g. 5+ web fallback
+        // candidates) stays scrollable inside the sheet instead of being
+        // clipped by the viewport. overscroll-contain prevents touch scrolls
+        // from leaking to the body underneath.
+        className="w-full lg:max-w-lg bg-white rounded-t-3xl lg:rounded-3xl shadow-xl pb-6 lg:pb-6 pt-3 lg:pt-6 max-h-[92vh] overflow-y-auto overscroll-contain animate-[slideUp_220ms_ease-out]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="lg:hidden mx-auto h-1 w-10 rounded-full bg-[#D1D5DB] mb-4" aria-hidden />

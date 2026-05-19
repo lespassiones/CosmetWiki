@@ -9,6 +9,12 @@ import type { DuckDuckGoCandidate } from "@/lib/productSearch/duckduckgo";
  *  on the deep-search server side, that's 3 pages of 4. */
 const DEEP_PAGE_SIZE = 4;
 
+/** Below this many catalogue hits, we proactively offer the deep web search
+ *  so niche/indie products that aren't on OBF or INCIDecoder still have a
+ *  shot. Tuned empirically: 1-4 hits usually means the engines misunderstood
+ *  the query (e.g. "pure pousse" only matched on "pure"). */
+const SCARCE_RESULTS_THRESHOLD = 5;
+
 const SOURCE_LABEL: Record<string, string> = {
   cache: "notre base",
   openbeautyfacts: "Open Beauty Facts",
@@ -36,6 +42,10 @@ type SuggestResponse = {
   candidates: OpenBeautyFactsCandidate[];
   hasMore: boolean;
   page: number;
+  /** Web fallback candidates surfaced automatically by the server when the
+   *  catalogue (cache + OBF + INCIDecoder) returned too few hits. Only present
+   *  on page 1. Same shape and click behaviour as the deep-search webCandidates. */
+  webCandidates?: DuckDuckGoCandidate[];
 };
 
 export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
@@ -101,6 +111,12 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
       setHasMore(data.hasMore);
       setPage(data.page);
       setSearched(true);
+      // Server already attached web fallback candidates when catalogue
+      // results were scarce - hydrate them directly so the user doesn't
+      // need to click "Recherche approfondie".
+      if (data.webCandidates && data.webCandidates.length > 0) {
+        setWebCandidates(data.webCandidates);
+      }
     } catch (err) {
       if ((err as DOMException)?.name === "AbortError") return;
       setError((err as Error).message ?? "Erreur réseau");
@@ -289,7 +305,25 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
     }
   }
 
-  const showEmpty = searched && candidates.length === 0 && !busy;
+  // Only show the "no result" panel when EVERY source is empty - catalogue,
+  // web fallback, deep result. Otherwise the user sees "aucun produit trouvé"
+  // right below 5 web cards we just rendered, which is confusing.
+  const showEmpty =
+    searched &&
+    candidates.length === 0 &&
+    webCandidates.length === 0 &&
+    !deepResult &&
+    !busy;
+  // Catalogue returned 1-4 hits AND the server didn't already auto-attach a
+  // web fallback AND the user hasn't already triggered deep-search. Likely
+  // a niche/indie product the catalogue mis-matched on a partial token.
+  const showScarcePrompt =
+    searched &&
+    !busy &&
+    candidates.length > 0 &&
+    candidates.length < SCARCE_RESULTS_THRESHOLD &&
+    webCandidates.length === 0 &&
+    !deepResult;
 
   return (
     <form onSubmit={submit} className="w-full">
@@ -352,12 +386,15 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
             </p>
             <span className="text-[11px] text-ink-subtle/70">défile pour voir plus</span>
           </div>
-          {/* Scrollable list - keeps the search input + footer in view while the
-              user browses 30+ candidates. The pr-1 gives the scrollbar room
-              without pushing cards under it. */}
-          <ul className="grid gap-2.5 sm:grid-cols-2 max-h-[58vh] overflow-y-auto overscroll-contain pr-1 -mr-1">
+          {/* The parent sheet (ScanSheet) provides the scroll context, so we
+              don't add a nested overflow here — nested touch-scroll is
+              awkward on mobile and the sheet's max-h handles the overflow. */}
+          <ul className="grid gap-2.5 sm:grid-cols-2">
             {candidates.map((c) => (
-              <li key={c.id}>
+              // min-w-0 on grid items: without it the item's intrinsic width
+              // defaults to its content width, which lets long product names
+              // push past the cell and out of the card (no truncation).
+              <li key={c.id} className="min-w-0">
                 <CandidateCard
                   candidate={c}
                   onSelect={selectCandidate}
@@ -394,6 +431,29 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
         </div>
       ) : null}
 
+      {/* Few catalogue hits → proactively offer a deep web search. Niche/indie
+          brands often live only on small shop pages, not on OBF/INCIDecoder. */}
+      {showScarcePrompt ? (
+        <div className="mt-4 rounded-2xl bg-amber-50/70 border border-amber-200/70 p-4">
+          <p className="text-[13px] text-amber-900">
+            <span className="font-semibold">Peu de résultats&nbsp;?</span> Ce
+            produit n&apos;est peut-être pas dans nos bases. On peut chercher
+            sur le web et tenter une analyse à partir du site du fabricant ou
+            d&apos;un revendeur.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={runDeepSearch}
+              disabled={deepSearching}
+              className="rounded-xl bg-gradient-to-b from-rose-400 to-pink-400 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(251,113,133,0.55),inset_0_1px_0_0_rgba(255,255,255,0.30)] transition-all hover:from-rose-500 hover:to-pink-500 disabled:cursor-not-allowed disabled:from-rose-200 disabled:to-pink-200"
+            >
+              {deepSearching ? "Recherche…" : "Lancer une recherche web approfondie"}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       {/* Web candidates from the deep search — paginated "Voir plus" */}
       {webCandidates.length > 0 ? (
         <div className="mt-5">
@@ -402,7 +462,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
           </p>
           <ul className="grid gap-2.5 sm:grid-cols-2">
             {webCandidates.slice(0, webVisibleCount).map((c) => (
-              <li key={c.url}>
+              <li key={c.url} className="min-w-0">
                 <WebCandidateCard
                   candidate={c}
                   onSelect={selectWebCandidate}
@@ -572,10 +632,10 @@ function CandidateCard({
           <ProductPlaceholderIcon />
         )}
       </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
+      <div className="min-w-0 flex-1 overflow-hidden">
+        <div className="flex items-center gap-1.5 min-w-0">
           {niceBrand ? (
-            <p className="truncate text-[11px] font-semibold uppercase tracking-[0.14em] text-pink-500/80">
+            <p className="min-w-0 line-clamp-1 break-words text-[11px] font-semibold uppercase tracking-[0.14em] text-pink-500/80">
               {niceBrand}
             </p>
           ) : null}
@@ -585,7 +645,7 @@ function CandidateCard({
             </span>
           )}
         </div>
-        <p className="truncate text-[14px] font-medium text-ink">
+        <p className="line-clamp-2 break-words text-[14px] font-medium text-ink leading-snug">
           {niceName ?? "Produit sans nom"}
         </p>
         <p className="mt-0.5 text-[11px] text-ink-subtle">
@@ -600,8 +660,26 @@ function CandidateCard({
   );
 }
 
-function titleCase(s: string): string {
+/**
+ * Decode the handful of HTML entities that may leak into product labels
+ * from upstream scrapers (legacy cache rows, raw DDG title text). Done at
+ * the display layer as a safety net — the server-side scrapers already
+ * decode at the source for new records.
+ */
+function decodeEntities(s: string): string {
   return s
+    .replace(/&amp;/g, "&")
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)));
+}
+
+function titleCase(s: string): string {
+  return decodeEntities(s)
     .toLowerCase()
     .replace(/(^|[\s\-/'])(\p{L})/gu, (_, sep, ch) => sep + ch.toUpperCase());
 }

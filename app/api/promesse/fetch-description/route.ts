@@ -80,7 +80,7 @@ export type FetchDescriptionResponse =
   | { notFound: true; reason: string };
 
 const MIN_DESC_LEN = 60;
-const MAX_DESC_LEN = 4000;
+const MAX_DESC_LEN = 5000;
 
 export async function POST(req: NextRequest) {
   // Auth + rate-limit only here. Credit is charged AFTER cache lookup so two
@@ -128,17 +128,19 @@ export async function POST(req: NextRequest) {
   const system = [
     "Tu reçois l'identité d'un produit cosmétique et l'URL de sa fiche officielle. Tu fais une recherche web ciblée sur cette URL (et sur la marque si l'URL ne suffit pas) pour récupérer la PROMESSE MARKETING du produit telle qu'elle est formulée par la marque.",
     "",
-    "La promesse marketing = ce que le produit prétend faire pour la peau / les cheveux : bénéfices revendiqués, claims (anti-âge, hydratation 24h, etc.), actifs mis en avant, résultats annoncés, public cible.",
+    "La promesse marketing = ce que le produit prétend faire pour la peau / les cheveux : bénéfices revendiqués, claims (anti-âge, hydratation 24h, etc.), actifs mis en avant, résultats annoncés, public cible, état souhaité de la peau / des cheveux après usage (douceur, souplesse, confort, beauté…).",
     "",
     "RÈGLES :",
-    "1. Cite la marque, pas tes propres mots. Reformule légèrement si nécessaire mais reste FIDÈLE au discours de la marque.",
-    "2. N'INVENTE PAS de bénéfices. Si tu ne trouves pas de description marketing crédible, renvoie `{\"notFound\": true, \"reason\": \"…\"}`.",
-    "3. Pas de listing d'ingrédients INCI - ça vient de l'autre côté. Concentre-toi sur les promesses et les actifs marketing.",
-    "4. Longueur cible : 200-600 caractères, format paragraphe (pas de liste à puces, pas de markdown).",
-    "5. Renvoie en JSON STRICT, pas de markdown.",
+    "1. Cite la marque, pas tes propres mots. Tu peux nettoyer le HTML, retirer les répétitions évidentes et structurer en paragraphe, mais tu ne raccourcis PAS au point de perdre des bénéfices.",
+    "2. PRÉSERVATION DES PHRASES-PROMESSES : toute phrase ou tronçon de phrase qui décrit un effet sur la zone d'application doit être conservé verbatim (ou quasi-verbatim). Cela inclut explicitement les formulations courtes type slogan : \"rend les mains douces et belles\", \"laisse la peau souple\", \"donne du confort\", \"embellit le teint\", \"sublime les cheveux\". Ces phrases comptent comme des promesses analysables même si elles sonnent marketing. NE LES JETTE JAMAIS sous prétexte qu'elles paraissent secondaires.",
+    "3. CE QUE TU PEUX CONDENSER : les redondances pures (le même claim répété 3 fois sur la page), les éléments hors-promesse (prix, code produit, FAQ logistique). PAS les claims distincts.",
+    "4. N'INVENTE PAS de bénéfices. Si la marque ne dit pas \"rend les mains douces\", tu ne l'ajoutes pas. Si tu ne trouves pas de description marketing crédible, renvoie `{\"notFound\": true, \"reason\": \"…\"}`.",
+    "5. Pas de listing d'ingrédients INCI complet - ça vient de l'autre côté. Mais si la marque cite explicitement des actifs (\"à l'huile d'argan\", \"enrichi en B5\"), tu les gardes : ils font partie de la promesse.",
+    "6. Longueur cible : 400-1800 caractères, format paragraphe (pas de liste à puces, pas de markdown). Tu dépasses cette plage si la marque a beaucoup de claims distincts à conserver.",
+    "7. Renvoie en JSON STRICT, pas de markdown.",
     "",
     "Format de réponse :",
-    "Si trouvé : {\"notFound\": false, \"description\": \"<promesse marketing>\", \"sourceUrl\": \"<URL effectivement utilisée>\"}",
+    "Si trouvé : {\"notFound\": false, \"description\": \"<promesse marketing fidèle>\", \"sourceUrl\": \"<URL effectivement utilisée>\"}",
     "Si rien trouvé : {\"notFound\": true, \"reason\": \"<brève raison>\"}",
   ].join("\n");
 
@@ -152,7 +154,7 @@ export async function POST(req: NextRequest) {
   const userMsg = `Produit : ${candidateName}
 URL source : ${sourceUrl}
 ${hintsBlock ? `${hintsBlock}\n` : ""}
-Cherche la promesse marketing officielle (claims, bénéfices, actifs mis en avant) telle que présentée par la marque. Réponds en JSON strict.`;
+Cherche la promesse marketing officielle (claims, bénéfices, actifs mis en avant, slogans bénéfice-cible) telle que présentée par la marque. Préserve toutes les phrases qui décrivent un effet sur la peau ou les cheveux, même les phrases courtes type slogan. Réponds en JSON strict.`;
 
   // Updates we'll PATCH onto the analyses row at the end. We collect the
   // identity bits (label/brand/type) up-front so the row gets renamed from

@@ -82,11 +82,11 @@ const PRODUCT_TYPE_GUIDANCE: Record<ProductType, string> = {
   cheveux:
     "Le produit agit sur la fibre capillaire et le cuir chevelu. Promesses pertinentes : hydratation, démêlage, brillance, anti-frisottis, anti-chute, densification, anti-pellicules, fixation/coiffage, protection thermique, fortification de la fibre. Le cheveu mort ne contient ni collagène ni cellules vivantes - toute promesse 'régénère les cellules du cheveu' / 'collagène capillaire' / 'jeunesse cellulaire' / 'anti-âge cellulaire' est HORS-SUJET biologiquement. Le cuir chevelu peut être apaisé / nourri (peau).",
   peau_visage:
-    "Le produit agit sur la peau du visage. Promesses pertinentes : hydratation, apaisement, anti-âge, éclat, exfoliation, raffermissement, anti-tache, anti-pores, anti-acné, protection UV. HORS-SUJET : promesses capillaires (démêlage, anti-frisottis…), olfactives (tenue parfum), dentaires.",
+    "Le produit agit sur la peau du visage. Promesses pertinentes : hydratation, apaisement, anti-âge, éclat, exfoliation, raffermissement, anti-tache, anti-pores, anti-acné, protection UV, ET aussi toutes les promesses qui décrivent un état de la peau visé par la formule : douceur, souplesse, confort cutané, beauté, lumière du teint, peau lisse, peau repulpée, peau saine, peau régénérée, nutrition. HORS-SUJET : promesses capillaires (démêlage, anti-frisottis…), olfactives (tenue parfum), dentaires.",
   peau_corps:
-    "Le produit agit sur la peau du corps. Promesses pertinentes : hydratation, apaisement, nourrissant, anti-âge corps, raffermissement, exfoliation, anti-vergetures. HORS-SUJET : promesses capillaires, dentaires, oculaires.",
+    "Le produit agit sur la peau du corps (incluant mains, pieds, bras…). Promesses pertinentes : hydratation, apaisement, nourrissant, anti-âge corps, raffermissement, exfoliation, anti-vergetures, ET aussi tout effet visé décrit côté peau : douceur (\"rend les mains douces\", \"peau de bébé\"), souplesse, confort cutané, beauté de la peau, peau lisse, peau réparée, élasticité, peau veloutée, nutrition de la peau. HORS-SUJET : promesses capillaires, dentaires, oculaires.",
   levres:
-    "Le produit agit sur les lèvres. Promesses pertinentes : hydratation, nourrissant, repulpant, anti-gerçures, protection UV, brillance/couvrance. HORS-SUJET : promesses capillaires, dentaires, anti-rides cellulaire profonde.",
+    "Le produit agit sur les lèvres. Promesses pertinentes : hydratation, nourrissant, repulpant, anti-gerçures, protection UV, brillance/couvrance, ET aussi douceur des lèvres, confort, souplesse, lèvres lisses, lèvres réparées. HORS-SUJET : promesses capillaires, dentaires, anti-rides cellulaire profonde.",
   parfum:
     "Le produit est un parfum / eau de toilette. Promesses pertinentes : tenue, sillage, fraîcheur, intensité, persistance, notes olfactives. HORS-SUJET : hydratation (sauf base alcoolique mentionnée comme telle), anti-âge, démêlage, etc.",
   dents:
@@ -130,8 +130,10 @@ ${effectList}
 ═══ CATÉGORIES D'ABSENCE (promesses "sans X") ═══
 ${absenceList}
 
-CATÉGORIE "autre" :
-Si une promesse décrit un effet attendu sur la peau/cheveux MAIS ne tombe dans AUCUNE catégorie d'effet ci-dessus, utilise category_slug="autre" avec un label descriptif clair (ex: "Fixation des boucles", "Régulation du sébum", "Renforcement de la barrière cutanée"…).
+CATÉGORIE "autre" - À UTILISER GÉNÉREUSEMENT :
+Les 12 catégories ci-dessus ne couvrent PAS tout le champ cosmétique : elles ratent volontairement la douceur, la souplesse, le confort cutané, la nutrition, la beauté/éclat de la peau, la réparation, la fixation, la régulation du sébum, le repulpant lèvres, le toucher velouté, etc. Pour TOUTES ces promesses qui ne tombent dans aucune catégorie d'effet listée, tu utilises category_slug="autre" avec un label précis et descriptif.
+
+TU PEUX (et tu DOIS) avoir PLUSIEURS entrées avec category_slug="autre" dans la même réponse - une par effet distinct. Exemples de labels : "Douceur de la peau", "Confort cutané", "Souplesse de la peau", "Nutrition de la peau", "Régulation du sébum", "Fixation des boucles", "Repulpant lèvres", "Toucher velouté", "Beauté du teint", "Réparation cutanée"… Chaque effet bio distinct = une entrée "autre" séparée, avec un label différent. Ne fusionne PAS deux effets distincts juste parce qu'ils tombent tous les deux en "autre".
 
 ═══ MÉTHODE SYSTÉMATIQUE (suivre dans l'ordre) ═══
 
@@ -143,7 +145,11 @@ Si une promesse décrit un effet attendu sur la peau/cheveux MAIS ne tombe dans 
       stimule, ralentit, prévient, élimine, réduit, atténue, apaise, calme, protège, régénère,
       répare, restaure, sublime, illumine, éclaircit, unifie, donne du volume, densifie,
       gaine, scelle, condition, parfume, désodorise, blanchit, durcit, repulpe, tient, dure,
-      conserve, contient (suivi d'un actif), agit, contribue à, favorise, aide à.
+      conserve, contient (suivi d'un actif), agit, contribue à, favorise, aide à,
+      rend (suivi d'un adjectif : "rend les mains douces", "rend la peau lumineuse"),
+      donne (suivi d'un état : "donne du confort", "donne de la souplesse", "donne un toucher velouté"),
+      laisse (suivi d'un état : "laisse la peau douce", "laisse les cheveux soyeux"),
+      adoucit, assouplit, embellit, soigne, prend soin de.
   (b) Une CIBLE (peau, cheveux, lèvres, ongles, dents, fibre, cuir chevelu, boucles, pointes…).
   (c) OU une mention "sans X" / "0 % de X" / "free of X".
 
@@ -168,14 +174,16 @@ Si une phrase ne contient aucun de (a), (b), (c) → pas une promesse, passe.
    "sans sulfate", "sans paraben", "sans silicone", "sans huile minérale", "sans colorant", "sans parfum" → catégorie absence_* correspondante. Ce sont des promesses, PAS des unverifiable.
 
 3. promesse vs unverifiable :
-   ✓ EST UNE PROMESSE = un EFFET attendu OU une absence d'ingrédient.
-   ✗ EST UNVERIFIABLE = ni effet ni absence identifiable :
+   ✓ EST UNE PROMESSE = un EFFET attendu sur la peau/cheveux/etc. OU une absence d'ingrédient. Toute phrase qui décrit un état de la peau ou des cheveux visé par le produit ("rend les mains douces", "laisse la peau souple", "donne du confort", "embellit le teint", "redonne de l'éclat") est une PROMESSE - même si le verbe est ambigu. Si l'utilisateur peut dire "je vérifie si la formule contient un actif qui fait ça", c'est une promesse.
+   ✗ EST UNVERIFIABLE = ni effet sur la peau/cheveux ni absence d'ingrédient :
      - composition générale : "97 % d'origine naturelle", "à base de B5", "formule clean"
      - certification : "Ecocert", "Cosmos Organic", "vegan", "cruelty-free", "bio"
-     - sensoriel : "odeur sucrée", "texture fondante", "mousse rapidement"
-     - marketing_general : "véritable soin", "efficacité prouvée", "résultats visibles"
+     - sensoriel PUR (du produit lui-même, pas de la peau après usage) : "odeur sucrée", "texture fondante", "mousse rapidement", "fragrance fraîche du produit"
+     - marketing_general : "véritable soin", "efficacité prouvée", "résultats visibles", sans cible précise
 
-4. RÈGLE D'OR : si une phrase dit qu'un ingrédient FAIT quelque chose ("la provitamine B5 fortifie les cheveux"), c'est une PROMESSE d'effet. Si elle dit qu'un ingrédient N'EST PAS dedans ("sans sulfate"), c'est une PROMESSE d'absence. Sinon c'est unverifiable.
+   ⚠️ DANS LE DOUTE : si la phrase mentionne la PEAU / les CHEVEUX / les LÈVRES / les MAINS / les ONGLES / l'HALEINE / etc., classe-la en PROMESSE (catégorie listée si possible, sinon "autre"). Le bucket "unverifiable" est réservé aux mentions qui parlent UNIQUEMENT du produit en pot (composition, certification, label, odeur du produit) sans dire ce qu'il fait à la zone d'application.
+
+4. RÈGLE D'OR : si une phrase dit qu'un ingrédient FAIT quelque chose ("la provitamine B5 fortifie les cheveux"), c'est une PROMESSE d'effet. Si elle dit qu'un ingrédient N'EST PAS dedans ("sans sulfate"), c'est une PROMESSE d'absence. Si elle décrit un état souhaité pour la zone d'application après usage ("rend les mains douces", "peau veloutée"), c'est aussi une PROMESSE d'effet (en "autre" si aucune catégorie listée ne colle). Sinon c'est unverifiable.
 
 5. EXCERPT : verbatim exact (ou fragment fidèle), max 80 caractères.
 
@@ -220,7 +228,25 @@ Sortie :
 - promises:
   · {category_slug: "autre", label: "Tenue longue durée", excerpt: "tient toute la journée"}  ← une seule entrée, on FUSIONNE "tient" + "tenue de 12 h" + "longue durée"
 - unverifiable: []
-- out_of_scope: []`;
+- out_of_scope: []
+
+═══ EXEMPLE 4 (peau du corps, plusieurs "autre" distincts - excerpts VERBATIM) ═══
+
+Type : Peau du corps
+Description : "Crème pour les mains au parfum d'agrumes et de fleur d'oranger. Sa formule riche nourrit les mains et les rend douces. Pour des mains belles et soignées au quotidien. Confort longue durée après application. Cosmos Natural."
+
+Sortie :
+- promises:
+  · {category_slug: "hydratation", label: "Hydratation", excerpt: "nourrit les mains"}  ← "nourrit" implique apport hydratant/lipidique
+  · {category_slug: "autre", label: "Douceur de la peau", excerpt: "les rend douces"}  ← effet "douceur" - non listé dans les 12 catégories, va en "autre" avec label propre. NOTE : l'excerpt est verbatim ("les rend douces" est dans le texte).
+  · {category_slug: "autre", label: "Beauté de la peau", excerpt: "mains belles et soignées"}  ← effet "beauté" - encore "autre" avec un label différent. Excerpt verbatim.
+  · {category_slug: "autre", label: "Confort cutané", excerpt: "Confort longue durée après application"}  ← 3e "autre", label distinct
+- unverifiable:
+  · {excerpt: "parfum d'agrumes et de fleur d'oranger", reason: "sensoriel"}  ← odeur du produit, pas un effet sur la peau
+  · {excerpt: "Cosmos Natural", reason: "certification"}
+- out_of_scope: []
+
+(Note : 3 entrées "autre" coexistent avec 3 labels différents. Chaque effet biologique distinct mérite sa propre ligne. TOUS les excerpts sont des fragments VERBATIM de la description, jamais reformulés.)`;
 
   const user = `Description du produit (type: ${typeLabel}) à analyser :
 """
@@ -800,6 +826,219 @@ export async function exploreOpenPromise(
     return result ?? { matches: [], missing: [] };
   } catch {
     return { matches: [], missing: [] };
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 1bis) Inferred promises from orphan ingredients (formula → description)
+// -----------------------------------------------------------------------------
+
+/**
+ * Proposal returned by the LLM when scanning unmatched ingredients against
+ * the description. The caller MUST re-verify mechanically that:
+ *   1. `support_excerpt` appears literally in the description,
+ *   2. `active_slug` corresponds to an item actually in the formula.
+ * Both checks defend against hallucinated excerpts / slugs.
+ */
+export type InferredPromiseProposal = {
+  /** Slug of the orphan ingredient (must match an item in the formula). */
+  active_slug: string;
+  /** Display name of the inferred effect, e.g. "Douceur de la peau". */
+  effect_label: string;
+  /** Verbatim fragment of the description supporting the inference. */
+  support_excerpt: string;
+};
+
+const INFER_FROM_ORPHANS_SCHEMA = {
+  name: "inferred_promises_from_orphans",
+  strict: true,
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      inferred: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            active_slug: { type: "string" },
+            effect_label: { type: "string" },
+            support_excerpt: { type: "string" },
+          },
+          required: ["active_slug", "effect_label", "support_excerpt"],
+        },
+      },
+    },
+    required: ["inferred"],
+  },
+} as const;
+
+function buildInferFromOrphansPrompt(
+  description: string,
+  orphans: FormulaItemForLlm[],
+  alreadyCoveredLabels: string[],
+) {
+  const orphanList = orphans
+    .slice(0, 12)
+    .map(
+      (it, i) =>
+        `${i + 1}. ${it.name} (slug: ${it.slug})${
+          it.primaryFunction ? ` - ${it.primaryFunction}` : ""
+        }`,
+    )
+    .join("\n");
+
+  const alreadyCovered = alreadyCoveredLabels.length
+    ? alreadyCoveredLabels.join(", ")
+    : "(aucune)";
+
+  const system = `Tu es chimiste cosmétique. Ton rôle ici est de RENFORCER une analyse existante : on t'a donné une description marketing et une liste d'ingrédients de la formule qui n'ont PAS encore été reliés à une promesse. Tu dois identifier si la description mentionne (explicitement ou par synonyme) l'effet biologique principal de chacun de ces ingrédients.
+
+RÈGLES STRICTES (anti-hallucination) :
+1. Pour CHAQUE ingrédient orphelin, demande-toi : "Cet ingrédient a-t-il un effet biologique documenté, et la description en parle-t-elle ?"
+2. Si la réponse aux deux est OUI, retourne une entrée avec :
+   - active_slug : le slug EXACT de l'ingrédient (tel qu'on te le donne)
+   - effect_label : libellé court FR de l'effet (ex: "Douceur de la peau", "Adoucissement capillaire", "Hydratation des lèvres", "Nutrition de la peau"). Soyons précis et descriptifs.
+   - support_excerpt : un fragment VERBATIM de la description qui supporte cette inférence (entre 5 et 200 caractères). Tu dois copier les mots EXACTS, pas reformuler. Si tu ne peux pas trouver de fragment exact, n'inclus pas l'entrée.
+3. NE PROPOSE PAS un effet si :
+   - L'effet est déjà couvert par une promesse existante (voir liste ci-dessous - évite les synonymes proches).
+   - Le support_excerpt n'apparaît pas LITTÉRALEMENT dans la description.
+   - L'ingrédient n'a pas d'effet biologique documenté (solvants, conservateurs, parfum, colorants, agents tensioactifs purement nettoyants, agents de texture - même s'ils apparaissent dans la liste, ignore-les).
+4. Sois CONSERVATEUR : mieux vaut ne rien proposer que proposer une inférence fragile. Si tu hésites, ne propose pas.
+5. Maximum 6 propositions au total.
+
+PROMESSES DÉJÀ COUVERTES (ne pas dupliquer, même par synonyme) :
+${alreadyCovered}
+
+INGRÉDIENTS ORPHELINS À ÉVALUER :
+${orphanList}`;
+
+  const user = `Description marketing du produit :
+"""
+${description.trim().slice(0, 4000)}
+"""
+
+Pour chaque ingrédient orphelin (numéroté ci-dessus), si tu peux relier son effet biologique à une phrase précise de la description, retourne une entrée. Sinon, omets-le. Retourne le JSON strict.`;
+
+  return { system, user };
+}
+
+function safeParseInferred(raw: string): InferredPromiseProposal[] | null {
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object") return null;
+    const obj = parsed as Record<string, unknown>;
+    const arr = Array.isArray(obj.inferred) ? obj.inferred : [];
+    return arr
+      .map((m) => m as Record<string, unknown>)
+      .filter(
+        (m): m is { active_slug: string; effect_label: string; support_excerpt: string } =>
+          typeof m.active_slug === "string"
+          && typeof m.effect_label === "string"
+          && typeof m.support_excerpt === "string"
+          && m.support_excerpt.length >= 5
+          && m.support_excerpt.length <= 240,
+      )
+      .slice(0, 6)
+      .map((m) => ({
+        active_slug: m.active_slug,
+        effect_label: m.effect_label.slice(0, 80),
+        support_excerpt: m.support_excerpt.slice(0, 200),
+      }));
+  } catch {
+    return null;
+  }
+}
+
+async function mistralInferOrphans(
+  description: string,
+  orphans: FormulaItemForLlm[],
+  alreadyCoveredLabels: string[],
+): Promise<InferredPromiseProposal[] | null> {
+  if (!hasMistral()) return null;
+  const { system, user } = buildInferFromOrphansPrompt(description, orphans, alreadyCoveredLabels);
+  const r = await fetch("https://api.mistral.ai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.MISTRAL_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "mistral-small-latest",
+      temperature: 0.2,
+      max_tokens: 1000,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: system },
+        {
+          role: "user",
+          content: `${user}\n\nFormat strict :\n{ "inferred": [{"active_slug","effect_label","support_excerpt"}] }`,
+        },
+      ],
+    }),
+  });
+  if (!r.ok) return null;
+  const json = (await r.json()) as { choices?: { message?: { content?: string } }[] };
+  const raw = json?.choices?.[0]?.message?.content;
+  if (!raw) return null;
+  return safeParseInferred(raw);
+}
+
+/**
+ * Run the bidirectional check: for each unmatched ingredient, ask the LLM
+ * whether the description supports an inferred effect. Returns *unvalidated*
+ * proposals - the caller MUST verify each `support_excerpt` is literally
+ * present in the description and each `active_slug` exists in the formula
+ * before creating a promise.
+ */
+export async function inferPromisesFromOrphans(
+  description: string,
+  orphans: FormulaItemForLlm[],
+  alreadyCoveredLabels: string[],
+  userId?: string | null,
+): Promise<InferredPromiseProposal[]> {
+  if (orphans.length === 0) return [];
+  if (!hasOpenAI() && !hasMistral()) return [];
+
+  const { system, user } = buildInferFromOrphansPrompt(description, orphans, alreadyCoveredLabels);
+
+  try {
+    const result = await callWithFallback<InferredPromiseProposal[] | null>({
+      feature: "categorize",
+      userId: userId ?? null,
+      timeoutMs: 20_000,
+      primary: async () => {
+        if (!hasOpenAI()) throw new Error("openai disabled");
+        const resp = await openai().chat.completions.create({
+          model: AI_MODEL,
+          temperature: 0.2,
+          max_tokens: 1000,
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: user },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: INFER_FROM_ORPHANS_SCHEMA,
+          },
+        });
+        const raw = resp.choices?.[0]?.message?.content ?? null;
+        const value = raw ? safeParseInferred(raw) : null;
+        return {
+          value,
+          tokensIn: resp.usage?.prompt_tokens,
+          tokensOut: resp.usage?.completion_tokens,
+        };
+      },
+      fallback: async () => ({
+        value: await mistralInferOrphans(description, orphans, alreadyCoveredLabels),
+        provider: "mistral",
+      }),
+    });
+    return result ?? [];
+  } catch {
+    return [];
   }
 }
 

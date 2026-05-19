@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { searchOpenBeautyFactsList } from "@/lib/productSearch/openBeautyFacts";
 import { searchInciDecoderList } from "@/lib/productSearch/inciDecoder";
+import {
+  collectDuckDuckGoCandidates,
+  type DuckDuckGoCandidate,
+} from "@/lib/productSearch/duckduckgo";
 import { supabaseServer } from "@/lib/supabase";
 import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import type { OpenBeautyFactsCandidate } from "@/lib/productSearch/openBeautyFacts";
@@ -21,6 +25,12 @@ const PAGE_SIZE = 24;
 // are also a single search-page extract.
 const CACHE_LIMIT = 16;
 const INCIDECODER_LIMIT = 20;
+// Below this many catalogue hits on page 1, we ALSO surface web candidates
+// (no Mistral extraction up-front — just titles/URLs) so niche or French
+// indie brands absent from OBF/INCIDecoder can still be analysed by clicking
+// a candidate and triggering /api/deep-fetch lazily.
+const WEB_FALLBACK_THRESHOLD = 5;
+const WEB_FALLBACK_LIMIT = 8;
 
 function normalize(s: string): string {
   return s
@@ -98,11 +108,34 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Web fallback: when the catalogue is sparse on page 1, attach a handful of
+  // web candidates so indie/FR brands missing from OBF + INCIDecoder still
+  // give the user something to click on. INCI is fetched lazily on click via
+  // /api/deep-fetch — keeps this endpoint cheap and CDN-cacheable.
+  let webCandidates: DuckDuckGoCandidate[] = [];
+  if (isFirstPage && merged.length < WEB_FALLBACK_THRESHOLD) {
+    try {
+      webCandidates = await collectDuckDuckGoCandidates(query, WEB_FALLBACK_LIMIT);
+      // Dedupe web candidates against catalogue hits by brand+name token set,
+      // so a Cerave page found by DDG doesn't appear twice when Cerave is
+      // already in OBF.
+      const catalogueKeys = new Set(
+        merged.map((c) => dedupeKey(c.brand, c.productName)),
+      );
+      webCandidates = webCandidates.filter(
+        (w) => !catalogueKeys.has(dedupeKey(w.brand, w.productName ?? w.title)),
+      );
+    } catch {
+      webCandidates = [];
+    }
+  }
+
   return NextResponse.json(
     {
       candidates: merged,
       hasMore: obf.hasMore,
       page,
+      webCandidates,
     },
     {
       headers: {
