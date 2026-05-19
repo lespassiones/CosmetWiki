@@ -10,6 +10,7 @@ import { loadProfileForPrompt } from "@/lib/skin/promptFormat";
 import { categorizeProduct, type ProductCategory } from "@/lib/ai/categorize";
 import { correctTypo } from "@/lib/ai/typo";
 import { parseInciWithAI } from "@/lib/ai/parseInci";
+import { splitInciWithGpt } from "@/lib/ai/splitInci";
 import { validateInciInput } from "@/lib/ai/validate";
 import {
   EU_ALLERGENS_TOTAL,
@@ -182,7 +183,23 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const tokens = parseInciList(text);
+  let tokens = parseInciList(text);
+
+  // Rescue : si le parser local n'a presque rien sorti d'un texte long, c'est
+  // probablement une liste recopiée d'étiquette sans virgules (typique des
+  // emballages physiques : "AQUA / WATER / EAU DIMETHICONE CETEARYL ALCOHOL…").
+  // On demande à GPT-4o-mini de ré-insérer les virgules entre ingrédients,
+  // puis on re-parse. Cas pivot : <3 tokens dans un texte > 60 caractères.
+  if (tokens.length < 3 && text.length > 60) {
+    const split = await splitInciWithGpt(text);
+    if (split) {
+      const rescued = parseInciList(split);
+      if (rescued.length > tokens.length) {
+        tokens = rescued;
+      }
+    }
+  }
+
   if (tokens.length === 0) {
     return NextResponse.json({ error: "Aucun ingrédient détecté dans la liste." }, { status: 400 });
   }

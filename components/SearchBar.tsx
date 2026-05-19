@@ -399,6 +399,17 @@ export function looksLikeIngredientList(text: string): boolean {
   // Two or more = the user pasted a list using periods (mirrors the parser).
   const periodSepCount = (trimmed.match(/[A-Za-z)]\.\s+[A-Z]/g) || []).length;
   if (periodSepCount >= 2) return true;
+  // Format "tout en majuscules sans virgule" : typique d'un texte OCR ou
+  // recopié d'une étiquette physique. Ex : "AQUA / WATER / EAU DIMETHICONE
+  // CETEARYL ALCOHOL PHENOXYETHANOL...". On détecte par : longueur > 60 ET
+  // >= 5 mots en MAJUSCULES de 4+ lettres. Le parser côté API utilise GPT
+  // pour splitter ce format en ingrédients individuels.
+  const uppercaseWords = (trimmed.match(/\b[A-Z][A-Z0-9-]{3,}\b/g) || []).length;
+  if (trimmed.length > 60 && uppercaseWords >= 5) return true;
+  // Format multilingue typique INCI "AQUA / WATER / EAU" : 3+ slashes dans
+  // un texte d'au moins 30 chars = quasi certainement une liste.
+  const slashCount = (trimmed.match(/\//g) || []).length;
+  if (slashCount >= 3 && trimmed.length > 30) return true;
   return false;
 }
 
