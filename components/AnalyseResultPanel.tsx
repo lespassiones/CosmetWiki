@@ -112,12 +112,26 @@ export function AnalyseResultPanel({
   // the button active) and surprising for users who pasted an INCI without
   // a name.
   const [promesseOpen, setPromesseOpen] = useState(autoOpenPromesse);
+  /** La liste détaillée des ingrédients est rendue dans une modal full-screen
+   *  ouverte sur clic d'un simple lien dans le panel d'analyse. Garde le
+   *  panel principal léger (juste le score + la synthèse + les observations). */
+  const [ingredientsModalOpen, setIngredientsModalOpen] = useState(false);
   useEffect(() => {
     if (autoOpenPromesse) {
       setPromesseOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoOpenPromesse]);
+
+  // Ferme la modal au Escape pour cohérence avec PromesseFlowModal.
+  useEffect(() => {
+    if (!ingredientsModalOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setIngredientsModalOpen(false);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [ingredientsModalOpen]);
 
   // `null` → caller explicitly hides the breadcrumb (history detail page).
   // `undefined` → fall back to the default [Accueil, Nouvelle analyse].
@@ -217,10 +231,104 @@ export function AnalyseResultPanel({
         </Reveal>
 
         <Reveal delayMs={1000} className="[grid-area:items]">
-          <ItemsTable items={result.items} counts={result.counts} mobileLimit={5} desktopLimit={8} compact />
+          <IngredientsLinkCard
+            count={result.counts.total}
+            onOpen={() => setIngredientsModalOpen(true)}
+          />
         </Reveal>
       </div>
+
+      {ingredientsModalOpen ? (
+        <IngredientsModal
+          items={result.items}
+          counts={result.counts}
+          onClose={() => setIngredientsModalOpen(false)}
+        />
+      ) : null}
     </section>
+  );
+}
+
+/**
+ * Carte compacte rendue à la place du tableau d'ingrédients dans le panel
+ * d'analyse. Un seul lien-bouton qui ouvre la modal détaillée. Garde la
+ * vue principale légère.
+ */
+function IngredientsLinkCard({
+  count,
+  onOpen,
+}: {
+  count: number;
+  onOpen: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="group w-full rounded-2xl bg-white/65 ring-1 ring-white/70 backdrop-blur-2xl px-5 py-4 text-left shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] transition hover:bg-white/85 hover:ring-rose-200"
+      aria-label={`Voir la liste détaillée des ${count} ingrédients`}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[15px] font-semibold text-ink">Liste des ingrédients</p>
+          <p className="mt-0.5 text-[12.5px] text-ink-muted">
+            Voir les <span className="font-semibold text-ink">{count}</span> ingrédient{count > 1 ? "s" : ""} avec couleur, fonction et fiche détaillée.
+          </p>
+        </div>
+        <span
+          aria-hidden
+          className="shrink-0 grid h-9 w-9 place-items-center rounded-full bg-ink text-white transition group-hover:bg-[#F43F5E]"
+        >
+          <ArrowRightIcon className="h-4 w-4" />
+        </span>
+      </div>
+    </button>
+  );
+}
+
+/**
+ * Modal full-screen qui rend le tableau complet des ingrédients (filtres
+ * couleur + barre de recherche + lignes). Backdrop cliquable pour fermer,
+ * Escape pour fermer, scroll interne pour les longues listes.
+ */
+function IngredientsModal({
+  items,
+  counts,
+  onClose,
+}: {
+  items: AnalyseItem[];
+  counts: AnalyseResponse["counts"];
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 backdrop-blur-sm lg:items-center animate-[fadeIn_180ms_ease-out]"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Liste détaillée des ingrédients"
+    >
+      <div
+        className="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-3xl bg-bg shadow-xl lg:max-w-3xl lg:rounded-3xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="lg:hidden mx-auto h-1 w-10 shrink-0 rounded-full bg-[#D1D5DB] my-3" aria-hidden />
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-black/[0.06] px-5 py-3">
+          <h2 className="text-[16px] font-bold text-ink">Liste des ingrédients</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fermer"
+            className="grid h-9 w-9 place-items-center rounded-full text-ink-muted transition hover:bg-black/[0.04] hover:text-ink"
+          >
+            <span aria-hidden className="text-lg leading-none">×</span>
+          </button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          <ItemsTable items={items} counts={counts} />
+        </div>
+      </div>
+    </div>
   );
 }
 
