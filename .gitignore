@@ -44,3 +44,6 @@ data/raw/
 .vercel/
 
 .vercel
+
+# Supabase CLI local state (project link, generated types, etc.)
+supabase/.temp/

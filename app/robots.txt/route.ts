@@ -14,12 +14,18 @@ export const dynamic = "force-static";
  */
 export function GET() {
   const body = `# Cosme Check - robots.txt
-# Tous les crawlers sont les bienvenus sur le contenu.
-# Seules les routes API sont bloquees (consomment des tokens AI).
+# Tous les crawlers sont les bienvenus sur le contenu principal.
+# Routes API : bloquees (consomment des tokens AI sans benefice SEO).
+# Fiches ingredient /i/[slug] : bloquees (15 700 pages = abus de crawl
+#   constate sur le budget IO Supabase, pas de valeur SEO incrementale).
+# Glossaire : retire du site.
 
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /i/
+Disallow: /glossaire
+Disallow: /ingredients/
 Crawl-delay: 5
 
 Sitemap: ${SITE_URL}/sitemap.xml
