@@ -62,14 +62,21 @@ ${ctx}
 
   // Primary : GPT-4o-mini (cohérent avec le reste de la recherche produit
   // qui utilise déjà GPT Web Search + GPT pour la promesse marketing).
+  // Timeout dur 12 s : sans ça, l'appel pouvait dépasser le budget serverless
+  // Vercel (25 s) et déclencher un 502 Bad Gateway côté client.
   if (hasOpenAI()) {
     try {
-      const r = await openai().chat.completions.create({
-        model: "gpt-4o-mini",
-        temperature: 0,
-        max_tokens: 1500,
-        messages: [{ role: "user", content: prompt }],
-      });
+      const r = await Promise.race([
+        openai().chat.completions.create({
+          model: "gpt-4o-mini",
+          temperature: 0,
+          max_tokens: 1500,
+          messages: [{ role: "user", content: prompt }],
+        }),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("openai_extract_timeout")), 12_000),
+        ),
+      ]);
       const txt = (r.choices?.[0]?.message?.content ?? "").trim();
       if (looksLikeInciList(txt)) return txt;
     } catch {

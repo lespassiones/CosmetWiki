@@ -7,6 +7,7 @@ import {
   type DuckDuckGoCandidate,
 } from "@/lib/productSearch/duckduckgo";
 import { collectOpenAIWebCandidates } from "@/lib/productSearch/openaiSearch";
+import { prevalidateCandidates } from "@/lib/productSearch/prevalidate";
 import { supabaseServer } from "@/lib/supabase";
 import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import type { OpenBeautyFactsCandidate } from "@/lib/productSearch/openBeautyFacts";
@@ -109,28 +110,32 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Web fallback: when the catalogue is sparse on page 1, attach a handful of
-  // web candidates so indie/FR brands missing from OBF + INCIDecoder still
-  // give the user something to click on. INCI is fetched lazily on click via
-  // /api/deep-fetch — keeps this endpoint cheap and CDN-cacheable.
+  // Web fallback : on attache des candidats web pré-validés quand le catalogue
+  // est pauvre. La pré-validation extrait l'INCI via GPT-4o-mini en parallèle
+  // → seuls les candidats cliquables sont renvoyés au front. L'INCI est
+  // embarquée dans chaque candidat, donc au clic le frontend skip /api/deep-fetch.
   //
   // Primary: OpenAI web search (reliable from Vercel IPs). Fallback: DDG
   // HTML scrape (free but bot-walled on datacenter IPs).
   let webCandidates: DuckDuckGoCandidate[] = [];
   if (isFirstPage && merged.length < WEB_FALLBACK_THRESHOLD) {
     try {
-      webCandidates = await collectOpenAIWebCandidates(query, WEB_FALLBACK_LIMIT);
-      if (webCandidates.length === 0) {
-        webCandidates = await collectDuckDuckGoCandidates(query, WEB_FALLBACK_LIMIT);
+      // On demande plus de candidats à OpenAI (16) qu'on ne va en garder (8)
+      // pour avoir de la marge — la pré-validation va en filtrer une partie.
+      let raw = await collectOpenAIWebCandidates(query, 16);
+      if (raw.length === 0) {
+        raw = await collectDuckDuckGoCandidates(query, 16);
       }
-      // Dedupe web candidates against catalogue hits by brand+name token set,
-      // so a Cerave page already in OBF doesn't reappear from the web layer.
+      // Dédup contre le catalogue avant la pré-validation (économise des
+      // calls GPT inutiles si un même produit est déjà en haut de l'écran).
       const catalogueKeys = new Set(
         merged.map((c) => dedupeKey(c.brand, c.productName)),
       );
-      webCandidates = webCandidates.filter(
+      raw = raw.filter(
         (w) => !catalogueKeys.has(dedupeKey(w.brand, w.productName ?? w.title)),
       );
+      const { validated } = await prevalidateCandidates(raw, WEB_FALLBACK_LIMIT);
+      webCandidates = validated;
     } catch {
       webCandidates = [];
     }
