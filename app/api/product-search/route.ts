@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchProductCascade } from "@/lib/productSearch/cascade";
 import { collectDuckDuckGoCandidates } from "@/lib/productSearch/duckduckgo";
+import { collectOpenAIWebCandidates } from "@/lib/productSearch/openaiSearch";
 import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import { normalizeProductQuery } from "@/lib/ai/productNormalize";
 
@@ -85,9 +86,16 @@ export async function POST(req: NextRequest) {
   // The user picks one, then /api/deep-fetch lazy-pulls its INCI. Keeps the
   // cost bounded: only one Mistral extraction per actual click instead of
   // 12 up-front.
+  //
+  // Primary: OpenAI web search — reliable from Vercel IPs. Fallback: DDG
+  // HTML scrape, used only when OpenAI returns nothing (key missing, quota,
+  // timeout). DDG is free but bot-walled on datacenter IPs, hence the order.
   let webCandidates: Awaited<ReturnType<typeof collectDuckDuckGoCandidates>> = [];
   if (!result.found) {
-    webCandidates = await collectDuckDuckGoCandidates(refinedQuery, MAX_WEB_CANDIDATES);
+    webCandidates = await collectOpenAIWebCandidates(refinedQuery, MAX_WEB_CANDIDATES);
+    if (webCandidates.length === 0) {
+      webCandidates = await collectDuckDuckGoCandidates(refinedQuery, MAX_WEB_CANDIDATES);
+    }
   }
 
   return NextResponse.json({

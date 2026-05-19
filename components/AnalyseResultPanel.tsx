@@ -279,23 +279,6 @@ function TitleBar({
         <h1 className="mt-1 text-balance text-2xl font-bold tracking-tight text-ink sm:text-3xl">
           {title}
         </h1>
-        {productSource ? (
-          <p className="mt-1 text-[12px] text-ink-subtle">
-            Composition trouvée via{" "}
-            {productSource.sourceUrl ? (
-              <a
-                href={productSource.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-rose-500 underline underline-offset-2 hover:no-underline"
-              >
-                {productSource.source}
-              </a>
-            ) : (
-              <span className="text-rose-500">{productSource.source}</span>
-            )}
-          </p>
-        ) : null}
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
         {existingCoherenceId ? (

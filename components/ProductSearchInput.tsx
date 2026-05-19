@@ -733,9 +733,6 @@ function WebCandidateCard({
         <p className="line-clamp-2 text-[13px] font-medium text-ink leading-snug">
           {niceName ?? "Produit sans nom"}
         </p>
-        <p className="mt-0.5 truncate text-[11px] text-ink-subtle">
-          {candidate.domain}
-        </p>
         <p className="mt-0.5 text-[11px] text-ink-subtle">
           {loading ? "Récupération de la composition…" : "Cliquer pour récupérer la composition →"}
         </p>
@@ -745,17 +742,12 @@ function WebCandidateCard({
 }
 
 export function ProductHero({
-  source,
-  sourceUrl,
   brand,
   productName,
 }: {
-  source: string;
-  sourceUrl: string | null;
   brand: string | null;
   productName: string | null;
 }) {
-  const sourceText = SOURCE_LABEL[source] ?? source;
   const niceBrand = brand ? titleCase(brand) : null;
   const niceProduct = productName ? titleCase(productName) : null;
   const headline = niceProduct ?? niceBrand ?? "Produit analysé";
@@ -769,40 +761,6 @@ export function ProductHero({
       <h1 className="mt-1 text-balance text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
         {headline}
       </h1>
-      <p className="mt-2 flex flex-wrap items-center gap-1.5 text-sm text-ink-muted">
-        <CheckBadgeIcon className="h-4 w-4 text-pink-400" />
-        <span>Composition trouvée via</span>
-        {sourceUrl ? (
-          <a
-            href={sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-rose-500 underline underline-offset-2 hover:no-underline"
-          >
-            {sourceText}
-          </a>
-        ) : (
-          <span className="font-medium text-rose-500">{sourceText}</span>
-        )}
-      </p>
     </header>
-  );
-}
-
-function CheckBadgeIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden
-    >
-      <path d="M9 12l2 2 4-4" />
-      <circle cx="12" cy="12" r="9" />
-    </svg>
   );
 }

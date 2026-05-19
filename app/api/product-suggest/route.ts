@@ -6,6 +6,7 @@ import {
   collectDuckDuckGoCandidates,
   type DuckDuckGoCandidate,
 } from "@/lib/productSearch/duckduckgo";
+import { collectOpenAIWebCandidates } from "@/lib/productSearch/openaiSearch";
 import { supabaseServer } from "@/lib/supabase";
 import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import type { OpenBeautyFactsCandidate } from "@/lib/productSearch/openBeautyFacts";
@@ -112,13 +113,18 @@ export async function GET(req: NextRequest) {
   // web candidates so indie/FR brands missing from OBF + INCIDecoder still
   // give the user something to click on. INCI is fetched lazily on click via
   // /api/deep-fetch — keeps this endpoint cheap and CDN-cacheable.
+  //
+  // Primary: OpenAI web search (reliable from Vercel IPs). Fallback: DDG
+  // HTML scrape (free but bot-walled on datacenter IPs).
   let webCandidates: DuckDuckGoCandidate[] = [];
   if (isFirstPage && merged.length < WEB_FALLBACK_THRESHOLD) {
     try {
-      webCandidates = await collectDuckDuckGoCandidates(query, WEB_FALLBACK_LIMIT);
+      webCandidates = await collectOpenAIWebCandidates(query, WEB_FALLBACK_LIMIT);
+      if (webCandidates.length === 0) {
+        webCandidates = await collectDuckDuckGoCandidates(query, WEB_FALLBACK_LIMIT);
+      }
       // Dedupe web candidates against catalogue hits by brand+name token set,
-      // so a Cerave page found by DDG doesn't appear twice when Cerave is
-      // already in OBF.
+      // so a Cerave page already in OBF doesn't reappear from the web layer.
       const catalogueKeys = new Set(
         merged.map((c) => dedupeKey(c.brand, c.productName)),
       );
