@@ -58,16 +58,18 @@ function sleep(ms: number): Promise<void> {
  * abandonne le worker après 3 tentatives rapprochées. Le backoff laisse à
  * Cloudflare le temps de relâcher (en général <10 s).
  */
-/** Timeout dur par tentative (sans ça supabase-js peut bloquer ~75 s sur un
- *  fetch TCP qui ne répond pas, et fait crever le worker Next.js). */
-const RPC_PER_ATTEMPT_TIMEOUT_MS = 6000;
+/** Budget total < timeout serverless Vercel Hobby (10 s).
+ *  Pire cas : 2 tentatives × 3 s + 1 s backoff = 7 s. Marge ~3 s pour le
+ *  rendering. Si Supabase ne répond pas dans ce budget, on accepte une page
+ *  vide plutôt qu'un 500 — l'utilisateur peut recharger. */
+const RPC_PER_ATTEMPT_TIMEOUT_MS = 3000;
 
 async function rpcWithRetry(
   rpcName: string,
   params: Record<string, unknown>,
   context: string,
 ): Promise<IngredientListItem[]> {
-  const MAX_ATTEMPTS = 4;
+  const MAX_ATTEMPTS = 2;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       const { data, error } = await Promise.race([
@@ -91,7 +93,7 @@ async function rpcWithRetry(
       );
     }
     if (attempt < MAX_ATTEMPTS) {
-      await sleep(2 ** (attempt - 1) * 1000);
+      await sleep(1000);
     }
   }
   return [];
@@ -283,13 +285,15 @@ export function getCategoryBySlug(slug: string): Category | undefined {
  * et la page enfant se chargera correctement (les liens ne dépendent pas
  * des counts). C'est OK pour une dégradation transitoire.
  */
-const LETTER_COUNTS_TIMEOUT_MS = 4000;
+/** Budget total : 2 tentatives × 3 s + 1 s backoff = 7 s max. Sous le
+ *  timeout Vercel Hobby (10 s) avec marge pour le rendering. */
+const LETTER_COUNTS_TIMEOUT_MS = 3000;
 
 export async function getLetterCounts(): Promise<Record<GlossaryLetter, number>> {
   const result = {} as Record<GlossaryLetter, number>;
   for (const letter of GLOSSARY_LETTERS) result[letter] = 0;
 
-  const MAX_ATTEMPTS = 3;
+  const MAX_ATTEMPTS = 2;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       const { data, error } = await Promise.race([
@@ -321,7 +325,7 @@ export async function getLetterCounts(): Promise<Record<GlossaryLetter, number>>
       );
     }
     if (attempt < MAX_ATTEMPTS) {
-      await sleep(2 ** (attempt - 1) * 1000);
+      await sleep(1000);
     }
   }
   return result;
