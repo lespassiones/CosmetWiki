@@ -16,6 +16,15 @@ type Props = {
    * to keep the analyse on the home page.
    */
   onAnalyseList?: (text: string) => void | Promise<void>;
+  /**
+   * Force "list mode" : tout texte saisi ou collé est traité comme une INCI
+   * et routé vers /api/analyser, sans passer par l'autocomplete d'ingrédient
+   * unique. Utilisé dans la modal "Coller INCI" où l'intention de l'utilisateur
+   * est sans ambiguïté — le backend gère ensuite n'importe quel format
+   * (commas, slashes, all-caps, OCR, sans séparateurs…) via parseInciWithAI
+   * et splitInciWithGpt.
+   */
+  alwaysAsList?: boolean;
 };
 
 const TEXTAREA_MIN_PX = 28;   // single-line height
@@ -26,6 +35,7 @@ export function SearchBar({
   placeholder = "Ex : Glycerin, Phenoxyethanol, 122-99-6…",
   size = "lg",
   onAnalyseList,
+  alwaysAsList = false,
 }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchHit[]>([]);
@@ -86,7 +96,7 @@ export function SearchBar({
       setLoading(false);
       return;
     }
-    if (pastedAsList || looksLikeIngredientList(trimmed)) {
+    if (alwaysAsList || pastedAsList || looksLikeIngredientList(trimmed)) {
       setResults([]);
       setIsOpen(false);
       setLoading(false);
@@ -182,7 +192,7 @@ export function SearchBar({
     if (e.key === "Enter" && !e.shiftKey && !e.altKey) {
       e.preventDefault();
       const trimmed = query.trim();
-      if (pastedAsList || looksLikeIngredientList(trimmed)) {
+      if (alwaysAsList || pastedAsList || looksLikeIngredientList(trimmed)) {
         submitList(trimmed);
         return;
       }
@@ -208,7 +218,7 @@ export function SearchBar({
   }
 
   const hasResults = results.length > 0;
-  const isList = pastedAsList || looksLikeIngredientList(query);
+  const isList = alwaysAsList || pastedAsList || looksLikeIngredientList(query);
   const showDropdown =
     !isList && isOpen && (hasResults || (query.trim().length > 0 && !loading));
 

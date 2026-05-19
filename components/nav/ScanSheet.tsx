@@ -283,6 +283,7 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
                 </div>
                 <SearchBar
                   size="md"
+                  alwaysAsList
                   onAnalyseList={(text) =>
                     submitForAnalysis({
                       ingredientsText: text,
