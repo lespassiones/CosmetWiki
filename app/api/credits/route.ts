@@ -31,6 +31,12 @@ export async function GET() {
     );
   }
   return NextResponse.json(data as GetCreditsResult, {
-    headers: { "Cache-Control": "no-store" },
+    // Cache 30 s côté navigateur. Le header pill se rafraîchit assez vite
+    // (les analyses consomment 1 crédit visible immédiatement après la
+    // mutation côté client, qui peut invalider ce cache manuellement). Mais
+    // sans cache, le simple fait de naviguer entre 5 pages = 5 RPC + 5 auth
+    // round-trips supplémentaires par utilisateur, ce qui sature le budget
+    // IO Supabase.
+    headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=60" },
   });
 }

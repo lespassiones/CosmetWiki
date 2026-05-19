@@ -49,6 +49,14 @@ function redirectToSignIn(req: NextRequest, pathname: string): NextResponse {
   return NextResponse.redirect(url);
 }
 
+// Timeout dur sur l'appel Supabase Auth. La middleware Vercel a un budget de
+// 25 s avant kill (MIDDLEWARE_INVOCATION_TIMEOUT → 504 pour TOUTE la page).
+// Si Supabase Auth est lent/down, on préfère laisser passer la requête sans
+// rafraîchir le cookie : les page-level checks (`lib/auth.getUser()`) re-
+// valident côté serveur, et au pire l'utilisateur sera redirigé vers la
+// sign-in au prochain hit. Mieux qu'une prod entièrement en 504.
+const AUTH_REFRESH_TIMEOUT_MS = 1500;
+
 async function refreshSession(req: NextRequest): Promise<NextResponse> {
   const res = NextResponse.next();
   const sb = createServerClient(
@@ -68,7 +76,20 @@ async function refreshSession(req: NextRequest): Promise<NextResponse> {
       },
     },
   );
-  await sb.auth.getUser();
+  try {
+    await Promise.race([
+      sb.auth.getUser(),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("supabase_auth_timeout")),
+          AUTH_REFRESH_TIMEOUT_MS,
+        ),
+      ),
+    ]);
+  } catch {
+    // Auth Supabase injoignable ou trop lente : on retourne la réponse en
+    // l'état. Pas de refresh de cookie cette fois — le prochain hit re-tentera.
+  }
   return res;
 }
 
@@ -89,6 +110,17 @@ export async function middleware(req: NextRequest) {
   }
   if (SUSPICIOUS_UA_RE.test(ua) && pathname.startsWith("/api/")) {
     return new NextResponse("Forbidden", { status: 403 });
+  }
+
+  // ── Skip auth refresh on API routes ───────────────────────────────────
+  // Chaque API route fait son propre `sb.auth.getUser()` (via apiGate, ou en
+  // direct comme /api/credits). Sans ce bypass, chaque hit /api/* déclenche
+  // DEUX round-trips Supabase Auth : un dans la middleware, un dans le
+  // handler. Sous charge ça double les appels Auth et fait dépasser le
+  // budget IO Supabase. supabase-ssr rafraîchit le cookie côté handler dans
+  // tous les cas, donc rien n'est perdu.
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
   }
 
   // ── Auth refresh / gating ─────────────────────────────────────────────

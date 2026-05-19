@@ -58,6 +58,10 @@ function sleep(ms: number): Promise<void> {
  * abandonne le worker après 3 tentatives rapprochées. Le backoff laisse à
  * Cloudflare le temps de relâcher (en général <10 s).
  */
+/** Timeout dur par tentative (sans ça supabase-js peut bloquer ~75 s sur un
+ *  fetch TCP qui ne répond pas, et fait crever le worker Next.js). */
+const RPC_PER_ATTEMPT_TIMEOUT_MS = 6000;
+
 async function rpcWithRetry(
   rpcName: string,
   params: Record<string, unknown>,
@@ -66,7 +70,15 @@ async function rpcWithRetry(
   const MAX_ATTEMPTS = 4;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
-      const { data, error } = await supabaseAnon().rpc(rpcName, params);
+      const { data, error } = await Promise.race([
+        supabaseAnon().rpc(rpcName, params),
+        new Promise<{ data: null; error: { message: string } }>((resolve) =>
+          setTimeout(
+            () => resolve({ data: null, error: { message: "client_timeout" } }),
+            RPC_PER_ATTEMPT_TIMEOUT_MS,
+          ),
+        ),
+      ]);
       if (!error) return asIngredientItems(data);
       console.warn(
         `[glossary] ${rpcName} ${context} attempt ${attempt}/${MAX_ATTEMPTS} failed:`,
@@ -264,28 +276,53 @@ export function getCategoryBySlug(slug: string): Category | undefined {
  * un dictionnaire `{ "A": 1285, "B": 700, … }`. Payload ~270 octets — sans
  * commune mesure avec la version précédente qui tapait 27 RPC en parallèle
  * pour ramener ~1 Mo juste pour compter des items.
+ *
+ * Robustesse : retry + timeout (cf. `rpcWithRetry` ci-dessus). Si tout
+ * échoue, on renvoie les compteurs à zéro — la page rend, le glossaire
+ * affiche "Aucun" pour chaque lettre, l'utilisateur peut quand même cliquer
+ * et la page enfant se chargera correctement (les liens ne dépendent pas
+ * des counts). C'est OK pour une dégradation transitoire.
  */
+const LETTER_COUNTS_TIMEOUT_MS = 4000;
+
 export async function getLetterCounts(): Promise<Record<GlossaryLetter, number>> {
   const result = {} as Record<GlossaryLetter, number>;
-  // Initialise toutes les lettres à 0 par défaut (au cas où la RPC échoue
-  // ou si une lettre n'a aucun ingrédient).
   for (const letter of GLOSSARY_LETTERS) result[letter] = 0;
 
-  try {
-    const { data, error } = await supabaseAnon().rpc("cosme_check_letter_counts");
-    if (error) {
-      console.warn("[glossary] letter_counts RPC failed:", error.message);
-      return result;
-    }
-    if (data && typeof data === "object" && !Array.isArray(data)) {
-      for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
-        if (isValidLetter(key) && typeof value === "number") {
-          result[key] = value;
+  const MAX_ATTEMPTS = 3;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const { data, error } = await Promise.race([
+        supabaseAnon().rpc("cosme_check_letter_counts"),
+        new Promise<{ data: null; error: { message: string } }>((resolve) =>
+          setTimeout(
+            () => resolve({ data: null, error: { message: "client_timeout" } }),
+            LETTER_COUNTS_TIMEOUT_MS,
+          ),
+        ),
+      ]);
+      if (error) {
+        console.warn(
+          `[glossary] letter_counts attempt ${attempt}/${MAX_ATTEMPTS} failed:`,
+          error.message,
+        );
+      } else if (data && typeof data === "object" && !Array.isArray(data)) {
+        for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+          if (isValidLetter(key) && typeof value === "number") {
+            result[key] = value;
+          }
         }
+        return result;
       }
+    } catch (err) {
+      console.warn(
+        `[glossary] letter_counts attempt ${attempt}/${MAX_ATTEMPTS} threw:`,
+        err instanceof Error ? err.message : String(err),
+      );
     }
-  } catch (err) {
-    console.warn("[glossary] letter_counts RPC threw:", err);
+    if (attempt < MAX_ATTEMPTS) {
+      await sleep(2 ** (attempt - 1) * 1000);
+    }
   }
   return result;
 }
