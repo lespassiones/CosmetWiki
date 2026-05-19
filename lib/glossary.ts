@@ -30,6 +30,62 @@ export function letterLabel(letter: GlossaryLetter): string {
 }
 
 /**
+ * Filtre + cast : ne garde que les items dont la forme JSONB correspond.
+ */
+function asIngredientItems(data: unknown): IngredientListItem[] {
+  if (!Array.isArray(data)) return [];
+  return data.filter(
+    (it): it is IngredientListItem =>
+      typeof it === "object" &&
+      it !== null &&
+      typeof (it as Record<string, unknown>).slug === "string" &&
+      typeof (it as Record<string, unknown>).name === "string",
+  );
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Exécute une RPC avec retry + backoff exponentiel (1s, 2s, 4s, 8s).
+ *
+ * Pourquoi : Supabase est derrière Cloudflare. Quand on rebuild Cosme Check,
+ * Vercel envoie ~4 workers qui pré-rendent 27 lettres + 13 catégories en
+ * rafale depuis la même IP datacenter. Cloudflare prend ça pour une attaque
+ * et renvoie une page HTML de challenge à la place du JSON. supabase-js
+ * échoue le parse et la page se génère vide — pire, dans certains cas Next.js
+ * abandonne le worker après 3 tentatives rapprochées. Le backoff laisse à
+ * Cloudflare le temps de relâcher (en général <10 s).
+ */
+async function rpcWithRetry(
+  rpcName: string,
+  params: Record<string, unknown>,
+  context: string,
+): Promise<IngredientListItem[]> {
+  const MAX_ATTEMPTS = 4;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const { data, error } = await supabaseAnon().rpc(rpcName, params);
+      if (!error) return asIngredientItems(data);
+      console.warn(
+        `[glossary] ${rpcName} ${context} attempt ${attempt}/${MAX_ATTEMPTS} failed:`,
+        error.message,
+      );
+    } catch (err) {
+      console.warn(
+        `[glossary] ${rpcName} ${context} attempt ${attempt}/${MAX_ATTEMPTS} threw:`,
+        err instanceof Error ? err.message : String(err),
+      );
+    }
+    if (attempt < MAX_ATTEMPTS) {
+      await sleep(2 ** (attempt - 1) * 1000);
+    }
+  }
+  return [];
+}
+
+/**
  * Récupère tous les ingrédients commençant par une lettre via la RPC
  * `cosme_check_list_ingredients_by_letter` (retourne JSONB pour contourner
  * le cap PostgREST). Retourne [] en cas d'erreur, jamais null.
@@ -37,54 +93,22 @@ export function letterLabel(letter: GlossaryLetter): string {
 export async function fetchIngredientsByLetter(
   letter: GlossaryLetter,
 ): Promise<IngredientListItem[]> {
-  try {
-    const { data, error } = await supabaseAnon().rpc(
-      "cosme_check_list_ingredients_by_letter",
-      { p_letter: letter },
-    );
-    if (error) {
-      console.warn("[glossary] RPC by_letter failed:", error.message);
-      return [];
-    }
-    if (!Array.isArray(data)) return [];
-    return data.filter(
-      (it): it is IngredientListItem =>
-        typeof it === "object" &&
-        it !== null &&
-        typeof (it as Record<string, unknown>).slug === "string" &&
-        typeof (it as Record<string, unknown>).name === "string",
-    );
-  } catch (err) {
-    console.warn("[glossary] RPC by_letter threw:", err);
-    return [];
-  }
+  return rpcWithRetry(
+    "cosme_check_list_ingredients_by_letter",
+    { p_letter: letter },
+    `letter=${letter}`,
+  );
 }
 
 /** Récupère tous les ingrédients portant un tag donné (silicone, paraben...). */
 export async function fetchIngredientsByTag(
   tag: string,
 ): Promise<IngredientListItem[]> {
-  try {
-    const { data, error } = await supabaseAnon().rpc(
-      "cosme_check_list_ingredients_by_tag",
-      { p_tag: tag },
-    );
-    if (error) {
-      console.warn("[glossary] RPC by_tag failed:", error.message);
-      return [];
-    }
-    if (!Array.isArray(data)) return [];
-    return data.filter(
-      (it): it is IngredientListItem =>
-        typeof it === "object" &&
-        it !== null &&
-        typeof (it as Record<string, unknown>).slug === "string" &&
-        typeof (it as Record<string, unknown>).name === "string",
-    );
-  } catch (err) {
-    console.warn("[glossary] RPC by_tag threw:", err);
-    return [];
-  }
+  return rpcWithRetry(
+    "cosme_check_list_ingredients_by_tag",
+    { p_tag: tag },
+    `tag=${tag}`,
+  );
 }
 
 // ===========================================================================

@@ -21,12 +21,15 @@ type Props = {
 };
 
 /**
- * Pré-rend les 27 pages de lettre au build. Chaque page est ISR avec
- * `revalidate = 86400` (24 h) — si la base évolue, la page se met à jour
- * sans rebuild complet.
+ * Pas de pré-rendu au build : générer 27 lettres en parallèle déclenchait le
+ * rate-limit Cloudflare devant Supabase (l'IP du worker Vercel se prenait des
+ * pages de challenge HTML au lieu du JSON, et le build crashait sur une
+ * lettre au hasard). On laisse Next.js générer chaque page à la demande au
+ * premier hit, puis le cache ISR de 7 jours (`revalidate` ci-dessus) absorbe
+ * tous les hits suivants — y compris les crawlers SEO.
  */
-export function generateStaticParams() {
-  return GLOSSARY_LETTERS.map((letter) => ({ lettre: letter.toLowerCase() }));
+export function generateStaticParams(): { lettre: string }[] {
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

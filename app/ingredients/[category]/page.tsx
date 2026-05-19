@@ -20,8 +20,14 @@ type Props = {
   params: Promise<{ category: string }>;
 };
 
-export function generateStaticParams() {
-  return CATEGORIES.map((c) => ({ category: c.slug }));
+/**
+ * Pas de pré-rendu au build : voir `app/glossaire/[lettre]/page.tsx` pour le
+ * détail (rate-limit Cloudflare devant Supabase lorsque le worker Vercel
+ * pré-rend 27 lettres + 13 catégories en rafale). ISR 7 j prend le relais
+ * dès le premier hit, donc SEO et perf utilisateur restent intacts.
+ */
+export function generateStaticParams(): { category: string }[] {
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
