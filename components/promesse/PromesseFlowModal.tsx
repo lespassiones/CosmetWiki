@@ -7,7 +7,7 @@ import { apiFetch } from "@/lib/clientApi";
 import type { IdentifyCandidate, IdentifyResponse } from "@/app/api/promesse/identify/route";
 import type { FetchDescriptionResponse } from "@/app/api/promesse/fetch-description/route";
 
-type Step = "identifying" | "pickCandidate" | "fetchingDescription" | "manualPromise" | "redirecting" | "error";
+type Step = "identifying" | "pickCandidate" | "fetchingDescription" | "manualPromise" | "runningCoherence" | "redirecting" | "error";
 
 const MIN_MANUAL_DESC = 30;
 const MAX_MANUAL_DESC = 4000;
@@ -135,7 +135,7 @@ export function PromesseFlowModal({
         setStep("manualPromise");
         return;
       }
-      jumpToWizard(data.description);
+      await runCoherenceOrFallback(data.description);
     } catch (err) {
       setError((err as Error).message ?? "Erreur réseau");
       setStep("error");
@@ -148,7 +148,47 @@ export function PromesseFlowModal({
       setError(`Décris la promesse en au moins ${MIN_MANUAL_DESC} caractères.`);
       return;
     }
-    jumpToWizard(desc);
+    void runCoherenceOrFallback(desc);
+  }
+
+  /** Launches /api/coherence directly when we already have an analysisId so
+   *  the user lands on the result without walking through the wizard's
+   *  Description → Produit → Vérification steps. Falls back to the wizard
+   *  pre-fill flow only when no analysisId is available (edge case). */
+  async function runCoherenceOrFallback(description: string) {
+    const desc = description.slice(0, MAX_MANUAL_DESC).trim();
+    if (!analysisId) {
+      jumpToWizard(desc);
+      return;
+    }
+    setStep("runningCoherence");
+    setError(null);
+    try {
+      const r = await apiFetch("/api/coherence", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ analysis_id: analysisId, description: desc }),
+      });
+      if (!r.ok) {
+        const j = (await r.json().catch(() => ({}))) as {
+          error?: string;
+          credits?: { used?: number; limit?: number; remaining?: number };
+        };
+        if (r.status === 429 && j?.credits) {
+          onClose();
+          return;
+        }
+        setError(j.error ?? `Erreur ${r.status}`);
+        setStep("error");
+        return;
+      }
+      const data = (await r.json()) as { id: string };
+      setStep("redirecting");
+      router.push(`/promesses/${data.id}`);
+    } catch (err) {
+      setError((err as Error).message ?? "Erreur réseau");
+      setStep("error");
+    }
   }
 
   function jumpToWizard(description: string) {
@@ -199,6 +239,10 @@ export function PromesseFlowModal({
 
           {step === "fetchingDescription" && (
             <Loader headline="Récupération de la promesse…" subline="On lit la fiche officielle pour extraire les claims marketing." />
+          )}
+
+          {step === "runningCoherence" && (
+            <Loader headline="Analyse de cohérence en cours…" subline="On compare les promesses marketing à ce qu'il y a vraiment dans la formule." />
           )}
 
           {step === "pickCandidate" && (
