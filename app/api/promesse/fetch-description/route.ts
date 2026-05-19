@@ -24,6 +24,23 @@ function normForCache(s: string | undefined | null): string {
   return (s ?? "").trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+// Some web-search responses end with a markdown citation like
+// "([example.com](https://example.com/...))" or "[source](https://...)" even
+// when the prompt says no markdown. We don't want to surface that URL in the
+// description shown to the user, so we strip trailing citations (possibly
+// stacked) before persisting / returning.
+function stripTrailingCitations(text: string): string {
+  let cleaned = text.trimEnd();
+  for (let i = 0; i < 4; i++) {
+    const next = cleaned
+      .replace(/\s*\(?\s*\[[^\]]+\]\(https?:\/\/[^)\s]+\)\s*\)?\s*\.?\s*$/u, "")
+      .trimEnd();
+    if (next === cleaned) break;
+    cleaned = next;
+  }
+  return cleaned;
+}
+
 function descriptionCacheKey(input: {
   sourceUrl: string;
   candidateName: string;
@@ -177,7 +194,8 @@ Cherche la promesse marketing officielle (claims, bénéfices, actifs mis en ava
 
   if (cachedDesc) {
     // Cache hit - skip the LLM call entirely, reuse the cached payload.
-    description = cachedDesc.description;
+    // Older cache entries may still embed a trailing citation, strip it here.
+    description = stripTrailingCitations(cachedDesc.description);
     finalUrl = cachedDesc.sourceUrl;
   } else {
     try {
@@ -189,7 +207,7 @@ Cherche la promesse marketing officielle (claims, bénéfices, actifs mis en ava
       } else if (parsed.notFound === true || !parsed.description) {
         notFoundReason = parsed.reason ?? "pas_de_description";
       } else {
-        description = parsed.description.trim().slice(0, MAX_DESC_LEN);
+        description = stripTrailingCitations(parsed.description.trim()).slice(0, MAX_DESC_LEN);
         if (description.length < MIN_DESC_LEN) {
           notFoundReason = "description_trop_courte";
           description = "";
