@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { getProfile, getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { isProfileComplete, readSkinProfile, SKIN_CONCERN_LABEL, SKIN_TYPE_LABEL } from "@/lib/skin/profile";
-import { AdvisorOnboarding } from "@/components/advisor/AdvisorOnboarding";
+import { BeautyProfileForm } from "@/components/profile/BeautyProfileForm";
 import { AdvisorChat } from "@/components/advisor/AdvisorChat";
 import { GLASS_CARD, GLASS_CARD_ROSE } from "@/lib/ui/glass";
 
@@ -38,11 +38,12 @@ export default async function AdvisorPage() {
 
       {!complete ? (
         <section className={`${GLASS_CARD} p-5 lg:p-7`}>
-          <h2 className="text-lg font-semibold mb-1">Crée ton profil en 3 questions</h2>
+          <h2 className="text-lg font-semibold mb-1">Complète ton profil beauté</h2>
           <p className="text-sm text-[#6B7280] mb-6">
-            On utilise ces réponses pour adapter les conseils à ta peau. Tu peux les modifier à tout moment.
+            Type de peau, préoccupations, cheveux, allergies — on utilise ces
+            informations pour adapter les conseils. Tu peux modifier à tout moment.
           </p>
-          <AdvisorOnboarding initial={skin} />
+          <BeautyProfileForm initial={skin} showCancel={false} />
         </section>
       ) : (
         <>
@@ -58,7 +59,7 @@ export default async function AdvisorPage() {
             <details className="text-[12px]">
               <summary className="cursor-pointer text-[#F43F5E] hover:underline">Modifier</summary>
               <div className="mt-4">
-                <AdvisorOnboarding initial={skin} />
+                <BeautyProfileForm initial={skin} showCancel={false} />
               </div>
             </details>
           </section>
