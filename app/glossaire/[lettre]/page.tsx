@@ -13,8 +13,13 @@ import {
 } from "@/lib/glossary";
 import { SITE_URL } from "@/lib/siteUrl";
 
-// 7 jours — la liste des ingrédients par lettre ne change quasiment jamais.
-export const revalidate = 604800;
+// Forcé dynamique : la fonction `fetchIngredientsByLetter` utilise un
+// timeout via `Promise.race` qui laisse le fetch Supabase en cours d'exécution
+// quand il déborde — Next.js détecte ça comme dynamique et refuse le cache
+// ISR avec `DYNAMIC_SERVER_USAGE`. Le compromis : on accepte un fetch par
+// hit (sous-protégé par retry/timeout). Pour reprotéger sous charge, on
+// pourra ajouter un cache CDN via Cache-Control quand Supabase sera stable.
+export const dynamic = "force-dynamic";
 
 type Props = {
   params: Promise<{ lettre: string }>;

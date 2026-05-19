@@ -12,9 +12,9 @@ import {
 } from "@/lib/glossary";
 import { SITE_URL } from "@/lib/siteUrl";
 
-// 7 jours — la composition d'une catégorie (silicones, parabens...) ne
-// bouge que lors d'ajouts en base, événement rare.
-export const revalidate = 604800;
+// Forcé dynamique : voir `app/glossaire/[lettre]/page.tsx` pour le détail
+// (Promise.race timeout + ISR cache incompatible → DYNAMIC_SERVER_USAGE).
+export const dynamic = "force-dynamic";
 
 type Props = {
   params: Promise<{ category: string }>;
