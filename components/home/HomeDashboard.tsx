@@ -176,7 +176,7 @@ export function HomeDashboard({
                 alt=""
                 width={327}
                 height={400}
-                className="absolute bottom-0 left-1 h-[100%] w-auto object-contain object-bottom drop-shadow-[0_6px_18px_rgba(0,0,0,0.28)]"
+                className="absolute bottom-0 left-1 h-[100%] lg:h-[108%] lg:translate-y-3 w-auto object-contain object-bottom drop-shadow-[0_6px_18px_rgba(0,0,0,0.28)]"
               />
             </div>
 
