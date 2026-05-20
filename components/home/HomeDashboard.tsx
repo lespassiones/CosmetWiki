@@ -182,10 +182,10 @@ export function HomeDashboard({
 
             {/* Texte */}
             <div className="flex-1 min-w-0 py-3 pl-3 pr-2">
-              <div className="text-[13px] font-bold text-white tracking-tight leading-tight">
+              <div className="text-[15px] lg:text-[16px] font-bold text-white tracking-tight leading-tight">
                 Beauty Advisor <span aria-hidden>✨</span>
               </div>
-              <p className="text-[11px] text-white/80 mt-1 leading-snug">
+              <p className="text-[11px] lg:text-[13px] text-white/80 mt-1 leading-snug">
                 Pose tes questions sur ta routine.
                 L&apos;assistant t&apos;appuie sur ton profil et tes analyses.
               </p>
@@ -235,10 +235,10 @@ export function HomeDashboard({
 
             {/* Texte */}
             <div className="flex-1 min-w-0 py-4 pl-5 pr-4">
-              <span className="inline-block rounded-full bg-emerald-600/15 text-emerald-700 text-[10px] font-semibold uppercase tracking-wide px-2.5 py-0.5 mb-2">
+              <span className="inline-block whitespace-nowrap rounded-full bg-emerald-600/15 text-emerald-700 text-[11px] lg:text-[13px] font-semibold uppercase tracking-wide px-2.5 py-0.5 mb-2">
                 Promesses vs Formule
               </span>
-              <p className="text-[11px] text-[#3a5a3a]/80 leading-snug text-justify hyphens-auto">
+              <p className="text-[11px] lg:text-[13px] text-[#3a5a3a]/80 leading-snug">
                 Vérifie si la description marketing d&apos;un produit correspond vraiment à sa composition INCI.
               </p>
             </div>
