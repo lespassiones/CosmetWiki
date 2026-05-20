@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { GLASS_CARD_ROSE } from "@/lib/ui/glass";
+import { GLASS_CARD_VIOLET } from "@/lib/ui/glass";
 
 const AUTO_ROTATE_MS = 10_000;
 const SWIPE_THRESHOLD_PX = 40;
@@ -53,35 +54,40 @@ export function TipCarousel({ tips }: { tips: string[] }) {
 
   return (
     <div
-      className={`mt-4 ${GLASS_CARD_ROSE} p-4 lg:p-5 select-none`}
+      className={`mt-4 ${GLASS_CARD_VIOLET} p-4 lg:p-5 select-none`}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      <div className="flex items-start gap-3">
-        <div className="text-xl shrink-0" aria-hidden>💡</div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-[11px] uppercase tracking-wide text-[#F43F5E] font-semibold">Astuce du jour</div>
-            <div className="text-[10px] text-[#9F1239]/70 tabular-nums">{index + 1} / {total}</div>
-          </div>
-          <div className="relative mt-1 overflow-hidden min-h-[2.5em]">
-            {tips.map((tip, i) => (
-              <p
-                key={i}
-                aria-hidden={i !== index}
-                className={`text-sm text-[#111111] leading-relaxed transition-all duration-500 ${
-                  i === index
-                    ? "relative opacity-100 translate-x-0"
-                    : "absolute inset-0 opacity-0 pointer-events-none translate-x-2"
-                }`}
-              >
-                {tip}
-              </p>
-            ))}
-          </div>
+      <div className="flex items-center gap-3">
+        <div className="text-sm uppercase tracking-wide text-violet-600 font-bold flex-1">Astuce du jour</div>
+        <div className="text-[10px] text-violet-700/70 tabular-nums">{index + 1} / {total}</div>
+      </div>
+
+      <div className="mt-2 flex items-center gap-3">
+        <div className="relative flex-1 min-w-0 overflow-hidden min-h-[3.5em]">
+          {tips.map((tip, i) => (
+            <p
+              key={i}
+              aria-hidden={i !== index}
+              className={`text-[13px] text-[#111111] leading-snug text-justify hyphens-auto transition-all duration-500 ${
+                i === index
+                  ? "relative opacity-100 translate-x-0"
+                  : "absolute inset-0 opacity-0 pointer-events-none translate-x-2"
+              }`}
+            >
+              {tip}
+            </p>
+          ))}
         </div>
+        <Image
+          src="/image/petiteImage/potion.webp"
+          alt=""
+          width={72}
+          height={72}
+          className="shrink-0 h-16 w-16 object-contain drop-shadow-[0_6px_12px_rgba(124,58,237,0.25)]"
+        />
       </div>
 
       {total > 1 && (
@@ -90,9 +96,9 @@ export function TipCarousel({ tips }: { tips: string[] }) {
             type="button"
             onClick={() => go(index - 1)}
             aria-label="Astuce précédente"
-            className="h-7 w-7 rounded-full bg-white/70 ring-1 ring-rose-200/70 text-rose-600 hover:bg-white transition flex items-center justify-center"
+            className="h-6 w-6 rounded-full bg-white/70 ring-1 ring-violet-200/70 text-violet-600 hover:bg-white transition flex items-center justify-center"
           >
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden>
+            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden>
               <path d="m15 6-6 6 6 6" />
             </svg>
           </button>
@@ -104,22 +110,22 @@ export function TipCarousel({ tips }: { tips: string[] }) {
                 onClick={() => go(i)}
                 aria-label={`Voir astuce ${i + 1}`}
                 aria-current={i === index}
-                className={`h-1.5 rounded-full transition-all ${
+                className={`h-1 rounded-full transition-all ${
                   i === index
-                    ? "w-5 bg-rose-500"
-                    : "w-1.5 bg-rose-300/70 hover:bg-rose-400"
+                    ? "w-4 bg-violet-500"
+                    : "w-1 bg-violet-300/70 hover:bg-violet-400"
                 }`}
               />
             ))}
-            {total > 8 && <span className="text-[10px] text-rose-400/80 ml-1">…</span>}
+            {total > 8 && <span className="text-[10px] text-violet-400/80 ml-1">…</span>}
           </div>
           <button
             type="button"
             onClick={() => go(index + 1)}
             aria-label="Astuce suivante"
-            className="h-7 w-7 rounded-full bg-white/70 ring-1 ring-rose-200/70 text-rose-600 hover:bg-white transition flex items-center justify-center"
+            className="h-6 w-6 rounded-full bg-white/70 ring-1 ring-violet-200/70 text-violet-600 hover:bg-white transition flex items-center justify-center"
           >
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden>
+            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden>
               <path d="m9 6 6 6-6 6" />
             </svg>
           </button>

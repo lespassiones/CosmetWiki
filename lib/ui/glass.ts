@@ -11,11 +11,11 @@
 
 /** Big surface - dashboard cards, panels, modal containers. */
 export const GLASS_CARD =
-  "rounded-3xl bg-white/70 ring-1 ring-black/[0.06] backdrop-blur-2xl backdrop-saturate-150 shadow-[0_2px_6px_-2px_rgba(15,23,42,0.06),0_24px_52px_-14px_rgba(15,23,42,0.20),inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-1px_0_rgba(15,23,42,0.04)]";
+  "rounded-3xl bg-white/70 ring-1 ring-black/[0.06] backdrop-blur-2xl backdrop-saturate-150 shadow-[0_4px_10px_-2px_rgba(15,23,42,0.08),0_32px_64px_-16px_rgba(15,23,42,0.30),inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-1px_0_rgba(15,23,42,0.04)]";
 
 /** Append to GLASS_CARD when the surface is interactive (Link/button). */
 export const GLASS_CARD_HOVER =
-  "hover:bg-white/80 hover:shadow-[0_4px_10px_-2px_rgba(15,23,42,0.08),0_30px_60px_-16px_rgba(15,23,42,0.24),inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-1px_0_rgba(15,23,42,0.05)] transition";
+  "hover:bg-white/80 hover:shadow-[0_6px_14px_-2px_rgba(15,23,42,0.10),0_38px_72px_-18px_rgba(15,23,42,0.34),inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-1px_0_rgba(15,23,42,0.05)] transition";
 
 /**
  * Pill-shaped list card - softer corners (closer to a pill), translucent
@@ -55,3 +55,6 @@ export const GLASS_CARD_EMERALD =
 
 export const GLASS_CARD_ORANGE =
   "rounded-3xl bg-gradient-to-br from-orange-100/80 to-orange-50/70 ring-1 ring-orange-200/70 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_18px_48px_-16px_rgba(234,88,12,0.18),inset_0_1px_0_rgba(255,255,255,0.85),inset_0_-1px_0_rgba(15,23,42,0.04)]";
+
+export const GLASS_CARD_VIOLET =
+  "rounded-3xl bg-gradient-to-br from-violet-100/80 to-violet-50/70 ring-1 ring-violet-200/70 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_4px_10px_-2px_rgba(124,58,237,0.10),0_28px_60px_-16px_rgba(124,58,237,0.30),inset_0_1px_0_rgba(255,255,255,0.9),inset_0_-1px_0_rgba(15,23,42,0.04)]";
