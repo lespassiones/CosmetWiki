@@ -218,17 +218,39 @@ export function HomeDashboard({
 
         <Link
           href="/promesses"
-          className={`block ${GLASS_CARD_DARK} p-5 transition group`}
+          className="block rounded-3xl overflow-hidden transition group relative"
+          style={{ background: "linear-gradient(135deg, #D6F5D6 0%, #E8FAE8 50%, #C8F0C8 100%)" }}
         >
-          <div className="flex items-center gap-4">
-            <span aria-hidden className="text-2xl">🔍</span>
-            <div className="flex-1">
-              <div className="text-[15px] font-semibold">Promesses vs Formule</div>
-              <p className="text-[12px] text-white/70 mt-1 leading-snug">
+          <div className="flex items-stretch">
+            {/* Illustration */}
+            <div className="relative w-[110px] shrink-0">
+              <Image
+                src="/image/petiteImage/promesse.webp"
+                alt=""
+                width={248}
+                height={202}
+                className="absolute top-1/2 -translate-y-1/2 left-2 h-[90%] w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,100,0,0.15)]"
+              />
+            </div>
+
+            {/* Texte */}
+            <div className="flex-1 min-w-0 py-4 pl-5 pr-4">
+              <span className="inline-block rounded-full bg-emerald-600/15 text-emerald-700 text-[10px] font-semibold uppercase tracking-wide px-2.5 py-0.5 mb-2">
+                Promesses vs Formule
+              </span>
+              <p className="text-[11px] text-[#3a5a3a]/80 leading-snug text-justify hyphens-auto">
                 Vérifie si la description marketing d&apos;un produit correspond vraiment à sa composition INCI.
               </p>
             </div>
-            <span aria-hidden className="opacity-60 group-hover:translate-x-1 transition">→</span>
+
+            {/* Flèche */}
+            <div className="flex items-center pr-4 shrink-0">
+              <div className="h-8 w-8 rounded-full bg-white/80 ring-1 ring-emerald-200 flex items-center justify-center text-emerald-700 group-hover:translate-x-0.5 transition shadow-sm">
+                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden>
+                  <path d="m9 6 6 6-6 6" />
+                </svg>
+              </div>
+            </div>
           </div>
         </Link>
       </div>
