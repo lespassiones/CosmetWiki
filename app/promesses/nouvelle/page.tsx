@@ -3,7 +3,6 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
-import { GLASS_CARD, GLASS_PILL_DARK } from "@/lib/ui/glass";
 import { CoherenceWizard, type AnalysisOption } from "@/components/coherence/CoherenceWizard";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
@@ -99,27 +98,13 @@ export default async function NouvellePromessePage({
         On compare ce qui est promis sur l&apos;emballage avec ce qui est vraiment dans la liste INCI.
       </p>
 
-      {options.length === 0 ? (
-        <article className={`${GLASS_CARD} p-6 mt-6 text-center`}>
-          <p className="text-[14px] text-[#6B7280] mb-4">
-            Tu n&apos;as encore aucune analyse INCI sauvegardée. Lance d&apos;abord une analyse de produit, puis reviens ici.
-          </p>
-          <Link
-            href="/"
-            className={`${GLASS_PILL_DARK} inline-block px-5 py-2.5 text-sm font-semibold`}
-          >
-            Analyser un produit
-          </Link>
-        </article>
-      ) : (
-        <div className="mt-6">
-          <CoherenceWizard
-            options={options}
-            initialAnalysisId={initialAnalysisId}
-            initialDescription={initialDescription}
-          />
-        </div>
-      )}
+      <div className="mt-6">
+        <CoherenceWizard
+          options={options}
+          initialAnalysisId={initialAnalysisId}
+          initialDescription={initialDescription}
+        />
+      </div>
     </div>
   );
 }

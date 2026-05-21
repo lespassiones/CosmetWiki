@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { AnalyseItem, AnalyseResponse, Observation } from "@/lib/analyseTypes";
+import { recomputeThresholdContext, type AnalyseItem, type AnalyseResponse, type Observation } from "@/lib/analyseTypes";
 import type { ColorRating } from "@/lib/supabase";
 import { Reveal } from "./Reveal";
 import { IngredientSpectrum } from "./analyse/IngredientSpectrum";
@@ -1326,8 +1326,13 @@ function ItemsTable({
   const [mobileExpanded, setMobileExpanded] = useState(false);
   const [desktopExpanded, setDesktopExpanded] = useState(false);
 
+  // Recompute on read so analyses saved before the ≤1 % rule change (parfum
+  // is now the preferred reference, not the first preservative) are still
+  // displayed with the current logic - no DB migration needed.
+  const normalizedItems = useMemo(() => recomputeThresholdContext(items), [items]);
+
   const filtered = useMemo(() => {
-    let out = items;
+    let out = normalizedItems;
     if (filter !== "all") {
       if (filter === "unknown") out = out.filter((i) => i.colorRating === null);
       else out = out.filter((i) => i.colorRating === filter);
@@ -1342,7 +1347,7 @@ function ItemsTable({
       );
     }
     return out;
-  }, [items, filter, search]);
+  }, [normalizedItems, filter, search]);
 
   const tabs: { key: typeof filter; label: string; count: number }[] = [
     { key: "all", label: "Tous", count: counts.total },
@@ -1462,25 +1467,29 @@ function ItemsTable({
                   <td className={cellPad}>
                     <ColorChip rating={i.colorRating} />
                     {/*
-                      "≤ 1 %" badge - only when the ingredient sits *after* the
-                      first preservative in the list. In INCI regulation,
-                      preservatives are required at ≤1 % and the list is ordered
-                      by descending concentration above 1 %, so anything past
-                      the first preservative is necessarily ≤1 %. We deliberately
-                      DO NOT show this badge after the first fragrance because
-                      some brands (EDT, body sprays, etc.) put 2-3 % of parfum,
-                      so "after parfum" doesn't imply ≤1 %.
+                      "≤ 1 %" badge - shown when the ingredient sits *after* the
+                      first fragrance (preferred reference for cosmetic
+                      products like creams, lotions, shampoos where parfum is
+                      dosed below 1 %). Falls back to "after preservative" only
+                      when the formula has no fragrance at all - the engine
+                      picks one reference, never both.
                     */}
-                    {i.thresholdContext === "after_preservative" ? (
+                    {i.thresholdContext === "after_fragrance"
+                    || i.thresholdContext === "after_preservative" ? (
                       <Tooltip
                         maxWidth={280}
                         content={
                           <>
-                            Cet ingrédient apparaît <b>après le premier
-                            conservateur</b> dans la liste INCI. Sa
-                            concentration est donc <b>≤ 1 %</b> - il est peu
-                            probable qu&apos;il soit l&apos;élément principal
-                            responsable de l&apos;efficacité du produit.
+                            Cet ingrédient apparaît{" "}
+                            <b>
+                              {i.thresholdContext === "after_fragrance"
+                                ? "après le premier parfum"
+                                : "après le premier conservateur"}
+                            </b>{" "}
+                            dans la liste INCI. Sa concentration est donc{" "}
+                            <b>≤ 1 %</b> - il est peu probable qu&apos;il soit
+                            l&apos;élément principal responsable de
+                            l&apos;efficacité du produit.
                           </>
                         }
                       >

@@ -33,6 +33,58 @@ export type AnalyseItem = {
   thresholdLabel: string | null;
 };
 
+/**
+ * Recompute `thresholdContext` + `thresholdLabel` on each item using the
+ * current ≤1 % rule (prefer fragrance, fall back to preservative). Lets
+ * analyses persisted in `cosme_check.analyses.result_json` reflect rule
+ * changes without a data migration. Mirrors the logic in
+ * `app/api/analyser/route.ts` — keep them in sync.
+ */
+const FRAGRANCE_NAMES = new Set(["PARFUM", "FRAGRANCE", "AROMA", "FLAVOR"]);
+
+export function recomputeThresholdContext(items: AnalyseItem[]): AnalyseItem[] {
+  const firstFragranceIdx = items.findIndex(
+    (it) =>
+      (it.name && FRAGRANCE_NAMES.has(it.name.toUpperCase()))
+      || (it.tags?.includes("parfum-synthese") ?? false),
+  );
+  const firstPreservativeIdx = items.findIndex(
+    (it) => it.tags?.includes("conservateur") ?? false,
+  );
+
+  let referenceIdx: number;
+  let kind: "fragrance" | "preservative" | null;
+  if (firstFragranceIdx >= 0) {
+    referenceIdx = firstFragranceIdx;
+    kind = "fragrance";
+  } else if (firstPreservativeIdx >= 0) {
+    referenceIdx = firstPreservativeIdx;
+    kind = "preservative";
+  } else {
+    referenceIdx = -1;
+    kind = null;
+  }
+
+  return items.map((it, idx) => {
+    if (referenceIdx < 0 || !kind || idx === referenceIdx) {
+      return { ...it, thresholdContext: null, thresholdLabel: null };
+    }
+    const before = idx < referenceIdx;
+    if (kind === "fragrance") {
+      return {
+        ...it,
+        thresholdContext: before ? "before_fragrance" : "after_fragrance",
+        thresholdLabel: before ? "avant parfum" : "après parfum",
+      };
+    }
+    return {
+      ...it,
+      thresholdContext: before ? "before_preservative" : "after_preservative",
+      thresholdLabel: before ? "avant conservateur" : "après conservateur",
+    };
+  });
+}
+
 export type Observation = {
   tag: string;
   label: string;

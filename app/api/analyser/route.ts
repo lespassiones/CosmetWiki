@@ -482,15 +482,22 @@ export async function POST(req: NextRequest) {
   const firstPreservativeIdx = byPosition.findIndex(
     (r) => r.effective_tags?.includes("conservateur") ?? false,
   );
-  // We pick the earliest threshold as the reference (most informative).
-  const validIdx = [firstFragranceIdx, firstPreservativeIdx].filter((i) => i >= 0);
-  const earliestThresholdIdx = validIdx.length ? Math.min(...validIdx) : -1;
-  const thresholdKind: "fragrance" | "preservative" | null =
-    earliestThresholdIdx < 0
-      ? null
-      : earliestThresholdIdx === firstFragranceIdx
-        ? "fragrance"
-        : "preservative";
+  // Prefer fragrance as the ≤1 % reference (standard cosmetic convention for
+  // creams, shampoos, lotions: parfum is dosed below 1 % so anything after it
+  // is necessarily in trace). Fall back to the first preservative when the
+  // formula lists no fragrance at all.
+  let earliestThresholdIdx: number;
+  let thresholdKind: "fragrance" | "preservative" | null;
+  if (firstFragranceIdx >= 0) {
+    earliestThresholdIdx = firstFragranceIdx;
+    thresholdKind = "fragrance";
+  } else if (firstPreservativeIdx >= 0) {
+    earliestThresholdIdx = firstPreservativeIdx;
+    thresholdKind = "preservative";
+  } else {
+    earliestThresholdIdx = -1;
+    thresholdKind = null;
+  }
 
   function thresholdFor(positionIdx: number): {
     context: ThresholdContext;

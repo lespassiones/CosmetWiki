@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GLASS_CARD, GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
 import { apiFetch } from "@/lib/clientApi";
+import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 export type AnalysisOption = {
   id: string;
@@ -18,8 +19,15 @@ export type AnalysisOption = {
 
 type Step = "description" | "pickProduct" | "confirm" | "running";
 
+/** On the "Produit" step, the user can either pick an existing analyse from
+ *  their history or paste a fresh INCI list (which will be analysed on the
+ *  fly via /api/analyser and added to history). */
+type PickMode = "history" | "paste";
+
 const MIN_DESCRIPTION = 30;
 const MAX_DESCRIPTION = 6000;
+const MIN_INCI = 20;
+const MAX_INCI = 12000;
 
 // Ordered list used to compute "is the user allowed to jump back/forward to
 // this step?". `running` isn't included - it's a transient state during the
@@ -69,9 +77,23 @@ export function CoherenceWizard({
   const [selectedId, setSelectedId] = useState<string | null>(
     hasPrefilledAnalysis ? initialAnalysisId : null,
   );
+  // Paste-INCI branch: when the user pastes a list rather than picking from
+  // history, we run /api/analyser to materialise a real analyse row (also
+  // saved in their history) and keep it here so the "Vérification" step can
+  // display the same metadata as for picked-from-history options.
+  const [pickMode, setPickMode] = useState<PickMode>(
+    options.length === 0 ? "paste" : "history",
+  );
+  const [pastedOption, setPastedOption] = useState<AnalysisOption | null>(null);
+  const [pasteName, setPasteName] = useState("");
+  const [pasteInci, setPasteInci] = useState("");
+  const [analysing, setAnalysing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const selected = options.find((o) => o.id === selectedId) ?? null;
+  const selected =
+    pastedOption && pastedOption.id === selectedId
+      ? pastedOption
+      : options.find((o) => o.id === selectedId) ?? null;
 
   function advanceTo(target: Step) {
     setStep(target);
@@ -105,15 +127,84 @@ export function CoherenceWizard({
       return;
     }
     if (step === "pickProduct") {
-      if (!selected) {
-        setError("Choisis le produit à comparer.");
+      if (pickMode === "history") {
+        if (!selected) {
+          setError("Choisis le produit à comparer.");
+          return;
+        }
+        advanceTo("confirm");
         return;
       }
-      advanceTo("confirm");
+      // Paste mode: run /api/analyser to create a fresh analyse row, then
+      // promote it as the selected option for the confirm step.
+      void runPasteAnalysis();
       return;
     }
     if (step === "confirm") {
       void launch();
+    }
+  }
+
+  async function runPasteAnalysis() {
+    const inci = pasteInci.trim();
+    if (inci.length < MIN_INCI) {
+      setError(`Colle une liste INCI complète (au moins ${MIN_INCI} caractères).`);
+      return;
+    }
+    if (inci.length > MAX_INCI) {
+      setError(`Liste trop longue (max ${MAX_INCI} caractères).`);
+      return;
+    }
+    const label = pasteName.trim().slice(0, 200);
+    setAnalysing(true);
+    setError(null);
+    try {
+      const r = await apiFetch("/api/analyser", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: inci,
+          ...(label ? { productLabel: label } : {}),
+        }),
+      });
+      if (!r.ok) {
+        const j = (await r.json().catch(() => ({}))) as { error?: string };
+        setError(j?.error ?? `Erreur ${r.status} lors de l'analyse INCI.`);
+        return;
+      }
+      const data = (await r.json()) as AnalyseResponse & { analysisId?: string | null };
+      const newId = typeof data.analysisId === "string" ? data.analysisId : null;
+      if (!newId) {
+        setError("L'analyse INCI a été produite mais n'a pas pu être sauvegardée.");
+        return;
+      }
+      const top3 = (data.items ?? [])
+        .slice()
+        .sort((a, b) => a.position - b.position)
+        .slice(0, 3)
+        .map((it) => it.name ?? it.input);
+      const opt: AnalysisOption = {
+        id: newId,
+        title: label || `Analyse du ${new Date().toLocaleDateString("fr-FR")}`,
+        score: typeof data.score === "number" ? data.score : null,
+        createdAt: new Date().toISOString(),
+        totalIngredients: data.counts?.total ?? 0,
+        matchedIngredients: data.counts?.matched ?? 0,
+        counts: {
+          vert: data.counts?.vert ?? 0,
+          jaune: data.counts?.jaune ?? 0,
+          orange: data.counts?.orange ?? 0,
+          rouge: data.counts?.rouge ?? 0,
+        },
+        top3,
+      };
+      setPastedOption(opt);
+      setSelectedId(newId);
+      advanceTo("confirm");
+    } catch (err) {
+      setError((err as Error).message ?? "Erreur réseau pendant l'analyse INCI.");
+    } finally {
+      setAnalysing(false);
     }
   }
 
@@ -183,48 +274,138 @@ export function CoherenceWizard({
         <article className={`${GLASS_CARD} p-5 lg:p-6 mt-6`}>
           <h2 className="text-[15px] font-semibold mb-1">2. Choisis le produit à comparer</h2>
           <p className="text-[12px] text-[#6B7280] mb-4">
-            Sélectionne l&apos;analyse INCI correspondant au produit dont tu as collé la description.
+            Sélectionne une analyse INCI déjà sauvegardée, ou colle la liste INCI d&apos;un produit non analysé.
           </p>
-          <ul className="space-y-2 max-h-[420px] overflow-auto pr-1">
-            {options.map((o) => {
-              const isSel = selectedId === o.id;
-              const date = new Date(o.createdAt).toLocaleDateString("fr-FR", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              });
-              return (
-                <li key={o.id}>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedId(o.id)}
-                    aria-pressed={isSel}
-                    className={`w-full text-left rounded-2xl ring-1 transition p-3 ${
-                      isSel
-                        ? "bg-rose-50 ring-rose-300"
-                        : "bg-white ring-[#E5E7EB] hover:ring-[#111111]"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-ink truncate">{o.title}</div>
-                        <div className="text-[12px] text-[#6B7280] mt-0.5">
-                          {o.matchedIngredients} / {o.totalIngredients} ingrédients · {date}
+
+          <div
+            role="tablist"
+            aria-label="Choix du produit"
+            className="mb-4 inline-flex rounded-full bg-[#F3F4F6] p-1 text-[12px] font-semibold"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={pickMode === "history" ? "true" : "false"}
+              onClick={() => {
+                setError(null);
+                setPickMode("history");
+              }}
+              disabled={options.length === 0}
+              className={`rounded-full px-3 py-1.5 transition ${
+                pickMode === "history"
+                  ? "bg-white text-ink shadow-sm"
+                  : "text-[#6B7280] hover:text-ink disabled:text-[#D1D5DB] disabled:hover:text-[#D1D5DB]"
+              }`}
+            >
+              Depuis l&apos;historique
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={pickMode === "paste" ? "true" : "false"}
+              onClick={() => {
+                setError(null);
+                setPickMode("paste");
+              }}
+              className={`rounded-full px-3 py-1.5 transition ${
+                pickMode === "paste"
+                  ? "bg-white text-ink shadow-sm"
+                  : "text-[#6B7280] hover:text-ink"
+              }`}
+            >
+              Coller une liste INCI
+            </button>
+          </div>
+
+          {pickMode === "history" && (
+            options.length === 0 ? (
+              <p className="text-[13px] text-[#6B7280]">
+                Tu n&apos;as encore aucune analyse INCI sauvegardée. Colle la liste INCI ci-dessous pour comparer.
+              </p>
+            ) : (
+              <ul className="space-y-2 max-h-[420px] overflow-auto pr-1">
+                {options.map((o) => {
+                  const isSel = selectedId === o.id;
+                  const date = new Date(o.createdAt).toLocaleDateString("fr-FR", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  });
+                  return (
+                    <li key={o.id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPastedOption(null);
+                          setSelectedId(o.id);
+                        }}
+                        aria-pressed={isSel ? "true" : "false"}
+                        className={`w-full text-left rounded-2xl ring-1 transition p-3 ${
+                          isSel
+                            ? "bg-rose-50 ring-rose-300"
+                            : "bg-white ring-[#E5E7EB] hover:ring-[#111111]"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="font-semibold text-ink truncate">{o.title}</div>
+                            <div className="text-[12px] text-[#6B7280] mt-0.5">
+                              {o.matchedIngredients} / {o.totalIngredients} ingrédients · {date}
+                            </div>
+                          </div>
+                          {isSel && (
+                            <span aria-hidden className="shrink-0 grid h-5 w-5 place-items-center rounded-full bg-rose-500 text-white">
+                              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+                                <path d="M5 12l5 5 9-12" />
+                              </svg>
+                            </span>
+                          )}
                         </div>
-                      </div>
-                      {isSel && (
-                        <span aria-hidden className="shrink-0 grid h-5 w-5 place-items-center rounded-full bg-rose-500 text-white">
-                          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
-                            <path d="M5 12l5 5 9-12" />
-                          </svg>
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )
+          )}
+
+          {pickMode === "paste" && (
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[12px] font-medium text-[#6B7280] mb-1" htmlFor="paste-name">
+                  Nom du produit <span className="text-[#9CA3AF]">(optionnel)</span>
+                </label>
+                <input
+                  id="paste-name"
+                  type="text"
+                  value={pasteName}
+                  onChange={(e) => setPasteName(e.target.value.slice(0, 200))}
+                  placeholder="Ex : Mon savon à froid lavande"
+                  className="w-full rounded-2xl bg-white ring-1 ring-[#E5E7EB] px-4 py-2.5 text-[13px] outline-none transition focus:ring-2 focus:ring-rose-300"
+                />
+              </div>
+              <div>
+                <label className="block text-[12px] font-medium text-[#6B7280] mb-1" htmlFor="paste-inci">
+                  Liste INCI
+                </label>
+                <textarea
+                  id="paste-inci"
+                  value={pasteInci}
+                  onChange={(e) => setPasteInci(e.target.value.slice(0, MAX_INCI))}
+                  rows={8}
+                  placeholder="Aqua, Sodium Olivate, Sodium Cocoate, Sodium Castorate, Glycerin, Lavandula Angustifolia Oil…"
+                  className="w-full rounded-2xl bg-white ring-1 ring-[#E5E7EB] px-4 py-3 text-[13px] outline-none transition focus:ring-2 focus:ring-rose-300"
+                />
+                <div className="mt-2 flex items-center justify-between text-[11px] text-[#9CA3AF]">
+                  <span>{pasteInci.trim().length} caractères</span>
+                  <span>min {MIN_INCI} · max {MAX_INCI}</span>
+                </div>
+              </div>
+              <p className="text-[11px] text-[#6B7280] bg-[#FFF7ED] ring-1 ring-amber-100 rounded-xl px-3 py-2 leading-snug">
+                Cette liste sera analysée puis ajoutée à ton historique. Coût total de l&apos;opération&nbsp;: 2 crédits (1 pour l&apos;analyse INCI + 1 pour la cohérence).
+              </p>
+            </div>
+          )}
         </article>
       )}
 
@@ -298,7 +479,8 @@ export function CoherenceWizard({
             <button
               type="button"
               onClick={back}
-              className={`${GLASS_PILL} px-4 py-2 text-[13px] font-semibold text-ink`}
+              disabled={analysing}
+              className={`${GLASS_PILL} px-4 py-2 text-[13px] font-semibold text-ink disabled:opacity-50`}
             >
               Retour
             </button>
@@ -308,9 +490,14 @@ export function CoherenceWizard({
           <button
             type="button"
             onClick={next}
-            className={`${GLASS_PILL_DARK} flex-1 px-4 py-2.5 text-[13px] font-semibold`}
+            disabled={analysing}
+            className={`${GLASS_PILL_DARK} flex-1 px-4 py-2.5 text-[13px] font-semibold disabled:opacity-60`}
           >
-            {step === "confirm" ? "Lancer l'analyse" : "Continuer"}
+            {analysing
+              ? "Analyse INCI en cours…"
+              : step === "confirm"
+                ? "Lancer l'analyse"
+                : "Continuer"}
           </button>
         </div>
       )}
