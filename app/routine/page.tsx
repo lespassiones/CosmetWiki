@@ -10,17 +10,11 @@ import { TagExposureBar } from "@/components/routine/TagExposureBar";
 import { AddProductButton } from "@/components/routine/AddProductButton";
 import { RoutineSimulationModal } from "@/components/routine/RoutineSimulationModal";
 import { InfoBadge, Tooltip } from "@/components/Tooltip";
+import { IngredientBlob } from "@/components/blob/IngredientBlob";
 import { GLASS_CARD, GLASS_CARD_AMBER, GLASS_CARD_ROSE } from "@/lib/ui/glass";
 
 export const metadata = { title: "Ma routine · Cosme Check" };
 export const dynamic = "force-dynamic";
-
-function exposureStroke(label: string): string {
-  if (label === "Faible") return "#10B981";
-  if (label === "Modérée") return "#F59E0B";
-  if (label === "Élevée") return "#FB923C";
-  return "#EF4444";
-}
 
 function exposureFg(label: string): string {
   if (label === "Faible") return "text-emerald-700";
@@ -59,35 +53,6 @@ function LeafAccent({ className = "" }: { className?: string }) {
         fill="none"
       />
     </svg>
-  );
-}
-
-function ExposureGauge({ score, stroke }: { score: number; stroke: string }) {
-  const radius = 50;
-  const arcLength = Math.PI * radius;
-  const filled = Math.max(0, Math.min(1, score / 20)) * arcLength;
-  const path = "M 10 64 A 50 50 0 0 1 110 64";
-  return (
-    <div className="relative h-[72px] w-[120px] shrink-0">
-      <svg viewBox="0 0 120 68" className="h-full w-full" aria-hidden>
-        <path d={path} fill="none" stroke="rgba(15,23,42,0.08)" strokeWidth="9" strokeLinecap="round" />
-        <path
-          d={path}
-          fill="none"
-          stroke={stroke}
-          strokeWidth="9"
-          strokeLinecap="round"
-          strokeDasharray={arcLength}
-          strokeDashoffset={arcLength - filled}
-        />
-      </svg>
-      <div className="absolute inset-x-0 bottom-0 flex items-baseline justify-center">
-        <span className="text-[22px] font-bold leading-none text-[#111111] tabular-nums">
-          {score.toFixed(1)}
-        </span>
-        <span className="ml-0.5 text-[11px] font-medium leading-none text-[#6B7280]">/20</span>
-      </div>
-    </div>
   );
 }
 
@@ -158,7 +123,6 @@ export default async function RoutinePage() {
     }));
 
   const metrics = computeRoutineMetrics(products);
-  const exposureStrokeColor = exposureStroke(metrics.exposureLabel);
   const exposureFgCls = exposureFg(metrics.exposureLabel);
 
   // Details for the "Produits pénalisants" tooltip.
@@ -248,7 +212,9 @@ export default async function RoutinePage() {
             </div>
             <div className={`mt-1 text-[12px] font-semibold ${exposureFgCls}`}>{metrics.exposureLabel}</div>
           </div>
-          <ExposureGauge score={metrics.exposureScore} stroke={exposureStrokeColor} />
+          <div className="w-[120px] shrink-0">
+            <IngredientBlob counts={metrics.colorCounts} variant="md" />
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3 lg:contents">

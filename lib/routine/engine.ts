@@ -44,6 +44,14 @@ export type RoutineMetrics = {
   totalUseUnits: number;        // sum of frequency weights
   /** Count of routine products whose own score falls in orange/rose band (< 13/20). */
   penalizingProductsCount: number;
+  /**
+   * Cumulative ingredient color distribution across the whole routine,
+   * weighted by use frequency (daily=1, weekly=1/7, monthly=1/30) - same
+   * weighting as the exposure score, so a daily product contributes more
+   * than a monthly one. Values are floats; only ratios are meaningful
+   * (used to drive the routine ingredient blob).
+   */
+  colorCounts: { vert: number; jaune: number; orange: number; rouge: number };
   tagExposure: { tag: string; label: string; cumulativeCount: number; colorSegments: { color: string; fraction: number }[] }[];
   topIngredients: {
     name: string;
@@ -127,6 +135,7 @@ export function computeRoutineMetrics(products: RoutineProduct[]): RoutineMetric
       exposureLabel: "Faible",
       totalUseUnits: 0,
       penalizingProductsCount: 0,
+      colorCounts: { vert: 0, jaune: 0, orange: 0, rouge: 0 },
       tagExposure: [],
       topIngredients: [],
       allergenOverlap: [],
@@ -352,11 +361,31 @@ export function computeRoutineMetrics(products: RoutineProduct[]): RoutineMetric
     (p) => typeof p.score === "number" && p.score < 13,
   ).length;
 
+  // Frequency-weighted ingredient colour distribution: each product's
+  // counts.{vert,jaune,orange,rouge} are multiplied by its FREQ_WEIGHT,
+  // so a daily product contributes 7× more than a weekly one - same
+  // weighting model as the exposure score.
+  const colorCounts = products.reduce(
+    (acc, p) => {
+      const w = FREQ_WEIGHT[p.frequency];
+      const c = p.result?.counts;
+      if (c) {
+        acc.vert += (c.vert ?? 0) * w;
+        acc.jaune += (c.jaune ?? 0) * w;
+        acc.orange += (c.orange ?? 0) * w;
+        acc.rouge += (c.rouge ?? 0) * w;
+      }
+      return acc;
+    },
+    { vert: 0, jaune: 0, orange: 0, rouge: 0 },
+  );
+
   return {
     exposureScore: Number(exposureScore.toFixed(1)),
     exposureLabel: exposureLabelFor(exposureScore),
     totalUseUnits: Number(totalUseUnits.toFixed(2)),
     penalizingProductsCount,
+    colorCounts,
     tagExposure,
     topIngredients,
     allergenOverlap,
