@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { getUser } from "@/lib/auth";
+import Link from "next/link";
+import { getProfile, getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { computeRoutineMetrics, type Frequency, type RoutineProduct } from "@/lib/routine/engine";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
@@ -8,10 +9,12 @@ import { RoutineProductRow } from "@/components/routine/RoutineProductRow";
 import { RoutineSuggestions } from "@/components/routine/RoutineSuggestions";
 import { TagExposureBar } from "@/components/routine/TagExposureBar";
 import { AddProductButton } from "@/components/routine/AddProductButton";
+import { RestrictionsLinkButton } from "@/components/routine/RestrictionsLinkButton";
 import { RoutineSimulationModal } from "@/components/routine/RoutineSimulationModal";
 import { InfoBadge, Tooltip } from "@/components/Tooltip";
 import { IngredientBlob } from "@/components/blob/IngredientBlob";
 import { GLASS_CARD, GLASS_CARD_AMBER, GLASS_CARD_ROSE } from "@/lib/ui/glass";
+import { readUserRestrictions } from "@/lib/restrictions/types";
 
 export const metadata = { title: "Ma routine · Cosme Check" };
 export const dynamic = "force-dynamic";
@@ -66,7 +69,7 @@ export default async function RoutinePage() {
   // + all analyses for the user. The second feeds the "Already scanned"
   // sub-modal of the AddProductButton - we trim out analyses already in the
   // routine so the user doesn't pick a duplicate.
-  const [routineRes, analysesRes] = await Promise.all([
+  const [routineRes, analysesRes, profile] = await Promise.all([
     sb
       .schema("cosme_check")
       .from("routine_items")
@@ -78,7 +81,11 @@ export default async function RoutinePage() {
       .select("id, name, product_label, score, created_at")
       .order("created_at", { ascending: false })
       .limit(50),
+    getProfile(),
   ]);
+
+  const restrictions = readUserRestrictions(profile?.preferences ?? null);
+  const restrictionsCount = restrictions.families.length + restrictions.ingredients.length;
 
   const items = (routineRes.data ?? []) as unknown as {
     id: string;
@@ -151,7 +158,10 @@ export default async function RoutinePage() {
               Ta routine est vide. Ajoute des produits pour voir ton exposition cumulée.
             </p>
           </div>
-          <AddProductButton eligibleAnalyses={eligibleAnalyses} />
+          <div className="flex items-center justify-between gap-2 flex-wrap w-full">
+            <AddProductButton eligibleAnalyses={eligibleAnalyses} />
+            <RestrictionsLinkButton count={restrictionsCount} />
+          </div>
         </header>
 
         <div className={`${GLASS_CARD_ROSE} p-8 text-center`}>
@@ -189,8 +199,9 @@ export default async function RoutinePage() {
             Suis l&apos;exposition cumulée de ta routine et repère les produits à ajuster.
           </p>
 
-          <div className="mt-4 lg:mt-0">
+          <div className="mt-4 lg:mt-0 flex items-center justify-between gap-2 flex-wrap w-full lg:w-auto">
             <AddProductButton eligibleAnalyses={eligibleAnalyses} />
+            <RestrictionsLinkButton count={restrictionsCount} />
           </div>
         </div>
       </header>

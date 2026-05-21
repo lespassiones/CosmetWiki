@@ -2,7 +2,13 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getProfile, getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
-import { isProfileComplete, readSkinProfile, SKIN_CONCERN_LABEL, SKIN_TYPE_LABEL } from "@/lib/skin/profile";
+import {
+  isProfileComplete,
+  readSkinProfile,
+  SKIN_CONCERN_LABEL,
+  SKIN_TYPE_BODY_LABEL,
+  SKIN_TYPE_FACE_LABEL,
+} from "@/lib/skin/profile";
 import { BeautyProfileForm } from "@/components/profile/BeautyProfileForm";
 import { AdvisorChat } from "@/components/advisor/AdvisorChat";
 import { GLASS_CARD, GLASS_CARD_ROSE } from "@/lib/ui/glass";
@@ -50,7 +56,21 @@ export default async function AdvisorPage() {
           <section className={`${GLASS_CARD_ROSE} p-4 mb-4 text-[13px] text-[#9F1239] flex items-start gap-3`}>
             <span aria-hidden className="text-base">🧬</span>
             <div className="flex-1 leading-relaxed">
-              <strong className="font-semibold">{SKIN_TYPE_LABEL[skin.skinType!]}</strong>
+              {(() => {
+                const face = skin.skinTypeFace
+                  ? SKIN_TYPE_FACE_LABEL[skin.skinTypeFace]
+                  : skin.otherSkinTypeFace;
+                const body = skin.skinTypeBody
+                  ? SKIN_TYPE_BODY_LABEL[skin.skinTypeBody]
+                  : skin.otherSkinTypeBody;
+                const parts = [
+                  face && `visage : ${face}`,
+                  body && `corps : ${body}`,
+                ].filter(Boolean);
+                return parts.length > 0 ? (
+                  <strong className="font-semibold">{parts.join(" · ")}</strong>
+                ) : null;
+              })()}
               {skin.concerns && skin.concerns.length > 0 && (
                 <> · {skin.concerns.map((c) => SKIN_CONCERN_LABEL[c]).join(", ")}</>
               )}

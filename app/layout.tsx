@@ -5,6 +5,9 @@ import { SITE_URL } from "@/lib/siteUrl";
 import { PWARegister } from "@/components/PWARegister";
 import { AppShell } from "@/components/nav/AppShell";
 import { getProfile, getUser } from "@/lib/auth";
+import { RestrictionsProvider } from "@/components/restrictions/RestrictionsProvider";
+import { loadIngredientFamilies } from "@/lib/restrictions/families";
+import { EMPTY_RESTRICTIONS, readUserRestrictions } from "@/lib/restrictions/types";
 import "./globals.css";
 
 // Self-host Inter on the Vercel edge: zero FOUT, no fonts.googleapis.com
@@ -110,6 +113,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // Hide the shell on full-screen flows that need their own chrome.
   const hideOnPaths = ["/auth", "/scan/photo"];
 
+  // Restrictions + family catalogue are loaded once at the root so every
+  // analyse result panel can read them without an extra fetch per page.
+  // Anonymous users skip the families load entirely (no restrictions to
+  // check).
+  const restrictions = signedIn
+    ? readUserRestrictions(profile?.preferences ?? null)
+    : EMPTY_RESTRICTIONS;
+  const families = signedIn ? await loadIngredientFamilies() : [];
+
   return (
     <html lang="fr" className={`light ${inter.variable}`} data-theme="light">
       <body className="min-h-screen antialiased">
@@ -118,9 +130,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           href={process.env.NEXT_PUBLIC_SUPABASE_URL}
           crossOrigin="anonymous"
         />
-        <AppShell signedIn={signedIn} firstName={firstName} hideOnPaths={hideOnPaths}>
-          {children}
-        </AppShell>
+        <RestrictionsProvider restrictions={restrictions} families={families}>
+          <AppShell signedIn={signedIn} firstName={firstName} hideOnPaths={hideOnPaths}>
+            {children}
+          </AppShell>
+        </RestrictionsProvider>
         <PWARegister />
         <Analytics />
       </body>

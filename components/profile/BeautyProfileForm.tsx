@@ -8,22 +8,26 @@ import {
   HAIR_CONCERNS,
   SKIN_CONCERN_LABEL,
   SKIN_CONCERNS,
-  SKIN_TYPE_LABEL,
-  SKIN_TYPES,
+  SKIN_TYPE_BODY_LABEL,
+  SKIN_TYPE_FACE_LABEL,
+  SKIN_TYPES_BODY,
+  SKIN_TYPES_FACE,
   type HairConcern,
   type SkinConcern,
   type SkinProfile,
-  type SkinType,
+  type SkinTypeBody,
+  type SkinTypeFace,
 } from "@/lib/skin/profile";
 
 /**
- * Formulaire complet du profil beauté : type de peau, préoccupations cutanées,
- * cheveux, allergies, autres précisions. Utilisé à 2 endroits :
+ * Formulaire complet du profil beauté : type de peau visage, type de peau
+ * corps, préoccupations, cheveux, allergies, autres précisions. Utilisé à 2
+ * endroits :
  *  - `/advisor` (onboarding Beauty Advisor)
  *  - `/profile` (SkinProfileCard en mode édition)
  *
- * Source de vérité unique pour que les 2 pages demandent strictement les
- * mêmes infos. La server action `saveSkinProfile` gère déjà tous les champs.
+ * Tous les champs sont facultatifs : l'utilisateur peut sauvegarder à tout
+ * moment, le profil se complète au fil du temps.
  */
 
 const SELECT_OTHER = "__other__" as const;
@@ -41,18 +45,35 @@ export function BeautyProfileForm({
   submitLabel?: string;
   showCancel?: boolean;
 }) {
-  const [skinType, setSkinType] = useState<SkinType | typeof SELECT_OTHER | "">(
-    initial.skinType ?? (initial.otherSkinType ? SELECT_OTHER : ""),
+  const [skinTypeFace, setSkinTypeFace] = useState<
+    SkinTypeFace | typeof SELECT_OTHER | ""
+  >(initial.skinTypeFace ?? (initial.otherSkinTypeFace ? SELECT_OTHER : ""));
+  const [otherSkinTypeFace, setOtherSkinTypeFace] = useState(
+    initial.otherSkinTypeFace ?? "",
   );
-  const [otherSkinType, setOtherSkinType] = useState(initial.otherSkinType ?? "");
+  const [skinTypeBody, setSkinTypeBody] = useState<
+    SkinTypeBody | typeof SELECT_OTHER | ""
+  >(initial.skinTypeBody ?? (initial.otherSkinTypeBody ? SELECT_OTHER : ""));
+  const [otherSkinTypeBody, setOtherSkinTypeBody] = useState(
+    initial.otherSkinTypeBody ?? "",
+  );
   const [concerns, setConcerns] = useState<Set<SkinConcern>>(
     new Set(initial.concerns ?? []),
   );
   const [otherConcerns, setOtherConcerns] = useState(initial.otherConcerns ?? "");
+  // "Autre" is now a dedicated option in the dropdown - the free-text input
+  // only shows when the option is ticked. Init: ticked iff legacy text was
+  // saved.
+  const [showOtherConcerns, setShowOtherConcerns] = useState(
+    Boolean(initial.otherConcerns?.trim()),
+  );
   const [hairConcerns, setHairConcerns] = useState<Set<HairConcern>>(
     new Set(initial.hairConcerns ?? []),
   );
   const [otherHair, setOtherHair] = useState(initial.otherHair ?? "");
+  const [showOtherHair, setShowOtherHair] = useState(
+    Boolean(initial.otherHair?.trim()),
+  );
   const [allergies, setAllergies] = useState(initial.allergiesFreeform ?? "");
   const [otherNotes, setOtherNotes] = useState(initial.otherNotes ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -78,25 +99,31 @@ export function BeautyProfileForm({
 
   function submit() {
     setError(null);
-    const hasPresetType = skinType && skinType !== SELECT_OTHER;
-    const hasOtherType = skinType === SELECT_OTHER && otherSkinType.trim().length > 0;
-    if (!hasPresetType && !hasOtherType) {
-      setError("Choisis ton type de peau (ou décris-le dans 'Autre').");
-      return;
-    }
-    if (concerns.size === 0 && otherConcerns.trim().length === 0) {
-      setError("Sélectionne au moins une préoccupation (ou décris-la dans 'Autre').");
-      return;
-    }
     const fd = new FormData();
-    if (hasPresetType) fd.set("skin_type", skinType);
-    if (hasOtherType) fd.set("other_skin_type", otherSkinType.trim());
+
+    if (skinTypeFace && skinTypeFace !== SELECT_OTHER) {
+      fd.set("skin_type_face", skinTypeFace);
+    }
+    if (skinTypeFace === SELECT_OTHER && otherSkinTypeFace.trim()) {
+      fd.set("other_skin_type_face", otherSkinTypeFace.trim());
+    }
+    if (skinTypeBody && skinTypeBody !== SELECT_OTHER) {
+      fd.set("skin_type_body", skinTypeBody);
+    }
+    if (skinTypeBody === SELECT_OTHER && otherSkinTypeBody.trim()) {
+      fd.set("other_skin_type_body", otherSkinTypeBody.trim());
+    }
     for (const c of concerns) fd.append("concerns", c);
-    if (otherConcerns.trim()) fd.set("other_concerns", otherConcerns.trim());
+    if (showOtherConcerns && otherConcerns.trim()) {
+      fd.set("other_concerns", otherConcerns.trim());
+    }
     for (const c of hairConcerns) fd.append("hair_concerns", c);
-    if (otherHair.trim()) fd.set("other_hair", otherHair.trim());
+    if (showOtherHair && otherHair.trim()) {
+      fd.set("other_hair", otherHair.trim());
+    }
     if (allergies.trim()) fd.set("allergies", allergies.trim());
     if (otherNotes.trim()) fd.set("other_notes", otherNotes.trim());
+
     startTransition(async () => {
       const r = await saveSkinProfile(fd);
       if (!r.ok) {
@@ -112,39 +139,38 @@ export function BeautyProfileForm({
     "w-full rounded-xl bg-[#F9FAFB] ring-1 ring-[#E5E7EB] px-3.5 py-2.5 text-[13px] outline-none transition focus:ring-2 focus:ring-rose-300 focus:bg-white";
 
   return (
-    <div className="space-y-3">
-      <fieldset className={SECTION}>
-        <legend className="text-[13px] font-semibold text-ink mb-2.5 px-1 -ml-1">
-          Type de peau
-        </legend>
-        <select
-          value={skinType}
-          onChange={(e) =>
-            setSkinType(e.target.value as SkinType | typeof SELECT_OTHER | "")
-          }
-          className={INPUT}
-        >
-          <option value="" disabled>
-            Choisis ton type de peau
-          </option>
-          {SKIN_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {SKIN_TYPE_LABEL[t]}
-            </option>
-          ))}
-          <option value={SELECT_OTHER}>Autre…</option>
-        </select>
-        {skinType === SELECT_OTHER && (
-          <input
-            type="text"
-            value={otherSkinType}
-            onChange={(e) => setOtherSkinType(e.target.value.slice(0, 120))}
-            placeholder="Décris ton type de peau"
-            className={`${INPUT} mt-2`}
-            maxLength={120}
-          />
-        )}
-      </fieldset>
+    <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-3">
+      <SkinTypeFieldset
+        title="Type de peau visage"
+        sectionClass={SECTION}
+        inputClass={INPUT}
+        value={skinTypeFace}
+        onChange={setSkinTypeFace}
+        otherValue={otherSkinTypeFace}
+        onOtherChange={setOtherSkinTypeFace}
+        options={SKIN_TYPES_FACE.map((t) => ({
+          value: t,
+          label: SKIN_TYPE_FACE_LABEL[t],
+        }))}
+        placeholder="Choisis ton type de peau visage"
+        otherPlaceholder="Décris ton type de peau visage"
+      />
+
+      <SkinTypeFieldset
+        title="Type de peau corps"
+        sectionClass={SECTION}
+        inputClass={INPUT}
+        value={skinTypeBody}
+        onChange={setSkinTypeBody}
+        otherValue={otherSkinTypeBody}
+        onOtherChange={setOtherSkinTypeBody}
+        options={SKIN_TYPES_BODY.map((t) => ({
+          value: t,
+          label: SKIN_TYPE_BODY_LABEL[t],
+        }))}
+        placeholder="Choisis ton type de peau corps"
+        otherPlaceholder="Décris ton type de peau corps"
+      />
 
       <fieldset className={SECTION}>
         <legend className="text-[13px] font-semibold text-ink mb-2.5 px-1 -ml-1">
@@ -159,24 +185,24 @@ export function BeautyProfileForm({
           }))}
           values={concerns}
           onToggle={toggleConcern}
+          otherSelected={showOtherConcerns}
+          onToggleOther={() => setShowOtherConcerns((v) => !v)}
         />
-        <label className="mt-3 block text-[12px] font-medium text-[#6B7280]">
-          Autre <span className="text-[#9CA3AF] font-normal">(facultatif)</span>
-        </label>
-        <input
-          type="text"
-          value={otherConcerns}
-          onChange={(e) => setOtherConcerns(e.target.value.slice(0, 300))}
-          placeholder="Ex : peau réactive au froid, cicatrices d'acné…"
-          className={`${INPUT} mt-1.5`}
-          maxLength={300}
-        />
+        {showOtherConcerns && (
+          <input
+            type="text"
+            value={otherConcerns}
+            onChange={(e) => setOtherConcerns(e.target.value.slice(0, 300))}
+            placeholder="Précise ton autre préoccupation (ex : peau réactive au froid…)"
+            className={`${INPUT} mt-3`}
+            maxLength={300}
+          />
+        )}
       </fieldset>
 
       <fieldset className={SECTION}>
         <legend className="text-[13px] font-semibold text-ink mb-2.5 px-1 -ml-1">
-          Cheveux{" "}
-          <span className="text-[11px] font-normal text-[#9CA3AF]">(facultatif)</span>
+          Cheveux
         </legend>
         <MultiSelectDropdown
           label="Sélectionne tes préoccupations capillaires"
@@ -188,24 +214,24 @@ export function BeautyProfileForm({
           values={hairConcerns}
           onToggle={toggleHair}
           accent="sky"
+          otherSelected={showOtherHair}
+          onToggleOther={() => setShowOtherHair((v) => !v)}
         />
-        <label className="mt-3 block text-[12px] font-medium text-[#6B7280]">
-          Autre <span className="text-[#9CA3AF] font-normal">(facultatif)</span>
-        </label>
-        <input
-          type="text"
-          value={otherHair}
-          onChange={(e) => setOtherHair(e.target.value.slice(0, 200))}
-          placeholder="Ex : cheveux crépus, chute saisonnière…"
-          className={`${INPUT} mt-1.5`}
-          maxLength={200}
-        />
+        {showOtherHair && (
+          <input
+            type="text"
+            value={otherHair}
+            onChange={(e) => setOtherHair(e.target.value.slice(0, 200))}
+            placeholder="Précise ta préoccupation capillaire (ex : cheveux crépus…)"
+            className={`${INPUT} mt-3`}
+            maxLength={200}
+          />
+        )}
       </fieldset>
 
       <fieldset className={SECTION}>
         <legend className="text-[13px] font-semibold text-ink mb-2 px-1 -ml-1">
-          Allergies / intolérances{" "}
-          <span className="text-[11px] font-normal text-[#9CA3AF]">(facultatif)</span>
+          Allergies / intolérances
         </legend>
         <textarea
           value={allergies}
@@ -219,8 +245,7 @@ export function BeautyProfileForm({
 
       <fieldset className={SECTION}>
         <legend className="text-[13px] font-semibold text-ink mb-2 px-1 -ml-1">
-          Autres précisions{" "}
-          <span className="text-[11px] font-normal text-[#9CA3AF]">(facultatif)</span>
+          Autres précisions
         </legend>
         <p className="text-[11px] text-[#6B7280] mb-2">
           Quelque chose que tu veux signaler et qui n&apos;entre pas dans les sections
@@ -239,13 +264,13 @@ export function BeautyProfileForm({
       {error && (
         <p
           role="alert"
-          className="text-[13px] text-[#E11D48] bg-rose-50 border border-rose-100 rounded-xl px-3 py-2"
+          className="text-[13px] text-[#E11D48] bg-rose-50 border border-rose-100 rounded-xl px-3 py-2 lg:col-span-2"
         >
           {error}
         </p>
       )}
 
-      <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-2 pt-1">
+      <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-2 pt-1 lg:col-span-2">
         {showCancel && (
           <button
             type="button"
@@ -268,6 +293,141 @@ export function BeautyProfileForm({
   );
 }
 
+function SkinTypeFieldset<T extends string>({
+  title,
+  sectionClass,
+  inputClass,
+  value,
+  onChange,
+  otherValue,
+  onOtherChange,
+  options,
+  placeholder,
+  otherPlaceholder,
+}: {
+  title: string;
+  sectionClass: string;
+  inputClass: string;
+  value: T | typeof SELECT_OTHER | "";
+  onChange: (v: T | typeof SELECT_OTHER | "") => void;
+  otherValue: string;
+  onOtherChange: (v: string) => void;
+  options: { value: T; label: string }[];
+  placeholder: string;
+  otherPlaceholder: string;
+}) {
+  return (
+    <fieldset className={sectionClass}>
+      <legend className="text-[13px] font-semibold text-ink mb-2.5 px-1 -ml-1">
+        {title}
+      </legend>
+      <SingleSelectDropdown
+        ariaLabel={title}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        options={[
+          ...options,
+          { value: SELECT_OTHER as unknown as T, label: "Autre…" },
+        ]}
+      />
+      {value === SELECT_OTHER && (
+        <input
+          type="text"
+          value={otherValue}
+          onChange={(e) => onOtherChange(e.target.value.slice(0, 120))}
+          placeholder={otherPlaceholder}
+          className={`${inputClass} mt-2`}
+          maxLength={120}
+        />
+      )}
+    </fieldset>
+  );
+}
+
+// Shared chrome for the dropdown trigger button (used by Single + Multi).
+const DROPDOWN_TRIGGER =
+  "flex w-full items-center justify-between gap-2 rounded-xl bg-[#F9FAFB] ring-1 ring-[#E5E7EB] px-3.5 py-2.5 text-left text-[13px] text-ink hover:bg-white transition";
+const DROPDOWN_PANEL =
+  "mt-2 rounded-xl bg-white ring-1 ring-[#E5E7EB] divide-y divide-[#F3F4F6] max-h-60 overflow-y-auto";
+
+function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`h-4 w-4 shrink-0 text-[#6B7280] transition-transform ${
+        open ? "rotate-180" : ""
+      }`}
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
+function SingleSelectDropdown<T extends string>({
+  ariaLabel,
+  placeholder,
+  value,
+  onChange,
+  options,
+}: {
+  ariaLabel: string;
+  placeholder: string;
+  value: T | "";
+  onChange: (v: T) => void;
+  options: { value: T; label: string }[];
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = options.find((o) => o.value === value);
+  const summary = selected?.label ?? placeholder;
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open ? "true" : "false"}
+        aria-label={ariaLabel}
+        className={DROPDOWN_TRIGGER}
+      >
+        <span className={`truncate ${!selected ? "text-[#9CA3AF]" : ""}`}>
+          {summary}
+        </span>
+        <ChevronIcon open={open} />
+      </button>
+      {open && (
+        <ul className={DROPDOWN_PANEL}>
+          {options.map((o) => {
+            const isActive = o.value === value;
+            return (
+              <li key={o.value}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange(o.value);
+                    setOpen(false);
+                  }}
+                  className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-[13px] cursor-pointer hover:bg-[#FAFAFA] ${
+                    isActive ? "bg-rose-50 text-rose-700 font-medium" : "text-ink"
+                  }`}
+                >
+                  <span className="flex-1">{o.label}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function MultiSelectDropdown<T extends string>({
   label,
   summaryWhenEmpty,
@@ -275,6 +435,8 @@ function MultiSelectDropdown<T extends string>({
   values,
   onToggle,
   accent = "rose",
+  otherSelected = false,
+  onToggleOther,
 }: {
   label: string;
   summaryWhenEmpty: string;
@@ -282,11 +444,17 @@ function MultiSelectDropdown<T extends string>({
   values: Set<T>;
   onToggle: (v: T) => void;
   accent?: "rose" | "sky";
+  /** When `onToggleOther` is provided, an extra "Autre…" row appears at the
+   *  bottom of the dropdown. The parent shows its free-text input only when
+   *  `otherSelected` is true. */
+  otherSelected?: boolean;
+  onToggleOther?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const selectedLabels = options
     .filter((o) => values.has(o.value))
     .map((o) => o.label);
+  if (otherSelected) selectedLabels.push("Autre");
   const summary =
     selectedLabels.length === 0 ? summaryWhenEmpty : selectedLabels.join(", ");
   const checkColor = accent === "sky" ? "accent-sky-500" : "accent-rose-500";
@@ -296,34 +464,21 @@ function MultiSelectDropdown<T extends string>({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="flex w-full items-center justify-between gap-2 rounded-xl bg-[#F9FAFB] ring-1 ring-[#E5E7EB] px-3.5 py-2.5 text-left text-[13px] text-ink hover:bg-white transition"
+        aria-expanded={open ? "true" : "false"}
+        className={DROPDOWN_TRIGGER}
       >
         <span
           className={`truncate ${selectedLabels.length === 0 ? "text-[#9CA3AF]" : ""}`}
         >
           {summary}
         </span>
-        <svg
-          aria-hidden
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={`h-4 w-4 shrink-0 text-[#6B7280] transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
-        >
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
+        <ChevronIcon open={open} />
       </button>
       <p className="mt-1 text-[11px] text-[#9CA3AF]">
         {label} (plusieurs choix possibles)
       </p>
       {open && (
-        <ul className="mt-2 rounded-xl bg-white ring-1 ring-[#E5E7EB] divide-y divide-[#F3F4F6] max-h-60 overflow-y-auto">
+        <ul className={DROPDOWN_PANEL}>
           {options.map((o) => {
             const checked = values.has(o.value);
             return (
@@ -340,6 +495,19 @@ function MultiSelectDropdown<T extends string>({
               </li>
             );
           })}
+          {onToggleOther && (
+            <li>
+              <label className="flex items-center gap-2.5 px-3 py-2.5 text-[13px] text-ink cursor-pointer hover:bg-[#FAFAFA]">
+                <input
+                  type="checkbox"
+                  checked={otherSelected}
+                  onChange={onToggleOther}
+                  className={`h-4 w-4 rounded ${checkColor}`}
+                />
+                <span className="flex-1">Autre…</span>
+              </label>
+            </li>
+          )}
         </ul>
       )}
     </div>

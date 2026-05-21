@@ -24,6 +24,7 @@ import { apiGate } from "@/lib/apiGate";
 import { idempotencyKey, idempotencyLookup, idempotencyStore } from "@/lib/idempotency";
 import { logError } from "@/lib/log";
 import { loadProfileForPrompt } from "@/lib/skin/promptFormat";
+import { loadRestrictionsForPrompt } from "@/lib/restrictions/promptFormat";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -261,8 +262,17 @@ export async function POST(req: NextRequest) {
   // Load skin profile so the conclusion can flag verdicts that specifically
   // matter for this user (sensible peau, allergies, etc.). Best-effort: a
   // missing profile just yields a generic conclusion.
-  const profileBlock = await loadProfileForPrompt(user.id);
-  const conclusion = await generateConclusion(promises, productLabel, user.id, profileBlock);
+  const [profileBlock, restrictionsBlock] = await Promise.all([
+    loadProfileForPrompt(user.id),
+    loadRestrictionsForPrompt(user.id),
+  ]);
+  const conclusion = await generateConclusion(
+    promises,
+    productLabel,
+    user.id,
+    profileBlock,
+    restrictionsBlock,
+  );
   const result = buildCoherenceResult({
     description,
     promises,

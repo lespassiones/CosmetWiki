@@ -6,11 +6,13 @@ import { supabaseServer } from "@/lib/supabase";
 import {
   HAIR_CONCERNS,
   SKIN_CONCERNS,
-  SKIN_TYPES,
+  SKIN_TYPES_BODY,
+  SKIN_TYPES_FACE,
   type HairConcern,
   type SkinConcern,
   type SkinProfile,
-  type SkinType,
+  type SkinTypeBody,
+  type SkinTypeFace,
 } from "@/lib/skin/profile";
 
 export type SkinProfileResult = { ok: true } | { ok: false; error: string };
@@ -21,17 +23,27 @@ export async function saveSkinProfile(form: FormData): Promise<SkinProfileResult
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return { ok: false, error: "Non connecté." };
 
-  // skin_type can be either a preset value OR the literal string "autre" when
-  // the user picked the free-text option. The custom label lives in
-  // other_skin_type.
-  const skinTypeRaw = String(form.get("skin_type") ?? "");
-  const otherSkinType = String(form.get("other_skin_type") ?? "").slice(0, 120).trim();
-  const skinType: SkinType | undefined = SKIN_TYPES.includes(skinTypeRaw as SkinType)
-    ? (skinTypeRaw as SkinType)
+  // All fields are optional - the user can save a partial profile and
+  // complete it later. Only the empty submission is harmless: the saved
+  // object simply has no signal for downstream prompts to use.
+
+  // Face skin type: preset OR free-text "Autre".
+  const skinTypeFaceRaw = String(form.get("skin_type_face") ?? "");
+  const otherSkinTypeFace = String(form.get("other_skin_type_face") ?? "").slice(0, 120).trim();
+  const skinTypeFace: SkinTypeFace | undefined = SKIN_TYPES_FACE.includes(
+    skinTypeFaceRaw as SkinTypeFace,
+  )
+    ? (skinTypeFaceRaw as SkinTypeFace)
     : undefined;
-  if (!skinType && !otherSkinType) {
-    return { ok: false, error: "Type de peau requis." };
-  }
+
+  // Body skin type: preset OR free-text "Autre".
+  const skinTypeBodyRaw = String(form.get("skin_type_body") ?? "");
+  const otherSkinTypeBody = String(form.get("other_skin_type_body") ?? "").slice(0, 120).trim();
+  const skinTypeBody: SkinTypeBody | undefined = SKIN_TYPES_BODY.includes(
+    skinTypeBodyRaw as SkinTypeBody,
+  )
+    ? (skinTypeBodyRaw as SkinTypeBody)
+    : undefined;
 
   const concerns = form
     .getAll("concerns")
@@ -40,11 +52,7 @@ export async function saveSkinProfile(form: FormData): Promise<SkinProfileResult
       SKIN_CONCERNS.includes(c as (typeof SKIN_CONCERNS)[number]),
     );
   const otherConcerns = String(form.get("other_concerns") ?? "").slice(0, 300).trim();
-  if (concerns.length === 0 && !otherConcerns) {
-    return { ok: false, error: "Choisis au moins une préoccupation (ou décris-la dans 'Autre')." };
-  }
 
-  // Hair section is optional - empty is fine.
   const hairConcerns = form
     .getAll("hair_concerns")
     .map(String)
@@ -55,17 +63,22 @@ export async function saveSkinProfile(form: FormData): Promise<SkinProfileResult
   const otherNotes = String(form.get("other_notes") ?? "").slice(0, 500).trim();
 
   const profile: SkinProfile = {
-    skinType,
+    skinTypeFace,
+    otherSkinTypeFace: otherSkinTypeFace || undefined,
+    skinTypeBody,
+    otherSkinTypeBody: otherSkinTypeBody || undefined,
     concerns: concerns.length > 0 ? concerns : undefined,
     hairConcerns: hairConcerns.length > 0 ? hairConcerns : undefined,
     allergiesFreeform: allergiesFreeform || undefined,
-    otherSkinType: otherSkinType || undefined,
     otherConcerns: otherConcerns || undefined,
     otherHair: otherHair || undefined,
     otherNotes: otherNotes || undefined,
   };
 
   // Merge into existing preferences (don't clobber other future settings).
+  // Note: this REPLACES the `skin` key entirely, which retires the legacy
+  // `skinType` / `otherSkinType` fields from any pre-migration profile as
+  // soon as the user re-saves.
   const { data: existing } = await sb
     .schema("cosme_check")
     .from("user_profiles")

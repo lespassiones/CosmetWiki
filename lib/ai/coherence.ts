@@ -1050,6 +1050,7 @@ function buildConclusionPrompt(
   promises: CoherencePromise[],
   productLabel: string | null,
   profileBlock?: string | null,
+  restrictionsBlock?: string | null,
 ) {
   const tenue = promises.filter((p) => p.verdict === "tenue").map((p) => p.label);
   const partielle = promises.filter((p) => p.verdict === "partielle").map((p) => p.label);
@@ -1068,14 +1069,18 @@ Structure attendue : "[ce que la formule tient] mais [ce qu'elle ne tient pas / 
 NE CITE QUE LES VERDICTS QUE JE TE DONNE. N'invente jamais d'ingrédient ni de verdict.
 
 ${NO_LONG_DASHES_RULE}`;
-  const system = profileBlock
-    ? `${baseSystem}\n\n${profileBlock}\n\nIMPORTANT — Personnalisation :
+  let system = baseSystem;
+  if (profileBlock) {
+    system += `\n\n${profileBlock}\n\nIMPORTANT — Personnalisation :
 1. Repère les promesses NON TENUES, PARTIELLES ou CONTREDITES qui correspondent DIRECTEMENT à une préoccupation du profil ci-dessus (ex : profil "cheveux secs, longueur affectée" + promesse "hydratation" non tenue, OU profil "rougeurs / sensibilité" + promesse "apaisant" non démontrée, OU une allergie listée présente dans la formule).
 2. Si tu en trouves une, AJOUTE EN FIN DE CONCLUSION une phrase courte de rappel doux à la 2e personne : "Sachant que tu cherches X, cette promesse de Y n'est pas vraiment tenue ici." (adapte au profil et au verdict).
 3. Reste factuel : tu signales, tu ne juges pas le produit en bloc. PAS de "à éviter", "déconseillé", "pas pour toi" — préfère "ne répond pas à ton besoin de Y", "ne couvre pas ta préoccupation Z".
 4. Si AUCUNE promesse négative ne touche le profil, n'ajoute RIEN. Ne fabrique pas un lien forcé.
-5. Si une promesse TENUE répond exactement à une préoccupation, tu peux le souligner en positif au lieu : "Bon point pour toi : la promesse de Y est tenue, ce qui correspond à ce que tu cherches."`
-    : baseSystem;
+5. Si une promesse TENUE répond exactement à une préoccupation, tu peux le souligner en positif au lieu : "Bon point pour toi : la promesse de Y est tenue, ce qui correspond à ce que tu cherches."`;
+  }
+  if (restrictionsBlock) {
+    system += `\n\n${restrictionsBlock}\n\nSi la formule de ce produit contient un ingrédient présent dans les restrictions ci-dessus, signale-le clairement en fin de conclusion à la 2e personne, en une phrase courte (ex : "À noter, ce produit contient X que tu as choisi d'éviter.").`;
+  }
 
   const user = `${productLabel ? `Produit : ${productLabel}\n\n` : ""}Verdicts (déjà calculés mécaniquement) :
 - Promesses TENUES : ${tenue.length ? tenue.join(", ") : "(aucune)"}
@@ -1093,9 +1098,10 @@ async function mistralConclusion(
   promises: CoherencePromise[],
   productLabel: string | null,
   profileBlock?: string | null,
+  restrictionsBlock?: string | null,
 ): Promise<string | null> {
   if (!hasMistral()) return null;
-  const { system, user } = buildConclusionPrompt(promises, productLabel, profileBlock);
+  const { system, user } = buildConclusionPrompt(promises, productLabel, profileBlock, restrictionsBlock);
   const r = await fetch("https://api.mistral.ai/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -1138,10 +1144,11 @@ export async function generateConclusion(
   productLabel: string | null,
   userId?: string | null,
   profileBlock?: string | null,
+  restrictionsBlock?: string | null,
 ): Promise<string> {
   if (!hasOpenAI() && !hasMistral()) return fallbackConclusion(promises);
 
-  const { system, user } = buildConclusionPrompt(promises, productLabel, profileBlock);
+  const { system, user } = buildConclusionPrompt(promises, productLabel, profileBlock, restrictionsBlock);
 
   try {
     const text = await callWithFallback<string | null>({
@@ -1168,7 +1175,7 @@ export async function generateConclusion(
         };
       },
       fallback: async () => {
-        const raw = await mistralConclusion(promises, productLabel, profileBlock);
+        const raw = await mistralConclusion(promises, productLabel, profileBlock, restrictionsBlock);
         return {
           value: raw ? stripLongDashes(raw) : null,
           provider: "mistral" as const,

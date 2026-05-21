@@ -6,11 +6,17 @@ import { supabaseServer } from "@/lib/supabase";
 import { compareAnalyses, type CompareSide } from "@/lib/routine/compare";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { GLASS_CARD, GLASS_CARD_ROSE } from "@/lib/ui/glass";
-import { IngredientBlob } from "@/components/blob/IngredientBlob";
 import { CompareInsights } from "@/components/compare/CompareInsights";
+import { ExposureBar, ExposureCountsRow } from "@/components/compare/ExposureBar";
 import { shortenProductName } from "@/lib/text/shortenProductName";
+import { loadIngredientFamilies } from "@/lib/restrictions/families";
 
-type Flagged = { name: string; fn: string | null; color: "Orange" | "Rouge" };
+type Flagged = {
+  name: string;
+  fn: string | null;
+  color: "Orange" | "Rouge";
+  tags: string[];
+};
 
 function flaggedFor(side: CompareSide): Flagged[] {
   return side.result.items
@@ -19,13 +25,52 @@ function flaggedFor(side: CompareSide): Flagged[] {
       name: i.name ?? i.input,
       fn: i.primaryFunction,
       color: i.colorRating as "Orange" | "Rouge",
+      tags: i.tags ?? [],
     }));
 }
 
-function pctSansPenalite(side: CompareSide): number | null {
-  return side.result.counts.matched > 0
-    ? Math.round((side.result.counts.vert / side.result.counts.matched) * 100)
-    : null;
+type FamilyGroup = {
+  label: string;
+  color: "Orange" | "Rouge";
+  items: Flagged[];
+};
+
+/**
+ * Group flagged ingredients by ingredient family (tag from
+ * cosme_check.ingredient_families). Items without a known family tag fall
+ * back to their primary function, or "Autres" when even that's missing.
+ * Returns groups sorted with reds first, then by descending item count.
+ */
+function groupByFamily(
+  items: Flagged[],
+  familyLabelByTag: Map<string, string>,
+): FamilyGroup[] {
+  const groups = new Map<string, FamilyGroup>();
+  for (const item of items) {
+    let label: string | null = null;
+    if (item.tags && item.tags.length > 0) {
+      for (const tag of item.tags) {
+        const famLabel = familyLabelByTag.get(tag);
+        if (famLabel) {
+          label = famLabel;
+          break;
+        }
+      }
+    }
+    const finalLabel = label ?? item.fn ?? "Autres";
+    const existing = groups.get(finalLabel) ?? {
+      label: finalLabel,
+      color: "Orange" as "Orange" | "Rouge",
+      items: [],
+    };
+    existing.items.push(item);
+    if (item.color === "Rouge") existing.color = "Rouge";
+    groups.set(finalLabel, existing);
+  }
+  return Array.from(groups.values()).sort((a, b) => {
+    if (a.color !== b.color) return a.color === "Rouge" ? -1 : 1;
+    return b.items.length - a.items.length;
+  });
 }
 
 export const metadata = { title: "Comparer · Cosme Check" };
@@ -42,13 +87,16 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
 
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
-  const { data } = await sb
-    .schema("cosme_check")
-    .from("analyses")
-    .select("id, name, product_label, score, result_json")
-    .in("id", list);
+  const [analysesRes, families] = await Promise.all([
+    sb
+      .schema("cosme_check")
+      .from("analyses")
+      .select("id, name, product_label, score, result_json")
+      .in("id", list),
+    loadIngredientFamilies(),
+  ]);
 
-  const rows = (data ?? []) as {
+  const rows = (analysesRes.data ?? []) as {
     id: string;
     name: string | null;
     product_label: string | null;
@@ -56,6 +104,12 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
     result_json: AnalyseResponse;
   }[];
   if (rows.length !== 2) notFound();
+
+  // Tag → label lookup, used to group flagged ingredients into families.
+  const familyLabelByTag = new Map<string, string>();
+  for (const f of families) {
+    if (f.tagSlug) familyLabelByTag.set(f.tagSlug, f.name);
+  }
 
   // Preserve URL order so the user sees A/B in the order they picked.
   const ordered = list.map((id) => rows.find((r) => r.id === id)!).filter(Boolean);
@@ -121,38 +175,47 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
       </Link>
       <h1 className="text-2xl lg:text-3xl font-bold mb-6">Comparer 2 produits</h1>
 
-      {/* Hero - two blobs side by side, no big score number, no winner badge. */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-6">
-        {[a, b].map((side) => {
-          const pct = pctSansPenalite(side);
-          return (
-            <article key={side.id} className={`${GLASS_CARD} p-5 lg:p-6`}>
-              <div className="text-[11px] uppercase tracking-wide text-ink-subtle mb-1">
-                {side.result.counts.matched} ingrédients reconnus
-              </div>
-              <h2 className="text-[15px] font-semibold mb-3 line-clamp-2">{side.name}</h2>
+      {/* Hero - stacked exposure bars. Mobile: stacked vertically, one card
+          per product. Desktop: side by side. The bar replaces the heavy
+          half-donut so the two products read instantly. */}
+      <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 mb-6">
+        {[a, b].map((side) => (
+          <article key={side.id} className={`${GLASS_CARD} p-4 lg:p-5`}>
+            <div className="flex items-baseline justify-between gap-3 mb-2">
+              <h2 className="text-[14px] lg:text-[15px] font-semibold text-ink line-clamp-2 flex-1 min-w-0">
+                {side.name}
+              </h2>
+              {side.score !== null ? (
+                <span className="text-[13px] font-semibold text-ink-subtle tabular-nums shrink-0">
+                  {side.score.toFixed(1)}/20
+                </span>
+              ) : null}
+            </div>
 
-              <IngredientBlob
+            <ExposureBar
+              counts={{
+                vert: side.result.counts.vert,
+                jaune: side.result.counts.jaune,
+                orange: side.result.counts.orange,
+                rouge: side.result.counts.rouge,
+              }}
+            />
+
+            <div className="mt-2.5 flex items-center justify-between gap-3">
+              <span className="text-[12px] text-ink-subtle">
+                {side.result.counts.matched} ingrédients reconnus
+              </span>
+              <ExposureCountsRow
                 counts={{
                   vert: side.result.counts.vert,
                   jaune: side.result.counts.jaune,
                   orange: side.result.counts.orange,
                   rouge: side.result.counts.rouge,
                 }}
-                variant="md"
-                showCenter
-                showLegend
-                subtitle={
-                  pct !== null ? (
-                    <p className="text-[13px] italic text-emerald-700">
-                      <span className="font-semibold not-italic">{pct} %</span> sans pénalité
-                    </p>
-                  ) : null
-                }
               />
-            </article>
-          );
-        })}
+            </div>
+          </article>
+        ))}
       </div>
 
       {/* AI portraits + "what they share" + "how to choose". The short
@@ -167,17 +230,27 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
         shortNameB={shortenProductName(b.name)}
       />
 
-      {/* À surveiller - appears for each product that has orange/red ingredients.
-          Renders one warning card per product so the user can quickly see which
-          side has irritants without scanning the full ingredient list. */}
+      {/* À surveiller - one card per product, grouped by ingredient family
+          so the user sees "the formula is loaded in silicones" instead of
+          scanning 10 individual INCI names. */}
       {(() => {
         const fA = flaggedFor(a);
         const fB = flaggedFor(b);
         if (fA.length === 0 && fB.length === 0) return null;
         return (
           <div className="space-y-3 mb-4">
-            {fA.length > 0 && <AttentionCard name={a.name} items={fA} />}
-            {fB.length > 0 && <AttentionCard name={b.name} items={fB} />}
+            {fA.length > 0 && (
+              <AttentionCard
+                name={a.name}
+                groups={groupByFamily(fA, familyLabelByTag)}
+              />
+            )}
+            {fB.length > 0 && (
+              <AttentionCard
+                name={b.name}
+                groups={groupByFamily(fB, familyLabelByTag)}
+              />
+            )}
           </div>
         );
       })()}
@@ -199,10 +272,6 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
         </section>
       )}
 
-      {/* Keep the deterministic diff in the DOM (commented out) so we
-          can re-enable it during the rollout if the AI output is missing
-          or judged insufficient. We don't render the old "Différences
-          clés" list anymore - it duplicated what the portraits say. */}
       {diff.uniqueToA.length + diff.uniqueToB.length === 0 && (
         <p className="mt-4 text-[12px] text-ink-subtle text-center">
           Les deux compositions ne diffèrent pas sur les ingrédients pénalisants.
@@ -221,62 +290,63 @@ function renderBold(text: string) {
   );
 }
 
-function AttentionCard({ name, items }: { name: string; items: Flagged[] }) {
-  const nbRouge = items.filter((i) => i.color === "Rouge").length;
-  const nbOrange = items.filter((i) => i.color === "Orange").length;
-  // Build the count phrasing - only mention the categories actually present.
-  const parts: string[] = [];
-  if (nbRouge > 0) parts.push(`${nbRouge} ingrédient${nbRouge > 1 ? "s" : ""} en rouge`);
-  if (nbOrange > 0) parts.push(`${nbOrange} ingrédient${nbOrange > 1 ? "s" : ""} en orange`);
-  const countLabel = parts.join(" et ");
+const INCI_PER_GROUP = 4;
 
-  // Sort red first so the most-concerning items lead the list.
-  const sorted = items
-    .slice()
-    .sort((x, y) => (x.color === y.color ? 0 : x.color === "Rouge" ? -1 : 1));
-  const visible = sorted.slice(0, 8);
-  const extra = sorted.length - visible.length;
-
+function AttentionCard({ name, groups }: { name: string; groups: FamilyGroup[] }) {
   return (
-    <article className={`${GLASS_CARD_ROSE} p-5`}>
-      <div className="flex items-start gap-3 mb-3">
-        <span aria-hidden className="text-xl shrink-0 leading-none mt-0.5">⚠️</span>
+    <article className={`${GLASS_CARD_ROSE} p-4`}>
+      <header className="flex items-start gap-2.5 mb-3">
+        <WarnIcon className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-rose-700">
             À surveiller
           </p>
-          <h3 className="text-[15px] font-semibold text-rose-900 truncate">{name}</h3>
-          <p className="text-[13px] leading-relaxed text-rose-800 mt-2">
-            Ce produit contient {countLabel}. Ces ingrédients peuvent dessécher, irriter ou
-            sensibiliser la peau, surtout en usage répété ou sur peau réactive.
-          </p>
+          <h3 className="text-[14px] font-semibold text-rose-900 truncate">{name}</h3>
         </div>
-      </div>
+      </header>
 
-      <ul className="space-y-1.5 mt-2">
-        {visible.map((it, i) => (
-          <li key={i} className="flex items-center gap-2 text-[13px]">
-            <span
-              aria-hidden
-              className={`h-2 w-2 rounded-full shrink-0 ${
-                it.color === "Rouge" ? "bg-rose-500" : "bg-orange-500"
-              }`}
-            />
-            <span className="font-medium text-rose-900">{it.name}</span>
-            {it.fn && <span className="text-[12px] text-rose-600 truncate">- {it.fn}</span>}
-          </li>
-        ))}
-        {extra > 0 && (
-          <li className="text-[12px] italic text-rose-600 pl-4">
-            +{extra} autre{extra > 1 ? "s" : ""} ingrédient{extra > 1 ? "s" : ""} à surveiller
-          </li>
-        )}
+      <ul className="space-y-1.5">
+        {groups.map((g) => {
+          const visible = g.items.slice(0, INCI_PER_GROUP);
+          const extra = g.items.length - visible.length;
+          return (
+            <li key={g.label} className="text-[13px] leading-snug">
+              <span
+                aria-hidden
+                className={`inline-block h-2 w-2 rounded-full mr-2 align-middle ${
+                  g.color === "Rouge" ? "bg-rose-500" : "bg-orange-500"
+                }`}
+              />
+              <span className="font-semibold text-rose-900">{g.label}</span>
+              <span className="text-rose-700/80"> ({g.items.length})</span>
+              <span className="text-rose-700"> : </span>
+              <span className="text-rose-800">
+                {visible.map((i) => i.name).join(", ")}
+                {extra > 0 ? `, +${extra}` : ""}
+              </span>
+            </li>
+          );
+        })}
       </ul>
-
-      <p className="text-[12px] italic text-rose-700 mt-3">
-        Surveille la réaction de ta peau et espace l&apos;usage si tu observes des signes
-        d&apos;irritation. À éviter en cas de peau sensible ou de barrière cutanée fragilisée.
-      </p>
     </article>
+  );
+}
+
+function WarnIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <circle cx="12" cy="17" r="0.6" fill="currentColor" />
+    </svg>
   );
 }

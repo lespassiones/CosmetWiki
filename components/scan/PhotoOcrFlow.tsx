@@ -3,19 +3,26 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProcessingOverlay, randomProcessingTotal } from "../ProcessingOverlay";
-import { GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
 import { apiFetch } from "@/lib/clientApi";
+import { quickInciSanityCheck } from "@/lib/ai/validate";
 
-// Bridge between "user clicked Analyser" and "AnalysisRunner has mounted on
-// /analyse". Without this bridge the user sees the review page for the 1-2 s
-// it takes Next.js to fetch the RSC payload for the destination.
-type Step = "capture" | "processing" | "review" | "error" | "navigating";
+// Step lifecycle:
+//   capture     - user picks photo(s)
+//   processing  - OCR running
+//   navigating  - OCR succeeded + sanity check passed: bridge while /analyse loads
+//   no_inci     - OCR returned but the text doesn't look like an INCI list
+//                 (or Vision + Tesseract both failed). We stay here with a
+//                 friendly recovery screen rather than dropping the user on
+//                 the analyse error page.
+type Step = "capture" | "processing" | "navigating" | "no_inci";
 
 type FrontInfo = {
   productName: string | null;
   brand: string | null;
   productType: string | null;
 };
+
+type NoInciReason = "ocr_failed" | "no_list_found";
 
 // Mirror the constants ScanSheet uses so the rest of the app (AnalysisRunner,
 // ProductHero) reads the same handoff keys regardless of entry point.
@@ -29,11 +36,8 @@ export function PhotoOcrFlow() {
   const [backFile, setBackFile] = useState<File | null>(null);
   const [frontPreview, setFrontPreview] = useState<string | null>(null);
   const [backPreview, setBackPreview] = useState<string | null>(null);
-  const [text, setText] = useState("");
-  const [uncertain, setUncertain] = useState<string[]>([]);
-  const [front, setFront] = useState<FrontInfo | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [usingFallback, setUsingFallback] = useState(false);
+  const [noInciReason, setNoInciReason] = useState<NoInciReason>("no_list_found");
   const [navBudget, setNavBudget] = useState<number>(0);
   const frontInputRef = useRef<HTMLInputElement>(null);
   const backInputRef = useRef<HTMLInputElement>(null);
@@ -68,17 +72,46 @@ export function PhotoOcrFlow() {
     setErrorMsg(null);
   }
 
+  /** Stash text + identity in sessionStorage and route to /analyse. We do this
+   *  through the same overlay AnalysisRunner paints on mount so the user
+   *  never sees the OCR raw text. */
+  function handoff(text: string, front: FrontInfo | null) {
+    try {
+      sessionStorage.setItem(PENDING_INCI_KEY, text);
+      if (front && (front.brand || front.productName)) {
+        sessionStorage.setItem(
+          PENDING_SOURCE_KEY,
+          JSON.stringify({
+            source: "photo",
+            sourceUrl: null,
+            brand: front.brand ?? null,
+            productName: front.productName ?? null,
+            productType: front.productType ?? null,
+          }),
+        );
+      } else {
+        sessionStorage.removeItem(PENDING_SOURCE_KEY);
+      }
+    } catch {
+      /* ignore */
+    }
+    setNavBudget(randomProcessingTotal());
+    setStep("navigating");
+    router.push(`/analyse?inci=${encodeURIComponent(text.slice(0, 6000))}`);
+  }
+
   async function process() {
     if (!backFile) {
       setErrorMsg("La photo des ingrédients (au dos) est obligatoire.");
       return;
     }
     setErrorMsg(null);
-    setUsingFallback(false);
     setStep("processing");
 
+    let extractedText: string | null = null;
+    let frontInfo: FrontInfo | null = null;
+
     // Primary: server-side Vision OCR on both photos in parallel.
-    let primaryOk = false;
     try {
       const fd = new FormData();
       fd.append("image_back", backFile);
@@ -93,86 +126,52 @@ export function PhotoOcrFlow() {
           front?: { found: boolean; productName: string | null; brand: string | null; productType: string | null } | null;
         };
         if (data.found && typeof data.text === "string") {
-          setText(data.text);
-          setUncertain(data.uncertain ?? []);
+          extractedText = data.text;
           if (data.front && data.front.found) {
-            setFront({
+            frontInfo = {
               productName: data.front.productName,
               brand: data.front.brand,
               productType: data.front.productType,
-            });
-          } else {
-            setFront(null);
+            };
           }
-          setStep("review");
-          primaryOk = true;
         }
       }
     } catch {
       // ignore - go to fallback
     }
 
-    if (primaryOk) return;
-
-    // Fallback: Tesseract.js client-side on the back photo only (front
-    // identity isn't critical, the user can still proceed without it).
-    try {
-      setUsingFallback(true);
-      const { default: Tesseract } = await import("tesseract.js");
-      const { data: ocr } = await Tesseract.recognize(backFile, "eng+fra");
-      const cleanedText = (ocr.text ?? "").replace(/\s+/g, " ").trim();
-      if (!cleanedText) throw new Error("empty");
-      setText(cleanedText);
-      setUncertain([]);
-      setFront(null);
-      setStep("review");
-    } catch {
-      setStep("error");
-      setErrorMsg(
-        "Impossible de lire le texte de cette image. Réessaie avec une photo plus nette ou tape la liste manuellement.",
-      );
-    }
-  }
-
-  function analyse() {
-    const t = text.trim();
-    if (t.length === 0) return;
-    // Stash the INCI in sessionStorage BEFORE navigating. AnalysisRunner
-    // reads this key first and only falls back to the URL searchParam if
-    // it's missing - without this, Next.js can serve a prefetched `/analyse`
-    // shell with no inci and bounce the user back to the home page.
-    try {
-      sessionStorage.setItem(PENDING_INCI_KEY, t);
-      // If the front OCR yielded any identity info, stash it so the analyser
-      // pipeline can use it as productLabel and as input to the web-search
-      // identification step later. We mirror the shape ProductSearchInput
-      // uses to keep the downstream consumers (ProductHero, AnalyseResultPanel)
-      // happy without branching.
-      if (front && (front.brand || front.productName)) {
-        const productName = front.productName ?? "";
-        const brand = front.brand ?? "";
-        sessionStorage.setItem(
-          PENDING_SOURCE_KEY,
-          JSON.stringify({
-            source: "photo",
-            sourceUrl: null,
-            brand: brand || null,
-            productName: productName || null,
-            productType: front.productType ?? null,
-          }),
-        );
-      } else {
-        sessionStorage.removeItem(PENDING_SOURCE_KEY);
+    // Fallback: Tesseract.js client-side on the back photo only.
+    if (extractedText === null) {
+      try {
+        const { default: Tesseract } = await import("tesseract.js");
+        const { data: ocr } = await Tesseract.recognize(backFile, "eng+fra");
+        const cleanedText = (ocr.text ?? "").replace(/\s+/g, " ").trim();
+        if (cleanedText) {
+          extractedText = cleanedText;
+        }
+      } catch {
+        /* ignore */
       }
-    } catch {
-      /* ignore */
     }
-    // Bridge the 1-2 s Next.js round-trip with the same overlay AnalysisRunner
-    // will paint on mount. Without this the review page sits idle while
-    // /analyse loads, which feels like the click didn't register.
-    setNavBudget(randomProcessingTotal());
-    setStep("navigating");
-    router.push(`/analyse?inci=${encodeURIComponent(t.slice(0, 6000))}`);
+
+    if (extractedText === null) {
+      // Both pipelines failed entirely. Photo unreadable.
+      setNoInciReason("ocr_failed");
+      setStep("no_inci");
+      return;
+    }
+
+    // OCR returned something. Check it actually looks like an INCI list
+    // before bouncing the user to /analyse — saves them landing on the
+    // generic "Texte trop court" error.
+    const sanity = quickInciSanityCheck(extractedText);
+    if (!sanity.ok) {
+      setNoInciReason("no_list_found");
+      setStep("no_inci");
+      return;
+    }
+
+    handoff(extractedText, frontInfo);
   }
 
   function reset() {
@@ -182,9 +181,6 @@ export function PhotoOcrFlow() {
     setBackFile(null);
     setFrontPreview(null);
     setBackPreview(null);
-    setText("");
-    setUncertain([]);
-    setFront(null);
     setStep("capture");
   }
 
@@ -213,7 +209,7 @@ export function PhotoOcrFlow() {
           </svg>
         </button>
         <h1 className="text-[15px] font-semibold">
-          {step === "capture" ? "Photos du produit" : step === "review" ? "Vérifie le texte" : ""}
+          {step === "capture" ? "Photos du produit" : ""}
         </h1>
         <div className="w-9" />
       </header>
@@ -278,97 +274,99 @@ export function PhotoOcrFlow() {
         </div>
       )}
 
-      {step === "review" && (
-        <div className="flex-1 flex flex-col bg-[#FAFAFA] text-[#111111] overflow-hidden">
-          <div className="px-5 pt-4 pb-3 border-b border-[#E5E7EB]">
-            <div className="flex items-center gap-3">
-              {backPreview && (
-                <div
-                  aria-hidden
-                  className="h-12 w-12 rounded-lg bg-cover bg-center bg-[#E5E7EB] shrink-0"
-                  style={{ backgroundImage: `url(${backPreview})` }}
-                />
-              )}
-              <div className="text-[12px] text-[#6B7280] flex-1">
-                {usingFallback
-                  ? "Texte extrait avec Tesseract.js (hors-ligne). Vérifie attentivement."
-                  : uncertain.length > 0
-                    ? `${uncertain.length} mot${uncertain.length > 1 ? "s" : ""} marqué${uncertain.length > 1 ? "s" : ""} comme incertain${uncertain.length > 1 ? "s" : ""} : ${uncertain.slice(0, 3).join(", ")}${uncertain.length > 3 ? "…" : ""}. Vérifie avant d'analyser.`
-                    : "Texte extrait avec succès. Vérifie ou édite si nécessaire."}
-              </div>
-            </div>
-
-            {front && (front.brand || front.productName) && (
-              <div className="mt-3 rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2">
-                <div className="text-[10px] uppercase tracking-wide text-emerald-700 font-semibold mb-0.5">
-                  Produit identifié
-                </div>
-                <div className="text-[13px] text-emerald-900">
-                  {front.brand ? <span className="font-semibold">{front.brand}</span> : null}
-                  {front.brand && front.productName ? " · " : null}
-                  {front.productName ?? null}
-                  {front.productType ? (
-                    <span className="ml-2 inline-block text-[11px] text-emerald-700 bg-emerald-100 rounded-full px-2 py-0.5">
-                      {front.productType}
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="flex-1 px-5 py-4 overflow-auto">
-            <label className="block text-[11px] text-[#6B7280] uppercase tracking-wide mb-2">
-              Composition détectée
-            </label>
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              spellCheck={false}
-              className="w-full h-full min-h-[200px] rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-[13px] leading-relaxed outline-none focus:border-[#111111] resize-none"
-              aria-label="Composition INCI détectée"
-            />
-          </div>
-          <div className="px-5 py-4 border-t border-[#E5E7EB] bg-white flex gap-2">
-            <button
-              type="button"
-              onClick={reset}
-              className={`${GLASS_PILL} flex-1 py-3 text-sm font-medium`}
-            >
-              Reprendre
-            </button>
-            <button
-              type="button"
-              onClick={analyse}
-              disabled={text.trim().length === 0}
-              className={`${GLASS_PILL_DARK} flex-1 py-3 text-sm font-semibold disabled:opacity-40`}
-            >
-              Analyser cette liste
-            </button>
-          </div>
-        </div>
+      {step === "no_inci" && (
+        <NoInciScreen
+          reason={noInciReason}
+          backPreview={backPreview}
+          onRetake={reset}
+          onPaste={() => router.push("/?mode=paste")}
+        />
       )}
+    </div>
+  );
+}
 
-      {step === "error" && (
-        <div className="flex-1 flex flex-col items-center justify-center gap-4 px-6 text-center">
-          <p className="text-sm text-white/80">{errorMsg ?? "Échec inconnu."}</p>
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setStep("capture")}
-              className="rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-5 py-2.5"
-            >
-              Réessayer
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push("/?mode=paste")}
-              className="rounded-xl bg-white text-black text-sm font-semibold px-5 py-2.5"
-            >
-              Saisir à la main
-            </button>
-          </div>
+function NoInciScreen({
+  reason,
+  backPreview,
+  onRetake,
+  onPaste,
+}: {
+  reason: NoInciReason;
+  backPreview: string | null;
+  onRetake: () => void;
+  onPaste: () => void;
+}) {
+  const title =
+    reason === "ocr_failed"
+      ? "On n'arrive pas à lire la photo"
+      : "Pas de liste d'ingrédients trouvée";
+  const subtitle =
+    reason === "ocr_failed"
+      ? "Le texte est flou ou trop sombre pour être déchiffré."
+      : "La photo ne semble pas contenir une liste INCI. C'est peut-être un produit sans liste visible côté affiché, ou la photo cadre la mauvaise face de l'emballage.";
+
+  return (
+    <div className="flex-1 flex flex-col items-center justify-start px-6 pt-6 pb-8 text-center">
+      <div className="relative h-32 w-32 mb-5">
+        {backPreview ? (
+          <div
+            aria-hidden
+            className="absolute inset-0 rounded-3xl bg-cover bg-center opacity-40"
+            style={{ backgroundImage: `url(${backPreview})` }}
+          />
+        ) : (
+          <div aria-hidden className="absolute inset-0 rounded-3xl bg-white/[0.04]" />
+        )}
+        <div
+          aria-hidden
+          className="absolute inset-0 rounded-3xl ring-1 ring-white/15 flex items-center justify-center backdrop-blur-sm"
+        >
+          <span className="text-4xl">🔎</span>
         </div>
-      )}
+      </div>
+
+      <h2 className="text-[18px] font-semibold mb-2">{title}</h2>
+      <p className="text-[13px] text-white/70 leading-relaxed max-w-sm">
+        {subtitle}
+      </p>
+
+      <div className="mt-6 w-full max-w-sm rounded-2xl bg-white/[0.04] ring-1 ring-white/10 px-4 py-3 text-left">
+        <p className="text-[11px] uppercase tracking-wide font-semibold text-white/50 mb-2">
+          Astuces pour une meilleure photo
+        </p>
+        <ul className="space-y-1.5 text-[12.5px] text-white/75">
+          <li className="flex items-start gap-2">
+            <span aria-hidden className="text-white/40 mt-0.5">·</span>
+            <span>Cadre <span className="font-semibold text-white">la face où apparaît la liste INCI</span> (souvent au dos ou sous l&apos;étiquette).</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span aria-hidden className="text-white/40 mt-0.5">·</span>
+            <span>Bonne lumière, sans reflet ni ombre sur le texte.</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span aria-hidden className="text-white/40 mt-0.5">·</span>
+            <span>Approche-toi pour que la liste remplisse le cadre, texte net.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div className="mt-6 flex flex-col gap-2 w-full max-w-sm">
+        <button
+          type="button"
+          onClick={onRetake}
+          className="w-full rounded-xl bg-white text-black text-sm font-semibold py-3 hover:bg-white/90 transition"
+        >
+          Reprendre une photo
+        </button>
+        <button
+          type="button"
+          onClick={onPaste}
+          className="w-full rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm font-medium py-3 transition"
+        >
+          Saisir la liste à la main
+        </button>
+      </div>
     </div>
   );
 }
@@ -426,7 +424,6 @@ function UploadZone({
         ref={inputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         onChange={(e) => {
           const f = e.currentTarget.files?.[0];
           if (f) onPick(f);

@@ -19,7 +19,8 @@ import {
   HAIR_CONCERN_LABEL,
   readSkinProfile,
   SKIN_CONCERN_LABEL,
-  SKIN_TYPE_LABEL,
+  SKIN_TYPE_BODY_LABEL,
+  SKIN_TYPE_FACE_LABEL,
   type SkinProfile,
 } from "./profile";
 
@@ -34,12 +35,20 @@ import {
 export function formatSkinProfileForPrompt(skin: SkinProfile): string | null {
   const lines: string[] = [];
 
-  // Skin type — preset, custom, or both
-  const skinTypeParts: string[] = [];
-  if (skin.skinType) skinTypeParts.push(SKIN_TYPE_LABEL[skin.skinType]);
-  if (skin.otherSkinType) skinTypeParts.push(`précision : ${skin.otherSkinType}`);
-  if (skinTypeParts.length > 0) {
-    lines.push(`- Type de peau : ${skinTypeParts.join(" — ")}`);
+  // Face & body skin type — preset, custom, or both. Each section is its
+  // own line so the LLM can recommend face vs body products independently.
+  const faceParts: string[] = [];
+  if (skin.skinTypeFace) faceParts.push(SKIN_TYPE_FACE_LABEL[skin.skinTypeFace]);
+  if (skin.otherSkinTypeFace) faceParts.push(`précision : ${skin.otherSkinTypeFace}`);
+  if (faceParts.length > 0) {
+    lines.push(`- Type de peau visage : ${faceParts.join(" — ")}`);
+  }
+
+  const bodyParts: string[] = [];
+  if (skin.skinTypeBody) bodyParts.push(SKIN_TYPE_BODY_LABEL[skin.skinTypeBody]);
+  if (skin.otherSkinTypeBody) bodyParts.push(`précision : ${skin.otherSkinTypeBody}`);
+  if (bodyParts.length > 0) {
+    lines.push(`- Type de peau corps : ${bodyParts.join(" — ")}`);
   }
 
   // Concerns

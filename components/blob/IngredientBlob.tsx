@@ -44,6 +44,13 @@ const BLOB_LABEL: Record<ColorKey, string> = {
   rouge: "pénalité forte",
 };
 
+const BLOB_PLURAL: Record<ColorKey, string> = {
+  vert: "verts",
+  jaune: "jaunes",
+  orange: "oranges",
+  rouge: "rouges",
+};
+
 const SEEDS: Record<ColorKey, number> = {
   vert: 8721,
   jaune: 4193,
@@ -188,6 +195,7 @@ export function IngredientBlob({
   counts,
   variant = "lg",
   showLegend = false,
+  legendVariant = "below",
   showCenter = false,
   className = "",
   animate = false,
@@ -196,6 +204,14 @@ export function IngredientBlob({
   counts: BlobCounts;
   variant?: Variant;
   showLegend?: boolean;
+  /**
+   * Where to render the colour legend when `showLegend` is true.
+   *  - "below" (default): 4 swatches in a row under the SVG (compact).
+   *  - "around": labels positioned at the 4 corners of the donut. The
+   *    top-left/right slots align with the arched jaune/orange segments and
+   *    the bottom-left/right slots align with the flat-base vert/rouge ends.
+   */
+  legendVariant?: "below" | "around";
   showCenter?: boolean;
   className?: string;
   /**
@@ -283,73 +299,104 @@ export function IngredientBlob({
   // free space above the ring's centre point.
   const centerY = geom.cy - geom.rInner * 0.55;
 
+  const useAroundLegend = showLegend && legendVariant === "around";
+
+  const svgNode = (
+    <svg
+      viewBox={`0 0 ${geom.width} ${geom.height}`}
+      className={`h-auto w-full ${animate ? "blob-pop-in" : ""}`}
+      role="img"
+      aria-label={ariaLabel}
+    >
+      {/*
+        Slice group: each slice now has its own dedicated pair of radial
+        edges, so we can apply the claymorphism shadow per-slice without
+        the doubled-shadow artefact at junctions.
+      */}
+      <g style={{ filter: geom.shadow }}>
+        {gappedSlices.map((s, i) => (
+          <path
+            key={s.color}
+            d={ringSectorPath(
+              geom.rInner,
+              geom.rOuter,
+              sliceEdges[i].leftEdge,
+              sliceEdges[i].rightEdge,
+            )}
+            fill={BLOB_COLORS[s.color]}
+            // Same-colour stroke with rounded joins/caps softens every
+            // corner (radial-edge ↔ inner/outer arc) and the wavy radial
+            // edges themselves - the "pill morphism" rounding. The gap
+            // between slices means a wide stroke can spill outwards
+            // without bleeding into a neighbour.
+            stroke={BLOB_COLORS[s.color]}
+            strokeWidth={geom.roundStroke}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+        ))}
+      </g>
+
+      {showCenter && (
+        <g>
+          <text
+            x={geom.cx}
+            y={centerY}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize={variant === "lg" ? 56 : 28}
+            fontWeight={700}
+            fill="#1F2937"
+          >
+            {total}
+          </text>
+          <text
+            x={geom.cx}
+            y={centerY + (variant === "lg" ? 30 : 18)}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize={variant === "lg" ? 16 : 11}
+            fill="#6B7280"
+          >
+            ingrédients
+          </text>
+        </g>
+      )}
+    </svg>
+  );
+
   return (
     <div className={`flex w-full flex-col items-center ${className}`}>
-      <svg
-        viewBox={`0 0 ${geom.width} ${geom.height}`}
-        className={`h-auto w-full ${animate ? "blob-pop-in" : ""}`}
-        role="img"
-        aria-label={ariaLabel}
-      >
-        {/*
-          Slice group: each slice now has its own dedicated pair of radial
-          edges, so we can apply the claymorphism shadow per-slice without
-          the doubled-shadow artefact at junctions.
-        */}
-        <g style={{ filter: geom.shadow }}>
-          {gappedSlices.map((s, i) => (
-            <path
-              key={s.color}
-              d={ringSectorPath(
-                geom.rInner,
-                geom.rOuter,
-                sliceEdges[i].leftEdge,
-                sliceEdges[i].rightEdge,
-              )}
-              fill={BLOB_COLORS[s.color]}
-              // Same-colour stroke with rounded joins/caps softens every
-              // corner (radial-edge ↔ inner/outer arc) and the wavy radial
-              // edges themselves - the "pill morphism" rounding. The gap
-              // between slices means a wide stroke can spill outwards
-              // without bleeding into a neighbour.
-              stroke={BLOB_COLORS[s.color]}
-              strokeWidth={geom.roundStroke}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-          ))}
-        </g>
-
-        {showCenter && (
-          <g>
-            <text
-              x={geom.cx}
-              y={centerY}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fontSize={variant === "lg" ? 56 : 28}
-              fontWeight={700}
-              fill="#1F2937"
-            >
-              {total}
-            </text>
-            <text
-              x={geom.cx}
-              y={centerY + (variant === "lg" ? 30 : 18)}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fontSize={variant === "lg" ? 16 : 11}
-              fill="#6B7280"
-            >
-              ingrédients
-            </text>
-          </g>
-        )}
-      </svg>
+      {useAroundLegend ? (
+        // Around layout: 3-column grid with the SVG in the centre column
+        // spanning both rows. Top row holds the jaune/orange labels (arched
+        // segments), bottom row holds vert/rouge (flat-base ends).
+        <div
+          className="grid w-full items-center gap-x-2 sm:gap-x-3 [grid-template-columns:minmax(0,1fr)_auto_minmax(0,1fr)] [grid-template-areas:'jaune_svg_orange''vert_svg_rouge']"
+        >
+          <div className="flex justify-end [grid-area:jaune]">
+            <AroundLabel color="jaune" count={counts.jaune} align="end" />
+          </div>
+          <div className="w-[58vw] max-w-[280px] sm:w-[320px] lg:w-[400px] [grid-area:svg]">
+            {svgNode}
+          </div>
+          <div className="flex justify-start [grid-area:orange]">
+            <AroundLabel color="orange" count={counts.orange} align="start" />
+          </div>
+          <div className="flex justify-end [grid-area:vert]">
+            <AroundLabel color="vert" count={counts.vert} align="end" />
+          </div>
+          <div className="flex justify-start [grid-area:rouge]">
+            <AroundLabel color="rouge" count={counts.rouge} align="start" />
+          </div>
+        </div>
+      ) : (
+        svgNode
+      )}
 
       {subtitle ? <div className="mt-2 w-full text-center">{subtitle}</div> : null}
 
-      {showLegend && (
+      {showLegend && !useAroundLegend && (
         <div className="mt-2 grid w-full grid-cols-4 gap-2 text-center">
           {ARC_ORDER.map((color) => (
             <div key={color} className="flex flex-col items-center">
@@ -370,6 +417,31 @@ export function IngredientBlob({
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function AroundLabel({
+  color,
+  count,
+  align,
+}: {
+  color: ColorKey;
+  count: number;
+  align: "start" | "end";
+}) {
+  const alignClass = align === "end" ? "items-end text-right" : "items-start text-left";
+  return (
+    <div className={`flex flex-col ${alignClass} ${BLOB_TEXT[color]}`}>
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-2xl font-bold tabular-nums leading-none">{count}</span>
+        <span className="text-[11px] font-medium italic leading-none">
+          {BLOB_PLURAL[color]}
+        </span>
+      </div>
+      <div className="mt-1 text-[10px] italic leading-tight">
+        {BLOB_LABEL[color]}
+      </div>
     </div>
   );
 }

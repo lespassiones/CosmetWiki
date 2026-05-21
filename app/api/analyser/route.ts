@@ -7,6 +7,8 @@ import { logError, logWarn } from "@/lib/log";
 import { safeError } from "@/lib/safeError";
 import { generateSynthesis } from "@/lib/ai/synthesis";
 import { loadProfileForPrompt } from "@/lib/skin/promptFormat";
+import { loadRestrictionsContext } from "@/lib/restrictions/promptFormat";
+import { checkRestrictions } from "@/lib/restrictions/check";
 import { categorizeProduct, type ProductCategory } from "@/lib/ai/categorize";
 import { correctTypo } from "@/lib/ai/typo";
 import { parseInciWithAI } from "@/lib/ai/parseInci";
@@ -601,7 +603,37 @@ export async function POST(req: NextRequest) {
   // different profiles get distinct synthèses on the same INCI list.
   let synthesis: string | null = null;
   if (body.withSynthesis !== false) {
-    const profileBlock = await loadProfileForPrompt(user.id);
+    const [profileBlock, restrictionsCtx] = await Promise.all([
+      loadProfileForPrompt(user.id),
+      loadRestrictionsContext(user.id),
+    ]);
+
+    // Pre-compute the per-ingredient restriction matches so the LLM doesn't
+    // have to cross-reference the restriction block manually. Each enriched
+    // row gets a `restriction_reason` flag the prompt formatter surfaces
+    // as `[restriction: X]` inside the row line.
+    const checkItems = enriched.map((r) => ({
+      position: r.position_idx + 1,
+      input: r.input_raw,
+      slug: r.slug,
+      name: r.effective_name,
+      tags: r.effective_tags ?? null,
+    }));
+    const restrictionMatches = checkRestrictions(
+      checkItems,
+      restrictionsCtx.restrictions,
+      restrictionsCtx.families,
+    );
+    const reasonByPosition = new Map<number, string>();
+    for (const m of restrictionMatches) {
+      // Prefer the first reason for a given position; multiple matches on
+      // the same ingredient stay listed in the warning card but the LLM
+      // only needs one label to call it out.
+      if (!reasonByPosition.has(m.position)) {
+        reasonByPosition.set(m.position, m.label);
+      }
+    }
+
     synthesis = await generateSynthesis({
       enriched: enriched.map((r) => ({
         input_raw: r.input_raw,
@@ -611,6 +643,7 @@ export async function POST(req: NextRequest) {
         tags: r.effective_tags,
         position_idx: r.position_idx,
         threshold_label: thresholdFor(r.position_idx).label,
+        restriction_reason: reasonByPosition.get(r.position_idx + 1) ?? null,
       })),
       counts,
       score,
@@ -619,6 +652,7 @@ export async function POST(req: NextRequest) {
       productLabel: body.productLabel?.slice(0, 200) ?? null,
       userId: user.id,
       profileBlock,
+      restrictionsBlock: restrictionsCtx.block,
     });
   }
 

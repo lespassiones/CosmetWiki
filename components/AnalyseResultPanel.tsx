@@ -12,6 +12,7 @@ import { IngredientBlob, type BlobCounts } from "./blob/IngredientBlob";
 import { InfoBadge, Tooltip } from "./Tooltip";
 import { commonNameFor, prettyInci } from "@/lib/inciCommonNames";
 import { AddToRoutineButton } from "./routine/AddToRoutineButton";
+import { RestrictionWarning } from "./analyse/RestrictionWarning";
 
 // Lazy-load : la modale n'est ouverte que sur clic utilisateur, on évite
 // d'embarquer son JS (et celui de ses dépendances OpenAI/Markdown) au LCP.
@@ -183,7 +184,7 @@ export function AnalyseResultPanel({
           col 2 (1fr) : observations on top, synthesis spanning 2 rows below
           col 3 (1.3fr): items spanning the full height
       */}
-      <div className="mt-6 grid gap-4 grid-cols-1 [grid-template-areas:'score''counts''synthesis''spectrum''observations''items'] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:[grid-template-areas:'left_observations_items''left_synthesis_items']">
+      <div className="mt-6 grid gap-4 grid-cols-1 [grid-template-areas:'score''warning''counts''synthesis''spectrum''observations''items'] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:[grid-template-areas:'left_observations_items''left_synthesis_items']">
         {/* Left column: on desktop, grouped as a flex column so Score + Spectrum
             + Counts stack tightly with no gap from row height mismatch. On mobile,
             `contents` makes each child participate directly in the outer grid. */}
@@ -201,6 +202,12 @@ export function AnalyseResultPanel({
             />
           </Reveal>
 
+          {/* Restriction warning sits right under the score donut so the user
+              sees it without scrolling. Renders nothing when no match. */}
+          <Reveal delayMs={REVEAL_SCORE_MS + 200} className="[grid-area:warning]">
+            <RestrictionWarning items={result.items} />
+          </Reveal>
+
           {result.spectrum ? (
             <Reveal delayMs={650} className="[grid-area:spectrum]">
               <IngredientSpectrum
@@ -216,7 +223,7 @@ export function AnalyseResultPanel({
           ) : null}
 
           <Reveal delayMs={0} className="[grid-area:counts]">
-            <CountsStrip counts={result.counts} />
+            <PenaltySummaryStrip counts={result.counts} />
           </Reveal>
         </div>
 
@@ -239,13 +246,25 @@ export function AnalyseResultPanel({
         </Reveal>
 
         <Reveal delayMs={1000} className="[grid-area:items]">
-          <IngredientsLinkCard
-            count={result.counts.total}
-            onOpen={() => {
-              setTargetIngredientPosition(null);
-              setIngredientsModalOpen(true);
-            }}
-          />
+          {/* Mobile : carte-lien compacte qui ouvre la modal détaillée — garde
+              la vue principale légère sur petit écran.
+              Desktop : la colonne de droite a beaucoup de hauteur, on rend
+              directement la table inline (filtres + recherche + lignes). */}
+          <div className="lg:hidden">
+            <IngredientsLinkCard
+              count={result.counts.total}
+              onOpen={() => {
+                setTargetIngredientPosition(null);
+                setIngredientsModalOpen(true);
+              }}
+            />
+          </div>
+          <div className="hidden lg:block">
+            <h2 className="text-[15px] font-semibold text-ink mb-3 px-1">
+              Liste des ingrédients
+            </h2>
+            <ItemsTable items={result.items} counts={result.counts} compact />
+          </div>
         </Reveal>
       </div>
 
@@ -473,11 +492,19 @@ function BigScoreCard({
 
   return (
     <article className="rounded-2xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
-      {/* MOBILE - compact stacked: blob (no legend) + "% sans pénalité" + ratio. */}
+      {/* MOBILE - blob with per-colour labels positioned around it, then the
+          "% sans pénalité" line and the recognised-ingredients ratio. */}
       <div className="flex flex-col items-center gap-2 lg:hidden">
-        <IngredientBlob counts={counts} variant="md" showCenter animate />
+        <IngredientBlob
+          counts={counts}
+          variant="md"
+          showCenter
+          showLegend
+          legendVariant="around"
+          animate
+        />
         {pctSansPenalite !== null && (
-          <p className="text-[13px] italic text-emerald-700">
+          <p className="mt-1 text-[13px] italic text-emerald-700">
             <span className="font-semibold not-italic">{pctSansPenalite} %</span> sans pénalité
           </p>
         )}
@@ -486,14 +513,15 @@ function BigScoreCard({
         </p>
       </div>
 
-      {/* DESKTOP - full blob with "% sans pénalité" injected between the
-          centre count and the colour legend, then the ratio at the bottom. */}
+      {/* DESKTOP - same around-the-blob layout, larger blob, with the
+          "% sans pénalité" subtitle slot and the ratio underneath. */}
       <div className="hidden lg:flex lg:flex-col lg:items-center">
         <IngredientBlob
           counts={counts}
           variant="lg"
           showCenter
           showLegend
+          legendVariant="around"
           animate
           subtitle={
             pctSansPenalite !== null ? (
@@ -511,101 +539,66 @@ function BigScoreCard({
   );
 }
 
-function CountsStrip({ counts }: { counts: AnalyseResponse["counts"] }) {
-  const colors = [
-    { label: "Vert", count: counts.vert, dot: "bg-emerald-500", text: "text-emerald-700", penalty: "sans pénalité" },
-    { label: "Jaune", count: counts.jaune, dot: "bg-amber-400", text: "text-amber-700", penalty: "pénalité faible" },
-    { label: "Orange", count: counts.orange, dot: "bg-orange-500", text: "text-orange-700", penalty: "pénalité moyenne" },
-    { label: "Rouge", count: counts.rouge, dot: "bg-rose-500", text: "text-rose-700", penalty: "pénalité forte" },
-  ];
-  const vert = colors[0];
-  const penaltyColors = [colors[1], colors[2], colors[3]];
+function PenaltySummaryStrip({ counts }: { counts: AnalyseResponse["counts"] }) {
+  // All ratios are computed against `matched` (recognised ingredients only).
+  // Non-recognised ingredients aren't classified, so it would be misleading
+  // to lump them into either bucket.
+  const matched = counts.matched;
+  const penalised = counts.jaune + counts.orange + counts.rouge;
+  const pctSafe = matched > 0 ? Math.round((counts.vert / matched) * 100) : 0;
+  const pctPenalised = matched > 0 ? Math.round((penalised / matched) * 100) : 0;
+  const atRisk = counts.rouge;
 
-  // Common card chrome (bg/blur/ring/shadow) - extracted so the mobile bento
-  // and the desktop strip stay visually consistent if we tweak it later.
-  const CARD =
-    "rounded-2xl bg-white/65 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl";
+  const stats = [
+    {
+      key: "safe",
+      icon: <ShieldCheckIcon className="h-4 w-4 text-emerald-600" />,
+      iconBg: "bg-emerald-50",
+      value: `${pctSafe} %`,
+      label: "sans pénalité",
+    },
+    {
+      key: "penalty",
+      icon: <WarningIcon className="h-4 w-4 text-amber-600" />,
+      iconBg: "bg-amber-50",
+      value: `${pctPenalised} %`,
+      label: "avec pénalité",
+    },
+    {
+      key: "risk",
+      icon: <XSquareIcon className="h-4 w-4 text-rose-600" />,
+      iconBg: "bg-rose-50",
+      value: `${atRisk}`,
+      label: "à risque fort",
+    },
+  ];
 
   return (
-    <>
-      {/* MOBILE - asymmetric 2-col bento:
-            LEFT  (1fr) : 2 stacked tall cards   → Identifiés + Vert
-            RIGHT (1fr) : 3 stacked thin strips  → Jaune / Orange / Rouge
-          Each tile gets a `stagger-up` animation with an incrementing delay
-          so the bento "fills up" cell-by-cell (~80ms apart) - playful and
-          guides the eye through the breakdown after the blob lands. */}
-      <div className="grid grid-cols-2 gap-2.5 lg:hidden">
-        <div className="flex flex-col gap-2.5">
-          <article
-            className={`${CARD} stagger-up p-3.5`}
-            style={{ ["--stagger-delay" as string]: "60ms" } as React.CSSProperties}
+    <article className="rounded-2xl bg-white/65 p-2.5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl sm:p-3">
+      <ul className="grid grid-cols-3 gap-1 sm:gap-2">
+        {stats.map((s, i) => (
+          <li
+            key={s.key}
+            className="stagger-up flex min-w-0 items-center gap-1.5 p-1 sm:gap-2.5 sm:p-1.5"
+            style={{ ["--stagger-delay" as string]: `${60 + i * 80}ms` } as React.CSSProperties}
           >
-            <p className="text-[10px] font-medium uppercase tracking-wide text-ink-subtle">
-              Ingrédients identifiés
-            </p>
-            <p className="mt-1.5 text-2xl font-bold tabular-nums text-ink leading-none">
-              {counts.matched}
-            </p>
-            <p className="mt-1 text-[11px] text-ink-subtle">
-              sur {counts.total} ingrédients
-            </p>
-          </article>
-          <article
-            className={`${CARD} stagger-up p-3.5`}
-            style={{ ["--stagger-delay" as string]: "220ms" } as React.CSSProperties}
-          >
-            <p className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide">
-              <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${vert.dot}`} />
-              <span className={vert.text}>{vert.label}</span>
-            </p>
-            <p className="mt-1.5 text-2xl font-bold tabular-nums text-ink leading-none">
-              {vert.count}
-            </p>
-            <p className={`mt-1 text-[10px] italic ${vert.text}`}>{vert.penalty}</p>
-          </article>
-        </div>
-
-        <div className="flex flex-col gap-2.5">
-          {penaltyColors.map((c, i) => (
-            <article
-              key={c.label}
-              className={`${CARD} stagger-up flex items-center gap-2 p-2.5`}
-              style={{ ["--stagger-delay" as string]: `${140 + i * 80}ms` } as React.CSSProperties}
+            <div
+              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg sm:h-9 sm:w-9 sm:rounded-xl ${s.iconBg}`}
             >
-              <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide">
-                  <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
-                  <span className={c.text}>{c.label}</span>
-                </p>
-                <p className={`mt-0.5 text-[10px] italic ${c.text}`}>{c.penalty}</p>
-              </div>
-              <p className="text-xl font-bold tabular-nums text-ink leading-none">
-                {c.count}
+              {s.icon}
+            </div>
+            <div className="min-w-0">
+              <p className="text-base font-bold tabular-nums leading-none text-ink sm:text-lg">
+                {s.value}
               </p>
-            </article>
-          ))}
-        </div>
-      </div>
-
-      {/* DESKTOP - compact 4-cell strip living under the score gauge in the
-          left column of the bento. */}
-      <article className={`hidden lg:block ${CARD} p-3`}>
-        <ul className="grid grid-cols-4 gap-2">
-          {colors.map((c) => (
-            <li key={c.label} className="flex flex-col items-center gap-0.5 py-1.5">
-              <span className="flex items-center gap-1.5">
-                <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
-                <span className={`text-[11px] font-semibold ${c.text}`}>{c.label}</span>
-              </span>
-              <span className="text-lg font-bold tabular-nums text-ink">{c.count}</span>
-              <span className="text-[10px] text-ink-subtle tabular-nums">
-                {pct(c.count, counts.total)} %
-              </span>
-            </li>
-          ))}
-        </ul>
-      </article>
-    </>
+              <p className="mt-1 whitespace-nowrap text-[10px] text-ink-subtle sm:text-[11px]">
+                {s.label}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </article>
   );
 }
 
@@ -1580,11 +1573,6 @@ function ColorChip({ rating }: { rating: ColorRating | null }) {
 // ============================================================
 // Helpers
 // ============================================================
-function pct(n: number, total: number): string {
-  if (!total) return "0";
-  return ((n / total) * 100).toFixed(0);
-}
-
 function prettyName(s: string): string {
   return s
     .toLowerCase()
@@ -1663,6 +1651,35 @@ function ShareIcon({ className }: { className?: string }) {
       <circle cx="18" cy="19" r="3" />
       <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
       <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+  );
+}
+
+function ShieldCheckIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M12 2 4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3z" />
+      <path d="m8.5 12.5 2.5 2.5 4.5-5" />
+    </svg>
+  );
+}
+
+function WarningIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  );
+}
+
+function XSquareIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <line x1="9" y1="9" x2="15" y2="15" />
+      <line x1="15" y1="9" x2="9" y2="15" />
     </svg>
   );
 }

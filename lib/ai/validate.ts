@@ -9,21 +9,47 @@ import { AI_MODEL, callWithFallback, getCached, hasOpenAI, openai, setCached } f
 
 export type ValidateResult = { valid: boolean; reason: string | null };
 
+/**
+ * Synchronous, AI-free sanity check on a candidate INCI string. Mirrors the
+ * fast-fail checks at the top of `validateInciInput` so callers (PhotoOcrFlow,
+ * paste flow) can short-circuit on the client BEFORE bouncing to /analyse,
+ * and surface a friendly modal instead of letting the user land on an error
+ * page. `validateInciInput` still runs the same logic server-side as
+ * defence in depth.
+ */
+export type QuickInciResult =
+  | { ok: true }
+  | { ok: false; reason: "too_short" | "garbage" };
+
+export function quickInciSanityCheck(text: string): QuickInciResult {
+  const trimmed = text.trim();
+  const commas = (trimmed.match(/,/g) ?? []).length;
+  const longWords = (trimmed.match(/\b[A-Za-z]{4,}\b/g) ?? []).length;
+  if (commas < 2 && longWords < 4) return { ok: false, reason: "too_short" };
+  if (/^[asdfghjklqwertyuiop\s]{6,}$/i.test(trimmed)) {
+    return { ok: false, reason: "garbage" };
+  }
+  return { ok: true };
+}
+
 export async function validateInciInput(
   text: string,
   userId?: string | null,
 ): Promise<ValidateResult> {
   const trimmed = text.trim();
-  // Local fast-fail BEFORE any AI call: at least 3 commas OR 3 words ≥ 4 chars.
+  // Local fast-fail BEFORE any AI call. Mirrored by quickInciSanityCheck for
+  // client-side use.
+  const quick = quickInciSanityCheck(trimmed);
+  if (!quick.ok) {
+    return {
+      valid: false,
+      reason: quick.reason === "too_short"
+        ? "Texte trop court pour être une liste INCI."
+        : "Texte non reconnu comme liste INCI.",
+    };
+  }
   const commas = (trimmed.match(/,/g) ?? []).length;
   const longWords = (trimmed.match(/\b[A-Za-z]{4,}\b/g) ?? []).length;
-  if (commas < 2 && longWords < 4) {
-    return { valid: false, reason: "Texte trop court pour être une liste INCI." };
-  }
-  // Short-circuit obvious garbage early.
-  if (/^[asdfghjklqwertyuiop\s]{6,}$/i.test(trimmed)) {
-    return { valid: false, reason: "Texte non reconnu comme liste INCI." };
-  }
 
   // For longer inputs we trust the local checks above and skip the AI step
   // to keep this call essentially free on the hot path.

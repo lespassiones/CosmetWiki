@@ -28,22 +28,47 @@ export type RoutineSuggestionsResponse = {
   cached: boolean;
 };
 
-function fingerprint(products: RoutineProduct[]): string {
+// Bump when the prompt structure changes meaningfully so previous cached
+// answers stop being served.
+const PROMPT_VERSION = 2;
+
+function fingerprint(
+  products: RoutineProduct[],
+  profileBlock: string | null,
+  restrictionsBlock: string | null,
+): string {
   const sig = products
     .map((p) => `${p.id}:${p.frequency}:${(p.score ?? 0).toFixed(1)}`)
     .sort()
     .join("|");
-  return crypto.createHash("sha256").update(sig).digest("hex").slice(0, 24);
+  const profileKey = profileBlock
+    ? `|prof=${crypto.createHash("sha256").update(profileBlock).digest("hex").slice(0, 12)}`
+    : "";
+  const restrictionsKey = restrictionsBlock
+    ? `|res=${crypto.createHash("sha256").update(restrictionsBlock).digest("hex").slice(0, 12)}`
+    : "";
+  const versionKey = `|v=${PROMPT_VERSION}`;
+  return crypto
+    .createHash("sha256")
+    .update(sig + profileKey + restrictionsKey + versionKey)
+    .digest("hex")
+    .slice(0, 24);
 }
 
 export async function generateRoutineSuggestions(
   metrics: RoutineMetrics,
   products: RoutineProduct[],
   userId?: string | null,
+  /** Pre-formatted skin profile block (from loadProfileForPrompt). */
+  profileBlock?: string | null,
+  /** Pre-formatted restrictions block (from loadRestrictionsForPrompt). */
+  restrictionsBlock?: string | null,
 ): Promise<RoutineSuggestionsResponse> {
   if (products.length === 0) return { suggestions: [], cached: false };
 
-  const cacheKey = `routinetips:${fingerprint(products)}`;
+  const profile = profileBlock ?? null;
+  const restrictions = restrictionsBlock ?? null;
+  const cacheKey = `routinetips:${fingerprint(products, profile, restrictions)}`;
   const cached = await getCached<RoutineSuggestionsResponse>(cacheKey);
   if (cached) return { ...cached, cached: true };
 
@@ -87,9 +112,9 @@ export async function generateRoutineSuggestions(
     expectedScoreIfRemoved: metrics.simulation.minus1.exposureScore,
   };
 
-  const system =
+  const baseSystem =
     "Tu es un analyste de routine cosmétique. Tu reçois des FAITS CHIFFRÉS issus de l'analyse INCI de la routine de l'utilisateur. " +
-    "Ton job : proposer 2 à 3 suggestions courtes et concrètes pour réduire son exposition. " +
+    "Ton job : proposer 2 à 3 suggestions courtes et concrètes pour réduire son exposition, ADAPTÉES à son profil et à ses restrictions s'ils sont fournis. " +
     "RÈGLES STRICTES :\n" +
     "- AUCUNE marque ni nom de produit alternatif (suggère uniquement un PROFIL d'ingrédients à chercher, ex : 'shampooing sans sulfates ni parfum'). " +
     "- N'invente AUCUNE statistique ni étude. " +
@@ -99,10 +124,18 @@ export async function generateRoutineSuggestions(
     NO_LONG_DASHES_RULE + " " +
     "Réponds en JSON STRICT : { \"suggestions\": [\"<phrase 1>\", \"<phrase 2>\", \"<phrase 3>\"] }";
 
+  let system = baseSystem;
+  if (profile) {
+    system += `\n\n${profile}\n\nAdapte tes suggestions au profil ci-dessus : priorise les axes qui parlent vraiment à cette personne (peau sèche → cherche les ingrédients desséchants ; cheveux secs → cherche les sulfates / alcohol denat ; allergies → cherche les allergènes du parfum).`;
+  }
+  if (restrictions) {
+    system += `\n\n${restrictions}\n\nIMPORTANT : les familles/ingrédients ci-dessus sont DÉJÀ pris en compte par l'utilisateur. Ne lui suggère JAMAIS de "chercher un produit sans X" si X est déjà dans ses restrictions, sauf pour confirmer qu'un produit de sa routine actuelle viole cette restriction. Concentre tes suggestions sur des axes encore pertinents pour lui.`;
+  }
+
   const user = `FAITS :
 ${JSON.stringify(facts, null, 2)}
 
-Donne 2-3 suggestions concrètes.`;
+Donne 2-3 suggestions concrètes${profile || restrictions ? ", adaptées au profil et aux restrictions ci-dessus" : ""}.`;
 
   try {
     const aiSuggestions = await callWithFallback<RoutineSuggestion[]>({

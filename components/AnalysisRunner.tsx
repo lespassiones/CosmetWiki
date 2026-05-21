@@ -359,16 +359,46 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
   }
 
   if (error) {
+    // Known "user input doesn't look like a real INCI list" errors get a
+    // friendly modal-style screen instead of a red one-liner. Generic 500-class
+    // errors keep the technical message so the user can report it.
+    const isNoInciError =
+      /trop court/i.test(error)
+      || /non reconnu/i.test(error)
+      || /Aucun ingrédient détecté/i.test(error)
+      || /pas une liste INCI/i.test(error)
+      || /ne ressemble pas/i.test(error);
     return (
-      <main className="mx-auto max-w-2xl px-4 py-16 text-center">
-        <p className="text-rose-700 font-semibold">{error}</p>
-        <button
-          type="button"
-          onClick={() => router.push("/")}
-          className="mt-4 text-rose-700 hover:underline"
-        >
-          ← Retour à l&apos;accueil
-        </button>
+      <main className="mx-auto max-w-md px-5 py-10 text-center">
+        <div className="flex items-center justify-center mb-4">
+          <span aria-hidden className="grid place-items-center h-16 w-16 rounded-full bg-rose-50 text-3xl ring-1 ring-rose-100">
+            {isNoInciError ? "🔎" : "⚠️"}
+          </span>
+        </div>
+        <h1 className="text-[18px] font-semibold text-ink mb-2">
+          {isNoInciError ? "Pas de liste d'ingrédients exploitable" : "L'analyse a échoué"}
+        </h1>
+        <p className="text-[13.5px] text-[#6B7280] leading-relaxed mb-6">
+          {isNoInciError
+            ? "Le texte fourni ne contient pas assez d'ingrédients reconnaissables pour lancer une analyse. C'est peut-être un produit sans liste INCI visible, ou le texte est incomplet."
+            : error}
+        </p>
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => router.push("/?mode=paste")}
+            className="w-full rounded-xl bg-ink text-white text-sm font-semibold py-3 hover:brightness-110 transition"
+          >
+            Saisir la liste à la main
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="w-full rounded-xl bg-white/80 ring-1 ring-black/[0.06] text-ink text-sm font-medium py-3 hover:bg-white transition"
+          >
+            Retour à l&apos;accueil
+          </button>
+        </div>
       </main>
     );
   }

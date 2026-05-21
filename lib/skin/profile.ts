@@ -3,8 +3,45 @@
  * under the `skin` key.
  */
 
-export const SKIN_TYPES = ["seche", "mixte", "grasse", "sensible", "normale"] as const;
-export type SkinType = typeof SKIN_TYPES[number];
+// ─── Face skin type ───────────────────────────────────────────────────────
+
+export const SKIN_TYPES_FACE = [
+  "seche",
+  "mixte",
+  "grasse",
+  "sensible",
+  "normale",
+] as const;
+export type SkinTypeFace = typeof SKIN_TYPES_FACE[number];
+
+export const SKIN_TYPE_FACE_LABEL: Record<SkinTypeFace, string> = {
+  seche: "Sèche",
+  mixte: "Mixte",
+  grasse: "Grasse",
+  sensible: "Sensible",
+  normale: "Normale",
+};
+
+// ─── Body skin type ───────────────────────────────────────────────────────
+
+export const SKIN_TYPES_BODY = [
+  "seche",
+  "tres_seche",
+  "normale",
+  "sensible",
+  "mixte",
+] as const;
+export type SkinTypeBody = typeof SKIN_TYPES_BODY[number];
+
+export const SKIN_TYPE_BODY_LABEL: Record<SkinTypeBody, string> = {
+  seche: "Sèche",
+  tres_seche: "Très sèche / atopique",
+  normale: "Normale",
+  sensible: "Sensible / réactive",
+  mixte: "Mixte (zones sèches et grasses)",
+};
+
+// ─── Skin concerns ────────────────────────────────────────────────────────
 
 // Concerns shown in the SKIN picker. "cuir_chevelu" + "cheveux" used to live
 // here too - they now have a dedicated "Cheveux" section (HAIR_CONCERNS).
@@ -26,14 +63,6 @@ export type SkinConcern =
   | "cuir_chevelu"  // legacy - migrated to HairConcern.cuir_chevelu_sensible
   | "cheveux";       // legacy - dropped (was too ambiguous between secs/gras)
 
-export const SKIN_TYPE_LABEL: Record<SkinType, string> = {
-  seche: "Sèche",
-  mixte: "Mixte",
-  grasse: "Grasse",
-  sensible: "Sensible",
-  normale: "Normale",
-};
-
 export const SKIN_CONCERN_LABEL: Record<SkinConcern, string> = {
   acne: "Acné / imperfections",
   "anti-age": "Anti-âge",
@@ -46,7 +75,7 @@ export const SKIN_CONCERN_LABEL: Record<SkinConcern, string> = {
   cheveux: "Cheveux (longueurs)",
 };
 
-// ─── Hair section (separate picker) ───────────────────────────────────────
+// ─── Hair section ─────────────────────────────────────────────────────────
 
 export const HAIR_CONCERNS = [
   "secs",
@@ -61,18 +90,22 @@ export const HAIR_CONCERN_LABEL: Record<HairConcern, string> = {
   cuir_chevelu_sensible: "Cuir chevelu sensible / affecté",
 };
 
+// ─── Profile ──────────────────────────────────────────────────────────────
+
 export type SkinProfile = {
-  skinType?: SkinType;
+  /** Face skin type (preset). */
+  skinTypeFace?: SkinTypeFace;
+  /** Free-text fallback when the user picked "Autre…" for the face. */
+  otherSkinTypeFace?: string;
+  /** Body skin type (preset). */
+  skinTypeBody?: SkinTypeBody;
+  /** Free-text fallback when the user picked "Autre…" for the body. */
+  otherSkinTypeBody?: string;
   concerns?: SkinConcern[];
   /** Hair-specific concerns. Optional - the picker stays hidden in the
    *  ReadView when empty. */
   hairConcerns?: HairConcern[];
   allergiesFreeform?: string;
-  /** Free-text values when the user picks "Autre" rather than a preset. The
-   *  prompt formatter joins them with the structured fields, so the LLM
-   *  sees both "Type de peau: Sèche" AND "Type de peau (autre): peau d'enfant
-   *  sensible au climat" if both are filled. */
-  otherSkinType?: string;
   otherConcerns?: string;
   otherHair?: string;
   /** Free-text catch-all for anything the user wants to flag that doesn't
@@ -84,7 +117,7 @@ export function readSkinProfile(prefs: Record<string, unknown> | null | undefine
   if (!prefs || typeof prefs !== "object") return {};
   const raw = (prefs as { skin?: unknown }).skin;
   if (!raw || typeof raw !== "object") return {};
-  const r = raw as Partial<Record<keyof SkinProfile, unknown>>;
+  const r = raw as Record<string, unknown>;
 
   // Read concerns, but split out the legacy "cuir_chevelu" / "cheveux" entries
   // and migrate them into the hair section instead.
@@ -109,23 +142,45 @@ export function readSkinProfile(prefs: Record<string, unknown> | null | undefine
       )
     : [];
   const hairSet = new Set<HairConcern>(rawHair);
-  // Legacy "cuir_chevelu" in concerns → "cuir_chevelu_sensible" in hairConcerns.
-  // Legacy "cheveux" is too vague (secs vs gras) - we drop it silently.
   if (rawConcerns.includes("cuir_chevelu")) hairSet.add("cuir_chevelu_sensible");
 
-  const readShort = (key: keyof SkinProfile, max: number): string | undefined => {
+  const readShort = (key: string, max: number): string | undefined => {
     const v = r[key];
     if (typeof v !== "string") return undefined;
     const trimmed = v.trim();
     return trimmed.length > 0 ? trimmed.slice(0, max) : undefined;
   };
 
+  // Face skin type — read the new field, then fall back to legacy `skinType`
+  // ONLY if the new face field is unset. Legacy installs answered the single
+  // question with a face-oriented intent, but the user asked to migrate
+  // legacy values into the BODY slot, so we route them there instead (see
+  // `skinTypeBody` below).
+  const skinTypeFace = SKIN_TYPES_FACE.includes(r.skinTypeFace as SkinTypeFace)
+    ? (r.skinTypeFace as SkinTypeFace)
+    : undefined;
+  const otherSkinTypeFace = readShort("otherSkinTypeFace", 120);
+
+  // Body skin type — new field OR legacy `skinType` (any preset value that
+  // also exists in SKIN_TYPES_BODY) OR legacy `otherSkinType` → other body.
+  const newBody = SKIN_TYPES_BODY.includes(r.skinTypeBody as SkinTypeBody)
+    ? (r.skinTypeBody as SkinTypeBody)
+    : undefined;
+  const legacyBody = SKIN_TYPES_BODY.includes(r.skinType as SkinTypeBody)
+    ? (r.skinType as SkinTypeBody)
+    : undefined;
+  const skinTypeBody = newBody ?? legacyBody;
+  const otherSkinTypeBody =
+    readShort("otherSkinTypeBody", 120) ?? readShort("otherSkinType", 120);
+
   return {
-    skinType: SKIN_TYPES.includes(r.skinType as SkinType) ? (r.skinType as SkinType) : undefined,
+    skinTypeFace,
+    otherSkinTypeFace,
+    skinTypeBody,
+    otherSkinTypeBody,
     concerns: cleanedConcerns.length > 0 ? cleanedConcerns : undefined,
     hairConcerns: hairSet.size > 0 ? Array.from(hairSet) : undefined,
     allergiesFreeform: readShort("allergiesFreeform", 500),
-    otherSkinType: readShort("otherSkinType", 120),
     otherConcerns: readShort("otherConcerns", 300),
     otherHair: readShort("otherHair", 200),
     otherNotes: readShort("otherNotes", 500),
@@ -133,9 +188,19 @@ export function readSkinProfile(prefs: Record<string, unknown> | null | undefine
 }
 
 export function isProfileComplete(p: SkinProfile): boolean {
-  // A custom skin type or concern counts as "complete" — the user explicitly
-  // filled the form, just outside our preset buckets.
-  const hasType = Boolean(p.skinType) || Boolean(p.otherSkinType);
-  const hasConcern = (p.concerns && p.concerns.length > 0) || Boolean(p.otherConcerns);
-  return hasType && hasConcern;
+  // Nothing is required - the profile is considered "started" as soon as
+  // the user has filled at least one signal. Used by /advisor to decide
+  // between the onboarding form and the chat (with the saved summary chip).
+  return (
+    Boolean(p.skinTypeFace) ||
+    Boolean(p.otherSkinTypeFace) ||
+    Boolean(p.skinTypeBody) ||
+    Boolean(p.otherSkinTypeBody) ||
+    (p.concerns?.length ?? 0) > 0 ||
+    Boolean(p.otherConcerns) ||
+    (p.hairConcerns?.length ?? 0) > 0 ||
+    Boolean(p.otherHair) ||
+    Boolean(p.allergiesFreeform) ||
+    Boolean(p.otherNotes)
+  );
 }

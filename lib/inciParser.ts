@@ -19,6 +19,67 @@ const STOP_WORDS = new Set([
   "INCI", "COMPOSITION", "LISTE", "INGREDIENTS:", "INCI:",
 ]);
 
+// Préfixes marketing / qualité qui décorent un nom INCI mais ne FONT PAS partie
+// de la nomenclature (ex : "Certified Organic Coconut Milk" → "Coconut Milk",
+// "Vegetable Glycerin" → "Glycerin"). On les retire de la forme normalisée
+// envoyée au matcher mais on garde `raw` intact pour l'affichage. Liste
+// volontairement conservative : uniquement les qualificatifs qui n'apparaissent
+// jamais comme un nucleus INCI réel.
+const DESCRIPTIVE_PREFIXES: RegExp[] = [
+  /^CERTIFIED\s+ORGANIC\s+/,
+  /^COLD[\s-]+PRESSED\s+/,
+  /^EXTRA\s+VIRGIN\s+/,
+  /^STEAM\s+DISTILLED\s+/,
+  /^FAIR[\s-]?TRADE\s+/,
+  /^WILD[\s-]?CRAFTED\s+/,
+  /^REVERSE\s+OSMOSIS\s+/,
+  /^ISSU\s+DE\s+L'AGRICULTURE\s+BIOLOGIQUE\s+/,
+  /^ORGANIC\s+/,
+  /^NATURAL\s+/,
+  /^NATUREL(LE)?\s+/,
+  /^VEGETABLE\s+/,
+  /^VEGETAL(E)?\s+/,
+  /^VIRGIN\s+/,
+  /^VIERGE\s+/,
+  /^WILD\s+/,
+  /^SAUVAGE\s+/,
+  /^RAW\s+/,
+  /^FRESH\s+/,
+  /^PURE\s+/,
+  /^PURIFIED\s+/,
+  /^PURIFIE(E)?\s+/,
+  /^DISTILLED\s+/,
+  /^DISTILLE(E)?\s+/,
+  /^DEIONIZED\s+/,
+  /^DEMINERALIZED\s+/,
+  /^DEMINERALISE(E)?\s+/,
+  /^FILTERED\s+/,
+  /^FILTRE(E)?\s+/,
+  /^SPRING\s+/,
+  /^IONIZED\s+/,
+  /^BIO\s+/,
+];
+
+// Ne strippe que si le reste reste plausible (≥ 4 caractères) pour ne pas
+// transformer "Vegetable Oil" en "Oil" — un nucleus trop court ne matche
+// jamais correctement.
+function stripDescriptivePrefixes(upper: string): string {
+  let work = upper;
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const re of DESCRIPTIVE_PREFIXES) {
+      const next = work.replace(re, "");
+      if (next !== work && next.trim().length >= 4) {
+        work = next.trim();
+        changed = true;
+        break;
+      }
+    }
+  }
+  return work;
+}
+
 const NOISE_PATTERNS: RegExp[] = [
   /\(F\.?I\.?L\.?\s+[A-Z0-9]+\/?\d*\)/gi,
   /\(\+\/?\-\)/g,                         // (+/-)
@@ -125,12 +186,13 @@ export function parseInciList(text: string): ParsedToken[] {
     const upper = stripAccents(cleaned).toUpperCase();
     if (STOP_WORDS.has(upper)) continue;
     if (/^[\d\s\-+%]+$/.test(upper)) continue; // pure numbers
-    if (seenNormalized.has(upper)) continue;
-    seenNormalized.add(upper);
+    const normalized = stripDescriptivePrefixes(upper);
+    if (seenNormalized.has(normalized)) continue;
+    seenNormalized.add(normalized);
 
     tokens.push({
       raw: cleaned,
-      normalized: upper,
+      normalized,
       position: position++,
     });
   }

@@ -6,8 +6,10 @@ import { GLASS_CARD } from "@/lib/ui/glass";
 import { BeautyProfileForm } from "./BeautyProfileForm";
 import {
   HAIR_CONCERN_LABEL,
+  isProfileComplete,
   SKIN_CONCERN_LABEL,
-  SKIN_TYPE_LABEL,
+  SKIN_TYPE_BODY_LABEL,
+  SKIN_TYPE_FACE_LABEL,
   type SkinProfile,
 } from "@/lib/skin/profile";
 
@@ -26,7 +28,7 @@ import {
 export function SkinProfileCard({ initial }: { initial: SkinProfile }) {
   const [editing, setEditing] = useState(false);
 
-  const filled = Boolean(initial.skinType) && (initial.concerns?.length ?? 0) > 0;
+  const filled = isProfileComplete(initial);
 
   if (!editing) {
     return (
@@ -73,9 +75,12 @@ export function SkinProfileCard({ initial }: { initial: SkinProfile }) {
     );
   }
 
+  // Edit mode: NO outer card. The form's per-section fieldsets already
+  // provide their own chrome, so wrapping them again would just nest cards.
+  // The freed horizontal space is exploited by the form's `lg:grid-cols-2`.
   return (
-    <section className={`${GLASS_CARD} p-5`}>
-      <header className="flex items-center justify-between mb-4">
+    <section>
+      <header className="flex items-center justify-between mb-4 px-1">
         <h2 className="text-sm font-semibold">Profil beauté</h2>
         <button
           type="button"
@@ -97,22 +102,41 @@ export function SkinProfileCard({ initial }: { initial: SkinProfile }) {
 function ReadView({ profile }: { profile: SkinProfile }) {
   const concerns = profile.concerns ?? [];
   const hairConcerns = profile.hairConcerns ?? [];
-  const skinTypeText = profile.skinType
-    ? SKIN_TYPE_LABEL[profile.skinType]
-    : profile.otherSkinType
-      ? `${profile.otherSkinType} (autre)`
-      : "-";
+  const faceText = profile.skinTypeFace
+    ? SKIN_TYPE_FACE_LABEL[profile.skinTypeFace]
+    : profile.otherSkinTypeFace
+      ? `${profile.otherSkinTypeFace} (autre)`
+      : null;
+  const bodyText = profile.skinTypeBody
+    ? SKIN_TYPE_BODY_LABEL[profile.skinTypeBody]
+    : profile.otherSkinTypeBody
+      ? `${profile.otherSkinTypeBody} (autre)`
+      : null;
   return (
     <ul className="divide-y divide-black/[0.06]">
-      <li className="flex items-start gap-3 py-3">
-        <DropIcon className="h-5 w-5 text-rose-500 mt-0.5 shrink-0" />
-        <div className="flex-1 min-w-0">
-          <p className="text-[11px] uppercase tracking-wide text-[#6B7280] font-medium">
-            Type de peau
-          </p>
-          <p className="text-[14px] font-semibold text-ink mt-0.5">{skinTypeText}</p>
-        </div>
-      </li>
+      {faceText && (
+        <li className="flex items-start gap-3 py-3">
+          <DropIcon className="h-5 w-5 text-rose-500 mt-0.5 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] uppercase tracking-wide text-[#6B7280] font-medium">
+              Type de peau visage
+            </p>
+            <p className="text-[14px] font-semibold text-ink mt-0.5">{faceText}</p>
+          </div>
+        </li>
+      )}
+
+      {bodyText && (
+        <li className="flex items-start gap-3 py-3">
+          <DropIcon className="h-5 w-5 text-rose-500 mt-0.5 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] uppercase tracking-wide text-[#6B7280] font-medium">
+              Type de peau corps
+            </p>
+            <p className="text-[14px] font-semibold text-ink mt-0.5">{bodyText}</p>
+          </div>
+        </li>
+      )}
 
       <li className="flex items-start gap-3 py-3">
         <AlertIcon className="h-5 w-5 text-rose-500 mt-0.5 shrink-0" />
