@@ -13,7 +13,6 @@ import { RestrictionsLinkButton } from "@/components/routine/RestrictionsLinkBut
 import { RoutineSimulationModal } from "@/components/routine/RoutineSimulationModal";
 import { InfoBadge, Tooltip } from "@/components/Tooltip";
 import { IngredientBlob } from "@/components/blob/IngredientBlob";
-import { GLASS_CARD, GLASS_CARD_AMBER, GLASS_CARD_ROSE } from "@/lib/ui/glass";
 import { readUserRestrictions } from "@/lib/restrictions/types";
 
 export const metadata = { title: "Ma routine · Cosme Check" };
@@ -150,7 +149,7 @@ export default async function RoutinePage() {
   // Empty state - keep it inviting + make the CTA actually open the scan sheet.
   if (products.length === 0) {
     return (
-      <div className="mx-auto max-w-5xl px-5 lg:px-8 py-8 lg:py-12">
+      <div className="neu-page mx-auto max-w-5xl px-5 lg:px-8 py-8 lg:py-12">
         <header className="mb-8 flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold mb-1">Ma routine quotidienne</h1>
@@ -164,7 +163,7 @@ export default async function RoutinePage() {
           </div>
         </header>
 
-        <div className={`${GLASS_CARD_ROSE} p-8 text-center`}>
+        <div className="neu-rose p-8 text-center">
           <AddProductButton eligibleAnalyses={eligibleAnalyses} variant="ghost" label="+ Ajouter un produit à ma routine" className="text-[15px]" />
           <p className="text-xs text-[#6B7280] mt-2">
             Cherche un produit, scanne un code-barres ou colle une liste INCI - il sera analysé et ajouté à ta routine.
@@ -178,7 +177,7 @@ export default async function RoutinePage() {
   const tagsTop = metrics.tagExposure.slice(0, 8);
 
   return (
-    <div className="mx-auto max-w-6xl px-5 lg:px-8 pt-4 pb-8 lg:py-12">
+    <div className="neu-page mx-auto max-w-6xl px-5 lg:px-8 pt-4 pb-8 lg:py-12">
       {/* Header - mobile: title (with leaf accent) → separator → desc → button (stacked)
                    desktop: title on top, separator under it, then desc + button row */}
       <header>
@@ -192,7 +191,7 @@ export default async function RoutinePage() {
         </div>
 
         {/* Separator immediately under the title (both mobile and desktop) */}
-        <div className="mt-3 -mx-5 h-[2px] bg-black/30 lg:mx-0 lg:mt-4 lg:h-px lg:bg-black/[0.08]" />
+        <div className="mt-3 -mx-5 h-px bg-[#c5ccd6] lg:mx-0 lg:mt-4" />
 
         <div className="lg:flex lg:items-start lg:justify-between lg:gap-4 lg:mt-4">
           <p className="mt-3 text-[12px] text-[#9CA3AF] lg:mt-0">
@@ -212,9 +211,9 @@ export default async function RoutinePage() {
           `lg:contents` on the mobile-only wrapper lets the 2 small cards
           re-join the parent grid on lg+. */}
       <section className="mt-6 mb-6 grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4">
-        <div className={`${GLASS_CARD} p-5 flex items-center gap-4`}>
+        <div className="neu p-5 flex items-center gap-4">
           <div className="min-w-0 flex-1">
-            <div className="text-[11px] uppercase tracking-wide text-[#6B7280] mb-1">Exposition cumulée</div>
+            <div className="text-[11px] uppercase tracking-wide text-black mb-1">Exposition cumulée</div>
             <div className="flex items-baseline gap-1.5">
               <span className={`text-3xl font-bold tabular-nums ${exposureFgCls}`}>
                 {metrics.exposureScore.toFixed(1)}
@@ -224,21 +223,21 @@ export default async function RoutinePage() {
             <div className={`mt-1 text-[12px] font-semibold ${exposureFgCls}`}>{metrics.exposureLabel}</div>
           </div>
           <div className="w-[120px] shrink-0">
-            <IngredientBlob counts={metrics.colorCounts} variant="md" />
+            <IngredientBlob counts={metrics.colorCounts} variant="md" neumorphic />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3 lg:contents">
-          <div className={`${GLASS_CARD} p-3.5 lg:p-5`}>
-            <div className="text-[10px] lg:text-[11px] uppercase tracking-wide text-[#6B7280] mb-0.5 lg:mb-1">Produits actifs</div>
+          <div className="neu p-3.5 lg:p-5">
+            <div className="text-[10px] lg:text-[11px] uppercase tracking-wide text-black mb-0.5 lg:mb-1">Produits actifs</div>
             <div className="text-2xl lg:text-3xl font-bold tabular-nums leading-tight">{productsCount}</div>
             <p className="text-[10px] lg:text-[11px] text-[#9CA3AF] mt-0.5 lg:mt-1 leading-snug">
               {metrics.totalUseUnits.toFixed(1)} u/jour
             </p>
           </div>
 
-          <div className={`${GLASS_CARD} p-3.5 lg:p-5`}>
-            <div className="text-[10px] lg:text-[11px] uppercase tracking-wide text-[#6B7280] mb-0.5 lg:mb-1">Produits pénalisants</div>
+          <div className="neu p-3.5 lg:p-5">
+            <div className="text-[10px] lg:text-[11px] uppercase tracking-wide text-black mb-0.5 lg:mb-1">Produits pénalisants</div>
             <div className="flex items-baseline gap-1.5">
               {metrics.penalizingProductsCount > 0 ? (
                 <Tooltip
@@ -284,7 +283,7 @@ export default async function RoutinePage() {
       {/* 2-column: bar chart + product list */}
       <section className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-3 lg:gap-4 mb-6">
         {/* Left: exposition par catégorie d'ingrédients */}
-        <div className={`${GLASS_CARD} p-5`}>
+        <div className="neu p-5">
           <div className="flex items-center gap-2 mb-1">
             <h2 className="text-[15px] font-semibold">Exposition cumulée par catégorie d&apos;ingrédients</h2>
             <Tooltip
@@ -320,7 +319,7 @@ export default async function RoutinePage() {
               </button>
             </Tooltip>
           </div>
-          <p className="text-[11px] text-[#9CA3AF] mb-4">
+          <p className="text-[11px] text-[#374151] mb-4">
             Plus la barre est longue, plus la catégorie est présente dans ta routine.
           </p>
           {tagsTop.length === 0 ? (
@@ -341,7 +340,7 @@ export default async function RoutinePage() {
         </div>
 
         {/* Right: liste produits */}
-        <div className={`${GLASS_CARD} p-5`}>
+        <div className="neu p-5">
           <h2 className="text-[15px] font-semibold mb-3">Mes produits</h2>
           <ul className="divide-y divide-[#F0F0F0]">
             {items
@@ -377,11 +376,11 @@ export default async function RoutinePage() {
           well-scored product just to bump the average doesn't reflect a real
           improvement. */}
       {metrics.simulation.removableCount > 0 && (
-        <section className={`${GLASS_CARD} p-5 mb-6`}>
+        <section className="neu p-5 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             <div className="min-w-0 flex-1">
               <h2 className="text-[15px] font-semibold mb-1">Simulation</h2>
-              <p className="text-[13px] text-[#6B7280]">
+              <p className="text-[13px] text-[#374151]">
                 {metrics.simulation.removableCount === 1
                   ? "Que se passe-t-il si je retire le produit le plus pénalisant ?"
                   : "Que se passe-t-il si je retire les 2 produits les plus pénalisants ?"}
@@ -409,7 +408,7 @@ export default async function RoutinePage() {
 
       {/* Allergen overlap warning */}
       {metrics.allergenOverlap.length > 0 && (
-        <section className={`${GLASS_CARD_AMBER} p-4 mb-6`}>
+        <section className="neu-amber p-4 mb-6">
           <h2 className="text-sm font-semibold text-amber-900 mb-2">
             ⚠️ Allergènes parfumants en doublon
           </h2>

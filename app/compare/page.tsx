@@ -181,15 +181,10 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
       <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 mb-6">
         {[a, b].map((side) => (
           <article key={side.id} className={`${GLASS_CARD} p-4 lg:p-5`}>
-            <div className="flex items-baseline justify-between gap-3 mb-2">
-              <h2 className="text-[14px] lg:text-[15px] font-semibold text-ink line-clamp-2 flex-1 min-w-0">
+            <div className="mb-2">
+              <h2 className="text-[14px] lg:text-[15px] font-semibold text-ink line-clamp-2">
                 {side.name}
               </h2>
-              {side.score !== null ? (
-                <span className="text-[13px] font-semibold text-ink-subtle tabular-nums shrink-0">
-                  {side.score.toFixed(1)}/20
-                </span>
-              ) : null}
             </div>
 
             <ExposureBar

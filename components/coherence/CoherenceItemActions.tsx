@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { deleteCoherenceAnalysis } from "@/app/promesses/actions";
-import { GLASS_CARD, GLASS_PILL } from "@/lib/ui/glass";
 
 /**
  * Three-dot menu button for a coherence analysis row. Shows a tiny popover
@@ -36,7 +35,7 @@ export function CoherenceItemActions({ id }: { id: string }) {
           setOpen((s) => !s);
         }}
         aria-label="Plus d'actions"
-        className={`${GLASS_PILL} h-9 w-9 inline-flex items-center justify-center`}
+        className="neu-sm rounded-full h-9 w-9 inline-flex items-center justify-center text-[#6B7280] hover:text-[#111111] transition"
       >
         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
           <circle cx="5" cy="12" r="1.6" />
@@ -47,7 +46,7 @@ export function CoherenceItemActions({ id }: { id: string }) {
 
       {open && (
         <div
-          className={`${GLASS_CARD} absolute right-0 top-11 z-30 w-52 p-2`}
+          className="neu-menu absolute right-0 top-11 z-30 w-52 p-2"
           onMouseLeave={() => setOpen(false)}
         >
           <button

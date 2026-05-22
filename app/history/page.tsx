@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { HistoryList } from "@/components/history/HistoryList";
-import { GLASS_CARD, GLASS_PILL_DARK } from "@/lib/ui/glass";
 
 export const metadata = { title: "Mon historique · Cosme Check" };
 export const dynamic = "force-dynamic";
@@ -112,17 +111,17 @@ export default async function HistoryPage() {
   });
 
   return (
-    <div className="mx-auto max-w-4xl px-5 lg:px-8 py-8 lg:py-12">
+    <div className="neu-page mx-auto max-w-4xl px-5 lg:px-8 py-8 lg:py-12">
       <h1 className="text-2xl lg:text-3xl font-bold mb-2">Mon historique</h1>
 
       {analyses.length === 0 ? (
-        <div className={`${GLASS_CARD} p-8 text-center mt-6`}>
+        <div className="neu p-8 text-center mt-6">
           <p className="text-sm text-[#6B7280] mb-4">
             Lance ta première analyse depuis la page d&apos;accueil.
           </p>
           <Link
             href="/"
-            className={`${GLASS_PILL_DARK} inline-block px-5 py-2.5 text-sm font-semibold`}
+            className="neu-btn-primary inline-block rounded-full px-5 py-2.5 text-sm"
           >
             Analyser un produit
           </Link>

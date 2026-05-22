@@ -5,6 +5,9 @@
 @layer base {
   :root {
     color-scheme: light only;
+    --neu-bg: #e8ecf1;
+    --neu-shadow-light: #ffffff;
+    --neu-shadow-dark: #c5ccd6;
   }
 
   html,
@@ -147,6 +150,147 @@
       transform: none;
       animation: none;
     }
+  }
+
+  /* ── Neumorphism ───────────────────────────────────────────────── */
+  .neu {
+    background: var(--neu-bg);
+    box-shadow: 6px 6px 14px var(--neu-shadow-dark),
+               -6px -6px 14px var(--neu-shadow-light);
+    border-radius: 16px;
+  }
+  .neu-sm {
+    background: var(--neu-bg);
+    box-shadow: 3px 3px 8px var(--neu-shadow-dark),
+               -3px -3px 8px var(--neu-shadow-light);
+    border-radius: 12px;
+  }
+  /* Soft-UI white variant of .neu-sm. Same dual shadow language, but the
+     surface is white so the element reads more clearly against a neu page. */
+  .neu-sm-white {
+    background: #ffffff;
+    box-shadow: 3px 3px 8px var(--neu-shadow-dark),
+               -3px -3px 8px var(--neu-shadow-light);
+    border-radius: 12px;
+  }
+  /* Dropdown panel that pairs with .neu-sm-white triggers — white surface,
+     soft outer shadow, no Tailwind ring/border so the chrome stays clean. */
+  .neu-menu {
+    background: #ffffff;
+    box-shadow: 6px 6px 14px var(--neu-shadow-dark),
+               -6px -6px 14px var(--neu-shadow-light);
+    border-radius: 12px;
+  }
+  /* Colour-preserving neumorphic shadow wrapper — apply alongside any
+     coloured pill / button to give it the same dual-shadow lift as .neu.
+     Stronger / more opaque than the neutral neu shadow so the lift reads
+     against any background tone (white, dark gradient, accent colours). */
+  .neu-shadow {
+    box-shadow: 8px 8px 16px rgba(163, 177, 198, 0.55),
+               -6px -6px 14px rgba(255, 255, 255, 0.85);
+  }
+  .neu-shadow:hover {
+    box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6),
+               -6px -6px 14px rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+  }
+  .neu-shadow:active {
+    transform: translateY(0);
+    box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.25);
+  }
+  /* Variant of .neu-shadow with a blue/indigo-tinted drop shadow instead of
+     the neutral grey one — used by the "Mes restrictions" CTA so its lift
+     reads in the button's own indigo hue. */
+  .neu-shadow-blue {
+    box-shadow: 8px 8px 16px rgba(79, 70, 229, 0.5),
+               -6px -6px 14px rgba(255, 255, 255, 0.85);
+  }
+  .neu-shadow-blue:hover {
+    box-shadow: 10px 10px 20px rgba(79, 70, 229, 0.55),
+               -6px -6px 14px rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+  }
+  .neu-shadow-blue:active {
+    transform: translateY(0);
+    box-shadow: inset 3px 3px 6px rgba(40, 30, 120, 0.35);
+  }
+  .neu-hover:hover {
+    box-shadow: 8px 8px 18px var(--neu-shadow-dark),
+               -8px -8px 18px var(--neu-shadow-light);
+  }
+  .neu-inset {
+    background: var(--neu-bg);
+    box-shadow: inset 4px 4px 9px var(--neu-shadow-dark),
+                inset -4px -4px 9px var(--neu-shadow-light);
+    border-radius: 12px;
+  }
+  /* Thin sunken track for progress / exposure bars. Same dual inset shadow
+     as .neu-inset, but tuned for tiny heights (≤ 12 px) so the soft groove
+     reads without crushing the coloured fill that sits on top. */
+  .neu-track {
+    background: var(--neu-bg);
+    box-shadow: inset 2px 2px 4px var(--neu-shadow-dark),
+                inset -2px -2px 4px var(--neu-shadow-light);
+  }
+  .neu-btn {
+    background: var(--neu-bg);
+    box-shadow: 4px 4px 9px var(--neu-shadow-dark),
+               -4px -4px 9px var(--neu-shadow-light);
+    border-radius: 12px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .neu-btn:hover {
+    box-shadow: 5px 5px 11px var(--neu-shadow-dark),
+               -5px -5px 11px var(--neu-shadow-light);
+  }
+  .neu-btn:active {
+    box-shadow: inset 3px 3px 6px var(--neu-shadow-dark),
+                inset -3px -3px 6px var(--neu-shadow-light);
+  }
+  .neu-btn-primary {
+    background: linear-gradient(145deg, #9b6ef5, #7c3aed);
+    box-shadow: 4px 4px 9px var(--neu-shadow-dark),
+               -2px -2px 6px var(--neu-shadow-light);
+    border-radius: 12px;
+    border: none;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .neu-btn-primary:hover {
+    box-shadow: 5px 5px 12px var(--neu-shadow-dark),
+               -2px -2px 5px var(--neu-shadow-light);
+    transform: translateY(-1px);
+  }
+  .neu-btn-primary:active {
+    transform: translateY(0);
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Tinted neumorphic surfaces - keep the warning/info colour but adopt the
+     same dual-shadow language as the neutral .neu cards. */
+  .neu-rose {
+    background: linear-gradient(135deg, #FFE4E6 0%, #FFF1F2 100%);
+    box-shadow: 6px 6px 14px var(--neu-shadow-dark),
+               -6px -6px 14px var(--neu-shadow-light);
+    border-radius: 16px;
+  }
+  .neu-amber {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%);
+    box-shadow: 6px 6px 14px var(--neu-shadow-dark),
+               -6px -6px 14px var(--neu-shadow-light);
+    border-radius: 16px;
+  }
+
+  /* Pages that opt into the neumorphic surface stack the `.neu-page` class on
+     a top-level element. The body background switches to the neu base so the
+     shadows on .neu cards actually read against the right tone. */
+  body:has(.neu-page) {
+    background: var(--neu-bg);
   }
 
 }

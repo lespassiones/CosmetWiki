@@ -46,7 +46,7 @@ export function TagExposureBar({
         <span className="font-medium text-[#111111]">{label}</span>
         <span className="text-[#6B7280] tabular-nums">{count.toFixed(2)}/j</span>
       </div>
-      <div className="h-2 bg-[#F3F4F6] rounded-full overflow-hidden">
+      <div className="neu-track h-2.5 rounded-full overflow-hidden">
         <div
           className="h-full rounded-full transition-[width] duration-500"
           style={{ width: `${pct}%`, ...barStyle }}

@@ -112,7 +112,7 @@ export function AppShell({
   if (!signedIn) return <>{children}</>;
 
   return (
-    <div className="relative isolate min-h-svh bg-[#FAFAFA] overflow-x-hidden">
+    <div className="relative isolate min-h-svh overflow-x-hidden">
       {/* Pastel orbs behind everything - gives the glass surfaces something to
           refract and ties the signed-in pages to the public landing visual
           language. */}
@@ -215,13 +215,21 @@ function NavBtnMobile({
         active ? "text-[#F43F5E]" : "text-[#4B5563]"
       }`}
     >
-      {active && (
-        <span
-          aria-hidden
-          className="absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-6 rounded-full bg-[#F43F5E]"
-        />
-      )}
-      <Icon className="h-5 w-5" />
+      <span
+        aria-hidden
+        className="flex items-center justify-center h-8 w-8 rounded-full transition"
+        style={
+          active
+            ? {
+                background: "#FFD1DC",
+                boxShadow:
+                  "3px 3px 6px #E8A8B4, -3px -3px 6px #FFF0F3",
+              }
+            : undefined
+        }
+      >
+        <Icon className="h-5 w-5" />
+      </span>
       <span className={active ? "font-semibold" : ""}>{label}</span>
     </Link>
   );

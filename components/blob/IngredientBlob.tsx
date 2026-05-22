@@ -26,6 +26,20 @@ const BLOB_COLORS: Record<ColorKey, string> = {
   rouge: "#E0432A",
 };
 
+/**
+ * Per-colour shadow tints for the neumorphic variant. Instead of a single
+ * neutral grey shadow under the whole donut, each slice casts a drop-shadow in
+ * its OWN colour (a slightly darker take on BLOB_COLORS) - so the shadow under
+ * the green arc is green, the one under the amber arc amber, etc. (rouge is
+ * already covered for when a red slice is present).
+ */
+const BLOB_SHADOW: Record<ColorKey, string> = {
+  vert: "rgba(123, 176, 67, 0.7)",
+  jaune: "rgba(214, 165, 44, 0.68)",
+  orange: "rgba(214, 118, 40, 0.68)",
+  rouge: "rgba(190, 52, 28, 0.68)",
+};
+
 const BLOB_TEXT: Record<ColorKey, string> = {
   vert: "text-[#84B043]",
   jaune: "text-[#D4A017]",
@@ -140,6 +154,17 @@ const GEOMETRY: Record<Variant, Geom> = {
 };
 
 /**
+ * Offset + blur (in viewBox units) of the per-slice colour shadow used by the
+ * neumorphic variant. Kept small enough to stay inside each variant's viewBox
+ * so the shadow is never clipped by the SVG bounds.
+ */
+const NEU_SLICE_SHADOW: Record<Variant, { dx: number; dy: number; blur: number }> = {
+  lg: { dx: 3, dy: 9, blur: 13 },
+  md: { dx: 1.5, dy: 5, blur: 7 },
+  sm: { dx: 0.5, dy: 1.8, blur: 2.5 },
+};
+
+/**
  * Distribute the half-circle's 180° among the colours that actually have at
  * least one ingredient.
  *
@@ -200,6 +225,7 @@ export function IngredientBlob({
   className = "",
   animate = false,
   subtitle,
+  neumorphic = false,
 }: {
   counts: BlobCounts;
   variant?: Variant;
@@ -226,8 +252,16 @@ export function IngredientBlob({
    * centre count but above the colour legend.
    */
   subtitle?: ReactNode;
+  /**
+   * When true, swaps the per-slice "claymorphism" drop-shadow for a single
+   * neumorphic dual shadow on the whole half-ring: a dark shadow toward the
+   * bottom-right and a white highlight toward the top-left, so the donut reads
+   * as gently extruded from the surrounding `.neu` card surface.
+   */
+  neumorphic?: boolean;
 }) {
   const geom = GEOMETRY[variant];
+  const neuSliceShadow = NEU_SLICE_SHADOW[variant];
   const total = counts.vert + counts.jaune + counts.orange + counts.rouge;
   const slices = computeSlices(counts);
 
@@ -305,6 +339,17 @@ export function IngredientBlob({
     <svg
       viewBox={`0 0 ${geom.width} ${geom.height}`}
       className={`h-auto w-full ${animate ? "blob-pop-in" : ""}`}
+      style={
+        neumorphic
+          ? {
+              // The dark side of the neumorphic shadow is rendered per-slice
+              // (each arc casts a shadow in its own colour - see the <path>
+              // filter below); only the white top-left highlight is applied
+              // to the whole donut here.
+              filter: "drop-shadow(-4px -4px 7px var(--neu-shadow-light))",
+            }
+          : undefined
+      }
       role="img"
       aria-label={ariaLabel}
     >
@@ -313,7 +358,7 @@ export function IngredientBlob({
         edges, so we can apply the claymorphism shadow per-slice without
         the doubled-shadow artefact at junctions.
       */}
-      <g style={{ filter: geom.shadow }}>
+      <g style={{ filter: neumorphic ? undefined : geom.shadow }}>
         {gappedSlices.map((s, i) => (
           <path
             key={s.color}
@@ -323,6 +368,16 @@ export function IngredientBlob({
               sliceEdges[i].leftEdge,
               sliceEdges[i].rightEdge,
             )}
+            // Neumorphic variant: each slice casts a soft shadow in its OWN
+            // colour, just below the arc - the green section gets a green
+            // shadow, the amber one an amber shadow, and so on.
+            style={
+              neumorphic
+                ? {
+                    filter: `drop-shadow(${neuSliceShadow.dx}px ${neuSliceShadow.dy}px ${neuSliceShadow.blur}px ${BLOB_SHADOW[s.color]})`,
+                  }
+                : undefined
+            }
             fill={BLOB_COLORS[s.color]}
             // Same-colour stroke with rounded joins/caps softens every
             // corner (radial-edge ↔ inner/outer arc) and the wavy radial

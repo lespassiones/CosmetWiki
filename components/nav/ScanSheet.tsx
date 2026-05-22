@@ -41,13 +41,13 @@ type TileAction =
 const TILES: {
   action: TileAction;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   icon: (p: { className?: string }) => React.JSX.Element;
   isNew?: boolean;
 }[] = [
   { action: { kind: "view", view: "barcode" }, title: "Code-barres", subtitle: "Scan rapide en magasin", icon: BarcodeIcon },
   { action: { kind: "view", view: "paste" }, title: "Coller la composition", subtitle: "Liste INCI texte", icon: ClipboardIcon },
-  { action: { kind: "route", href: "/scan/photo" }, title: "Photo de la composition", subtitle: "OCR automatique", icon: CameraIcon, isNew: true },
+  { action: { kind: "route", href: "/scan/photo" }, title: "Photo de la composition", icon: CameraIcon, isNew: true },
   { action: { kind: "view", view: "search" }, title: "Rechercher un produit", subtitle: "Par nom ou marque", icon: SearchIcon },
 ];
 
@@ -264,7 +264,9 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
                   )}
                   <tile.icon className="h-7 w-7 text-[#111111] mb-2" />
                   <div className="text-[14px] font-semibold leading-snug">{tile.title}</div>
-                  <div className="text-[12px] text-[#6B7280] mt-1 leading-snug">{tile.subtitle}</div>
+                  {tile.subtitle && (
+                    <div className="text-[12px] text-[#6B7280] mt-1 leading-snug">{tile.subtitle}</div>
+                  )}
                 </button>
               ))}
             </div>

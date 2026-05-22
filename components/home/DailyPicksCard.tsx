@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { GLASS_CARD, GLASS_PILL_DARK } from "@/lib/ui/glass";
 import type { DailyPickItem } from "@/lib/dailyPicks/select";
 
 /**
@@ -111,13 +110,13 @@ export function DailyPicksCard() {
   if (!hydrated || items === null) {
     if (error) {
       return (
-        <article className={`${GLASS_CARD} p-5`}>
+        <article className={"neu p-5"}>
           <p className="text-[12px] text-rose-700">{error}</p>
         </article>
       );
     }
     return (
-      <article className={`${GLASS_CARD} p-5 lg:p-6`}>
+      <article className={"neu p-5 lg:p-6"}>
         <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-subtle mb-3">
           Quizz & idées reçues du jour
         </div>
@@ -131,7 +130,7 @@ export function DailyPicksCard() {
 
   if (items.length === 0) {
     return (
-      <article className={`${GLASS_CARD} p-5`}>
+      <article className={"neu p-5"}>
         <p className="text-[13px] text-[#6B7280]">
           Pas de contenu disponible aujourd&apos;hui. Reviens bientôt.
         </p>
@@ -158,14 +157,14 @@ export function DailyPicksCard() {
             ? "Pas mal, continue comme ça."
             : "Tu feras mieux la prochaine fois.";
     return (
-      <article className={`${GLASS_CARD} p-5 lg:p-6 text-center`}>
+      <article className={"neu p-5 lg:p-6 text-center"}>
         <div aria-hidden className="text-3xl mb-2">✨</div>
         <h3 className="text-[15px] font-semibold mb-2">
           C&apos;est tout pour aujourd&apos;hui !
         </h3>
 
         <div
-          className={`inline-flex items-baseline gap-1 rounded-full ring-1 px-4 py-1.5 mb-2 ${scoreTone}`}
+          className={`inline-flex items-baseline gap-1 rounded-xl ring-1 px-4 py-1.5 mb-2 ${scoreTone}`}
         >
           <span className="text-[20px] font-bold tabular-nums">{score}</span>
           <span className="text-[13px] font-medium opacity-70">/ {total}</span>
@@ -191,7 +190,7 @@ export function DailyPicksCard() {
   const correctIdx = item.correct_index;
 
   return (
-    <article className={`${GLASS_CARD} p-5 lg:p-6`}>
+    <article className={"neu p-5 lg:p-6"}>
       {/* Header row: progress + kind tag */}
       <div className="flex items-center justify-between mb-3">
         <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-subtle">
@@ -203,7 +202,7 @@ export function DailyPicksCard() {
       </div>
 
       {/* Progress bar */}
-      <div className="h-1 w-full rounded-full bg-[#F3F4F6] overflow-hidden mb-4">
+      <div className="h-1 w-full rounded-full bg-[#d8dde6] overflow-hidden mb-4">
         <div
           className="h-full bg-gradient-to-r from-rose-400 to-pink-500 rounded-full transition-[width] duration-500"
           style={{ width: `${((index + (picked !== null ? 1 : 0)) / items.length) * 100}%` }}
@@ -223,14 +222,14 @@ export function DailyPicksCard() {
           // After the user picks, we colour both their choice and the
           // correct choice. Untouched options fade.
           const showResult = picked !== null;
-          let cls = "bg-white ring-1 ring-[#E5E7EB] hover:ring-[#111111] text-ink";
+          let cls = "neu-sm";
           if (showResult) {
             if (isCorrect) {
-              cls = "bg-emerald-50 ring-1 ring-emerald-300 text-emerald-800";
+              cls = "rounded-[12px] bg-emerald-50 text-emerald-800";
             } else if (isPicked) {
-              cls = "bg-rose-50 ring-1 ring-rose-300 text-rose-700";
+              cls = "rounded-[12px] bg-rose-50 text-rose-700";
             } else {
-              cls = "bg-[#FAFAFA] ring-1 ring-[#E5E7EB] text-[#9CA3AF]";
+              cls = "neu-sm opacity-50";
             }
           }
           return (
@@ -239,7 +238,7 @@ export function DailyPicksCard() {
                 type="button"
                 disabled={picked !== null}
                 onClick={() => setPicked(i)}
-                className={`w-full rounded-2xl px-4 py-3 text-left text-[14px] font-medium transition disabled:cursor-default ${cls}`}
+                className={`w-full rounded-[12px] px-4 py-3 text-left text-[14px] font-medium transition disabled:cursor-default ${cls}`}
               >
                 <span className="inline-flex items-center gap-2">
                   {showResult && isCorrect && <span aria-hidden>✓</span>}
@@ -254,7 +253,7 @@ export function DailyPicksCard() {
 
       {/* Reveal panel - only after the user has picked */}
       {picked !== null && (
-        <div className="mt-4 rounded-2xl bg-sky-50 ring-1 ring-sky-100 p-4">
+        <div className="mt-4 rounded-xl bg-sky-50 p-4">
           <div className="text-[11px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
             Réponse
           </div>
@@ -262,7 +261,7 @@ export function DailyPicksCard() {
           <button
             type="button"
             onClick={() => next(picked === correctIdx)}
-            className={`${GLASS_PILL_DARK} mt-4 w-full text-[13px] font-semibold py-2.5`}
+            className="neu-btn-primary mt-4 w-full text-[13px] py-2.5"
           >
             {index + 1 < items.length ? "Suivant →" : "Voir mon score"}
           </button>

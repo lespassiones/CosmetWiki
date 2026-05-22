@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { GLASS_CARD_VIOLET } from "@/lib/ui/glass";
 
 const AUTO_ROTATE_MS = 10_000;
 const SWIPE_THRESHOLD_PX = 40;
@@ -54,7 +53,7 @@ export function TipCarousel({ tips }: { tips: string[] }) {
 
   return (
     <div
-      className={`mt-4 ${GLASS_CARD_VIOLET} p-4 lg:p-5 select-none`}
+      className="mt-4 neu p-4 lg:p-5 select-none"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={onTouchStart}
@@ -70,7 +69,7 @@ export function TipCarousel({ tips }: { tips: string[] }) {
           {tips.map((tip, i) => (
             <p
               key={i}
-              aria-hidden={i !== index}
+              aria-hidden={i !== index ? true : undefined}
               className={`text-[13px] text-[#111111] leading-snug text-justify hyphens-auto transition-all duration-500 ${
                 i === index
                   ? "relative opacity-100 translate-x-0"
@@ -96,7 +95,7 @@ export function TipCarousel({ tips }: { tips: string[] }) {
             type="button"
             onClick={() => go(index - 1)}
             aria-label="Astuce précédente"
-            className="h-6 w-6 rounded-full bg-white/70 ring-1 ring-violet-200/70 text-violet-600 hover:bg-white transition flex items-center justify-center"
+            className="neu-sm h-6 w-6 flex items-center justify-center text-violet-600 transition"
           >
             <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden>
               <path d="m15 6-6 6 6 6" />
@@ -123,7 +122,7 @@ export function TipCarousel({ tips }: { tips: string[] }) {
             type="button"
             onClick={() => go(index + 1)}
             aria-label="Astuce suivante"
-            className="h-6 w-6 rounded-full bg-white/70 ring-1 ring-violet-200/70 text-violet-600 hover:bg-white transition flex items-center justify-center"
+            className="neu-sm h-6 w-6 flex items-center justify-center text-violet-600 transition"
           >
             <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden>
               <path d="m9 6 6 6-6 6" />

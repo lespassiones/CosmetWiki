@@ -215,53 +215,51 @@ export function PhotoOcrFlow() {
       </header>
 
       {step === "capture" && (
-        <div className="flex-1 overflow-auto px-5 pb-6">
-          <p className="text-[13px] text-white/70 text-center max-w-md mx-auto mt-1 mb-5">
-            Prends <span className="font-semibold text-white">deux photos</span> : le devant pour identifier le produit, le dos pour lire les ingrédients. Les photos ne sont pas stockées.
-          </p>
-
-          <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
-            <UploadZone
-              label="Devant"
-              hint="Nom & marque"
-              optional
-              preview={frontPreview}
-              onPick={pickFront}
-              inputRef={frontInputRef}
-            />
-            <UploadZone
-              label="Dos"
-              hint="Liste INCI"
-              preview={backPreview}
-              onPick={pickBack}
-              inputRef={backInputRef}
-            />
-          </div>
-
-          <p className="text-[11px] text-white/40 text-center mt-4 max-w-md mx-auto">
-            Le dos est obligatoire. Sans le devant, l&apos;analyse reste possible mais on ne pourra pas identifier le produit automatiquement.
-          </p>
-
-          {errorMsg && (
-            <p role="alert" className="mt-3 max-w-md mx-auto text-[12px] text-rose-300 bg-rose-500/10 border border-rose-500/30 rounded-lg px-3 py-2">
-              {errorMsg}
+        <div className="flex-1 overflow-auto px-5">
+          <div className="min-h-full flex flex-col justify-center py-6">
+            <p className="text-[13px] text-white/70 text-center max-w-md mx-auto mb-5">
+              Prends <span className="font-semibold text-white">deux photos</span> : le devant pour identifier le produit, le dos pour lire les ingrédients. Les photos ne sont pas stockées.
             </p>
-          )}
 
-          <div className="mt-6 max-w-md mx-auto">
-            <button
-              type="button"
-              onClick={process}
-              disabled={!backFile}
-              className="w-full rounded-xl bg-white text-black text-sm font-semibold py-3 hover:bg-white/90 transition disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {backFile && frontFile ? "Analyser les deux photos" : backFile ? "Analyser (sans la photo de devant)" : "Ajoute au moins la photo du dos"}
-            </button>
+            <div className="grid grid-cols-2 gap-3 max-w-md mx-auto w-full">
+              <UploadZone
+                label="Devant"
+                hint="Nom & marque"
+                optional
+                preview={frontPreview}
+                onPick={pickFront}
+                inputRef={frontInputRef}
+              />
+              <UploadZone
+                label="Dos"
+                hint="Liste INCI"
+                preview={backPreview}
+                onPick={pickBack}
+                inputRef={backInputRef}
+              />
+            </div>
+
+            <p className="text-[11px] text-white/40 text-center mt-4 max-w-md mx-auto">
+              Le dos est obligatoire. Sans le devant, l&apos;analyse reste possible mais on ne pourra pas identifier le produit automatiquement.
+            </p>
+
+            {errorMsg && (
+              <p role="alert" className="mt-3 max-w-md mx-auto text-[12px] text-rose-300 bg-rose-500/10 border border-rose-500/30 rounded-lg px-3 py-2">
+                {errorMsg}
+              </p>
+            )}
+
+            <div className="mt-6 max-w-md mx-auto w-full">
+              <button
+                type="button"
+                onClick={process}
+                disabled={!backFile}
+                className="w-full rounded-xl bg-white text-black text-sm font-semibold py-3 hover:bg-white/90 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {backFile && frontFile ? "Analyser les deux photos" : backFile ? "Analyser (sans la photo de devant)" : "Ajoute au moins la photo du dos"}
+              </button>
+            </div>
           </div>
-
-          <p className="text-[11px] text-white/40 text-center mt-3 max-w-md mx-auto">
-            Analyse via GPT-4o-mini Vision · Tesseract.js en secours si indisponible
-          </p>
         </div>
       )}
 

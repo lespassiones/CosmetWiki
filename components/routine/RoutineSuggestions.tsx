@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import type { RoutineMetrics, RoutineProduct } from "@/lib/routine/engine";
-import { GLASS_CARD, GLASS_PILL_DARK } from "@/lib/ui/glass";
 
 type Suggestion = {
   text: string;
@@ -53,14 +52,14 @@ export function RoutineSuggestions({
 
   if (suggestions === null) {
     return (
-      <section className={`${GLASS_CARD} p-5 mb-6`}>
+      <section className="neu p-5 mb-6">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
             <h2 className="text-[15px] font-semibold flex items-center gap-2">
               <span aria-hidden>✨</span>
               Suggestions intelligentes
             </h2>
-            <p className="text-[12px] text-[#6B7280] mt-1">
+            <p className="text-[12px] text-[#374151] mt-1">
               Idées concrètes pour réduire ton exposition cumulée, basées sur ta routine actuelle.
             </p>
           </div>
@@ -68,7 +67,7 @@ export function RoutineSuggestions({
             type="button"
             onClick={load}
             disabled={pending}
-            className={`${GLASS_PILL_DARK} text-sm font-semibold px-4 py-2.5 disabled:opacity-50`}
+            className="neu-shadow inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[#1F2937] via-[#111111] to-[#0A0A0A] text-white text-sm font-semibold px-4 py-2.5 hover:brightness-110 transition disabled:opacity-50"
           >
             {pending ? "Génération…" : "Générer"}
           </button>
@@ -81,7 +80,7 @@ export function RoutineSuggestions({
   }
 
   return (
-    <section className={`${GLASS_CARD} p-5 mb-6`}>
+    <section className="neu p-5 mb-6">
       <div className="flex items-center justify-between gap-3 mb-3">
         <h2 className="text-[15px] font-semibold flex items-center gap-2">
           <span aria-hidden>✨</span>

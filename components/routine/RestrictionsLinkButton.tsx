@@ -10,8 +10,7 @@ export function RestrictionsLinkButton({ count }: { count: number }) {
   return (
     <Link
       href="/profile/restrictions"
-      className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/15 shadow-[0_14px_30px_-12px_rgba(79,70,229,0.50),inset_0_1px_0_rgba(255,255,255,0.18)] hover:brightness-110 transition"
-      style={{ background: "linear-gradient(135deg, #6C3FD8 0%, #4F46E5 55%, #7C3AED 100%)" }}
+      className="neu-shadow-blue inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white bg-gradient-to-br from-[#6C3FD8] via-[#4F46E5] to-[#7C3AED] hover:brightness-110 transition"
     >
       <ShieldIcon className="h-4 w-4 text-white" />
       Mes restrictions

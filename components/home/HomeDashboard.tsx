@@ -1,11 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import {
-  GLASS_CARD,
-  GLASS_CARD_DARK,
-  GLASS_CARD_HOVER,
-} from "@/lib/ui/glass";
 import { IngredientBlob, type BlobCounts } from "../blob/IngredientBlob";
 import { TipCarousel } from "./TipCarousel";
 
@@ -108,7 +103,7 @@ function PenaltyPill({
   const iconCls = size === "sm" ? "h-2.5 w-2.5" : "h-3 w-3";
   return (
     <span
-      className={`inline-flex items-center rounded-full ${sizeCls} ${PENALTY_PILL[tone]}`}
+      className={`inline-flex items-center rounded-md ${sizeCls} ${PENALTY_PILL[tone]}`}
     >
       <LeafIcon className={iconCls} />
       <span className="font-semibold">{pct} %</span>
@@ -130,7 +125,7 @@ export function HomeDashboard({
     <section aria-label="Tableau de bord" className="mx-auto w-full max-w-6xl px-5 lg:px-8 mt-2 lg:mt-6">
       <h1 className="text-[26px] lg:text-[36px] leading-tight font-bold tracking-tight">{greeting}</h1>
 
-      <div className="mt-3 -mx-5 h-[2px] bg-black/30 lg:mx-0 lg:mt-4 lg:h-px lg:bg-black/[0.08]" />
+      <div className="mt-3 -mx-5 h-px bg-[#c5ccd6] lg:mx-0 lg:mt-4" />
 
       <p className="mt-3 lg:mt-4 text-sm lg:text-base text-[#6B7280]">
         Décrypte tes cosmétiques{" "}
@@ -165,11 +160,10 @@ export function HomeDashboard({
       <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
         <Link
           href="/advisor"
-          className="block rounded-3xl overflow-hidden transition group relative"
-          style={{ background: "linear-gradient(135deg, #6C3FD8 0%, #4F46E5 55%, #7C3AED 100%)" }}
+          className="block rounded-2xl overflow-hidden transition group relative"
+          style={{ background: "linear-gradient(135deg, #6C3FD8 0%, #4F46E5 55%, #7C3AED 100%)", boxShadow: "6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light)" }}
         >
           <div className="flex items-stretch">
-            {/* Personnage — remplit toute la hauteur, tête clippée en haut par overflow-hidden */}
             <div className="relative w-[100px] shrink-0">
               <Image
                 src="/image/petiteImage/portion.webp"
@@ -180,7 +174,6 @@ export function HomeDashboard({
               />
             </div>
 
-            {/* Texte */}
             <div className="flex-1 min-w-0 py-3 pl-3 pr-2">
               <div className="text-[15px] lg:text-[16px] font-bold text-white tracking-tight leading-tight">
                 Beauty Advisor <span aria-hidden>✨</span>
@@ -189,8 +182,13 @@ export function HomeDashboard({
                 Pose tes questions sur ta routine.
                 L&apos;assistant t&apos;appuie sur ton profil et tes analyses.
               </p>
-              {/* Bouton visible sur mobile uniquement */}
-              <div className="lg:hidden mt-2 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-[11px] text-white font-semibold ring-1 ring-white/25">
+              <div
+                className="lg:hidden mt-2 inline-flex items-center gap-2 rounded-xl bg-white/15 px-3 py-1.5 text-[11px] text-white font-semibold"
+                style={{
+                  boxShadow:
+                    "3px 3px 8px rgba(28, 16, 64, 0.6), -3px -3px 8px rgba(255, 255, 255, 0.18)",
+                }}
+              >
                 <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
@@ -198,16 +196,21 @@ export function HomeDashboard({
               </div>
             </div>
 
-            {/* Séparateur + bouton + flèche — desktop uniquement */}
             <div className="hidden lg:flex items-center gap-3 py-4 pr-4 shrink-0">
               <div className="self-stretch w-px bg-white/20 mx-1" />
-              <div className="flex items-center gap-2 rounded-full bg-white/15 hover:bg-white/25 transition px-4 py-2 text-[12px] text-white font-semibold ring-1 ring-white/25">
+              <div
+                className="flex items-center gap-2 rounded-xl bg-white/15 hover:bg-white/25 transition px-4 py-2 text-[12px] text-white font-semibold"
+                style={{
+                  boxShadow:
+                    "3px 3px 8px rgba(28, 16, 64, 0.6), -3px -3px 8px rgba(255, 255, 255, 0.18)",
+                }}
+              >
                 <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
                 Poser une question
               </div>
-              <div className="h-8 w-8 rounded-full bg-white/15 ring-1 ring-white/25 flex items-center justify-center text-white group-hover:translate-x-0.5 transition shrink-0">
+              <div className="h-8 w-8 rounded-xl bg-white/15 ring-1 ring-white/25 flex items-center justify-center text-white group-hover:translate-x-0.5 transition shrink-0">
                 <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden>
                   <path d="m9 6 6 6-6 6" />
                 </svg>
@@ -218,11 +221,10 @@ export function HomeDashboard({
 
         <Link
           href="/promesses"
-          className="block rounded-3xl overflow-hidden transition group relative"
-          style={{ background: "linear-gradient(135deg, #D6F5D6 0%, #E8FAE8 50%, #C8F0C8 100%)" }}
+          className="block rounded-2xl overflow-hidden transition group relative"
+          style={{ background: "linear-gradient(135deg, #D6F5D6 0%, #E8FAE8 50%, #C8F0C8 100%)", boxShadow: "6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light)" }}
         >
           <div className="flex items-stretch">
-            {/* Illustration */}
             <div className="relative w-[110px] shrink-0">
               <Image
                 src="/image/petiteImage/promesse.webp"
@@ -233,9 +235,8 @@ export function HomeDashboard({
               />
             </div>
 
-            {/* Texte */}
             <div className="flex-1 min-w-0 py-4 pl-5 pr-4">
-              <span className="inline-block whitespace-nowrap rounded-full bg-emerald-600/15 text-emerald-700 text-[11px] lg:text-[13px] font-semibold uppercase tracking-wide px-2.5 py-0.5 mb-2">
+              <span className="inline-block whitespace-nowrap rounded-md bg-emerald-600/15 text-emerald-700 text-[11px] lg:text-[13px] font-semibold uppercase tracking-wide px-2.5 py-0.5 mb-2">
                 Promesses vs Formule
               </span>
               <p className="text-[11px] lg:text-[13px] text-[#3a5a3a]/80 leading-snug">
@@ -243,9 +244,15 @@ export function HomeDashboard({
               </p>
             </div>
 
-            {/* Flèche */}
             <div className="flex items-center pr-4 shrink-0">
-              <div className="h-8 w-8 rounded-full bg-white/80 ring-1 ring-emerald-200 flex items-center justify-center text-emerald-700 group-hover:translate-x-0.5 transition shadow-sm">
+              <div
+                className="h-8 w-8 rounded-full flex items-center justify-center text-emerald-700 group-hover:translate-x-0.5 transition"
+                style={{
+                  background: "#DFF5DF",
+                  boxShadow:
+                    "3px 3px 8px rgba(125, 173, 125, 0.6), -3px -3px 8px rgba(255, 255, 255, 0.95)",
+                }}
+              >
                 <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden>
                   <path d="m9 6 6 6-6 6" />
                 </svg>
@@ -263,7 +270,7 @@ export function HomeDashboard({
 function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
   if (!last) {
     return (
-      <div className={`${GLASS_CARD} p-5`}>
+      <div className="neu p-5">
         <div className="flex items-center gap-1.5 text-[12px] text-[#6B7280] uppercase tracking-wide">
           <ShieldCheckIcon className="h-4 w-4 text-emerald-600" />
           Dernière analyse
@@ -282,7 +289,7 @@ function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
   return (
     <Link
       href={`/history/${last.id}`}
-      className={`block ${GLASS_CARD} ${GLASS_CARD_HOVER} px-5 pt-5 pb-3 transition`}
+      className="block neu neu-hover px-5 pt-5 pb-3 transition"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-[12px] text-[#6B7280] uppercase tracking-wide">
@@ -301,7 +308,7 @@ function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
           )}
         </div>
         <div className="w-[140px] shrink-0">
-          <IngredientBlob counts={counts} variant="md" />
+          <IngredientBlob counts={counts} variant="md" neumorphic />
         </div>
       </div>
     </Link>
@@ -321,7 +328,7 @@ function RoutineCard({
     return (
       <Link
         href="/routine"
-        className={`block ${GLASS_CARD} ${GLASS_CARD_HOVER} p-5 transition`}
+        className="block neu neu-hover p-5 transition"
       >
         <div className="flex items-center gap-1.5 text-[12px] text-[#6B7280] uppercase tracking-wide">
           <HeartIcon className="h-4 w-4 text-rose-500" />
@@ -351,7 +358,7 @@ function RoutineCard({
   return (
     <Link
       href="/routine"
-      className={`block ${GLASS_CARD} ${GLASS_CARD_HOVER} px-5 pt-5 pb-3 transition`}
+      className="block neu neu-hover px-5 pt-5 pb-3 transition"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-[12px] text-[#6B7280] uppercase tracking-wide">
@@ -376,7 +383,7 @@ function RoutineCard({
           )}
         </div>
         <div className="w-[140px] shrink-0">
-          <IngredientBlob counts={safeCounts} variant="md" />
+          <IngredientBlob counts={safeCounts} variant="md" neumorphic />
         </div>
       </div>
     </Link>

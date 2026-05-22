@@ -5,7 +5,8 @@
       "Read(//d/MesApps/deploy/**)",
       "Bash(mkdir -p \"/c/Users/bbiendou/.claude/projects/d--MesApps-deploy-CosmetWiki/memory/\")",
       "Read(//c/Users/bbiendou/.claude/projects/d--MesApps-deploy-CosmetWiki/**)",
-      "mcp__claude_ai_Supabase__get_advisors"
+      "mcp__claude_ai_Supabase__get_advisors",
+      "mcp__claude_ai_Supabase__execute_sql"
     ]
   }
 }

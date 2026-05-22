@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { GLASS_CARD, GLASS_CARD_HOVER, GLASS_PILL_CARD, GLASS_PILL_CARD_HOVER, GLASS_PILL_DARK } from "@/lib/ui/glass";
 import { HistoryItemActions } from "@/components/history/HistoryItemActions";
 import { IngredientBlob, type BlobCounts } from "@/components/blob/IngredientBlob";
 
@@ -103,7 +102,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
     <div>
       {/* Separator first - sits right under the page title (which is rendered
           by the parent route), before the toolbar / count subline. */}
-      <div className="-mx-5 h-[2px] bg-black/30 lg:mx-0 lg:h-px lg:bg-black/[0.08]" />
+      <div className="-mx-5 h-px bg-[#c5ccd6] lg:mx-0" />
 
       {/* Discrete toolbar - only the "Comparer" entry point is visible when idle */}
       <div className="mt-3 flex items-center justify-between">
@@ -116,7 +115,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
           <button
             type="button"
             onClick={startSelect}
-            className="inline-flex items-center gap-1.5 rounded-full bg-white/85 hover:bg-rose-50 text-[#F43F5E] ring-1 ring-rose-200/70 hover:ring-rose-300 backdrop-blur-md px-3 py-1.5 text-[12px] font-semibold shadow-[0_6px_16px_-4px_rgba(244,63,94,0.20),inset_0_1px_0_rgba(255,255,255,0.85)] hover:shadow-[0_8px_20px_-4px_rgba(244,63,94,0.28),inset_0_1px_0_rgba(255,255,255,0.9)] transition"
+            className="neu-btn rounded-full inline-flex items-center gap-1.5 hover:bg-rose-50 text-[#F43F5E] px-3.5 py-1.5 text-[12px] font-semibold"
           >
             Comparer 2 analyses
             <SwapHorizontalIcon className="h-3.5 w-3.5" />
@@ -136,7 +135,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
               type="button"
               onClick={compare}
               disabled={!canCompare}
-              className={`${GLASS_PILL_DARK} text-[12px] font-semibold px-3 py-1.5 disabled:opacity-40`}
+              className="neu-btn-primary rounded-full text-[12px] px-3 py-1.5 disabled:opacity-40"
             >
               Comparer ({selectedCount}/2)
             </button>
@@ -157,7 +156,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Rechercher un produit ou un ingrédient…"
-              className="w-full rounded-full bg-white/85 backdrop-blur-md ring-1 ring-black/[0.08] focus:ring-black/30 focus:outline-none pl-9 pr-9 py-2 text-sm placeholder:text-[#9CA3AF] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]"
+              className="neu-inset w-full rounded-full focus:outline-none pl-9 pr-9 py-2.5 text-sm text-[#111111] placeholder:text-[#9CA3AF]"
             />
             {query && (
               <button
@@ -197,7 +196,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                   type="button"
                   onClick={() => toggle(a.id)}
                   aria-pressed={isSelected}
-                  className={`${GLASS_PILL_CARD} ${GLASS_PILL_CARD_HOVER} w-full flex items-center gap-4 p-4 text-left ${
+                  className={`neu neu-hover w-full flex items-center gap-4 p-4 text-left ${
                     isSelected ? "ring-2 ring-[#111111]" : ""
                   }`}
                 >
@@ -240,7 +239,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
           return (
             <li key={a.id} className="relative">
               <div
-                className={`${GLASS_PILL_CARD} ${GLASS_PILL_CARD_HOVER} relative flex items-center gap-4 p-4 pr-16`}
+                className="neu neu-hover relative flex items-center gap-4 p-4 pr-16"
               >
                 {/* Card-wide click target - kept underneath the action buttons
                     so the dedicated "Analyser la promesse" link / kebab menu

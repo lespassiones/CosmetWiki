@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { GLASS_PILL_DARK } from "@/lib/ui/glass";
 import { AddProductChoiceModal, type EligibleAnalysis } from "./AddProductChoiceModal";
 
 /** sessionStorage key - consumed by AnalysisRunner to flip on `addToRoutine`
@@ -44,7 +43,7 @@ export function AddProductButton({
   const ButtonChrome =
     variant === "ghost"
       ? `inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-[#F43F5E] hover:bg-rose-50 transition ${className}`
-      : `${GLASS_PILL_DARK} inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold ${className}`;
+      : `neu-shadow inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white bg-gradient-to-br from-[#1F2937] via-[#111111] to-[#0A0A0A] hover:brightness-110 transition ${className}`;
 
   return (
     <>

@@ -193,7 +193,7 @@ export function RoutineSimulationModal({
       type="button"
       onClick={() => canSimulate && setOpen(true)}
       disabled={!canSimulate}
-      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 text-white px-5 py-2.5 text-sm font-semibold shadow-[0_10px_24px_-8px_rgba(244,63,94,0.55),inset_0_1px_0_rgba(255,255,255,0.4)] hover:brightness-105 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed"
+      className="neu-shadow inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 text-white px-5 py-2.5 text-sm font-semibold hover:brightness-105 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed"
     >
       Simuler
       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden>

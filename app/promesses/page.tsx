@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
-import { GLASS_CARD, GLASS_PILL_CARD, GLASS_PILL_CARD_HOVER, GLASS_PILL_DARK } from "@/lib/ui/glass";
 import { computeMetrics } from "@/lib/coherence/engine";
 import { CoherenceItemActions } from "@/components/coherence/CoherenceItemActions";
 import type { CoherenceResult } from "@/lib/coherence/types";
@@ -45,10 +44,10 @@ export default async function PromessesPage() {
   const rows = (error ? [] : (data ?? [])) as unknown as Row[];
 
   return (
-    <div className="mx-auto max-w-4xl px-5 lg:px-8 py-8 lg:py-12">
+    <div className="neu-page mx-auto max-w-4xl px-5 lg:px-8 py-8 lg:py-12">
       <h1 className="text-2xl lg:text-3xl font-bold mb-2">Promesses du produit vs Formule</h1>
 
-      <div className="mt-3 -mx-5 h-[2px] bg-black/30 lg:mx-0 lg:mt-4 lg:h-px lg:bg-black/[0.08]" />
+      <div className="mt-3 -mx-5 h-px bg-[#c5ccd6] lg:mx-0 lg:mt-4" />
 
       <div className="mt-3 flex items-center justify-between gap-3">
         <p className="text-sm text-[#6B7280]">
@@ -61,21 +60,21 @@ export default async function PromessesPage() {
             ligne grâce à whitespace-nowrap. */}
         <Link
           href="/promesses/nouvelle"
-          className="inline-flex items-center gap-1.5 rounded-full bg-rose-100/70 hover:bg-rose-200/70 text-rose-700 ring-1 ring-rose-200/80 backdrop-blur-md px-4 py-2 text-[13px] font-semibold whitespace-nowrap shadow-[0_6px_18px_-6px_rgba(244,63,94,0.30),inset_0_1px_0_rgba(255,255,255,0.7)] transition"
+          className="neu-btn rounded-full inline-flex items-center gap-1.5 hover:bg-rose-50 text-rose-700 px-4 py-2 text-[13px] font-semibold whitespace-nowrap"
         >
           <span aria-hidden>+</span> Nouvelle analyse
         </Link>
       </div>
 
       {rows.length === 0 ? (
-        <article className={`${GLASS_CARD} p-6 lg:p-8 mt-6 text-center`}>
+        <article className="neu p-6 lg:p-8 mt-6 text-center">
           <p className="text-[14px] text-[#6B7280] mb-4">
             Compare les promesses marketing d&apos;un produit avec sa formule
             réelle. On te dit ce qui est tenu et ce qui relève du marketing.
           </p>
           <Link
             href="/promesses/nouvelle"
-            className={`${GLASS_PILL_DARK} inline-block px-5 py-2.5 text-sm font-semibold`}
+            className="neu-btn-primary inline-block rounded-full px-5 py-2.5 text-sm"
           >
             Lancer ma première analyse
           </Link>
@@ -95,13 +94,15 @@ export default async function PromessesPage() {
               <li key={r.id} className="relative">
                 <Link
                   href={`/promesses/${r.id}`}
-                  className={`${GLASS_PILL_CARD} ${GLASS_PILL_CARD_HOVER} flex items-center gap-4 p-4 pr-16`}
+                  className="neu neu-hover flex items-center gap-4 p-4 pr-16"
                 >
-                  <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
-                    <span className="text-base font-bold leading-none">
-                      {m.tenuePct}
+                  <div className="neu-sm flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                    <span className="inline-flex items-baseline gap-0.5">
+                      <span className="text-base font-bold leading-none">
+                        {m.tenuePct}
+                      </span>
+                      <span className="text-[10px]">%</span>
                     </span>
-                    <span className="text-[10px] mt-0.5">%</span>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold text-[#111111] truncate">{productName}</div>
