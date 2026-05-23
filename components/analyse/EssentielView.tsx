@@ -34,7 +34,7 @@ export function EssentielView({
   onToggle: () => void;
 }) {
   return (
-    <section className="mt-4 space-y-3" aria-label="Aperçu essentiel de l'analyse">
+    <section className="mt-4 space-y-3 lg:max-w-3xl" aria-label="Aperçu essentiel de l'analyse">
       {/* Each card uses the `.stagger-up` animation (defined in globals.css)
           with an incremental --stagger-delay so the 3 blocks fade-up one
           after the other on mount. The animation only runs on the first

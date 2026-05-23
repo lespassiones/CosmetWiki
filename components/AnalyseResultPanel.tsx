@@ -15,7 +15,9 @@ import { commonNameFor, prettyInci } from "@/lib/inciCommonNames";
 import { AddToRoutineButton } from "./routine/AddToRoutineButton";
 import { RestrictionWarning } from "./analyse/RestrictionWarning";
 import { EssentielView } from "./analyse/EssentielView";
+import { VerdictGauge } from "./analyse/VerdictGauge";
 import { computeEssentiel } from "@/lib/essentiel/engine";
+import type { VerdictTone } from "@/lib/essentiel/engine";
 
 // Lazy-load : la modale n'est ouverte que sur clic utilisateur, on évite
 // d'embarquer son JS (et celui de ses dépendances OpenAI/Markdown) au LCP.
@@ -124,31 +126,18 @@ export function AnalyseResultPanel({
   //   * clicking back from an ingredient detail page (`router.back()` on the
   //     ingredient page) returns to the analyse with the modal still open.
   // Falls back to the default (collapsed, modal closed) when no analysisId.
+  //
+  // IMPORTANT — we DO NOT seed the initial state from sessionStorage. Doing
+  // that would diverge the server-rendered HTML (where window is undefined
+  // and the flags are false) from the first client render (which would read
+  // the persisted true values) → "hydration failed" React error. Instead we
+  // mount with the safe defaults and hydrate from storage in an effect
+  // BELOW, after the first paint.
   const uiStorageKey = analysisId ? `analyse-ui:${analysisId}` : null;
-  const initialUiState = useMemo(() => {
-    if (typeof window === "undefined" || !uiStorageKey) {
-      return { detailsExpanded: false, ingredientsModalOpen: false };
-    }
-    try {
-      const raw = window.sessionStorage.getItem(uiStorageKey);
-      if (!raw) return { detailsExpanded: false, ingredientsModalOpen: false };
-      const parsed = JSON.parse(raw) as {
-        detailsExpanded?: boolean;
-        ingredientsModalOpen?: boolean;
-      };
-      return {
-        detailsExpanded: Boolean(parsed.detailsExpanded),
-        ingredientsModalOpen: Boolean(parsed.ingredientsModalOpen),
-      };
-    } catch {
-      return { detailsExpanded: false, ingredientsModalOpen: false };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   /** La liste détaillée des ingrédients est rendue dans une modal full-screen
    *  ouverte sur clic d'un simple lien dans le panel d'analyse. Garde le
    *  panel principal léger (juste le score + la synthèse + les observations). */
-  const [ingredientsModalOpen, setIngredientsModalOpen] = useState(initialUiState.ingredientsModalOpen);
+  const [ingredientsModalOpen, setIngredientsModalOpen] = useState(false);
   // When a square of the top 5/10 spectrum is tapped, we open the ingredients
   // modal AND ask it to scroll to that ingredient once its DOM is mounted.
   // `null` = just open the modal at the top of the list.
@@ -157,12 +146,41 @@ export function AnalyseResultPanel({
   // collapsed by default and opens when the user clicks "Voir l'analyse
   // complète". Rules-based (no LLM), so the snapshot is instantly available.
   const essentiel = useMemo(() => computeEssentiel(result), [result]);
-  const [detailsExpanded, setDetailsExpanded] = useState(initialUiState.detailsExpanded);
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
   const detailsRef = useRef<HTMLDivElement | null>(null);
+  // True once we've finished the post-mount sessionStorage read — keeps the
+  // auto-save effect below from clobbering the persisted value with the
+  // default `false` BEFORE we've had a chance to restore it.
+  const hasHydratedUiRef = useRef(false);
+
+  // Restore UI flags from sessionStorage on first mount (after hydration).
+  useEffect(() => {
+    if (!uiStorageKey) {
+      hasHydratedUiRef.current = true;
+      return;
+    }
+    try {
+      const raw = window.sessionStorage.getItem(uiStorageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw) as {
+          detailsExpanded?: boolean;
+          ingredientsModalOpen?: boolean;
+        };
+        if (parsed.detailsExpanded) setDetailsExpanded(true);
+        if (parsed.ingredientsModalOpen) setIngredientsModalOpen(true);
+      }
+    } catch {
+      // Storage unavailable (Safari private mode, quota) — non-fatal.
+    }
+    hasHydratedUiRef.current = true;
+  }, [uiStorageKey]);
 
   // Persist UI flags whenever they change so a refresh / back-nav can restore.
+  // Skipped until the restore effect above has run, otherwise we'd overwrite
+  // the persisted value with the initial `false` defaults on the very first
+  // render and lose the user's state.
   useEffect(() => {
-    if (typeof window === "undefined" || !uiStorageKey) return;
+    if (!hasHydratedUiRef.current || !uiStorageKey) return;
     try {
       window.sessionStorage.setItem(
         uiStorageKey,
@@ -260,6 +278,7 @@ export function AnalyseResultPanel({
         breadcrumb={trail}
         analysisId={analysisId}
         alreadyInRoutine={alreadyInRoutine}
+        verdictTone={essentiel.verdict.tone}
       />
       {!existingCoherenceId && (
         <PromesseFlowModal
@@ -290,19 +309,24 @@ export function AnalyseResultPanel({
         MOBILE (single column, user-requested order)
           score → counts → synthesis → spectrum → observations → items
 
-        DESKTOP (3-column bento)
-          col 1 (1fr) : score → spectrum → counts
-          col 2 (1fr) : observations on top, synthesis spanning 2 rows below
-          col 3 (1.3fr): items spanning the full height
+        DESKTOP (3-column bento, SINGLE ROW)
+          col 1 (1fr)   : score → counts (24/76/1) → spectrum
+          col 2 (1fr)   : observations + synthesis stacked tight
+          col 3 (1.3fr) : items (collapsed CTA → expands inline)
+
+        Each desktop column flows as its own flex-col, so a tall column
+        (e.g. ingredients table when expanded) NEVER pushes the other two —
+        no more empty vertical gap between observations and synthèse.
       */}
       {detailsExpanded && (
       <div
         ref={detailsRef}
-        className="mt-6 grid gap-4 grid-cols-1 [grid-template-areas:'score''warning''counts''synthesis''spectrum''observations''items'] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:[grid-template-areas:'left_observations_items''left_synthesis_items']"
+        className="mt-6 grid gap-4 grid-cols-1 [grid-template-areas:'score''warning''counts''synthesis''spectrum''observations''items'] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:[grid-template-areas:'left_middle_items']"
       >
-        {/* Left column: on desktop, grouped as a flex column so Score + Spectrum
-            + Counts stack tightly with no gap from row height mismatch. On mobile,
-            `contents` makes each child participate directly in the outer grid. */}
+        {/* Left column: on desktop, grouped as a flex column so Score + Counts
+            + Spectrum stack tightly with no gap from row height mismatch. On
+            mobile, `contents` makes each child participate directly in the
+            outer grid (mobile order driven by grid-template-areas). */}
         <div className="contents lg:flex lg:flex-col lg:gap-4 lg:[grid-area:left]">
           <Reveal delayMs={REVEAL_SCORE_MS} className="[grid-area:score]">
             <BigScoreCard
@@ -323,6 +347,12 @@ export function AnalyseResultPanel({
             <RestrictionWarning items={result.items} />
           </Reveal>
 
+          {/* 24% / 76% / 1% strip — moved ABOVE the spectrum so it reads
+              right after the half-donut as the "verdict en chiffres". */}
+          <Reveal delayMs={0} className="[grid-area:counts]">
+            <PenaltySummaryStrip counts={result.counts} />
+          </Reveal>
+
           {result.spectrum ? (
             <Reveal delayMs={650} className="[grid-area:spectrum]">
               <IngredientSpectrum
@@ -336,39 +366,41 @@ export function AnalyseResultPanel({
               />
             </Reveal>
           ) : null}
-
-          <Reveal delayMs={0} className="[grid-area:counts]">
-            <PenaltySummaryStrip counts={result.counts} />
-          </Reveal>
         </div>
 
-        <Reveal delayMs={REVEAL_SYNTHESIS_MS} className="[grid-area:synthesis]">
-          {synthesisLoading && !synthesis ? (
-            <SynthesisLoadingCard />
-          ) : (
-            <MobileExpander
-              expandLabel="Voir la synthèse complète"
-              collapsedMaxHeight={160}
-              desktopCollapsedMaxHeight={320}
-            >
-              <SynthesisCard
-                synthesis={synthesis}
-                items={result.items}
-                streamDelayMs={REVEAL_SYNTHESIS_MS}
-              />
-            </MobileExpander>
-          )}
-        </Reveal>
+        {/* Middle column wrapper — observations + synthèse stacked tight in
+            a flex-col on desktop. `contents` on mobile preserves the
+            single-column flow controlled by grid-template-areas. */}
+        <div className="contents lg:flex lg:flex-col lg:gap-4 lg:[grid-area:middle]">
+          <Reveal delayMs={500} className="[grid-area:observations]">
+            <ObservationsCard observations={result.observations} />
+          </Reveal>
 
-        <Reveal delayMs={500} className="[grid-area:observations]">
-          <ObservationsCard observations={result.observations} />
-        </Reveal>
+          <Reveal delayMs={REVEAL_SYNTHESIS_MS} className="[grid-area:synthesis]">
+            {synthesisLoading && !synthesis ? (
+              <SynthesisLoadingCard />
+            ) : (
+              <MobileExpander
+                expandLabel="Voir la synthèse complète"
+                collapsedMaxHeight={160}
+                desktopCollapsedMaxHeight={320}
+              >
+                <SynthesisCard
+                  synthesis={synthesis}
+                  items={result.items}
+                  streamDelayMs={REVEAL_SYNTHESIS_MS}
+                />
+              </MobileExpander>
+            )}
+          </Reveal>
+        </div>
 
         <Reveal delayMs={1000} className="[grid-area:items]">
           {/* Mobile : carte-lien compacte qui ouvre la modal détaillée — garde
               la vue principale légère sur petit écran.
-              Desktop : la colonne de droite a beaucoup de hauteur, on rend
-              directement la table inline (filtres + recherche + lignes). */}
+              Desktop : par défaut, même style de carte cliquable. Clic →
+              déplie le tableau INLINE dans cette colonne (qui grandit
+              indépendamment des autres colonnes). */}
           <div className="lg:hidden">
             <IngredientsLinkCard
               count={result.counts.total}
@@ -378,11 +410,20 @@ export function AnalyseResultPanel({
               }}
             />
           </div>
+          {/* Desktop : tableau avec preview des 5 premiers ingrédients + un
+              bouton "Voir les X ingrédients →" en pied de table qui déplie
+              le reste inline (et bascule en "Replier ↑" une fois ouvert).
+              `compact` resserre la typo pour tenir dans la colonne étroite. */}
           <div className="hidden lg:block">
             <h2 className="text-[15px] font-semibold text-ink mb-3 px-1">
               Liste des ingrédients
             </h2>
-            <ItemsTable items={result.items} counts={result.counts} compact />
+            <ItemsTable
+              items={result.items}
+              counts={result.counts}
+              compact
+              desktopLimit={5}
+            />
           </div>
         </Reveal>
       </div>
@@ -517,6 +558,7 @@ function TitleBar({
   breadcrumb,
   analysisId,
   alreadyInRoutine,
+  verdictTone,
 }: {
   title: string;
   productSource: { source: string; sourceUrl: string | null; brand: string | null } | null;
@@ -526,6 +568,9 @@ function TitleBar({
   breadcrumb: BreadcrumbItem[] | null;
   analysisId: string | null;
   alreadyInRoutine: boolean;
+  /** Computed verdict tier rendered as the 5-pastille gauge next to the
+   *  share button. Same rules-based value as the L'ESSENTIEL card. */
+  verdictTone: VerdictTone;
 }) {
   const brand = productSource?.brand ?? null;
   // Standard convention: last item is the current location (not clickable).
@@ -599,9 +644,32 @@ function TitleBar({
             />
           ) : null}
         </div>
-        <ToolbarButton onClick={onShare}>
-          <ShareIcon className="h-3.5 w-3.5" /> Partager
-        </ToolbarButton>
+        {/* Single white pill that groups the share button and the 5-pastille
+            gauge — same chrome (rounded-full, white surface, ring,
+            backdrop-blur) as the standalone `ToolbarButton`. The pill takes
+            `w-full` on mobile so it lines up edge-to-edge with the CTA pair
+            above (and the gauge's `justify-between` spreads the 5 pastilles
+            from "Partager" all the way to the pill's right edge). On ≥sm
+            it shrinks back to its natural width.
+            NB: the pill MUST stay non-clipping (no `overflow-hidden`) — the
+            active pastille is intentionally taller than the pill so its
+            white ring "pops" above AND below the bandeau. */}
+        <div className="flex w-full items-center gap-2.5 rounded-full bg-white/85 px-3 py-1.5 ring-1 ring-black/[0.06] backdrop-blur-md transition-all hover:bg-white/95 hover:shadow-[0_6px_20px_-8px_rgba(15,23,42,0.15)] sm:w-auto">
+          <button
+            type="button"
+            onClick={onShare}
+            aria-label="Partager cette analyse"
+            className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-ink transition hover:text-rose-700"
+          >
+            <ShareIcon className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">Partager</span>
+          </button>
+          <span aria-hidden className="h-4 w-px shrink-0 bg-black/10" />
+          <VerdictGauge
+            tone={verdictTone}
+            className="flex-1 justify-between sm:flex-initial sm:justify-start sm:gap-1.5"
+          />
+        </div>
       </div>
     </header>
   );

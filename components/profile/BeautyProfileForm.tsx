@@ -527,12 +527,19 @@ function MultiSelectDropdown<T extends string>({
         aria-expanded={open ? "true" : "false"}
         className={DROPDOWN_TRIGGER}
       >
+        {/* `min-w-0` is required so the flex child can actually shrink below
+            its intrinsic width — without it the `truncate` is a no-op and a
+            long summary ("Sécheresse, Pores dilatés, Excès de sébum…")
+            pushes the dropdown out of its parent card. */}
         <span
-          className={`truncate ${selectedLabels.length === 0 ? "text-[#9CA3AF]" : ""}`}
+          className={`min-w-0 flex-1 truncate ${selectedLabels.length === 0 ? "text-[#9CA3AF]" : ""}`}
+          title={summary}
         >
           {summary}
         </span>
-        <ChevronIcon open={open} />
+        <span className="shrink-0">
+          <ChevronIcon open={open} />
+        </span>
       </button>
       <p className="mt-1 text-[11px] text-[#9CA3AF]">
         {label} (plusieurs choix possibles)
