@@ -108,14 +108,14 @@ export function HistoryList({ rows }: { rows: Row[] }) {
       <div className="mt-3 flex items-center justify-between">
         <p className="text-sm text-[#6B7280]">
           {rows.length === 0
-            ? "Tu n'as pas encore d'analyse sauvegardée."
-            : `${rows.length} analyse${rows.length > 1 ? "s" : ""} sauvegardée${rows.length > 1 ? "s" : ""}.`}
+            ? "Aucune analyse pour l'instant."
+            : `${rows.length} analyse${rows.length > 1 ? "s" : ""}.`}
         </p>
         {rows.length >= 2 && !selectMode && (
           <button
             type="button"
             onClick={startSelect}
-            className="neu-btn rounded-full inline-flex items-center gap-1.5 hover:bg-rose-50 text-[#F43F5E] px-3.5 py-1.5 text-[12px] font-semibold"
+            className="neu-shadow-rose rounded-full inline-flex items-center gap-1.5 bg-[#F43F5E] text-white px-3.5 py-1.5 text-[12px] font-semibold transition hover:bg-[#E11D48]"
           >
             Comparer 2 analyses
             <SwapHorizontalIcon className="h-3.5 w-3.5" />

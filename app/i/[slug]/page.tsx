@@ -10,6 +10,7 @@ import { ProductRow } from "@/components/ProductRow";
 import { MobileMenu } from "@/components/MobileMenu";
 import { Reveal } from "@/components/Reveal";
 import { ExplainIngredient } from "@/components/ingredient/ExplainIngredient";
+import { BackToAnalyseButton } from "@/components/ingredient/BackToAnalyseButton";
 import { SITE_URL } from "@/lib/siteUrl";
 import {
   supabaseAnon,
@@ -203,7 +204,14 @@ function buildIngredientJsonLd(ing: Ingredient): object {
 export default async function IngredientPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const sp = searchParams ? await searchParams : undefined;
-  const fromAnalyser = sp?.from === "analyser" || sp?.from === "home";
+  // `?from=` carries either the literal "analyser"/"home" flag (legacy) OR the
+  // exact source URL (new pattern, set by AnalyseResultPanel via usePathname).
+  // When we have a real URL we can populate the breadcrumb's "Analyse" link
+  // so clicking it brings the user back to THEIR analysis, not the home page.
+  const fromRaw = sp?.from ?? null;
+  const fromUrl =
+    fromRaw && fromRaw.startsWith("/") ? decodeURIComponent(fromRaw) : null;
+  const fromAnalyser = fromUrl !== null || fromRaw === "analyser" || fromRaw === "home";
   const ing = await loadIngredient(slug);
   if (!ing) notFound();
 
@@ -259,38 +267,14 @@ export default async function IngredientPage({ params, searchParams }: Props) {
       </header>
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-6 pb-16">
-        {/* Breadcrumb */}
-        <nav
-          aria-label="Fil d'ariane"
-          className="mb-6 flex items-center gap-1.5 text-[13px] text-ink-subtle"
-        >
-          <Link href="/" className="hover:text-ink">
-            Accueil
-          </Link>
-          <ChevronIcon className="h-3.5 w-3.5" />
-          {fromAnalyser ? (
-            <>
-              <Link href="/" className="hover:text-ink">
-                Analyse
-              </Link>
-              <ChevronIcon className="h-3.5 w-3.5" />
-            </>
-          ) : (
-            <>
-              <span>Ingrédients</span>
-              <ChevronIcon className="h-3.5 w-3.5" />
-            </>
-          )}
-          <span className="text-ink">{name}</span>
-        </nav>
-
+        {/* Real back button at the very top — preferred entry point when the
+            user comes from an analyse (ingredients modal). The breadcrumb
+            still appears further down for navigational context, but the
+            primary "leave this page" affordance is this prominent button. */}
         {fromAnalyser ? (
-          <Link
-            href="/"
-            className="mb-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-violet-700 hover:text-violet-900"
-          >
-            <span aria-hidden>←</span> Retour à l&apos;analyse
-          </Link>
+          <div className="mb-5">
+            <BackToAnalyseButton fromUrl={fromUrl} />
+          </div>
         ) : null}
 
         {/* Hero */}
@@ -556,6 +540,33 @@ export default async function IngredientPage({ params, searchParams }: Props) {
             </aside>
           </Reveal>
         </div>
+
+        {/* Breadcrumb at the bottom of the page (after content). The "Analyse"
+            link uses the `?from=` URL when present so the user lands back on
+            THEIR analysis instead of being dumped on the home page. */}
+        <nav
+          aria-label="Fil d'ariane"
+          className="mt-10 flex items-center gap-1.5 text-[12px] text-ink-subtle"
+        >
+          <Link href="/" className="hover:text-ink">
+            Accueil
+          </Link>
+          <ChevronIcon className="h-3.5 w-3.5" />
+          {fromAnalyser ? (
+            <>
+              <Link href={fromUrl ?? "/"} className="hover:text-ink">
+                Analyse
+              </Link>
+              <ChevronIcon className="h-3.5 w-3.5" />
+            </>
+          ) : (
+            <>
+              <span>Ingrédients</span>
+              <ChevronIcon className="h-3.5 w-3.5" />
+            </>
+          )}
+          <span className="text-ink">{name}</span>
+        </nav>
       </main>
 
       <Footer />

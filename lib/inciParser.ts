@@ -86,6 +86,21 @@ const NOISE_PATTERNS: RegExp[] = [
   /\(may contain\)/gi,
   /\(peut contenir\)/gi,
   /\([A-Z0-9. ]+\d+\/\d+\)/g,             // batch codes
+  // "MAY CONTAIN:" / "PEUT CONTENIR:" labels (with or without surrounding
+  // brackets). The colorants that follow are real ingredients we want to keep,
+  // but the LABEL itself is noise that would otherwise become a fake "token".
+  /\[\s*\+\/?\-?\s*/g,                    // "[+/-" or "[+ /-" before MAY CONTAIN
+  /\b(?:MAY\s+CONTAIN|PEUT\s+CONTENIR)\s*:?/gi,
+  /\]/g,                                  // closing bracket of MAY CONTAIN block
+  // Standalone "INGREDIENTS:" / "INCI:" / "COMPOSITION:" labels (often pasted
+  // from product detail pages). The STOP_WORDS set already drops them when
+  // they end up as their own token, but stripping the prefix here ensures the
+  // first real ingredient is parsed cleanly even when no separator follows.
+  /\b(?:INGREDIENTS?|INGRÉDIENTS?|INCI|COMPOSITION)\s*:\s*/gi,
+  // Leading batch/reference codes like "G2047548 -" or "11075v0 -" that some
+  // brands print before the actual list. Heuristic: 4+ alphanumeric chars,
+  // followed by a dash or colon and whitespace, at the very start of the text.
+  /^\s*[A-Z0-9]{4,}\s*[-:]\s+/,
 ];
 
 function stripAccents(s: string): string {
@@ -161,7 +176,14 @@ export function parseInciList(text: string): ParsedToken[] {
   // INCI names have intra-name hyphens like "PEG-100 Stearate" or "C12-15 Alkyl
   // Benzoate"). Bullets/middots can also be used as separators in pasted lists.
   work = work.replace(/(?<=\w)(?:\s+-+\s*|\s*-+\s+)(?=\w)/g, ", ");
-  work = work.replace(/(?<=\w)\s*[•·]\s*(?=\w)/g, ", ");
+  // Bullet/middot/black-circle/diamond glyphs used by some brands instead of
+  // commas (●, •, ·, ◆, ▪). When sandwiched between two ingredient tokens
+  // they're real separators.
+  work = work.replace(/(?<=\w)\s*[•·●◆▪]\s*(?=\w)/g, ", ");
+  // Also: when a bullet stands ALONE (e.g. just before "[+/- MAY CONTAIN]"
+  // where we've already stripped the bracket as noise), turn it into a comma
+  // too so the previous ingredient doesn't get concatenated with the next.
+  work = work.replace(/\s*[•·●◆▪]\s*/g, ", ");
 
   // Split on common separators
   const rawParts = work

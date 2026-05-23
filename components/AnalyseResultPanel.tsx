@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { recomputeThresholdContext, type AnalyseItem, type AnalyseResponse, type Observation } from "@/lib/analyseTypes";
 import type { ColorRating } from "@/lib/supabase";
@@ -115,10 +116,39 @@ export function AnalyseResultPanel({
   // the button active) and surprising for users who pasted an INCI without
   // a name.
   const [promesseOpen, setPromesseOpen] = useState(autoOpenPromesse);
+  const pathname = usePathname();
+  // Persist the "is the full analysis open?" / "is the ingredients modal
+  // open?" flags in sessionStorage keyed by analysisId. That way:
+  //   * a page refresh keeps the user on the exact same view (modal open,
+  //     details expanded) instead of resetting them to the 3-card essentiel.
+  //   * clicking back from an ingredient detail page (`router.back()` on the
+  //     ingredient page) returns to the analyse with the modal still open.
+  // Falls back to the default (collapsed, modal closed) when no analysisId.
+  const uiStorageKey = analysisId ? `analyse-ui:${analysisId}` : null;
+  const initialUiState = useMemo(() => {
+    if (typeof window === "undefined" || !uiStorageKey) {
+      return { detailsExpanded: false, ingredientsModalOpen: false };
+    }
+    try {
+      const raw = window.sessionStorage.getItem(uiStorageKey);
+      if (!raw) return { detailsExpanded: false, ingredientsModalOpen: false };
+      const parsed = JSON.parse(raw) as {
+        detailsExpanded?: boolean;
+        ingredientsModalOpen?: boolean;
+      };
+      return {
+        detailsExpanded: Boolean(parsed.detailsExpanded),
+        ingredientsModalOpen: Boolean(parsed.ingredientsModalOpen),
+      };
+    } catch {
+      return { detailsExpanded: false, ingredientsModalOpen: false };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   /** La liste détaillée des ingrédients est rendue dans une modal full-screen
    *  ouverte sur clic d'un simple lien dans le panel d'analyse. Garde le
    *  panel principal léger (juste le score + la synthèse + les observations). */
-  const [ingredientsModalOpen, setIngredientsModalOpen] = useState(false);
+  const [ingredientsModalOpen, setIngredientsModalOpen] = useState(initialUiState.ingredientsModalOpen);
   // When a square of the top 5/10 spectrum is tapped, we open the ingredients
   // modal AND ask it to scroll to that ingredient once its DOM is mounted.
   // `null` = just open the modal at the top of the list.
@@ -127,8 +157,21 @@ export function AnalyseResultPanel({
   // collapsed by default and opens when the user clicks "Voir l'analyse
   // complète". Rules-based (no LLM), so the snapshot is instantly available.
   const essentiel = useMemo(() => computeEssentiel(result), [result]);
-  const [detailsExpanded, setDetailsExpanded] = useState(false);
+  const [detailsExpanded, setDetailsExpanded] = useState(initialUiState.detailsExpanded);
   const detailsRef = useRef<HTMLDivElement | null>(null);
+
+  // Persist UI flags whenever they change so a refresh / back-nav can restore.
+  useEffect(() => {
+    if (typeof window === "undefined" || !uiStorageKey) return;
+    try {
+      window.sessionStorage.setItem(
+        uiStorageKey,
+        JSON.stringify({ detailsExpanded, ingredientsModalOpen }),
+      );
+    } catch {
+      // Storage quota / Safari private mode — non-fatal.
+    }
+  }, [uiStorageKey, detailsExpanded, ingredientsModalOpen]);
   // The AI synthesis is no longer computed in the initial /api/analyser call
   // (saved 2-8 s of LLM latency on the scan path). We fetch it lazily on the
   // first expand via /api/synthesis. If the result already carries one
@@ -522,27 +565,40 @@ function TitleBar({
         </h1>
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
-        {existingCoherenceId ? (
-          // Coherence already exists for this analyse - short-circuit to it
-          // instead of re-running the (paid) web search + LLM round-trip.
-          <Link
-            href={`/promesses/${existingCoherenceId}`}
-            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
-          >
-            <PromesseIcon className="h-3.5 w-3.5" /> Voir l&apos;analyse de la promesse
-          </Link>
-        ) : (
-          <button
-            type="button"
-            onClick={onAnalysePromesse}
-            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
-          >
-            <PromesseIcon className="h-3.5 w-3.5" /> Analyser la promesse
-          </button>
-        )}
-        {analysisId ? (
-          <AddToRoutineButton analysisId={analysisId} alreadyInRoutine={alreadyInRoutine} />
-        ) : null}
+        {/* Primary CTA pair — "Analyser la promesse" + "Ajouter à ma
+            routine" — locked on the SAME row at every width. They share the
+            available width with flex-1 + min-w-0 on mobile, then keep their
+            natural size on sm+ where the toolbar is on a single line anyway.
+            Labels truncate ("…") before the buttons would have to wrap. */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          {existingCoherenceId ? (
+            // Coherence already exists for this analyse - short-circuit to it
+            // instead of re-running the (paid) web search + LLM round-trip.
+            <Link
+              href={`/promesses/${existingCoherenceId}`}
+              className="flex-1 sm:flex-initial min-w-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 px-3 sm:px-4 py-2 text-xs sm:text-[13px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
+            >
+              <PromesseIcon className="h-3.5 w-3.5 shrink-0" />
+              <span className="min-w-0 truncate">Voir l&apos;analyse de la promesse</span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={onAnalysePromesse}
+              className="flex-1 sm:flex-initial min-w-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 px-3 sm:px-4 py-2 text-xs sm:text-[13px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
+            >
+              <PromesseIcon className="h-3.5 w-3.5 shrink-0" />
+              <span className="min-w-0 truncate">Analyser la promesse</span>
+            </button>
+          )}
+          {analysisId ? (
+            <AddToRoutineButton
+              analysisId={analysisId}
+              alreadyInRoutine={alreadyInRoutine}
+              className="flex-1 sm:flex-initial min-w-0"
+            />
+          ) : null}
+        </div>
         <ToolbarButton onClick={onShare}>
           <ShareIcon className="h-3.5 w-3.5" /> Partager
         </ToolbarButton>
@@ -836,6 +892,10 @@ function ObservationsCard({
   const [expanded, setExpanded] = useState(false);
   const [openTags, setOpenTags] = useState<Set<string>>(new Set());
   const visible = expanded ? observations : observations.slice(0, 5);
+  // Carry the current analyse URL on every ingredient link so the back button
+  // / breadcrumb on the ingredient page can return here instead of /home.
+  const pathname = usePathname();
+  const fromParam = encodeURIComponent(pathname || "/");
 
   function toggleTag(tag: string) {
     setOpenTags((prev) => {
@@ -898,7 +958,7 @@ function ObservationsCard({
                     <li key={idx} className="text-[13px]">
                       {it.slug ? (
                         <Link
-                          href={`/i/${it.slug}?from=home`}
+                          href={`/i/${it.slug}?from=${fromParam}`}
                           className="inline-flex items-center gap-1.5 text-ink hover:text-rose-700"
                         >
                           {it.colorRating ? (
@@ -1421,6 +1481,10 @@ function ItemsTable({
   const [search, setSearch] = useState("");
   const [mobileExpanded, setMobileExpanded] = useState(false);
   const [desktopExpanded, setDesktopExpanded] = useState(false);
+  // Carry the current analyse URL on every row's "voir la fiche" arrow so
+  // the back button / breadcrumb on the ingredient page can return here.
+  const pathname = usePathname();
+  const fromParam = encodeURIComponent(pathname || "/");
 
   // Recompute on read so analyses saved before the ≤1 % rule change (parfum
   // is now the preferred reference, not the first preservative) are still
@@ -1509,14 +1573,25 @@ function ItemsTable({
         </label>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-[13px]">
+      {/* `table-fixed` + an explicit colgroup so the rightmost "arrow" column
+          NEVER gets pushed off-screen when the modal narrows. Long ingredient
+          names wrap naturally in column 1 instead of forcing horizontal
+          overflow. Padding shrinks on mobile so the 3 visible columns always
+          fit even on a 360 px viewport. */}
+      <div className="w-full">
+        <table className="w-full text-left text-[13px] table-fixed">
+          <colgroup>
+            <col />
+            <col className="hidden md:table-column w-[130px]" />
+            <col className="w-[92px]" />
+            <col className="w-[68px] sm:w-[80px]" />
+          </colgroup>
           <thead>
             <tr className="text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
-              <th className="px-5 py-3">Ingrédient</th>
-              <th className="px-5 py-3 max-md:hidden">Fonction</th>
-              <th className="px-5 py-3">Tolérance</th>
-              <th className="px-5 py-3 text-right">Détails</th>
+              <th className="px-3 sm:px-5 py-3">Ingrédient</th>
+              <th className="px-3 sm:px-5 py-3 max-md:hidden">Fonction</th>
+              <th className="px-2 sm:px-5 py-3">Tolérance</th>
+              <th className="px-2 sm:px-5 py-3 text-right">Détails</th>
             </tr>
           </thead>
           <tbody>
@@ -1540,7 +1615,12 @@ function ItemsTable({
                 if (hiddenOnMobile && hiddenOnDesktop) hiddenCls = "hidden";
                 else if (hiddenOnMobile) hiddenCls = "hidden lg:table-row";
                 else if (hiddenOnDesktop) hiddenCls = "lg:hidden";
-                const cellPad = compact ? "px-3 py-2" : "px-5 py-3";
+                // Padding scales down on mobile so the 3 visible columns
+                // (Ingrédient + Tolérance + Détails) always fit a 360 px modal
+                // without the rightmost cell being clipped.
+                const cellPad = compact ? "px-3 py-2" : "px-3 sm:px-5 py-3";
+                const ratingCellPad = compact ? "px-2 py-2" : "px-2 sm:px-5 py-3";
+                const arrowCellPad = compact ? "px-1 py-2" : "px-2 sm:px-5 py-3";
                 return (
                 <tr
                   key={`${i.position}-${i.input}`}
@@ -1548,11 +1628,24 @@ function ItemsTable({
                   className={`border-t border-black/[0.04] transition-colors hover:bg-rose-50/30 scroll-mt-24 ${hiddenCls}`}
                 >
                   <td className={cellPad}>
-                    <div className={`font-semibold text-ink ${compact ? "text-[13px]" : ""}`}>
+                    {/* Truncate with ellipsis on phones so a long INCI name
+                        like "Vp/Acrylates/Lauryl Methacrylate Copolymer"
+                        doesn't blow the row up to 3-4 lines. On ≥sm there's
+                        enough room to let it wrap normally. The full name is
+                        kept in `title` so a long-press / hover still reveals it. */}
+                    <div
+                      className={`font-semibold text-ink truncate sm:whitespace-normal sm:overflow-visible ${compact ? "text-[13px]" : ""}`}
+                      title={prettyName(i.name ?? i.input)}
+                    >
                       {prettyName(i.name ?? i.input)}
                     </div>
                     {i.translationFr ? (
-                      <div className="text-[11px] text-ink-muted">{i.translationFr}</div>
+                      <div
+                        className="text-[11px] text-ink-muted truncate sm:whitespace-normal sm:overflow-visible"
+                        title={i.translationFr}
+                      >
+                        {i.translationFr}
+                      </div>
                     ) : i.matchKind === null ? (
                       <div className="text-[11px] text-ink-subtle">Non reconnu</div>
                     ) : null}
@@ -1560,8 +1653,8 @@ function ItemsTable({
                   <td className={`${cellPad} text-ink-muted max-md:hidden ${compact ? "hidden xl:table-cell" : ""}`}>
                     {i.primaryFunction || "-"}
                   </td>
-                  <td className={cellPad}>
-                    <ColorChip rating={i.colorRating} />
+                  <td className={ratingCellPad}>
+                    <ColorChip rating={i.colorRating} fallback={i.dbColorRating} />
                     {/*
                       "≤ 1 %" badge - shown when the ingredient sits *after* the
                       first fragrance (preferred reference for cosmetic
@@ -1599,10 +1692,10 @@ function ItemsTable({
                       </Tooltip>
                     ) : null}
                   </td>
-                  <td className={`${cellPad} text-right`}>
+                  <td className={`${arrowCellPad} text-right`}>
                     {i.slug ? (
                       <Link
-                        href={`/i/${i.slug}?from=home`}
+                        href={`/i/${i.slug}?from=${fromParam}`}
                         className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-muted transition hover:bg-rose-50 hover:text-rose-700"
                         aria-label={`Voir la fiche de ${i.name}`}
                       >
@@ -1651,8 +1744,20 @@ function ItemsTable({
   );
 }
 
-function ColorChip({ rating }: { rating: ColorRating | null }) {
-  if (!rating) {
+function ColorChip({
+  rating,
+  fallback = null,
+}: {
+  rating: ColorRating | null;
+  /** Color carried by the matched slug in the DB even when `rating` is null
+   *  (i.e. low-confidence "suggestion" match). When provided, the chip renders
+   *  in that colour so the list stays consistent with the ingredient detail
+   *  page. Visually identical to a confirmed match — the slug's classification
+   *  is trusted as-is. */
+  fallback?: ColorRating | null;
+}) {
+  const effective = rating ?? fallback ?? null;
+  if (!effective) {
     return (
       <span className="inline-flex items-center gap-1.5 text-[13px] text-ink-subtle">
         <span className="h-1.5 w-1.5 rounded-full bg-black/[0.2]" aria-hidden /> -
@@ -1666,9 +1771,9 @@ function ColorChip({ rating }: { rating: ColorRating | null }) {
     Rouge: { dot: "bg-rose-500", text: "text-rose-700" },
   };
   return (
-    <span className={`inline-flex items-center gap-1.5 text-[13px] font-medium ${map[rating].text}`}>
-      <span className={`h-2 w-2 rounded-full ${map[rating].dot}`} aria-hidden />
-      {rating}
+    <span className={`inline-flex items-center gap-1.5 text-[13px] font-medium ${map[effective].text}`}>
+      <span className={`h-2 w-2 rounded-full ${map[effective].dot}`} aria-hidden />
+      {effective}
     </span>
   );
 }

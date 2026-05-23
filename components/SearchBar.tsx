@@ -246,71 +246,97 @@ export function SearchBar({
       />
 
       <div
-        className={`relative flex w-full items-start gap-3 bg-white ${wrapperBase} transition-all duration-200 ${
+        className={`relative bg-white ${wrapperBase} transition-all duration-200 ${
           focused
             ? "ring-2 ring-black/[0.18] shadow-[0_18px_50px_-12px_rgba(15,23,42,0.14),0_8px_24px_-6px_rgba(15,23,42,0.10)]"
             : "ring-1 ring-black/[0.06] shadow-[0_14px_40px_-12px_rgba(15,23,42,0.16),0_4px_18px_-4px_rgba(15,23,42,0.08)]"
-        }`}
+        } ${isList ? "" : "flex w-full items-start gap-3"}`}
       >
-        <SearchIcon
-          className={`mt-1 shrink-0 text-ink-subtle ${iconSize}`}
-        />
-        <textarea
-          ref={inputRef}
-          rows={1}
-          aria-label="Recherche d'ingrédient ou d'une liste INCI"
-          aria-controls={listboxId}
-          autoComplete="off"
-          autoCapitalize="none"
-          spellCheck={false}
-          enterKeyHint="search"
-          placeholder={placeholder}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => {
-            setFocused(true);
-            if (results.length > 0) setIsOpen(true);
-          }}
-          onBlur={() => {
-            setFocused(false);
-            setTimeout(() => setIsOpen(false), 150);
-          }}
-          onKeyDown={onKeyDown}
-          onPaste={onPaste}
-          maxLength={6000}
-          className={`flex-1 resize-none bg-transparent ${inputCls} font-normal leading-6 text-ink placeholder:text-ink-subtle outline-none scrollbar-soft sm:leading-7`}
-        />
+        {/* In list mode the textarea uses the WHOLE width (icon + field on one
+            row, action button on a row below) so a long INCI list doesn't
+            squeeze itself into the left half of the card. In single-ingredient
+            search mode we keep the compact horizontal layout with the spinner
+            / clear button inline on the right. */}
+        <div className={isList ? "flex items-start gap-3" : "contents"}>
+          <SearchIcon
+            className={`mt-1 shrink-0 text-ink-subtle ${iconSize}`}
+          />
+          <textarea
+            ref={inputRef}
+            rows={1}
+            aria-label="Recherche d'ingrédient ou d'une liste INCI"
+            aria-controls={listboxId}
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            enterKeyHint="search"
+            placeholder={placeholder}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => {
+              setFocused(true);
+              if (results.length > 0) setIsOpen(true);
+            }}
+            onBlur={() => {
+              setFocused(false);
+              setTimeout(() => setIsOpen(false), 150);
+            }}
+            onKeyDown={onKeyDown}
+            onPaste={onPaste}
+            maxLength={6000}
+            className={`flex-1 resize-none bg-transparent ${inputCls} font-normal leading-6 text-ink placeholder:text-ink-subtle outline-none scrollbar-soft sm:leading-7`}
+          />
 
-        <div className="flex shrink-0 items-center gap-1 self-start pt-0.5">
-          {isList ? (
+          {!isList && (
+            <div className="flex shrink-0 items-center gap-1 self-start pt-0.5">
+              {loading ? (
+                <Spinner className={`text-ink-subtle ${iconSize}`} />
+              ) : query ? (
+                <button
+                  type="button"
+                  aria-label="Effacer"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setQuery("");
+                    inputRef.current?.focus();
+                  }}
+                  className="grid h-7 w-7 place-items-center rounded-full text-ink-subtle hover:bg-black/[0.04] hover:text-ink"
+                >
+                  <CloseIcon className="h-4 w-4" />
+                </button>
+              ) : null}
+            </div>
+          )}
+        </div>
+
+        {isList && (
+          <div className="mt-2.5 flex items-center justify-end gap-2">
+            {query ? (
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setQuery("");
+                  inputRef.current?.focus();
+                }}
+                className="rounded-full px-3 py-1.5 text-[12px] font-medium text-ink-subtle transition hover:bg-black/[0.04] hover:text-ink"
+              >
+                Effacer
+              </button>
+            ) : null}
             <button
               type="button"
               onMouseDown={(e) => {
                 e.preventDefault();
                 submitList(query.trim());
               }}
-              className="inline-flex items-center gap-1.5 rounded-full bg-rose-600 px-3.5 py-1.5 text-[13px] font-semibold text-white shadow-[0_4px_14px_-4px_rgba(244, 63, 94,0.6)] transition-all hover:bg-rose-700 hover:shadow-[0_8px_22px_-6px_rgba(244, 63, 94,0.7)]"
+              className="inline-flex items-center gap-1.5 rounded-full bg-rose-600 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_4px_14px_-4px_rgba(244,63,94,0.6)] transition-all hover:bg-rose-700 hover:shadow-[0_8px_22px_-6px_rgba(244,63,94,0.7)]"
             >
               Analyser
               <span aria-hidden>→</span>
             </button>
-          ) : loading ? (
-            <Spinner className={`text-ink-subtle ${iconSize}`} />
-          ) : query ? (
-            <button
-              type="button"
-              aria-label="Effacer"
-              onMouseDown={(e) => {
-                e.preventDefault();
-                setQuery("");
-                inputRef.current?.focus();
-              }}
-              className="grid h-7 w-7 place-items-center rounded-full text-ink-subtle hover:bg-black/[0.04] hover:text-ink"
-            >
-              <CloseIcon className="h-4 w-4" />
-            </button>
-          ) : null}
-        </div>
+          </div>
+        )}
       </div>
 
       {showDropdown ? (

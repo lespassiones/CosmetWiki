@@ -40,15 +40,19 @@ export function AddProductButton({
     }
   }
 
+  // text-xs → sm:text-sm : the label shrinks progressively before resorting
+  // to "…" truncation on really narrow screens.
+  // justify-center : when the button is sized via flex-1 (routine page), the
+  // label sits centred in the slot rather than left-aligned.
   const ButtonChrome =
     variant === "ghost"
-      ? `inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-[#F43F5E] hover:bg-rose-50 transition ${className}`
-      : `neu-shadow inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white bg-gradient-to-br from-[#1F2937] via-[#111111] to-[#0A0A0A] hover:brightness-110 transition ${className}`;
+      ? `inline-flex items-center justify-center gap-2 rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-[#F43F5E] hover:bg-rose-50 transition ${className}`
+      : `neu-shadow inline-flex items-center justify-center gap-2 rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-br from-[#1F2937] via-[#111111] to-[#0A0A0A] hover:brightness-110 transition ${className}`;
 
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className={ButtonChrome}>
-        {label}
+        <span className="min-w-0 truncate">{label}</span>
       </button>
       <AddProductChoiceModal
         open={open}

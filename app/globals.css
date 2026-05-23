@@ -214,6 +214,22 @@
     transform: translateY(0);
     box-shadow: inset 3px 3px 6px rgba(40, 30, 120, 0.35);
   }
+  /* Rose-tinted variant of .neu-shadow — used by "Comparer 2 analyses" so
+     the drop shadow reads in the button's own rose hue rather than a flat
+     grey, keeping the neumorphic depth on a coloured surface. */
+  .neu-shadow-rose {
+    box-shadow: 8px 8px 16px rgba(244, 63, 94, 0.45),
+               -6px -6px 14px rgba(255, 255, 255, 0.85);
+  }
+  .neu-shadow-rose:hover {
+    box-shadow: 10px 10px 20px rgba(244, 63, 94, 0.55),
+               -6px -6px 14px rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+  }
+  .neu-shadow-rose:active {
+    transform: translateY(0);
+    box-shadow: inset 3px 3px 6px rgba(120, 20, 40, 0.4);
+  }
   .neu-hover:hover {
     box-shadow: 8px 8px 18px var(--neu-shadow-dark),
                -8px -8px 18px var(--neu-shadow-light);

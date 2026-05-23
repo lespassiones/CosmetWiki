@@ -133,21 +133,29 @@ const DIACRITICS_RE = new RegExp("[\\u0300-\\u036f]", "g");
  * we skip three AI round-trips (parseInciWithAI + validateInciInput +
  * splitInciWithGpt) that would otherwise add ~500-1300 ms to the response.
  */
-const CLEAN_INCI_CHARSET_RE = /^[\sA-Za-z0-9\-\(\)\.\/,;:'&%À-ſ]+$/;
+// Charset accepted on the fast path. Covers commas + bullets (•·●◆▪) + the
+// usual cosmetic-list punctuation. Brackets and "+/-" are tolerated because
+// the local parseInciList strips them as noise (MAY CONTAIN labels).
+const CLEAN_INCI_CHARSET_RE = /^[\sA-Za-z0-9\-\(\)\.\/,;:'&%À-ſ•·●◆▪\[\]+]+$/;
+const SEPARATOR_RE = /[,•·●◆▪]/;
 function isCleanInciInput(raw: string): boolean {
   const trimmed = raw.trim();
   if (trimmed.length < 20) return false;
-  if (!trimmed.includes(",")) return false;
+  // Need at least one of: comma, bullet, middot, black circle, diamond, small
+  // square. Brand labels use a wild variety so we accept any of them.
+  if (!SEPARATOR_RE.test(trimmed)) return false;
   const tokens = trimmed
-    .split(",")
+    .split(/[,•·●◆▪]/)
     .map((t) => t.trim())
     .filter(Boolean);
   if (tokens.length < 4) return false;
-  // Reject if any token is suspiciously long (>120 chars) or contains
-  // characters we wouldn't expect in a clean INCI list (pipes, asterisks,
-  // backslashes — classic OCR noise).
+  // Reject if any token is suspiciously long (>140 chars) — usually a sign
+  // of a paragraph rather than a list. Note: we measure the FIRST raw token
+  // too because brand prefixes like "G2047548 - INGREDIENTS: AQUA" still get
+  // stripped by parseInciList's noise patterns; we just need the overall
+  // shape to look list-y.
   for (const tok of tokens) {
-    if (tok.length === 0 || tok.length > 120) return false;
+    if (tok.length === 0 || tok.length > 140) return false;
   }
   return CLEAN_INCI_CHARSET_RE.test(trimmed);
 }
@@ -353,6 +361,13 @@ export async function POST(req: NextRequest) {
       effective_name: isSuggestion ? null : r.name,
       effective_tags: isSuggestion ? null : r.tags,
       suggested_name: isSuggestion ? r.name : null,
+      // Always preserve the color carried by the matched slug in the
+      // ingredients table — regardless of whether we elevated the match to
+      // "confirmed" status. The list UI uses this as a fallback so it stays
+      // consistent with the ingredient detail page the row's arrow links to.
+      // Counts / spectrum / score still use `effective_color` only, so a
+      // low-confidence suggestion never silently shifts the verdict.
+      db_color_rating: r.color_rating,
       confidence,
     };
   });
@@ -707,6 +722,12 @@ export async function POST(req: NextRequest) {
       slug: r.slug,
       name: r.effective_name,
       colorRating: r.effective_color,
+      // Color from the matched slug's row in `ingredients`, present even when
+      // the match was a low-confidence suggestion that didn't elevate to a
+      // confirmed status. Used by the list UI as a display fallback so an
+      // ingredient that links to a green detail page also shows green in
+      // the list, instead of a confusing grey dash.
+      dbColorRating: r.db_color_rating,
       casNumber: r.cas_number,
       translationFr: r.translation_fr,
       primaryFunction: r.primary_function,

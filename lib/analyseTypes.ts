@@ -20,6 +20,14 @@ export type AnalyseItem = {
   slug: string | null;
   name: string | null;
   colorRating: ColorRating | null;
+  /**
+   * Color carried by the matched slug's row in the `ingredients` table — kept
+   * even when the match was a low-confidence "suggestion" so the analyse list
+   * can stay consistent with the ingredient detail page the row's arrow links
+   * to. Counts / spectrum / score only ever read `colorRating`, so a
+   * suggestion never silently shifts the verdict.
+   */
+  dbColorRating: ColorRating | null;
   casNumber: string | null;
   translationFr: string | null;
   primaryFunction: string | null;

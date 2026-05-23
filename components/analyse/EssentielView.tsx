@@ -1,7 +1,14 @@
 "use client";
 
-import type { ComponentType } from "react";
+import type { ComponentType, CSSProperties } from "react";
 import type { ConcernTier, EssentielData, VerdictTone } from "@/lib/essentiel/engine";
+
+/** CSS variable consumed by the `.stagger-up` keyframe (defined in
+ *  globals.css). Returned typed as CSSProperties so TS accepts the custom
+ *  property name. */
+function staggerDelay(delayMs: number): CSSProperties {
+  return { ["--stagger-delay" as string]: `${delayMs}ms` } as CSSProperties;
+}
 
 /**
  * The "essentiel" 3-card snapshot rendered ABOVE the full analysis grid.
@@ -28,17 +35,28 @@ export function EssentielView({
 }) {
   return (
     <section className="mt-4 space-y-3" aria-label="Aperçu essentiel de l'analyse">
-      <VerdictCard verdict={data.verdict} />
+      {/* Each card uses the `.stagger-up` animation (defined in globals.css)
+          with an incremental --stagger-delay so the 3 blocks fade-up one
+          after the other on mount. The animation only runs on the first
+          render — subsequent re-renders (toggle expand/collapse) keep the
+          cards visible. */}
+      <div className="stagger-up" style={staggerDelay(0)}>
+        <VerdictCard verdict={data.verdict} />
+      </div>
       {data.positives.length > 0 ? (
-        <PositivesCard positives={data.positives} />
+        <div className="stagger-up" style={staggerDelay(120)}>
+          <PositivesCard positives={data.positives} />
+        </div>
       ) : null}
-      {data.concerns.length > 0 ? (
-        <ConcernsCard concerns={data.concerns} />
-      ) : (
-        <AllClearCard />
-      )}
+      <div className="stagger-up" style={staggerDelay(240)}>
+        {data.concerns.length > 0 ? (
+          <ConcernsCard concerns={data.concerns} />
+        ) : (
+          <AllClearCard />
+        )}
+      </div>
 
-      <div className="flex justify-center pt-2">
+      <div className="stagger-up flex justify-center pt-2" style={staggerDelay(360)}>
         <button
           type="button"
           onClick={onToggle}

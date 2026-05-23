@@ -121,9 +121,21 @@ export async function POST(req: NextRequest) {
       restriction_reason: reasonByPosition.get(it.position) ?? null,
     }));
 
+    // generateSynthesis expects counts keyed by capitalised ColorRating
+    // ("Vert", "Jaune", "Orange", "Rouge"). The persisted result_json uses
+    // lowercase keys ("vert", "jaune", ...) for the UI — without this
+    // remap the synthesis ends up reading 0 for every colour and writes
+    // the nonsensical "Sur les 0 ingrédients identifiés…" sentence.
+    const countsForLlm: Record<string, number> = {
+      Vert: resultJson.counts.vert ?? 0,
+      Jaune: resultJson.counts.jaune ?? 0,
+      Orange: resultJson.counts.orange ?? 0,
+      Rouge: resultJson.counts.rouge ?? 0,
+    };
+
     const rawSynthesis = await generateSynthesis({
       enriched,
-      counts: resultJson.counts as unknown as Record<string, number>,
+      counts: countsForLlm,
       score: Number(row.score ?? 0),
       scoreLabel: (resultJson as unknown as { scoreLabel?: string }).scoreLabel ?? "",
       observations: resultJson.observations ?? [],

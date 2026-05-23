@@ -3,14 +3,15 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addToRoutine } from "@/app/routine/actions";
-import { GLASS_PILL } from "@/lib/ui/glass";
 
 export function AddToRoutineButton({
   analysisId,
   alreadyInRoutine = false,
+  className = "",
 }: {
   analysisId: string;
   alreadyInRoutine?: boolean;
+  className?: string;
 }) {
   const [pending, startTransition] = useTransition();
   const [done, setDone] = useState(alreadyInRoutine);
@@ -28,11 +29,13 @@ export function AddToRoutineButton({
 
   if (done) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 text-emerald-700 text-[13px] font-medium px-3.5 py-1.5 ring-1 ring-emerald-100">
-        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden>
+      <span
+        className={`inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-50 text-emerald-700 text-[13px] font-medium px-3 sm:px-3.5 py-1.5 ring-1 ring-emerald-100 ${className}`}
+      >
+        <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden>
           <path d="M5 12l5 5 9-12" />
         </svg>
-        Dans ta routine
+        <span className="min-w-0 truncate">Dans ta routine</span>
       </span>
     );
   }
@@ -42,13 +45,20 @@ export function AddToRoutineButton({
       type="button"
       onClick={add}
       disabled={pending}
-      className={`${GLASS_PILL} inline-flex items-center gap-1.5 text-[13px] font-medium px-3.5 py-1.5 text-ink disabled:opacity-50`}
+      // Rose CTA matching the site accent (#F43F5E) with a rose-tinted
+      // neumorphic lift (.neu-shadow-rose). Hover darkens slightly; the
+      // class already handles translateY on hover and inset press on active.
+      // min-w-0 + truncate on the label so the button can shrink in flex-1
+      // slots (analyse header on mobile) without breaking the row.
+      className={`neu-shadow-rose inline-flex items-center justify-center gap-1.5 rounded-full bg-[#F43F5E] text-white text-xs sm:text-[13px] font-semibold px-3 sm:px-3.5 py-1.5 transition hover:bg-[#E11D48] disabled:opacity-60 ${className}`}
     >
-      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <line x1="12" y1="5" x2="12" y2="19" />
         <line x1="5" y1="12" x2="19" y2="12" />
       </svg>
-      {pending ? "Ajout…" : "Ajouter à ma routine"}
+      <span className="min-w-0 truncate">
+        {pending ? "Ajout…" : "Ajouter à ma routine"}
+      </span>
     </button>
   );
 }

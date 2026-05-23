@@ -198,9 +198,19 @@ export default async function RoutinePage() {
             Suis l&apos;exposition cumulée de ta routine et repère les produits à ajuster.
           </p>
 
-          <div className="mt-4 lg:mt-0 flex items-center justify-between gap-2 flex-wrap w-full lg:w-auto">
-            <AddProductButton eligibleAnalyses={eligibleAnalyses} />
-            <RestrictionsLinkButton count={restrictionsCount} />
+          {/* Buttons stay on ONE row on every screen size. On mobile they
+              share the width with flex-1 + min-w-0 so they shrink in lockstep
+              instead of wrapping; inside each button the label is truncated
+              with "…" if the slot gets too narrow. Gap stays constant. */}
+          <div className="mt-4 lg:mt-0 flex items-center gap-2 w-full lg:w-auto">
+            <AddProductButton
+              eligibleAnalyses={eligibleAnalyses}
+              className="flex-1 lg:flex-initial min-w-0"
+            />
+            <RestrictionsLinkButton
+              count={restrictionsCount}
+              className="flex-1 lg:flex-initial min-w-0"
+            />
           </div>
         </div>
       </header>

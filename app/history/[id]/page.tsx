@@ -6,6 +6,7 @@ import { supabaseServer } from "@/lib/supabase";
 import { AnalyseResultPanel } from "@/components/AnalyseResultPanel";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { HistoryItemActions } from "@/components/history/HistoryItemActions";
+import { enrichAnalyseWithDbColors } from "@/lib/analysisEnrichment";
 
 export const metadata = { title: "Analyse · Cosme Check" };
 export const dynamic = "force-dynamic";
@@ -71,7 +72,21 @@ export default async function HistoryDetailPage({
     data.product_label
     ?? data.name
     ?? `Analyse du ${new Date(data.created_at).toLocaleDateString("fr-FR")}`;
-  const result = data.result_json as AnalyseResponse;
+  const rawResult = data.result_json as AnalyseResponse;
+
+  // Lazily backfill `dbColorRating` on items saved before the field existed:
+  // looks up the matched slug's colour in `ingredients` so the list stays
+  // consistent with the ingredient detail pages. Persists the patched
+  // result_json fire-and-forget so the next visit is instant.
+  const { enriched: result, changed: enriched } = await enrichAnalyseWithDbColors(rawResult, sb);
+  if (enriched) {
+    void sb
+      .schema("cosme_check")
+      .from("analyses")
+      .update({ result_json: result })
+      .eq("id", id);
+  }
+
   const analysedAt = new Date(data.created_at).toLocaleDateString("fr-FR", {
     day: "2-digit",
     month: "long",

@@ -71,7 +71,23 @@ export function IngredientSpectrum({
     return items.find((it) => it.position === position);
   }
 
-  const nonGreenInTop5 = top5.filter((r) => r && r !== "Vert").length;
+  /**
+   * Effective colour for a spectrum square : the strict `colorRating` if the
+   * analyser confirmed it, otherwise the `dbColorRating` carried by the
+   * matched slug in the ingredients table (the same colour the detail page
+   * shows). Falls back to the server-pre-computed `top5/top10` value as a
+   * last resort so old persisted analyses without the new fields still
+   * render something.
+   */
+  function effectiveRatingAt(position: number, serverFallback: ColorRating | null): ColorRating | null {
+    const it = ingredientAt(position);
+    if (!it) return serverFallback;
+    return it.colorRating ?? it.dbColorRating ?? serverFallback;
+  }
+
+  const effectiveTop5 = top5.map((r, i) => effectiveRatingAt(i + 1, r));
+  const effectiveTop10 = top10.map((r, i) => effectiveRatingAt(i + 1, r));
+  const nonGreenInTop5 = effectiveTop5.filter((r) => r && r !== "Vert").length;
 
   return (
     <section
@@ -97,7 +113,7 @@ export function IngredientSpectrum({
       </div>
 
       <ul className="flex items-end gap-2 mb-2">
-        {top5.map((rating, i) => {
+        {effectiveTop5.map((rating, i) => {
           const position = i + 1;
           const it = ingredientAt(position);
           const name = it?.name ?? it?.input ?? "-";
@@ -159,7 +175,7 @@ export function IngredientSpectrum({
       </div>
 
       <ul className="flex gap-1">
-        {top10.map((rating, i) => {
+        {effectiveTop10.map((rating, i) => {
           const position = i + 1;
           const it = ingredientAt(position);
           const name = it?.name ?? it?.input ?? "-";
