@@ -258,7 +258,17 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
 
     setError(null);
     const startedAt = Date.now();
-    const budget = budgetRef.current;
+    void budgetRef.current; // budget no longer enforces a minimum wait
+
+    // Hard timeout so the overlay never hangs forever on a stalled fetch
+    // (was the root cause of the "stuck on Génération de la synthèse" bug
+    // — the old animation had a synthesis step but no abort, so when the
+    // server was slow or the network dropped, the overlay never closed).
+    let timedOut = false;
+    const analyseTimeout = setTimeout(() => {
+      timedOut = true;
+      try { ctrl.abort(); } catch { /* noop */ }
+    }, 10000);
 
     const productLabel = src
       ? [src.brand, src.productName].filter(Boolean).join(" ").trim() || undefined
@@ -272,7 +282,11 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text: trimmed,
-          withSynthesis: true,
+          // Initial scan returns FAST (≈300 ms — DB lookup + colour bucketing
+          // only). The AI synthesis is fetched lazily by AnalyseResultPanel
+          // when the user clicks "Voir l'analyse complète", so the EssentielView
+          // appears instantly without waiting on the LLM round-trip.
+          withSynthesis: false,
           ...(productLabel ? { productLabel } : {}),
           ...(brand ? { brand } : {}),
           ...(productType ? { productType } : {}),
@@ -304,13 +318,11 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
       if (addedFlag) setAddedToRoutine(true);
       const savedId = typeof data.analysisId === "string" ? data.analysisId : null;
       setAnalysisId(savedId);
-      const elapsed = Date.now() - startedAt;
-      // Always honour the minimum animation budget so the user has time to
-      // read the "On décode la composition…" steps. The fetch itself is
-      // usually too fast for the eye otherwise.
-      if (elapsed < budget) {
-        await new Promise((res) => setTimeout(res, budget - elapsed));
-      }
+      // No artificial wait — show the EssentielView the moment the fetch
+      // returns. The overlay used to be padded so the user could read the
+      // 5 fake steps, but the initial call is now rules-based + fast, so
+      // padding it would just feel sluggish.
+      void startedAt;
       setProductSource(src);
       setResult(data);
       setOriginalText(trimmed);
@@ -328,8 +340,15 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
         ts: Date.now(),
       });
     } catch (err) {
-      if ((err as DOMException).name === "AbortError") return;
+      if ((err as DOMException).name === "AbortError") {
+        if (timedOut) {
+          setError("La connexion a expiré. Réessaye dans un instant.");
+        }
+        return;
+      }
       setError((err as Error).message ?? "Erreur réseau");
+    } finally {
+      clearTimeout(analyseTimeout);
     }
   }
 

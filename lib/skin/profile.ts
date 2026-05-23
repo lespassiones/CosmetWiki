@@ -90,6 +90,26 @@ export const HAIR_CONCERN_LABEL: Record<HairConcern, string> = {
   cuir_chevelu_sensible: "Cuir chevelu sensible / affecté",
 };
 
+// ─── Goals / souhaits ─────────────────────────────────────────────────────
+
+// What the user wants to get out of Cosme Check. Collected during onboarding
+// (step 3) and used by the Beauty Advisor to tailor its tone (educational vs
+// product-oriented vs routine-building).
+export const PROFILE_GOALS = [
+  "comprendre_produits",
+  "eviter_risques",
+  "alternatives_adaptees",
+  "construire_routine",
+] as const;
+export type ProfileGoal = typeof PROFILE_GOALS[number];
+
+export const PROFILE_GOAL_LABEL: Record<ProfileGoal, string> = {
+  comprendre_produits: "Mieux comprendre mes produits",
+  eviter_risques: "Éviter les ingrédients risqués",
+  alternatives_adaptees: "Trouver des alternatives adaptées",
+  construire_routine: "Construire / améliorer ma routine",
+};
+
 // ─── Profile ──────────────────────────────────────────────────────────────
 
 export type SkinProfile = {
@@ -111,6 +131,10 @@ export type SkinProfile = {
   /** Free-text catch-all for anything the user wants to flag that doesn't
    *  fit the buckets above. Surfaces in every AI prompt. */
   otherNotes?: string;
+  /** What the user wants from Cosme Check (multi). Collected at onboarding. */
+  goals?: ProfileGoal[];
+  /** Free-text "Autre" for goals (max 300 chars). */
+  otherGoals?: string;
 };
 
 export function readSkinProfile(prefs: Record<string, unknown> | null | undefined): SkinProfile {
@@ -173,6 +197,12 @@ export function readSkinProfile(prefs: Record<string, unknown> | null | undefine
   const otherSkinTypeBody =
     readShort("otherSkinTypeBody", 120) ?? readShort("otherSkinType", 120);
 
+  const goals: ProfileGoal[] = Array.isArray(r.goals)
+    ? (r.goals as unknown[]).filter((g): g is ProfileGoal =>
+        PROFILE_GOALS.includes(g as ProfileGoal),
+      )
+    : [];
+
   return {
     skinTypeFace,
     otherSkinTypeFace,
@@ -184,6 +214,8 @@ export function readSkinProfile(prefs: Record<string, unknown> | null | undefine
     otherConcerns: readShort("otherConcerns", 300),
     otherHair: readShort("otherHair", 200),
     otherNotes: readShort("otherNotes", 500),
+    goals: goals.length > 0 ? goals : undefined,
+    otherGoals: readShort("otherGoals", 300),
   };
 }
 
@@ -201,6 +233,23 @@ export function isProfileComplete(p: SkinProfile): boolean {
     (p.hairConcerns?.length ?? 0) > 0 ||
     Boolean(p.otherHair) ||
     Boolean(p.allergiesFreeform) ||
-    Boolean(p.otherNotes)
+    Boolean(p.otherNotes) ||
+    (p.goals?.length ?? 0) > 0 ||
+    Boolean(p.otherGoals)
   );
+}
+
+// ─── Onboarding flag ──────────────────────────────────────────────────────
+
+/**
+ * Whether the user has already been shown the post-signup onboarding wizard.
+ * Stored at `preferences.onboardingShown` (root, not under `skin`). Set to
+ * true as soon as the user either completes a step or skips out of the
+ * wizard — guarantees they only see it once.
+ */
+export function readOnboardingShown(
+  prefs: Record<string, unknown> | null | undefined,
+): boolean {
+  if (!prefs || typeof prefs !== "object") return false;
+  return (prefs as { onboardingShown?: unknown }).onboardingShown === true;
 }

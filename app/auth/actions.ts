@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase";
 import { SITE_URL } from "@/lib/siteUrl";
+import { resolveOnboardingDestination } from "@/lib/onboarding/resolve";
 
 export type AuthResult = { ok: true } | { ok: false; error: string };
 
@@ -48,7 +49,14 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
   });
 
   if (error) return { ok: false, error: error.message };
-  redirect(next);
+  // Send fresh signups through the 3-step onboarding wizard. The wizard
+  // forwards to `next` once the user finishes or dismisses. A returning user
+  // would never hit this branch (signUp creates a new account here).
+  const onboardingUrl =
+    next === "/"
+      ? "/onboarding"
+      : `/onboarding?next=${encodeURIComponent(next)}`;
+  redirect(onboardingUrl);
 }
 
 /** Timeout dur sur l'appel Auth pour ne pas tenir une Server Action 25 s
@@ -99,6 +107,16 @@ export async function signIn(formData: FormData): Promise<AuthResult> {
       return { ok: false, error: "Email non confirmé. Vérifie ta boîte mail." };
     }
     return { ok: false, error: "Email ou mot de passe incorrect." };
+  }
+  // After a successful sign-in we route the user through /onboarding if they
+  // have never been shown the wizard AND their profile is still empty. This
+  // catches pre-existing accounts created before /onboarding existed: the
+  // FIRST login after the feature ships sends them there once. The resolver
+  // is fail-open (any error → just go to `next`).
+  const { data: { user } } = await sb.auth.getUser();
+  if (user) {
+    const dest = await resolveOnboardingDestination(sb, user.id, next);
+    redirect(dest);
   }
   redirect(next);
 }

@@ -429,19 +429,23 @@ export function IngredientBlob({
         <div
           className="grid w-full items-center gap-x-2 sm:gap-x-3 [grid-template-columns:minmax(0,1fr)_auto_minmax(0,1fr)] [grid-template-areas:'jaune_svg_orange''vert_svg_rouge']"
         >
-          <div className="flex justify-end [grid-area:jaune]">
+          <div className="flex justify-end min-w-0 [grid-area:jaune]">
             <AroundLabel color="jaune" count={counts.jaune} align="end" />
           </div>
-          <div className="w-[58vw] max-w-[280px] sm:w-[320px] lg:w-[400px] [grid-area:svg]">
+          {/* SVG width is capped tighter on narrow screens so the side labels
+              ("pénalité moyenne", etc.) always have enough room to wrap inside
+              the card. On desktops there's plenty of space, so the donut can
+              still be large. */}
+          <div className="w-[48vw] max-w-[260px] sm:w-[60vw] sm:max-w-[300px] lg:w-[380px] [grid-area:svg]">
             {svgNode}
           </div>
-          <div className="flex justify-start [grid-area:orange]">
+          <div className="flex justify-start min-w-0 [grid-area:orange]">
             <AroundLabel color="orange" count={counts.orange} align="start" />
           </div>
-          <div className="flex justify-end [grid-area:vert]">
+          <div className="flex justify-end min-w-0 [grid-area:vert]">
             <AroundLabel color="vert" count={counts.vert} align="end" />
           </div>
-          <div className="flex justify-start [grid-area:rouge]">
+          <div className="flex justify-start min-w-0 [grid-area:rouge]">
             <AroundLabel color="rouge" count={counts.rouge} align="start" />
           </div>
         </div>

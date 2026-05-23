@@ -7,12 +7,14 @@ const DEFAULT_STEPS = [
   "Identification des ingrédients",
   "Détection des catégories",
   "Évaluation des ingrédients",
-  "Génération de la synthèse",
 ];
 
-/** Random duration between 5000 and 6000 ms - used for both list analysis and single-ingredient lookups. */
+/** Random duration between 1100 and 1800 ms — sized for the rules-based fast
+ *  path. The AI synthesis is no longer generated in the initial call (it's
+ *  fetched lazily when the user clicks "Voir l'analyse complète"), so the
+ *  overlay doesn't need to mask a 5+ s LLM round-trip anymore. */
 export function randomProcessingTotal(): number {
-  return Math.round(5000 + Math.random() * 1000);
+  return Math.round(1100 + Math.random() * 700);
 }
 
 /**

@@ -7,6 +7,7 @@ import { BeautyProfileForm } from "./BeautyProfileForm";
 import {
   HAIR_CONCERN_LABEL,
   isProfileComplete,
+  PROFILE_GOAL_LABEL,
   SKIN_CONCERN_LABEL,
   SKIN_TYPE_BODY_LABEL,
   SKIN_TYPE_FACE_LABEL,
@@ -219,6 +220,32 @@ function ReadView({ profile }: { profile: SkinProfile }) {
           </div>
         </li>
       ) : null}
+
+      {((profile.goals?.length ?? 0) > 0 || profile.otherGoals) ? (
+        <li className="flex items-start gap-3 py-3">
+          <TargetIcon className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] uppercase tracking-wide text-[#6B7280] font-medium">
+              Souhaits
+            </p>
+            <ul className="mt-1.5 flex flex-wrap gap-1.5">
+              {(profile.goals ?? []).map((g) => (
+                <li
+                  key={g}
+                  className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-[12px] font-medium text-amber-800 ring-1 ring-amber-100"
+                >
+                  {PROFILE_GOAL_LABEL[g]}
+                </li>
+              ))}
+              {profile.otherGoals ? (
+                <li className="inline-flex items-center rounded-full bg-amber-50/60 px-2.5 py-0.5 text-[12px] font-medium text-amber-800/90 ring-1 ring-amber-100">
+                  {profile.otherGoals}
+                </li>
+              ) : null}
+            </ul>
+          </div>
+        </li>
+      ) : null}
     </ul>
   );
 }
@@ -298,6 +325,16 @@ function InfoIcon({ className }: { className?: string }) {
       <circle cx="12" cy="12" r="9" />
       <line x1="12" y1="11" x2="12" y2="16" />
       <circle cx="12" cy="8" r="0.6" fill="currentColor" />
+    </svg>
+  );
+}
+
+function TargetIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="5" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
     </svg>
   );
 }

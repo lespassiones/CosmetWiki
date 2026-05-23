@@ -51,7 +51,9 @@ export type SynthesisInput = {
 
 // Bump this any time `buildPrompt()` changes meaningfully - old cached
 // outputs keyed on the previous version will no longer be served.
-const PROMPT_VERSION = 10;
+// v11 (2026-05-23): removed the "Sans parabens, sans sulfates..." absences
+// bullet — it duplicates the dedicated Observations panel.
+const PROMPT_VERSION = 11;
 
 function makeCacheKey(input: SynthesisInput): string {
   const list = input.enriched
@@ -184,9 +186,9 @@ BLOC 2 (puces, chaque ligne commence par "- ", 4 à 7 puces max) :
 - 1 à 3 jaunes notables → 1 puce courte chacun.
 - Plus de 3 → 1 puce groupée "À surveiller selon les peaux sensibles : **NOM1**, **NOM2**, **NOM3**...".
 
-4. BONUS optionnels (max 1 de chaque) :
+4. BONUS optionnel (max 1) :
 - "Bon à savoir" sur UN VERT notable (Niacinamide, Acide Hyaluronique, Panthénol, Centella Asiatica). Ignore eau / glycérine / propanediol / sodium hydroxide / pH ajusteurs.
-- Puce d'absences si la liste est non vide : "- Sans **parabens**, sans **sulfates**...". Ne pas inventer.
+- INTERDIT : ne jamais énumérer ce qui est absent (style "Sans parabens, sans sulfates..."). Cette information est déjà affichée dans le panneau Observations, la répéter ici alourdit la synthèse.
 
 5. CLOSING (DERNIÈRE PUCE, obligatoire) — règle :
    ${closingRule}
@@ -219,8 +221,6 @@ ${yellow.length ? yellow.slice(0, 8).map(fmt).join("\n") + (yellow.length > 8 ? 
 
 VERTS notables (utilise UN seul pour la puce "Bon à savoir" si pertinent) :
 ${greenWithFunction.length ? greenWithFunction.join("\n") : "(aucun avec fonction connue)"}
-
-Absences réelles à mentionner si tu fais la puce d'absences : ${positives.join(", ") || "(aucune)"}
 
 Écris maintenant la synthèse en suivant la structure (Bloc 1 prose, ligne vide, Bloc 2 puces). Pas de titre, pas de préambule, pas de signature.`;
 

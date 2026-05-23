@@ -6,6 +6,8 @@ import { GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
 import {
   HAIR_CONCERN_LABEL,
   HAIR_CONCERNS,
+  PROFILE_GOAL_LABEL,
+  PROFILE_GOALS,
   SKIN_CONCERN_LABEL,
   SKIN_CONCERNS,
   SKIN_TYPE_BODY_LABEL,
@@ -13,6 +15,7 @@ import {
   SKIN_TYPES_BODY,
   SKIN_TYPES_FACE,
   type HairConcern,
+  type ProfileGoal,
   type SkinConcern,
   type SkinProfile,
   type SkinTypeBody,
@@ -76,6 +79,10 @@ export function BeautyProfileForm({
   );
   const [allergies, setAllergies] = useState(initial.allergiesFreeform ?? "");
   const [otherNotes, setOtherNotes] = useState(initial.otherNotes ?? "");
+  const [goals, setGoals] = useState<Set<ProfileGoal>>(
+    new Set(initial.goals ?? []),
+  );
+  const [otherGoals, setOtherGoals] = useState(initial.otherGoals ?? "");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -93,6 +100,15 @@ export function BeautyProfileForm({
       const next = new Set(prev);
       if (next.has(c)) next.delete(c);
       else next.add(c);
+      return next;
+    });
+  }
+
+  function toggleGoal(g: ProfileGoal) {
+    setGoals((prev) => {
+      const next = new Set(prev);
+      if (next.has(g)) next.delete(g);
+      else next.add(g);
       return next;
     });
   }
@@ -123,6 +139,11 @@ export function BeautyProfileForm({
     }
     if (allergies.trim()) fd.set("allergies", allergies.trim());
     if (otherNotes.trim()) fd.set("other_notes", otherNotes.trim());
+    // `goals_submitted` flips `saveSkinProfile` into the goals-update branch
+    // (it preserves existing goals when the field is absent).
+    fd.set("goals_submitted", "1");
+    for (const g of goals) fd.append("goals", g);
+    if (otherGoals.trim()) fd.set("other_goals", otherGoals.trim());
 
     startTransition(async () => {
       const r = await saveSkinProfile(fd);
@@ -257,6 +278,45 @@ export function BeautyProfileForm({
           rows={2}
           maxLength={500}
           placeholder="Ex : grossesse, traitement dermato en cours, climat tropical…"
+          className={INPUT}
+        />
+      </fieldset>
+
+      <fieldset className={`${SECTION} lg:col-span-2`}>
+        <legend className="text-[13px] font-semibold text-ink mb-2 px-1 -ml-1">
+          Souhaits
+        </legend>
+        <p className="text-[11px] text-[#6B7280] mb-3">
+          Qu&apos;est-ce que tu attends de Cosme Check ? (plusieurs choix possibles)
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {PROFILE_GOALS.map((g) => {
+            const active = goals.has(g);
+            return (
+              <button
+                key={g}
+                type="button"
+                onClick={() => toggleGoal(g)}
+                className={`text-left rounded-xl px-3.5 py-2.5 text-[13px] font-medium ring-1 transition ${
+                  active
+                    ? "bg-rose-50 ring-rose-300 text-rose-700"
+                    : "bg-[#F9FAFB] ring-[#E5E7EB] text-ink hover:bg-white"
+                }`}
+              >
+                {PROFILE_GOAL_LABEL[g]}
+              </button>
+            );
+          })}
+        </div>
+        <label className="block text-[11px] text-[#6B7280] mt-3 mb-1">
+          Autre : dis-le dans tes mots (optionnel)
+        </label>
+        <textarea
+          value={otherGoals}
+          onChange={(e) => setOtherGoals(e.target.value.slice(0, 300))}
+          rows={2}
+          maxLength={300}
+          placeholder="Ex : « comprendre les étiquettes » ou « routine simple peau mixte »…"
           className={INPUT}
         />
       </fieldset>

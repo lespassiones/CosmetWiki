@@ -56,3 +56,37 @@ export function stripLongDashes(s: string): string {
     .replace(/[ \t]+([.,;:!?])/g, "$1")
     .trim();
 }
+
+/**
+ * Remove the "Sans parabens, sans sulfates, ..." absences bullet from a
+ * synthesis. This information is already shown by the dedicated Observations
+ * panel, so repeating it in the prose is just visual noise.
+ *
+ * Applied at READ TIME (in the synthesis route) so existing analyses cached
+ * in `analyses.result_json.synthesis` get cleaned up transparently — no DB
+ * backfill needed. Future analyses won't generate it in the first place
+ * (the prompt now explicitly forbids it).
+ *
+ * Detection rule (conservative, won't false-positive on genuine prose):
+ *   - The line, after stripping any leading "- " bullet marker, starts with
+ *     "Sans " (case-insensitive).
+ *   - AND it contains at least 2 further ", sans " occurrences (so it really
+ *     is an enumeration, not a sentence that happens to begin with "Sans").
+ */
+export function stripAbsencesParagraph(s: string): string {
+  if (!s) return s;
+  const ABSENCES_RE = /^(?:[-•*]\s+)?sans\s+\S/i;
+  const kept: string[] = [];
+  for (const line of s.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (ABSENCES_RE.test(trimmed)) {
+      const enumerations = (trimmed.match(/,\s*sans\s/gi) ?? []).length;
+      if (enumerations >= 2) continue; // drop this bullet
+    }
+    kept.push(line);
+  }
+  // Collapse any double-blank-line gap created by removing a bullet so the
+  // resulting markdown still parses cleanly (the synthesis renderer uses
+  // \n{2,} as the paragraph delimiter).
+  return kept.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}

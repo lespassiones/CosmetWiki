@@ -7,7 +7,7 @@ const SUSPICIOUS_UA_RE =
 const BOT_TRAP_PATHS = ["/admin-bot-trap", "/wp-admin", "/wp-login.php"];
 
 // Pages that require an authenticated session. Public pages stay accessible.
-const PROTECTED_PREFIXES = ["/history", "/routine", "/profile", "/compare"];
+const PROTECTED_PREFIXES = ["/history", "/routine", "/profile", "/compare", "/onboarding"];
 
 // Pages where calling Supabase auth at all is pure waste - they don't read the
 // session server-side and they're not gated. Skip the round-trip entirely.

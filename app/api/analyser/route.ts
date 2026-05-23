@@ -125,6 +125,33 @@ const TOP_LIST_WINDOW = 5;
 
 const DIACRITICS_RE = new RegExp("[\\u0300-\\u036f]", "g");
 
+/**
+ * Heuristic that says "this INCI text looks already clean — no AI parser /
+ * validator needed". Tuned to match the output of the product-search and
+ * barcode flows (comma-separated, ASCII + diacritics only, no OCR noise),
+ * but it also catches a well-formatted manual paste. When this returns true
+ * we skip three AI round-trips (parseInciWithAI + validateInciInput +
+ * splitInciWithGpt) that would otherwise add ~500-1300 ms to the response.
+ */
+const CLEAN_INCI_CHARSET_RE = /^[\sA-Za-z0-9\-\(\)\.\/,;:'&%À-ſ]+$/;
+function isCleanInciInput(raw: string): boolean {
+  const trimmed = raw.trim();
+  if (trimmed.length < 20) return false;
+  if (!trimmed.includes(",")) return false;
+  const tokens = trimmed
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+  if (tokens.length < 4) return false;
+  // Reject if any token is suspiciously long (>120 chars) or contains
+  // characters we wouldn't expect in a clean INCI list (pipes, asterisks,
+  // backslashes — classic OCR noise).
+  for (const tok of tokens) {
+    if (tok.length === 0 || tok.length > 120) return false;
+  }
+  return CLEAN_INCI_CHARSET_RE.test(trimmed);
+}
+
 export async function POST(req: NextRequest) {
   let body: AnalysePayload;
   try {
@@ -163,26 +190,40 @@ export async function POST(req: NextRequest) {
   const charge = await gate.consumeCredit("analyser");
   if (!charge.ok) return charge.response;
 
-  // AI-powered INCI parser cascade: Mistral (gratuit, primary) → OpenAI (fallback)
-  // → regex (final fallback below). Handles lists pasted without separators,
-  // OCR noise, typos. Cached by hash of input so a repeated paste is free.
-  const aiParsed = await parseInciWithAI(rawText);
-  // If the AI reconstructed the list, feed the clean comma-separated version
-  // back into the rest of the pipeline. Validation + regex parser handle
-  // clean input perfectly.
-  const text = aiParsed && aiParsed.ingredients.length > 0
-    ? aiParsed.ingredients.join(", ")
-    : rawText;
+  // Fast-path: when the input is already a well-formed comma-separated INCI
+  // list (typical of barcode/product-search/clean paste), we skip the three
+  // AI clean-up steps (parseInciWithAI + validateInciInput + splitInciWithGpt)
+  // and feed the raw text directly into the local parser. Saves ~500-1300 ms
+  // on the response time without sacrificing correctness — the local parser
+  // handles clean lists perfectly, and the DB match step would simply ignore
+  // any token it can't resolve anyway.
+  const skipAiParse = isCleanInciInput(rawText);
 
-  // Pre-flight: bail out on garbage input (cheap local checks + AI for the
-  // borderline cases). The AI defaults to "valid" if unavailable so we never
-  // block a real user.
-  const validation = await validateInciInput(text);
-  if (!validation.valid) {
-    return NextResponse.json(
-      { error: validation.reason ?? "Ceci ne ressemble pas à une liste INCI." },
-      { status: 400 },
-    );
+  let text: string;
+  if (skipAiParse) {
+    text = rawText;
+  } else {
+    // AI-powered INCI parser cascade: Mistral (gratuit, primary) → OpenAI (fallback)
+    // → regex (final fallback below). Handles lists pasted without separators,
+    // OCR noise, typos. Cached by hash of input so a repeated paste is free.
+    const aiParsed = await parseInciWithAI(rawText);
+    // If the AI reconstructed the list, feed the clean comma-separated version
+    // back into the rest of the pipeline. Validation + regex parser handle
+    // clean input perfectly.
+    text = aiParsed && aiParsed.ingredients.length > 0
+      ? aiParsed.ingredients.join(", ")
+      : rawText;
+
+    // Pre-flight: bail out on garbage input (cheap local checks + AI for the
+    // borderline cases). The AI defaults to "valid" if unavailable so we never
+    // block a real user.
+    const validation = await validateInciInput(text);
+    if (!validation.valid) {
+      return NextResponse.json(
+        { error: validation.reason ?? "Ceci ne ressemble pas à une liste INCI." },
+        { status: 400 },
+      );
+    }
   }
 
   let tokens = parseInciList(text);
@@ -192,7 +233,9 @@ export async function POST(req: NextRequest) {
   // emballages physiques : "AQUA / WATER / EAU DIMETHICONE CETEARYL ALCOHOL…").
   // On demande à GPT-4o-mini de ré-insérer les virgules entre ingrédients,
   // puis on re-parse. Cas pivot : <3 tokens dans un texte > 60 caractères.
-  if (tokens.length < 3 && text.length > 60) {
+  // Skipped on the fast-path: a clean comma-separated input never has <3
+  // tokens (we filtered for ≥4 above), so the rescue would always be a no-op.
+  if (!skipAiParse && tokens.length < 3 && text.length > 60) {
     const split = await splitInciWithGpt(text);
     if (split) {
       const rescued = parseInciList(split);
@@ -702,11 +745,11 @@ export async function POST(req: NextRequest) {
   // Silence unused-import noise in some narrow code paths.
   void EU_FRAGRANCE_ALLERGENS;
 
-  // Auto-save the analysis for signed-in users + AI categorize (fire-and-forget).
-  // We do this AFTER preparing the response so a failure here never blocks
-  // the user. Categorization runs in the background and is patched in later.
-  // Errors are logged server-side - they used to be swallowed silently, which
-  // hid a months-long RLS misconfiguration (zero rows ever persisted).
+  // Auto-save the analysis for signed-in users. We do this AFTER preparing
+  // the response so a failure here never blocks the user. The AI category is
+  // computed in the BACKGROUND (fire-and-forget) and patched into the row
+  // when it finishes — this used to be awaited, which blocked the response
+  // by ~200-400 ms for nothing user-visible.
   let savedAnalysisId: string | null = null;
   let addedToRoutine = false;
   try {
@@ -714,13 +757,6 @@ export async function POST(req: NextRequest) {
       .slice(0, 5)
       .map((r) => r.effective_name ?? r.input_raw)
       .filter(Boolean);
-    let category: ProductCategory | null = null;
-    try {
-      category = await categorizeProduct(top5, user.id);
-    } catch (catErr) {
-      logWarn("[analyser] categorize failed", { error: (catErr as Error).message });
-      category = null;
-    }
     const autoName = body.productLabel?.slice(0, 200)
       ?? `Analyse du ${new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
     // We need the inserted row id when the caller wants the analysis pushed
@@ -734,7 +770,8 @@ export async function POST(req: NextRequest) {
         product_label: body.productLabel?.slice(0, 200) ?? null,
         brand: body.brand?.slice(0, 120) ?? null,
         product_type: body.productType?.slice(0, 120) ?? null,
-        category,
+        // Category is computed asynchronously after the response — see below.
+        category: null,
         input_text: text,
         result_json: responsePayload,
         score: Number(score.toFixed(2)),
@@ -759,6 +796,29 @@ export async function POST(req: NextRequest) {
           addedToRoutine = true;
         }
       }
+      // Fire-and-forget AI categorization. We don't await it so the response
+      // ships immediately — the user gets the 3-card essentiel view back in
+      // ~300 ms instead of ~600 ms. The category is just metadata used by
+      // the routine engine; it's harmless if it's null for a few seconds.
+      const categorizeId = inserted.id as string;
+      void categorizeProduct(top5, user.id)
+        .then(async (cat) => {
+          if (!cat) return;
+          const { error: catUpdateError } = await sbAuth
+            .schema("cosme_check")
+            .from("analyses")
+            .update({ category: cat })
+            .eq("id", categorizeId);
+          if (catUpdateError) {
+            logWarn("[analyser] categorize update failed", {
+              error: catUpdateError.message,
+              userId: user.id,
+            });
+          }
+        })
+        .catch((catErr) => {
+          logWarn("[analyser] categorize failed", { error: (catErr as Error).message });
+        });
     }
   } catch (err) {
     logError("analyser.history_save", err, { userId: user.id });

@@ -13,6 +13,8 @@ import { InfoBadge, Tooltip } from "./Tooltip";
 import { commonNameFor, prettyInci } from "@/lib/inciCommonNames";
 import { AddToRoutineButton } from "./routine/AddToRoutineButton";
 import { RestrictionWarning } from "./analyse/RestrictionWarning";
+import { EssentielView } from "./analyse/EssentielView";
+import { computeEssentiel } from "@/lib/essentiel/engine";
 
 // Lazy-load : la modale n'est ouverte que sur clic utilisateur, on évite
 // d'embarquer son JS (et celui de ses dépendances OpenAI/Markdown) au LCP.
@@ -121,12 +123,68 @@ export function AnalyseResultPanel({
   // modal AND ask it to scroll to that ingredient once its DOM is mounted.
   // `null` = just open the modal at the top of the list.
   const [targetIngredientPosition, setTargetIngredientPosition] = useState<number | null>(null);
+  // "Essentiel" snapshot is rendered first; the full analysis grid below is
+  // collapsed by default and opens when the user clicks "Voir l'analyse
+  // complète". Rules-based (no LLM), so the snapshot is instantly available.
+  const essentiel = useMemo(() => computeEssentiel(result), [result]);
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
+  const detailsRef = useRef<HTMLDivElement | null>(null);
+  // The AI synthesis is no longer computed in the initial /api/analyser call
+  // (saved 2-8 s of LLM latency on the scan path). We fetch it lazily on the
+  // first expand via /api/synthesis. If the result already carries one
+  // (history page revisit on a previously-generated synthesis), we keep it.
+  const [synthesis, setSynthesis] = useState<string | null>(result.synthesis ?? null);
+  const [synthesisLoading, setSynthesisLoading] = useState(false);
   useEffect(() => {
     if (autoOpenPromesse) {
       setPromesseOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoOpenPromesse]);
+
+  // Smoothly scroll the full analysis grid into view when the user opens it,
+  // so the page doesn't just "grow" beneath them without a visual cue.
+  useEffect(() => {
+    if (!detailsExpanded || !detailsRef.current) return;
+    const el = detailsRef.current;
+    requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [detailsExpanded]);
+
+  // Lazy synthesis fetch — only the first time the user expands the full
+  // analysis. After that the synthesis is persisted on the analyses row, so
+  // a second visit (history page) gets it instantly from `result.synthesis`.
+  useEffect(() => {
+    if (!detailsExpanded) return;
+    if (synthesis !== null) return;
+    if (!analysisId) return;
+    const ctrl = new AbortController();
+    setSynthesisLoading(true);
+    fetch("/api/synthesis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ analysisId }),
+      signal: ctrl.signal,
+    })
+      .then(async (r) => {
+        if (!r.ok) return null;
+        const j = (await r.json()) as { synthesis?: string | null };
+        return j.synthesis ?? null;
+      })
+      .then((text) => {
+        if (ctrl.signal.aborted) return;
+        if (text) setSynthesis(text);
+      })
+      .catch(() => {
+        // Network/abort errors are non-fatal — SynthesisCard simply stays empty
+        // and the rest of the analysis remains usable.
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setSynthesisLoading(false);
+      });
+    return () => ctrl.abort();
+  }, [detailsExpanded, synthesis, analysisId]);
 
   // Ferme la modal au Escape pour cohérence avec PromesseFlowModal.
   useEffect(() => {
@@ -172,6 +230,16 @@ export function AnalyseResultPanel({
         />
       )}
 
+      {/* Essentiel snapshot - the 3 rules-based cards (verdict + ce qui est
+          bien + à surveiller) that show instantly after an analysis. The full
+          AI-powered grid below is collapsed until the user explicitly asks
+          for it. */}
+      <EssentielView
+        data={essentiel}
+        expanded={detailsExpanded}
+        onToggle={() => setDetailsExpanded((v) => !v)}
+      />
+
       {/*
         Layout via grid-template-areas - same DOM order regardless of
         viewport, but the placement of each section differs:
@@ -184,7 +252,11 @@ export function AnalyseResultPanel({
           col 2 (1fr) : observations on top, synthesis spanning 2 rows below
           col 3 (1.3fr): items spanning the full height
       */}
-      <div className="mt-6 grid gap-4 grid-cols-1 [grid-template-areas:'score''warning''counts''synthesis''spectrum''observations''items'] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:[grid-template-areas:'left_observations_items''left_synthesis_items']">
+      {detailsExpanded && (
+      <div
+        ref={detailsRef}
+        className="mt-6 grid gap-4 grid-cols-1 [grid-template-areas:'score''warning''counts''synthesis''spectrum''observations''items'] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:[grid-template-areas:'left_observations_items''left_synthesis_items']"
+      >
         {/* Left column: on desktop, grouped as a flex column so Score + Spectrum
             + Counts stack tightly with no gap from row height mismatch. On mobile,
             `contents` makes each child participate directly in the outer grid. */}
@@ -228,17 +300,21 @@ export function AnalyseResultPanel({
         </div>
 
         <Reveal delayMs={REVEAL_SYNTHESIS_MS} className="[grid-area:synthesis]">
-          <MobileExpander
-            expandLabel="Voir la synthèse complète"
-            collapsedMaxHeight={160}
-            desktopCollapsedMaxHeight={320}
-          >
-            <SynthesisCard
-              synthesis={result.synthesis}
-              items={result.items}
-              streamDelayMs={REVEAL_SYNTHESIS_MS}
-            />
-          </MobileExpander>
+          {synthesisLoading && !synthesis ? (
+            <SynthesisLoadingCard />
+          ) : (
+            <MobileExpander
+              expandLabel="Voir la synthèse complète"
+              collapsedMaxHeight={160}
+              desktopCollapsedMaxHeight={320}
+            >
+              <SynthesisCard
+                synthesis={synthesis}
+                items={result.items}
+                streamDelayMs={REVEAL_SYNTHESIS_MS}
+              />
+            </MobileExpander>
+          )}
         </Reveal>
 
         <Reveal delayMs={500} className="[grid-area:observations]">
@@ -267,6 +343,7 @@ export function AnalyseResultPanel({
           </div>
         </Reveal>
       </div>
+      )}
 
       {ingredientsModalOpen ? (
         <IngredientsModal
@@ -492,15 +569,16 @@ function BigScoreCard({
 
   return (
     <article className="rounded-2xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
-      {/* MOBILE - blob with per-colour labels positioned around it, then the
-          "% sans pénalité" line and the recognised-ingredients ratio. */}
+      {/* MOBILE - clean donut with just the centred count, followed by the
+          "% sans pénalité" line and the recognised-ingredients ratio. The
+          per-colour labels around the donut were removed because they
+          overflowed on narrow phones and the % below already carries the
+          headline. */}
       <div className="flex flex-col items-center gap-2 lg:hidden">
         <IngredientBlob
           counts={counts}
           variant="md"
           showCenter
-          showLegend
-          legendVariant="around"
           animate
         />
         {pctSansPenalite !== null && (
@@ -513,15 +591,14 @@ function BigScoreCard({
         </p>
       </div>
 
-      {/* DESKTOP - same around-the-blob layout, larger blob, with the
-          "% sans pénalité" subtitle slot and the ratio underneath. */}
+      {/* DESKTOP - larger blob without the corner labels (same reason as the
+          mobile version), the "% sans pénalité" subtitle slot, and the ratio
+          underneath. */}
       <div className="hidden lg:flex lg:flex-col lg:items-center">
         <IngredientBlob
           counts={counts}
           variant="lg"
           showCenter
-          showLegend
-          legendVariant="around"
           animate
           subtitle={
             pctSansPenalite !== null ? (
@@ -1003,6 +1080,32 @@ function dotForRating(r: ColorRating): string {
 // ============================================================
 // Synthesis
 // ============================================================
+
+/**
+ * Lightweight skeleton shown while /api/synthesis is generating the AI
+ * commentary on the first expand. Renders pulsing placeholder bars instead
+ * of the (briefly empty) SynthesisCard so the area never looks broken.
+ */
+function SynthesisLoadingCard() {
+  return (
+    <article
+      className="rounded-2xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl"
+      aria-busy="true"
+    >
+      <h2 className="text-[15px] font-semibold text-ink mb-3">Synthèse</h2>
+      <div className="space-y-2.5">
+        <div className="h-3 w-full bg-gray-200 rounded animate-pulse" />
+        <div className="h-3 w-11/12 bg-gray-200 rounded animate-pulse" />
+        <div className="h-3 w-9/12 bg-gray-200 rounded animate-pulse" />
+        <div className="h-3 w-10/12 bg-gray-200 rounded animate-pulse" />
+      </div>
+      <p className="mt-4 text-[12px] italic text-[#6B7280]">
+        Génération de la synthèse en cours…
+      </p>
+    </article>
+  );
+}
+
 function SynthesisCard({
   synthesis,
   items,

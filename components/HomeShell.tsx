@@ -181,15 +181,15 @@ export function HomeShell({
     const ctrl = new AbortController();
     inFlightRef.current = ctrl;
 
-    // Timeout réseau côté client : si /api/analyser dépasse 30 s (au-delà
-    // du budget serverless Vercel) la promesse fetch peut rester pending
-    // pour toujours, l'overlay tourne indéfiniment et le finally n'est
-    // jamais atteint. On force l'abort pour libérer l'UI.
+    // Timeout réseau côté client : si /api/analyser dépasse 10 s la promesse
+    // fetch peut rester pending pour toujours et l'overlay tournerait
+    // indéfiniment. L'appel initial est désormais en mode "fast" (sans LLM
+    // de synthèse, sans AI parser sur input propre), donc 10 s est large.
     let timedOut = false;
     const analyseTimeout = setTimeout(() => {
       timedOut = true;
       try { ctrl.abort(); } catch { /* noop */ }
-    }, 30000);
+    }, 10000);
 
     // Consume the pending product source synchronously : whatever happens
     // next (success, network error, abort), this call owns it exactly once.
@@ -229,7 +229,11 @@ export function HomeShell({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text: trimmed,
-          withSynthesis: true,
+          // Initial scan returns FAST (≈300 ms — DB lookup + colour bucketing
+          // only). The AI synthesis is fetched lazily by AnalyseResultPanel
+          // when the user clicks "Voir l'analyse complète", so the EssentielView
+          // appears instantly without waiting on the LLM round-trip.
+          withSynthesis: false,
           ...(productLabel ? { productLabel } : {}),
           ...(addToRoutine ? { addToRoutine: true } : {}),
         }),
@@ -247,10 +251,16 @@ export function HomeShell({
       };
       const savedId = typeof data.analysisId === "string" ? data.analysisId : null;
       const addedFlag = data.addedToRoutine === true;
-      const elapsed = Date.now() - startedAt;
-      if (elapsed < budget) {
-        await new Promise((res) => setTimeout(res, budget - elapsed));
-      }
+      // No artificial wait — show the EssentielView the moment the fetch
+      // returns. The overlay used to be padded to ~5 s "so the user has time
+      // to read the steps", but that was a relic of the LLM-heavy synthesis
+      // pipeline. The new initial call is rules-based + fast, the user wants
+      // it to feel instant, and the small overlay animation runs in parallel
+      // with the actual fetch.
+      // `budget` and `startedAt` are still referenced for potential telemetry
+      // — keep them silent here so the lint stays clean.
+      void budget;
+      void startedAt;
       setProductSource(src);
       setResult(data);
       setOriginalText(trimmed);

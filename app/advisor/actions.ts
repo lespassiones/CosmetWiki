@@ -5,10 +5,12 @@ import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase";
 import {
   HAIR_CONCERNS,
+  PROFILE_GOALS,
   SKIN_CONCERNS,
   SKIN_TYPES_BODY,
   SKIN_TYPES_FACE,
   type HairConcern,
+  type ProfileGoal,
   type SkinConcern,
   type SkinProfile,
   type SkinTypeBody,
@@ -62,6 +64,16 @@ export async function saveSkinProfile(form: FormData): Promise<SkinProfileResult
   const allergiesFreeform = String(form.get("allergies") ?? "").slice(0, 500).trim();
   const otherNotes = String(form.get("other_notes") ?? "").slice(0, 500).trim();
 
+  // Goals (onboarding step 3). When this form is submitted by
+  // BeautyProfileForm — which doesn't expose goals — the absent fields leave
+  // the existing goals intact (see the read-merge-write block below).
+  const goalsSubmitted = form.has("goals_submitted");
+  const goals = form
+    .getAll("goals")
+    .map(String)
+    .filter((g): g is ProfileGoal => PROFILE_GOALS.includes(g as ProfileGoal));
+  const otherGoals = String(form.get("other_goals") ?? "").slice(0, 300).trim();
+
   const profile: SkinProfile = {
     skinTypeFace,
     otherSkinTypeFace: otherSkinTypeFace || undefined,
@@ -74,6 +86,12 @@ export async function saveSkinProfile(form: FormData): Promise<SkinProfileResult
     otherHair: otherHair || undefined,
     otherNotes: otherNotes || undefined,
   };
+  // Only overwrite goals when the form explicitly submitted them. Avoids
+  // wiping the user's goals when BeautyProfileForm (no goals UI) is saved.
+  if (goalsSubmitted) {
+    profile.goals = goals.length > 0 ? goals : undefined;
+    profile.otherGoals = otherGoals || undefined;
+  }
 
   // Merge into existing preferences (don't clobber other future settings).
   // Note: this REPLACES the `skin` key entirely, which retires the legacy
@@ -85,6 +103,19 @@ export async function saveSkinProfile(form: FormData): Promise<SkinProfileResult
     .select("preferences")
     .eq("id", user.id)
     .maybeSingle();
+
+  // Preserve goals if the caller didn't submit them (e.g. BeautyProfileForm,
+  // which has no goals UI). Without this, re-editing the beauty profile from
+  // /profile would silently wipe the goals captured during onboarding.
+  if (!goalsSubmitted) {
+    const existingSkin = (existing?.preferences as { skin?: SkinProfile } | undefined)?.skin;
+    if (existingSkin?.goals && existingSkin.goals.length > 0) {
+      profile.goals = existingSkin.goals;
+    }
+    if (existingSkin?.otherGoals) {
+      profile.otherGoals = existingSkin.otherGoals;
+    }
+  }
 
   const merged = {
     ...((existing?.preferences ?? {}) as Record<string, unknown>),
