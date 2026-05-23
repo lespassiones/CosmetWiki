@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase";
 import {
   HAIR_CONCERNS,
-  PROFILE_GOALS,
+  PROFILE_GOAL_LABEL,
   SKIN_CONCERNS,
   SKIN_TYPES_BODY,
   SKIN_TYPES_FACE,
@@ -71,7 +71,8 @@ export async function saveSkinProfile(form: FormData): Promise<SkinProfileResult
   const goals = form
     .getAll("goals")
     .map(String)
-    .filter((g): g is ProfileGoal => PROFILE_GOALS.includes(g as ProfileGoal));
+    // Accept new + legacy goals so profiles filled before the rewrite still parse.
+    .filter((g): g is ProfileGoal => g in PROFILE_GOAL_LABEL);
   const otherGoals = String(form.get("other_goals") ?? "").slice(0, 300).trim();
 
   const profile: SkinProfile = {

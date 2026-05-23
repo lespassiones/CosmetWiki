@@ -49,38 +49,56 @@ export const SKIN_TYPE_BODY_LABEL: Record<SkinTypeBody, string> = {
 // with profiles saved before the split, but they no longer appear in the
 // picker. `readSkinProfile` migrates any leftover values into the new
 // hairConcerns array so users don't lose their previous choice.
+// Skin + body concerns shown in the unified "Tes préoccupations" picker
+// (step 2 of the onboarding). Hair-specific concerns live in HAIR_CONCERNS
+// below — but the picker presents both as a single grid so the user doesn't
+// have to think about the split.
 export const SKIN_CONCERNS = [
   "acne",
-  "anti-age",
+  "rides",
   "taches",
   "secheresse",
   "rougeurs",
   "sensibilite",
   "pores_dilates",
+  "exces_sebum",
+  "cernes_poches",
+  "vergetures_cellulite",
 ] as const;
 export type SkinConcern =
   | typeof SKIN_CONCERNS[number]
-  | "cuir_chevelu"  // legacy - migrated to HairConcern.cuir_chevelu_sensible
-  | "cheveux";       // legacy - dropped (was too ambiguous between secs/gras)
+  | "anti-age"      // legacy alias for "rides" — kept for backwards compat
+  | "cuir_chevelu"  // legacy — migrated to HairConcern.cuir_chevelu_sensible
+  | "cheveux";       // legacy — dropped (was too ambiguous between secs/gras)
 
 export const SKIN_CONCERN_LABEL: Record<SkinConcern, string> = {
-  acne: "Acné / imperfections",
-  "anti-age": "Anti-âge",
+  acne: "Acné / boutons",
+  rides: "Rides et ridules",
   taches: "Taches pigmentaires",
-  secheresse: "Sécheresse",
+  secheresse: "Sécheresse / déshydratation",
   rougeurs: "Rougeurs",
   sensibilite: "Sensibilité",
   pores_dilates: "Pores dilatés",
+  exces_sebum: "Excès de sébum / brillance",
+  cernes_poches: "Cernes / poches",
+  vergetures_cellulite: "Cellulite / vergetures",
+  "anti-age": "Rides et ridules",
   cuir_chevelu: "Cuir chevelu",
   cheveux: "Cheveux (longueurs)",
 };
 
 // ─── Hair section ─────────────────────────────────────────────────────────
 
+// Hair-only concerns. The first three describe the resting state (used in the
+// step-1 "Cheveux" sub-section); the last three are problems the user has and
+// surface in the step-2 "Tes préoccupations" grid alongside the skin ones.
 export const HAIR_CONCERNS = [
   "secs",
   "gras",
   "cuir_chevelu_sensible",
+  "chute",
+  "pellicules",
+  "ternes_cassants",
 ] as const;
 export type HairConcern = typeof HAIR_CONCERNS[number];
 
@@ -88,27 +106,133 @@ export const HAIR_CONCERN_LABEL: Record<HairConcern, string> = {
   secs: "Secs",
   gras: "Gras",
   cuir_chevelu_sensible: "Cuir chevelu sensible / affecté",
+  chute: "Chute de cheveux",
+  pellicules: "Pellicules",
+  ternes_cassants: "Cheveux ternes / cassants",
 };
+
+/** Subset of HAIR_CONCERNS used in step 1 "Type / état général des cheveux"
+ *  (resting state — Secs / Gras / Cuir chevelu sensible). The other entries
+ *  are real problems and live in step 2 "Tes préoccupations". */
+export const HAIR_STATE_CONCERNS: readonly HairConcern[] = [
+  "secs",
+  "gras",
+  "cuir_chevelu_sensible",
+];
+
+/** Subset of HAIR_CONCERNS that appear in step 2 alongside skin concerns. */
+export const HAIR_PROBLEM_CONCERNS: readonly HairConcern[] = [
+  "chute",
+  "pellicules",
+  "ternes_cassants",
+];
 
 // ─── Goals / souhaits ─────────────────────────────────────────────────────
 
 // What the user wants to get out of Cosme Check. Collected during onboarding
 // (step 3) and used by the Beauty Advisor to tailor its tone (educational vs
 // product-oriented vs routine-building).
+// Concrete, plain-French goals shown in step 3 "Tes objectifs". Phrased so a
+// non-expert (even a teenager) immediately understands what each one means.
+// The 4 legacy values below ("comprendre_produits", "eviter_risques", …) are
+// kept on the type union so profiles saved before the rewrite still parse,
+// but they no longer appear in the picker.
 export const PROFILE_GOALS = [
-  "comprendre_produits",
-  "eviter_risques",
-  "alternatives_adaptees",
-  "construire_routine",
+  // Visage
+  "peau_douce",
+  "teint_uniforme",
+  "attenuer_boutons",
+  "reduire_rides",
+  "calmer_rougeurs",
+  "hydrater_profondeur",
+  "reduire_taches",
+  "renforcer_barriere",
+  // Corps
+  "adoucir_corps",
+  "reduire_vergetures",
+  "proteger_soleil",
+  // Cheveux
+  "cheveux_brillants",
+  "renforcer_cheveux",
+  "definir_boucles",
+  "cuir_chevelu_sain",
+  "reduire_chute",
+  // Routine
+  "simplifier_routine",
+  "decouvrir_clean",
 ] as const;
-export type ProfileGoal = typeof PROFILE_GOALS[number];
+export type ProfileGoal =
+  | typeof PROFILE_GOALS[number]
+  // Legacy values (pre-rewrite). Kept on the union so old profiles parse.
+  | "comprendre_produits"
+  | "eviter_risques"
+  | "alternatives_adaptees"
+  | "construire_routine";
 
 export const PROFILE_GOAL_LABEL: Record<ProfileGoal, string> = {
+  peau_douce: "Avoir une peau plus douce",
+  teint_uniforme: "Uniformiser mon teint",
+  attenuer_boutons: "Atténuer mes boutons",
+  reduire_rides: "Réduire mes rides et ridules",
+  calmer_rougeurs: "Calmer mes rougeurs",
+  hydrater_profondeur: "Hydrater ma peau en profondeur",
+  reduire_taches: "Réduire mes taches",
+  renforcer_barriere: "Renforcer ma peau face aux agressions",
+  adoucir_corps: "Adoucir ma peau du corps",
+  reduire_vergetures: "Réduire l'apparence des vergetures",
+  proteger_soleil: "Mieux protéger ma peau du soleil",
+  cheveux_brillants: "Avoir des cheveux plus brillants",
+  renforcer_cheveux: "Renforcer mes cheveux abîmés",
+  definir_boucles: "Définir mes boucles",
+  cuir_chevelu_sain: "Avoir un cuir chevelu sain",
+  reduire_chute: "Réduire la chute / casse",
+  simplifier_routine: "Simplifier ma routine quotidienne",
+  decouvrir_clean: "Découvrir des produits plus clean",
+  // Legacy labels kept so old profiles still render somewhere readable.
   comprendre_produits: "Mieux comprendre mes produits",
   eviter_risques: "Éviter les ingrédients risqués",
   alternatives_adaptees: "Trouver des alternatives adaptées",
   construire_routine: "Construire / améliorer ma routine",
 };
+
+/**
+ * Goals grouped by category for the step-3 picker. The picker renders one
+ * section per group so the user scans by intent ("Visage / Corps / Cheveux /
+ * Routine") rather than scrolling a flat list of 17 chips.
+ */
+export const PROFILE_GOAL_GROUPS: { label: string; goals: readonly ProfileGoal[] }[] = [
+  {
+    label: "Visage",
+    goals: [
+      "peau_douce",
+      "teint_uniforme",
+      "attenuer_boutons",
+      "reduire_rides",
+      "calmer_rougeurs",
+      "hydrater_profondeur",
+      "reduire_taches",
+      "renforcer_barriere",
+    ],
+  },
+  {
+    label: "Corps",
+    goals: ["adoucir_corps", "reduire_vergetures", "proteger_soleil"],
+  },
+  {
+    label: "Cheveux",
+    goals: [
+      "cheveux_brillants",
+      "renforcer_cheveux",
+      "definir_boucles",
+      "cuir_chevelu_sain",
+      "reduire_chute",
+    ],
+  },
+  {
+    label: "Routine",
+    goals: ["simplifier_routine", "decouvrir_clean"],
+  },
+];
 
 // ─── Profile ──────────────────────────────────────────────────────────────
 
@@ -143,21 +267,24 @@ export function readSkinProfile(prefs: Record<string, unknown> | null | undefine
   if (!raw || typeof raw !== "object") return {};
   const r = raw as Record<string, unknown>;
 
-  // Read concerns, but split out the legacy "cuir_chevelu" / "cheveux" entries
-  // and migrate them into the hair section instead.
+  // Read concerns. We accept new values + legacy ones for backwards compat,
+  // then migrate "anti-age" → "rides" and route "cuir_chevelu" / "cheveux"
+  // into the hair section.
   const rawConcerns: SkinConcern[] = Array.isArray(r.concerns)
     ? (r.concerns as unknown[]).filter(
         (c): c is SkinConcern =>
           SKIN_CONCERNS.includes(c as (typeof SKIN_CONCERNS)[number])
+          || c === "anti-age"
           || c === "cuir_chevelu"
           || c === "cheveux",
       )
     : [];
 
-  // Concerns to keep in the skin section (drop legacy hair-ish ones).
-  const cleanedConcerns = rawConcerns.filter(
-    (c) => c !== "cuir_chevelu" && c !== "cheveux",
-  ) as SkinConcern[];
+  // Concerns to keep in the skin section (drop legacy hair-ish ones, migrate
+  // "anti-age" → "rides").
+  const cleanedConcerns = rawConcerns
+    .filter((c) => c !== "cuir_chevelu" && c !== "cheveux")
+    .map((c) => (c === "anti-age" ? "rides" : c)) as SkinConcern[];
 
   // Hair concerns: read existing + migrate from legacy.
   const rawHair = Array.isArray(r.hairConcerns)
@@ -199,7 +326,7 @@ export function readSkinProfile(prefs: Record<string, unknown> | null | undefine
 
   const goals: ProfileGoal[] = Array.isArray(r.goals)
     ? (r.goals as unknown[]).filter((g): g is ProfileGoal =>
-        PROFILE_GOALS.includes(g as ProfileGoal),
+        typeof g === "string" && g in PROFILE_GOAL_LABEL,
       )
     : [];
 

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase";
 import {
   HAIR_CONCERNS,
-  PROFILE_GOALS,
+  PROFILE_GOAL_LABEL,
   SKIN_CONCERNS,
   SKIN_TYPES_BODY,
   SKIN_TYPES_FACE,
@@ -81,11 +81,25 @@ export async function saveOnboardingStep(form: FormData): Promise<OnboardingResu
       ? (skinTypeBodyRaw as SkinTypeBody)
       : undefined;
 
-    const hairConcerns = form
+    const hairConcernsRaw = form
       .getAll("hair_concerns")
       .map(String)
       .filter((c): c is HairConcern => HAIR_CONCERNS.includes(c as HairConcern));
     const otherHair = String(form.get("other_hair") ?? "").slice(0, 200).trim();
+
+    // Step 1 owns the "Type / état général des cheveux" sub-set (Secs / Gras
+    // / Cuir chevelu sensible). Keep any step-2 hair problems (chute,
+    // pellicules, ternes_cassants) the user may have already saved so we
+    // don't clobber them when they navigate back to step 1.
+    const STEP1_HAIR = new Set<HairConcern>(["secs", "gras", "cuir_chevelu_sensible"]);
+    const previousHair = new Set(existingSkin.hairConcerns ?? []);
+    const mergedHair = new Set<HairConcern>();
+    previousHair.forEach((c) => {
+      if (!STEP1_HAIR.has(c)) mergedHair.add(c);
+    });
+    hairConcernsRaw.forEach((c) => {
+      if (STEP1_HAIR.has(c)) mergedHair.add(c);
+    });
 
     updatedSkin = {
       ...updatedSkin,
@@ -93,7 +107,7 @@ export async function saveOnboardingStep(form: FormData): Promise<OnboardingResu
       otherSkinTypeFace: otherSkinTypeFace || undefined,
       skinTypeBody,
       otherSkinTypeBody: otherSkinTypeBody || undefined,
-      hairConcerns: hairConcerns.length > 0 ? hairConcerns : undefined,
+      hairConcerns: mergedHair.size > 0 ? Array.from(mergedHair) : undefined,
       otherHair: otherHair || undefined,
     };
   } else if (step === "concerns") {
@@ -103,6 +117,16 @@ export async function saveOnboardingStep(form: FormData): Promise<OnboardingResu
       .filter((c): c is SkinConcern =>
         SKIN_CONCERNS.includes(c as (typeof SKIN_CONCERNS)[number]),
       );
+    // Step 2 now also surfaces a handful of hair-only concerns (chute,
+    // pellicules, ternes/cassants) in the same picker. We accept those
+    // alongside the skin concerns and merge them into `hairConcerns` so the
+    // downstream AI sees a unified picture.
+    const hairProblemConcerns = form
+      .getAll("hair_problem_concerns")
+      .map(String)
+      .filter((c): c is HairConcern =>
+        HAIR_CONCERNS.includes(c as HairConcern),
+      );
     const otherConcerns = String(form.get("other_concerns") ?? "")
       .slice(0, 300)
       .trim();
@@ -111,9 +135,25 @@ export async function saveOnboardingStep(form: FormData): Promise<OnboardingResu
       .trim();
     const otherNotes = String(form.get("other_notes") ?? "").slice(0, 500).trim();
 
+    // Merge step-2 hair problems into the hairConcerns array WITHOUT clobbering
+    // step-1 state (Secs / Gras / Cuir chevelu sensible). We keep the step-1
+    // entries and add the step-2 ones; values absent from the form are removed
+    // from the step-2 sub-set only.
+    const previousHair = new Set(existingSkin.hairConcerns ?? []);
+    const STEP1_HAIR = new Set<HairConcern>(["secs", "gras", "cuir_chevelu_sensible"]);
+    const STEP2_HAIR = new Set<HairConcern>(["chute", "pellicules", "ternes_cassants"]);
+    const mergedHair = new Set<HairConcern>();
+    previousHair.forEach((c) => {
+      if (STEP1_HAIR.has(c)) mergedHair.add(c);
+    });
+    hairProblemConcerns.forEach((c) => {
+      if (STEP2_HAIR.has(c)) mergedHair.add(c);
+    });
+
     updatedSkin = {
       ...updatedSkin,
       concerns: concerns.length > 0 ? concerns : undefined,
+      hairConcerns: mergedHair.size > 0 ? Array.from(mergedHair) : undefined,
       otherConcerns: otherConcerns || undefined,
       allergiesFreeform: allergiesFreeform || undefined,
       otherNotes: otherNotes || undefined,
@@ -123,7 +163,9 @@ export async function saveOnboardingStep(form: FormData): Promise<OnboardingResu
     const goals = form
       .getAll("goals")
       .map(String)
-      .filter((g): g is ProfileGoal => PROFILE_GOALS.includes(g as ProfileGoal));
+      // Accept the new picker values AND any legacy ones still stored on old
+      // profiles (PROFILE_GOAL_LABEL has both, PROFILE_GOALS only the new).
+      .filter((g): g is ProfileGoal => g in PROFILE_GOAL_LABEL);
     const otherGoals = String(form.get("other_goals") ?? "").slice(0, 300).trim();
 
     updatedSkin = {

@@ -110,8 +110,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const [user, profile] = await Promise.all([getUser(), getProfile()]);
   const signedIn = Boolean(user);
   const firstName = profile?.first_name ?? null;
-  // Hide the shell on full-screen flows that need their own chrome.
-  const hideOnPaths = ["/auth", "/scan/photo"];
+  // Hide the shell on full-screen flows that need their own chrome —
+  // includes the onboarding wizard so a brand-new user fills their profile
+  // without the sidebar / bottom nav stealing attention.
+  const hideOnPaths = ["/auth", "/scan/photo", "/onboarding"];
 
   // Restrictions + family catalogue are loaded once at the root so every
   // analyse result panel can read them without an extra fetch per page.

@@ -54,8 +54,14 @@ export default async function OnboardingPage({ searchParams }: Props) {
   }
 
   return (
-    <main className="min-h-svh bg-[#FAFAFA] py-8 px-5 sm:py-12">
-      <div className="mx-auto w-full max-w-xl">
+    // Cream background + centered editorial column. No sidebar — `app/layout.tsx`
+    // hides the AppShell on `/onboarding` so the wizard owns the whole screen
+    // both on mobile and desktop.
+    <main className="min-h-svh bg-[#FAFAF7] px-5 py-10 sm:py-16">
+      <div className="mx-auto flex w-full max-w-2xl flex-col">
+        <p className="mb-10 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-[#9CA3AF]">
+          Cosme Check
+        </p>
         <OnboardingWizard initial={initial} finalNext={next} />
       </div>
     </main>
