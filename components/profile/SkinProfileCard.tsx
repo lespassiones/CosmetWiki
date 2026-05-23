@@ -6,7 +6,7 @@ import { GLASS_CARD } from "@/lib/ui/glass";
 import { BeautyProfileForm } from "./BeautyProfileForm";
 import {
   HAIR_CONCERN_LABEL,
-  isProfileComplete,
+  isProfileStarted,
   PROFILE_GOAL_LABEL,
   SKIN_CONCERN_LABEL,
   SKIN_TYPE_BODY_LABEL,
@@ -29,7 +29,9 @@ import {
 export function SkinProfileCard({ initial }: { initial: SkinProfile }) {
   const [editing, setEditing] = useState(false);
 
-  const filled = isProfileComplete(initial);
+  // Card shows "filled" view as soon as the user has any signal — the
+  // stricter "complete" check is reserved for the onboarding redirect logic.
+  const filled = isProfileStarted(initial);
 
   if (!editing) {
     return (

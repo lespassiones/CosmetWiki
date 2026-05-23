@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { getProfile, getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import {
-  isProfileComplete,
+  isProfileStarted,
   readSkinProfile,
   SKIN_CONCERN_LABEL,
   SKIN_TYPE_BODY_LABEL,
@@ -30,7 +30,9 @@ export default async function AdvisorPage() {
 
   const profile = await getProfile();
   const skin = readSkinProfile((row?.preferences ?? null) as Record<string, unknown> | null);
-  const complete = isProfileComplete(skin);
+  // Show chat as soon as any signal is filled; the strict "complete" check
+  // is only relevant for the onboarding redirect.
+  const complete = isProfileStarted(skin);
 
   return (
     <div className="mx-auto max-w-3xl px-5 lg:px-8 py-6 lg:py-10">

@@ -175,12 +175,60 @@ export async function saveOnboardingStep(form: FormData): Promise<OnboardingResu
     };
   }
 
+  // IMPORTANT — we DON'T set `onboardingShown: true` here. This action runs
+  // on every keystroke via the auto-save effect, so flipping the flag would
+  // immediately bounce the user out of the wizard (the page reads the flag
+  // server-side and redirect()s when true). The flag is set only by
+  // `completeOnboarding` (final step's Continuer) or `dismissOnboarding`
+  // (Plus tard / Passer).
+  //
+  // We also DON'T call revalidatePath("/onboarding") here for the same
+  // reason: it forces the server component to re-run and would interrupt
+  // the user mid-input. Other paths (/profile, /advisor) are revalidated by
+  // the terminal actions below — no need on every keystroke either.
   const merged = {
     ...prefs,
     skin: updatedSkin,
-    onboardingShown: true,
   };
 
+  const { error } = await sb
+    .schema("cosme_check")
+    .from("user_profiles")
+    .update({ preferences: merged, updated_at: new Date().toISOString() })
+    .eq("id", user.id);
+
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+/**
+ * Terminal action called on the very last "Continuer" click of the wizard.
+ * Marks the onboarding as completed (sets `onboardingShown: true`) and
+ * revalidates the surrounding pages so they pick up the fresh profile on
+ * the next navigation. Safe to call multiple times.
+ */
+export async function completeOnboarding(): Promise<OnboardingResult> {
+  const cookieStore = await cookies();
+  const sb = supabaseServer(cookieStore);
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return { ok: false, error: "Non connecté." };
+
+  const { data: existing } = await sb
+    .schema("cosme_check")
+    .from("user_profiles")
+    .select("preferences")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const prefs = (existing?.preferences ?? {}) as Record<string, unknown>;
+  if (prefs.onboardingShown === true) {
+    revalidatePath("/onboarding");
+    revalidatePath("/profile");
+    revalidatePath("/advisor");
+    return { ok: true };
+  }
+
+  const merged = { ...prefs, onboardingShown: true };
   const { error } = await sb
     .schema("cosme_check")
     .from("user_profiles")

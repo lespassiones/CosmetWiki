@@ -346,10 +346,12 @@ export function readSkinProfile(prefs: Record<string, unknown> | null | undefine
   };
 }
 
-export function isProfileComplete(p: SkinProfile): boolean {
-  // Nothing is required - the profile is considered "started" as soon as
-  // the user has filled at least one signal. Used by /advisor to decide
-  // between the onboarding form and the chat (with the saved summary chip).
+/**
+ * Used by `/advisor` to decide whether to show its own profile prompt or
+ * jump straight to the chat. Returns true as soon as the user has filled at
+ * least one signal — the chat can already adapt with any data point.
+ */
+export function isProfileStarted(p: SkinProfile): boolean {
   return (
     Boolean(p.skinTypeFace) ||
     Boolean(p.otherSkinTypeFace) ||
@@ -364,6 +366,31 @@ export function isProfileComplete(p: SkinProfile): boolean {
     (p.goals?.length ?? 0) > 0 ||
     Boolean(p.otherGoals)
   );
+}
+
+/**
+ * Stricter check used by the onboarding page to decide "is this user already
+ * onboarded enough that we shouldn't show the wizard?". A single field isn't
+ * enough — that would bounce a user out of step 2 because step 1 was filled.
+ * We require at least 2 of the 3 logical sections (skin / concerns / goals)
+ * to have something in them.
+ */
+export function isProfileComplete(p: SkinProfile): boolean {
+  const skinDone =
+    Boolean(p.skinTypeFace) ||
+    Boolean(p.otherSkinTypeFace) ||
+    Boolean(p.skinTypeBody) ||
+    Boolean(p.otherSkinTypeBody) ||
+    (p.hairConcerns?.length ?? 0) > 0 ||
+    Boolean(p.otherHair);
+  const concernsDone =
+    (p.concerns?.length ?? 0) > 0 ||
+    Boolean(p.otherConcerns) ||
+    Boolean(p.allergiesFreeform) ||
+    Boolean(p.otherNotes);
+  const goalsDone = (p.goals?.length ?? 0) > 0 || Boolean(p.otherGoals);
+  const filled = [skinDone, concernsDone, goalsDone].filter(Boolean).length;
+  return filled >= 2;
 }
 
 // ─── Onboarding flag ──────────────────────────────────────────────────────

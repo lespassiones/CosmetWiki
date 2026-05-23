@@ -22,6 +22,7 @@ import {
   type SkinTypeFace,
 } from "@/lib/skin/profile";
 import {
+  completeOnboarding,
   dismissOnboarding,
   saveOnboardingStep,
 } from "@/app/onboarding/actions";
@@ -198,13 +199,27 @@ export function OnboardingWizard({ initial, finalNext }: Props) {
   }
 
   function handleContinue() {
-    commitStep(() => {
-      if (isLast) {
+    if (isLast) {
+      // Final step: save the data AND flip `onboardingShown` to true via
+      // completeOnboarding so we never auto-show the wizard again on the
+      // next sign-in.
+      setError(null);
+      startTransition(async () => {
+        const saveRes = await saveOnboardingStep(buildFormData());
+        if (!saveRes.ok) {
+          setError(saveRes.error);
+          return;
+        }
+        const completeRes = await completeOnboarding();
+        if (!completeRes.ok) {
+          setError(completeRes.error);
+          return;
+        }
         router.replace(finalNext);
-      } else {
-        setStepIdx((i) => i + 1);
-      }
-    });
+      });
+      return;
+    }
+    commitStep(() => setStepIdx((i) => i + 1));
   }
 
   function handleSkipStep() {
