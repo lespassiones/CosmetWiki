@@ -11,7 +11,7 @@
  */
 
 import type { AnalyseItem, AnalyseResponse } from "@/lib/analyseTypes";
-import { findCategoryBySlug, type ActiveEntry, type ClaimCategory } from "./claims";
+import { CLAIM_CATEGORIES, findCategoryBySlug, type ActiveEntry, type ClaimCategory } from "./claims";
 import type {
   CoherencePromise,
   CoherenceResult,
@@ -189,6 +189,77 @@ export type LlmPromiseProposal = {
  * Pure function, called once at the start of /api/coherence right after
  * extraction. No-op when the LLM already deduped properly.
  */
+// Lower-case + strip diacritics for keyword matching. Shared with the
+// reclassifier below.
+function deburre(s: string): string {
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+
+/**
+ * Re-route "autre" proposals to a catalogue category when their label or
+ * excerpt strongly matches that category's keywords AND the category is
+ * applicable to the detected product type.
+ *
+ * Without this step the LLM produces two semantically equivalent rows for
+ * a single concept: a clean catalogue entry ("Brillance") AND a separate
+ * "autre" entry whose label is a phrasing variant ("Éclat de la fibre
+ * capillaire"). These two rows then go through different resolvers
+ * (catalogue matching vs LLM-exploratory) and end up scored 0 % and 100 %
+ * for what users perceive as one promise — confusing and contradictory.
+ *
+ * After reclassification, the regular `dedupProposals` will merge the
+ * twin into the catalogue row on slug equality. Promises that don't match
+ * any catalogue category keep their "autre" slug and flow through the
+ * open-promise path as before.
+ *
+ * Heuristic:
+ *   - keywords < 4 characters are ignored (avoid matching stop-words)
+ *   - the candidate must match at least one keyword
+ *   - among multiple matching categories, the one with the most keyword
+ *     hits wins (ties resolved by catalogue order — first declaration)
+ *   - productType compatibility (via the new `productTypes` field on
+ *     each ClaimCategory) gates which categories are admissible. When
+ *     productType is null we skip the gate and consider all categories,
+ *     matching the prior behaviour for legacy callers.
+ *
+ * Pure function. No-op when the LLM stayed in catalogue or when no
+ * keyword matches.
+ */
+export function reclassifyOpenProposals(
+  proposals: LlmPromiseProposal[],
+  productType: ProductType | null,
+): LlmPromiseProposal[] {
+  return proposals.map((p) => {
+    if (p.category_slug !== "autre") return p;
+    const haystack = deburre(`${p.label ?? ""} ${p.excerpt ?? ""}`);
+    if (!haystack.trim()) return p;
+
+    let best: { slug: string; label: string; matches: number } | null = null;
+    for (const cat of CLAIM_CATEGORIES) {
+      if (cat.forbiddenTag) continue;
+      if (
+        productType
+        && cat.productTypes
+        && !cat.productTypes.includes(productType as Exclude<ProductType, "autre">)
+      ) {
+        continue;
+      }
+      let matches = 0;
+      for (const kw of cat.keywords) {
+        const needle = deburre(kw);
+        if (needle.length < 4) continue;
+        if (haystack.includes(needle)) matches++;
+      }
+      if (matches === 0) continue;
+      if (!best || matches > best.matches) {
+        best = { slug: cat.slug, label: cat.label, matches };
+      }
+    }
+    if (!best) return p;
+    return { ...p, category_slug: best.slug, label: best.label };
+  });
+}
+
 export function dedupProposals(proposals: LlmPromiseProposal[]): LlmPromiseProposal[] {
   const byKey = new Map<string, LlmPromiseProposal>();
   for (const p of proposals) {

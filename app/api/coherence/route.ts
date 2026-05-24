@@ -13,6 +13,7 @@ import {
   dedupProposals,
   isExcerptInDescription,
   pickOrphansForInference,
+  reclassifyOpenProposals,
   resolveAbsencePromise,
   resolveOpenPromise,
   resolvePromise,
@@ -145,9 +146,21 @@ export async function POST(req: NextRequest) {
     productType,
     user.id,
   );
+  // Re-classify "autre" proposals whose label/excerpt actually matches a
+  // catalogue category compatible with the product type. Fixes the case
+  // where the LLM keeps a phrasing variant ("Éclat de la fibre capillaire")
+  // out of the catalogue while the equivalent catalogue slug ("Brillance")
+  // is also in the list — without this, the same concept would surface as
+  // two contradictory bars (0 % vs 100 %) because each row goes through a
+  // different resolver. After reclassification the dedup step below merges
+  // the twin into a single row.
+  const reclassifiedProposals = reclassifyOpenProposals(
+    extraction.proposals,
+    productType,
+  );
   // Mechanical safety net: collapse any duplicate proposals the LLM may have
   // emitted despite the prompt rule (cf. dedupProposals docstring).
-  const dedupedProposals = dedupProposals(extraction.proposals);
+  const dedupedProposals = dedupProposals(reclassifiedProposals);
 
   // ─── Step 2: split proposals between catalogue (effect), catalogue
   // (absence), and open ───────────────────────────────────────────────────

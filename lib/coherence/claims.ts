@@ -46,6 +46,25 @@ export type ClaimCategory = {
    * empty in that case.
    */
   forbiddenTag?: string;
+  /**
+   * Product types this category is biologically relevant for. When omitted,
+   * the category is treated as universally applicable (mostly used for
+   * absence claims like "sans paraben"). The reclassifier in engine.ts uses
+   * this list to disambiguate keywords shared across categories — e.g.
+   * "éclat" appears in BOTH `brillance` (hair shine) and `eclat`
+   * (skin radiance / anti-spot); on a hair product only the `brillance`
+   * variant is admissible.
+   */
+  productTypes?: ReadonlyArray<
+    | "cheveux"
+    | "peau_visage"
+    | "peau_corps"
+    | "levres"
+    | "parfum"
+    | "dents"
+    | "ongles"
+    | "maquillage"
+  >;
 };
 
 /**
@@ -55,6 +74,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
   {
     slug: "anti_chute",
     label: "Anti-chute",
+    productTypes: ["cheveux"],
     keywords: ["anti-chute", "chute", "anti chute", "stop chute", "tombe", "tomber", "ralentir la chute"],
     actives: [
       { slug: "caffeine", name: "Caféine", evidence: "documented" },
@@ -72,6 +92,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
   {
     slug: "densification",
     label: "Densification",
+    productTypes: ["cheveux"],
     keywords: ["densifie", "densification", "densité", "épaissi", "épaisseur", "volume capillaire", "ancrage"],
     actives: [
       { slug: "redensyl", name: "Redensyl", evidence: "documented" },
@@ -89,6 +110,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
   {
     slug: "hydratation",
     label: "Hydratation",
+    productTypes: ["cheveux", "peau_visage", "peau_corps", "levres"],
     keywords: ["hydrate", "hydratation", "hydratant", "humidité", "humidifie"],
     actives: [
       { slug: "glycerin", name: "Glycérine", evidence: "documented" },
@@ -106,6 +128,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
   {
     slug: "anti_age",
     label: "Anti-âge",
+    productTypes: ["peau_visage", "peau_corps"],
     keywords: ["anti-âge", "anti age", "rides", "fermeté", "raffermi", "jeunesse", "rajeunit"],
     actives: [
       { slug: "retinol", name: "Rétinol", evidence: "documented" },
@@ -123,6 +146,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
   {
     slug: "raffermissement",
     label: "Raffermissement",
+    productTypes: ["peau_visage", "peau_corps"],
     keywords: ["raffermi", "ferme", "tonifi", "tone", "élasticité"],
     actives: [
       { slug: "caffeine", name: "Caféine", evidence: "documented" },
@@ -137,6 +161,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
   {
     slug: "anti_pellicules",
     label: "Anti-pellicules",
+    productTypes: ["cheveux"],
     keywords: ["pellicules", "antipelliculaire", "anti-pelliculaire", "pellicule", "squames"],
     actives: [
       { slug: "piroctone-olamine", name: "Piroctone olamine", evidence: "documented" },
@@ -152,7 +177,8 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
   {
     slug: "demelage",
     label: "Démêlage",
-    keywords: ["démêle", "démêlant", "demele", "demelant", "facile à coiffer"],
+    productTypes: ["cheveux"],
+    keywords: ["démêle", "démêlant", "demele", "demelant", "facile à coiffer", "douceur des cheveux", "douceur cheveux", "souplesse des cheveux", "souplesse cheveux", "souple"],
     actives: [
       { slug: "behentrimonium-methosulfate", name: "Behentrimonium methosulfate", evidence: "documented" },
       { slug: "behenamidopropyl-dimethylamine", name: "Behenamidopropyl dimethylamine", evidence: "documented" },
@@ -168,7 +194,23 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
   {
     slug: "brillance",
     label: "Brillance",
-    keywords: ["brillance", "brillant", "éclat", "lumière", "shine"],
+    // Brillance = hair-shine; the "éclat" keyword is intentionally shared
+    // with the `eclat` (skin radiance) category — the reclassifier resolves
+    // the ambiguity using productTypes (hair products route to here, skin
+    // products to `eclat`).
+    productTypes: ["cheveux"],
+    keywords: [
+      "brillance",
+      "brillant",
+      "brillants",
+      "éclat",
+      "éclat de la fibre",
+      "éclat des cheveux",
+      "éclat fibre capillaire",
+      "lumière",
+      "lumineux",
+      "shine",
+    ],
     actives: [
       { slug: "dimethicone", name: "Diméthicone", evidence: "documented" },
       { slug: "cyclopentasiloxane", name: "Cyclopentasiloxane", evidence: "documented" },
@@ -180,6 +222,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
   {
     slug: "anti_frisottis",
     label: "Anti-frisottis",
+    productTypes: ["cheveux"],
     keywords: ["frisottis", "anti-frisottis", "frizz", "lisse", "défrisé"],
     actives: [
       { slug: "amodimethicone", name: "Amodiméthicone", evidence: "documented" },
@@ -192,6 +235,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
   {
     slug: "apaisement",
     label: "Apaisement",
+    productTypes: ["peau_visage", "peau_corps", "cheveux"],
     keywords: ["apaise", "apaisant", "calme", "irritation", "rougeur", "sensibilité"],
     actives: [
       { slug: "centella-asiatica-extract", name: "Centella asiatica", evidence: "documented" },
@@ -207,6 +251,7 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
   {
     slug: "exfoliation",
     label: "Exfoliation",
+    productTypes: ["peau_visage", "peau_corps"],
     keywords: ["exfolie", "exfoliant", "peeling", "renouvellement", "gomme", "scrub"],
     actives: [
       { slug: "glycolic-acid", name: "Acide glycolique (AHA)", evidence: "documented" },
@@ -222,7 +267,12 @@ export const CLAIM_CATEGORIES: ClaimCategory[] = [
   {
     slug: "eclat",
     label: "Éclaircissement / Éclat",
-    keywords: ["éclat", "éclaircit", "éclaircissant", "tache", "pigmentation", "uniformise", "anti-tache"],
+    // Skin-only: "éclat du teint", anti-spot. The shared "éclat" keyword
+    // routes hair-product contexts to `brillance` via the reclassifier;
+    // here we keep the skin-specific keywords first so the LLM prompt
+    // disambiguates correctly.
+    productTypes: ["peau_visage", "peau_corps"],
+    keywords: ["éclat du teint", "éclaircit", "éclaircissant", "tache", "pigmentation", "uniformise", "anti-tache", "éclat"],
     actives: [
       { slug: "niacinamide", name: "Niacinamide", evidence: "documented" },
       { slug: "ascorbic-acid", name: "Vitamine C", evidence: "documented" },
