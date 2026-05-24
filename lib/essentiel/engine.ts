@@ -9,9 +9,16 @@
  *
  * Everything here is deterministic: it works only from data already in the
  * `AnalyseResponse` (counts, items, tags, primaryFunction). No LLM call.
+ *
+ * Context-aware verbs (2026-05): each ingredient's "what does it do" verb is
+ * now resolved against the product's category (déodorant, shampooing, …).
+ * That way a binding agent on a deodorant no longer gets the hair-fixative
+ * verb that fits a shampoo. See `FUNCTION_VERBS` below and the regression
+ * tests in `lib/essentiel/__tests__/engine.test.ts`.
  */
 
 import type { AnalyseItem, AnalyseResponse } from "@/lib/analyseTypes";
+import type { ProductCategory } from "@/lib/ai/categorize";
 
 // ─── Verdict ──────────────────────────────────────────────────────────────
 
@@ -66,24 +73,100 @@ function pickPhrase(tone: VerdictTone, counts: AnalyseResponse["counts"]): strin
   }
 }
 
+// ─── Product type → Category normalisation ────────────────────────────────
+
+/**
+ * Convert the free-form `productType` string returned by the front-photo OCR
+ * (e.g. "déodorant spray", "shampoing antipelliculaire") into the closed-enum
+ * `ProductCategory` used by the verb mapping.
+ *
+ * This is a deliberate string-match fallback used when the backend's LLM
+ * categorisation hasn't run yet (first scan, cache miss) and we still want
+ * the "Ce qui est bien" verbs to be context-aware. Returns `null` when no
+ * confident match — callers should treat that as "unknown context" and fall
+ * back to the universal `default` verbs.
+ */
+// ORDER MATTERS: patterns are tested top-to-bottom and the first hit wins.
+// More-specific compounds (e.g. "après-shampooing") MUST be listed before
+// substrings they overlap with (e.g. "shampooing"), otherwise the broad
+// pattern shadows the narrow one. The smoke test in
+// scripts/test_essentiel.ts has a "après-shampooing nourrissant" case to
+// keep this ordering honest.
+const PRODUCT_TYPE_PATTERNS: Array<{ category: ProductCategory; keywords: string[] }> = [
+  { category: "deodorant", keywords: ["deodorant", "déodorant", "anti-perspirant", "antitranspirant", "anti-transpirant"] },
+  { category: "apres_shampooing", keywords: ["apres-shampooing", "après-shampooing", "apres shampoing", "après shampoing", "conditioner", "soin capillaire", "masque capillaire", "masque cheveux", "huile capillaire", "soin cheveux"] },
+  { category: "shampooing", keywords: ["shampooing", "shampoing", "shampoo", "shampoing sec", "antipelliculaire"] },
+  { category: "solaire", keywords: ["solaire", "creme solaire", "crème solaire", "ecran solaire", "écran solaire", "spf", "sunscreen", "after-sun", "apres-soleil", "après-soleil"] },
+  { category: "nettoyant_visage", keywords: ["nettoyant visage", "gel nettoyant", "mousse nettoyante", "demaquillant", "démaquillant", "eau micellaire", "cleanser"] },
+  { category: "creme_visage", keywords: ["creme visage", "crème visage", "soin visage", "serum visage", "sérum visage", "serum", "sérum", "contour des yeux", "contour yeux", "creme de jour", "crème de jour", "creme de nuit", "crème de nuit", "anti-age", "anti-âge", "anti-rides", "anti-ride", "creme hydratante", "crème hydratante"] },
+  { category: "creme_corps", keywords: ["creme corps", "crème corps", "lait corps", "baume corps", "huile corps", "soin corps", "gel douche", "savon", "huile de douche", "lait hydratant", "beurre corporel", "body lotion", "body cream"] },
+  { category: "maquillage", keywords: ["fond de teint", "rouge a levres", "rouge à lèvres", "mascara", "fard", "blush", "eyeliner", "anticerne", "anti-cerne", "vernis a ongles", "vernis à ongles", "vernis", "poudre"] },
+  { category: "parfum", keywords: ["parfum", "eau de toilette", "eau de parfum", "eau de cologne", "edt", "edp", "fragrance"] },
+];
+
+// Strip diacritics + lowercase for keyword matching. Uses the Combining
+// Diacritical Marks Unicode block (U+0300–U+036F) so we never depend on the
+// editor preserving literal accents in the source file.
+const DIACRITICS_RE = new RegExp("[\\u0300-\\u036f]", "g");
+
+function deburr(s: string): string {
+  return s.normalize("NFD").replace(DIACRITICS_RE, "").toLowerCase().trim();
+}
+
+export function normalizeProductTypeToCategory(
+  productType: string | null | undefined,
+): ProductCategory | null {
+  if (!productType) return null;
+  const needle = deburr(productType);
+  if (!needle) return null;
+  for (const { category, keywords } of PRODUCT_TYPE_PATTERNS) {
+    for (const kw of keywords) {
+      if (needle.includes(deburr(kw))) return category;
+    }
+  }
+  return null;
+}
+
 // ─── Positives ────────────────────────────────────────────────────────────
 
 export type Positive = { name: string; verb: string };
 
 /**
+ * A function's verb can be a plain string (universal — same effect regardless
+ * of product type) or a contextual map. Use `null` in `by` or `default` to
+ * mark the function as IRRELEVANT for that context: pickPositives will then
+ * skip the ingredient rather than show a wrong-context bullet point.
+ */
+type VerbsByCategory = {
+  /** Verb used when the category is null/autre or not present in `by`.
+   *  `null` means: skip this ingredient when the context isn't matched. */
+  default: string | null;
+  /** Per-category overrides. Use `null` to skip in that exact category. */
+  by?: Partial<Record<ProductCategory, string | null>>;
+};
+
+type VerbConfig = string | VerbsByCategory;
+
+/**
  * Short action verb attached to each primaryFunction value we see in the DB.
  * The full list of ~75 function names was extracted from
- * `cosme_check.ingredients.functions[].name`. Anything not mapped here falls
- * back to the raw function string in lowercase.
+ * `cosme_check.ingredients.functions[].name`.
+ *
+ * Two flavours:
+ *   - plain string  : universal verb, applied regardless of product category.
+ *   - VerbsByCategory : default fallback + optional per-category overrides.
+ *
+ * Contextual entries exist to avoid wrong-context phrases such as
+ * "fixe la coiffure" surfacing on a deodorant (where "Agent fixant" really
+ * means "binding agent", not hair fixative).
  */
-const FUNCTION_VERBS: Record<string, string> = {
+const FUNCTION_VERBS: Record<string, VerbConfig> = {
+  // ─── Universal verbs (safe in any category) ──────────────────────────
   "Agent d'entretien de la peau": "soigne la peau",
   "Agent d'entretien de la peau - Divers": "soigne la peau",
   "Agent d'entretien de la peau - Humectant": "hydrate la peau",
   "Agent d'entretien de la peau - Occlusif": "verrouille l'hydratation",
-  "Conditionneur capillaire": "lisse les cheveux",
   "Emollient": "adoucit la peau",
-  "Tensioactif": "nettoie",
   "Agent émulsifiant": "lie l'eau et l'huile",
   "Agent parfumant": "parfume",
   "Agent masquant": "neutralise les odeurs",
@@ -92,96 +175,270 @@ const FUNCTION_VERBS: Record<string, string> = {
   "Agent de protection de la peau": "protège la peau",
   "Humectant": "hydrate",
   "Agent filmogène": "forme un film protecteur",
-  "Agent nettoyant": "nettoie en douceur",
   "Antistatique": "anti-électricité statique",
   "Antimicrobien": "limite les bactéries",
   "Solvant": "support de formule",
   "Astringent": "resserre les pores",
   "Stabilisateur d'émulsion": "stabilise la texture",
-  "Agent fixant": "fixe la coiffure",
   "Tonifiant": "tonifie",
   "Agent Abrasif": "exfolie",
-  "Agent colorant pour cheveux": "colore les cheveux",
   "Colorant cosmétique": "colore",
   "Sinergiste de mousse": "renforce la mousse",
   "Régulateur de pH": "équilibre le pH",
   "Opacifiant": "rend la formule opaque",
   "Agent de foisonnement": "épaissit",
-  "Agent de fixation capillaire": "tient la coiffure",
   "Conservateur": "préserve la formule",
-  "Agent d'hygiène buccale": "hygiène buccale",
-  "Déodorant": "limite les odeurs",
   "Agent apaisant": "apaise",
   "Agent Absorbant": "absorbe l'excès de sébum",
   "Agent arômatisant": "parfume",
-  "Agent moussant": "fait mousser",
   "Agent stabilisant": "stabilise la formule",
   "Non classé": "rôle non classé",
   "Agent de chélation": "stabilise la formule",
   "Agent plastifiant": "assouplit",
-  "Absorbant UV": "absorbe les UV",
   "Anti Agglomérant": "empêche l'agglomérat",
-  "Agent éclaircissant": "éclaircit",
   "Hydrotrope": "solubilise",
   "Anti-séborrhée": "régule le sébum",
-  "Agent d'entretien des ongles": "soigne les ongles",
-  "Antipelliculaire": "anti-pelliculaire",
   "Hydratant": "hydrate",
-  "Agent bouclant ou lissant (coiffant)": "discipline les cheveux",
   "Agent réducteur": "agent réducteur",
   "Agent rafraîchissant": "rafraîchit",
-  "Antiplaque": "anti-plaque dentaire",
   "Agent lissant": "lisse",
-  "Filtre UV": "protège des UV",
   "Dénaturant": "dénature l'alcool",
   "Anti-moussant": "empêche la mousse",
   "Agent Oxydant": "oxyde",
-  "Dépilatoire": "élimine les poils",
-  "Anti-transpirant": "limite la transpiration",
   "Gélifiant": "gélifie",
   "Anticorrosif": "anti-corrosion",
   "Kératolytique": "exfolie les cellules mortes",
   "Agent propulseur": "propulse l'aérosol",
   "Agent de restauration lipidique": "restaure le film lipidique",
   "Modificateurs de glissement": "améliore le toucher",
-  "Agent démêlant": "démêle",
   "Dispersion des agents de surface": "disperse",
   "Ajusteurs de pH": "équilibre le pH",
-  "Sculpture des ongles": "sculpte les ongles",
-  "Agent de bronzage": "bronze sans soleil",
   "Exfoliant": "exfolie",
   "Dispersant non tensioactif": "disperse",
   "Agent tensioactif - Solubilisant": "solubilise",
   "Modificateur de surface": "modifie la surface",
   "Agent nacrant": "donne un effet nacré",
+
+  // ─── Context-aware verbs ─────────────────────────────────────────────
+
+  /** Binding / cohesion agent (NOT a hair fixative). The old mapping naively
+   *  said "fixe la coiffure" everywhere — which is wrong on a deodorant,
+   *  cream, etc. Real hair-fixative chemistry sits under
+   *  "Agent de fixation capillaire" below. */
+  "Agent fixant": {
+    default: "lie les ingrédients",
+    by: {
+      shampooing: "lie les ingrédients",
+      apres_shampooing: "tient la coiffure",
+    },
+  },
+
+  /** True hair fixative — only relevant in hair-care contexts. Skipped in
+   *  any other category so it doesn't surface as "tient la coiffure" on a
+   *  body lotion. */
+  "Agent de fixation capillaire": {
+    default: null,
+    by: {
+      shampooing: "tient la coiffure",
+      apres_shampooing: "tient la coiffure",
+    },
+  },
+
+  "Conditionneur capillaire": {
+    default: null,
+    by: {
+      shampooing: "lisse les cheveux",
+      apres_shampooing: "lisse les cheveux",
+    },
+  },
+
+  "Agent colorant pour cheveux": {
+    default: null,
+    by: {
+      shampooing: "colore les cheveux",
+      apres_shampooing: "colore les cheveux",
+    },
+  },
+
+  "Antipelliculaire": {
+    default: null,
+    by: {
+      shampooing: "anti-pelliculaire",
+      apres_shampooing: "anti-pelliculaire",
+    },
+  },
+
+  "Agent bouclant ou lissant (coiffant)": {
+    default: null,
+    by: {
+      shampooing: "discipline les cheveux",
+      apres_shampooing: "discipline les cheveux",
+    },
+  },
+
+  "Agent démêlant": {
+    default: null,
+    by: {
+      shampooing: "démêle",
+      apres_shampooing: "démêle",
+    },
+  },
+
+  /** A deodorising agent on a non-deodorant (e.g. magnesium hydroxide in a
+   *  cream) doesn't really "limit body odour" in the worn-product sense —
+   *  it's there for pH or scent masking. We keep a soft default verb but
+   *  the strong claim only fires for true deodorants. */
+  "Déodorant": {
+    default: "neutralise les odeurs",
+    by: {
+      deodorant: "limite les odeurs",
+    },
+  },
+
+  "Anti-transpirant": {
+    default: null,
+    by: {
+      deodorant: "limite la transpiration",
+    },
+  },
+
+  "Filtre UV": {
+    default: null,
+    by: {
+      solaire: "protège des UV",
+      creme_visage: "protège des UV",
+      creme_corps: "protège des UV",
+      maquillage: "protège des UV",
+    },
+  },
+
+  "Absorbant UV": {
+    default: null,
+    by: {
+      solaire: "absorbe les UV",
+      creme_visage: "absorbe les UV",
+      creme_corps: "absorbe les UV",
+      maquillage: "absorbe les UV",
+    },
+  },
+
+  "Dépilatoire": {
+    default: null,
+    // "autre" covers depilatory creams which we don't have as their own
+    // category — better to show the verb than skip it entirely.
+    by: { autre: "élimine les poils" },
+  },
+
+  "Agent de bronzage": {
+    default: null,
+    by: { creme_visage: "bronze sans soleil", creme_corps: "bronze sans soleil", autre: "bronze sans soleil" },
+  },
+
+  "Agent éclaircissant": {
+    default: null,
+    by: { creme_visage: "éclaircit", creme_corps: "éclaircit", maquillage: "éclaircit" },
+  },
+
+  /** Oral hygiene — only meaningful on dental products (not in our 10-cat
+   *  enum). Falls back to "autre" so a toothpaste tagged as autre still
+   *  surfaces the right verb. */
+  "Agent d'hygiène buccale": {
+    default: null,
+    by: { autre: "hygiène buccale" },
+  },
+
+  "Antiplaque": {
+    default: null,
+    by: { autre: "anti-plaque dentaire" },
+  },
+
+  "Agent d'entretien des ongles": {
+    default: null,
+    by: { maquillage: "soigne les ongles", autre: "soigne les ongles" },
+  },
+
+  "Sculpture des ongles": {
+    default: null,
+    by: { maquillage: "sculpte les ongles", autre: "sculpte les ongles" },
+  },
+
+  /** Cleansing surfactants — every category gets a cleansing verb but we
+   *  tune the phrasing so it stays natural (a deodorant doesn't say
+   *  "nettoie en douceur"). */
+  "Tensioactif": {
+    default: "nettoie",
+    by: {
+      shampooing: "nettoie les cheveux",
+      nettoyant_visage: "nettoie en douceur",
+      apres_shampooing: "nettoie les cheveux",
+    },
+  },
+
+  "Agent nettoyant": {
+    default: "nettoie",
+    by: {
+      shampooing: "nettoie les cheveux",
+      nettoyant_visage: "nettoie en douceur",
+      apres_shampooing: "nettoie les cheveux",
+    },
+  },
+
+  "Agent moussant": {
+    default: "fait mousser",
+    by: {
+      shampooing: "fait mousser",
+      nettoyant_visage: "fait mousser",
+      apres_shampooing: "fait mousser",
+    },
+  },
 };
 
 /**
- * Map a raw primaryFunction string to a short verb phrase. Falls back to the
- * raw string (lowercased + leading "Agent " stripped) if we don't have an
- * explicit entry — so new function names appearing in the DB still render
- * something readable rather than nothing.
+ * Resolve a primaryFunction to its action verb for the given product
+ * category. Returns `null` when the function is contextually irrelevant —
+ * callers should skip the ingredient entirely instead of falling back to a
+ * raw function-name string (which historically produced bullets like
+ * "Magnesium carbonate hydroxide — agent fixant" on a deodorant).
  */
-function verbForFunction(fn: string | null): string | null {
+function verbForFunction(
+  fn: string | null,
+  category: ProductCategory | null,
+): string | null {
   if (!fn) return null;
-  const direct = FUNCTION_VERBS[fn];
-  if (direct) return direct;
-  // Soft fallback: "Agent moussant" → "agent moussant"
-  return fn.toLowerCase();
+  const entry = FUNCTION_VERBS[fn];
+  if (entry === undefined) {
+    // Unknown function — soft fallback so the engine still renders something
+    // readable when the DB introduces a brand-new function name.
+    return fn.toLowerCase();
+  }
+  if (typeof entry === "string") return entry;
+  if (category && entry.by && Object.prototype.hasOwnProperty.call(entry.by, category)) {
+    // Explicit per-category override — including an explicit `null` which
+    // means "skip in this exact category".
+    const override = entry.by[category];
+    return override ?? null;
+  }
+  return entry.default;
 }
 
-/** Best green ingredients first (by INCI position = highest concentration). */
-function pickPositives(items: AnalyseItem[]): Positive[] {
+/** Best green ingredients first (by INCI position = highest concentration).
+ *
+ *  We walk the green ingredients ordered by position and stop once we have
+ *  three positives with a context-valid verb. If an ingredient has no verb
+ *  in the current context (e.g. "Conditionneur capillaire" on a deodorant)
+ *  we silently skip it rather than burn a slot — that way a body lotion
+ *  with one mismatched green ingredient still shows three valid bullets. */
+function pickPositives(items: AnalyseItem[], category: ProductCategory | null): Positive[] {
   const greens = items
     .filter((it) => it.colorRating === "Vert")
-    .sort((a, b) => a.position - b.position)
-    .slice(0, 3);
+    .sort((a, b) => a.position - b.position);
 
   const out: Positive[] = [];
   for (const it of greens) {
+    if (out.length >= 3) break;
     const name = (it.name ?? it.input ?? "").trim();
     if (!name) continue;
-    const verb = verbForFunction(it.primaryFunction);
+    const verb = verbForFunction(it.primaryFunction, category);
     if (!verb) continue;
     out.push({ name: capitalise(name), verb });
   }
@@ -314,13 +571,16 @@ const TAG_CONSEQUENCES: Record<string, string> = {
 };
 
 /** Tags that we'd rather NOT highlight as "what's wrong" — they're either
- *  positive (huile-vegetale) or neutral classifications. When the worst
- *  ingredient of a tier only carries these, we fall back to a generic
- *  tier-level message instead. */
-const NEUTRAL_OR_POSITIVE_TAGS = new Set([
+ *  positive (huile-vegetale) or neutral classifications. Exported so the
+ *  /api/analyser route can use the SAME set to filter observations and we
+ *  never get the "huile-vegetale flagged in orange in the Observations
+ *  panel while it's been excluded from the À-surveiller card" inconsistency
+ *  the tester ran into. */
+export const NEUTRAL_OR_POSITIVE_TAGS: ReadonlySet<string> = new Set([
   "huile-vegetale",
   "colorant-naturel",
   "filtre-uv-mineral",
+  "colorant-mineral",
 ]);
 
 const TIER_FALLBACK: Record<ConcernTier, { family: string; effect: string }> = {
@@ -383,10 +643,27 @@ export type EssentielData = {
   concerns: Concern[];
 };
 
-export function computeEssentiel(result: AnalyseResponse): EssentielData {
+export type EssentielOptions = {
+  /** Closed-enum product category (from the backend's LLM categorisation).
+   *  Takes precedence over `productType` when both are provided. */
+  category?: ProductCategory | null;
+  /** Raw front-OCR product type string (e.g. "déodorant spray"). Used as a
+   *  fallback when `category` is null/autre — we keyword-match it back to a
+   *  category so the verbs stay contextual even on the very first scan. */
+  productType?: string | null;
+};
+
+export function computeEssentiel(
+  result: AnalyseResponse,
+  opts?: EssentielOptions,
+): EssentielData {
   const tone = pickTone(result.counts);
   const phrase = pickPhrase(tone, result.counts);
-  const positives = pickPositives(result.items);
+  const resolvedCategory: ProductCategory | null =
+    (opts?.category && opts.category !== "autre" ? opts.category : null)
+    ?? normalizeProductTypeToCategory(opts?.productType)
+    ?? (opts?.category ?? null);
+  const positives = pickPositives(result.items, resolvedCategory);
   const concerns: Concern[] = [];
   for (const tier of ["rouge", "orange", "jaune"] as const) {
     const c = buildConcern(result.items, tier);
@@ -398,3 +675,12 @@ export function computeEssentiel(result: AnalyseResponse): EssentielData {
     concerns,
   };
 }
+
+// ─── Test-only exports ────────────────────────────────────────────────────
+// Kept module-private under a single namespace so the integration tests can
+// poke at the verb mapping without us widening the public API.
+export const __testing = {
+  verbForFunction,
+  pickPositives,
+  FUNCTION_VERBS,
+};

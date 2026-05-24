@@ -10,6 +10,8 @@ import { loadProfileForPrompt } from "@/lib/skin/promptFormat";
 import { loadRestrictionsContext } from "@/lib/restrictions/promptFormat";
 import { checkRestrictions } from "@/lib/restrictions/check";
 import { categorizeProduct, type ProductCategory } from "@/lib/ai/categorize";
+import { NEUTRAL_OR_POSITIVE_TAGS, normalizeProductTypeToCategory } from "@/lib/essentiel/engine";
+import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { correctTypo } from "@/lib/ai/typo";
 import { parseInciWithAI } from "@/lib/ai/parseInci";
 import { splitInciWithGpt } from "@/lib/ai/splitInci";
@@ -450,9 +452,18 @@ export async function POST(req: NextRequest) {
       observations.push({ tag, label: TAG_LABELS[tag] ?? tag, status: "present", count: c, items: tagItems[tag] ?? [] });
     }
   }
-  // Other tags only when present
+  // Other tags only when present.
+  //
+  // We skip the positive / neutral families (huile-vegetale, colorant-naturel,
+  // filtre-uv-mineral, colorant-mineral) here — they're already excluded from
+  // the "À surveiller" engine card, but they were leaking into the detailed
+  // ObservationsCard below the synthesis with an orange "présents" pill,
+  // which made testers read them as warnings ("Huiles végétales présentes"
+  // looked like an alert even though it's a positive trait). One shared
+  // source of truth lives in `lib/essentiel/engine.ts`.
   for (const [tag, c] of Object.entries(tagCounts)) {
     if (ABSENCE_REPORTED.has(tag)) continue;
+    if (NEUTRAL_OR_POSITIVE_TAGS.has(tag)) continue;
     if (c > 0) {
       observations.push({ tag, label: TAG_LABELS[tag] ?? tag, status: "present", count: c, items: tagItems[tag] ?? [] });
     }
@@ -462,6 +473,19 @@ export async function POST(req: NextRequest) {
 
   // Sort once by position so first-element checks are stable.
   const byPosition = [...enriched].sort((a, b) => a.position_idx - b.position_idx);
+
+  // Kick off product categorisation in parallel — we only need its result
+  // when assembling responsePayload further down, so issuing it now lets it
+  // overlap with the synthesis LLM call. categorizeProduct caches by hash of
+  // the top-5 ingredients, so repeat scans return instantly. The .catch()
+  // collapses any LLM failure to "autre" so the awaiter below never throws.
+  const categoryTop5Names = byPosition
+    .slice(0, 5)
+    .map((r) => r.effective_name ?? r.input_raw)
+    .filter((n): n is string => Boolean(n));
+  const categoryPromise: Promise<ProductCategory> = categoryTop5Names.length > 0
+    ? categorizeProduct(categoryTop5Names, user.id).catch(() => "autre" as ProductCategory)
+    : Promise.resolve("autre" as ProductCategory);
 
   // 1. Water-based formula : Aqua / Water in position 0.
   const first = byPosition[0];
@@ -739,7 +763,21 @@ export async function POST(req: NextRequest) {
     };
   });
 
-  const responsePayload = {
+  // Wait at most 1.5 s for the LLM categorisation. When the cache is warm
+  // (same top-5 ingredients seen before) this resolves immediately; on a
+  // cache miss + slow first token we'd rather ship the response than block
+  // for the full 6 s upstream timeout. If we time out (or the LLM returned
+  // "autre") we fall back to a keyword match against the OCR-extracted
+  // `productType` — e.g. "déodorant spray" → deodorant. Final null means
+  // "unknown context": the engine will then use universal `default` verbs.
+  const llmCategory: ProductCategory | null = await Promise.race([
+    categoryPromise.then((c) => (c && c !== "autre" ? c : null)),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500)),
+  ]);
+  const resolvedCategory: ProductCategory | null =
+    llmCategory ?? normalizeProductTypeToCategory(body.productType) ?? null;
+
+  const responsePayload: AnalyseResponse = {
     counts: {
       total: enriched.length,
       matched,
@@ -762,22 +800,23 @@ export async function POST(req: NextRequest) {
       total: EU_ALLERGENS_TOTAL,
     },
     synthesis,
+    productType: body.productType?.slice(0, 120) ?? null,
+    category: resolvedCategory,
   };
   // Silence unused-import noise in some narrow code paths.
   void EU_FRAGRANCE_ALLERGENS;
 
   // Auto-save the analysis for signed-in users. We do this AFTER preparing
-  // the response so a failure here never blocks the user. The AI category is
-  // computed in the BACKGROUND (fire-and-forget) and patched into the row
-  // when it finishes — this used to be awaited, which blocked the response
-  // by ~200-400 ms for nothing user-visible.
+  // the response so a failure here never blocks the user. `resolvedCategory`
+  // is what we already returned to the client (LLM if it came back in time,
+  // otherwise a keyword fallback from `productType`); we persist it so the
+  // history row matches what the user saw. The background promise below
+  // still patches the row with the LLM's authoritative answer if it arrives
+  // later than our 1.5 s race timeout — that way the routine engine always
+  // ends up with the real category eventually.
   let savedAnalysisId: string | null = null;
   let addedToRoutine = false;
   try {
-    const top5 = byPosition
-      .slice(0, 5)
-      .map((r) => r.effective_name ?? r.input_raw)
-      .filter(Boolean);
     const autoName = body.productLabel?.slice(0, 200)
       ?? `Analyse du ${new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
     // We need the inserted row id when the caller wants the analysis pushed
@@ -791,8 +830,11 @@ export async function POST(req: NextRequest) {
         product_label: body.productLabel?.slice(0, 200) ?? null,
         brand: body.brand?.slice(0, 120) ?? null,
         product_type: body.productType?.slice(0, 120) ?? null,
-        // Category is computed asynchronously after the response — see below.
-        category: null,
+        // Best-effort category from the 1.5 s race in responsePayload. May
+        // be overwritten below if the LLM answer arrives after the race
+        // timeout — `categoryPromise` is the SAME promise that started
+        // before synthesis so we don't pay for a second LLM call.
+        category: resolvedCategory,
         input_text: text,
         result_json: responsePayload,
         score: Number(score.toFixed(2)),
@@ -817,14 +859,14 @@ export async function POST(req: NextRequest) {
           addedToRoutine = true;
         }
       }
-      // Fire-and-forget AI categorization. We don't await it so the response
-      // ships immediately — the user gets the 3-card essentiel view back in
-      // ~300 ms instead of ~600 ms. The category is just metadata used by
-      // the routine engine; it's harmless if it's null for a few seconds.
+      // Reuse the SAME categoryPromise we launched before synthesis (no
+      // duplicate LLM call thanks to the in-memory dedupe + cache). When it
+      // resolves to a non-"autre" value that differs from what we already
+      // wrote, patch the row so the DB ends up with the LLM's answer.
       const categorizeId = inserted.id as string;
-      void categorizeProduct(top5, user.id)
+      void categoryPromise
         .then(async (cat) => {
-          if (!cat) return;
+          if (!cat || cat === resolvedCategory) return;
           const { error: catUpdateError } = await sbAuth
             .schema("cosme_check")
             .from("analyses")

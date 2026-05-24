@@ -27,12 +27,18 @@ import type { VerdictTone } from "@/lib/essentiel/engine";
  */
 export function VerdictGauge({
   tone,
+  orientation = "horizontal",
   className = "",
 }: {
   tone: VerdictTone;
+  /** "horizontal" (default) keeps the 5 pastilles on a single row — used
+   *  inside the toolbar pill on mobile. "vertical" stacks them top-to-bottom,
+   *  used as a side column next to the EssentielView cards on desktop. */
+  orientation?: "horizontal" | "vertical";
   className?: string;
 }) {
   const activeIdx = ACTIVE_INDEX_BY_TONE[tone];
+  const isVertical = orientation === "vertical";
   return (
     <div
       role="meter"
@@ -47,7 +53,7 @@ export function VerdictGauge({
       // TALLER than its slot (h-12 vs h-9) and wrapped in a `ring-4 ring-white`
       // that itself extends another 4 px on each side — clipping would crush
       // the "popping out of the pill" effect the design hinges on.
-      className={`flex items-center overflow-visible ${className}`}
+      className={`flex ${isVertical ? "flex-col" : ""} items-center overflow-visible ${className}`}
     >
       {SLOTS.map((slot, i) => {
         const active = i === activeIdx;

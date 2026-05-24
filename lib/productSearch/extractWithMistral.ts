@@ -4,6 +4,22 @@
 
 import { hasOpenAI, openai } from "@/lib/ai/client";
 
+/**
+ * Compress a page HTML down to a token-cheap excerpt the LLM can chew on.
+ *
+ * Strategy (in order of preference):
+ *   1. Look for an INCI-shaped sequence directly — AQUA or WATER followed by
+ *      several uppercase tokens separated by `,`, `.`, `;` or `•`. When we
+ *      find one we capture a window around it: this is the most reliable
+ *      signal on pharma sites (Avène, La Roche-Posay, Bioderma) where the
+ *      first "composition" keyword hit on the page lands on a CSS class name
+ *      thousands of chars upstream of the real list.
+ *   2. Fall back to keyword search ("ingredients", "composition", "inci",
+ *      "ingrédients"). On these we now capture up to three matches and
+ *      concatenate their windows, so a page with the keyword in the nav AND
+ *      in the real section still surfaces the right text.
+ *   3. Last resort: first 5 KB of the page.
+ */
 function reduceHtmlForExtraction(html: string): string {
   const stripped = html
     .replace(/<script[\s\S]*?<\/script>/gi, " ")
@@ -18,12 +34,36 @@ function reduceHtmlForExtraction(html: string): string {
     .replace(/\s+/g, " ")
     .trim();
 
-  const re = /(ingredients|composition|inci|ingr[eé]dients)/i;
-  const m = re.exec(stripped);
-  if (!m) return stripped.slice(0, 5_000);
-  const start = Math.max(0, m.index - 300);
-  const end = Math.min(stripped.length, m.index + 5_000);
-  return stripped.slice(start, end);
+  // Step 1: locate an INCI-shaped sequence. Pattern: AQUA or WATER, followed
+  // by punctuation, then 2+ uppercase tokens within the next 200 chars (3 in
+  // total). This is loose enough to catch Avène's "AVENE AQUA. CAPRYLIC/…"
+  // and tight enough to skip arbitrary occurrences of the word "AQUA" in a
+  // marketing paragraph.
+  const inciShape = /\b(?:AQUA|WATER)\b[^A-Za-z]{0,5}[,.;•·][^A-Za-z]{0,5}[A-Z][A-Z0-9/ \-]{2,40}[,.;•·][^A-Za-z]{0,5}[A-Z]/;
+  const inciMatch = inciShape.exec(stripped);
+  if (inciMatch) {
+    const start = Math.max(0, inciMatch.index - 200);
+    const end = Math.min(stripped.length, inciMatch.index + 4_800);
+    return stripped.slice(start, end);
+  }
+
+  // Step 2: keyword-driven excerpts. Take up to 3 hits, dedupe their windows.
+  const re = /(ingredients|composition|inci|ingr[eé]dients|liste\s+complète|liste\s+des\s+ingr)/gi;
+  const matches = [...stripped.matchAll(re)].slice(0, 3);
+  if (matches.length === 0) return stripped.slice(0, 5_000);
+
+  const slices: string[] = [];
+  let usedChars = 0;
+  for (const m of matches) {
+    const start = Math.max(0, (m.index ?? 0) - 200);
+    const remaining = 6_000 - usedChars;
+    if (remaining <= 0) break;
+    const end = Math.min(stripped.length, (m.index ?? 0) + Math.min(3_000, remaining));
+    const slice = stripped.slice(start, end);
+    slices.push(slice);
+    usedChars += slice.length;
+  }
+  return slices.join("\n\n---\n\n");
 }
 
 function looksLikeInciList(text: string): boolean {
@@ -52,6 +92,12 @@ Règles strictes :
 - N'invente AUCUN ingrédient. Ne reformule pas. Ne traduis pas.
 - Si la page ne contient pas de liste INCI claire, réponds NONE.
 - Pas de commentaire, pas de "Voici" ou "INCI :", uniquement la liste séparée par virgules.
+- Les noms INCI sont en latin/anglais et habituellement en MAJUSCULES (ex: AQUA, GLYCERIN, BUTYROSPERMUM PARKII BUTTER).
+- **Séparateurs possibles dans la source** : les marques pharmaceutiques françaises (Avène, La Roche-Posay, Bioderma, Eucerin…) utilisent souvent des POINTS au lieu de virgules entre ingrédients. Si tu repères ce pattern, normalise la sortie en utilisant des VIRGULES.
+  Exemple input : "AVENE AQUA. CAPRYLIC/CAPRIC TRIGLYCERIDE. MINERAL OIL. GLYCERIN."
+  Exemple output : "AVENE AQUA, CAPRYLIC/CAPRIC TRIGLYCERIDE, MINERAL OIL, GLYCERIN"
+- Autres séparateurs possibles à normaliser en virgules : • (bullet), · (middot), ; (point-virgule).
+- Garde les parenthèses et la casse d'origine (les ingrédients sont souvent en MAJUSCULES).
 
 Produit : ${input.label}
 

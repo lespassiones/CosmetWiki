@@ -3,6 +3,7 @@
  */
 
 import type { ColorRating } from "./supabase";
+import type { ProductCategory } from "./ai/categorize";
 
 export type MatchKind = "exact" | "alias" | "fuzzy_high" | "suggestion" | null;
 
@@ -143,4 +144,13 @@ export type AnalyseResponse = {
     total: number;
   };
   synthesis: string | null;
+  /** Raw free-form product type from the front-photo OCR (e.g. "déodorant
+   *  spray", "shampoing antipelliculaire"). Optional; not always available. */
+  productType?: string | null;
+  /** Closed-enum product category, either resolved from `productType` via a
+   *  keyword fallback or computed by the backend's LLM categoriser. Used by
+   *  `computeEssentiel` to pick context-aware verbs in the "Ce qui est bien"
+   *  card (e.g. "Agent fixant" on a deodorant becomes "lie les ingrédients"
+   *  instead of the wrong "fixe la coiffure"). */
+  category?: ProductCategory | null;
 };

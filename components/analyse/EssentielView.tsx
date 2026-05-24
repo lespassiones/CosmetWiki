@@ -28,10 +28,17 @@ export function EssentielView({
   data,
   expanded,
   onToggle,
+  hideToggle = false,
 }: {
   data: EssentielData;
   expanded: boolean;
   onToggle: () => void;
+  /** When true, the "Voir l'analyse complète" / "Masquer le détail" toggle
+   *  button is NOT rendered inside this section. The parent is expected to
+   *  render it separately (typically below the flex row that pairs the cards
+   *  with the desktop verdict gauge — keeps the gauge's `items-stretch`
+   *  matching only the 3 cards' height, not including the toggle). */
+  hideToggle?: boolean;
 }) {
   return (
     <section className="mt-4 space-y-3 lg:max-w-3xl" aria-label="Aperçu essentiel de l'analyse">
@@ -56,29 +63,50 @@ export function EssentielView({
         )}
       </div>
 
-      <div className="stagger-up flex justify-center pt-2" style={staggerDelay(360)}>
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-expanded={expanded}
-          className="neu-sm-white inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-[13px] font-medium text-[#374151] hover:text-[#111111] transition"
-        >
-          {expanded ? "Masquer le détail" : "Voir l'analyse complète"}
-          <svg
-            aria-hidden
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`}
-          >
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </button>
-      </div>
+      {hideToggle ? null : (
+        <div className="stagger-up flex justify-center pt-2" style={staggerDelay(360)}>
+          <EssentielToggleButton expanded={expanded} onToggle={onToggle} />
+        </div>
+      )}
     </section>
+  );
+}
+
+/**
+ * The "Voir l'analyse complète" / "Masquer le détail" toggle button extracted
+ * as its own component so callers can render it OUTSIDE `EssentielView` when
+ * they need the desktop verdict gauge to match only the cards' height
+ * (the gauge uses `items-stretch`, and keeping the toggle inside the same
+ * flex item would make the gauge taller than the cards).
+ */
+export function EssentielToggleButton({
+  expanded,
+  onToggle,
+}: {
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-expanded={expanded}
+      className="neu-sm-white inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-[13px] font-medium text-[#374151] hover:text-[#111111] transition"
+    >
+      {expanded ? "Masquer le détail" : "Voir l'analyse complète"}
+      <svg
+        aria-hidden
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2.2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`}
+      >
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </button>
   );
 }
 

@@ -307,7 +307,14 @@ function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
             </div>
           )}
         </div>
-        <div className="w-[140px] shrink-0">
+        {/* `-mr-5` cancels the card's right `px-5` padding so the donut
+            container reaches the card's outer right edge — aligns the
+            donut's visible right with the potion image in the Astuce
+            card above, which sits at `p-4` (16 px). The half-donut SVG's
+            asymmetric viewBox (~18 px of empty space on its right, only
+            ~6 px on its left) finishes the alignment by visually
+            shrinking the right margin. */}
+        <div className="w-[140px] shrink-0 -mr-5">
           <IngredientBlob counts={counts} variant="md" neumorphic />
         </div>
       </div>
@@ -382,7 +389,8 @@ function RoutineCard({
             </ul>
           )}
         </div>
-        <div className="w-[140px] shrink-0">
+        {/* Same alignment trick as LastAnalysisCard above. */}
+        <div className="w-[140px] shrink-0 -mr-5">
           <IngredientBlob counts={safeCounts} variant="md" neumorphic />
         </div>
       </div>

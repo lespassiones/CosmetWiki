@@ -14,7 +14,7 @@ import { InfoBadge, Tooltip } from "./Tooltip";
 import { commonNameFor, prettyInci } from "@/lib/inciCommonNames";
 import { AddToRoutineButton } from "./routine/AddToRoutineButton";
 import { RestrictionWarning } from "./analyse/RestrictionWarning";
-import { EssentielView } from "./analyse/EssentielView";
+import { EssentielView, EssentielToggleButton } from "./analyse/EssentielView";
 import { VerdictGauge } from "./analyse/VerdictGauge";
 import { computeEssentiel } from "@/lib/essentiel/engine";
 import type { VerdictTone } from "@/lib/essentiel/engine";
@@ -145,7 +145,17 @@ export function AnalyseResultPanel({
   // "Essentiel" snapshot is rendered first; the full analysis grid below is
   // collapsed by default and opens when the user clicks "Voir l'analyse
   // complète". Rules-based (no LLM), so the snapshot is instantly available.
-  const essentiel = useMemo(() => computeEssentiel(result), [result]);
+  //
+  // We feed the product context to the engine so verbs in "Ce qui est bien"
+  // are picked relative to the product type — e.g. "Agent fixant" surfaces
+  // as "lie les ingrédients" on a deodorant rather than the wrong-context
+  // "fixe la coiffure" we used to show. Prefer `result.category` (closed
+  // enum computed server-side) and fall back to the raw OCR `productType`
+  // (free-form) so the very first scan is already context-aware.
+  const essentiel = useMemo(
+    () => computeEssentiel(result, { category: result.category ?? null, productType }),
+    [result, productType],
+  );
   const [detailsExpanded, setDetailsExpanded] = useState(false);
   const detailsRef = useRef<HTMLDivElement | null>(null);
   // True once we've finished the post-mount sessionStorage read — keeps the
@@ -295,12 +305,55 @@ export function AnalyseResultPanel({
       {/* Essentiel snapshot - the 3 rules-based cards (verdict + ce qui est
           bien + à surveiller) that show instantly after an analysis. The full
           AI-powered grid below is collapsed until the user explicitly asks
-          for it. */}
-      <EssentielView
-        data={essentiel}
-        expanded={detailsExpanded}
-        onToggle={() => setDetailsExpanded((v) => !v)}
-      />
+          for it.
+          DESKTOP layout : the 3 cards sit on the left with a soft max-width
+          so they don't span the entire row, and the 5-pastille verdict gauge
+          is rendered IMMEDIATELY next to them as a vertical column. Both
+          flex items use `items-stretch` so the gauge container takes the
+          full height of the cards stack, and inside the gauge the pastilles
+          spread evenly (`justify-around` + `h-full`) — matching the cards'
+          vertical span as requested. */}
+      <div className="lg:flex lg:items-stretch lg:gap-8">
+        <div className="lg:flex-1 lg:min-w-0 lg:max-w-[640px]">
+          {/* `hideToggle` on desktop only: the toggle button is rendered
+              OUTSIDE this flex below, so the verdict gauge's `items-stretch`
+              matches the 3 cards' height — not the 3 cards + button. On
+              mobile (no flex, no gauge column), we render the toggle
+              inline via `EssentielToggleButton` further down. */}
+          <EssentielView
+            data={essentiel}
+            expanded={detailsExpanded}
+            onToggle={() => setDetailsExpanded((v) => !v)}
+            hideToggle
+          />
+        </div>
+        {/* Desktop verdict gauge — same chrome as the mobile toolbar pill
+            (rounded-full + white surface + ring + backdrop-blur) so the 5
+            pastilles read as a grouped control instead of floating loose
+            next to the cards. The active pastille's `ring-4` is allowed to
+            overflow the pill horizontally (px-1.5 keeps the side padding
+            small enough for the "pop" effect). Height = exactly the cards
+            stack — see `hideToggle` note above. */}
+        <div className="hidden lg:flex lg:shrink-0 lg:items-stretch">
+          <VerdictGauge
+            tone={essentiel.verdict.tone}
+            orientation="vertical"
+            className="h-full justify-around rounded-full bg-white/85 px-1.5 py-3 ring-1 ring-black/[0.06] backdrop-blur-md"
+          />
+        </div>
+      </div>
+
+      {/* Toggle button — rendered OUTSIDE the flex pair above so the gauge's
+          stretched height matches only the 3 cards (not cards + button).
+          `lg:max-w-[640px]` mirrors the cards column above so the button is
+          centred under the cards, not pushed off-centre by the gauge column
+          on the right. */}
+      <div className="mt-3 flex justify-center pt-2 lg:max-w-[640px]">
+        <EssentielToggleButton
+          expanded={detailsExpanded}
+          onToggle={() => setDetailsExpanded((v) => !v)}
+        />
+      </div>
 
       {/*
         Layout via grid-template-areas - same DOM order regardless of
@@ -644,16 +697,11 @@ function TitleBar({
             />
           ) : null}
         </div>
-        {/* Single white pill that groups the share button and the 5-pastille
-            gauge — same chrome (rounded-full, white surface, ring,
-            backdrop-blur) as the standalone `ToolbarButton`. The pill takes
-            `w-full` on mobile so it lines up edge-to-edge with the CTA pair
-            above (and the gauge's `justify-between` spreads the 5 pastilles
-            from "Partager" all the way to the pill's right edge). On ≥sm
-            it shrinks back to its natural width.
-            NB: the pill MUST stay non-clipping (no `overflow-hidden`) — the
-            active pastille is intentionally taller than the pill so its
-            white ring "pops" above AND below the bandeau. */}
+        {/* White pill — on mobile groups "Partager" + the 5-pastille
+            horizontal gauge; on desktop only contains "Partager" (the gauge
+            is moved to a vertical column next to the EssentielView cards).
+            NB: pill stays non-clipping (no `overflow-hidden`) so the active
+            pastille's ring can "pop" above/below on mobile. */}
         <div className="flex w-full items-center gap-2.5 rounded-full bg-white/85 px-3 py-1.5 ring-1 ring-black/[0.06] backdrop-blur-md transition-all hover:bg-white/95 hover:shadow-[0_6px_20px_-8px_rgba(15,23,42,0.15)] sm:w-auto">
           <button
             type="button"
@@ -664,10 +712,10 @@ function TitleBar({
             <ShareIcon className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">Partager</span>
           </button>
-          <span aria-hidden className="h-4 w-px shrink-0 bg-black/10" />
+          <span aria-hidden className="lg:hidden h-4 w-px shrink-0 bg-black/10" />
           <VerdictGauge
             tone={verdictTone}
-            className="flex-1 justify-between sm:flex-initial sm:justify-start sm:gap-1.5"
+            className="lg:hidden flex-1 justify-between sm:flex-initial sm:justify-start sm:gap-1.5"
           />
         </div>
       </div>
@@ -1001,7 +1049,7 @@ function ObservationsCard({
                       toggleTag(o.tag);
                     }
                   }}
-                  aria-expanded={isOpen}
+                  aria-expanded={isOpen ? "true" : "false"}
                   className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-1.5 py-1 text-left text-[14px] transition-colors hover:bg-black/[0.025] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500"
                 >
                   <ObservationIcon obs={o} />

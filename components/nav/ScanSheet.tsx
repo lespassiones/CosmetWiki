@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ProcessingOverlay, randomProcessingTotal } from "../ProcessingOverlay";
 import { ProductSearchInput } from "../ProductSearchInput";
+import { ProductUrlInput } from "../ProductUrlInput";
 import { SearchBar } from "../SearchBar";
-import { BarcodeIcon, CameraIcon, ClipboardIcon, SearchIcon } from "./NavIcons";
+import { BarcodeIcon, CameraIcon, ClipboardIcon, LinkIcon, SearchIcon } from "./NavIcons";
 
 // Lazy-load : MediaStream + BarcodeDetector, payload ~80 kb. Pas utile tant
 // que l'utilisateur n'ouvre pas l'onglet « code-barres » dans la feuille scan.
@@ -15,7 +16,7 @@ const BarcodeScannerInput = dynamic(
   { ssr: false },
 );
 
-type View = "picker" | "paste" | "search" | "barcode";
+type View = "picker" | "paste" | "search" | "barcode" | "url";
 
 type FoundPayload = {
   ingredientsText: string;
@@ -38,17 +39,27 @@ type TileAction =
   | { kind: "view"; view: Exclude<View, "picker"> }
   | { kind: "route"; href: string };
 
-const TILES: {
+type Tile = {
   action: TileAction;
   title: string;
   subtitle?: string;
   icon: (p: { className?: string }) => React.JSX.Element;
   isNew?: boolean;
-}[] = [
+};
+
+// Asymmetric 2+3 layout: the two "physical-product" entry points (real
+// camera/scanner interactions) get the large left column; the three
+// "data-only" entries (paste text, paste URL, name search) fit in the
+// compact right column. NEW badge stays on the latest addition (URL).
+const LEFT_TILES: Tile[] = [
   { action: { kind: "view", view: "barcode" }, title: "Code-barres", subtitle: "Scan rapide en magasin", icon: BarcodeIcon },
-  { action: { kind: "view", view: "paste" }, title: "Coller la composition", subtitle: "Liste INCI texte", icon: ClipboardIcon },
-  { action: { kind: "route", href: "/scan/photo" }, title: "Photo de la composition", icon: CameraIcon, isNew: true },
-  { action: { kind: "view", view: "search" }, title: "Rechercher un produit", subtitle: "Par nom ou marque", icon: SearchIcon },
+  { action: { kind: "route", href: "/scan/photo" }, title: "Photo de la composition", subtitle: "OCR de l'étiquette", icon: CameraIcon },
+];
+
+const RIGHT_TILES: Tile[] = [
+  { action: { kind: "view", view: "paste" }, title: "Coller la composition", icon: ClipboardIcon },
+  { action: { kind: "view", view: "url" }, title: "Coller le lien", icon: LinkIcon, isNew: true },
+  { action: { kind: "view", view: "search" }, title: "Rechercher un produit", icon: SearchIcon },
 ];
 
 export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -121,7 +132,7 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
     }
   }, [pathname, open, onClose]);
 
-  function pickTile(tile: (typeof TILES)[number]) {
+  function pickTile(tile: Tile) {
     if (tile.action.kind === "route") {
       onClose();
       router.push(tile.action.href);
@@ -212,7 +223,9 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
       ? "Colle ta liste INCI"
       : view === "search"
         ? "Cherche ton produit"
-        : "Scanne le code-barres";
+        : view === "url"
+          ? "Colle le lien du produit"
+          : "Scanne le code-barres";
 
   return (
     <div
@@ -249,26 +262,58 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
 
         <div className="px-5">
           {isPicker ? (
+            // Asymmetric 2+3 grid: two large square tiles on the left for the
+            // "physical product in hand" flows (barcode + photo), three
+            // compact tiles on the right for the "data-only" flows (paste,
+            // URL, search). Both columns share the same height via the
+            // outer grid so the layout stays balanced regardless of how
+            // many subtitles render.
             <div className="grid grid-cols-2 gap-3">
-              {TILES.map((tile) => (
-                <button
-                  key={tile.title}
-                  type="button"
-                  onClick={() => pickTile(tile)}
-                  className="relative flex flex-col items-center text-center bg-white border border-[#E5E7EB] rounded-2xl p-4 hover:border-[#111111] transition"
-                >
-                  {tile.isNew && (
-                    <span className="absolute top-2 right-2 bg-[#F43F5E] text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                      NEW
-                    </span>
-                  )}
-                  <tile.icon className="h-7 w-7 text-[#111111] mb-2" />
-                  <div className="text-[14px] font-semibold leading-snug">{tile.title}</div>
-                  {tile.subtitle && (
-                    <div className="text-[12px] text-[#6B7280] mt-1 leading-snug">{tile.subtitle}</div>
-                  )}
-                </button>
-              ))}
+              {/* Left column — 2 large tiles */}
+              <div className="grid grid-rows-2 gap-3">
+                {LEFT_TILES.map((tile) => (
+                  <button
+                    key={tile.title}
+                    type="button"
+                    onClick={() => pickTile(tile)}
+                    className="relative flex flex-col items-center justify-center text-center bg-white border border-[#E5E7EB] rounded-2xl p-4 hover:border-[#111111] transition"
+                  >
+                    {tile.isNew && (
+                      <span className="absolute top-2 right-2 bg-[#F43F5E] text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                        NEW
+                      </span>
+                    )}
+                    <tile.icon className="h-8 w-8 text-[#111111] mb-2" />
+                    <div className="text-[14px] font-semibold leading-snug">{tile.title}</div>
+                    {tile.subtitle && (
+                      <div className="text-[12px] text-[#6B7280] mt-1 leading-snug">{tile.subtitle}</div>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Right column — 3 compact tiles. Horizontal layout
+                  (icon + title) so the rows stay short. */}
+              <div className="grid grid-rows-3 gap-3">
+                {RIGHT_TILES.map((tile) => (
+                  <button
+                    key={tile.title}
+                    type="button"
+                    onClick={() => pickTile(tile)}
+                    className="relative flex flex-row items-center text-left gap-3 bg-white border border-[#E5E7EB] rounded-2xl p-3 hover:border-[#111111] transition"
+                  >
+                    {tile.isNew && (
+                      <span className="absolute top-1.5 right-1.5 bg-[#F43F5E] text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-full">
+                        NEW
+                      </span>
+                    )}
+                    <tile.icon className="h-5 w-5 shrink-0 text-[#111111]" />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[13px] font-semibold leading-snug">{tile.title}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           ) : view === "paste" ? (
             <div className="space-y-3">
@@ -323,6 +368,17 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
                 Tape la marque et le nom du produit. On retrouve sa composition.
               </p>
               <ProductSearchInput
+                onFound={(payload) => submitForAnalysis(payload)}
+                onFallbackToManual={() => setView("paste")}
+              />
+            </div>
+          ) : view === "url" ? (
+            <div className="space-y-3">
+              <p className="text-[13px] text-[#475569]">
+                Colle le lien d&apos;une page produit. On récupère le nom, la marque et la composition,
+                puis on lance l&apos;analyse une fois que tu as confirmé.
+              </p>
+              <ProductUrlInput
                 onFound={(payload) => submitForAnalysis(payload)}
                 onFallbackToManual={() => setView("paste")}
               />
