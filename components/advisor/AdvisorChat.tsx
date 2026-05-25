@@ -1,9 +1,13 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState } from "react";
-import { GLASS_CARD, GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
 
-type ChatMsg = { role: "user" | "assistant"; content: string };
+type ChatMsg = {
+  role: "user" | "assistant";
+  content: string;
+  time?: string;
+  uiOnly?: boolean;
+};
 
 const SUGGESTED_PROMPTS = [
   "Que penses-tu de ma routine ?",
@@ -12,15 +16,13 @@ const SUGGESTED_PROMPTS = [
   "Comment ajuster ma routine pour l'hiver ?",
 ];
 
-/**
- * Minimal inline markdown renderer for assistant messages. Handles the cases
- * the model actually produces (bold, italic, bullet lists, line breaks). Not a
- * full CommonMark parser - that would be overkill for a chat bubble.
- */
+function getTime() {
+  return new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+}
+
 function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
   const nodes: React.ReactNode[] = [];
-  // Match **bold**, *italic*, `code`, then plain text in between.
-  const re = /\*\*([^*]+?)\*\*|\*([^*]+?)\*|`([^`]+?)`/g;
+  const re = /\*\*([^*]+?)\*\*|__([^_]+?)__|_([^_]+?)_|\*([^*]+?)\*|`([^`]+?)`/g;
   let lastIdx = 0;
   let m: RegExpExecArray | null;
   let i = 0;
@@ -29,11 +31,15 @@ function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
     if (m[1] !== undefined) {
       nodes.push(<strong key={`${keyPrefix}-b-${i}`} className="font-semibold">{m[1]}</strong>);
     } else if (m[2] !== undefined) {
-      nodes.push(<em key={`${keyPrefix}-i-${i}`} className="italic">{m[2]}</em>);
+      nodes.push(<u key={`${keyPrefix}-u-${i}`}>{m[2]}</u>);
     } else if (m[3] !== undefined) {
+      nodes.push(<em key={`${keyPrefix}-i-${i}`} className="italic">{m[3]}</em>);
+    } else if (m[4] !== undefined) {
+      nodes.push(<em key={`${keyPrefix}-i2-${i}`} className="italic">{m[4]}</em>);
+    } else if (m[5] !== undefined) {
       nodes.push(
         <code key={`${keyPrefix}-c-${i}`} className="rounded bg-black/[0.06] px-1 py-0.5 text-[12.5px] font-mono">
-          {m[3]}
+          {m[5]}
         </code>,
       );
     }
@@ -64,7 +70,7 @@ function MarkdownMessage({ content }: { content: string }) {
   for (let idx = 0; idx < lines.length; idx++) {
     const raw = lines[idx];
     const line = raw.trimEnd();
-    const bullet = line.match(/^\s*[-*•]\s+(.*)$/);
+    const bullet = line.match(/^\s*[-*•,]\s+(.*)$/);
     if (bullet) {
       listBuf.push(bullet[1]);
       continue;
@@ -87,7 +93,14 @@ function MarkdownMessage({ content }: { content: string }) {
 }
 
 export function AdvisorChat({ firstName }: { firstName: string }) {
-  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const [messages, setMessages] = useState<ChatMsg[]>([
+    {
+      role: "assistant",
+      content: `Salut ${firstName} 👋\nJe suis là pour t'aider avec ta routine ou tes ingrédients.\n\n**Que souhaites-tu savoir ?**`,
+      time: getTime(),
+      uiOnly: true,
+    },
+  ]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -103,41 +116,40 @@ export function AdvisorChat({ firstName }: { firstName: string }) {
     setError(null);
     setStreaming(true);
 
-    const userMsg: ChatMsg = { role: "user", content: text };
-    const next = [...messages, userMsg];
-    setMessages([...next, { role: "assistant", content: "" }]);
+    const userMsg: ChatMsg = { role: "user", content: text, time: getTime() };
+    const apiMessages = [...messages.filter((m) => !m.uiOnly), userMsg];
+    setMessages((prev) => [...prev, userMsg, { role: "assistant", content: "", time: getTime() }]);
     setInput("");
 
     try {
       const r = await fetch("/api/advisor/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next }),
+        body: JSON.stringify({ messages: apiMessages }),
       });
       if (!r.ok) {
         const j = (await r.json().catch(() => ({}))) as { error?: string };
         setError(j.error ?? `Erreur ${r.status}`);
-        setMessages(next);
+        setMessages((prev) => prev.slice(0, -1));
         setStreaming(false);
         return;
       }
       const reader = r.body?.getReader();
       if (!reader) {
         setError("Pas de réponse.");
-        setMessages(next);
+        setMessages((prev) => prev.slice(0, -1));
         setStreaming(false);
         return;
       }
       const decoder = new TextDecoder();
       let buffer = "";
-      // eslint-disable-next-line no-constant-condition
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
         setMessages((prev) => {
           const copy = [...prev];
-          copy[copy.length - 1] = { role: "assistant", content: buffer };
+          copy[copy.length - 1] = { role: "assistant", content: buffer, time: getTime() };
           return copy;
         });
       }
@@ -148,66 +160,69 @@ export function AdvisorChat({ firstName }: { firstName: string }) {
     }
   }
 
-  const showSuggestions = messages.length === 0;
+  const showSuggestions = messages.filter((m) => !m.uiOnly).length === 0;
 
   return (
-    <div
-      className={`${GLASS_CARD} flex flex-col overflow-hidden h-[min(calc(100dvh-19rem),640px)] lg:h-[min(70vh,640px)]`}
-    >
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
-        {messages.length === 0 ? (
-          <div className="text-center py-6">
-            <p className="text-[14px] text-[#6B7280] mb-4">
-              Salut {firstName} 👋 - pose-moi une question sur ta routine ou tes ingrédients.
-            </p>
-            <p className="text-[11px] text-[#9CA3AF]">
-              Je n&apos;invente rien, je ne recommande pas de marque, et je n&apos;émets aucun conseil médical.
-            </p>
-          </div>
-        ) : (
-          messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+    <div className="flex flex-col overflow-hidden h-[min(calc(100dvh-19rem),640px)] lg:h-[min(70vh,640px)]">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-1 py-4 space-y-4">
+        {messages.map((m, i) => (
+          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div className={`max-w-[80%] flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
+              {m.role === "assistant" && (
+                <div className="w-7 h-7 rounded-full bg-rose-50 flex items-center justify-center text-sm mb-1.5">
+                  ✨
+                </div>
+              )}
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed ${
+                className={`rounded-2xl px-4 py-3 text-[12px] leading-relaxed ${
                   m.role === "user"
-                    ? "bg-[#111111] text-white whitespace-pre-wrap"
-                    : "bg-[#F3F4F6] text-[#111111]"
+                    ? "bg-[#111111] text-white whitespace-pre-wrap rounded-br-sm"
+                    : "bg-white shadow-sm border border-[#F3F4F6] text-[#111111] rounded-bl-sm"
                 }`}
               >
                 {m.role === "assistant" ? (
                   m.content ? (
                     <MarkdownMessage content={m.content} />
                   ) : (
-                    streaming && i === messages.length - 1 ? "…" : ""
+                    streaming && i === messages.length - 1 ? (
+                      <span className="flex gap-1 items-center py-0.5">
+                        <span className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full animate-bounce [animation-delay:0ms]" />
+                        <span className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full animate-bounce [animation-delay:150ms]" />
+                        <span className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full animate-bounce [animation-delay:300ms]" />
+                      </span>
+                    ) : ""
                   )
                 ) : (
                   m.content
                 )}
               </div>
+              {m.time && (
+                <span className="text-[10px] text-[#9CA3AF] mt-1 px-1">
+                  {m.time}
+                  {m.role === "user" && (
+                    <span className="ml-1 text-rose-400">✓✓</span>
+                  )}
+                </span>
+              )}
             </div>
-          ))
-        )}
+          </div>
+        ))}
         {error && (
           <div className="rounded-xl bg-rose-50 text-rose-700 text-[13px] px-3 py-2">{error}</div>
         )}
       </div>
 
       {showSuggestions && (
-        <div className="border-t border-[#E5E7EB] bg-[#FAFAFA] px-5 py-3">
+        <div className="border-t border-[#F3F4F6] px-0 py-3">
           <p className="text-[10px] uppercase tracking-wide text-[#6B7280] mb-2">Suggestions</p>
-          {/* Horizontal carousel - single row, snap-scroll, hidden scrollbar.
-              The negative-mx + same px bleeds the pills to the card edges so
-              the user sees there's more to swipe. */}
-          <div
-            className="-mx-5 flex gap-2 overflow-x-auto snap-x snap-mandatory px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
+          <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {SUGGESTED_PROMPTS.map((p) => (
               <button
                 key={p}
                 type="button"
                 onClick={() => send(p)}
                 disabled={streaming}
-                className={`${GLASS_PILL} shrink-0 snap-start whitespace-nowrap px-3 py-1.5 text-[12px] disabled:opacity-50`}
+                className="shrink-0 snap-start whitespace-nowrap px-3 py-2 text-[12px] font-medium border-2 border-[#111111] rounded-xl bg-white text-[#111111] active:bg-[#111111] active:text-white transition-colors disabled:opacity-50"
               >
                 {p}
               </button>
@@ -221,7 +236,7 @@ export function AdvisorChat({ firstName }: { firstName: string }) {
           e.preventDefault();
           send(input);
         }}
-        className="border-t border-[#E5E7EB] bg-white p-3 flex items-center gap-2"
+        className="border-t border-[#F3F4F6] pt-3 flex items-center gap-2"
       >
         <input
           value={input}
@@ -229,13 +244,13 @@ export function AdvisorChat({ firstName }: { firstName: string }) {
           placeholder={streaming ? "Génération en cours…" : "Pose ta question…"}
           disabled={streaming}
           maxLength={500}
-          className="flex-1 rounded-xl border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm outline-none focus:border-[#111111]"
+          className="flex-1 rounded-2xl border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm outline-none focus:border-[#FDA4AF]"
         />
         <button
           type="submit"
           disabled={streaming || input.trim().length === 0}
           aria-label="Envoyer"
-          className={`${GLASS_PILL_DARK} h-10 w-10 flex items-center justify-center disabled:opacity-40`}
+          className="h-10 w-10 flex items-center justify-center rounded-full bg-rose-500 text-white disabled:opacity-40 shrink-0"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
             <path d="m22 2-11 11M22 2l-7 20-4-9-9-4 20-7z" />

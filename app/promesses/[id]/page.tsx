@@ -9,7 +9,6 @@ import { CoherenceTable } from "@/components/coherence/CoherenceTable";
 import { ConclusionCard } from "@/components/coherence/ConclusionCard";
 import { IngredientsPositionChart } from "@/components/coherence/IngredientsPositionChart";
 import { DescriptionKeywordsCard } from "@/components/coherence/DescriptionKeywordsCard";
-import { InferredPromisesCard } from "@/components/coherence/InferredPromisesCard";
 import { MarketingIndexCard } from "@/components/coherence/MarketingIndexCard";
 import { OutOfScopePromisesCard } from "@/components/coherence/OutOfScopePromisesCard";
 import { Reveal } from "@/components/Reveal";
@@ -127,13 +126,6 @@ export default async function PromesseDetailPage({
           <ConclusionCard conclusion={result.conclusion} />
         </Reveal>
       </section>
-
-      {/* Inferred promises - promises we recovered from formula ingredients
-          that weren't mentioned in the directly-extracted set. Renders
-          nothing when no inference was made (or on legacy rows). */}
-      <Reveal delayMs={500}>
-        <InferredPromisesCard promises={result.promises} />
-      </Reveal>
 
       {/* Out-of-scope promises (claims that don't biologically apply to this
           product type, e.g. anti-âge on a parfum). Renders nothing when

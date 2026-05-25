@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -17,6 +18,28 @@ import { readUserRestrictions } from "@/lib/restrictions/types";
 
 export const metadata = { title: "Ma routine · Cosme Check" };
 export const dynamic = "force-dynamic";
+
+function RoutineSkeleton() {
+  return (
+    <div
+      className="neu-page mx-auto max-w-6xl px-5 lg:px-8 pt-4 pb-8 lg:py-12"
+      aria-busy
+      aria-label="Chargement de la routine"
+    >
+      <div className="h-8 w-56 rounded-xl bg-[#c5ccd6]/50 animate-pulse mb-4" />
+      <div className="mt-3 -mx-5 h-px bg-[#c5ccd6] lg:mx-0" />
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4">
+        <div className="neu h-28 animate-pulse" />
+        <div className="neu h-28 animate-pulse" />
+        <div className="neu h-28 animate-pulse" />
+      </div>
+      <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+        <div className="neu h-64 animate-pulse" />
+        <div className="neu h-64 animate-pulse" />
+      </div>
+    </div>
+  );
+}
 
 function exposureFg(label: string): string {
   if (label === "Faible") return "text-emerald-700";
@@ -62,6 +85,17 @@ export default async function RoutinePage() {
   const user = await getUser();
   if (!user) redirect("/auth/sign-in?next=/routine");
 
+  return (
+    <Suspense fallback={<RoutineSkeleton />}>
+      <RoutineContent />
+    </Suspense>
+  );
+}
+
+async function RoutineContent() {
+  const user = await getUser();
+  if (!user) return null;
+
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
   // Two parallel queries: routine items (with their parent analyses joined)
@@ -73,7 +107,8 @@ export default async function RoutinePage() {
       .schema("cosme_check")
       .from("routine_items")
       .select("id, frequency, added_at, analysis_id, analyses(id, name, product_label, score, result_json)")
-      .order("added_at", { ascending: false }),
+      .order("added_at", { ascending: false })
+      .limit(100),
     sb
       .schema("cosme_check")
       .from("analyses")

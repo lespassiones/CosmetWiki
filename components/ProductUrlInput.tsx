@@ -237,10 +237,6 @@ export function ProductUrlInput({
         </div>
       ) : null}
 
-      <p className="text-[12px] text-[#475569]">
-        On va récupérer le nom, la marque et la composition depuis la page.
-        Marche sur la plupart des sites e-commerce cosmétiques.
-      </p>
     </form>
   );
 }

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
-import { supabaseServer } from "@/lib/supabase";
+import { supabaseServer, supabaseService } from "@/lib/supabase";
 import { openai, hasOpenAI, hasMistral, logAI } from "@/lib/ai/client";
 import { NO_LONG_DASHES_RULE } from "@/lib/ai/sanitize";
 import {
@@ -11,7 +11,7 @@ import {
 } from "@/lib/skin/profile";
 import { readUserRestrictions } from "@/lib/restrictions/types";
 import { loadIngredientFamilies } from "@/lib/restrictions/families";
-import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { getClientIp } from "@/lib/ratelimit";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 export const runtime = "nodejs";
@@ -84,7 +84,11 @@ async function streamMistralChat(opts: {
         const delta = parsed.choices?.[0]?.delta?.content;
         if (delta) {
           // Same em/en-dash sanitization as the OpenAI streaming path.
-          const clean = delta.replace(/\s*[-–]\s*/g, ", ");
+          // Only strip true en/em dashes and space-wrapped ascii hyphens;
+          // bare hyphens in compound words (peut-être, souhaites-tu) are kept.
+          const clean = delta
+            .replace(/[ \t]*[–—][ \t]*/g, ", ")
+            .replace(/ - /g, ", ");
           controller.enqueue(enc.encode(clean));
         }
         if (parsed.usage) {
@@ -102,9 +106,15 @@ async function streamMistralChat(opts: {
 
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req.headers);
-  // Hard per-IP rate limit to keep the cost bounded.
-  const rl = checkRateLimit(ip, 20, 60_000);
-  if (!rl.ok) {
+  // Hard per-IP rate limit (Postgres-backed, shared across Vercel instances).
+  const svc = supabaseService();
+  const { data: rateData } = await svc.rpc("cosme_check_check_rate_limit", {
+    p_key: `burst:chat:${ip}`,
+    p_max: 20,
+    p_window_sec: 60,
+  });
+  const rate = (rateData ?? { ok: true }) as { ok: boolean };
+  if (!rate.ok) {
     return new Response(
       JSON.stringify({ error: "Trop de messages récents. Patiente une minute." }),
       { status: 429, headers: { "Content-Type": "application/json" } },
@@ -173,7 +183,9 @@ export async function POST(req: NextRequest) {
     sb
       .schema("cosme_check")
       .from("routine_items")
-      .select("frequency, analyses(name, product_label, score, result_json)"),
+      .select("frequency, analyses(name, product_label, score, result_json)")
+      .eq("user_id", user.id)
+      .limit(12),
   ]);
 
   const usedToday = usedTodayRes.count;
@@ -254,8 +266,12 @@ export async function POST(req: NextRequest) {
 - Si la question relève du soin médical (acné sévère, rosacée diagnostiquée, eczéma...), oriente vers un dermatologue.
 - Tu peux mentionner des ingrédients (par leur nom INCI) connus pour une catégorie (ex. niacinamide, acide salicylique, panthénol) mais sans recommander un produit précis.
 - Tu cites les FAITS PERSONNELS de l'utilisateur (type de peau, routine actuelle) si pertinents, en restant factuel.
-- Style : phrases courtes, ton calme, pas d'emoji, pas de marketing.
-- Si la question n'a rien à voir avec la cosmétique, redirige poliment.
+- Si la question n'a rien à voir avec la cosmétique, redirige poliment en une phrase.
+- CONTEXTE : tu AS déjà accès au profil complet et à la routine de l'utilisateur ci-dessous.
+- LONGUEUR : Va droit au but.
+- FOCUS : tu peux légèrement rappeler les fait connus mais de maniere très concise, donne directement le conseil ou la suggestion utile.
+- FORMAT markdown : **gras** pour les ingrédients clés, *italique* pour les nuances, __souligné__ pour la conclusion, tirets - pour les listes courtes (3 items max).
+- QUESTION DE SUIVI : termine TOUJOURS ta réponse par une question courte, intelligente et utile qui fait avancer la conversation (ex. approfondir le besoin, affiner le conseil, proposer un angle complémentaire). La question doit être naturelle, jamais générique.
 
 ${NO_LONG_DASHES_RULE}
 
@@ -307,7 +323,7 @@ Quand l'utilisateur évoque un produit, vérifie d'abord si la formule contient 
               // that sneaks through despite the instruction. Done
               // per-chunk; this covers the common case where GPT emits
               // the dash as a single token.
-              emit(delta.replace(/\s*[-–]\s*/g, ", "));
+              emit(delta.replace(/[ \t]*[–—][ \t]*/g, ", ").replace(/ - /g, ", "));
             }
             const usage = (part as unknown as { usage?: { prompt_tokens?: number; completion_tokens?: number } }).usage;
             if (usage) {

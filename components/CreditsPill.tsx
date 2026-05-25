@@ -6,21 +6,30 @@ import Link from "next/link";
 type CreditsState = { used: number; limit: number; remaining: number } | null;
 
 /**
- * Gold-coin styled credits pill - fetches /api/credits on mount, on tab focus,
- * and whenever a `cosmecheck:credits-updated` event fires (dispatched by the
- * apiFetch wrapper after a credit-consuming call).
+ * Gold-coin styled credits pill.
  *
- * Renders nothing if the user isn't signed in (401 from the endpoint).
+ * When `initialCredits` is provided (pre-fetched server-side in layout.tsx),
+ * the pill renders immediately without a client-side fetch on mount. It still
+ * re-fetches on tab focus and on `cosmecheck:credits-updated` events so the
+ * count stays fresh after a credit-consuming call.
  *
- * Layout: [🪙 1390] [+] - the "+" links to /offre for the Premium upsell.
+ * Without `initialCredits` (legacy usage), falls back to fetching on mount.
+ *
+ * Layout: [🪙 1390] [+] — "+" links to /offre for the Premium upsell.
  */
-export function CreditsPill({ className = "" }: { className?: string }) {
-  const [credits, setCredits] = useState<CreditsState>(null);
+export function CreditsPill({
+  className = "",
+  initialCredits,
+}: {
+  className?: string;
+  initialCredits?: CreditsState;
+}) {
+  const [credits, setCredits] = useState<CreditsState>(initialCredits ?? null);
   const [hidden, setHidden] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
-      const r = await fetch("/api/credits", { cache: "no-store" });
+      const r = await fetch("/api/credits");
       if (r.status === 401) {
         setHidden(true);
         return;
@@ -36,7 +45,9 @@ export function CreditsPill({ className = "" }: { className?: string }) {
   }, []);
 
   useEffect(() => {
-    void refresh();
+    // Skip the initial fetch when SSR-provided credits are available —
+    // they are fresh from the same request that rendered the page.
+    if (!initialCredits) void refresh();
     const onFocus = () => void refresh();
     const onUpdate = () => void refresh();
     window.addEventListener("focus", onFocus);
@@ -45,6 +56,10 @@ export function CreditsPill({ className = "" }: { className?: string }) {
       window.removeEventListener("focus", onFocus);
       window.removeEventListener("cosmecheck:credits-updated", onUpdate as EventListener);
     };
+  // initialCredits is intentionally excluded: it's stable for the lifetime of
+  // the component and we only want the "no initialCredits → do initial fetch"
+  // branch to fire once on mount, not on every credits update.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
 
   if (hidden || !credits) return null;

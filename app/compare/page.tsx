@@ -87,13 +87,18 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
 
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
-  const [analysesRes, families] = await Promise.all([
+  const [analysesRes, families, routineRes] = await Promise.all([
     sb
       .schema("cosme_check")
       .from("analyses")
       .select("id, name, product_label, score, result_json")
       .in("id", list),
     loadIngredientFamilies(),
+    sb
+      .schema("cosme_check")
+      .from("routine_items")
+      .select("analyses(id, result_json)")
+      .limit(30),
   ]);
 
   const rows = (analysesRes.data ?? []) as {
@@ -121,10 +126,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
   })) as [CompareSide, CompareSide];
 
   // Routine context for the "bon à savoir" exposure insight only.
-  const { data: routine } = await sb
-    .schema("cosme_check")
-    .from("routine_items")
-    .select("analyses(id, result_json)");
+  const { data: routine } = routineRes;
   const routineSlugs = new Set<string>();
   for (const it of (routine ?? []) as unknown as { analyses: { id: string; result_json: AnalyseResponse } | null }[]) {
     if (!it.analyses) continue;

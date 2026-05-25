@@ -273,76 +273,94 @@ export async function POST(req: NextRequest) {
   }
   let rows = (data ?? []) as MatchRow[];
 
-  // AI typo correction: for each "suggestion" row (fuzzy 0.55..0.90), ask
-  // GPT-4o-mini to pick the most likely INCI candidate from the top-5 trigram
-  // hits. If GPT is confident enough (≥0.85), upgrade the row to a real match
-  // marked as "ai_corrected". Otherwise keep it as a suggestion.
+  // AI typo correction — 3-phase pipeline to minimise round-trips:
+  //
+  // Phase 1 : all trigram RPC calls in parallel (one per suggestion row).
+  // Phase 2 : all LLM (correctTypo) calls in parallel — only for rows that
+  //           returned at least one candidate.
+  // Phase 3 : single batch SELECT on `ingredients` for all confident winners,
+  //           replacing N individual .eq() queries with one .in() query.
   const suggestionRows = rows.filter((r) => r.match_kind === "suggestion");
   if (suggestionRows.length > 0) {
-    await Promise.all(
+    type CandidateRow = {
+      inci_id: number;
+      name: string;
+      primary_function: string | null;
+      similarity: number;
+    };
+
+    // Phase 1: fan out all trigram lookups simultaneously.
+    const candidateResults = await Promise.all(
       suggestionRows.map(async (row) => {
-        const { data: candidates } = await sb.rpc("cosme_check_top_trigram_candidates", {
+        const { data } = await sb.rpc("cosme_check_top_trigram_candidates", {
           p_token: tokens[row.position_idx]?.normalized ?? row.input_token,
           p_limit: 5,
         });
-        const list = (candidates ?? []) as {
-          inci_id: number;
-          name: string;
-          primary_function: string | null;
-          similarity: number;
-        }[];
-        if (list.length === 0) return;
-        const decision = await correctTypo(
-          tokens[row.position_idx]?.normalized ?? row.input_token,
-          list,
-        );
-        if (
-          decision.matchedInciId !== null
-          && decision.confidence >= 0.85
-        ) {
-          // Fetch the full row for the chosen INCI and replace the match in place.
-          const { data: ingRows } = await sb
-            .schema("cosme_check")
-            .from("ingredients")
-            .select(
-              "inci_id, slug, name, color_rating, cas_number, translations, functions, tags",
-            )
-            .eq("inci_id", decision.matchedInciId)
-            .limit(1);
-          const ing = (ingRows ?? [])[0] as
-            | {
-                inci_id: number;
-                slug: string;
-                name: string;
-                color_rating: ColorRating | null;
-                cas_number: string | null;
-                translations: Record<string, string> | null;
-                functions: { name?: string }[] | null;
-                tags: string[] | null;
-              }
-            | undefined;
-          if (ing) {
-            const idx = rows.findIndex((r) => r.position_idx === row.position_idx);
-            if (idx >= 0) {
-              rows[idx] = {
-                input_token: row.input_token,
-                position_idx: row.position_idx,
-                inci_id: ing.inci_id,
-                slug: ing.slug,
-                name: ing.name,
-                color_rating: ing.color_rating,
-                cas_number: ing.cas_number,
-                translation_fr: ing.translations?.fr ?? "",
-                primary_function: ing.functions?.[0]?.name ?? "",
-                tags: ing.tags,
-                match_kind: "fuzzy_high",
-                confidence: decision.confidence,
-              };
-            }
-          }
-        }
+        return { row, candidates: (data ?? []) as CandidateRow[] };
       }),
     );
+
+    // Phase 2: LLM calls in parallel, skip rows with no candidates.
+    const decisions = await Promise.all(
+      candidateResults
+        .filter(({ candidates }) => candidates.length > 0)
+        .map(async ({ row, candidates }) => {
+          const decision = await correctTypo(
+            tokens[row.position_idx]?.normalized ?? row.input_token,
+            candidates,
+          );
+          return { row, decision };
+        }),
+    );
+
+    // Phase 3: single batch ingredient fetch for all confident corrections.
+    const winners = decisions.filter(
+      ({ decision }) => decision.matchedInciId !== null && decision.confidence >= 0.85,
+    );
+    if (winners.length > 0) {
+      const winnerIds = winners.map(({ decision }) => decision.matchedInciId as number);
+      const { data: ingRows } = await sb
+        .schema("cosme_check")
+        .from("ingredients")
+        .select("inci_id, slug, name, color_rating, cas_number, translations, functions, tags")
+        .in("inci_id", winnerIds);
+
+      type IngRow = {
+        inci_id: number;
+        slug: string;
+        name: string;
+        color_rating: ColorRating | null;
+        cas_number: string | null;
+        translations: Record<string, string> | null;
+        functions: { name?: string }[] | null;
+        tags: string[] | null;
+      };
+      const ingById = new Map(
+        ((ingRows ?? []) as IngRow[]).map((ing) => [ing.inci_id, ing]),
+      );
+
+      for (const { row, decision } of winners) {
+        const ing = ingById.get(decision.matchedInciId as number);
+        if (!ing) continue;
+        const idx = rows.findIndex((r) => r.position_idx === row.position_idx);
+        if (idx >= 0) {
+          rows[idx] = {
+            input_token: row.input_token,
+            position_idx: row.position_idx,
+            inci_id: ing.inci_id,
+            slug: ing.slug,
+            name: ing.name,
+            color_rating: ing.color_rating,
+            cas_number: ing.cas_number,
+            translation_fr: ing.translations?.fr ?? "",
+            primary_function: ing.functions?.[0]?.name ?? "",
+            tags: ing.tags,
+            match_kind: "fuzzy_high",
+            confidence: decision.confidence,
+          };
+        }
+      }
+    }
   }
 
   // Re-attach the original raw token (for display) by position. Suggestions

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { deleteCoherenceAnalysis } from "@/app/promesses/actions";
 
 /**
@@ -15,6 +15,21 @@ import { deleteCoherenceAnalysis } from "@/app/promesses/actions";
 export function CoherenceItemActions({ id }: { id: string }) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onOutside(e: MouseEvent | TouchEvent) {
+      if (wrapperRef.current?.contains(e.target as Node)) return;
+      setOpen(false);
+    }
+    document.addEventListener("mousedown", onOutside);
+    document.addEventListener("touchstart", onOutside);
+    return () => {
+      document.removeEventListener("mousedown", onOutside);
+      document.removeEventListener("touchstart", onOutside);
+    };
+  }, [open]);
 
   function remove(e: React.MouseEvent) {
     e.preventDefault();
@@ -26,7 +41,7 @@ export function CoherenceItemActions({ id }: { id: string }) {
   }
 
   return (
-    <div className="relative" onClick={(e) => e.stopPropagation()}>
+    <div ref={wrapperRef} className="relative" onClick={(e) => e.stopPropagation()}>
       <button
         type="button"
         onClick={(e) => {
@@ -46,8 +61,7 @@ export function CoherenceItemActions({ id }: { id: string }) {
 
       {open && (
         <div
-          className="neu-menu absolute right-0 top-11 z-30 w-52 p-2"
-          onMouseLeave={() => setOpen(false)}
+          className="neu-menu absolute right-0 bottom-full mb-1 z-[70] w-52 p-2"
         >
           <button
             type="button"

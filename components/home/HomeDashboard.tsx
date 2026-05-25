@@ -271,7 +271,7 @@ function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
   if (!last) {
     return (
       <div className="neu p-5">
-        <div className="flex items-center gap-1.5 text-[12px] text-[#6B7280] uppercase tracking-wide">
+        <div className="flex items-center gap-1.5 text-[13px] text-emerald-600 uppercase tracking-wide font-semibold">
           <ShieldCheckIcon className="h-4 w-4 text-emerald-600" />
           Dernière analyse
         </div>
@@ -292,7 +292,7 @@ function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
       className="block neu neu-hover px-5 pt-5 pb-3 transition"
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-[12px] text-[#6B7280] uppercase tracking-wide">
+        <div className="flex items-center gap-1.5 text-[13px] text-emerald-600 uppercase tracking-wide font-semibold">
           <ShieldCheckIcon className="h-4 w-4 text-emerald-600" />
           Dernière analyse
         </div>
@@ -337,7 +337,7 @@ function RoutineCard({
         href="/routine"
         className="block neu neu-hover p-5 transition"
       >
-        <div className="flex items-center gap-1.5 text-[12px] text-[#6B7280] uppercase tracking-wide">
+        <div className="flex items-center gap-1.5 text-[13px] text-rose-500 uppercase tracking-wide font-semibold">
           <HeartIcon className="h-4 w-4 text-rose-500" />
           Ta routine
         </div>
@@ -368,7 +368,7 @@ function RoutineCard({
       className="block neu neu-hover px-5 pt-5 pb-3 transition"
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-[12px] text-[#6B7280] uppercase tracking-wide">
+        <div className="flex items-center gap-1.5 text-[13px] text-rose-500 uppercase tracking-wide font-semibold">
           <HeartIcon className="h-4 w-4 text-rose-500" />
           Ta routine
         </div>

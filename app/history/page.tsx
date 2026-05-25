@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
@@ -51,6 +52,27 @@ export default async function HistoryPage() {
   const user = await getUser();
   if (!user) redirect("/auth/sign-in?next=/history");
 
+  return (
+    <div className="neu-page mx-auto max-w-4xl px-5 lg:px-8 py-8 lg:py-12">
+      <h1 className="text-2xl lg:text-3xl font-bold mb-2">Mon historique</h1>
+      <Suspense fallback={<HistorySkeleton />}>
+        <HistoryContent />
+      </Suspense>
+    </div>
+  );
+}
+
+function HistorySkeleton() {
+  return (
+    <div className="space-y-3 mt-6" aria-busy aria-label="Chargement de l'historique">
+      {[0, 1, 2, 3].map((i) => (
+        <div key={i} className="neu h-16 rounded-2xl animate-pulse" />
+      ))}
+    </div>
+  );
+}
+
+async function HistoryContent() {
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
   // Two parallel queries - analyses (last 50) + every coherence row for this
@@ -68,7 +90,8 @@ export default async function HistoryPage() {
       .schema("cosme_check")
       .from("coherence_analyses")
       .select("id, analysis_id, created_at")
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })
+      .limit(200),
   ]);
 
   const raw = (analysesResult.error ? [] : (analysesResult.data ?? [])) as RawRow[];
@@ -110,25 +133,21 @@ export default async function HistoryPage() {
     };
   });
 
-  return (
-    <div className="neu-page mx-auto max-w-4xl px-5 lg:px-8 py-8 lg:py-12">
-      <h1 className="text-2xl lg:text-3xl font-bold mb-2">Mon historique</h1>
+  if (analyses.length === 0) {
+    return (
+      <div className="neu p-8 text-center mt-6">
+        <p className="text-sm text-[#6B7280] mb-4">
+          Lance ta première analyse depuis la page d&apos;accueil.
+        </p>
+        <Link
+          href="/"
+          className="neu-btn-primary inline-block rounded-full px-5 py-2.5 text-sm"
+        >
+          Analyser un produit
+        </Link>
+      </div>
+    );
+  }
 
-      {analyses.length === 0 ? (
-        <div className="neu p-8 text-center mt-6">
-          <p className="text-sm text-[#6B7280] mb-4">
-            Lance ta première analyse depuis la page d&apos;accueil.
-          </p>
-          <Link
-            href="/"
-            className="neu-btn-primary inline-block rounded-full px-5 py-2.5 text-sm"
-          >
-            Analyser un produit
-          </Link>
-        </div>
-      ) : (
-        <HistoryList rows={analyses} />
-      )}
-    </div>
-  );
+  return <HistoryList rows={analyses} />;
 }

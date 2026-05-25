@@ -4,15 +4,11 @@ import {
   exploreOpenPromise,
   extractPromisesFromDescription,
   generateConclusion,
-  inferPromisesFromOrphans,
   type FormulaItemForLlm,
 } from "@/lib/ai/coherence";
 import {
   buildCoherenceResult,
-  buildInferredPromise,
   dedupProposals,
-  isExcerptInDescription,
-  pickOrphansForInference,
   reclassifyOpenProposals,
   resolveAbsencePromise,
   resolveOpenPromise,
@@ -210,65 +206,7 @@ export async function POST(req: NextRequest) {
   );
 
   const directPromises = [...cataloguePromises, ...openPromises];
-
-  // ─── Step 3-bis: bidirectional reinforcement (formula → description) ─────
-  // For each ingredient in the formula that NO direct promise cited, ask the
-  // LLM whether the description mentions its documented effect. If yes (and
-  // we can verify the cited excerpt is verbatim in the description), promote
-  // it to an "inferred" promise. This catches promises the extraction step
-  // missed because the LLM filed them as sensory/marketing-general instead
-  // of as analysable promises (e.g. "rend les mains douces" → "douceur" not
-  // in the catalogue, sometimes dropped into unverifiable).
-  //
-  // Best-effort: any failure (timeout, LLM unavailable, schema error) is
-  // swallowed - the analysis still returns the directPromises set.
-  let inferredPromises: CoherencePromise[] = [];
-  try {
-    const matchedSlugs = new Set<string>(
-      directPromises
-        .flatMap((p) => [
-          ...p.foundActives.map((a) => a.slug),
-          ...p.cosmeticActives.map((a) => a.slug),
-        ])
-        .filter((s): s is string => Boolean(s)),
-    );
-    const orphans = pickOrphansForInference(parent.items, matchedSlugs);
-
-    if (orphans.length > 0) {
-      const alreadyCoveredLabels = directPromises.map((p) => p.label);
-      const proposals = await inferPromisesFromOrphans(
-        description,
-        orphans,
-        alreadyCoveredLabels,
-        user.id,
-      );
-
-      // Anti-hallucination guards (defence in depth on top of the prompt
-      // rules): (a) the support_excerpt MUST appear verbatim in the
-      // description, (b) the active_slug MUST resolve to a real formula
-      // item AND match one of the orphans we submitted (so the LLM can't
-      // re-claim an already-matched ingredient or invent a new one).
-      const orphanSlugSet = new Set(orphans.map((o) => o.slug));
-      const seenInferredSlugs = new Set<string>();
-      for (const p of proposals) {
-        if (!orphanSlugSet.has(p.active_slug)) continue;
-        if (seenInferredSlugs.has(p.active_slug)) continue; // dedup
-        if (!isExcerptInDescription(p.support_excerpt, description)) continue;
-        const built = buildInferredPromise(p, parent.items);
-        if (built) {
-          inferredPromises.push(built);
-          seenInferredSlugs.add(p.active_slug);
-        }
-      }
-    }
-  } catch (err) {
-    // Inference is purely additive - if it fails, fall back to the direct
-    // promises and continue. Logged at warn so we can monitor success rate.
-    logError("coherence.infer_orphans", err, { userId: user.id });
-    inferredPromises = [];
-  }
-
-  const promises = [...directPromises, ...inferredPromises];
+  const promises = directPromises;
 
   // ─── Step 4: build the full structured result (engine, deterministic) ────
   // ─── Step 5: write the conclusion sentence (LLM, only sees the verdicts)

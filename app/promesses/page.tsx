@@ -117,7 +117,7 @@ export default async function PromessesPage() {
                 </Link>
                 {/* The 3-dot menu sits in absolute on top of the row so the
                     <Link> wrapper stays clickable everywhere else. */}
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 z-[60]">
                   <CoherenceItemActions id={r.id} />
                 </div>
               </li>

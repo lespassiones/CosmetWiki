@@ -1,15 +1,44 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { renameAnalysis, deleteAnalysis } from "@/app/history/actions";
 
-export function HistoryItemActions({ id, currentName }: { id: string; currentName: string }) {
+export function HistoryItemActions({
+  id,
+  currentName,
+  onOpenChange,
+}: {
+  id: string;
+  currentName: string;
+  onOpenChange?: (open: boolean) => void;
+}) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(currentName);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open || editing) return;
+    function onOutside(e: MouseEvent | TouchEvent) {
+      if (wrapperRef.current?.contains(e.target as Node)) return;
+      toggle(false);
+    }
+    document.addEventListener("mousedown", onOutside);
+    document.addEventListener("touchstart", onOutside);
+    return () => {
+      document.removeEventListener("mousedown", onOutside);
+      document.removeEventListener("touchstart", onOutside);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, editing]);
+
+  function toggle(next: boolean) {
+    setOpen(next);
+    onOpenChange?.(next);
+  }
 
   function save() {
     const newName = name.trim();
@@ -21,7 +50,7 @@ export function HistoryItemActions({ id, currentName }: { id: string; currentNam
       const r = await renameAnalysis(id, newName);
       if (r.ok) {
         setEditing(false);
-        setOpen(false);
+        toggle(false);
         router.refresh();
       }
     });
@@ -35,10 +64,10 @@ export function HistoryItemActions({ id, currentName }: { id: string; currentNam
   }
 
   return (
-    <div className="relative">
+    <div ref={wrapperRef} className="relative">
       <button
         type="button"
-        onClick={() => setOpen((s) => !s)}
+        onClick={() => toggle(!open)}
         aria-label="Plus d'actions"
         className="neu-sm rounded-full h-9 w-9 inline-flex items-center justify-center text-[#6B7280] hover:text-[#111111] transition"
       >
@@ -51,8 +80,7 @@ export function HistoryItemActions({ id, currentName }: { id: string; currentNam
 
       {open && (
         <div
-          className="neu-menu absolute right-0 top-11 z-30 w-64 p-2"
-          onMouseLeave={() => !editing && setOpen(false)}
+          className="neu-menu absolute right-0 bottom-full mb-1 z-[70] w-64 p-2"
         >
           {editing ? (
             <div className="p-2">

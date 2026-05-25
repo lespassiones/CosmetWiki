@@ -44,6 +44,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
+  const [openActionsId, setOpenActionsId] = useState<string | null>(null);
   const router = useRouter();
 
   const selectedCount = selected.size;
@@ -237,7 +238,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
           // on the INCI alone and falling back to manual description.
           const canAnalysePromesse = true;
           return (
-            <li key={a.id} className="relative">
+            <li key={a.id} className={`relative${openActionsId === a.id ? " z-[60]" : ""}`}>
               <div
                 className="neu neu-hover relative flex items-center gap-4 p-4 pr-16"
               >
@@ -279,8 +280,12 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                   )}
                 </div>
               </div>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
-                <HistoryItemActions id={a.id} currentName={a.name ?? displayName} />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 z-[2]">
+                <HistoryItemActions
+                  id={a.id}
+                  currentName={a.name ?? displayName}
+                  onOpenChange={(isOpen) => setOpenActionsId(isOpen ? a.id : null)}
+                />
               </div>
             </li>
           );

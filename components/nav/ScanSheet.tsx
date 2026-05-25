@@ -252,9 +252,10 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
               type="button"
               onClick={() => setView("picker")}
               aria-label="Retour aux options"
-              className="absolute left-5 grid h-10 w-10 place-items-center rounded-full bg-[#EEF2F8] text-[#1E3A8A] hover:bg-[#DDE5F0] transition"
+              className="absolute left-5 flex items-center gap-1 text-[#1E3A8A] hover:text-[#1a3070] transition text-[13px] font-medium"
             >
-              <span aria-hidden className="text-lg leading-none">←</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M15 18l-6-6 6-6"/></svg>
+              Retour
             </button>
           )}
           <h2 className="text-center text-[20px] font-bold text-[#1E3A8A]">{heading}</h2>
@@ -374,14 +375,14 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
             </div>
           ) : view === "url" ? (
             <div className="space-y-3">
-              <p className="text-[13px] text-[#475569]">
-                Colle le lien d&apos;une page produit. On récupère le nom, la marque et la composition,
-                puis on lance l&apos;analyse une fois que tu as confirmé.
-              </p>
               <ProductUrlInput
                 onFound={(payload) => submitForAnalysis(payload)}
                 onFallbackToManual={() => setView("paste")}
               />
+              <p className="text-[13px] text-[#475569]">
+                Colle le lien d&apos;une page produit. On récupère le nom, la marque et la composition,
+                puis on lance l&apos;analyse une fois que tu as confirmé.
+              </p>
             </div>
           ) : (
             <div className="space-y-3">

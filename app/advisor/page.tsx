@@ -1,7 +1,5 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { getProfile, getUser } from "@/lib/auth";
-import { supabaseServer } from "@/lib/supabase";
 import {
   isProfileStarted,
   readSkinProfile,
@@ -19,17 +17,8 @@ export default async function AdvisorPage() {
   const user = await getUser();
   if (!user) redirect("/auth/sign-in?next=/advisor");
 
-  const cookieStore = await cookies();
-  const sb = supabaseServer(cookieStore);
-  const { data: row } = await sb
-    .schema("cosme_check")
-    .from("user_profiles")
-    .select("preferences")
-    .eq("id", user.id)
-    .maybeSingle();
-
   const profile = await getProfile();
-  const skin = readSkinProfile((row?.preferences ?? null) as Record<string, unknown> | null);
+  const skin = readSkinProfile((profile?.preferences ?? null) as Record<string, unknown> | null);
   // Show chat as soon as any signal is filled; the strict "complete" check
   // is only relevant for the onboarding redirect.
   const complete = isProfileStarted(skin);
@@ -39,9 +28,8 @@ export default async function AdvisorPage() {
       <h1 className="text-2xl lg:text-3xl font-bold mb-2 flex items-center gap-2">
         <span aria-hidden>✨</span> Beauty Advisor
       </h1>
-      <p className="text-sm text-[#6B7280] mb-6">
-        Un assistant factuel qui s&apos;appuie sur ton profil et ta routine. Aucun conseil médical, aucune marque
-        recommandée.
+      <p className="text-[12px] text-[#6B7280] mb-6 truncate">
+        Un assistant factuel qui s&apos;appuie sur ton profil et ta routine.
       </p>
 
       {!complete ? (
@@ -55,31 +43,33 @@ export default async function AdvisorPage() {
         </section>
       ) : (
         <>
-          <section className={`${GLASS_CARD_ROSE} p-4 mb-4 text-[13px] text-[#9F1239] flex items-start gap-3`}>
-            <span aria-hidden className="text-base">🧬</span>
-            <div className="flex-1 leading-relaxed">
-              {(() => {
-                const face = skin.skinTypeFace
-                  ? SKIN_TYPE_FACE_LABEL[skin.skinTypeFace]
-                  : skin.otherSkinTypeFace;
-                const body = skin.skinTypeBody
-                  ? SKIN_TYPE_BODY_LABEL[skin.skinTypeBody]
-                  : skin.otherSkinTypeBody;
-                const parts = [
-                  face && `visage : ${face}`,
-                  body && `corps : ${body}`,
-                ].filter(Boolean);
-                return parts.length > 0 ? (
-                  <strong className="font-semibold">{parts.join(" · ")}</strong>
-                ) : null;
-              })()}
-              {skin.concerns && skin.concerns.length > 0 && (
-                <> · {skin.concerns.map((c) => SKIN_CONCERN_LABEL[c]).join(", ")}</>
-              )}
-              {skin.allergiesFreeform && <> · sans : {skin.allergiesFreeform}</>}
-            </div>
-            <details className="text-[12px]">
-              <summary className="cursor-pointer text-[#F43F5E] hover:underline">Modifier</summary>
+          <section className={`${GLASS_CARD_ROSE} p-4 mb-4 text-[12px] text-[#9F1239]`}>
+            <details>
+              <summary className="list-none [&::-webkit-details-marker]:hidden marker:hidden flex items-center gap-2 cursor-pointer overflow-hidden">
+                <span aria-hidden className="text-sm shrink-0">🧬</span>
+                <div className="flex-1 min-w-0 truncate">
+                  {(() => {
+                    const face = skin.skinTypeFace
+                      ? SKIN_TYPE_FACE_LABEL[skin.skinTypeFace]
+                      : skin.otherSkinTypeFace;
+                    const body = skin.skinTypeBody
+                      ? SKIN_TYPE_BODY_LABEL[skin.skinTypeBody]
+                      : skin.otherSkinTypeBody;
+                    const parts = [
+                      face && `visage : ${face}`,
+                      body && `corps : ${body}`,
+                    ].filter(Boolean);
+                    return parts.length > 0 ? (
+                      <strong className="font-semibold">{parts.join(" · ")}</strong>
+                    ) : null;
+                  })()}
+                  {skin.concerns && skin.concerns.length > 0 && (
+                    <> · {skin.concerns.map((c) => SKIN_CONCERN_LABEL[c]).join(", ")}</>
+                  )}
+                  {skin.allergiesFreeform && <> · sans : {skin.allergiesFreeform}</>}
+                </div>
+                <span className="text-[#F43F5E] hover:underline shrink-0 text-[12px]">Modifier</span>
+              </summary>
               <div className="mt-4">
                 <BeautyProfileForm initial={skin} showCancel={false} />
               </div>

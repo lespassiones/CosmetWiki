@@ -1,10 +1,33 @@
 import type { NextConfig } from "next";
 
+// Content-Security-Policy — inventaire des origines réelles :
+//   Scripts  : 'self' + inline Next.js hydration + Vercel Analytics
+//              'unsafe-eval' requis par le runtime webpack de Next.js (module registry)
+//   Connect  : Supabase REST + Realtime WS + Vercel Analytics beacon
+//   Images   : Supabase Storage, incibeauty.com, data: (canvas), blob: (caméra)
+//   Fonts    : 'self' — Inter est self-hosted via next/font
+//   Workers  : 'self' + blob: (certaines implémentations SW)
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://*.supabase.co https://incibeauty.com https://*.incibeauty.com",
+  "font-src 'self'",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com",
+  "worker-src 'self' blob:",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join("; ");
+
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" },
+  { key: "Content-Security-Policy", value: CSP },
+  // HSTS — 1 an. Ajouter preload + soumission au preload list si domaine stable.
+  { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
 ];
 
 const config: NextConfig = {

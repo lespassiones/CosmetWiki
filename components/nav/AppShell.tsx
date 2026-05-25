@@ -39,27 +39,28 @@ export function AppShell({
   hideOnPaths = [],
   signedIn,
   firstName,
+  initialCredits = null,
 }: {
   children: React.ReactNode;
   /** Path prefixes where the shell (bottom nav + sidebar) should be hidden. */
   hideOnPaths?: string[];
   signedIn: boolean;
   firstName?: string | null;
+  /** Credits pre-fetched server-side in layout.tsx — skips the client fetch on mount. */
+  initialCredits?: { used: number; limit: number; remaining: number } | null;
 }) {
   const pathname = usePathname() ?? "/";
   const [scanOpen, setScanOpen] = useState(false);
-  // Last-known credits state for the "Décode" guard. Refreshed on mount, on
-  // window focus, and whenever a credit-consuming call dispatches
-  // `cosmecheck:credits-updated`. We only need it to decide whether the scan
-  // button should open the sheet or pop the exhausted modal.
-  const [credits, setCredits] = useState<{ used: number; limit: number; remaining: number } | null>(null);
+  // Pre-populated from SSR so the scan guard works on first render without
+  // waiting for a client-side fetch. Refreshed on focus and credit events.
+  const [credits, setCredits] = useState(initialCredits);
 
   useEffect(() => {
     if (!signedIn) return;
     let aborted = false;
     const refresh = async () => {
       try {
-        const r = await fetch("/api/credits", { cache: "no-store" });
+        const r = await fetch("/api/credits");
         if (!r.ok) return;
         const data = await r.json();
         if (!aborted && data?.ok && typeof data.remaining === "number") {
@@ -69,7 +70,8 @@ export function AppShell({
         /* ignore - guard falls back to opening the sheet */
       }
     };
-    void refresh();
+    // No initial refresh() — initialCredits from SSR is already fresh.
+    // Re-fetch only when the user refocuses or a credit-consuming call fires.
     const onUpdate = () => void refresh();
     window.addEventListener("focus", onUpdate);
     window.addEventListener("cosmecheck:credits-updated", onUpdate as EventListener);
@@ -124,6 +126,7 @@ export function AppShell({
         onScanClick={handleScanClick}
         signedIn={signedIn}
         firstName={firstName}
+        initialCredits={initialCredits}
       />
 
       {/* Page content */}
@@ -145,7 +148,7 @@ export function AppShell({
         <Link
           href="/advisor"
           aria-label="Ouvrir Beauty Advisor"
-          className="lg:hidden fixed right-4 z-40 h-12 w-12 rounded-full bg-gradient-to-br from-[#1F2937] via-[#111111] to-[#0A0A0A] text-white flex items-center justify-center ring-1 ring-white/[0.08] shadow-[0_10px_24px_-8px_rgba(15,23,42,0.45),inset_0_1px_0_rgba(255,255,255,0.18)] hover:brightness-110 active:scale-95 transition"
+          className="lg:hidden fixed right-4 z-[75] h-12 w-12 rounded-full bg-gradient-to-br from-[#1F2937] via-[#111111] to-[#0A0A0A] text-white flex items-center justify-center ring-1 ring-white/[0.08] shadow-[0_10px_24px_-8px_rgba(15,23,42,0.45),inset_0_1px_0_rgba(255,255,255,0.18)] hover:brightness-110 active:scale-95 transition"
           style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 88px)" }}
         >
           <SparklesIcon className="h-5 w-5 text-[#FBBF24]" />
@@ -164,7 +167,7 @@ function MobileBottomNav({ pathname, onScanClick }: { pathname: string; onScanCl
   // background (gradient + backdrop blur) and a subtle inner highlight.
   return (
     <nav
-      className="lg:hidden fixed bottom-0 inset-x-0 z-50 pb-[max(env(safe-area-inset-bottom),12px)] pt-2 px-3 pointer-events-none"
+      className="lg:hidden fixed bottom-0 inset-x-0 z-[80] pb-[max(env(safe-area-inset-bottom),12px)] pt-2 px-3 pointer-events-none"
       aria-label="Navigation principale"
     >
       <div className="relative mx-auto max-w-md pointer-events-auto">
@@ -240,11 +243,13 @@ function DesktopSidebar({
   onScanClick,
   signedIn,
   firstName,
+  initialCredits,
 }: {
   pathname: string;
   onScanClick: () => void;
   signedIn: boolean;
   firstName?: string | null;
+  initialCredits?: { used: number; limit: number; remaining: number } | null;
 }) {
   return (
     <aside
@@ -304,7 +309,7 @@ function DesktopSidebar({
             <span className="text-[12px] font-medium text-[#6B7280]">
               Vos crédits restants
             </span>
-            <CreditsPill />
+            <CreditsPill initialCredits={initialCredits} />
           </div>
         </div>
       )}
