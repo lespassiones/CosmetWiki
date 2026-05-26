@@ -166,10 +166,10 @@ export function HomeDashboard({
           <div className="flex items-stretch">
             <div className="relative w-[100px] shrink-0">
               <Image
-                src="/image/petiteImage/portion.webp"
+                src="/image/petiteImage/portion2.webp"
                 alt=""
-                width={327}
-                height={400}
+                width={451}
+                height={553}
                 className="absolute bottom-0 left-1 h-[100%] lg:h-[108%] lg:translate-y-3 w-auto object-contain object-bottom drop-shadow-[0_6px_18px_rgba(0,0,0,0.28)]"
               />
             </div>
