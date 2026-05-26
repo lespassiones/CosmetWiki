@@ -28,6 +28,7 @@ type ProductSource = {
   sourceUrl: string | null;
   brand: string | null;
   productName: string | null;
+  ean?: string | null;
 };
 
 type Cached = {
@@ -236,6 +237,7 @@ export function HomeShell({
           withSynthesis: false,
           ...(productLabel ? { productLabel } : {}),
           ...(addToRoutine ? { addToRoutine: true } : {}),
+          ...(src?.ean ? { productEan: src.ean } : {}),
         }),
         signal: ctrl.signal,
       });
@@ -335,12 +337,14 @@ export function HomeShell({
     productName: string | null;
     source: string;
     sourceUrl: string | null;
+    ean?: string | null;
   }) {
     pendingProductSourceRef.current = {
       source: input.source,
       sourceUrl: input.sourceUrl,
       brand: input.brand,
       productName: input.productName,
+      ean: input.ean ?? null,
     };
     void runAnalyse(input.ingredientsText);
   }

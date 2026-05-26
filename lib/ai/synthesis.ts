@@ -197,6 +197,7 @@ CONTRAINTES STRICTES :
 - Total puces (bloc 2) : 4 à 7 max, closing comprise.
 - Chaque puce : 1 à 2 phrases courtes. Pas de pavé.
 - Pas de jargon médical (dermatite, eczéma, comédogène, sébo-régulateur). Préfère "peut irriter", "peut boucher les pores".
+- INTERDIT absolu : les verbes "soigne", "traite", "guérit", "cicatrise", "régénère", "répare", "restaure" — réservés aux médicaments (Règlement CE 1223/2009). Utilise à la place : "entretient la peau", "maintient en bon état", "hydrate", "adoucit", "protège", "reconstitue".
 - Pas d'emoji, pas d'astérisque autre que les **gras INCI**.
 - AUCUN tiret cadratin (—) ni demi-cadratin (–). Utilise virgule, deux-points ou nouvelle phrase.
 - VARIE l'attaque du bloc 1 d'une analyse à l'autre.

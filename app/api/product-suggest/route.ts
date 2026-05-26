@@ -8,7 +8,7 @@ import {
 } from "@/lib/productSearch/duckduckgo";
 import { collectOpenAIWebCandidates } from "@/lib/productSearch/openaiSearch";
 import { prevalidateCandidates } from "@/lib/productSearch/prevalidate";
-import { supabaseServer } from "@/lib/supabase";
+import { supabaseAnon, supabaseServer } from "@/lib/supabase";
 import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import type { OpenBeautyFactsCandidate } from "@/lib/productSearch/openBeautyFacts";
 
@@ -22,15 +22,12 @@ type RequestBody = {
 };
 
 const PAGE_SIZE = 24;
-// Cache and INCIDecoder only contribute on page 1 - page 2+ is pure OBF
-// pagination since cache hits are a small fixed set and INCIDecoder lists
-// are also a single search-page extract.
+// Own catalog covers ~39K products with pre-computed scores.
+// If catalog returns enough, we skip OBF/INCIDecoder entirely.
+const CATALOG_LIMIT = 24;
+const CATALOG_THRESHOLD = 8;   // catalog hits needed to skip OBF
 const CACHE_LIMIT = 16;
 const INCIDECODER_LIMIT = 20;
-// Below this many catalogue hits on page 1, we ALSO surface web candidates
-// (no Mistral extraction up-front — just titles/URLs) so niche or French
-// indie brands absent from OBF/INCIDecoder can still be analysed by clicking
-// a candidate and triggering /api/deep-fetch lazily.
 const WEB_FALLBACK_THRESHOLD = 5;
 const WEB_FALLBACK_LIMIT = 8;
 
@@ -82,26 +79,38 @@ export async function GET(req: NextRequest) {
   const page = Math.max(1, Math.min(20, Math.floor(Number(pageParam ?? 1) || 1)));
   const isFirstPage = page === 1;
 
-  // Cache + INCIDecoder only contribute on page 1 (they're fixed-size sets,
-  // not paginated like OBF).
-  const obfP = searchOpenBeautyFactsList(query, page, PAGE_SIZE);
-  const cacheP = isFirstPage ? fetchCachedCandidates(query, CACHE_LIMIT) : Promise.resolve([] as OpenBeautyFactsCandidate[]);
-  const inciP = isFirstPage
+  // Catalog (own DB) : toujours interrogé en premier.
+  // OBF / INCIDecoder : uniquement si le catalog n'a pas assez de résultats
+  // ou si on est sur une page > 1 (pagination OBF).
+  const catalogP = isFirstPage
+    ? fetchCatalogCandidates(query, CATALOG_LIMIT)
+    : Promise.resolve([] as OpenBeautyFactsCandidate[]);
+  const cacheP = isFirstPage
+    ? fetchCachedCandidates(query, CACHE_LIMIT)
+    : Promise.resolve([] as OpenBeautyFactsCandidate[]);
+
+  const [catalogRes, cacheRes] = await Promise.allSettled([catalogP, cacheP]);
+  const catalog = catalogRes.status === "fulfilled" ? catalogRes.value : [];
+  const cached = cacheRes.status === "fulfilled" ? cacheRes.value : [];
+
+  // Si le catalog a assez de résultats, on saute OBF et INCIDecoder.
+  const needFallback = catalog.length < CATALOG_THRESHOLD;
+
+  const obfP = needFallback || !isFirstPage
+    ? searchOpenBeautyFactsList(query, page, PAGE_SIZE)
+    : Promise.resolve({ candidates: [] as OpenBeautyFactsCandidate[], hasMore: false });
+  const inciP = isFirstPage && needFallback
     ? fetchInciDecoderCandidates(query, INCIDECODER_LIMIT)
     : Promise.resolve([] as OpenBeautyFactsCandidate[]);
 
-  // allSettled : a failure in one source must not kill the others.
-  const [obfRes, cacheRes, inciRes] = await Promise.allSettled([obfP, cacheP, inciP]);
-
+  const [obfRes, inciRes] = await Promise.allSettled([obfP, inciP]);
   const obf = obfRes.status === "fulfilled" ? obfRes.value : { candidates: [], hasMore: false };
-  const cached = cacheRes.status === "fulfilled" ? cacheRes.value : [];
   const inci = inciRes.status === "fulfilled" ? inciRes.value : [];
 
-  // Merge order: cache first (cheapest, already verified), then OBF (rich
-  // metadata + INCI), then INCIDecoder (lazy-loaded).
+  // Ordre de fusion : catalog > cache > OBF > INCIDecoder
   const seen = new Set<string>();
   const merged: OpenBeautyFactsCandidate[] = [];
-  for (const list of [cached, obf.candidates, inci]) {
+  for (const list of [catalog, cached, obf.candidates, inci]) {
     for (const c of list) {
       const key = dedupeKey(c.brand, c.productName);
       if (seen.has(key)) continue;
@@ -202,6 +211,47 @@ async function fetchInciDecoderCandidates(
       sourceUrl: c.sourceUrl,
       source: "incidecoder" as const,
       slug: c.slug,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function fetchCatalogCandidates(
+  query: string,
+  limit: number,
+): Promise<OpenBeautyFactsCandidate[]> {
+  try {
+    const { data, error } = await supabaseAnon()
+      .schema("cosme_check")
+      .rpc("cosme_check_search_catalog", { p_query: query, p_limit: limit });
+    if (error || !data) return [];
+    return (
+      data as Array<{
+        ean: string;
+        brand: string | null;
+        name: string;
+        category: string | null;
+        image_url: string | null;
+        source_url: string | null;
+        score: number;
+        score_label: string;
+        score_tone: string;
+        count_total: number | null;
+        ingredients_text: string | null;
+      }>
+    ).map((r) => ({
+      id: `catalog-${r.ean}`,
+      brand: r.brand,
+      productName: r.name,
+      ingredientsText: r.ingredients_text ?? "",
+      imageUrl: r.image_url,
+      sourceUrl: r.source_url ?? "",
+      source: "catalog" as const,
+      ean: r.ean,
+      score: r.score,
+      scoreLabel: r.score_label,
+      scoreTone: r.score_tone,
     }));
   } catch {
     return [];

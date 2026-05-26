@@ -31,6 +31,7 @@ type FoundPayload = {
   productName: string | null;
   source: string;
   sourceUrl: string | null;
+  ean?: string | null;
 };
 
 type Props = {
@@ -282,6 +283,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
       productName: c.productName,
       source: c.source ?? "openbeautyfacts",
       sourceUrl: c.sourceUrl,
+      ean: c.ean ?? null,
     });
   }
 
@@ -704,9 +706,16 @@ function ProductPlaceholderIcon() {
 }
 
 const SOURCE_BADGE: Record<string, { label: string; cls: string }> = {
+  catalog: { label: "NOTE", cls: "bg-emerald-100 text-emerald-700 ring-emerald-200" },
   cache: { label: "BASE", cls: "bg-emerald-100 text-emerald-700 ring-emerald-200" },
   openbeautyfacts: { label: "OBF", cls: "bg-amber-100 text-amber-700 ring-amber-200" },
   incidecoder: { label: "INCIDECODER", cls: "bg-violet-100 text-violet-700 ring-violet-200" },
+};
+
+const SCORE_TONE_CLS: Record<string, string> = {
+  green: "text-emerald-600",
+  orange: "text-amber-600",
+  red: "text-rose-600",
 };
 
 function CandidateCard({
@@ -728,6 +737,8 @@ function CandidateCard({
   const showImage = candidate.imageUrl && !imgFailed;
   const sourceMeta = candidate.source ? SOURCE_BADGE[candidate.source] : null;
   const needsLoad = candidate.source === "incidecoder" && !candidate.ingredientsText;
+  const isCatalog = candidate.source === "catalog";
+  const scoreToneCls = candidate.scoreTone ? (SCORE_TONE_CLS[candidate.scoreTone] ?? "text-ink") : "text-ink";
   return (
     <button
       type="button"
@@ -761,7 +772,7 @@ function CandidateCard({
               {niceBrand}
             </p>
           ) : null}
-          {sourceMeta && (
+          {sourceMeta && !isCatalog && (
             <span className={`shrink-0 inline-flex items-center rounded-full px-1.5 py-0.5 text-[8.5px] font-semibold tracking-wide ring-1 ${sourceMeta.cls}`}>
               {sourceMeta.label}
             </span>
@@ -770,13 +781,19 @@ function CandidateCard({
         <p className="line-clamp-2 break-words text-[14px] font-medium text-ink leading-snug">
           {niceName ?? "Produit sans nom"}
         </p>
-        <p className="mt-0.5 text-[11px] text-ink-subtle">
-          {loading
-            ? "Chargement de la composition…"
-            : needsLoad
-              ? "Cliquer pour récupérer la composition →"
-              : "Cliquer pour analyser →"}
-        </p>
+        {isCatalog && candidate.scoreLabel ? (
+          <p className={`mt-0.5 text-[11px] font-semibold ${scoreToneCls}`}>
+            {candidate.scoreLabel}
+          </p>
+        ) : (
+          <p className="mt-0.5 text-[11px] text-ink-subtle">
+            {loading
+              ? "Chargement de la composition…"
+              : needsLoad
+                ? "Cliquer pour récupérer la composition →"
+                : "Cliquer pour analyser →"}
+          </p>
+        )}
       </div>
     </button>
   );

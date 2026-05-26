@@ -1,3 +1,4 @@
+import type { ProductCategory } from "@/lib/ai/categorize";
 export type { ProductCategory } from "@/lib/ai/categorize";
 
 const LABELS: Record<ProductCategory, string | null> = {

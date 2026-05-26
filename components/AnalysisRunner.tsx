@@ -36,6 +36,9 @@ type ProductSource = {
   /** Optional product type ("crème hydratante", "sérum"…). Filled by the
    *  front-photo OCR; absent on barcode / product-search / paste flows. */
   productType?: string | null;
+  /** EAN barcode, present when the user scanned a physical product. Used to
+   *  look up / save pre-computed analyses in product_analyses. */
+  ean?: string | null;
 };
 
 type CachedRun = {
@@ -291,6 +294,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
           ...(brand ? { brand } : {}),
           ...(productType ? { productType } : {}),
           ...(addToRoutine ? { addToRoutine: true } : {}),
+          ...(src?.ean ? { productEan: src.ean } : {}),
         }),
         signal: ctrl.signal,
       });

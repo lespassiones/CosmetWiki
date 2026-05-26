@@ -24,6 +24,7 @@ type FoundPayload = {
   productName: string | null;
   source: string;
   sourceUrl: string | null;
+  ean?: string | null;
 };
 
 // Same key HomeShell reads on mount to render the ProductHero (brand + name)
@@ -166,6 +167,7 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
             sourceUrl: input.sourceUrl,
             brand: input.brand,
             productName: input.productName,
+            ean: input.ean ?? null,
           }),
         );
       } catch {

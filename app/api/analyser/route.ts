@@ -12,6 +12,7 @@ import { checkRestrictions } from "@/lib/restrictions/check";
 import { categorizeProduct, type ProductCategory } from "@/lib/ai/categorize";
 import { NEUTRAL_OR_POSITIVE_TAGS, normalizeProductTypeToCategory } from "@/lib/essentiel/engine";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
+import { recomputeThresholdContext } from "@/lib/analyseTypes";
 import { correctTypo } from "@/lib/ai/typo";
 import { parseInciWithAI } from "@/lib/ai/parseInci";
 import { splitInciWithGpt } from "@/lib/ai/splitInci";
@@ -68,6 +69,10 @@ type AnalysePayload = {
    *  routine (`routine_items`). Set by the "+ Ajouter un produit" button on
    *  /routine via sessionStorage → AnalysisRunner. */
   addToRoutine?: boolean;
+  /** EAN barcode of the scanned product. When present, we check
+   *  `cosme_check.product_analyses` for a pre-computed result before running
+   *  the full pipeline, and save the computed result back after analysis. */
+  productEan?: string;
 };
 
 const TAG_LABELS: Record<string, string> = {
@@ -197,6 +202,54 @@ export async function POST(req: NextRequest) {
   });
   const cached = await idempotencyLookup(idemKey);
   if (cached) return cached;
+
+  // EAN pre-computed cache — check product_analyses before running the full
+  // pipeline. No credit charged: the result was computed by the ETL or by a
+  // previous live analysis. We still save to user history so the scan appears
+  // in /history. Uses the anon client (public SELECT RLS policy).
+  const productEan = body.productEan?.trim() || null;
+  if (productEan) {
+    try {
+      const { data: precomputed } = await supabaseAnon()
+        .schema("cosme_check")
+        .rpc("cosme_check_get_product_analysis", { p_ean: productEan });
+
+      if (precomputed) {
+        const cached_result = precomputed as AnalyseResponse;
+        // Recompute thresholdContext from items (stored as null by ETL).
+        cached_result.items = recomputeThresholdContext(cached_result.items ?? []);
+        cached_result.synthesis = null;
+
+        // Save to user history without charging credits.
+        let savedAnalysisId: string | null = null;
+        if (user) {
+          try {
+            const autoName = body.productLabel?.slice(0, 200)
+              ?? `Analyse du ${new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
+            const { data: inserted } = await sbAuth
+              .schema("cosme_check")
+              .from("analyses")
+              .insert({
+                user_id: user.id,
+                name: autoName,
+                product_label: body.productLabel?.slice(0, 200) ?? null,
+                brand: body.brand?.slice(0, 120) ?? null,
+                product_type: body.productType?.slice(0, 120) ?? null,
+                category: cached_result.category ?? null,
+                input_text: rawText,
+                result_json: cached_result,
+                score: Number((cached_result.score ?? 0).toFixed(2)),
+              })
+              .select("id")
+              .single();
+            savedAnalysisId = (inserted?.id as string) ?? null;
+          } catch { /* history save failure must not block the response */ }
+        }
+
+        return NextResponse.json({ ...cached_result, analysisId: savedAnalysisId, addedToRoutine: false });
+      }
+    } catch { /* cache miss or network error — fall through to full pipeline */ }
+  }
 
   const charge = await gate.consumeCredit("analyser");
   if (!charge.ok) return charge.response;
@@ -907,6 +960,26 @@ export async function POST(req: NextRequest) {
     }
   } catch (err) {
     logError("analyser.history_save", err, { userId: user.id });
+  }
+
+  // Background: cache this analysis in product_analyses so the next barcode
+  // scan of the same EAN is instant (no credit, no AI pipeline).
+  if (productEan) {
+    void (async () => {
+      try {
+        const { supabaseService } = await import("@/lib/supabase");
+        await supabaseService()
+          .schema("cosme_check")
+          .rpc("cosme_check_upsert_product_analysis", {
+            p_ean: productEan,
+            p_result_json: responsePayload,
+            p_score: Number(score.toFixed(4)),
+            p_score_label: scoreLabelText,
+            p_score_tone: scoreTone,
+            p_algo_version: "v1.1",
+          });
+      } catch { /* non-blocking */ }
+    })();
   }
 
   const response = NextResponse.json({ ...responsePayload, analysisId: savedAnalysisId, addedToRoutine });

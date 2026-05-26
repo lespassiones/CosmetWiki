@@ -162,8 +162,8 @@ type VerbConfig = string | VerbsByCategory;
  */
 const FUNCTION_VERBS: Record<string, VerbConfig> = {
   // ─── Universal verbs (safe in any category) ──────────────────────────
-  "Agent d'entretien de la peau": "soigne la peau",
-  "Agent d'entretien de la peau - Divers": "soigne la peau",
+  "Agent d'entretien de la peau": "maintient la peau en bon état",
+  "Agent d'entretien de la peau - Divers": "entretient la peau",
   "Agent d'entretien de la peau - Humectant": "hydrate la peau",
   "Agent d'entretien de la peau - Occlusif": "verrouille l'hydratation",
   "Emollient": "adoucit la peau",
@@ -171,7 +171,7 @@ const FUNCTION_VERBS: Record<string, VerbConfig> = {
   "Agent parfumant": "parfume",
   "Agent masquant": "neutralise les odeurs",
   "Agent de contrôle de la viscosité": "donne la texture",
-  "Antioxydant": "protège du vieillissement",
+  "Antioxydant": "limite l'oxydation",
   "Agent de protection de la peau": "protège la peau",
   "Humectant": "hydrate",
   "Agent filmogène": "forme un film protecteur",
@@ -222,7 +222,7 @@ const FUNCTION_VERBS: Record<string, VerbConfig> = {
   "Anticorrosif": "anti-corrosion",
   "Kératolytique": "exfolie les cellules mortes",
   "Agent propulseur": "propulse l'aérosol",
-  "Agent de restauration lipidique": "restaure le film lipidique",
+  "Agent de restauration lipidique": "reconstitue le film lipidique",
   "Modificateurs de glissement": "améliore le toucher",
   "Dispersion des agents de surface": "disperse",
   "Ajusteurs de pH": "équilibre le pH",
@@ -367,7 +367,7 @@ const FUNCTION_VERBS: Record<string, VerbConfig> = {
 
   "Agent d'entretien des ongles": {
     default: null,
-    by: { maquillage: "soigne les ongles", autre: "soigne les ongles" },
+    by: { maquillage: "entretient les ongles", autre: "entretient les ongles" },
   },
 
   "Sculpture des ongles": {

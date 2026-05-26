@@ -97,14 +97,19 @@ export type OpenBeautyFactsCandidate = {
   ingredientsText: string;
   imageUrl: string | null;
   sourceUrl: string;
-  /** Source tag - "openbeautyfacts" for OBF results, "cache" for cached
-   *  product_inci_cache rows, "incidecoder" for INCIDecoder list rows. The
-   *  client uses this to decide whether INCI must be lazy-fetched on click. */
-  source?: "openbeautyfacts" | "cache" | "incidecoder";
+  /** Source tag. "catalog" = pre-computed from own DB (has score). */
+  source?: "openbeautyfacts" | "cache" | "incidecoder" | "catalog";
   /** INCIDecoder slug - only set when source === "incidecoder". When present
    *  and `ingredientsText` is empty, the client must POST /api/incidecoder-fetch
    *  to obtain the INCI before triggering an analyse. */
   slug?: string;
+  /** EAN barcode — set for catalog + OBF results so the analyser can hit the
+   *  product_analyses cache directly instead of re-running the full pipeline. */
+  ean?: string | null;
+  /** Pre-computed score (0-20) — only present for source === "catalog". */
+  score?: number | null;
+  scoreLabel?: string | null;
+  scoreTone?: string | null;
 };
 
 /**

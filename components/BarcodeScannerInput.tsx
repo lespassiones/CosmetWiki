@@ -9,6 +9,7 @@ type FoundPayload = {
   productName: string | null;
   source: string;
   sourceUrl: string | null;
+  ean?: string | null;
 };
 
 type Props = {
@@ -121,6 +122,7 @@ export function BarcodeScannerInput({
           productName: data.productName,
           source: data.source,
           sourceUrl: data.sourceUrl,
+          ean: barcode,
         });
       } catch (e) {
         setState({
