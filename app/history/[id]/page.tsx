@@ -35,7 +35,7 @@ export default async function HistoryDetailPage({
       .schema("cosme_check")
       .from("analyses")
       .select(
-        "id, name, product_label, brand, product_type, product_description, score, input_text, result_json, created_at",
+        "id, name, product_label, brand, product_type, product_description, score, input_text, result_json, category, created_at",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -73,6 +73,13 @@ export default async function HistoryDetailPage({
     ?? data.name
     ?? `Analyse du ${new Date(data.created_at).toLocaleDateString("fr-FR")}`;
   const rawResult = data.result_json as AnalyseResponse;
+  // Backfill category from the dedicated DB column when result_json missed it
+  // (e.g. LLM timed out during the 1.5 s race and the async patch only updated
+  // the column, not result_json). Both fields carry the same value once stable.
+  const dbCategory = (data as { category?: string | null }).category ?? null;
+  if (!rawResult.category && dbCategory) {
+    rawResult.category = dbCategory as import("@/lib/ai/categorize").ProductCategory;
+  }
 
   // Lazily backfill `dbColorRating` on items saved before the field existed:
   // looks up the matched slug's colour in `ingredients` so the list stays

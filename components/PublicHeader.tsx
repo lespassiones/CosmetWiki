@@ -37,33 +37,27 @@ export function PublicHeader() {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-3 z-50 px-3 sm:px-5">
-        <div className="relative mx-auto flex items-center justify-between overflow-hidden rounded-full bg-white/30 px-5 py-2.5 ring-1 ring-white/40 shadow-[0_8px_32px_-8px_rgba(15,23,42,0.10),inset_0_1px_0_rgba(255,255,255,0.7),inset_0_-1px_0_rgba(255,255,255,0.15)] backdrop-blur-2xl backdrop-saturate-150 sm:px-7 sm:py-3">
-          {/* Liquid glass highlight overlay - subtle top reflection */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-full bg-gradient-to-b from-white/40 via-white/10 to-transparent"
-          />
-
+      <header className="fixed inset-x-0 top-0 z-50 bg-transparent border-b border-black/[0.10]">
+        <div className="flex h-[77px] w-full items-center justify-between px-5 sm:px-10 xl:px-16">
           <Link
             href="/"
-            className="relative text-[20px] font-bold tracking-tight sm:text-[24px]"
+            className="text-[24px] font-bold tracking-tight sm:text-[26px]"
           >
             <span className="text-[#111111]">Cosme </span>
             <span className="text-[#F43F5E]">Check</span>
           </Link>
 
-          <nav className="relative hidden items-center gap-1 lg:flex">
+          <nav className="hidden items-center gap-1 lg:flex">
             {NAV_ITEMS.map((item) => {
               const active = pathname?.startsWith(item.href);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`rounded-full px-4 py-2 text-[16px] font-medium transition-colors ${
+                  className={`rounded-md px-4 py-2 text-[15px] font-medium transition-colors ${
                     active
                       ? "text-[#F43F5E]"
-                      : "text-ink/80 hover:text-ink hover:bg-white/40"
+                      : "text-[#374151] hover:text-[#111111] hover:bg-black/[0.04]"
                   }`}
                 >
                   {item.label}
@@ -72,10 +66,10 @@ export function PublicHeader() {
             })}
           </nav>
 
-          <div className="relative flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Link
               href="/auth/sign-in"
-              className="rounded-full bg-gradient-to-br from-[#F43F5E] to-[#E11D48] px-5 py-2.5 text-[15px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(244,63,94,0.45),inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:brightness-110 sm:px-6"
+              className="rounded-full bg-[#F43F5E] px-5 py-2 text-[14px] font-semibold text-white transition hover:bg-[#E11D48] sm:px-6"
             >
               Se connecter
             </Link>
@@ -85,7 +79,7 @@ export function PublicHeader() {
               aria-label="Ouvrir le menu"
               aria-expanded={ariaExpanded}
               onClick={() => setOpen(true)}
-              className="grid h-9 w-9 place-items-center rounded-full text-ink/80 hover:bg-white/40 hover:text-ink lg:hidden"
+              className="grid h-9 w-9 place-items-center rounded-md text-[#374151] hover:bg-black/[0.04] hover:text-[#111111] lg:hidden"
             >
               <BurgerIcon className="h-5 w-5" />
             </button>

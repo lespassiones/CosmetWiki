@@ -264,7 +264,7 @@ export default function PerturbateursArticlePage() {
             className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/75"
           />
 
-          <div className="relative mx-auto flex h-full w-full max-w-6xl flex-col justify-end px-5 pb-10 pt-32 sm:px-8 sm:pb-14 sm:pt-36">
+          <div className="relative mx-auto flex h-full w-full max-w-6xl flex-col justify-end px-5 pb-10 pt-24 sm:px-8 sm:pb-14 sm:pt-28">
             <nav className="text-[13px] text-white/80">
               <Link href="/" className="hover:text-white">
                 Accueil

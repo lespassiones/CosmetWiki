@@ -89,7 +89,7 @@ export default function FaqPage() {
       <BackgroundGlow />
       <PublicHeader />
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-5 pb-16 pt-28 sm:px-8 sm:pt-32">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-5 pb-16 pt-20 sm:px-8 sm:pt-24">
         <header className="mb-10 max-w-3xl">
           <h1 className="text-balance text-4xl font-bold tracking-tight text-ink sm:text-5xl lg:text-6xl">
             Questions <span className="text-ink">fréquentes</span>

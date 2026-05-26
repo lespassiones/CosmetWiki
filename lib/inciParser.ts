@@ -171,6 +171,12 @@ export function parseInciList(text: string): ParsedToken[] {
   // Do NOT split "CAPRYLIC/CAPRIC TRIGLYCERIDE" or "LEUCONOSTOC/RADISH ROOT FERMENT
   // FILTRATE" - those are compound INCI names where the slash has no surrounding space.
   work = work.replace(/\s+\/\s+/g, ", ");
+  // Also split slash-joined synonyms WITHOUT spaces when both sides are single words,
+  // e.g. "Aqua/Water" → "Aqua, Water". The negative lookahead (?!\s+[A-Za-z])
+  // preserves compound names like "CAPRYLIC/CAPRIC TRIGLYCERIDE" (second part is
+  // followed by more words) and numeric INCI like "PEG-10/PPG-10" (digits break
+  // the [A-Za-z-]* match before the slash).
+  work = work.replace(/([A-Za-z][A-Za-z-]*)\/([A-Za-z][A-Za-z-]*)(?!\s+[A-Za-z])/g, "$1, $2");
   // Replace hyphens used as separators by commas. Catch all asymmetric spacing
   // patterns: "X - Y", "X -Y", "X- Y" (but NOT "X-Y", which is too risky - many
   // INCI names have intra-name hyphens like "PEG-100 Stearate" or "C12-15 Alkyl

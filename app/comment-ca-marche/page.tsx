@@ -69,7 +69,7 @@ export default function HowItWorksPage() {
       <BackgroundGlow />
       <PublicHeader />
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16 pt-28 sm:pt-32">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16 pt-20 sm:pt-24">
         <p className="text-[13px] font-medium uppercase tracking-wider text-ink-subtle">
           Comment ça marche
         </p>

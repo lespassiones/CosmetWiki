@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { HistoryItemActions } from "@/components/history/HistoryItemActions";
 import { IngredientBlob, type BlobCounts } from "@/components/blob/IngredientBlob";
+import { categoryLabel, type ProductCategory } from "@/lib/categoryLabel";
 
 type Row = {
   id: string;
@@ -20,6 +21,10 @@ type Row = {
   /** Lowercased ingredient names + raw INCI inputs, used by the search bar
    *  to match analyses containing a given ingredient. */
   ingredientTokens?: string[];
+  /** Closed-enum product category from result_json, null when absent or "autre". */
+  category?: ProductCategory | null;
+  /** Raw free-form product type from OCR, used as fallback when category is absent. */
+  productType?: string | null;
 };
 
 function scoreTone(score: number | null) {
@@ -187,7 +192,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
         {filteredRows.map((a) => {
           const tone = scoreTone(a.score);
           const displayName =
-            a.product_label ?? a.name ?? `Analyse du ${formatDate(a.created_at)}`;
+            a.name ?? a.product_label ?? `Analyse du ${formatDate(a.created_at)}`;
           const isSelected = selected.has(a.id);
 
           if (selectMode) {
@@ -258,6 +263,11 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                 </div>
                 <div className="relative z-[1] min-w-0 flex-1 pointer-events-none">
                   <div className="font-semibold text-[#111111] truncate">{displayName}</div>
+                  {(categoryLabel(a.category) ?? a.productType) ? (
+                    <span className="mt-0.5 inline-flex items-center rounded-full bg-black/[0.06] px-2 py-0.5 text-[10px] font-medium text-[#6B7280] capitalize">
+                      {categoryLabel(a.category) ?? a.productType}
+                    </span>
+                  ) : null}
                   <div className="text-[12px] text-[#6B7280]">
                     {formatDate(a.created_at)}
                   </div>

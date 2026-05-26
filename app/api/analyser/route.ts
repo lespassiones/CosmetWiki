@@ -36,6 +36,7 @@ type MatchRow = {
   cas_number: string | null;
   translation_fr: string | null;
   primary_function: string | null;
+  all_functions: string[] | null;
   tags: string[] | null;
   match_kind: "exact" | "alias" | "fuzzy_high" | "suggestion" | null;
   confidence: number | string | null;
@@ -354,6 +355,7 @@ export async function POST(req: NextRequest) {
             cas_number: ing.cas_number,
             translation_fr: ing.translations?.fr ?? "",
             primary_function: ing.functions?.[0]?.name ?? "",
+            all_functions: ing.functions?.map((f: { name?: string }) => f.name ?? "").filter(Boolean) ?? null,
             tags: ing.tags,
             match_kind: "fuzzy_high",
             confidence: decision.confidence,
@@ -380,6 +382,7 @@ export async function POST(req: NextRequest) {
       effective_inci_id: isSuggestion ? null : r.inci_id,
       effective_name: isSuggestion ? null : r.name,
       effective_tags: isSuggestion ? null : r.tags,
+      effective_all_functions: isSuggestion ? null : r.all_functions,
       suggested_name: isSuggestion ? r.name : null,
       // Always preserve the color carried by the matched slug in the
       // ingredients table — regardless of whether we elevated the match to
@@ -773,6 +776,7 @@ export async function POST(req: NextRequest) {
       casNumber: r.cas_number,
       translationFr: r.translation_fr,
       primaryFunction: r.primary_function,
+      allFunctions: r.effective_all_functions ?? null,
       tags: r.effective_tags,
       matchKind: r.match_kind,
       confidence: Number(r.confidence.toFixed(3)),

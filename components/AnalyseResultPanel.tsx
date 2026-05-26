@@ -18,6 +18,7 @@ import { EssentielView, EssentielToggleButton } from "./analyse/EssentielView";
 import { VerdictGauge } from "./analyse/VerdictGauge";
 import { computeEssentiel } from "@/lib/essentiel/engine";
 import type { VerdictTone } from "@/lib/essentiel/engine";
+import { categoryLabel, type ProductCategory } from "@/lib/categoryLabel";
 
 // Lazy-load : la modale n'est ouverte que sur clic utilisateur, on évite
 // d'embarquer son JS (et celui de ses dépendances OpenAI/Markdown) au LCP.
@@ -282,6 +283,8 @@ export function AnalyseResultPanel({
       <TitleBar
         title={title}
         productSource={productSource}
+        category={result.category ?? null}
+        productType={productType ?? result.productType ?? null}
         onAnalysePromesse={() => setPromesseOpen(true)}
         existingCoherenceId={existingCoherenceId}
         onShare={() => shareReport(originalText)}
@@ -605,6 +608,8 @@ function IngredientsModal({
 function TitleBar({
   title,
   productSource,
+  category,
+  productType,
   onAnalysePromesse,
   existingCoherenceId,
   onShare,
@@ -615,6 +620,8 @@ function TitleBar({
 }: {
   title: string;
   productSource: { source: string; sourceUrl: string | null; brand: string | null } | null;
+  category: ProductCategory | null;
+  productType: string | null;
   onAnalysePromesse: () => void;
   existingCoherenceId: string | null;
   onShare: () => void;
@@ -653,14 +660,14 @@ function TitleBar({
             ) : null}
           </nav>
         ) : null}
-        {brand ? (
-          <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-pink-500/80">
-            {brand}
-          </p>
-        ) : null}
         <h1 className="mt-1 text-balance text-2xl font-bold tracking-tight text-ink sm:text-3xl">
           {title}
         </h1>
+        {(categoryLabel(category) ?? productType) ? (
+          <p className="mt-2 inline-flex items-center rounded-full bg-black/[0.06] px-2.5 py-0.5 text-[11px] font-medium text-ink-subtle capitalize">
+            {categoryLabel(category) ?? productType}
+          </p>
+        ) : null}
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
         {/* Primary CTA pair — "Analyser la promesse" + "Ajouter à ma
@@ -1049,7 +1056,7 @@ function ObservationsCard({
                       toggleTag(o.tag);
                     }
                   }}
-                  aria-expanded={isOpen ? "true" : "false"}
+                  aria-expanded={isOpen}
                   className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-1.5 py-1 text-left text-[14px] transition-colors hover:bg-black/[0.025] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500"
                 >
                   <ObservationIcon obs={o} />

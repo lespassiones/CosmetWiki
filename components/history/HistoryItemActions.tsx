@@ -17,6 +17,10 @@ export function HistoryItemActions({
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(currentName);
   const [pending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (!editing) setName(currentName);
+  }, [currentName, editing]);
   const router = useRouter();
   const wrapperRef = useRef<HTMLDivElement>(null);
 

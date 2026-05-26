@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { HistoryList } from "@/components/history/HistoryList";
+import type { ProductCategory } from "@/lib/categoryLabel";
 
 export const metadata = { title: "Mon historique · Cosme Check" };
 export const dynamic = "force-dynamic";
@@ -25,6 +26,8 @@ type AnalysisRow = {
    *  on the client to match analyses by ingredient. Kept short - duplicates
    *  removed, empty values filtered out. */
   ingredientTokens: string[];
+  category: ProductCategory | null;
+  productType: string | null;
 };
 
 type RawItem = {
@@ -38,10 +41,13 @@ type RawRow = {
   product_label: string | null;
   score: number | null;
   created_at: string;
+  category?: ProductCategory | null;
   result_json:
     | {
         counts?: { vert?: number; jaune?: number; orange?: number; rouge?: number };
         items?: RawItem[];
+        category?: ProductCategory | null;
+        productType?: string | null;
       }
     | null;
 };
@@ -83,7 +89,7 @@ async function HistoryContent() {
     sb
       .schema("cosme_check")
       .from("analyses")
-      .select("id, name, product_label, score, created_at, result_json")
+      .select("id, name, product_label, score, created_at, result_json, category")
       .order("created_at", { ascending: false })
       .limit(50),
     sb
@@ -130,6 +136,8 @@ async function HistoryContent() {
         : null,
       latestCoherenceId: latestCoherenceByAnalysis.get(r.id) ?? null,
       ingredientTokens: Array.from(tokenSet),
+      category: r.result_json?.category ?? r.category ?? null,
+      productType: r.result_json?.productType ?? null,
     };
   });
 

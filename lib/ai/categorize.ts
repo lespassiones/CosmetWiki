@@ -17,6 +17,7 @@ export type ProductCategory =
   | "parfum"
   | "autre";
 
+
 const VALID = new Set<ProductCategory>([
   "creme_visage",
   "creme_corps",

@@ -48,19 +48,34 @@ export function ProductUrlInput({
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<ScrapePreview | null>(null);
 
+  function extractUrl(text: string): string | null {
+    const m = text.match(/https?:\/\/[^\s<>"{}|\\^`[\]]+/i);
+    return m ? m[0].replace(/[.,;!?]+$/, "") : null;
+  }
+
   function isLikelyUrl(s: string): boolean {
-    const t = s.trim();
-    return /^https?:\/\//i.test(t) && t.length >= 12;
+    return extractUrl(s) !== null;
+  }
+
+  function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    const raw = e.clipboardData.getData("text");
+    const found = extractUrl(raw);
+    if (found && found !== raw.trim()) {
+      e.preventDefault();
+      setUrl(found);
+      if (error) setError(null);
+    }
   }
 
   async function fetchPreview(e?: React.FormEvent) {
     if (e) e.preventDefault();
     if (busy) return;
-    const target = url.trim();
-    if (!isLikelyUrl(target)) {
+    const found = extractUrl(url);
+    if (!found) {
       setError("Colle un lien complet commençant par https://");
       return;
     }
+    const target = found;
     setBusy(true);
     setError(null);
     setPreview(null);
@@ -216,6 +231,7 @@ export function ProductUrlInput({
               setUrl(e.target.value);
               if (error) setError(null);
             }}
+            onPaste={handlePaste}
             placeholder="https://lessecretsdeloly.com/products/..."
             className="min-w-0 flex-1 bg-transparent px-2 py-2.5 text-[14px] placeholder:text-[#9CA3AF] focus:outline-none"
             disabled={busy}

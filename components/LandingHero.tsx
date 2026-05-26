@@ -18,7 +18,7 @@ import { PublicHeader } from "@/components/PublicHeader";
  */
 export function LandingHero() {
   return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-[#FAFAFA]">
+    <section className="relative min-h-screen w-full bg-[#FAFAFA]">
       {/* Two background images, one per viewport. We can't conditionally
           render based on viewport in SSR, so both ship in the DOM with CSS
           visibility toggled at `lg`. Only the MOBILE variant has `priority`
@@ -97,15 +97,15 @@ function Headline({ mobile = false }: { mobile?: boolean }) {
           mobile ? "text-[28px] sm:text-[32px]" : "text-[48px] xl:text-[58px]"
         }`}
       >
-        Ce que tu ne lis pas
+        <span className="text-[#111111]">Cosme </span>
+        <span className="text-[#F43F5E]">Check</span>
+        {" "}t&apos;aide à comprendre
         <br />
-        sur l&apos;étiquette,
+        les compositions et à
         <br />
-        on te le{" "}
+        prendre soin de toi et tes{" "}
         <span className="relative inline-block whitespace-nowrap">
-          montre.
-          {/* Hand-drawn squiggle under "montre" - same SVG family as the
-              tagline on the dashboard, kept in brand rose. */}
+          proches&nbsp;♡
           <svg
             aria-hidden
             viewBox="0 0 200 14"

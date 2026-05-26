@@ -27,7 +27,7 @@ export default function ContactPage() {
       <BackgroundGlow />
       <PublicHeader />
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-5 pb-16 pt-28 sm:px-8 sm:pt-32">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-5 pb-16 pt-20 sm:px-8 sm:pt-24">
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
           <section>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-[12px] font-semibold text-[#F43F5E] ring-1 ring-rose-100">

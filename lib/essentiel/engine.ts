@@ -175,7 +175,13 @@ const FUNCTION_VERBS: Record<string, VerbConfig> = {
   "Agent de protection de la peau": "protège la peau",
   "Humectant": "hydrate",
   "Agent filmogène": "forme un film protecteur",
-  "Antistatique": "anti-électricité statique",
+  "Antistatique": {
+    default: null,
+    by: {
+      shampooing: "réduit l'électricité statique",
+      apres_shampooing: "réduit l'électricité statique",
+    },
+  },
   "Antimicrobien": "limite les bactéries",
   "Solvant": "support de formule",
   "Astringent": "resserre les pores",
@@ -183,7 +189,14 @@ const FUNCTION_VERBS: Record<string, VerbConfig> = {
   "Tonifiant": "tonifie",
   "Agent Abrasif": "exfolie",
   "Colorant cosmétique": "colore",
-  "Sinergiste de mousse": "renforce la mousse",
+  "Sinergiste de mousse": {
+    default: null,
+    by: {
+      shampooing: "renforce la mousse",
+      nettoyant_visage: "renforce la mousse",
+      creme_corps: "renforce la mousse",
+    },
+  },
   "Régulateur de pH": "équilibre le pH",
   "Opacifiant": "rend la formule opaque",
   "Agent de foisonnement": "épaissit",
@@ -421,6 +434,58 @@ function verbForFunction(
   return entry.default;
 }
 
+/**
+ * Functions that serve a purely technical/regulatory role and carry no
+ * user-facing benefit. When an ingredient has other functions available we
+ * prefer those; we only fall back to a technical function when it's the
+ * only one present.
+ */
+const TECHNICAL_FUNCTIONS = new Set([
+  "Dénaturant",
+  "Agent propulseur",
+  "Anti-moussant",
+  "Anticorrosif",
+  "Opacifiant",
+  "Modificateur de surface",
+  "Dispersant non tensioactif",
+  "Dispersion des agents de surface",
+  "Modificateurs de glissement",
+  "Anti Agglomérant",
+  "Agent réducteur",
+  "Agent Oxydant",
+]);
+
+/**
+ * Pick the best display verb for an ingredient given its full function list
+ * and the product category. Non-technical functions are tried first; we fall
+ * back to technical ones only when no other option produces a verb.
+ */
+function bestVerbForItem(
+  item: AnalyseItem,
+  category: ProductCategory | null,
+): string | null {
+  const fns: string[] = [];
+  if (item.allFunctions?.length) {
+    fns.push(...item.allFunctions);
+  } else if (item.primaryFunction) {
+    fns.push(item.primaryFunction);
+  }
+  if (!fns.length) return null;
+
+  // First pass: skip technical functions — prefer a user-facing benefit verb.
+  for (const fn of fns) {
+    if (TECHNICAL_FUNCTIONS.has(fn)) continue;
+    const v = verbForFunction(fn, category);
+    if (v) return v;
+  }
+  // Second pass: accept technical functions as fallback.
+  for (const fn of fns) {
+    const v = verbForFunction(fn, category);
+    if (v) return v;
+  }
+  return null;
+}
+
 /** Best green ingredients first (by INCI position = highest concentration).
  *
  *  We walk the green ingredients ordered by position and stop once we have
@@ -438,7 +503,7 @@ function pickPositives(items: AnalyseItem[], category: ProductCategory | null): 
     if (out.length >= 3) break;
     const name = (it.name ?? it.input ?? "").trim();
     if (!name) continue;
-    const verb = verbForFunction(it.primaryFunction, category);
+    const verb = bestVerbForItem(it, category);
     if (!verb) continue;
     out.push({ name: capitalise(name), verb });
   }

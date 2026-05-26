@@ -32,6 +32,7 @@ export type AnalyseItem = {
   casNumber: string | null;
   translationFr: string | null;
   primaryFunction: string | null;
+  allFunctions: string[] | null;
   tags: string[] | null;
   matchKind: MatchKind;
   /** Trigram similarity for fuzzy/suggestion kinds, 1 for exact/alias, 0 if unmatched. */

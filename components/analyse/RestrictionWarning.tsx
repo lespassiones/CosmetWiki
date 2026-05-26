@@ -1,19 +1,15 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { useRestrictions } from "@/components/restrictions/RestrictionsProvider";
 import { checkRestrictions } from "@/lib/restrictions/check";
+import { hasAnyRestriction } from "@/lib/restrictions/types";
 import type { AnalyseItem } from "@/lib/analyseTypes";
 import { GLASS_CARD_ROSE } from "@/lib/ui/glass";
 
-/**
- * Banner shown right below the score donut when the analysed product
- * contains at least one ingredient that matches the user's restrictions.
- * Renders nothing when:
- *   - the user has no restrictions configured, OR
- *   - none of the analysed ingredients match.
- * No AI involved — just a local match against the user's saved list.
- */
+const RESTRICTIONS_HREF = "/profile/restrictions";
+
 export function RestrictionWarning({ items }: { items: AnalyseItem[] }) {
   const { restrictions, families } = useRestrictions();
 
@@ -22,10 +18,38 @@ export function RestrictionWarning({ items }: { items: AnalyseItem[] }) {
     [items, restrictions, families],
   );
 
-  if (matches.length === 0) return null;
+  const hasRestrictions = hasAnyRestriction(restrictions);
 
-  // Dedup by label so we show each family/ingredient once, with the
-  // smallest position (closer to the top of the INCI list = more concerning).
+  // No restrictions configured → persistent invite to set them up
+  if (!hasRestrictions) {
+    return (
+      <Link
+        href={RESTRICTIONS_HREF}
+        className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-[11.5px] font-medium text-rose-600 ring-1 ring-rose-200 bg-rose-50/60 hover:bg-rose-50 transition-colors overflow-hidden"
+      >
+        <ShieldPlusIcon className="h-3.5 w-3.5 shrink-0" />
+        <span className="truncate">Configurez vos restrictions pour personnaliser l'analyse</span>
+        <ChevronRightIcon className="h-3 w-3 ml-auto shrink-0 opacity-60" />
+      </Link>
+    );
+  }
+
+  // Restrictions configured but no match → clean product, offer to manage
+  if (matches.length === 0) {
+    return (
+      <Link
+        href={RESTRICTIONS_HREF}
+        className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-[11.5px] font-medium text-emerald-700 ring-1 ring-emerald-200 bg-emerald-50/60 hover:bg-emerald-50 transition-colors overflow-hidden"
+      >
+        <ShieldCheckIcon className="h-3.5 w-3.5 shrink-0" />
+        <span className="truncate">Aucune restriction détectée</span>
+        <span className="ml-auto whitespace-nowrap text-[11px] text-emerald-600/70 shrink-0 pl-2">Gérer</span>
+        <ChevronRightIcon className="h-3 w-3 shrink-0 opacity-60" />
+      </Link>
+    );
+  }
+
+  // Restrictions configured and matches found → full warning + manage link
   const grouped = new Map<
     string,
     { label: string; kind: "family" | "ingredient"; positions: number[] }
@@ -75,25 +99,51 @@ export function RestrictionWarning({ items }: { items: AnalyseItem[] }) {
           </li>
         ))}
       </ul>
+
+      <Link
+        href={RESTRICTIONS_HREF}
+        className="mt-2 flex items-center gap-1.5 text-[11.5px] font-medium text-rose-500 hover:text-rose-700 transition-colors w-fit"
+      >
+        <span>Gérer mes restrictions</span>
+        <ChevronRightIcon className="h-3 w-3" />
+      </Link>
     </section>
   );
 }
 
 function ShieldAlertIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
       <path d="M12 2 4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3z" />
       <line x1="12" y1="8" x2="12" y2="13" />
       <circle cx="12" cy="16" r="0.6" fill="currentColor" />
+    </svg>
+  );
+}
+
+function ShieldCheckIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M12 2 4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3z" />
+      <polyline points="9 12 11 14 15 10" />
+    </svg>
+  );
+}
+
+function ShieldPlusIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M12 2 4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3z" />
+      <line x1="12" y1="9" x2="12" y2="15" />
+      <line x1="9" y1="12" x2="15" y2="12" />
+    </svg>
+  );
+}
+
+function ChevronRightIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <polyline points="9 18 15 12 9 6" />
     </svg>
   );
 }

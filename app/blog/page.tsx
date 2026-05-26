@@ -51,7 +51,7 @@ export default function BlogPage() {
             aria-hidden
             className="absolute inset-x-0 bottom-0 -z-10 h-px bg-black/[0.06]"
           />
-          <div className="mx-auto max-w-6xl px-5 pb-16 pt-28 text-center sm:px-8 sm:pb-24 sm:pt-36">
+          <div className="mx-auto max-w-6xl px-5 pb-16 pt-20 text-center sm:px-8 sm:pb-24 sm:pt-24">
             <h1 className="text-balance text-4xl font-bold tracking-tight text-ink drop-shadow-[0_1px_2px_rgba(255,255,255,0.6)] sm:text-5xl lg:text-6xl">
               Le Journal Cosme Check
             </h1>
