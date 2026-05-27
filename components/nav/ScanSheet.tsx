@@ -60,7 +60,7 @@ const LEFT_TILES: Tile[] = [
 const RIGHT_TILES: Tile[] = [
   { action: { kind: "view", view: "paste" }, title: "Coller la composition", icon: ClipboardIcon },
   { action: { kind: "view", view: "url" }, title: "Coller le lien", icon: LinkIcon, isNew: true },
-  { action: { kind: "view", view: "search" }, title: "Rechercher un produit", icon: SearchIcon },
+  { action: { kind: "route", href: "/produits" }, title: "Rechercher un produit", icon: SearchIcon },
 ];
 
 export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => void }) {

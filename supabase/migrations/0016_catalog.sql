@@ -72,7 +72,7 @@ AS $$
     (COALESCE(c.brand, '') || ' ' || c.name)
       ILIKE '%' || p_query || '%'
   ORDER BY
-    similarity(COALESCE(c.brand, '') || ' ' || c.name, p_query) DESC,
+    word_similarity(p_query, COALESCE(c.brand, '') || ' ' || c.name) DESC,
     c.score DESC
   LIMIT p_limit;
 $$;
