@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
-import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { MobileMenu } from "@/components/MobileMenu";
 import { LEGAL } from "@/lib/legal";
@@ -69,7 +68,6 @@ export function LegalLayout({
         </article>
       </main>
 
-      <Footer />
     </div>
   );
 }

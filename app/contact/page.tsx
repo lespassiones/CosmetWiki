@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { PublicHeader } from "@/components/PublicHeader";
-import { Footer } from "@/components/Footer";
-import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { LEGAL } from "@/lib/legal";
 
@@ -23,28 +21,49 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="relative isolate flex min-h-screen flex-col bg-bg">
-      <BackgroundGlow />
+    <div className="relative isolate flex min-h-screen flex-col bg-white">
       <PublicHeader />
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-5 pb-16 pt-20 sm:px-8 sm:pt-24">
+      {/* Hero — aucune vague ici, aucun overflow */}
+      <section className="relative w-full bg-white pt-24 sm:pt-28">
+        <div className="relative mx-auto flex max-w-6xl items-center justify-center px-5 pb-16 sm:px-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+              Nous contacter
+            </h1>
+            <p className="mt-3 max-w-md text-[15px] leading-relaxed text-ink-muted">
+              Une question, un souci, une idée ? On est là pour toi.{" "}
+              Écris-nous et on te répondra rapidement.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Main vert — remonte de 56px pour chevaucher le hero, vague blanche au sommet */}
+      <main className="relative -mt-14 w-full flex-1 overflow-hidden bg-[#C8EDD6] pb-16">
+        {/* Grain en z-0 — sous la vague */}
+        <div
+          aria-hidden
+          className="grain-overlay pointer-events-none absolute inset-0 z-0 opacity-[0.22] mix-blend-multiply"
+        />
+        {/* Vague blanche en z-10 — au-dessus du grain, reste pure blanche */}
+        <div aria-hidden className="relative z-10 w-full overflow-hidden leading-none">
+          <svg
+            viewBox="0 0 1440 56"
+            xmlns="http://www.w3.org/2000/svg"
+            className="block w-full"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0,36 C240,0 480,56 720,24 C960,0 1200,50 1440,28 L1440,0 L0,0 Z"
+              fill="white"
+            />
+          </svg>
+        </div>
+        <div className="relative mx-auto max-w-6xl px-5 pt-4 sm:px-8">
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
           <section>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-[12px] font-semibold text-[#F43F5E] ring-1 ring-rose-100">
-              <ChatIcon className="h-3.5 w-3.5" />
-              Contact
-            </span>
-
-            <h1 className="mt-4 text-balance text-4xl font-bold tracking-tight text-ink sm:text-5xl">
-              On t&apos;écoute
-            </h1>
-
-            <p className="mt-4 max-w-md text-[15px] leading-relaxed text-ink-muted">
-              Une question, un souci, une idée ? On est là pour toi. Écris-nous
-              et on te répondra rapidement.
-            </p>
-
-            <ul className="mt-8 space-y-3">
+            <div className="space-y-3">
               <InfoCard
                 icon={<MailIcon className="h-5 w-5" />}
                 title="Email direct"
@@ -67,16 +86,16 @@ export default function ContactPage() {
                 title="Confidentialité"
                 value={<span className="text-[#F43F5E]">on ne partage rien.</span>}
               />
-            </ul>
+            </div>
           </section>
 
           <section>
             <ContactForm />
           </section>
         </div>
+        </div>
       </main>
 
-      <Footer />
     </div>
   );
 }
@@ -91,7 +110,7 @@ function InfoCard({
   value: React.ReactNode;
 }) {
   return (
-    <li className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-[0_4px_16px_-8px_rgba(17,17,17,0.06)] ring-1 ring-black/[0.04]">
+    <div className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-[0_4px_16px_-8px_rgba(17,17,17,0.06)] ring-1 ring-black/[0.04]">
       <span className="grid h-12 w-12 shrink-0 place-items-center text-[#F43F5E]">
         {icon}
       </span>
@@ -99,20 +118,7 @@ function InfoCard({
         <p className="text-sm font-semibold text-ink">{title}</p>
         <p className="text-sm">{value}</p>
       </div>
-    </li>
-  );
-}
-
-function ChatIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-      aria-hidden
-    >
-      <path d="M12 2C6.48 2 2 6.04 2 11c0 2.5 1.13 4.74 2.93 6.32L4 22l4.84-1.5c.99.3 2.05.47 3.16.47 5.52 0 10-4.04 10-9s-4.48-9-10-9z" />
-    </svg>
+    </div>
   );
 }
 

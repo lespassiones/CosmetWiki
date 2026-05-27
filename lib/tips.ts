@@ -11,7 +11,7 @@ export const DAILY_TIPS: string[] = [
   "Sur une étiquette, les ingrédients sont rangés du plus présent au moins présent. Plus c'est haut, plus il y en a.",
   "Si « Aqua » (l'eau) est en 1er, le produit est avant tout… de l'eau. Normal pour une crème, plus surprenant pour un sérum « ultra concentré ».",
   "Quand un ingrédient arrive après le 1er conservateur, il y en a en général moins de 1 % dans le produit.",
-  "Sous 1 %, les marques peuvent écrire les ingrédients dans l'ordre qu'elles veulent — la fin de liste n'est plus un classement fiable.",
+  "Sous 1 %, les marques peuvent écrire les ingrédients dans l'ordre qu'elles veulent, la fin de liste n'est plus un classement fiable.",
   "Un ingrédient placé après « Parfum » est présent en toute petite quantité : son effet sur la peau reste limité.",
   "Avant « Parfum » = ingrédient bien présent, à surveiller. Après « Parfum » = traces, plus rassurant.",
   "Le mot « Parfum » sur une étiquette peut cacher des dizaines de molécules différentes que la marque n'est pas obligée de détailler.",
@@ -68,7 +68,7 @@ export const DAILY_TIPS: string[] = [
   // Catégories spécifiques
   "Pour un bébé, choisis une liste d'ingrédients courte (moins de 10 si possible), sans parfum et sans alcool. Sa peau est beaucoup plus fragile que la nôtre.",
   "Un « déodorant » réduit les odeurs, un « anti-transpirant » bloque la transpiration. Ce ne sont pas les mêmes produits, et l'un n'est pas obligé de remplacer l'autre.",
-  "Les masques à l'argile absorbent l'excès de gras. 1 à 2 fois par semaine sur les zones grasses suffit — plus, ça assèche la peau.",
+  "Les masques à l'argile absorbent l'excès de gras. 1 à 2 fois par semaine sur les zones grasses suffit, plus, ça assèche la peau.",
   "Pour bien retirer une crème solaire résistante à l'eau, un démaquillant à l'huile fait beaucoup mieux qu'une eau micellaire seule.",
 
   // Bonnes habitudes

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { PublicHeader } from "@/components/PublicHeader";
 
@@ -145,7 +144,6 @@ export default function HowItWorksPage() {
         </section>
       </main>
 
-      <Footer />
     </div>
   );
 }

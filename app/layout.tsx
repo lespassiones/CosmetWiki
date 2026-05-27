@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/next";
 import { SITE_URL } from "@/lib/siteUrl";
 import { PWARegister } from "@/components/PWARegister";
 import { AppShell } from "@/components/nav/AppShell";
+import { ConditionalLandingFooter } from "@/components/ConditionalLandingFooter";
 import { getProfile, getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { RestrictionsProvider } from "@/components/restrictions/RestrictionsProvider";
@@ -13,6 +14,40 @@ import { EMPTY_RESTRICTIONS, readUserRestrictions } from "@/lib/restrictions/typ
 import "./globals.css";
 
 type InitialCredits = { used: number; limit: number; remaining: number };
+
+// Pages 100 % statiques (landing public). On veut éviter 3-4 round-trips
+// Supabase au layout root pour chaque navigation entre ces pages — elles ne
+// rendent jamais le dashboard, donc profile / families / credits ne servent
+// à rien ici. `signedIn` reste déduit du cookie pour que le LandingFooter
+// reste correctement caché aux utilisateurs connectés.
+const PUBLIC_LANDING_PREFIXES = [
+  "/comment-ca-marche",
+  "/fonctionnalites",
+  "/faq",
+  "/offre",
+  "/en-savoir-plus",
+  "/equipe",
+  "/blog",
+  "/contact",
+  "/cgu",
+  "/confidentialite",
+  "/mentions-legales",
+];
+
+function isPublicLandingPath(pathname: string): boolean {
+  return PUBLIC_LANDING_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+}
+
+function hasAuthCookie(cookieStore: Awaited<ReturnType<typeof cookies>>): boolean {
+  for (const cookie of cookieStore.getAll()) {
+    if (cookie.name.startsWith("sb-") && cookie.name.includes("auth-token")) {
+      return true;
+    }
+  }
+  return false;
+}
 
 // Self-host Inter on the Vercel edge: zero FOUT, no fonts.googleapis.com
 // round-trip on first visit. We expose it as a CSS variable so the existing
@@ -112,6 +147,39 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
+  const hdrs = await headers();
+  const pathname = hdrs.get("x-pathname") ?? "";
+
+  const hideOnPaths = ["/auth", "/scan/photo", "/onboarding"];
+
+  // Fast path : pages landing publiques. AppShell rend juste {children} pour
+  // les visiteurs anonymes (ligne 114 du composant), donc profile / families /
+  // credits sont inutiles côté layout. Pour les visiteurs connectés naviguant
+  // ces mêmes pages, on déduit `signedIn` du cookie pour préserver l'UX
+  // (LandingFooter caché) sans payer l'aller-retour Supabase.
+  if (isPublicLandingPath(pathname)) {
+    const signedIn = hasAuthCookie(cookieStore);
+    return (
+      <html lang="fr" className={`light ${inter.variable}`} data-theme="light">
+        <body className="min-h-screen antialiased">
+          <link
+            rel="preconnect"
+            href={process.env.NEXT_PUBLIC_SUPABASE_URL}
+            crossOrigin="anonymous"
+          />
+          <RestrictionsProvider restrictions={EMPTY_RESTRICTIONS} families={[]}>
+            <AppShell signedIn={signedIn} firstName={null} hideOnPaths={hideOnPaths} initialCredits={null}>
+              {children}
+              <ConditionalLandingFooter signedIn={signedIn} />
+            </AppShell>
+          </RestrictionsProvider>
+          <PWARegister />
+          <Analytics />
+        </body>
+      </html>
+    );
+  }
+
   const sb = supabaseServer(cookieStore);
 
   // Phase 1: resolve identity. getProfile() calls getUser() internally (cached)
@@ -138,7 +206,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       : Promise.resolve({ data: null }),
   ]);
   const firstName = profile?.first_name ?? null;
-  const hideOnPaths = ["/auth", "/scan/photo", "/onboarding"];
 
   const restrictions = signedIn
     ? readUserRestrictions(profile?.preferences ?? null)
@@ -164,6 +231,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <RestrictionsProvider restrictions={restrictions} families={families}>
           <AppShell signedIn={signedIn} firstName={firstName} hideOnPaths={hideOnPaths} initialCredits={initialCredits}>
             {children}
+            <ConditionalLandingFooter signedIn={signedIn} />
           </AppShell>
         </RestrictionsProvider>
         <PWARegister />

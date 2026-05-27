@@ -19,6 +19,7 @@
 
 import type { AnalyseItem, AnalyseResponse } from "@/lib/analyseTypes";
 import type { ProductCategory } from "@/lib/ai/categorize";
+import { commonNameForRaw } from "@/lib/inciCommonNames";
 
 // ─── Verdict ──────────────────────────────────────────────────────────────
 
@@ -162,75 +163,80 @@ type VerbConfig = string | VerbsByCategory;
  */
 const FUNCTION_VERBS: Record<string, VerbConfig> = {
   // ─── Universal verbs (safe in any category) ──────────────────────────
+  // 2026-05 phrasing rewrite: replaced one-word verbs ("nettoie", "épaissit")
+  // with short descriptive sentences (4-7 words) that explain WHAT the
+  // ingredient does in the formula and WHY it's there. Matches the style
+  // already used on the "À surveiller" side ("asséchants en grande
+  // quantité", "agent chélateur, non biodégradable").
   "Agent d'entretien de la peau": "maintient la peau en bon état",
-  "Agent d'entretien de la peau - Divers": "entretient la peau",
-  "Agent d'entretien de la peau - Humectant": "hydrate la peau",
-  "Agent d'entretien de la peau - Occlusif": "verrouille l'hydratation",
-  "Emollient": "adoucit la peau",
-  "Agent émulsifiant": "lie l'eau et l'huile",
-  "Agent parfumant": "parfume",
-  "Agent masquant": "neutralise les odeurs",
-  "Agent de contrôle de la viscosité": "donne la texture",
-  "Antioxydant": "limite l'oxydation",
-  "Agent de protection de la peau": "protège la peau",
-  "Humectant": "hydrate",
-  "Agent filmogène": "forme un film protecteur",
+  "Agent d'entretien de la peau - Divers": "maintient l'équilibre de la peau",
+  "Agent d'entretien de la peau - Humectant": "attire l'eau dans les couches superficielles",
+  "Agent d'entretien de la peau - Occlusif": "verrouille l'hydratation à la surface",
+  "Emollient": "adoucit et assouplit la peau",
+  "Agent émulsifiant": "lie l'eau et les corps gras",
+  "Agent parfumant": "donne son odeur au produit",
+  "Agent masquant": "masque les odeurs des autres actifs",
+  "Agent de contrôle de la viscosité": "donne sa texture à la formule",
+  "Antioxydant": "protège la formule de l'oxydation",
+  "Agent de protection de la peau": "renforce la barrière cutanée",
+  "Humectant": "attire l'eau dans la peau",
+  "Agent filmogène": "forme un film protecteur en surface",
   "Antistatique": {
     default: null,
     by: {
-      shampooing: "réduit l'électricité statique",
-      apres_shampooing: "réduit l'électricité statique",
+      shampooing: "réduit l'électricité statique des cheveux",
+      apres_shampooing: "réduit l'électricité statique des cheveux",
     },
   },
-  "Antimicrobien": "limite les bactéries",
-  "Solvant": "support de formule",
-  "Astringent": "resserre les pores",
-  "Stabilisateur d'émulsion": "stabilise la texture",
-  "Tonifiant": "tonifie",
-  "Agent Abrasif": "exfolie",
-  "Colorant cosmétique": "colore",
+  "Antimicrobien": "limite la prolifération bactérienne",
+  "Solvant": "dissout les autres ingrédients de la formule",
+  "Astringent": "resserre les pores et tonifie la peau",
+  "Stabilisateur d'émulsion": "garde le mélange eau/huile homogène",
+  "Tonifiant": "apporte un effet tonifiant immédiat",
+  "Agent Abrasif": "exfolie mécaniquement les cellules mortes",
+  "Colorant cosmétique": "donne sa couleur au produit",
   "Sinergiste de mousse": {
     default: null,
     by: {
-      shampooing: "renforce la mousse",
-      nettoyant_visage: "renforce la mousse",
-      creme_corps: "renforce la mousse",
+      shampooing: "rend la mousse plus dense",
+      nettoyant_visage: "rend la mousse plus dense",
+      creme_corps: "rend la mousse plus dense",
     },
   },
-  "Régulateur de pH": "équilibre le pH",
-  "Opacifiant": "rend la formule opaque",
-  "Agent de foisonnement": "épaissit",
-  "Conservateur": "préserve la formule",
-  "Agent apaisant": "apaise",
-  "Agent Absorbant": "absorbe l'excès de sébum",
-  "Agent arômatisant": "parfume",
-  "Agent stabilisant": "stabilise la formule",
-  "Non classé": "rôle non classé",
-  "Agent de chélation": "stabilise la formule",
-  "Agent plastifiant": "assouplit",
-  "Anti Agglomérant": "empêche l'agglomérat",
-  "Hydrotrope": "solubilise",
-  "Anti-séborrhée": "régule le sébum",
-  "Hydratant": "hydrate",
-  "Agent réducteur": "agent réducteur",
-  "Agent rafraîchissant": "rafraîchit",
-  "Agent lissant": "lisse",
-  "Dénaturant": "dénature l'alcool",
-  "Anti-moussant": "empêche la mousse",
-  "Agent Oxydant": "oxyde",
-  "Gélifiant": "gélifie",
-  "Anticorrosif": "anti-corrosion",
-  "Kératolytique": "exfolie les cellules mortes",
-  "Agent propulseur": "propulse l'aérosol",
-  "Agent de restauration lipidique": "reconstitue le film lipidique",
-  "Modificateurs de glissement": "améliore le toucher",
-  "Dispersion des agents de surface": "disperse",
-  "Ajusteurs de pH": "équilibre le pH",
-  "Exfoliant": "exfolie",
-  "Dispersant non tensioactif": "disperse",
-  "Agent tensioactif - Solubilisant": "solubilise",
-  "Modificateur de surface": "modifie la surface",
-  "Agent nacrant": "donne un effet nacré",
+  "Régulateur de pH": "équilibre le pH au plus près de la peau",
+  "Opacifiant": "rend la formule opaque visuellement",
+  "Agent de foisonnement": "épaissit pour stabiliser la texture",
+  "Conservateur": "protège la formule des micro-organismes",
+  "Agent apaisant": "calme les rougeurs et tiraillements",
+  "Agent Absorbant": "absorbe l'excès de sébum et l'humidité",
+  "Agent arômatisant": "donne son arôme au produit",
+  "Agent stabilisant": "garde la formule stable dans le temps",
+  "Non classé": "rôle non documenté dans la base",
+  "Agent de chélation": "neutralise les métaux de l'eau du robinet",
+  "Agent plastifiant": "assouplit les films cosmétiques",
+  "Anti Agglomérant": "empêche les poudres de s'agglomérer",
+  "Hydrotrope": "aide à dissoudre les ingrédients peu solubles",
+  "Anti-séborrhée": "régule la production de sébum",
+  "Hydratant": "apporte de l'eau à la peau",
+  "Agent réducteur": "joue un rôle chimique de réduction",
+  "Agent rafraîchissant": "procure une sensation de fraîcheur",
+  "Agent lissant": "lisse la surface de la peau",
+  "Dénaturant": "rend l'alcool impropre à la consommation",
+  "Anti-moussant": "limite la formation de mousse indésirable",
+  "Agent Oxydant": "joue un rôle chimique d'oxydation",
+  "Gélifiant": "donne sa consistance gélifiée au produit",
+  "Anticorrosif": "protège le contenant de la corrosion",
+  "Kératolytique": "élimine les cellules mortes en surface",
+  "Agent propulseur": "propulse le produit hors de l'aérosol",
+  "Agent de restauration lipidique": "reconstitue le film lipidique de la peau",
+  "Modificateurs de glissement": "améliore le toucher et l'étalement",
+  "Dispersion des agents de surface": "disperse les actifs uniformément",
+  "Ajusteurs de pH": "ajuste le pH au niveau cutané",
+  "Exfoliant": "élimine les cellules mortes de surface",
+  "Dispersant non tensioactif": "disperse pigments et poudres",
+  "Agent tensioactif - Solubilisant": "solubilise les huiles dans l'eau",
+  "Modificateur de surface": "modifie la texture de surface",
+  "Agent nacrant": "donne un effet nacré au produit",
 
   // ─── Context-aware verbs ─────────────────────────────────────────────
 
@@ -239,10 +245,10 @@ const FUNCTION_VERBS: Record<string, VerbConfig> = {
    *  cream, etc. Real hair-fixative chemistry sits under
    *  "Agent de fixation capillaire" below. */
   "Agent fixant": {
-    default: "lie les ingrédients",
+    default: "lie les ingrédients entre eux",
     by: {
-      shampooing: "lie les ingrédients",
-      apres_shampooing: "tient la coiffure",
+      shampooing: "lie les ingrédients entre eux",
+      apres_shampooing: "tient la coiffure en place",
     },
   },
 
@@ -252,48 +258,48 @@ const FUNCTION_VERBS: Record<string, VerbConfig> = {
   "Agent de fixation capillaire": {
     default: null,
     by: {
-      shampooing: "tient la coiffure",
-      apres_shampooing: "tient la coiffure",
+      shampooing: "tient la coiffure en place",
+      apres_shampooing: "tient la coiffure en place",
     },
   },
 
   "Conditionneur capillaire": {
     default: null,
     by: {
-      shampooing: "lisse les cheveux",
-      apres_shampooing: "lisse les cheveux",
+      shampooing: "lisse et démêle les cheveux",
+      apres_shampooing: "lisse et démêle les cheveux",
     },
   },
 
   "Agent colorant pour cheveux": {
     default: null,
     by: {
-      shampooing: "colore les cheveux",
-      apres_shampooing: "colore les cheveux",
+      shampooing: "colore les cheveux durablement",
+      apres_shampooing: "colore les cheveux durablement",
     },
   },
 
   "Antipelliculaire": {
     default: null,
     by: {
-      shampooing: "anti-pelliculaire",
-      apres_shampooing: "anti-pelliculaire",
+      shampooing: "limite la formation de pellicules",
+      apres_shampooing: "limite la formation de pellicules",
     },
   },
 
   "Agent bouclant ou lissant (coiffant)": {
     default: null,
     by: {
-      shampooing: "discipline les cheveux",
-      apres_shampooing: "discipline les cheveux",
+      shampooing: "discipline boucles et frisottis",
+      apres_shampooing: "discipline boucles et frisottis",
     },
   },
 
   "Agent démêlant": {
     default: null,
     by: {
-      shampooing: "démêle",
-      apres_shampooing: "démêle",
+      shampooing: "démêle pour faciliter le coiffage",
+      apres_shampooing: "démêle pour faciliter le coiffage",
     },
   },
 
@@ -302,36 +308,36 @@ const FUNCTION_VERBS: Record<string, VerbConfig> = {
    *  it's there for pH or scent masking. We keep a soft default verb but
    *  the strong claim only fires for true deodorants. */
   "Déodorant": {
-    default: "neutralise les odeurs",
+    default: "neutralise les odeurs corporelles",
     by: {
-      deodorant: "limite les odeurs",
+      deodorant: "limite les odeurs sous les aisselles",
     },
   },
 
   "Anti-transpirant": {
     default: null,
     by: {
-      deodorant: "limite la transpiration",
+      deodorant: "réduit la transpiration des aisselles",
     },
   },
 
   "Filtre UV": {
     default: null,
     by: {
-      solaire: "protège des UV",
-      creme_visage: "protège des UV",
-      creme_corps: "protège des UV",
-      maquillage: "protège des UV",
+      solaire: "filtre les rayons UV nocifs",
+      creme_visage: "filtre les rayons UV nocifs",
+      creme_corps: "filtre les rayons UV nocifs",
+      maquillage: "filtre les rayons UV nocifs",
     },
   },
 
   "Absorbant UV": {
     default: null,
     by: {
-      solaire: "absorbe les UV",
-      creme_visage: "absorbe les UV",
-      creme_corps: "absorbe les UV",
-      maquillage: "absorbe les UV",
+      solaire: "absorbe une partie des rayons UV",
+      creme_visage: "absorbe une partie des rayons UV",
+      creme_corps: "absorbe une partie des rayons UV",
+      maquillage: "absorbe une partie des rayons UV",
     },
   },
 
@@ -339,17 +345,25 @@ const FUNCTION_VERBS: Record<string, VerbConfig> = {
     default: null,
     // "autre" covers depilatory creams which we don't have as their own
     // category — better to show the verb than skip it entirely.
-    by: { autre: "élimine les poils" },
+    by: { autre: "élimine les poils au contact" },
   },
 
   "Agent de bronzage": {
     default: null,
-    by: { creme_visage: "bronze sans soleil", creme_corps: "bronze sans soleil", autre: "bronze sans soleil" },
+    by: {
+      creme_visage: "donne un effet bronzé sans soleil",
+      creme_corps: "donne un effet bronzé sans soleil",
+      autre: "donne un effet bronzé sans soleil",
+    },
   },
 
   "Agent éclaircissant": {
     default: null,
-    by: { creme_visage: "éclaircit", creme_corps: "éclaircit", maquillage: "éclaircit" },
+    by: {
+      creme_visage: "éclaircit progressivement le teint",
+      creme_corps: "éclaircit progressivement le teint",
+      maquillage: "éclaircit progressivement le teint",
+    },
   },
 
   /** Oral hygiene — only meaningful on dental products (not in our 10-cat
@@ -357,51 +371,57 @@ const FUNCTION_VERBS: Record<string, VerbConfig> = {
    *  surfaces the right verb. */
   "Agent d'hygiène buccale": {
     default: null,
-    by: { autre: "hygiène buccale" },
+    by: { autre: "contribue à l'hygiène bucco-dentaire" },
   },
 
   "Antiplaque": {
     default: null,
-    by: { autre: "anti-plaque dentaire" },
+    by: { autre: "limite la formation de plaque dentaire" },
   },
 
   "Agent d'entretien des ongles": {
     default: null,
-    by: { maquillage: "entretient les ongles", autre: "entretient les ongles" },
+    by: {
+      maquillage: "entretient et fortifie les ongles",
+      autre: "entretient et fortifie les ongles",
+    },
   },
 
   "Sculpture des ongles": {
     default: null,
-    by: { maquillage: "sculpte les ongles", autre: "sculpte les ongles" },
+    by: {
+      maquillage: "sculpte et structure les ongles",
+      autre: "sculpte et structure les ongles",
+    },
   },
 
   /** Cleansing surfactants — every category gets a cleansing verb but we
    *  tune the phrasing so it stays natural (a deodorant doesn't say
    *  "nettoie en douceur"). */
   "Tensioactif": {
-    default: "nettoie",
+    default: "nettoie en captant sébum et impuretés",
     by: {
-      shampooing: "nettoie les cheveux",
-      nettoyant_visage: "nettoie en douceur",
-      apres_shampooing: "nettoie les cheveux",
+      shampooing: "détache le sébum du cuir chevelu",
+      nettoyant_visage: "nettoie la peau en douceur",
+      apres_shampooing: "détache le sébum du cuir chevelu",
     },
   },
 
   "Agent nettoyant": {
-    default: "nettoie",
+    default: "nettoie en captant sébum et impuretés",
     by: {
-      shampooing: "nettoie les cheveux",
-      nettoyant_visage: "nettoie en douceur",
-      apres_shampooing: "nettoie les cheveux",
+      shampooing: "lave les cheveux et le cuir chevelu",
+      nettoyant_visage: "lave la peau sans la décaper",
+      apres_shampooing: "lave les cheveux et le cuir chevelu",
     },
   },
 
   "Agent moussant": {
-    default: "fait mousser",
+    default: "génère la mousse au contact de l'eau",
     by: {
-      shampooing: "fait mousser",
-      nettoyant_visage: "fait mousser",
-      apres_shampooing: "fait mousser",
+      shampooing: "génère la mousse au contact de l'eau",
+      nettoyant_visage: "génère la mousse au contact de l'eau",
+      apres_shampooing: "génère la mousse au contact de l'eau",
     },
   },
 };
@@ -501,11 +521,23 @@ function pickPositives(items: AnalyseItem[], category: ProductCategory | null): 
   const out: Positive[] = [];
   for (const it of greens) {
     if (out.length >= 3) break;
-    const name = (it.name ?? it.input ?? "").trim();
-    if (!name) continue;
+    const rawName = (it.name ?? it.input ?? "").trim();
+    if (!rawName) continue;
     const verb = bestVerbForItem(it, category);
     if (!verb) continue;
-    out.push({ name: capitalise(name), verb });
+    // Display-name priority:
+    //   1. it.translationFr  — DB French translation shown in the full
+    //      "Liste des ingrédients" sheet (e.g. "Glycérine / Glycérol",
+    //      "Ferment de radis"). Already properly cased, use as-is.
+    //   2. commonNameForRaw  — grand-public override for the ~50 most
+    //      visible ingredients (Aqua → eau, Persea Gratissima → huile
+    //      d'avocat) when translationFr is missing.
+    //   3. raw INCI          — final fallback, capitalised.
+    const trFr = it.translationFr?.trim();
+    const displayName = trFr
+      ? trFr
+      : capitalise(commonNameForRaw(rawName) ?? rawName);
+    out.push({ name: displayName, verb });
   }
   return out;
 }

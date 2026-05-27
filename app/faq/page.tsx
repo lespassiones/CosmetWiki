@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { PublicHeader } from "@/components/PublicHeader";
-import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { FaqExplorer } from "@/components/faq/FaqExplorer";
 import { SITE_URL } from "@/lib/siteUrl";
@@ -106,7 +105,6 @@ export default function FaqPage() {
         />
       </main>
 
-      <Footer />
     </div>
   );
 }

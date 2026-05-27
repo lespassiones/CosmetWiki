@@ -157,6 +157,17 @@ export function commonNameFor(normalisedToken: string): string | undefined {
 }
 
 /**
+ * Same lookup as `commonNameFor` but accepts a raw INCI token (e.g. "AQUA",
+ * "Persea Gratissima Oil") and runs the normalisation internally. Useful for
+ * callers outside the synthesis renderer that just want "give me the grand-
+ * public name if you have one".
+ */
+export function commonNameForRaw(raw: string): string | undefined {
+  if (!raw) return undefined;
+  return NORMALISED.get(normaliseInciKey(raw));
+}
+
+/**
  * Pretty-cases an INCI name for display inside the "(…)" suffix that
  * accompanies the common name. Goes from "PERSEA GRATISSIMA OIL" to
  * "Persea Gratissima Oil" - easier on the eye than ALLCAPS in body copy

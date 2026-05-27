@@ -579,7 +579,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
       {webCandidates.length > 0 ? (
         <div className="mt-5">
           <p className="mb-3 text-[13px] text-ink-muted">
-            {webCandidates.length} résultat{webCandidates.length > 1 ? "s" : ""} trouvé{webCandidates.length > 1 ? "s" : ""} sur le web — choisis ton produit&nbsp;:
+            {webCandidates.length} résultat{webCandidates.length > 1 ? "s" : ""} trouvé{webCandidates.length > 1 ? "s" : ""} sur le web, choisis ton produit&nbsp;:
           </p>
           <ul className="grid gap-2.5 sm:grid-cols-2">
             {webCandidates.slice(0, webVisibleCount).map((c) => (

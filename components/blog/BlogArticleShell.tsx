@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { PublicHeader } from "@/components/PublicHeader";
-import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { SITE_URL } from "@/lib/siteUrl";
 import {
@@ -262,7 +261,6 @@ export function BlogArticleShell({
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

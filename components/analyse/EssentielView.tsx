@@ -118,10 +118,10 @@ function VerdictCard({ verdict }: { verdict: EssentielData["verdict"] }) {
   return (
     <article className="neu flex items-center gap-4 p-4">
       <div
-        className={`h-14 w-14 shrink-0 rounded-full flex items-center justify-center ${v.badgeClass}`}
+        className={`h-10 w-10 shrink-0 rounded-full flex items-center justify-center ${v.badgeClass}`}
         aria-hidden
       >
-        <Icon className={`h-7 w-7 ${v.iconClass}`} />
+        <Icon className={`h-5 w-5 ${v.iconClass}`} />
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-1">
@@ -139,10 +139,10 @@ function PositivesCard({ positives }: { positives: EssentielData["positives"] })
   return (
     <article className="neu flex items-start gap-4 p-4">
       <div
-        className="h-14 w-14 shrink-0 rounded-full bg-emerald-100 flex items-center justify-center mt-0.5"
+        className="h-10 w-10 shrink-0 rounded-full bg-emerald-100 flex items-center justify-center mt-0.5"
         aria-hidden
       >
-        <LeafIcon className="h-7 w-7 text-emerald-600" />
+        <LeafIcon className="h-5 w-5 text-emerald-600" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-1.5">
@@ -173,10 +173,10 @@ function ConcernsCard({ concerns }: { concerns: EssentielData["concerns"] }) {
   return (
     <article className="neu flex items-start gap-4 p-4">
       <div
-        className={`h-14 w-14 shrink-0 rounded-full ${v.badgeClass} flex items-center justify-center mt-0.5`}
+        className={`h-10 w-10 shrink-0 rounded-full ${v.badgeClass} flex items-center justify-center mt-0.5`}
         aria-hidden
       >
-        <Icon className={`h-7 w-7 ${v.iconClass}`} />
+        <Icon className={`h-5 w-5 ${v.iconClass}`} />
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-1.5">
@@ -208,10 +208,10 @@ function AllClearCard() {
   return (
     <article className="neu flex items-center gap-4 p-4">
       <div
-        className="h-14 w-14 shrink-0 rounded-full bg-emerald-100 flex items-center justify-center"
+        className="h-10 w-10 shrink-0 rounded-full bg-emerald-100 flex items-center justify-center"
         aria-hidden
       >
-        <CheckIcon className="h-7 w-7 text-emerald-600" strokeWidth={2.6} />
+        <CheckIcon className="h-5 w-5 text-emerald-600" strokeWidth={2.6} />
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-1">

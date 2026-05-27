@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 const NAV_ITEMS = [
   { href: "/fonctionnalites", label: "Fonctionnalités" },
+  { href: "/en-savoir-plus", label: "En savoir plus" },
   { href: "/blog", label: "Blog" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
@@ -13,6 +14,7 @@ const NAV_ITEMS = [
 
 export function PublicHeader() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const ariaExpanded: "true" | "false" = open ? "true" : "false";
 
@@ -35,10 +37,25 @@ export function PublicHeader() {
     setOpen(false);
   }, [pathname]);
 
+  // Track scroll so the header switches from transparent (over the hero) to
+  // a solid blurred background as soon as the user starts scrolling.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 bg-transparent border-b border-black/[0.10]">
-        <div className="flex h-[77px] w-full items-center justify-between px-5 sm:px-10 xl:px-16">
+      <header
+        className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+          scrolled
+            ? "bg-white/90 backdrop-blur-md border-b border-black/[0.06] shadow-[0_2px_12px_-6px_rgba(0,0,0,0.10)]"
+            : "bg-transparent border-b border-transparent"
+        }`}
+      >
+        <div className="mx-auto flex h-[77px] w-full max-w-[1280px] items-center justify-between px-6 sm:px-8">
           <Link
             href="/"
             className="text-[24px] font-bold tracking-tight sm:text-[26px]"
@@ -69,7 +86,7 @@ export function PublicHeader() {
           <div className="flex items-center gap-2">
             <Link
               href="/auth/sign-in"
-              className="rounded-full bg-[#F43F5E] px-5 py-2 text-[14px] font-semibold text-white transition hover:bg-[#E11D48] sm:px-6"
+              className="hidden rounded-full bg-[#F43F5E] px-5 py-2 text-[14px] font-semibold text-white transition hover:bg-[#E11D48] sm:px-6 lg:inline-flex"
             >
               Se connecter
             </Link>
@@ -79,9 +96,9 @@ export function PublicHeader() {
               aria-label="Ouvrir le menu"
               aria-expanded={ariaExpanded}
               onClick={() => setOpen(true)}
-              className="grid h-9 w-9 place-items-center rounded-md text-[#374151] hover:bg-black/[0.04] hover:text-[#111111] lg:hidden"
+              className="grid h-10 w-10 place-items-center rounded-md text-[#374151] hover:bg-black/[0.04] hover:text-[#111111] lg:hidden"
             >
-              <BurgerIcon className="h-5 w-5" />
+              <BurgerIcon className="h-6 w-6" />
             </button>
           </div>
         </div>
@@ -131,6 +148,14 @@ export function PublicHeader() {
                 );
               })}
             </ul>
+            <div className="px-3 pb-4">
+              <Link
+                href="/auth/sign-in"
+                className="flex w-full items-center justify-center rounded-full bg-[#F43F5E] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_10px_24px_-8px_rgba(244,63,94,0.5)] transition hover:bg-[#E11D48]"
+              >
+                Se connecter
+              </Link>
+            </div>
           </nav>
         </div>
       ) : null}

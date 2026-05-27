@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Fragment } from "react";
+import Image from "next/image";
 import { PublicHeader } from "@/components/PublicHeader";
-import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { BlogList } from "./BlogList";
 import { ARTICLES } from "./articles";
@@ -36,11 +36,13 @@ export default function BlogPage() {
 
       <main className="flex-1 pb-20">
         <section className="relative overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/image/landing/blog.webp"
             alt=""
             aria-hidden
+            fill
+            priority
+            sizes="100vw"
             className="absolute inset-0 -z-10 h-full w-full object-cover"
           />
           <div
@@ -84,7 +86,6 @@ export default function BlogPage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

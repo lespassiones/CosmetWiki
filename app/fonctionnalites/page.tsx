@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { PublicHeader } from "@/components/PublicHeader";
-import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { FeaturesNav, type NavItem } from "@/components/features/FeaturesNav";
 import { SITE_URL } from "@/lib/siteUrl";
@@ -303,7 +302,7 @@ const SECTIONS: Section[] = [
     benefits: [
       {
         title: "Verdict couleur immédiat",
-        body: "Les deux demi-camemberts s'affichent l'un à côté de l'autre. Le winner se voit en un coup d'œil.",
+        body: "Deux barres segmentées vert / jaune / orange / rouge s'affichent côte à côte. Le rapport de force se lit en une seconde, sans interpréter le moindre graphique.",
       },
       {
         title: "Différences soulignées",
@@ -312,10 +311,6 @@ const SECTIONS: Section[] = [
       {
         title: "Synthèse écrite",
         body: "Un paragraphe lisible résume pourquoi un produit l'emporte sur l'autre, en langage clair.",
-      },
-      {
-        title: "Sauvegarde du comparatif",
-        body: "Garde la comparaison dans ton historique pour y revenir avant l'achat ou pour la partager.",
       },
     ],
   },
@@ -453,7 +448,6 @@ export default function FonctionnalitesPage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { HomeShell } from "@/components/HomeShell";
 import { LandingHero } from "@/components/LandingHero";
+import { LandingSteps } from "@/components/LandingSteps";
+import { LandingValues } from "@/components/LandingValues";
 import { HomeDashboard, type DashboardData } from "@/components/home/HomeDashboard";
 import { DailyPicksCard } from "@/components/home/DailyPicksCard";
 import { getProfile, getUser } from "@/lib/auth";
@@ -228,6 +230,8 @@ export default async function Home({ searchParams }: Props) {
       <>
         <HomeJsonLdScript />
         <LandingHero />
+        <LandingSteps />
+        <LandingValues />
       </>
     );
   }

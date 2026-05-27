@@ -16,25 +16,25 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["health", "lifestyle", "utilities"],
     icons: [
       {
-        src: "/icon-192.png",
+        src: "/pwa/icon-192.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icon.png",
+        src: "/pwa/icon.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icon-maskable.png",
+        src: "/pwa/icon-maskable.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
       },
       {
-        src: "/apple-icon.png",
+        src: "/pwa/apple-icon.png",
         sizes: "180x180",
         type: "image/png",
       },

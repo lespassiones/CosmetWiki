@@ -18,68 +18,136 @@ import { PublicHeader } from "@/components/PublicHeader";
  */
 export function LandingHero() {
   return (
-    <section className="relative min-h-screen w-full bg-[#FAFAFA]">
-      {/* Two background images, one per viewport. We can't conditionally
-          render based on viewport in SSR, so both ship in the DOM with CSS
-          visibility toggled at `lg`. Only the MOBILE variant has `priority`
-          because mobile traffic dominates and Google LCP weighs mobile heavier.
-          The desktop image still loads eagerly (Next default for images
-          above the fold), just without the <link rel="preload"> hint, so we
-          don't waste ~1.7 MB on mobile users who never see it. */}
-      <Image
-        src="/image/landing/landing.webp"
-        alt=""
-        fill
-        sizes="100vw"
-        className="hidden lg:block object-cover object-center"
-      />
-      <Image
-        src="/image/landing/landingportrait.webp"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="lg:hidden object-cover object-center"
-      />
+    <section className="relative w-full bg-[#FAFAFA]">
+      {/* Bloc rose : sa hauteur suit son contenu (titre + image), donc
+          rétrécit/grandit proportionnellement avec le contenu — pas avec le
+          viewport. Pas de min-h en vh. */}
+      <div className="relative overflow-hidden">
+        <Image
+          src="/image/landing2/banniere.webp"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        <div
+          aria-hidden
+          className="grain-overlay pointer-events-none absolute inset-0 opacity-[0.22] mix-blend-multiply"
+        />
 
-      <PublicHeader />
-
-      {/*
-        Content layer.
-        Desktop : sits in the LEFT half (the empty zone of landing.png),
-                  vertically centred.
-        Mobile  : sits at the BOTTOM (the empty zone of landingportrait.png),
-                  horizontally centred.
-      */}
-      <div className="relative z-10 flex h-screen flex-col pt-20">
-        <div className="hidden lg:flex flex-1 items-center">
-          <div className="px-10 xl:px-16 max-w-[44%]">
+        {/* Contenu desktop : container 1280, alignement bas */}
+        <div className="relative z-10 mx-auto hidden w-full max-w-[1280px] items-end gap-6 px-6 pt-32 sm:px-8 lg:flex">
+          <div className="flex-1 pb-16">
             <Headline />
+            <div className="mt-10">
+              <KpiRow />
+            </div>
+            <div className="mt-6">
+              <StoreBadges align="left" />
+            </div>
+          </div>
+          <div className="flex flex-[1.6] items-end justify-end">
+            <div
+              className="relative w-full max-w-[884px]"
+              style={{ aspectRatio: "1350 / 1063" }}
+            >
+              <Image
+                src="/image/landing2/herodroites.webp"
+                alt="Aperçu de l'application Cosme Check"
+                fill
+                priority
+                sizes="884px"
+                className="object-contain object-bottom"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="lg:hidden mt-auto px-5 pb-8 pt-4 text-center">
-          <Headline mobile />
+        {/* Contenu mobile vertical, style OnSkin :
+            titre → image (halo) → description → KPIs → badges → CTA */}
+        <div className="relative z-10 flex flex-col items-center gap-6 px-5 pb-10 pt-28 text-center lg:hidden">
+          <h1 className="font-bold leading-[1.05] tracking-tight text-ink text-[34px] sm:text-[40px]">
+            <span className="text-[#111111]">Décode tes </span>
+            <span className="relative inline-block whitespace-nowrap">
+              <span className="text-[#F43F5E]">cosmétiques</span>&nbsp;♡
+              <svg
+                aria-hidden
+                viewBox="0 0 200 14"
+                preserveAspectRatio="none"
+                className="pointer-events-none absolute left-0 right-0 -bottom-1.5 h-2 text-rose-500"
+              >
+                <path
+                  d="M3,10 Q60,1 100,5 T197,10"
+                  stroke="currentColor"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </svg>
+            </span>
+          </h1>
+
+          {/* Image avec halo radial + dégradé concave en bas */}
+          <div className="relative mx-auto w-full max-w-[340px]">
+            <div
+              aria-hidden
+              className="absolute inset-0 -z-10"
+              style={{
+                background:
+                  "radial-gradient(ellipse 75% 60% at 50% 42%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.15) 35%, transparent 70%)",
+              }}
+            />
+            <div
+              className="relative"
+              style={{ aspectRatio: "1350 / 1063" }}
+            >
+              <Image
+                src="/image/landing2/herodroites.webp"
+                alt="Aperçu de l'application Cosme Check"
+                fill
+                priority
+                sizes="340px"
+                className="object-contain object-bottom"
+              />
+              {/* Dégradé concave en bas pour fondre dans le background */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3"
+                style={{
+                  background:
+                    "radial-gradient(ellipse 90% 100% at 50% 100%, rgba(228,165,168,0.85) 0%, rgba(228,165,168,0.3) 50%, transparent 80%)",
+                }}
+              />
+            </div>
+          </div>
+
+          <p className="max-w-[32rem] text-[15px] leading-relaxed text-ink-muted">
+            <span className="font-semibold text-ink">
+              Au-delà des notes, la vérité de tes cosmétiques.
+            </span>
+            <br />
+            Décode la composition, vérifie les promesses marketing, identifie
+            ce qui agit vraiment sur ta peau.
+          </p>
+
+          <KpiRow />
+
+          <StoreBadges />
+
+          <Link
+            href="/auth/sign-in"
+            className="group mt-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[#F43F5E] to-[#E11D48] px-7 py-3 text-[15px] font-semibold text-white shadow-[0_12px_28px_-8px_rgba(244,63,94,0.55),inset_0_1px_0_rgba(255,255,255,0.30)] transition hover:brightness-110 active:scale-[0.98]"
+          >
+            Analyse ton premier produit
+            <span aria-hidden className="transition group-hover:translate-x-0.5">
+              →
+            </span>
+          </Link>
         </div>
       </div>
 
-      {/* Mini footer légal - visible depuis la home (requis par Google OAuth). */}
-      <nav
-        aria-label="Liens légaux"
-        className="absolute inset-x-0 bottom-0 z-10 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-5 pb-3 text-[11px] text-ink-subtle"
-      >
-        <Link href="/confidentialite" className="hover:text-ink transition-colors">
-          Confidentialité
-        </Link>
-        <span aria-hidden>·</span>
-        <Link href="/cgu" className="hover:text-ink transition-colors">
-          CGU
-        </Link>
-        <span aria-hidden>·</span>
-        <Link href="/mentions-legales" className="hover:text-ink transition-colors">
-          Mentions légales
-        </Link>
-      </nav>
+      <PublicHeader />
     </section>
   );
 }
@@ -94,18 +162,12 @@ function Headline({ mobile = false }: { mobile?: boolean }) {
     <div className={align}>
       <h1
         className={`font-bold leading-[1.05] tracking-tight text-ink ${
-          mobile ? "text-[28px] sm:text-[32px]" : "text-[48px] xl:text-[58px]"
+          mobile ? "text-[28px] sm:text-[32px]" : "text-[38px] xl:text-[46px]"
         }`}
       >
-        <span className="text-[#111111]">Cosme </span>
-        <span className="text-[#F43F5E]">Check</span>
-        {" "}t&apos;aide à comprendre
-        <br />
-        les compositions et à
-        <br />
-        prendre soin de toi et tes{" "}
+        <span className="text-[#111111]">Décode tes </span>
         <span className="relative inline-block whitespace-nowrap">
-          proches&nbsp;♡
+          <span className="text-[#F43F5E]">cosmétiques</span>&nbsp;♡
           <svg
             aria-hidden
             viewBox="0 0 200 14"
@@ -148,11 +210,88 @@ function Headline({ mobile = false }: { mobile?: boolean }) {
             : "mt-8 px-8 py-4 text-[17px]"
         }`}
       >
-        Analyse mon premier produit
+        Analyse ton premier produit
         <span aria-hidden className="transition group-hover:translate-x-0.5">
           →
         </span>
       </Link>
+    </div>
+  );
+}
+
+/** Ligne de 3 KPIs sur mobile (chiffre + label, séparés par un fin trait). */
+function KpiRow() {
+  const items = [
+    { value: "1M+", label: "Produits" },
+    { value: "4.8★", label: "Satisfaction" },
+    { value: "+10K", label: "Marques" },
+  ];
+  return (
+    <div className="my-1 flex w-full max-w-[380px] items-stretch justify-between border-y border-black/[0.10] py-4">
+      {items.map((it, i) => (
+        <div key={it.label} className="flex flex-1 items-center">
+          {i > 0 ? <div aria-hidden className="mr-3 h-8 w-px bg-black/[0.10]" /> : null}
+          <div className="flex flex-1 flex-col items-center text-center">
+            <span className="text-[22px] font-bold leading-none text-ink">
+              {it.value}
+            </span>
+            <span className="mt-1 text-[11px] uppercase tracking-wide text-ink-muted">
+              {it.label}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Badges App Store + Google Play (visuels, non cliquables pour l'instant). */
+function StoreBadges({ align = "center" }: { align?: "center" | "left" }) {
+  const justify = align === "left" ? "justify-start" : "justify-center";
+  return (
+    <div className={`flex flex-wrap items-center gap-3 ${justify}`}>
+      <AppleStoreBadge />
+      <GooglePlayBadge />
+    </div>
+  );
+}
+
+function AppleStoreBadge() {
+  return (
+    <div
+      role="img"
+      aria-label="Bientôt sur l'App Store"
+      className="flex h-[44px] w-[140px] items-center gap-2 rounded-lg bg-black px-3 text-white"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden className="h-7 w-7 fill-current">
+        <path d="M17.05 12.04c-.02-2.3 1.88-3.4 1.96-3.45-1.07-1.56-2.74-1.78-3.33-1.8-1.42-.15-2.77.84-3.5.84-.73 0-1.84-.82-3.03-.79-1.56.02-3 .91-3.8 2.31-1.62 2.82-.41 6.97 1.17 9.25.77 1.12 1.69 2.37 2.89 2.33 1.16-.05 1.6-.75 3-.75s1.8.75 3.03.72c1.25-.02 2.04-1.14 2.8-2.27.88-1.3 1.25-2.56 1.27-2.62-.03-.02-2.44-.94-2.46-3.77zM14.84 5.27c.64-.78 1.07-1.86.95-2.93-.92.04-2.04.61-2.7 1.39-.6.69-1.12 1.8-.98 2.85 1.03.08 2.08-.52 2.73-1.31z" />
+      </svg>
+      <div className="flex flex-col text-left leading-none">
+        <span className="text-[9px] tracking-wide">Télécharger sur</span>
+        <span className="text-[15px] font-semibold tracking-tight">App Store</span>
+      </div>
+    </div>
+  );
+}
+
+function GooglePlayBadge() {
+  return (
+    <div
+      role="img"
+      aria-label="Bientôt sur Google Play"
+      className="flex h-[44px] w-[150px] items-center gap-2 rounded-lg bg-black px-3 text-white"
+    >
+      <svg viewBox="0 0 60 64" aria-hidden className="h-7 w-7">
+        <path d="M0 5.4v53.2c0 1.7 1.4 3 3 3l30-30L3 1.5C1.4 1.8 0 3.2 0 5.4z" fill="#4285F4" />
+        <path d="M48.6 22.4 39 17 33 23l9 9 6.6-5.4c2-1.5 2-4.7 0-6.2z" fill="#FBBC04" />
+        <path d="m3 1.5 39 30.5L51.5 41 3 62.6c-1.6-.3-3-1.7-3-3.4V5.4c0-1.7 1.4-3 3-3z" fill="transparent" />
+        <path d="M3 1.5c.4 0 .7.1 1.1.3L42 22 36 28 0 4.5C0 3 1.3 1.5 3 1.5z" fill="#34A853" />
+        <path d="m3 62.5 33-30 6 6L4.1 62.2c-.4.2-.7.3-1.1.3z" fill="#EA4335" />
+      </svg>
+      <div className="flex flex-col text-left leading-none">
+        <span className="text-[9px] tracking-wide">Disponible sur</span>
+        <span className="text-[15px] font-semibold tracking-tight">Google Play</span>
+      </div>
     </div>
   );
 }

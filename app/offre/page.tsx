@@ -1,5 +1,5 @@
 import { GLASS_CARD } from "@/lib/ui/glass";
-import { DiamondIcon } from "@/components/nav/NavIcons";
+import { PublicHeader } from "@/components/PublicHeader";
 
 export const metadata = { title: "Passez Premium · Cosme Check" };
 
@@ -15,13 +15,11 @@ const FEATURES = [
 
 export default function OffrePage() {
   return (
-    <div className="mx-auto max-w-5xl px-5 lg:px-8 py-8 lg:py-12">
+    <>
+      <PublicHeader />
+      <div className="mx-auto max-w-5xl px-5 lg:px-8 py-8 pt-28 lg:py-12 lg:pt-32">
       {/* Header */}
       <div className="text-center mb-10 lg:mb-12">
-        <span className="inline-flex items-center gap-2 rounded-full bg-rose-50 ring-1 ring-rose-200 px-3 py-1 text-[12px] font-semibold text-[#F43F5E] mb-4">
-          <DiamondIcon className="h-3.5 w-3.5" />
-          Premium
-        </span>
         <h1 className="text-3xl lg:text-4xl font-bold tracking-tight mb-3">
           Décode tes cosmétiques sans limite
         </h1>
@@ -76,6 +74,7 @@ export default function OffrePage() {
         sera lancée prochainement. Merci pour ta patience !
       </p>
     </div>
+    </>
   );
 }
 

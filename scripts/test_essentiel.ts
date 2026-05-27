@@ -157,8 +157,8 @@ const fixtures: Fixture[] = [
     ],
     assertions: (e) => {
       check("ne dit jamais 'fixe la coiffure' sur un déodorant", noVerb(e, "coiffure"));
-      check("'Agent fixant' devient 'lie les ingrédients'", e.positives.some((p) => p.name.toLowerCase().includes("magnesium carbonate") && p.verb === "lie les ingrédients"));
-      check("'Déodorant' fonction devient 'limite les odeurs'", hasVerb(e, "limite les odeurs") || e.positives.length === 3);
+      check("'Agent fixant' devient 'lie les ingrédients entre eux'", e.positives.some((p) => p.name.toLowerCase().includes("magnesium carbonate") && p.verb === "lie les ingrédients entre eux"));
+      check("'Déodorant' fonction devient 'limite les odeurs sous les aisselles'", hasVerb(e, "limite les odeurs sous les aisselles") || e.positives.length === 3);
     },
   },
 
@@ -177,8 +177,8 @@ const fixtures: Fixture[] = [
       item({ name: "Zinc pyrithione", primaryFunction: "Antipelliculaire" }),
     ],
     assertions: (e) => {
-      check("'Tensioactif' adapté au capillaire", e.positives.some((p) => p.verb === "nettoie les cheveux"));
-      check("'Agent moussant' garde 'fait mousser'", e.positives.some((p) => p.verb === "fait mousser"));
+      check("'Tensioactif' adapté au capillaire", e.positives.some((p) => p.verb === "détache le sébum du cuir chevelu"));
+      check("'Agent moussant' garde une formulation mousse", e.positives.some((p) => p.verb === "génère la mousse au contact de l'eau"));
     },
   },
 
@@ -194,8 +194,8 @@ const fixtures: Fixture[] = [
       item({ name: "Argania spinosa oil", primaryFunction: "Emollient", tags: ["huile-vegetale"] }),
     ],
     assertions: (e) => {
-      check("'Conditionneur capillaire' affiche 'lisse les cheveux'", hasVerb(e, "lisse les cheveux"));
-      check("'Agent démêlant' affiche 'démêle'", hasVerb(e, "démêle"));
+      check("'Conditionneur capillaire' affiche 'lisse et démêle les cheveux'", hasVerb(e, "lisse et démêle les cheveux"));
+      check("'Agent démêlant' affiche 'démêle pour faciliter le coiffage'", hasVerb(e, "démêle pour faciliter le coiffage"));
     },
   },
 
@@ -212,7 +212,7 @@ const fixtures: Fixture[] = [
     ],
     assertions: (e) => {
       check("aucun verbe capillaire", noVerb(e, "cheveux") && noVerb(e, "coiffure"));
-      check("verbes peau présents", hasVerb(e, "hydrate") || hasVerb(e, "adoucit la peau"));
+      check("verbes peau présents", hasVerb(e, "attire l'eau dans la peau") || hasVerb(e, "adoucit et assouplit la peau"));
     },
   },
 
@@ -230,7 +230,7 @@ const fixtures: Fixture[] = [
       item({ name: "Butyrospermum parkii butter", primaryFunction: "Emollient" }),
     ],
     assertions: (e) => {
-      check("verbes peau cohérents", hasVerb(e, "adoucit la peau"));
+      check("verbes peau cohérents", hasVerb(e, "adoucit et assouplit la peau"));
       check("3 positifs trouvés", e.positives.length === 3);
     },
   },
@@ -247,7 +247,7 @@ const fixtures: Fixture[] = [
       item({ name: "Glycerin", primaryFunction: "Humectant" }),
     ],
     assertions: (e) => {
-      check("'Filtre UV' affiche 'protège des UV'", hasVerb(e, "protège des UV"));
+      check("'Filtre UV' affiche 'filtre les rayons UV nocifs'", hasVerb(e, "filtre les rayons UV nocifs"));
     },
   },
 
@@ -263,7 +263,7 @@ const fixtures: Fixture[] = [
       item({ name: "Sodium cocoyl isethionate", primaryFunction: "Agent nettoyant" }),
     ],
     assertions: (e) => {
-      check("'Tensioactif' devient 'nettoie en douceur'", hasVerb(e, "nettoie en douceur"));
+      check("'Tensioactif' devient 'nettoie la peau en douceur'", hasVerb(e, "nettoie la peau en douceur"));
       check("aucun verbe capillaire", noVerb(e, "cheveux"));
     },
   },
@@ -281,7 +281,7 @@ const fixtures: Fixture[] = [
     ],
     assertions: (e) => {
       check("aucun verbe capillaire", noVerb(e, "cheveux") && noVerb(e, "coiffure"));
-      check("'Colorant cosmétique' devient 'colore'", hasVerb(e, "colore"));
+      check("'Colorant cosmétique' devient 'donne sa couleur au produit'", hasVerb(e, "donne sa couleur au produit"));
     },
   },
 
@@ -297,7 +297,7 @@ const fixtures: Fixture[] = [
       item({ name: "Limonene", primaryFunction: "Agent parfumant" }),
     ],
     assertions: (e) => {
-      check("'Agent parfumant' devient 'parfume'", hasVerb(e, "parfume"));
+      check("'Agent parfumant' devient 'donne son odeur au produit'", hasVerb(e, "donne son odeur au produit"));
       check("aucun verbe capillaire", noVerb(e, "cheveux")),
       check("aucun verbe 'coiffure'", noVerb(e, "coiffure"));
     },
@@ -316,7 +316,7 @@ const fixtures: Fixture[] = [
     ],
     assertions: (e) => {
       check("'Agent fixant' ne dit jamais 'fixe la coiffure' par défaut", noVerb(e, "coiffure"));
-      check("'Agent fixant' tombe sur 'lie les ingrédients'", hasVerb(e, "lie les ingrédients"));
+      check("'Agent fixant' tombe sur 'lie les ingrédients entre eux'", hasVerb(e, "lie les ingrédients entre eux"));
     },
   },
 ];
@@ -381,7 +381,111 @@ function testContextSkipping() {
     `got: ${dumpPositives(e)}`,
   );
   // …but the cleansing/solvent ingredient still surfaces
-  check("Le solvant reste affichable", hasVerb(e, "support de formule"));
+  check("Le solvant reste affichable", hasVerb(e, "dissout les autres ingrédients de la formule"));
+}
+
+/**
+ * Exhaustive lockdown: walk every hair-care function through every NON-hair
+ * category and make sure verbForFunction returns null. Same goes for the
+ * cleansing surfactants when they need to surface a "cuir chevelu" phrase
+ * on a face cream — that should never happen.
+ *
+ * The categories we explicitly want hair-free verbs on:
+ *   deodorant, creme_visage, creme_corps, solaire, nettoyant_visage,
+ *   maquillage, parfum, autre, null  (=== no category detected)
+ *
+ * If a new hair function is added to FUNCTION_VERBS, add it here too so the
+ * lockdown stays exhaustive. Otherwise the bug will only surface in prod.
+ */
+function testHairLockdown() {
+  console.log("\n[lockdown] no hair-care verb on non-hair products");
+  const v = __testing.verbForFunction;
+
+  const HAIR_ONLY_FUNCTIONS = [
+    "Antistatique",
+    "Agent de fixation capillaire",
+    "Conditionneur capillaire",
+    "Agent colorant pour cheveux",
+    "Antipelliculaire",
+    "Agent bouclant ou lissant (coiffant)",
+    "Agent démêlant",
+  ] as const;
+
+  const NON_HAIR_CATEGORIES: Array<ProductCategory | null> = [
+    "deodorant",
+    "creme_visage",
+    "creme_corps",
+    "solaire",
+    "nettoyant_visage",
+    "maquillage",
+    "parfum",
+    "autre",
+    null,
+  ];
+
+  for (const fn of HAIR_ONLY_FUNCTIONS) {
+    for (const cat of NON_HAIR_CATEGORIES) {
+      const verb = v(fn, cat);
+      check(
+        `'${fn}' + ${cat ?? "null"} -> null (jamais sur produit non capillaire)`,
+        verb === null,
+        verb === null ? undefined : `got "${verb}"`,
+      );
+    }
+  }
+
+  // Agent fixant has a non-capillary default ("lie les ingrédients entre
+  // eux"). Make sure NO non-hair category leaks the "tient la coiffure"
+  // variant — that's the original tester's bug, re-checked exhaustively.
+  for (const cat of NON_HAIR_CATEGORIES) {
+    const verb = v("Agent fixant", cat);
+    check(
+      `'Agent fixant' + ${cat ?? "null"} ne mentionne JAMAIS la coiffure`,
+      verb !== null && !verb.includes("coiffure") && !verb.includes("cheveux"),
+      verb === null ? "got null" : `got "${verb}"`,
+    );
+  }
+
+  // Surfactants: the "cuir chevelu" phrasing is only legitimate on
+  // shampooing / apres_shampooing. Anywhere else, the verb must not mention
+  // cuir chevelu, cheveux, coiffure, or pellicules.
+  const HAIR_KEYWORDS = ["cheveu", "coiffure", "coiffage", "chevelu", "pellicule", "boucl", "frisott"];
+  const SURFACTANTS = ["Tensioactif", "Agent nettoyant", "Agent moussant"] as const;
+  for (const fn of SURFACTANTS) {
+    for (const cat of NON_HAIR_CATEGORIES) {
+      const verb = v(fn, cat);
+      if (!verb) continue; // null is fine — nothing to display
+      const leak = HAIR_KEYWORDS.find((kw) => verb.includes(kw));
+      check(
+        `'${fn}' + ${cat ?? "null"} ne mentionne aucun jargon capillaire`,
+        !leak,
+        leak ? `got "${verb}" (leak: ${leak})` : undefined,
+      );
+    }
+  }
+
+  // End-to-end check via computeEssentiel: even when EVERY green ingredient
+  // is a hair-only function, the card stays empty rather than showing
+  // wrong-context bullets. We already test the deodorant case above —
+  // extend it to creme_visage, creme_corps, solaire to be thorough.
+  for (const cat of ["creme_visage", "creme_corps", "solaire", "maquillage", "nettoyant_visage", "parfum"] as const) {
+    const r = makeAnalyseResponse({
+      category: cat,
+      items: [
+        item({ name: "Hair colour", primaryFunction: "Agent colorant pour cheveux" }),
+        item({ name: "Conditioner", primaryFunction: "Conditionneur capillaire" }),
+        item({ name: "Antidandruff", primaryFunction: "Antipelliculaire" }),
+        item({ name: "Detangler", primaryFunction: "Agent démêlant" }),
+        item({ name: "Hair fix", primaryFunction: "Agent de fixation capillaire" }),
+      ],
+    });
+    const e = computeEssentiel(r, { category: cat });
+    check(
+      `catégorie ${cat}: aucun verbe capillaire ne fuite quand tous les ingrédients sont capillaires`,
+      e.positives.length === 0,
+      `got: ${dumpPositives(e)}`,
+    );
+  }
 }
 
 function testKeywordFallbackWhenCategoryAutre() {
@@ -396,21 +500,21 @@ function testKeywordFallbackWhenCategoryAutre() {
     ],
   });
   const e = computeEssentiel(r, { category: "autre", productType: "déodorant" });
-  check("'Déodorant' devient 'limite les odeurs' quand keyword route -> deodorant", hasVerb(e, "limite les odeurs"));
+  check("'Déodorant' devient 'limite les odeurs sous les aisselles' quand keyword route -> deodorant", hasVerb(e, "limite les odeurs sous les aisselles"));
   check("'Agent fixant' reste neutre", noVerb(e, "coiffure"));
 }
 
 function testVerbForFunctionUnit() {
   console.log("\n[bonus] verbForFunction — unit checks on the private mapping");
   const v = __testing.verbForFunction;
-  check("'Agent fixant' + deodorant -> 'lie les ingrédients'", v("Agent fixant", "deodorant") === "lie les ingrédients");
-  check("'Agent fixant' + null -> 'lie les ingrédients'", v("Agent fixant", null) === "lie les ingrédients");
-  check("'Agent fixant' + shampooing -> 'lie les ingrédients'", v("Agent fixant", "shampooing") === "lie les ingrédients");
-  check("'Agent fixant' + apres_shampooing -> 'tient la coiffure'", v("Agent fixant", "apres_shampooing") === "tient la coiffure");
+  check("'Agent fixant' + deodorant -> 'lie les ingrédients entre eux'", v("Agent fixant", "deodorant") === "lie les ingrédients entre eux");
+  check("'Agent fixant' + null -> 'lie les ingrédients entre eux'", v("Agent fixant", null) === "lie les ingrédients entre eux");
+  check("'Agent fixant' + shampooing -> 'lie les ingrédients entre eux'", v("Agent fixant", "shampooing") === "lie les ingrédients entre eux");
+  check("'Agent fixant' + apres_shampooing -> 'tient la coiffure en place'", v("Agent fixant", "apres_shampooing") === "tient la coiffure en place");
   check("'Agent de fixation capillaire' + deodorant -> null (skipped)", v("Agent de fixation capillaire", "deodorant") === null);
-  check("'Agent de fixation capillaire' + shampooing -> 'tient la coiffure'", v("Agent de fixation capillaire", "shampooing") === "tient la coiffure");
+  check("'Agent de fixation capillaire' + shampooing -> 'tient la coiffure en place'", v("Agent de fixation capillaire", "shampooing") === "tient la coiffure en place");
   check("'Conditionneur capillaire' + deodorant -> null", v("Conditionneur capillaire", "deodorant") === null);
-  check("'Emollient' (universal) survives any category", v("Emollient", "deodorant") === "adoucit la peau");
+  check("'Emollient' (universal) survives any category", v("Emollient", "deodorant") === "adoucit et assouplit la peau");
   check("unknown function -> lowercased raw fallback", v("Some New Function Name", "creme_visage") === "some new function name");
   check("null fn -> null", v(null, "deodorant") === null);
 }
@@ -434,6 +538,7 @@ for (const fx of fixtures) {
 testNormalizeProductType();
 testNeutralPositiveSet();
 testContextSkipping();
+testHairLockdown();
 testKeywordFallbackWhenCategoryAutre();
 testVerbForFunctionUnit();
 

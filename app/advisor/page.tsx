@@ -36,7 +36,7 @@ export default async function AdvisorPage() {
         <section className={`${GLASS_CARD} p-5 lg:p-7`}>
           <h2 className="text-lg font-semibold mb-1">Complète ton profil beauté</h2>
           <p className="text-sm text-[#6B7280] mb-6">
-            Type de peau, préoccupations, cheveux, allergies — on utilise ces
+            Type de peau, préoccupations, cheveux, allergies, on utilise ces
             informations pour adapter les conseils. Tu peux modifier à tout moment.
           </p>
           <BeautyProfileForm initial={skin} showCancel={false} />

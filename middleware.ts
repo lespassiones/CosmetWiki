@@ -57,8 +57,18 @@ function redirectToSignIn(req: NextRequest, pathname: string): NextResponse {
 // sign-in au prochain hit. Mieux qu'une prod entièrement en 504.
 const AUTH_REFRESH_TIMEOUT_MS = 1500;
 
-async function refreshSession(req: NextRequest): Promise<NextResponse> {
-  const res = NextResponse.next();
+// Expose the request pathname to Server Components via a custom header.
+// Server Components can't read req.nextUrl directly — the supported pattern is
+// to set a request header in middleware and read it via `headers()` in the
+// layout. Used by app/layout.tsx to skip Supabase calls on public landing pages.
+function withPathnameHeader(req: NextRequest, pathname: string): Headers {
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-pathname", pathname);
+  return requestHeaders;
+}
+
+async function refreshSession(req: NextRequest, pathname: string): Promise<NextResponse> {
+  const res = NextResponse.next({ request: { headers: withPathnameHeader(req, pathname) } });
   const sb = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -120,7 +130,7 @@ export async function middleware(req: NextRequest) {
   // budget IO Supabase. supabase-ssr rafraîchit le cookie côté handler dans
   // tous les cas, donc rien n'est perdu.
   if (pathname.startsWith("/api/")) {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: withPathnameHeader(req, pathname) } });
   }
 
   // ── Auth refresh / gating ─────────────────────────────────────────────
@@ -141,8 +151,8 @@ export async function middleware(req: NextRequest) {
     // Prefetch on a protected route : let the RSC payload through without
     // refreshing the session. The real navigation will trigger its own
     // middleware run that does the refresh.
-    if (isPrefetch) return NextResponse.next();
-    return refreshSession(req);
+    if (isPrefetch) return NextResponse.next({ request: { headers: withPathnameHeader(req, pathname) } });
+    return refreshSession(req, pathname);
   }
 
   // Public route : refresh the session only when there's something to refresh
@@ -151,9 +161,9 @@ export async function middleware(req: NextRequest) {
   //   - users with no session at all
   //   - sign-in / sign-up / static info pages where the cookie isn't read
   if (!hasSession || isPrefetch || isSkipAuthPath(pathname)) {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: withPathnameHeader(req, pathname) } });
   }
-  return refreshSession(req);
+  return refreshSession(req, pathname);
 }
 
 export const config = {
