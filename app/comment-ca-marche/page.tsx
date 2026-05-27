@@ -125,11 +125,6 @@ export default function HowItWorksPage() {
               au jaune, ou inversement, à mesure que de nouvelles études
               paraissent ou que la réglementation change.
             </li>
-            <li>
-              Une note 0/20 n&apos;est pas forcément un produit dangereux -
-              c&apos;est l&apos;agrégation de pénalités d&apos;ingrédients qui
-              ne sont pas tous critiques.
-            </li>
           </ul>
 
           <h2 className="pt-6 text-xl font-semibold text-ink">Notre méthodologie</h2>

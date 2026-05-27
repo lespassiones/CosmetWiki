@@ -10,6 +10,7 @@ import { collectOpenAIWebCandidates } from "@/lib/productSearch/openaiSearch";
 import { prevalidateCandidates } from "@/lib/productSearch/prevalidate";
 import { supabaseAnon, supabaseServer } from "@/lib/supabase";
 import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { normalizeProductQuery } from "@/lib/ai/productNormalize";
 import type { OpenBeautyFactsCandidate } from "@/lib/productSearch/openBeautyFacts";
 
 export const runtime = "nodejs";
@@ -79,11 +80,26 @@ export async function GET(req: NextRequest) {
   const page = Math.max(1, Math.min(20, Math.floor(Number(pageParam ?? 1) || 1)));
   const isFirstPage = page === 1;
 
+  // Normalize the query for catalog search (handles typos, case, word order).
+  // Cached per unique input so GPT is called at most once per distinct query.
+  // Only on page 1 — pagination re-uses OBF which handles typos natively.
+  let catalogQuery = query;
+  if (isFirstPage) {
+    try {
+      const norm = await normalizeProductQuery(query);
+      if (norm.kind === "query" && norm.confidence >= 0.6) {
+        catalogQuery = norm.query;
+      }
+    } catch {
+      // normalisation failure → keep original query
+    }
+  }
+
   // Catalog (own DB) : toujours interrogé en premier.
   // OBF / INCIDecoder : uniquement si le catalog n'a pas assez de résultats
   // ou si on est sur une page > 1 (pagination OBF).
   const catalogP = isFirstPage
-    ? fetchCatalogCandidates(query, CATALOG_LIMIT)
+    ? fetchCatalogCandidates(catalogQuery, CATALOG_LIMIT)
     : Promise.resolve([] as OpenBeautyFactsCandidate[]);
   const cacheP = isFirstPage
     ? fetchCachedCandidates(query, CACHE_LIMIT)
@@ -223,7 +239,6 @@ async function fetchCatalogCandidates(
 ): Promise<OpenBeautyFactsCandidate[]> {
   try {
     const { data, error } = await supabaseAnon()
-      .schema("cosme_check")
       .rpc("cosme_check_search_catalog", { p_query: query, p_limit: limit });
     if (error || !data) return [];
     return (

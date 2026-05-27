@@ -212,7 +212,6 @@ export async function POST(req: NextRequest) {
   if (productEan) {
     try {
       const { data: precomputed } = await supabaseAnon()
-        .schema("cosme_check")
         .rpc("cosme_check_get_product_analysis", { p_ean: productEan });
 
       if (precomputed) {

@@ -16,6 +16,7 @@
 
 import { normalizeQuery } from "./normalize";
 import { getProductCache, setProductCache } from "./cache";
+import { searchCatalogByName } from "./catalog";
 import { searchOpenBeautyFacts } from "./openBeautyFacts";
 import { searchInciDecoder } from "./inciDecoder";
 import { searchDuckDuckGo } from "./duckduckgo";
@@ -78,6 +79,35 @@ async function runCascade(rawQuery: string, startedAt: number): Promise<ProductS
       found: false,
       reason: "too_short",
       message: "Tape au moins 3 caractères (marque + nom du produit).",
+    };
+  }
+
+  // ─── Step 0 : Own catalog (48k products, indexed Postgres). Sub-100 ms,
+  // no external HTTP call. Products with known INCI are returned instantly. ──
+  const catalogHit = await searchCatalogByName(query);
+  if (catalogHit) {
+    logInfo("cascade.hit", {
+      source: "catalog",
+      durationMs: Date.now() - startedAt,
+      query: query.slice(0, 60),
+    });
+    void setProductCache({
+      queryNorm,
+      brand: catalogHit.brand,
+      productName: catalogHit.productName,
+      ingredientsText: catalogHit.ingredientsText,
+      source: "catalog",
+      sourceUrl: null,
+      confidence: 0.95,
+    });
+    return {
+      found: true,
+      brand: catalogHit.brand,
+      productName: catalogHit.productName,
+      ingredientsText: catalogHit.ingredientsText,
+      source: "cache" as const,
+      sourceUrl: null,
+      confidence: 0.95,
     };
   }
 

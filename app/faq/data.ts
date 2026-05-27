@@ -1,6 +1,6 @@
 export type FaqCategory =
   | "Composition"
-  | "Score & couleurs"
+  | "Couleurs"
   | "Ingrédients"
   | "Compte & abonnement"
   | "Confidentialité";
@@ -18,7 +18,7 @@ export type FaqItem = {
 
 export const FAQ_CATEGORIES: FaqCategory[] = [
   "Composition",
-  "Score & couleurs",
+  "Couleurs",
   "Ingrédients",
   "Compte & abonnement",
   "Confidentialité",
@@ -32,7 +32,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     dot: "vert",
     question: "Comment fonctionne le scan d'un produit ?",
     answer:
-      "Tu prends en photo la liste INCI (la liste d'ingrédients au dos du produit) ou tu scannes le code-barres. Cosme Check lit la composition, identifie chaque ingrédient dans notre base de plus de 40 000 références, puis t'affiche un score global et le détail ingrédient par ingrédient en quelques secondes.",
+      "Tu prends en photo la liste INCI (la liste d'ingrédients au dos du produit) ou tu scannes le code-barres. Cosme Check lit la composition, identifie chaque ingrédient dans notre base de plus de 40 000 références, puis t'affiche le détail ingrédient par ingrédient en quelques secondes.",
     learnMore: { href: "/comment-ca-marche" },
   },
   {
@@ -65,7 +65,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     dot: "vert",
     question: "Les ingrédients sont-ils classés par ordre d'importance ?",
     answer:
-      "Oui. La réglementation européenne impose aux marques de lister les ingrédients par ordre décroissant de concentration, jusqu'à 1 %. En dessous, l'ordre est libre. Cosme Check respecte cet ordre et le prend en compte dans le calcul du score.",
+      "Oui. La réglementation européenne impose aux marques de lister les ingrédients par ordre décroissant de concentration, jusqu'à 1 %. En dessous, l'ordre est libre. Cosme Check respecte cet ordre et l'intègre dans l'analyse.",
   },
   {
     id: "ajout-manuel",
@@ -76,35 +76,27 @@ export const FAQ_ITEMS: FaqItem[] = [
       "Depuis l'accueil, choisis l'option « Coller la liste INCI ». Tu peux copier-coller la liste depuis le site de la marque, un blog ou une photo. L'analyse se lance immédiatement.",
   },
 
-  // ── Score & couleurs ─────────────────────────────────────────────────────
+  // ── Couleurs ─────────────────────────────────────────────────────────────
   {
     id: "signification-couleurs",
-    category: "Score & couleurs",
+    category: "Couleurs",
     dot: "jaune",
-    question: "Que signifient les couleurs du score ?",
+    question: "Que signifient les couleurs des ingrédients ?",
     answer:
       "Les couleurs t'aident à comprendre en un coup d'œil l'impact potentiel d'un produit sur ta santé. Vert = excellent, Jaune = bon, Orange = à surveiller, Rouge = à éviter. Notre méthode s'appuie sur des données scientifiques et des évaluations d'experts indépendants.",
     learnMore: { href: "/comment-ca-marche", label: "En savoir plus" },
   },
   {
-    id: "calcul-score",
-    category: "Score & couleurs",
-    dot: "jaune",
-    question: "Comment le score global est-il calculé ?",
-    answer:
-      "Le score combine plusieurs critères : la note individuelle de chaque ingrédient (vert/jaune/orange/rouge), sa position dans la liste INCI (donc sa concentration), et la présence ou non d'ingrédients sensibles (allergènes, perturbateurs endocriniens suspectés, etc.). Plus la couleur d'un ingrédient est rouge, plus la pénalité est forte.",
-  },
-  {
-    id: "produit-naturel-mauvais-score",
-    category: "Score & couleurs",
+    id: "produit-naturel-mal-classe",
+    category: "Couleurs",
     dot: "orange",
-    question: "Pourquoi mon produit « naturel » obtient-il un mauvais score ?",
+    question: "Pourquoi mon produit « naturel » affiche-t-il des ingrédients pénalisés ?",
     answer:
       "« Naturel » n'est pas un terme réglementé : un produit peut contenir 99 % d'eau et 1 % d'extrait végétal et s'afficher comme tel. Cosme Check ne juge pas le marketing, mais la composition. Certains ingrédients naturels (huiles essentielles, allergènes) peuvent aussi être pénalisés selon leur impact réel.",
   },
   {
     id: "ingredient-rouge",
-    category: "Score & couleurs",
+    category: "Couleurs",
     dot: "orange",
     question: "Un produit avec un ingrédient rouge est-il forcément à éviter ?",
     answer:
@@ -112,7 +104,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     id: "professionnel-sante",
-    category: "Score & couleurs",
+    category: "Couleurs",
     dot: "orange",
     question: "Cosme Check remplace-t-il l'avis d'un professionnel de santé ?",
     answer:
@@ -120,7 +112,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     id: "confiance-resultats",
-    category: "Score & couleurs",
+    category: "Couleurs",
     dot: "vert",
     question: "Puis-je faire confiance aux résultats de Cosme Check ?",
     answer:
@@ -192,7 +184,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     dot: "jaune",
     question: "L'application est-elle gratuite ?",
     answer:
-      "Oui, l'essentiel est gratuit : scanner un produit, voir son score, consulter le détail des ingrédients. Une formule premium débloque l'historique illimité, l'analyse de routine complète, le coach IA et la comparaison avancée.",
+      "Oui, l'essentiel est gratuit : scanner un produit, consulter le détail des ingrédients. Une formule premium débloque l'historique illimité, l'analyse de routine complète, le coach IA et la comparaison avancée.",
     learnMore: { href: "/offre", label: "Voir les offres" },
   },
   {
@@ -201,7 +193,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     dot: "jaune",
     question: "Que comprend l'offre premium ?",
     answer:
-      "Analyses illimitées, sauvegarde de tous tes scans, routine personnalisée évaluée globalement, conseils IA selon ton type de peau, comparaison de produits avancée, et accès prioritaire aux nouvelles fonctionnalités.",
+      "Analyses illimitées, sauvegarde de tous tes scans, routine personnalisée évaluée globalement, conseils IA selon ton profil, comparaison de produits avancée, et accès prioritaire aux nouvelles fonctionnalités.",
   },
   {
     id: "credits",

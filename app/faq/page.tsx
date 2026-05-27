@@ -7,7 +7,7 @@ import { FAQ_CATEGORIES, FAQ_ITEMS } from "./data";
 
 const TITLE = "FAQ - Questions fréquentes";
 const DESCRIPTION =
-  "Tout ce que tu as toujours voulu savoir sur tes cosmétiques : composition INCI, score, ingrédients, confidentialité, abonnement. Les réponses claires de Cosme Check.";
+  "Tout ce que tu as toujours voulu savoir sur tes cosmétiques : composition INCI, ingrédients, confidentialité, abonnement. Les réponses claires de Cosme Check.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     "FAQ cosmétiques",
     "questions fréquentes INCI",
     "comprendre composition cosmétique",
-    "score cosme check",
+
     "perturbateurs endocriniens cosmétiques",
     "parabens",
     "silicones",

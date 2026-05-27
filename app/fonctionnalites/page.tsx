@@ -7,7 +7,7 @@ import { SITE_URL } from "@/lib/siteUrl";
 
 const TITLE = "Fonctionnalités";
 const DESCRIPTION =
-  "Découvre tous les outils Cosme Check pour mieux comprendre tes produits : analyse de promesses marketing, score INCI, scan, recherche d'ingrédients, routine, comparaison, coach IA.";
+  "Découvre tous les outils Cosme Check pour mieux comprendre tes produits : analyse de promesses marketing, analyse INCI, scan, recherche d'ingrédients, routine, comparaison, coach IA.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -122,7 +122,7 @@ const SECTIONS: Section[] = [
         body: "Les promesses sans fondement réel sont signalées, avec l'explication précise de la contradiction.",
       },
       {
-        title: "Score de cohérence",
+        title: "Bilan de cohérence",
         body: "Un résumé visuel global pour savoir si l'argumentaire de la marque est honnête, ambigu, ou faux.",
       },
       {
@@ -146,7 +146,7 @@ const SECTIONS: Section[] = [
     ],
     useCases: [
       "Tu scannes ton sérum préféré. Le verdict visuel apparaît en trois secondes.",
-      "Tu hésites en magasin. Tu décodes l'étiquette en pleine allée, sans connexion experte.",
+      "Tu hésites en magasin. Tu décodes l'étiquette en pleine allée, sans avoir à appeler un expert.",
       "Tu compares deux flacons. Le demi-camembert te dit lequel l'emporte sans biais.",
     ],
     benefits: [
@@ -252,20 +252,20 @@ const SECTIONS: Section[] = [
     eyebrow: "Au quotidien",
     title: "Ma routine",
     description:
-      "Compose ta routine (nettoyant, sérum, crème, soin de nuit) et observe la note de couleur globale de l'ensemble. Idéal pour identifier le maillon faible d'une routine et ajuster ses choix de façon raisonnée plutôt qu'au coup par coup.",
+      "Compose ta routine (nettoyant, sérum, crème, soin de nuit) et observe la répartition colorée de l'ensemble. Idéal pour identifier le maillon faible d'une routine et ajuster ses choix de façon raisonnée plutôt qu'au coup par coup.",
     keywords: [
-      "note de couleur globale",
+      "répartition colorée",
       "maillon faible",
       "raisonnée",
     ],
     useCases: [
-      "Tu construis ta routine du soir. Le score global te dit si elle tient la route.",
-      "Tu remplaces ta crème. Le score se met à jour sans aucune validation manuelle.",
+      "Tu construis ta routine du soir. Le résultat t'indique si elle tient la route.",
+      "Tu remplaces ta crème. L'analyse se met à jour sans aucune validation manuelle.",
       "Tu sépares visage, corps et cheveux pour une vision claire de chaque routine.",
     ],
     benefits: [
       {
-        title: "Note globale de la routine",
+        title: "Vue globale de la routine",
         body: "Le demi-camembert combine tous les produits pour donner l'image complète, sans avoir à les analyser un par un.",
       },
       {
@@ -274,7 +274,7 @@ const SECTIONS: Section[] = [
       },
       {
         title: "Suivi des changements",
-        body: "Ajoute, retire ou remplace un produit : le score se recalcule instantanément, sans rien à valider.",
+        body: "Ajoute, retire ou remplace un produit : l'analyse se recalcule instantanément, sans rien à valider.",
       },
       {
         title: "Routines séparées",
