@@ -95,6 +95,12 @@
     animation: reveal-anim 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
     animation-delay: var(--reveal-delay, 0ms);
   }
+  .reveal-delay-100  { --reveal-delay: 100ms; }
+  .reveal-delay-150  { --reveal-delay: 150ms; }
+  .reveal-delay-160  { --reveal-delay: 160ms; }
+  .reveal-delay-220  { --reveal-delay: 220ms; }
+  .reveal-delay-270  { --reveal-delay: 270ms; }
+  .reveal-delay-320  { --reveal-delay: 320ms; }
   @keyframes reveal-anim {
     to {
       opacity: 1;

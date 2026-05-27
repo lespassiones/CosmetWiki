@@ -5,6 +5,7 @@ import { logError } from "@/lib/log";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 25;
 
 const MAX_BYTES = 6 * 1024 * 1024;     // 6 MB after base64 decode
 const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"]);

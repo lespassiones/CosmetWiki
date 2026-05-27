@@ -104,61 +104,75 @@ export function PublicHeader() {
         </div>
       </header>
 
-      {open ? (
-        <div
-          className="fixed inset-0 z-[60] bg-black/30 backdrop-blur-sm lg:hidden"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setOpen(false);
-          }}
-        >
-          <nav
-            aria-label="Menu principal"
-            className="absolute right-4 top-4 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-3xl bg-white/95 shadow-[0_18px_48px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl"
+      {/* Overlay sombre */}
+      <div
+        className={`fixed inset-0 z-[60] bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 lg:hidden ${
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget) setOpen(false);
+        }}
+      />
+
+      {/* Drawer plein écran depuis la droite */}
+      <nav
+        aria-label="Menu principal"
+        className={`fixed inset-y-0 right-0 z-[70] flex w-full max-w-[320px] flex-col bg-white shadow-[−20px_0_60px_rgba(0,0,0,0.12)] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden ${
+          open ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {/* En-tête du drawer */}
+        <div className="flex h-[64px] items-center justify-between border-b border-black/[0.06] px-6">
+          <Link
+            href="/"
+            onClick={() => setOpen(false)}
+            className="text-[20px] font-bold tracking-tight"
           >
-            <div className="flex items-center justify-between px-5 pb-3 pt-4">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-subtle">
-                Menu
-              </span>
-              <button
-                type="button"
-                aria-label="Fermer le menu"
-                onClick={() => setOpen(false)}
-                className="grid h-8 w-8 place-items-center rounded-full text-ink-muted hover:bg-black/[0.04] hover:text-ink"
-              >
-                <CloseIcon className="h-4 w-4" />
-              </button>
-            </div>
-            <ul className="px-2 pb-3">
-              {NAV_ITEMS.map((item) => {
-                const active = pathname?.startsWith(item.href);
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className={`flex items-center justify-between rounded-2xl px-3.5 py-3 text-[15px] font-medium transition-colors ${
-                        active
-                          ? "bg-rose-50/70 text-rose-700"
-                          : "text-ink hover:bg-black/[0.03]"
-                      }`}
-                    >
-                      {item.label}
-                      <ArrowIcon className="h-3.5 w-3.5" />
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-            <div className="px-3 pb-4">
-              <Link
-                href="/auth/sign-in"
-                className="flex w-full items-center justify-center rounded-full bg-[#F43F5E] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_10px_24px_-8px_rgba(244,63,94,0.5)] transition hover:bg-[#E11D48]"
-              >
-                Se connecter
-              </Link>
-            </div>
-          </nav>
+            <span className="text-[#111111]">Cosme </span>
+            <span className="text-[#F43F5E]">Check</span>
+          </Link>
+          <button
+            type="button"
+            aria-label="Fermer le menu"
+            onClick={() => setOpen(false)}
+            className="grid h-9 w-9 place-items-center rounded-full text-[#374151] hover:bg-black/[0.05] hover:text-[#111111]"
+          >
+            <CloseIcon className="h-5 w-5" />
+          </button>
         </div>
-      ) : null}
+
+        {/* Liens de navigation */}
+        <ul className="flex-1 overflow-y-auto px-4 py-4">
+          {NAV_ITEMS.map((item) => {
+            const active = pathname?.startsWith(item.href);
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`flex items-center justify-between rounded-xl px-4 py-3.5 text-[16px] font-medium transition-colors ${
+                    active
+                      ? "text-[#F43F5E] bg-rose-50"
+                      : "text-[#111111] hover:bg-black/[0.03]"
+                  }`}
+                >
+                  {item.label}
+                  <ArrowIcon className="h-4 w-4 text-[#9CA3AF]" />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* CTA bas du drawer */}
+        <div className="border-t border-black/[0.06] px-5 py-5">
+          <Link
+            href="/auth/sign-in"
+            className="flex w-full items-center justify-center rounded-full bg-[#F43F5E] py-3.5 text-[15px] font-semibold text-white shadow-[0_10px_24px_-8px_rgba(244,63,94,0.45)] transition hover:bg-[#E11D48]"
+          >
+            Se connecter
+          </Link>
+        </div>
+      </nav>
     </>
   );
 }
@@ -212,8 +226,7 @@ function ArrowIcon({ className }: { className?: string }) {
       className={className}
       aria-hidden
     >
-      <line x1="5" y1="12" x2="19" y2="12" />
-      <polyline points="12 5 19 12 12 19" />
+      <path d="M9 18l6-6-6-6" />
     </svg>
   );
 }

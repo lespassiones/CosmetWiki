@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState, type ReactNode } from "react";
+import { FadeInSection } from "@/components/FadeInSection";
 
 type Slide = {
   titleNode: ReactNode;
@@ -69,22 +70,21 @@ export function LandingSteps() {
           }`}
         >
           {/* Grand titre — change par slide */}
-          <h2 className="mx-auto max-w-[44rem] text-center text-[28px] font-bold leading-[1.15] tracking-tight text-ink sm:text-[34px] lg:text-[44px]">
-            {slide.titleNode}
-          </h2>
+          <FadeInSection>
+            <h2 className="mx-auto max-w-[44rem] text-center text-[28px] font-bold leading-[1.15] tracking-tight text-ink sm:text-[34px] lg:text-[44px]">
+              {slide.titleNode}
+            </h2>
+          </FadeInSection>
 
           {/* Bloc principal : image gauche + (texte + flèches) droite (desktop) /
               image en haut + (texte + flèches) en bas (mobile).
               `lg:items-start` => le bloc texte est aligné en haut, pas centré
               verticalement sur l'image. */}
-          <div className="mt-12 flex flex-col items-center gap-12 lg:mt-20 lg:flex-row lg:items-start lg:gap-8">
+          <FadeInSection delay={100} className="mt-12 flex flex-col items-center gap-12 lg:mt-20 lg:flex-row lg:items-start lg:gap-8">
             {/* Image (téléphone) — réduite de ~30% par rapport à la version
                 précédente. */}
             <div className="flex flex-1 items-start justify-center">
-              <div
-                className="relative w-full max-w-[210px] sm:max-w-[240px] lg:max-w-[280px]"
-                style={{ aspectRatio: "966 / 1629" }}
-              >
+              <div className="relative w-full max-w-[210px] sm:max-w-[240px] lg:max-w-[280px] aspect-[966/1629]">
                 <Image
                   src={slide.image}
                   alt={slide.alt}
@@ -129,7 +129,7 @@ export function LandingSteps() {
                 </button>
               </div>
             </div>
-          </div>
+          </FadeInSection>
         </div>
       </div>
     </section>

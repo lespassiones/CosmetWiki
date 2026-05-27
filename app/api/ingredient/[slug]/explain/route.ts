@@ -4,6 +4,7 @@ import { explainIngredient } from "@/lib/ai/explain";
 import type { ColorRating } from "@/lib/supabase";
 
 export const runtime = "nodejs";
+export const maxDuration = 25;
 // `force-dynamic` is intentionally NOT set: we want Next/Vercel to honour the
 // public `s-maxage` Cache-Control below and cache by URL at the Edge CDN.
 

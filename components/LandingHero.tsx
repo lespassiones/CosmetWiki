@@ -38,7 +38,7 @@ export function LandingHero() {
 
         {/* Contenu desktop : container 1280, alignement bas */}
         <div className="relative z-10 mx-auto hidden w-full max-w-[1280px] items-end gap-6 px-6 pt-32 sm:px-8 lg:flex">
-          <div className="flex-1 pb-16">
+          <div className="flex-1 pb-16 reveal-on-mount">
             <Headline />
             <div className="mt-10">
               <KpiRow />
@@ -47,7 +47,7 @@ export function LandingHero() {
               <StoreBadges align="left" />
             </div>
           </div>
-          <div className="flex flex-[1.6] items-end justify-end">
+          <div className="flex flex-[1.6] items-end justify-end reveal-on-mount reveal-delay-150">
             <div
               className="relative w-full max-w-[884px]"
               style={{ aspectRatio: "1350 / 1063" }}
@@ -67,7 +67,7 @@ export function LandingHero() {
         {/* Contenu mobile vertical, style OnSkin :
             titre → image (halo) → description → KPIs → badges → CTA */}
         <div className="relative z-10 flex flex-col items-center gap-6 px-5 pb-10 pt-28 text-center lg:hidden">
-          <h1 className="font-bold leading-[1.05] tracking-tight text-ink text-[34px] sm:text-[40px]">
+          <h1 className="reveal-on-mount font-bold leading-[1.05] tracking-tight text-ink text-[34px] sm:text-[40px]">
             <span className="text-[#111111]">Décode tes </span>
             <span className="relative inline-block whitespace-nowrap">
               <span className="text-[#F43F5E]">cosmétiques</span>&nbsp;♡
@@ -89,7 +89,7 @@ export function LandingHero() {
           </h1>
 
           {/* Image avec halo radial + dégradé concave en bas */}
-          <div className="relative mx-auto w-full max-w-[340px]">
+          <div className="relative mx-auto w-full max-w-[340px] reveal-on-mount reveal-delay-100">
             <div
               aria-hidden
               className="absolute inset-0 -z-10"
@@ -122,7 +122,7 @@ export function LandingHero() {
             </div>
           </div>
 
-          <p className="max-w-[32rem] text-[15px] leading-relaxed text-ink-muted">
+          <p className="reveal-on-mount reveal-delay-160 max-w-[32rem] text-[15px] leading-relaxed text-ink-muted">
             <span className="font-semibold text-ink">
               Au-delà des notes, la vérité de tes cosmétiques.
             </span>
@@ -131,13 +131,17 @@ export function LandingHero() {
             ce qui agit vraiment sur ta peau.
           </p>
 
-          <KpiRow />
+          <div className="reveal-on-mount reveal-delay-220">
+            <KpiRow />
+          </div>
 
-          <StoreBadges />
+          <div className="reveal-on-mount reveal-delay-270">
+            <StoreBadges />
+          </div>
 
           <Link
             href="/auth/sign-in"
-            className="group mt-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[#F43F5E] to-[#E11D48] px-7 py-3 text-[15px] font-semibold text-white shadow-[0_12px_28px_-8px_rgba(244,63,94,0.55),inset_0_1px_0_rgba(255,255,255,0.30)] transition hover:brightness-110 active:scale-[0.98]"
+            className="group reveal-on-mount reveal-delay-320 mt-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[#F43F5E] to-[#E11D48] px-7 py-3 text-[15px] font-semibold text-white shadow-[0_12px_28px_-8px_rgba(244,63,94,0.55),inset_0_1px_0_rgba(255,255,255,0.30)] transition hover:brightness-110 active:scale-[0.98]"
           >
             Analyse ton premier produit
             <span aria-hidden className="transition group-hover:translate-x-0.5">

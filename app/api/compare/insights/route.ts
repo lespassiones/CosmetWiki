@@ -7,6 +7,7 @@ import { logError } from "@/lib/log";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 25;
 
 /**
  * GET /api/compare/insights?a=<id>&b=<id>

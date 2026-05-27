@@ -62,6 +62,7 @@ const IdentifyLlmSchema = z.object({
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 25;
 
 type IdentifyPayload = {
   inci?: string;

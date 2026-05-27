@@ -28,6 +28,7 @@ import type { AnalyseItem, AnalyseResponse } from "@/lib/analyseTypes";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 25;
 
 type Body = { analysisId?: string };
 

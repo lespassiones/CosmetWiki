@@ -16,6 +16,7 @@ import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 25;
 
 const MODEL = "gpt-4o-mini";
 const MISTRAL_MODEL = "mistral-small-latest";

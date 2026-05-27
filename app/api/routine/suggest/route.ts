@@ -10,6 +10,7 @@ import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 25;
 
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req.headers);

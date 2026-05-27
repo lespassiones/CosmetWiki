@@ -25,6 +25,7 @@ import { loadRestrictionsForPrompt } from "@/lib/restrictions/promptFormat";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 25;
 
 type Body = {
   analysis_id?: string;

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { FadeInSection } from "@/components/FadeInSection";
 
 type Value = {
   image: string;
@@ -48,19 +49,23 @@ export function LandingValues() {
       <SectionDivider />
 
       <div className="mx-auto w-full max-w-[1280px] px-6 sm:px-8">
-        <h2
-          id="values-heading"
-          className="mx-auto max-w-[44rem] text-center text-[28px] font-bold leading-[1.15] tracking-tight text-ink sm:text-[34px] lg:text-[44px]"
-        >
-          La méthode <span className="text-[#F43F5E]">Cosme Check</span>
-        </h2>
-        <p className="mx-auto mt-4 max-w-[36rem] text-center text-[15px] leading-relaxed text-ink-muted lg:text-[16px]">
-          Quatre engagements simples, qui guident chaque analyse.
-        </p>
+        <FadeInSection>
+          <h2
+            id="values-heading"
+            className="mx-auto max-w-[44rem] text-center text-[28px] font-bold leading-[1.15] tracking-tight text-ink sm:text-[34px] lg:text-[44px]"
+          >
+            La méthode <span className="text-[#F43F5E]">Cosme Check</span>
+          </h2>
+          <p className="mx-auto mt-4 max-w-[36rem] text-center text-[15px] leading-relaxed text-ink-muted lg:text-[16px]">
+            Quatre engagements simples, qui guident chaque analyse.
+          </p>
+        </FadeInSection>
 
         <div className="mt-12 grid grid-cols-1 gap-10 sm:gap-12 lg:mt-20 lg:grid-cols-2 lg:gap-x-16 lg:gap-y-20">
-          {VALUES.map((v) => (
-            <ValueCard key={v.title} value={v} />
+          {VALUES.map((v, i) => (
+            <FadeInSection key={v.title} delay={(i % 2) * 100}>
+              <ValueCard value={v} />
+            </FadeInSection>
           ))}
         </div>
       </div>
