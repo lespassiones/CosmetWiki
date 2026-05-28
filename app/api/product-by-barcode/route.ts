@@ -9,6 +9,15 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
+// INCI lists have many short comma-separated tokens. Marketing text has few
+// commas and long sentences. Threshold: ≥5 tokens, average length ≤40 chars.
+function looksLikeInci(text: string): boolean {
+  const tokens = text.split(/[,;]/).map((t) => t.trim()).filter(Boolean);
+  if (tokens.length < 5) return false;
+  const avgLen = tokens.reduce((s, t) => s + t.length, 0) / tokens.length;
+  return avgLen <= 40;
+}
+
 type RequestBody = {
   barcode?: string;
   hp?: string;
@@ -125,13 +134,15 @@ export async function POST(req: NextRequest) {
 
   // Priorité OBF si INCI valide, sinon OPF si INCI valide.
   if (obf && obf.inci.length >= 30) {
-    void upsertCatalogProduct({
-      ean: barcode,
-      brand: obf.brand,
-      name: obf.name,
-      ingredientsText: obf.inci,
-      sourceUrl: obf.sourceUrl,
-    });
+    if (looksLikeInci(obf.inci)) {
+      void upsertCatalogProduct({
+        ean: barcode,
+        brand: obf.brand,
+        name: obf.name,
+        ingredientsText: obf.inci,
+        sourceUrl: obf.sourceUrl,
+      });
+    }
     return NextResponse.json({
       found: true,
       brand: obf.brand,
@@ -144,13 +155,15 @@ export async function POST(req: NextRequest) {
   }
 
   if (opf && opf.inci.length >= 30) {
-    void upsertCatalogProduct({
-      ean: barcode,
-      brand: opf.brand,
-      name: opf.name,
-      ingredientsText: opf.inci,
-      sourceUrl: opf.sourceUrl,
-    });
+    if (looksLikeInci(opf.inci)) {
+      void upsertCatalogProduct({
+        ean: barcode,
+        brand: opf.brand,
+        name: opf.name,
+        ingredientsText: opf.inci,
+        sourceUrl: opf.sourceUrl,
+      });
+    }
     return NextResponse.json({
       found: true,
       brand: opf.brand,
@@ -172,13 +185,15 @@ export async function POST(req: NextRequest) {
       .trim();
     const cascadeResult = await searchProductCascade(nameQuery);
     if (cascadeResult.found) {
-      void upsertCatalogProduct({
-        ean: barcode,
-        brand: cascadeResult.brand ?? partial.brand,
-        name: cascadeResult.productName ?? partial.name,
-        ingredientsText: cascadeResult.ingredientsText,
-        sourceUrl: cascadeResult.sourceUrl ?? partial.sourceUrl,
-      });
+      if (looksLikeInci(cascadeResult.ingredientsText)) {
+        void upsertCatalogProduct({
+          ean: barcode,
+          brand: cascadeResult.brand ?? partial.brand,
+          name: cascadeResult.productName ?? partial.name,
+          ingredientsText: cascadeResult.ingredientsText,
+          sourceUrl: cascadeResult.sourceUrl ?? partial.sourceUrl,
+        });
+      }
       // Prefer the brand/name we got from the barcode DB since they're more
       // reliable than whatever the cascade scraped from a web page.
       return NextResponse.json({
@@ -199,13 +214,15 @@ export async function POST(req: NextRequest) {
   //    → web search GPT comme dernier recours (Action 1).
   const webResult = await searchProductByBarcode(barcode);
   if (webResult.found) {
-    void upsertCatalogProduct({
-      ean: barcode,
-      brand: webResult.brand,
-      name: webResult.productName,
-      ingredientsText: webResult.ingredientsText,
-      sourceUrl: webResult.sourceUrl,
-    });
+    if (looksLikeInci(webResult.ingredientsText)) {
+      void upsertCatalogProduct({
+        ean: barcode,
+        brand: webResult.brand,
+        name: webResult.productName,
+        ingredientsText: webResult.ingredientsText,
+        sourceUrl: webResult.sourceUrl,
+      });
+    }
     return NextResponse.json({
       found: true,
       brand: webResult.brand,
