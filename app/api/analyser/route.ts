@@ -1044,6 +1044,47 @@ export async function POST(req: NextRequest) {
     } catch { /* non-blocking */ }
   })();
 
+  // Persist product in catalog with full analysis score.
+  if (productEan) {
+    void (async () => {
+      try {
+        const { upsertCatalogProduct } = await import("@/lib/db/catalog");
+        await upsertCatalogProduct({
+          ean: productEan,
+          brand: body.brand ?? null,
+          name: body.productLabel ?? null,
+          ingredientsText: body.text ?? null,
+          score: Number(score.toFixed(4)),
+          scoreLabel: scoreLabelText,
+          scoreTone: scoreTone,
+          countTotal: itemsResponse.length,
+        });
+      } catch { /* non-blocking */ }
+    })();
+  }
+
+  // Action 2: when product comes from OCR (no EAN) but brand + productLabel
+  // are known, save to product_inci_cache so future name searches get a
+  // cache hit instead of running the full web cascade.
+  if (!productEan && body.brand && body.productLabel && body.text && body.text.length > 30) {
+    void (async () => {
+      try {
+        const { setProductCache } = await import("@/lib/productSearch/cache");
+        const { normalizeQuery } = await import("@/lib/productSearch/normalize");
+        const queryNorm = normalizeQuery(`${body.brand} ${body.productLabel}`);
+        await setProductCache({
+          queryNorm,
+          brand: body.brand ?? null,
+          productName: body.productLabel ?? null,
+          ingredientsText: body.text,
+          source: "photo_ocr",
+          sourceUrl: null,
+          confidence: 0.90,
+        });
+      } catch { /* non-blocking */ }
+    })();
+  }
+
   const response = NextResponse.json({ ...responsePayload, analysisId: savedAnalysisId, addedToRoutine });
   await idempotencyStore(idemKey, response);
   return response;

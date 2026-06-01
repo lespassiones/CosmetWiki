@@ -260,7 +260,7 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
               Retour
             </button>
           )}
-          <h2 className="text-center text-[20px] font-bold text-[#1E3A8A]">{heading}</h2>
+          <h2 className="text-center text-[20px] font-bold text-[#1E3A8A] pl-16 lg:pl-0">{heading}</h2>
         </div>
 
         <div className="px-5">

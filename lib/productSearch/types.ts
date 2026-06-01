@@ -4,6 +4,7 @@ export type ProductSource =
   | "openproductsfacts"
   | "incidecoder"
   | "duckduckgo+mistral"
+  | "web_search"
   | `brand:${string}`;
 
 export type ProductSearchHit = {

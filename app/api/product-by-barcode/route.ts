@@ -2,9 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import { searchProductCascade } from "@/lib/productSearch/cascade";
 import type { ProductSearchResult } from "@/lib/productSearch/types";
+import { upsertCatalogProduct } from "@/lib/db/catalog";
+import { searchProductByBarcode } from "@/lib/productSearch/barcodeWebSearch";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 30;
+
+// INCI lists have many short comma-separated tokens. Marketing text has few
+// commas and long sentences. Threshold: ≥5 tokens, average length ≤40 chars.
+function looksLikeInci(text: string): boolean {
+  const tokens = text.split(/[,;]/).map((t) => t.trim()).filter(Boolean);
+  if (tokens.length < 5) return false;
+  const avgLen = tokens.reduce((s, t) => s + t.length, 0) / tokens.length;
+  return avgLen <= 40;
+}
 
 type RequestBody = {
   barcode?: string;
@@ -110,9 +122,27 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 1. Open Beauty Facts - primary source for cosmetics.
-  const obf = await fetchOFFProduct("world.openbeautyfacts.org", barcode);
+  // 1. OBF + OPF en parallèle — on prend le premier avec INCI ≥ 30 chars.
+  //    Priorité à OBF si les deux ont un INCI valide.
+  const [obfResult, opfResult] = await Promise.allSettled([
+    fetchOFFProduct("world.openbeautyfacts.org", barcode),
+    fetchOFFProduct("world.openproductsfacts.org", barcode),
+  ]);
+
+  const obf = obfResult.status === "fulfilled" ? obfResult.value : null;
+  const opf = opfResult.status === "fulfilled" ? opfResult.value : null;
+
+  // Priorité OBF si INCI valide, sinon OPF si INCI valide.
   if (obf && obf.inci.length >= 30) {
+    if (looksLikeInci(obf.inci)) {
+      void upsertCatalogProduct({
+        ean: barcode,
+        brand: obf.brand,
+        name: obf.name,
+        ingredientsText: obf.inci,
+        sourceUrl: obf.sourceUrl,
+      });
+    }
     return NextResponse.json({
       found: true,
       brand: obf.brand,
@@ -124,10 +154,16 @@ export async function POST(req: NextRequest) {
     } satisfies ProductSearchResult);
   }
 
-  // 2. Open Products Facts - same API, covers more household/personal-care
-  // products that are not in OBF (shampoos, deodorants, cleaning products…).
-  const opf = await fetchOFFProduct("world.openproductsfacts.org", barcode);
   if (opf && opf.inci.length >= 30) {
+    if (looksLikeInci(opf.inci)) {
+      void upsertCatalogProduct({
+        ean: barcode,
+        brand: opf.brand,
+        name: opf.name,
+        ingredientsText: opf.inci,
+        sourceUrl: opf.sourceUrl,
+      });
+    }
     return NextResponse.json({
       found: true,
       brand: opf.brand,
@@ -139,11 +175,8 @@ export async function POST(req: NextRequest) {
     } satisfies ProductSearchResult);
   }
 
-  // 3. If either source returned a product name but no usable INCI list, run
-  // that name through the full product-search cascade (cache → OBF text search
-  // → INCIDecoder scrape → DuckDuckGo + Mistral extraction). This recovers the
-  // INCI for many products that are registered in the barcode DB but whose
-  // ingredient list was never entered by the community.
+  // 2. Si l'un des deux a un nom mais sans INCI → cascade par nom.
+  //    Si la cascade réussit → écriture catalog avec l'EAN (Action 3).
   const partial = obf?.name ? obf : opf?.name ? opf : null;
   if (partial?.name) {
     const nameQuery = [partial.brand, partial.name]
@@ -152,6 +185,15 @@ export async function POST(req: NextRequest) {
       .trim();
     const cascadeResult = await searchProductCascade(nameQuery);
     if (cascadeResult.found) {
+      if (looksLikeInci(cascadeResult.ingredientsText)) {
+        void upsertCatalogProduct({
+          ean: barcode,
+          brand: cascadeResult.brand ?? partial.brand,
+          name: cascadeResult.productName ?? partial.name,
+          ingredientsText: cascadeResult.ingredientsText,
+          sourceUrl: cascadeResult.sourceUrl ?? partial.sourceUrl,
+        });
+      }
       // Prefer the brand/name we got from the barcode DB since they're more
       // reliable than whatever the cascade scraped from a web page.
       return NextResponse.json({
@@ -165,6 +207,30 @@ export async function POST(req: NextRequest) {
       found: false,
       reason: "not_found",
       message: `Produit identifié (${partial.name}) mais sans liste INCI exploitable sur nos sources. Colle la liste INCI du packaging.`,
+    } satisfies ProductSearchResult);
+  }
+
+  // 3. Code-barres totalement inconnu (OBF + OPF ne connaissent pas l'EAN)
+  //    → web search GPT comme dernier recours (Action 1).
+  const webResult = await searchProductByBarcode(barcode);
+  if (webResult.found) {
+    if (looksLikeInci(webResult.ingredientsText)) {
+      void upsertCatalogProduct({
+        ean: barcode,
+        brand: webResult.brand,
+        name: webResult.productName,
+        ingredientsText: webResult.ingredientsText,
+        sourceUrl: webResult.sourceUrl,
+      });
+    }
+    return NextResponse.json({
+      found: true,
+      brand: webResult.brand,
+      productName: webResult.productName,
+      ingredientsText: webResult.ingredientsText,
+      source: "web_search",
+      sourceUrl: webResult.sourceUrl,
+      confidence: webResult.confidence,
     } satisfies ProductSearchResult);
   }
 
