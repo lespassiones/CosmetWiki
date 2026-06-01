@@ -37,15 +37,68 @@ export type Verdict = {
   phrase: string;
 };
 
+/**
+ * Threshold for the position-weighted yellow sum above which the verdict
+ * drops from "safe" (feuille verte) to "caution" (œil jaune).
+ *
+ * Tuned so that:
+ *   - 3 jaunes en tête de liste (positions 1-3 / 10) ≈ 2.88  → caution
+ *   - 3 jaunes en milieu de liste (positions 6-8 / 10) ≈ 2.00 → safe
+ *   - 4 jaunes répartis (positions 1, 3, 5, 7 / 10) ≈ 3.42   → caution
+ *   - 4 jaunes en fin de liste (positions 17-20 / 20) ≈ 0.80 → safe
+ *
+ * Replaces the old count-blind rule (`jaune >= 4`) which classified a
+ * formula with 3 jaunes très concentrés comme "feuille verte" — alors
+ * qu'une autre formule avec 3 jaunes en fin de liste recevait la même
+ * pastille malgré une exposition réelle bien plus faible.
+ */
+const YELLOW_WEIGHTED_CAUTION_THRESHOLD = 2.5;
+
+/**
+ * Position weight matching `computeScore` in lib/inciParser.ts:
+ *   w(p) = log(N - p + 1) / log(N + 1)   avec p en 0-indexé.
+ * Pèse 1.0 pour la 1ʳᵉ position (plus forte concentration) et tend vers 0
+ * en fin de liste.
+ */
+function positionWeight(positionOneIndexed: number, total: number): number {
+  if (total <= 0) return 0;
+  const N = Math.max(total, 1);
+  const p = Math.max(0, positionOneIndexed - 1);
+  return Math.log(N - p + 1) / Math.log(N + 1);
+}
+
+/**
+ * Somme pondérée par position des ingrédients jaunes — mirroir de la
+ * pénalité jaune dans `computeScore`. Permet à `pickTone` de distinguer
+ * "3 jaunes très concentrés" de "3 jaunes en fin de liste" au lieu de les
+ * traiter comme équivalents.
+ */
+function weightedYellowSum(items: AnalyseItem[]): number {
+  if (items.length === 0) return 0;
+  const total = items.length;
+  let sum = 0;
+  for (const it of items) {
+    if (it.colorRating === "Jaune") {
+      sum += positionWeight(it.position, total);
+    }
+  }
+  return sum;
+}
+
 /** Pick the appropriate verdict tier from the colour counts. */
-function pickTone(counts: AnalyseResponse["counts"]): VerdictTone {
+function pickTone(
+  counts: AnalyseResponse["counts"],
+  items: AnalyseItem[],
+): VerdictTone {
   const { jaune, orange, rouge, matched } = counts;
   if (matched === 0) return "unknown";
   if (rouge >= 2) return "high-risk";
   if (rouge >= 1) return "danger";
   if (orange >= 3) return "danger";
   if (orange >= 1) return "warning";
-  if (jaune >= 4) return "caution";
+  if (jaune >= 1 && weightedYellowSum(items) >= YELLOW_WEIGHTED_CAUTION_THRESHOLD) {
+    return "caution";
+  }
   if (jaune >= 1) return "safe";
   return "very-safe";
 }
@@ -754,7 +807,7 @@ export function computeEssentiel(
   result: AnalyseResponse,
   opts?: EssentielOptions,
 ): EssentielData {
-  const tone = pickTone(result.counts);
+  const tone = pickTone(result.counts, result.items);
   const phrase = pickPhrase(tone, result.counts);
   const resolvedCategory: ProductCategory | null =
     (opts?.category && opts.category !== "autre" ? opts.category : null)
