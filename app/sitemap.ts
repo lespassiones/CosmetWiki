@@ -1,4 +1,4 @@
-import type { MetadataRoute } from "next";
+ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/siteUrl";
 
 // Cache the sitemap : Next will revalidate at most once per day.
