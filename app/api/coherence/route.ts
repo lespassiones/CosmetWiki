@@ -22,6 +22,10 @@ import { idempotencyKey, idempotencyLookup, idempotencyStore } from "@/lib/idemp
 import { logError } from "@/lib/log";
 import { loadProfileForPrompt } from "@/lib/skin/promptFormat";
 import { loadRestrictionsForPrompt } from "@/lib/restrictions/promptFormat";
+import { hashInci, hashDescription } from "@/lib/cacheHash";
+import { supabaseAnon, supabaseService } from "@/lib/supabase";
+
+const COHERENCE_ALGO_VERSION = "v1.0";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -79,22 +83,19 @@ export async function POST(req: NextRequest) {
   const { user, supabase: sb } = gate;
 
   const idemKey = idempotencyKey(user.id, "coherence", { analysisId, description });
-  const cached = await idempotencyLookup(idemKey);
-  if (cached) return cached;
-
-  // Now consume 1 credit. On exhaustion → 429.
-  const charge = await gate.consumeCredit("coherence");
-  if (!charge.ok) return charge.response;
+  const cachedIdem = await idempotencyLookup(idemKey);
+  if (cachedIdem) return cachedIdem;
 
   try {
   // Look up the parent analysis. RLS already restricts to the user's own
   // rows; we add an explicit user_id check as belt-and-braces.
   // We also pull `product_type` (string hint from OCR / identification) and
-  // `brand` so we can give the type detector richer context.
+  // `brand` so we can give the type detector richer context. `input_text` is
+  // pulled to compute the INCI hash for the shared cohérence cache lookup.
   const { data: analysisRow, error: analysisErr } = await sb
     .schema("cosme_check")
     .from("analyses")
-    .select("id, user_id, name, product_label, product_type, brand, result_json")
+    .select("id, user_id, name, product_label, product_type, brand, result_json, input_text")
     .eq("id", analysisId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -113,6 +114,47 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
+
+  // Shared coherence cache — clé composite (hash INCI, hash description).
+  // Si un autre user a déjà analysé la même promesse sur la même formule, on
+  // retourne le résultat instantanément, on l'écrit dans l'historique perso
+  // de l'user, et on ne débite aucun crédit (cohérent avec analyser).
+  const inciSource = (analysisRow.input_text as string | null)?.trim() || "";
+  const inciHash = inciSource ? hashInci(inciSource) : null;
+  const descHash = hashDescription(description);
+
+  if (inciHash) {
+    try {
+      const { data: cachedCoh } = await supabaseAnon()
+        .rpc("cosme_check_get_coherence_cache", {
+          p_inci_hash: inciHash,
+          p_description_hash: descHash,
+        });
+
+      if (cachedCoh) {
+        const cachedResult = cachedCoh as Record<string, unknown>;
+        const { data: saved } = await sb
+          .schema("cosme_check")
+          .from("coherence_analyses")
+          .insert({
+            user_id: user.id,
+            analysis_id: analysisId,
+            description,
+            result_json: cachedResult,
+          })
+          .select("id")
+          .single();
+
+        const response = NextResponse.json({ id: saved?.id ?? null, result: cachedResult });
+        await idempotencyStore(idemKey, response);
+        return response;
+      }
+    } catch { /* cache miss or RPC error — fall through to full pipeline */ }
+  }
+
+  // Cache miss → débite 1 crédit puis lance le pipeline LLM complet.
+  const charge = await gate.consumeCredit("coherence");
+  if (!charge.ok) return charge.response;
 
   const productLabel
     = (analysisRow.product_label as string | null)
@@ -254,6 +296,24 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     );
   }
+
+    // Background: alimente le cache partagé pour que le prochain user
+    // (même formule + même description) court-circuite tout le pipeline LLM.
+    if (inciHash) {
+      void (async () => {
+        try {
+          await supabaseService()
+            .schema("cosme_check")
+            .rpc("cosme_check_upsert_coherence_cache", {
+              p_inci_hash: inciHash,
+              p_description_hash: descHash,
+              p_result_json: result,
+              p_product_type: productType,
+              p_algo_version: COHERENCE_ALGO_VERSION,
+            });
+        } catch { /* non-blocking */ }
+      })();
+    }
 
     const response = NextResponse.json({ id: saved.id, result });
     await idempotencyStore(idemKey, response);

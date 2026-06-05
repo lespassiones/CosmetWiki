@@ -387,6 +387,55 @@ export function resolvePromise(
 }
 
 /**
+ * EU Annex III substances qui sont aussi utilisées hors-parfumerie
+ * (conservateur, solvant, plastifiant). Lorsque la formule ne contient AUCUN
+ * marqueur de parfum, ces ingrédients servent à leur autre fonction et ne
+ * doivent donc PAS contredire une promesse « sans allergène parfumant ».
+ *
+ * Source : Annexe III du règlement UE 1223/2009 + usages réels documentés.
+ * - benzyl-alcohol  : conservateur / solvant (≈90 % des usages cosmétiques)
+ * - benzyl-benzoate : solvant, fixateur, plastifiant
+ * - benzyl-salicylate : aussi absorbeur UV faible
+ */
+const DUAL_USE_ANNEX_III_SLUGS: ReadonlySet<string> = new Set([
+  "benzyl-alcohol",
+  "benzyl-benzoate",
+  "benzyl-salicylate",
+]);
+
+/** INCI names that explicitly signal a fragrance composition in the formula. */
+const FRAGRANCE_MARKER_NAMES: ReadonlySet<string> = new Set([
+  "PARFUM",
+  "FRAGRANCE",
+  "AROMA",
+  "FLAVOR",
+]);
+
+/**
+ * Détecte si une formule contient un marqueur de parfum déclaré : soit le
+ * mot PARFUM/FRAGRANCE/AROMA/FLAVOR explicite, soit un tag `parfum-synthese`,
+ * soit un allergène Annexe III « pur parfum » (i.e. NON dual-use). On exclut
+ * les dual-use de ce signal pour éviter l'auto-confirmation circulaire :
+ * la présence de Benzyl Alcohol seul ne « prouve » pas que la formule est
+ * parfumée — c'est précisément ce qu'on cherche à déterminer.
+ */
+function formulaHasDeclaredFragrance(items: AnalyseItem[]): boolean {
+  for (const it of items) {
+    const upperName = (it.name ?? it.input ?? "").toUpperCase().trim();
+    if (FRAGRANCE_MARKER_NAMES.has(upperName)) return true;
+    const tags = it.tags ?? [];
+    if (tags.includes("parfum-synthese")) return true;
+    if (
+      tags.includes("allergene-parfumant")
+      && (!it.slug || !DUAL_USE_ANNEX_III_SLUGS.has(it.slug))
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Resolve an "absence" promise (sans sulfate, sans paraben…) by scanning
  * every formula item for the forbidden tag.
  *
@@ -395,6 +444,12 @@ export function resolvePromise(
  *   - At least one item carries the tag → "contredite" (score 0). The
  *     contradicting ingredients go into `contradictingActives` so the UI
  *     can name and shame them.
+ *
+ * Cas particulier « sans allergène parfumant » : certains Annexe III sont
+ * dual-use (Benzyl Alcohol = conservateur). Si la formule ne déclare AUCUN
+ * parfum (pas de PARFUM/FRAGRANCE, pas de parfum-synthese, pas d'autre
+ * Annexe III « pur parfum »), ces substances ne sont pas utilisées comme
+ * allergène parfumant et la promesse reste tenue.
  *
  * Purely deterministic - no LLM call, no fuzzy matching. The tags were
  * computed once when the INCI list was first analysed, we just reread them
@@ -423,7 +478,17 @@ export function resolveAbsencePromise(
   }
 
   const tag = cat.forbiddenTag;
-  const offenders = items.filter((it) => (it.tags ?? []).includes(tag));
+  let offenders = items.filter((it) => (it.tags ?? []).includes(tag));
+
+  // Filtre contextuel pour "sans allergène parfumant" : les substances
+  // dual-use (Benzyl Alcohol, Benzyl Benzoate, Benzyl Salicylate) ne
+  // comptent comme allergène parfumant que si la formule contient un
+  // parfum déclaré.
+  if (tag === "allergene-parfumant" && !formulaHasDeclaredFragrance(items)) {
+    offenders = offenders.filter(
+      (it) => !it.slug || !DUAL_USE_ANNEX_III_SLUGS.has(it.slug),
+    );
+  }
 
   if (offenders.length === 0) {
     return {

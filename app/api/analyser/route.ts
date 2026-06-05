@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAnon } from "@/lib/supabase";
 import { parseInciList, computeScore, scoreLabel, type ColorRating } from "@/lib/inciParser";
+import { hashInci } from "@/lib/cacheHash";
 import { apiGate } from "@/lib/apiGate";
 import { idempotencyKey, idempotencyLookup, idempotencyStore } from "@/lib/idempotency";
 import { logError, logWarn } from "@/lib/log";
@@ -250,6 +251,48 @@ export async function POST(req: NextRequest) {
       }
     } catch { /* cache miss or network error — fall through to full pipeline */ }
   }
+
+  // INCI-hash cache — couvre les produits sans EAN fiable (recherche web,
+  // collage manuel). Si la même liste INCI a déjà été analysée par un autre
+  // user, on retourne le résultat instantanément sans débiter de crédit.
+  const inciHash = hashInci(rawText);
+  try {
+    const { data: precomputedByInci } = await supabaseAnon()
+      .rpc("cosme_check_get_inci_analysis", { p_inci_hash: inciHash });
+
+    if (precomputedByInci) {
+      const cached_result = precomputedByInci as AnalyseResponse;
+      cached_result.items = recomputeThresholdContext(cached_result.items ?? []);
+      cached_result.synthesis = null;
+
+      let savedAnalysisId: string | null = null;
+      if (user) {
+        try {
+          const autoName = body.productLabel?.slice(0, 200)
+            ?? `Analyse du ${new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
+          const { data: inserted } = await sbAuth
+            .schema("cosme_check")
+            .from("analyses")
+            .insert({
+              user_id: user.id,
+              name: autoName,
+              product_label: body.productLabel?.slice(0, 200) ?? null,
+              brand: body.brand?.slice(0, 120) ?? null,
+              product_type: body.productType?.slice(0, 120) ?? null,
+              category: cached_result.category ?? null,
+              input_text: rawText,
+              result_json: cached_result,
+              score: Number((cached_result.score ?? 0).toFixed(2)),
+            })
+            .select("id")
+            .single();
+          savedAnalysisId = (inserted?.id as string) ?? null;
+        } catch { /* history save failure must not block the response */ }
+      }
+
+      return NextResponse.json({ ...cached_result, analysisId: savedAnalysisId, addedToRoutine: false });
+    }
+  } catch { /* cache miss or network error — fall through to full pipeline */ }
 
   const charge = await gate.consumeCredit("analyser");
   if (!charge.ok) return charge.response;
@@ -981,6 +1024,25 @@ export async function POST(req: NextRequest) {
       } catch { /* non-blocking */ }
     })();
   }
+
+  // Background: cache aussi par hash INCI — couvre les formules sans EAN
+  // (recherche web, collage manuel). Toute analyse calculée bénéficie au
+  // prochain user, quelle que soit la voie d'entrée.
+  void (async () => {
+    try {
+      const { supabaseService } = await import("@/lib/supabase");
+      await supabaseService()
+        .schema("cosme_check")
+        .rpc("cosme_check_upsert_inci_analysis", {
+          p_inci_hash: inciHash,
+          p_result_json: responsePayload,
+          p_score: Number(score.toFixed(4)),
+          p_score_label: scoreLabelText,
+          p_score_tone: scoreTone,
+          p_algo_version: "v1.1",
+        });
+    } catch { /* non-blocking */ }
+  })();
 
   // Persist product in catalog with full analysis score.
   if (productEan) {

@@ -7,18 +7,19 @@ import { SITE_URL } from "@/lib/siteUrl";
 
 const TITLE = "Fonctionnalités";
 const DESCRIPTION =
-  "Découvre tous les outils Cosme Check pour mieux comprendre tes produits : analyse de promesses marketing, analyse INCI, scan, recherche d'ingrédients, routine, comparaison, coach IA.";
+  "Découvre tous les outils Cosme Check pour mieux comprendre tes produits : analyse INCI (photo, scan, liste, recherche, lien), analyse de promesses marketing, routine, comparaison, recherche d'ingrédients, coach IA.";
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   keywords: [
     "fonctionnalités Cosme Check",
-    "analyse promesse marketing cosmétique",
     "analyse INCI",
     "scan cosmétique",
-    "comparateur cosmétiques",
+    "analyse promesse marketing cosmétique",
     "routine beauté",
+    "comparateur cosmétiques",
+    "recherche ingrédient cosmétique",
     "coach IA beauté",
   ],
   alternates: { canonical: "/fonctionnalites" },
@@ -36,13 +37,12 @@ export const metadata: Metadata = {
 };
 
 const NAV: NavItem[] = [
-  { id: "promesses", number: "01", label: "Promesses vs Formule" },
-  { id: "inci", number: "02", label: "Analyse INCI" },
-  { id: "scan", number: "03", label: "Scanner un produit" },
-  { id: "recherche", number: "04", label: "Recherche d'ingrédient" },
-  { id: "routine", number: "05", label: "Ma routine" },
-  { id: "comparer", number: "06", label: "Comparer 2 produits" },
-  { id: "advisor", number: "07", label: "Beauty Advisor" },
+  { id: "inci", number: "01", label: "Analyse INCI" },
+  { id: "promesses", number: "02", label: "Promesses vs Formule" },
+  { id: "routine", number: "03", label: "Ma routine" },
+  { id: "comparer", number: "04", label: "Comparer 2 produits" },
+  { id: "recherche", number: "05", label: "Recherche d'ingrédient" },
+  { id: "advisor", number: "06", label: "Beauty Advisor" },
 ];
 
 type Benefit = { title: string; body: string };
@@ -91,8 +91,62 @@ function highlight(text: string, keywords?: string[]): React.ReactNode {
 
 const SECTIONS: Section[] = [
   {
-    id: "promesses",
+    id: "inci",
     number: "01",
+    eyebrow: "Le cœur de l'application",
+    title: "Analyse INCI",
+    description:
+      "Décrypte la composition complète d'un produit, ingrédient par ingrédient. Lance l'analyse comme tu veux — photo de l'étiquette, scan caméra en direct, liste INCI collée, recherche par nom de produit ou simple lien — puis chaque ligne reçoit une couleur (vert, jaune, orange, rouge) qui résume sa pénalité selon des données scientifiques publiques, dans un système clair et indépendant.",
+    keywords: [
+      "photo de l'étiquette",
+      "scan caméra",
+      "liste INCI collée",
+      "recherche par nom de produit",
+      "lien",
+      "vert, jaune, orange, rouge",
+      "INCI",
+      "demi-camembert",
+      "indépendant",
+    ],
+    useCases: [
+      "Tu scannes ton sérum préféré à la caméra. Le verdict visuel apparaît en trois secondes.",
+      "Tu hésites en magasin : tu sors ton téléphone, tu filmes le produit en rayon, tu sais.",
+      "Tu reçois une crème en cadeau. Tu colles l'INCI ou tu colles le lien produit, le demi-camembert s'affiche.",
+    ],
+    benefits: [
+      {
+        title: "Cinq façons de lancer l'analyse",
+        body: "Photo de l'étiquette, scan caméra en direct, liste INCI collée, recherche par nom de produit ou simple lien : tu choisis le mode qui t'arrange, le résultat est identique. Aucun compte à créer pour essayer.",
+      },
+      {
+        title: "Répartition visuelle par couleur",
+        body: "Un graphique en demi-camembert affiche en un coup d'œil combien d'ingrédients sont sûrs, à surveiller, ou à éviter.",
+      },
+      {
+        title: "Analyse de chaque ingrédient",
+        body: "Rôle, bienfaits, risques, fonctions et présence réglementaire pour chaque ligne de la formule.",
+      },
+      {
+        title: "Points forts et points d'attention",
+        body: "Les actifs marquants et les ingrédients potentiellement irritants sont mis en évidence séparément.",
+      },
+      {
+        title: "Compatible avec toutes les formes",
+        body: "Crèmes, sérums, shampoings, parfums, déodorants, soins corps : tout ce qui présente une étiquette lisible peut être analysé, même sous un angle imparfait.",
+      },
+      {
+        title: "Transparence totale",
+        body: "Aucune marque ne paie pour modifier un résultat. Nos sources sont publiques, citables et vérifiables.",
+      },
+    ],
+    trust: {
+      title: "Une analyse fiable et indépendante.",
+      body: "Cosme Check est 100 % indépendant. Nos évaluations ne sont influencées par aucune marque, aucun annonceur, aucun partenariat commercial.",
+    },
+  },
+  {
+    id: "promesses",
+    number: "02",
     eyebrow: "Fonctionnalité phare",
     title: "Promesses vs Formule",
     description:
@@ -132,123 +186,8 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    id: "inci",
-    number: "02",
-    eyebrow: "Le cœur de l'application",
-    title: "Analyse INCI",
-    description:
-      "Décrypte la composition complète d'un produit, ingrédient par ingrédient. Chaque ligne de la liste INCI reçoit une couleur (vert, jaune, orange, rouge) qui résume sa pénalité selon des données scientifiques publiques et un système clair, public et indépendant.",
-    keywords: [
-      "vert, jaune, orange, rouge",
-      "INCI",
-      "demi-camembert",
-      "indépendant",
-    ],
-    useCases: [
-      "Tu scannes ton sérum préféré. Le verdict visuel apparaît en trois secondes.",
-      "Tu hésites en magasin. Tu décodes l'étiquette en pleine allée, sans avoir à appeler un expert.",
-      "Tu compares deux flacons. Le demi-camembert te dit lequel l'emporte sans biais.",
-    ],
-    benefits: [
-      {
-        title: "Répartition visuelle par couleur",
-        body: "Un graphique en demi-camembert affiche en un coup d'œil combien d'ingrédients sont sûrs, à surveiller, ou à éviter.",
-      },
-      {
-        title: "Analyse de chaque ingrédient",
-        body: "Rôle, bienfaits, risques, fonctions et présence réglementaire pour chaque ligne de la formule.",
-      },
-      {
-        title: "Points forts et points d'attention",
-        body: "Les actifs marquants et les ingrédients potentiellement irritants sont mis en évidence séparément.",
-      },
-      {
-        title: "Transparence totale",
-        body: "Aucune marque ne paie pour modifier un résultat. Nos sources sont publiques, citables et vérifiables.",
-      },
-    ],
-    trust: {
-      title: "Une analyse fiable et indépendante.",
-      body: "Cosme Check est 100 % indépendant. Nos évaluations ne sont influencées par aucune marque, aucun annonceur, aucun partenariat commercial.",
-    },
-  },
-  {
-    id: "scan",
-    number: "03",
-    eyebrow: "Le plus rapide",
-    title: "Scanner un produit",
-    description:
-      "Prends ton produit en main, filme-le quelques secondes avec ton téléphone : Cosme Check capte les informations nécessaires et lance l'analyse dans la foulée. Aucune saisie manuelle, aucun compte à créer pour essayer.",
-    keywords: [
-      "filme-le",
-      "ton téléphone",
-      "dans la foulée",
-      "Aucune saisie manuelle",
-    ],
-    useCases: [
-      "Tu tiens ton sérum en main. Tu le filmes brièvement, l'analyse s'enchaîne toute seule.",
-      "Tu hésites en magasin. Tu sors ton téléphone, tu filmes le produit en rayon, tu sais.",
-      "Une dizaine de produits passés en revue à la caméra, sans un mot tapé au clavier.",
-    ],
-    benefits: [
-      {
-        title: "Capture par la caméra",
-        body: "Tu pointes ton téléphone vers le produit que tu tiens en main, et tu le filmes quelques secondes. Cosme Check récupère ce qu'il faut pour l'analyse, même sous un angle imparfait.",
-      },
-      {
-        title: "Analyse enchaînée automatiquement",
-        body: "Une fois la capture faite, l'analyse démarre immédiatement. Tu n'as rien à valider, rien à lancer manuellement.",
-      },
-      {
-        title: "Zéro saisie au clavier",
-        body: "Aucun nom de produit à chercher, aucune liste d'ingrédients à coller. Ton téléphone et notre lecteur font tout le travail.",
-      },
-      {
-        title: "Compatible avec toutes les formes",
-        body: "Crèmes, sérums, shampoings, parfums, déodorants, soins corps : tout ce qui présente une étiquette lisible peut être analysé.",
-      },
-    ],
-  },
-  {
-    id: "recherche",
-    number: "04",
-    eyebrow: "La bibliothèque",
-    title: "Recherche d'ingrédient",
-    description:
-      "Une base de plus de 15 700 ingrédients cosmétiques classés et expliqués. Tu cherches le rétinol, le niacinamide ou un nom barbare lu sur une étiquette : tu tapes, tu lis. Chaque ingrédient possède sa fiche dédiée, mise à jour selon les dernières évaluations réglementaires.",
-    keywords: [
-      "15 700 ingrédients",
-      "rétinol",
-      "niacinamide",
-      "fiche dédiée",
-    ],
-    useCases: [
-      "Tu lis un nom barbare sur une étiquette. Tu tapes les premières lettres, tu sais.",
-      "Tu cherches une alternative plus douce à un ingrédient connu pour irriter.",
-      "Tu explores la famille chimique d'un actif pour comprendre son rôle réel.",
-    ],
-    benefits: [
-      {
-        title: "Fiches complètes",
-        body: "Pour chaque ingrédient : couleur, fonctions cosmétiques, prévalence dans la base, statut réglementaire, description claire.",
-      },
-      {
-        title: "Suggestions intelligentes",
-        body: "On reconnaît les fautes de frappe et les noms commerciaux usuels en plus de la dénomination INCI officielle.",
-      },
-      {
-        title: "Couleur instantanée",
-        body: "Vert, jaune, orange, rouge : tu sais en deux secondes si l'ingrédient te convient ou s'il appelle la prudence.",
-      },
-      {
-        title: "Liens entre ingrédients",
-        body: "Famille chimique, alternatives plus douces, produits qui en contiennent : tout est relié dans une exploration cohérente.",
-      },
-    ],
-  },
-  {
     id: "routine",
-    number: "05",
+    number: "03",
     eyebrow: "Au quotidien",
     title: "Ma routine",
     description:
@@ -284,7 +223,7 @@ const SECTIONS: Section[] = [
   },
   {
     id: "comparer",
-    number: "06",
+    number: "04",
     eyebrow: "Pour choisir",
     title: "Comparer 2 produits",
     description:
@@ -315,8 +254,45 @@ const SECTIONS: Section[] = [
     ],
   },
   {
+    id: "recherche",
+    number: "05",
+    eyebrow: "La bibliothèque",
+    title: "Recherche d'ingrédient",
+    description:
+      "Une base de plus de 15 700 ingrédients cosmétiques classés et expliqués. Tu cherches le rétinol, le niacinamide ou un nom barbare lu sur une étiquette : tu tapes, tu lis. Chaque ingrédient possède sa fiche dédiée, mise à jour selon les dernières évaluations réglementaires.",
+    keywords: [
+      "15 700 ingrédients",
+      "rétinol",
+      "niacinamide",
+      "fiche dédiée",
+    ],
+    useCases: [
+      "Tu lis un nom barbare sur une étiquette. Tu tapes les premières lettres, tu sais.",
+      "Tu cherches une alternative plus douce à un ingrédient connu pour irriter.",
+      "Tu explores la famille chimique d'un actif pour comprendre son rôle réel.",
+    ],
+    benefits: [
+      {
+        title: "Fiches complètes",
+        body: "Pour chaque ingrédient : couleur, fonctions cosmétiques, prévalence dans la base, statut réglementaire, description claire.",
+      },
+      {
+        title: "Suggestions intelligentes",
+        body: "On reconnaît les fautes de frappe et les noms commerciaux usuels en plus de la dénomination INCI officielle.",
+      },
+      {
+        title: "Couleur instantanée",
+        body: "Vert, jaune, orange, rouge : tu sais en deux secondes si l'ingrédient te convient ou s'il appelle la prudence.",
+      },
+      {
+        title: "Liens entre ingrédients",
+        body: "Famille chimique, alternatives plus douces, produits qui en contiennent : tout est relié dans une exploration cohérente.",
+      },
+    ],
+  },
+  {
     id: "advisor",
-    number: "07",
+    number: "06",
     eyebrow: "Conseiller personnel",
     title: "Beauty Advisor",
     description:

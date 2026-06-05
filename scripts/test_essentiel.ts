@@ -297,7 +297,7 @@ const fixtures: Fixture[] = [
       item({ name: "Limonene", primaryFunction: "Agent parfumant" }),
     ],
     assertions: (e) => {
-      check("'Agent parfumant' devient 'donne son odeur au produit'", hasVerb(e, "donne son odeur au produit"));
+      check("'Agent parfumant' devient 'parfume naturellement'", hasVerb(e, "parfume naturellement"));
       check("aucun verbe capillaire", noVerb(e, "cheveux")),
       check("aucun verbe 'coiffure'", noVerb(e, "coiffure"));
     },
