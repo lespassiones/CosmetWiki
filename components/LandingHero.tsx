@@ -68,7 +68,7 @@ export function LandingHero() {
             titre → image (halo) → description → KPIs → badges → CTA */}
         <div className="relative z-10 flex flex-col items-center gap-6 px-5 pb-10 pt-28 text-center lg:hidden">
           <h1 className="reveal-on-mount font-bold leading-[1.05] tracking-tight text-ink text-[34px] sm:text-[40px]">
-            <span className="text-[#111111]">Décode tes </span>
+            <span className="text-[#111111]">Check tes </span>
             <span className="relative inline-block whitespace-nowrap">
               <span className="text-[#F43F5E]">cosmétiques</span>&nbsp;♡
               <svg
@@ -169,7 +169,7 @@ function Headline({ mobile = false }: { mobile?: boolean }) {
           mobile ? "text-[28px] sm:text-[32px]" : "text-[38px] xl:text-[46px]"
         }`}
       >
-        <span className="text-[#111111]">Décode tes </span>
+        <span className="text-[#111111]">Check tes </span>
         <span className="relative inline-block whitespace-nowrap">
           <span className="text-[#F43F5E]">cosmétiques</span>&nbsp;♡
           <svg

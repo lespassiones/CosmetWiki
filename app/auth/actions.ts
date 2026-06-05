@@ -45,7 +45,9 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
   const { error } = await sb.auth.signUp({
     email,
     password,
-    options: { data: { first_name: firstName } },
+    // `signup_platform` est copié dans user_profiles.signup_platform par le
+    // trigger handle_new_user → distingue les inscriptions web vs mobile.
+    options: { data: { first_name: firstName, signup_platform: "web" } },
   });
 
   if (error) return { ok: false, error: error.message };
