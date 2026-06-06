@@ -33,7 +33,7 @@ type ScannerState =
   | { kind: "scanning" }
   | { kind: "looking-up"; barcode: string }
   | { kind: "error"; message: string; reason: ErrorReason }
-  | { kind: "not-found"; barcode: string };
+  | { kind: "not-found"; barcode: string; reason: "incomplete" | "registered" };
 
 // Format list passed to the native BarcodeDetector. Same set is supported by
 // @zxing/browser (the fallback) automatically - no need to filter there.
@@ -113,7 +113,8 @@ export function BarcodeScannerInput({
         }
         const data = (await r.json()) as ProductSearchResult;
         if (!data.found) {
-          setState({ kind: "not-found", barcode });
+          const reason = data.reason === "incomplete" ? "incomplete" : "registered";
+          setState({ kind: "not-found", barcode, reason });
           return;
         }
         onFoundRef.current({
@@ -417,29 +418,11 @@ export function BarcodeScannerInput({
       {state.kind === "not-found" ? (
         <div className="mt-4 rounded-2xl bg-white/65 p-4 ring-1 ring-white/70">
           <p className="text-[14px] text-ink">
-            Code-barres{" "}
-            <span className="font-mono text-[12px]">{state.barcode}</span> non
-            référencé sur Open Beauty Facts.
-          </p>
-          <p className="mt-1 text-[13px] text-ink-muted">
-            Tu peux chercher le produit par son nom, ou coller la liste INCI
-            telle qu'elle apparaît sur le packaging.
+            {state.reason === "incomplete"
+              ? "Ce produit n'a pas encore été référencé dans notre base de données."
+              : "Ce produit a été enregistré et sera référencé très prochainement."}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={onFallbackToProductSearch}
-              className="rounded-xl bg-gradient-to-b from-rose-400 to-pink-400 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(251,113,133,0.55),inset_0_1px_0_0_rgba(255,255,255,0.30)] transition-all hover:from-rose-500 hover:to-pink-500"
-            >
-              Chercher par nom
-            </button>
-            <button
-              type="button"
-              onClick={onFallbackToManual}
-              className="rounded-xl bg-white/80 px-4 py-2 text-sm font-medium text-ink ring-1 ring-black/[0.06] transition-colors hover:bg-white"
-            >
-              Coller la liste INCI
-            </button>
             <button
               type="button"
               onClick={resumeScanning}

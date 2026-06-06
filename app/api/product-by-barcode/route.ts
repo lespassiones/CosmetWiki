@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import { searchProductCascade } from "@/lib/productSearch/cascade";
 import type { ProductSearchResult } from "@/lib/productSearch/types";
-import { upsertCatalogProduct } from "@/lib/db/catalog";
+import {
+  upsertCatalogProduct,
+  getCatalogByEan,
+  registerScannedBarcode,
+} from "@/lib/db/catalog";
 import { searchProductByBarcode } from "@/lib/productSearch/barcodeWebSearch";
 
 export const runtime = "nodejs";
@@ -26,12 +30,35 @@ type RequestBody = {
 // EAN-8 / EAN-13 / UPC-A / UPC-E / ITF-14
 const BARCODE_RE = /^\d{8,14}$/;
 
-const NOT_FOUND: ProductSearchResult = {
+// Recherche Internet (OBF / OPF / cascade / web search) DÉSACTIVÉE.
+// Le scan lit UNIQUEMENT notre catalogue par EAN ; si le produit n'y est pas
+// (ou pas assez enrichi), on enregistre le code-barres pour le compléter plus
+// tard. Le code Internet est conservé derrière ce flag — repasser à `true`
+// réactive l'ancien comportement (enrichissement à la volée OBF/OPF/web).
+const ENABLE_INTERNET_FALLBACK = false;
+
+// EAN présent au catalogue mais sans liste INCI exploitable (produit "désactivé"
+// tant qu'il n'est pas enrichi). Aligné sur l'app mobile.
+const INCOMPLETE: ProductSearchResult = {
   found: false,
-  reason: "not_found",
-  message:
-    "Code-barres non référencé sur nos sources publiques. Tape le nom du produit ou colle sa liste INCI.",
+  reason: "incomplete",
+  message: "Ce produit n'a pas encore été référencé dans notre base de données.",
 };
+
+// EAN totalement inconnu : on vient de l'enregistrer pour enrichissement futur.
+const REGISTERED: ProductSearchResult = {
+  found: false,
+  reason: "registered",
+  message:
+    "Ce produit a été enregistré et sera référencé très prochainement sur Cosme Check.",
+};
+
+// Un produit du catalogue est exploitable pour l'analyse s'il a une vraie liste
+// INCI (≥ 5 ingrédients). En-dessous, on le considère "non encore référencé"
+// (même règle que le masquage count_total >= 5 du catalogue).
+function hasUsableInci(ingredientsText: string | null): boolean {
+  return !!ingredientsText && looksLikeInci(ingredientsText);
+}
 
 type OFFProduct = {
   name: string | null;
@@ -122,6 +149,41 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // ─── 1. Notre catalogue par EAN — source unique de vérité. ──────────────
+  const local = await getCatalogByEan(barcode);
+  if (local) {
+    if (hasUsableInci(local.ingredients_text)) {
+      return NextResponse.json({
+        found: true,
+        brand: local.brand,
+        productName: local.name,
+        ingredientsText: local.ingredients_text as string,
+        source: "cache" as const,
+        sourceUrl: local.source_url,
+        confidence: 0.9,
+      } satisfies ProductSearchResult);
+    }
+    // EAN présent mais INCI pas encore remplie → "à compléter".
+    return NextResponse.json(INCOMPLETE);
+  }
+
+  // ─── 2. Recherche externe (DÉSACTIVÉE via ENABLE_INTERNET_FALLBACK). ─────
+  if (ENABLE_INTERNET_FALLBACK) {
+    const internet = await searchViaInternet(barcode);
+    if (internet) return NextResponse.json(internet);
+  }
+
+  // ─── 3. Code-barres inconnu → on l'enregistre pour le compléter plus tard.
+  void registerScannedBarcode(barcode);
+  return NextResponse.json(REGISTERED);
+}
+
+// Cascade Internet (OBF + OPF + cascade par nom + recherche web). Retourne un
+// hit (found:true) ou null si rien d'exploitable n'a été trouvé (on bascule
+// alors sur le catalogue / l'enregistrement).
+async function searchViaInternet(
+  barcode: string,
+): Promise<ProductSearchResult | null> {
   // 1. OBF + OPF en parallèle — on prend le premier avec INCI ≥ 30 chars.
   //    Priorité à OBF si les deux ont un INCI valide.
   const [obfResult, opfResult] = await Promise.allSettled([
@@ -143,7 +205,7 @@ export async function POST(req: NextRequest) {
         sourceUrl: obf.sourceUrl,
       });
     }
-    return NextResponse.json({
+    return {
       found: true,
       brand: obf.brand,
       productName: obf.name,
@@ -151,7 +213,7 @@ export async function POST(req: NextRequest) {
       source: "openbeautyfacts",
       sourceUrl: obf.sourceUrl,
       confidence: 0.98,
-    } satisfies ProductSearchResult);
+    } satisfies ProductSearchResult;
   }
 
   if (opf && opf.inci.length >= 30) {
@@ -164,7 +226,7 @@ export async function POST(req: NextRequest) {
         sourceUrl: opf.sourceUrl,
       });
     }
-    return NextResponse.json({
+    return {
       found: true,
       brand: opf.brand,
       productName: opf.name,
@@ -172,7 +234,7 @@ export async function POST(req: NextRequest) {
       source: "openproductsfacts",
       sourceUrl: opf.sourceUrl,
       confidence: 0.95,
-    } satisfies ProductSearchResult);
+    } satisfies ProductSearchResult;
   }
 
   // 2. Si l'un des deux a un nom mais sans INCI → cascade par nom.
@@ -196,18 +258,14 @@ export async function POST(req: NextRequest) {
       }
       // Prefer the brand/name we got from the barcode DB since they're more
       // reliable than whatever the cascade scraped from a web page.
-      return NextResponse.json({
+      return {
         ...cascadeResult,
         brand: cascadeResult.brand ?? partial.brand,
         productName: cascadeResult.productName ?? partial.name,
-      } satisfies ProductSearchResult);
+      } satisfies ProductSearchResult;
     }
-    // The cascade found the product in a DB but no INCI anywhere.
-    return NextResponse.json({
-      found: false,
-      reason: "not_found",
-      message: `Produit identifié (${partial.name}) mais sans liste INCI exploitable sur nos sources. Colle la liste INCI du packaging.`,
-    } satisfies ProductSearchResult);
+    // Cascade sans INCI exploitable → on bascule sur le catalogue/enregistrement.
+    return null;
   }
 
   // 3. Code-barres totalement inconnu (OBF + OPF ne connaissent pas l'EAN)
@@ -223,7 +281,7 @@ export async function POST(req: NextRequest) {
         sourceUrl: webResult.sourceUrl,
       });
     }
-    return NextResponse.json({
+    return {
       found: true,
       brand: webResult.brand,
       productName: webResult.productName,
@@ -231,9 +289,9 @@ export async function POST(req: NextRequest) {
       source: "web_search",
       sourceUrl: webResult.sourceUrl,
       confidence: webResult.confidence,
-    } satisfies ProductSearchResult);
+    } satisfies ProductSearchResult;
   }
 
-  // 4. Barcode completely unknown across all sources.
-  return NextResponse.json(NOT_FOUND);
+  // 4. Rien d'exploitable trouvé sur Internet.
+  return null;
 }

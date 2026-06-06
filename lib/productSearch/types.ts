@@ -19,7 +19,10 @@ export type ProductSearchHit = {
 
 export type ProductSearchMiss = {
   found: false;
-  reason: "too_short" | "not_found" | "timeout";
+  // Scan code-barres :
+  //  - "incomplete"  : EAN présent au catalogue mais sans liste INCI exploitable
+  //  - "registered"  : EAN inconnu, enregistré pour enrichissement ultérieur
+  reason: "too_short" | "not_found" | "timeout" | "registered" | "incomplete";
   message: string;
 };
 
