@@ -106,27 +106,28 @@ function isInTrace(item: AnalyseItem): boolean {
 /**
  * Decide the verdict for one promise based on what was found in the formula.
  *
- * Rules (evaluated top-down):
- *   - At least one *documented* active is present AND well dosed (not in trace)
+ * Tout ingrédient qui CONFIRME la promesse compte — qu'il soit un actif
+ * biologique documenté OU un ingrédient cosmétique/sensoriel (texture,
+ * filmogène…). On évalue alors la promesse selon la position :
+ *
+ *   - Au moins un ingrédient confirmant bien placé (avant parfum/conservateur)
  *     → "tenue"
- *   - At least one *documented* active is present but ALL are in trace (≤1 %)
+ *   - Des ingrédients confirmants présents mais TOUS en trace (≤1 %)
  *     → "partielle"
- *   - No documented active, but a *marketing* active is present
- *     (e.g. polysaccharides for densification) → "marketing"
- *   - Otherwise → "non_demontree"
+ *   - Aucun ingrédient confirmant → "non_demontree"
+ *
+ * Le verdict "marketing" n'est plus produit (conservé dans le type pour les
+ * analyses déjà stockées).
  */
 function deriveVerdict({
-  documentedFound,
-  documentedFoundWellDosed,
-  marketingFound,
+  confirmingFound,
+  confirmingWellDosed,
 }: {
-  documentedFound: number;
-  documentedFoundWellDosed: number;
-  marketingFound: number;
+  confirmingFound: number;
+  confirmingWellDosed: number;
 }): CoherenceVerdict {
-  if (documentedFoundWellDosed > 0) return "tenue";
-  if (documentedFound > 0) return "partielle";
-  if (marketingFound > 0) return "marketing";
+  if (confirmingWellDosed > 0) return "tenue";
+  if (confirmingFound > 0) return "partielle";
   return "non_demontree";
 }
 
@@ -353,23 +354,25 @@ export function resolvePromise(
         name: active.name,
         slug: item.slug,
         position: item.position,
+        inTrace: isInTrace(item),
         note: "effet visuel/sensoriel",
       });
     }
   }
 
-  const wellDosed = foundDocumented.filter((f) => !f.inTrace).length;
-  const inTrace = foundDocumented.filter((f) => f.inTrace).length;
+  // Les ingrédients cosmétiques/sensoriels comptent désormais comme
+  // confirmation de la promesse, au même titre que les actifs documentés.
+  const wellDosed =
+    foundDocumented.filter((f) => !f.inTrace).length
+    + foundCosmetic.filter((c) => !c.inTrace).length;
+  const inTrace =
+    foundDocumented.filter((f) => f.inTrace).length
+    + foundCosmetic.filter((c) => c.inTrace).length;
   const verdict = deriveVerdict({
-    documentedFound: foundDocumented.length,
-    documentedFoundWellDosed: wellDosed,
-    marketingFound: foundCosmetic.length,
+    confirmingFound: foundDocumented.length + foundCosmetic.length,
+    confirmingWellDosed: wellDosed,
   });
-  const score = unifiedScore({
-    wellDosed,
-    inTrace,
-    cosmetic: foundCosmetic.length,
-  });
+  const score = unifiedScore({ wellDosed, inTrace, cosmetic: 0 });
 
   return {
     slug: cat.slug,
@@ -584,6 +587,7 @@ export function resolveOpenPromise(
         name: item.name ?? match.item_name,
         slug: item.slug,
         position: item.position,
+        inTrace: isInTrace(item),
         note: match.reason.trim().slice(0, 80) || "effet visuel/sensoriel",
       });
     } else {
@@ -596,12 +600,16 @@ export function resolveOpenPromise(
     }
   }
 
-  const wellDosed = foundDocumented.filter((f) => !f.inTrace).length;
-  const trace = foundDocumented.filter((f) => f.inTrace).length;
+  // Documenté + cosmétique : tout ingrédient confirmant compte.
+  const wellDosed =
+    foundDocumented.filter((f) => !f.inTrace).length
+    + foundCosmetic.filter((c) => !c.inTrace).length;
+  const trace =
+    foundDocumented.filter((f) => f.inTrace).length
+    + foundCosmetic.filter((c) => c.inTrace).length;
   const verdict = deriveVerdict({
-    documentedFound: foundDocumented.length,
-    documentedFoundWellDosed: wellDosed,
-    marketingFound: foundCosmetic.length,
+    confirmingFound: foundDocumented.length + foundCosmetic.length,
+    confirmingWellDosed: wellDosed,
   });
 
   // Same unified scale as catalogue path - keeps progress bars comparable
@@ -610,7 +618,7 @@ export function resolveOpenPromise(
   const score = unifiedScore({
     wellDosed,
     inTrace: trace,
-    cosmetic: foundCosmetic.length,
+    cosmetic: 0,
   });
 
   return {

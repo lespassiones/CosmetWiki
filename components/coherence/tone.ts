@@ -47,11 +47,11 @@ export const VERDICT_TONE: Record<
   },
   non_demontree: {
     label: "Non démontré",
-    bg: "bg-rose-500",
-    bgSoft: "bg-rose-50",
-    ringSoft: "ring-rose-200",
-    text: "text-rose-700",
-    hex: "#F43F5E",
+    bg: "bg-red-500",
+    bgSoft: "bg-red-50",
+    ringSoft: "ring-red-200",
+    text: "text-red-700",
+    hex: "#EF4444",
   },
   // Deeper red than non_demontree - this is "the formula actively contradicts
   // the absence claim", which is a much stronger negative signal than "we
