@@ -416,41 +416,30 @@ export function BarcodeScannerInput({
       ) : null}
 
       {state.kind === "not-found" ? (
-        // `key={barcode}` force le remontage à chaque nouveau scan → l'animation
-        // `animate-reveal` se rejoue, on voit que le message concerne le produit
-        // qu'on vient de scanner (pas un message figé).
+        // Même rendu vert que le produit soit déjà connu (INCI incomplète) ou
+        // inconnu : message unifié. `key={barcode}` force le remontage à chaque
+        // scan → l'animation `animate-reveal` se rejoue (pas un message figé).
         <div
           key={state.barcode}
-          className={`animate-reveal mt-4 rounded-2xl p-4 ring-1 ${
-            state.reason === "registered"
-              ? "bg-emerald-50 ring-emerald-200"
-              : "bg-white/65 ring-white/70"
-          }`}
+          className="animate-reveal mt-4 rounded-2xl bg-emerald-50 p-4 ring-1 ring-emerald-200"
         >
-          {state.reason === "registered" ? (
-            <div className="flex items-start gap-2">
-              <svg
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden
-                className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <p className="text-[14px] font-medium text-emerald-700">
-                Ce produit a été enregistré et sera référencé très prochainement.
-              </p>
-            </div>
-          ) : (
-            <p className="text-[14px] text-ink">
-              Ce produit n&apos;a pas encore été référencé dans notre base de
-              données.
+          <div className="flex items-start gap-2">
+            <svg
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden
+              className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <p className="text-[14px] font-medium text-emerald-700">
+              Ce produit a été enregistré et sera référencé très prochainement.
             </p>
-          )}
+          </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               type="button"
