@@ -174,7 +174,11 @@ export async function POST(req: NextRequest) {
   }
 
   // ─── 3. Code-barres inconnu → on l'enregistre pour le compléter plus tard.
-  void registerScannedBarcode(barcode);
+  //        IMPORTANT : on AWAIT l'insertion. En fire-and-forget (void), le
+  //        runtime peut tuer la fonction après la réponse et l'INSERT échoue
+  //        silencieusement (~1 scan sur 3 perdu). L'await garantit la
+  //        persistance avant de répondre (INSERT d'une ligne, ~50 ms).
+  await registerScannedBarcode(barcode);
   return NextResponse.json(REGISTERED);
 }
 
