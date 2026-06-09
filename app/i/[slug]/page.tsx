@@ -338,7 +338,7 @@ export default async function IngredientPage({ params, searchParams }: Props) {
 
           {hasPrevalence ? (
             <Reveal delayMs={350}>
-              <StatCard label="Prévalence" cta="Méthodologie" href="/comment-ca-marche">
+              <StatCard label="Prévalence">
                 <p className="text-2xl font-semibold tracking-tight text-ink">
                   {Number(ing.prevalence_pct).toFixed(2)}
                   <span className="ml-0.5 text-base font-medium text-ink-muted">

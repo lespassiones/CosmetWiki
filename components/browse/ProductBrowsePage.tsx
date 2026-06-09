@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-
-export type CategoryCount = {
-  category: string;
-  subcategory: string;
-  cnt: number;
-};
+import {
+  CATEGORY_EMOJI,
+  getChildrenAtPath,
+  isLeafPath,
+  pathToSlug,
+  type CategoryNode,
+} from "@/lib/categories";
 
 type BrowseProduct = {
   ean: string;
@@ -21,8 +22,16 @@ type BrowseProduct = {
   ingredients_text: string | null;
 };
 
+type BrowseState = {
+  path: string[];
+  products: BrowseProduct[];
+  offset: number;
+  hasMore: boolean;
+};
+
 const PENDING_SOURCE_KEY = "cw:pendingProductSource";
 const PENDING_INCI_KEY = "cw:pendingInci";
+const BROWSE_STATE_KEY = "cw:browseState";
 
 function scoreVisual(score: number): { bg: string; fg: string; icon: React.ReactNode } {
   if (score >= 17) return { bg: "bg-emerald-100", fg: "text-emerald-600", icon: <HeartSvg /> };
@@ -32,43 +41,9 @@ function scoreVisual(score: number): { bg: string; fg: string; icon: React.React
   return                  { bg: "bg-rose-100",    fg: "text-rose-600",    icon: <OctagonSvg /> };
 }
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  "Soin du visage": "✨",
-  "Soin du corps": "🌿",
-  "Hygiène du corps": "🚿",
-  "Coiffure": "💇",
-  "Maquillage": "💄",
-  "Protection solaire": "☀️",
-  "Parfum": "🌸",
-  "Hygiène dentaire": "🦷",
-  "Soin bébé": "👶",
-  "Rasage & épilation": "🪒",
-  "Manucure & pédicure": "💅",
-  "Bien-être": "🧘",
-};
-
-function groupByCategory(counts: CategoryCount[]): Record<string, { subcategory: string; cnt: number }[]> {
-  const map: Record<string, { subcategory: string; cnt: number }[]> = {};
-  for (const c of counts) {
-    if (!map[c.category]) map[c.category] = [];
-    map[c.category].push({ subcategory: c.subcategory, cnt: c.cnt });
-  }
-  return map;
-}
-
-export function ProductBrowsePage({ categoryCounts }: { categoryCounts: CategoryCount[] }) {
+export function ProductBrowsePage() {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const selectedCategory = searchParams.get("cat");
-  const selectedSubcategory = searchParams.get("sub");
-  const navigate = useCallback((cat: string | null, sub: string | null) => {
-    const params = new URLSearchParams();
-    if (cat) params.set("cat", cat);
-    if (sub) params.set("sub", sub);
-    const qs = params.toString();
-    router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [router, pathname]);
+  const [path, setPath] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [searchResults, setSearchResults] = useState<BrowseProduct[]>([]);
@@ -79,9 +54,24 @@ export function ProductBrowsePage({ categoryCounts }: { categoryCounts: Category
   const [browseLoadingMore, setBrowseLoadingMore] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const groupedCategories = groupByCategory(categoryCounts);
+  // Quand true, le useEffect sur `path` saute le fetch (restoration depuis sessionStorage)
+  const skipNextPathEffectRef = useRef(false);
 
   const BROWSE_PAGE = 24;
+
+  // Restauration de l'état browse depuis sessionStorage (retour depuis /analyse)
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(BROWSE_STATE_KEY);
+      if (!saved) return;
+      const state = JSON.parse(saved) as BrowseState;
+      skipNextPathEffectRef.current = true;
+      setPath(state.path);
+      setBrowseProducts(state.products);
+      setBrowseOffset(state.offset);
+      setBrowseHasMore(state.hasMore);
+    } catch {}
+  }, []);
 
   // Debounce search query
   useEffect(() => {
@@ -90,7 +80,7 @@ export function ProductBrowsePage({ categoryCounts }: { categoryCounts: Category
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [query]);
 
-  // Fetch search results — catalogue direct, tous les produits correspondants
+  // Fetch search results
   useEffect(() => {
     if (debouncedQuery.length < 2) {
       setSearchResults([]);
@@ -104,18 +94,26 @@ export function ProductBrowsePage({ categoryCounts }: { categoryCounts: Category
       .finally(() => setSearchLoading(false));
   }, [debouncedQuery]);
 
-  // Fetch first page when subcategory changes
+  // Fetch products only when path reaches a leaf.
+  // Skipped once after sessionStorage restoration to avoid re-fetching already loaded products.
   useEffect(() => {
-    if (!selectedSubcategory) {
+    if (skipNextPathEffectRef.current) {
+      skipNextPathEffectRef.current = false;
+      return;
+    }
+    if (!isLeafPath(path)) {
       setBrowseProducts([]);
       setBrowseOffset(0);
       setBrowseHasMore(false);
+      // L'utilisateur a navigué hors de la feuille — on efface l'état sauvegardé
+      try { sessionStorage.removeItem(BROWSE_STATE_KEY); } catch {}
       return;
     }
+    const slug = pathToSlug(path);
     setBrowseLoading(true);
     setBrowseProducts([]);
     setBrowseOffset(0);
-    fetch(`/api/browse-subcategory?sub=${encodeURIComponent(selectedSubcategory)}&limit=${BROWSE_PAGE}&offset=0`)
+    fetch(`/api/browse-category-slug?slug=${encodeURIComponent(slug)}&limit=${BROWSE_PAGE}&offset=0`)
       .then((r) => r.json() as Promise<{ products: BrowseProduct[] }>)
       .then((data) => {
         const products = data.products ?? [];
@@ -125,12 +123,13 @@ export function ProductBrowsePage({ categoryCounts }: { categoryCounts: Category
       })
       .catch(() => setBrowseProducts([]))
       .finally(() => setBrowseLoading(false));
-  }, [selectedSubcategory]);
+  }, [path]);
 
   const loadMoreBrowse = useCallback(() => {
-    if (!selectedSubcategory || browseLoadingMore) return;
+    if (!isLeafPath(path) || browseLoadingMore) return;
+    const slug = pathToSlug(path);
     setBrowseLoadingMore(true);
-    fetch(`/api/browse-subcategory?sub=${encodeURIComponent(selectedSubcategory)}&limit=${BROWSE_PAGE}&offset=${browseOffset}`)
+    fetch(`/api/browse-category-slug?slug=${encodeURIComponent(slug)}&limit=${BROWSE_PAGE}&offset=${browseOffset}`)
       .then((r) => r.json() as Promise<{ products: BrowseProduct[] }>)
       .then((data) => {
         const products = data.products ?? [];
@@ -143,10 +142,24 @@ export function ProductBrowsePage({ categoryCounts }: { categoryCounts: Category
       })
       .catch(() => {})
       .finally(() => setBrowseLoadingMore(false));
-  }, [selectedSubcategory, browseOffset, browseLoadingMore]);
+  }, [path, browseOffset, browseLoadingMore]);
+
+  function tapNode(node: CategoryNode) {
+    setPath((prev) => [...prev, node.name]);
+  }
 
   function handleProductClick(p: BrowseProduct) {
     if (p.ingredients_text) {
+      // Sauvegarde la position de navigation pour le retour arrière
+      try {
+        const state: BrowseState = {
+          path,
+          products: browseProducts,
+          offset: browseOffset,
+          hasMore: browseHasMore,
+        };
+        sessionStorage.setItem(BROWSE_STATE_KEY, JSON.stringify(state));
+      } catch {}
       sessionStorage.setItem(PENDING_SOURCE_KEY, JSON.stringify({
         source: "catalog",
         sourceUrl: null,
@@ -161,6 +174,9 @@ export function ProductBrowsePage({ categoryCounts }: { categoryCounts: Category
 
   const showSearch = debouncedQuery.length >= 2;
   const showBrowse = !showSearch;
+  const children = getChildrenAtPath(path);
+  const isLeaf = isLeafPath(path);
+  const currentName = path.length > 0 ? path[path.length - 1] : null;
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
@@ -230,9 +246,7 @@ export function ProductBrowsePage({ categoryCounts }: { categoryCounts: Category
                     <div className="text-[14px] font-medium text-ink truncate">{p.name}</div>
                     {!p.ingredients_text && <div className="text-[11px] text-ink-muted">Composition indisponible</div>}
                   </div>
-                  {p.score != null && (
-                    <ScoreBadge score={p.score} />
-                  )}
+                  {p.score != null && <ScoreBadge score={p.score} />}
                 </button>
               ))}
             </div>
@@ -242,99 +256,73 @@ export function ProductBrowsePage({ categoryCounts }: { categoryCounts: Category
         {/* BROWSE MODE */}
         {showBrowse && (
           <>
-            {/* Breadcrumb */}
-            {(selectedCategory || selectedSubcategory) && (
-              <div className="flex items-center gap-2 mb-4 text-sm text-ink-muted">
-                <button
-                  onClick={() => navigate(null, null)}
-                  className="hover:text-ink transition-colors"
-                >
+            {/* Breadcrumb dynamique */}
+            {path.length > 0 && (
+              <div className="flex items-center gap-2 mb-4 text-sm text-ink-muted flex-wrap">
+                <button onClick={() => setPath([])} className="hover:text-ink transition-colors">
                   Catégories
                 </button>
-                {selectedCategory && (
-                  <>
-                    <svg viewBox="0 0 16 16" className="w-3 h-3 fill-current opacity-40" aria-hidden><path d="M6 3l5 5-5 5"/></svg>
-                    <button
-                      onClick={() => navigate(selectedCategory, null)}
-                      className={selectedSubcategory ? "hover:text-ink transition-colors" : "text-ink font-medium"}
-                    >
-                      {selectedCategory}
-                    </button>
-                  </>
-                )}
-                {selectedSubcategory && (
-                  <>
-                    <svg viewBox="0 0 16 16" className="w-3 h-3 fill-current opacity-40" aria-hidden><path d="M6 3l5 5-5 5"/></svg>
-                    <span className="text-ink font-medium">{selectedSubcategory}</span>
-                  </>
-                )}
+                {path.map((seg, i) => (
+                  <React.Fragment key={i}>
+                    <svg viewBox="0 0 16 16" className="w-3 h-3 fill-current opacity-40 shrink-0" aria-hidden>
+                      <path d="M6 3l5 5-5 5"/>
+                    </svg>
+                    {i < path.length - 1 ? (
+                      <button
+                        onClick={() => setPath(path.slice(0, i + 1))}
+                        className="hover:text-ink transition-colors"
+                      >
+                        {seg}
+                      </button>
+                    ) : (
+                      <span className="text-ink font-medium">{seg}</span>
+                    )}
+                  </React.Fragment>
+                ))}
               </div>
             )}
 
-            {/* Top-level categories */}
-            {!selectedCategory && (
+            {/* Navigation catégories / sous-catégories (nœud non-feuille) */}
+            {!isLeaf && (
               <>
-                <h2 className="text-[13px] font-semibold uppercase tracking-wider text-ink-muted mb-3">
-                  Catégories
-                </h2>
-                {categoryCounts.length === 0 ? (
-                  <div className="rounded-2xl bg-white p-6 text-center ring-1 ring-black/[0.05] text-sm text-ink-muted">
-                    Les catégories seront disponibles après l&apos;import de la classification.
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {Object.entries(groupedCategories).map(([cat]) => (
-                      <button
-                        key={cat}
-                        onClick={() => navigate(cat, null)}
-                        className="w-full flex items-center gap-3 rounded-xl bg-white px-4 py-3.5 ring-1 ring-black/[0.06] hover:ring-[#F43F5E]/40 hover:bg-rose-50/40 transition-all text-left"
-                      >
-                        <span className="text-xl leading-none">{CATEGORY_EMOJI[cat] ?? "🧴"}</span>
-                        <span className="flex-1 text-[15px] font-medium text-ink">{cat}</span>
-                        <svg viewBox="0 0 16 16" className="w-4 h-4 shrink-0 fill-current text-ink-muted opacity-50" aria-hidden>
-                          <path d="M6 3l5 5-5 5"/>
-                        </svg>
-                      </button>
-                    ))}
-                  </div>
+                {path.length === 0 && (
+                  <h2 className="text-[13px] font-semibold uppercase tracking-wider text-ink-muted mb-3">
+                    Catégories
+                  </h2>
                 )}
-              </>
-            )}
-
-            {/* Subcategory list */}
-            {selectedCategory && !selectedSubcategory && (
-              <>
-                <h2 className="text-base font-semibold text-ink mb-3 flex items-center gap-2">
-                  <span>{CATEGORY_EMOJI[selectedCategory] ?? "🧴"}</span>
-                  {selectedCategory}
-                </h2>
+                {path.length > 0 && currentName && (
+                  <h2 className="text-base font-semibold text-ink mb-3 flex items-center gap-2">
+                    {path.length === 1 && (
+                      <span>{CATEGORY_EMOJI[currentName] ?? "🧴"}</span>
+                    )}
+                    {currentName}
+                  </h2>
+                )}
                 <div className="space-y-2">
-                  {(groupedCategories[selectedCategory] ?? [])
-                    .sort((a, b) => b.cnt - a.cnt)
-                    .map((sub) => (
-                      <button
-                        key={sub.subcategory}
-                        onClick={() => navigate(selectedCategory, sub.subcategory)}
-                        className="w-full flex items-center justify-between rounded-xl bg-white px-4 py-3 ring-1 ring-black/[0.06] hover:ring-[#F43F5E]/40 hover:bg-rose-50/40 transition-all text-left"
-                      >
-                        <span className="text-[15px] font-medium text-ink">{sub.subcategory}</span>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-[13px] text-ink-muted">{sub.cnt.toLocaleString()}</span>
-                          <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current text-ink-muted" aria-hidden>
-                            <path d="M6 3l5 5-5 5"/>
-                          </svg>
-                        </div>
-                      </button>
-                    ))}
+                  {children.map((node) => (
+                    <button
+                      key={node.name}
+                      onClick={() => tapNode(node)}
+                      className="w-full flex items-center gap-3 rounded-xl bg-white px-4 py-3.5 ring-1 ring-black/[0.06] hover:ring-[#F43F5E]/40 hover:bg-rose-50/40 transition-all text-left"
+                    >
+                      {path.length === 0 && (
+                        <span className="text-xl leading-none">{CATEGORY_EMOJI[node.name] ?? "🧴"}</span>
+                      )}
+                      <span className="flex-1 text-[15px] font-medium text-ink">{node.name}</span>
+                      <svg viewBox="0 0 16 16" className="w-4 h-4 shrink-0 fill-current text-ink-muted opacity-50" aria-hidden>
+                        <path d="M6 3l5 5-5 5"/>
+                      </svg>
+                    </button>
+                  ))}
                 </div>
               </>
             )}
 
-            {/* Product grid for selected subcategory */}
-            {selectedSubcategory && (
+            {/* Grille produits (feuille) */}
+            {isLeaf && (
               <>
                 <h2 className="text-base font-semibold text-ink mb-3">
-                  {selectedSubcategory}
+                  {currentName}
                   {browseProducts.length > 0 && (
                     <span className="ml-2 text-sm font-normal text-ink-muted">
                       {browseProducts.length}{browseHasMore ? "+" : ""} produits
@@ -348,7 +336,7 @@ export function ProductBrowsePage({ categoryCounts }: { categoryCounts: Category
                 )}
                 {!browseLoading && browseProducts.length === 0 && (
                   <p className="text-sm text-ink-muted text-center py-12">
-                    Aucun produit trouvé. L&apos;import de la classification est peut-être encore en cours.
+                    Aucun produit trouvé dans cette catégorie.
                   </p>
                 )}
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">

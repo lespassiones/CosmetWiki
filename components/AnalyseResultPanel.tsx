@@ -1614,11 +1614,32 @@ function ItemsTable({
   // displayed with the current logic - no DB migration needed.
   const normalizedItems = useMemo(() => recomputeThresholdContext(items), [items]);
 
+  // Derive counts from the resolved color (colorRating ?? dbColorRating) so
+  // "suggestion" matches (colorRating=null, dbColorRating=Vert) are counted
+  // in their real color bucket instead of "Non reconnu". Mirrors what
+  // ColorChip already does for display — keeps filter tabs + display coherent.
+  const itemCounts = useMemo(() => {
+    const c = { all: 0, Vert: 0, Jaune: 0, Orange: 0, Rouge: 0, unknown: 0 };
+    for (const it of normalizedItems) {
+      const r = it.colorRating ?? it.dbColorRating;
+      c.all++;
+      if (r === "Vert") c.Vert++;
+      else if (r === "Jaune") c.Jaune++;
+      else if (r === "Orange") c.Orange++;
+      else if (r === "Rouge") c.Rouge++;
+      else c.unknown++;
+    }
+    return c;
+  }, [normalizedItems]);
+
   const filtered = useMemo(() => {
     let out = normalizedItems;
     if (filter !== "all") {
-      if (filter === "unknown") out = out.filter((i) => i.colorRating === null);
-      else out = out.filter((i) => i.colorRating === filter);
+      if (filter === "unknown") {
+        out = out.filter((i) => (i.colorRating ?? i.dbColorRating) === null);
+      } else {
+        out = out.filter((i) => (i.colorRating ?? i.dbColorRating) === filter);
+      }
     }
     const q = search.trim().toLowerCase();
     if (q) {
@@ -1633,14 +1654,14 @@ function ItemsTable({
   }, [normalizedItems, filter, search]);
 
   const tabs: { key: typeof filter; label: string; count: number }[] = [
-    { key: "all", label: "Tous", count: counts.total },
-    { key: "Vert", label: "Vert", count: counts.vert },
-    { key: "Jaune", label: "Jaune", count: counts.jaune },
-    { key: "Orange", label: "Orange", count: counts.orange },
-    { key: "Rouge", label: "Rouge", count: counts.rouge },
+    { key: "all", label: "Tous", count: itemCounts.all },
+    { key: "Vert", label: "Vert", count: itemCounts.Vert },
+    { key: "Jaune", label: "Jaune", count: itemCounts.Jaune },
+    { key: "Orange", label: "Orange", count: itemCounts.Orange },
+    { key: "Rouge", label: "Rouge", count: itemCounts.Rouge },
   ];
-  if (counts.unknown > 0) {
-    tabs.push({ key: "unknown", label: "Non reconnu", count: counts.unknown });
+  if (itemCounts.unknown > 0) {
+    tabs.push({ key: "unknown", label: "Non reconnu", count: itemCounts.unknown });
   }
 
   return (
