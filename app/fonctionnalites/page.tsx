@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 const NAV: NavItem[] = [
-  { id: "inci", number: "01", label: "Analyse INCI" },
+  { id: "inci", number: "01", label: "Analyse des produits" },
   { id: "promesses", number: "02", label: "Promesses vs Formule" },
   { id: "routine", number: "03", label: "Ma routine" },
   { id: "comparer", number: "04", label: "Comparer 2 produits" },
@@ -94,7 +94,7 @@ const SECTIONS: Section[] = [
     id: "inci",
     number: "01",
     eyebrow: "Le cœur de l'application",
-    title: "Analyse INCI",
+    title: "Analyse des produits",
     description:
       "Décrypte la composition complète d'un produit, ingrédient par ingrédient. Lance l'analyse comme tu veux — photo de l'étiquette, scan caméra en direct, liste INCI collée, recherche par nom de produit ou simple lien — puis chaque ligne reçoit une couleur (vert, jaune, orange, rouge) qui résume sa pénalité selon des données scientifiques publiques, dans un système clair et indépendant.",
     keywords: [
