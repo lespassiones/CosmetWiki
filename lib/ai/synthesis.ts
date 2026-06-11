@@ -53,7 +53,8 @@ export type SynthesisInput = {
 // outputs keyed on the previous version will no longer be served.
 // v11 (2026-05-23): removed the "Sans parabens, sans sulfates..." absences
 // bullet — it duplicates the dedicated Observations panel.
-const PROMPT_VERSION = 11;
+// v12 (2026-06-09): closingRule rewritten — 4 cases, no "ya mieux ailleurs".
+const PROMPT_VERSION = 12;
 
 function makeCacheKey(input: SynthesisInput): string {
   const list = input.enriched
@@ -148,13 +149,20 @@ function buildPrompt(input: SynthesisInput): { system: string; user: string } {
   })();
 
   const closingRule = (() => {
+    if (hasMatches && (input.score < 13 || restrictedIngredients.length >= 2)) {
+      // Cas 1 : restrictions matchées ET score faible OU plusieurs matches
+      return `CLOSING (DERNIÈRE PUCE, obligatoire) : conseil actionnable et constructif basé sur la/les restriction(s) matchée(s) et le profil si présent. Oriente vers ce qu'il faut chercher dans la prochaine formule : quelle famille d'ingrédients éviter dans la recherche, quel label regarder sur l'emballage (ex : "sans parfum de synthèse", "hypoallergénique", "sans conservateurs"), ou quel type de formule privilégier. INTERDIT ABSOLU : ne jamais écrire "ya mieux ailleurs", "évite ce produit", "va voir ailleurs", ni aucune formulation équivalente. Commence par "- Pour toi" ou "- Au final".`;
+    }
     if (hasMatches) {
-      return `CLOSING (DERNIÈRE PUCE, obligatoire) : recommandation franche personnalisée qui s'appuie sur la/les restriction(s) matchée(s) et sur le profil si présent. Tu PEUX dire "vise plutôt", "à utiliser de temps en temps", "pour toi, ya mieux ailleurs", "à éviter au quotidien", "à toi de voir si tu veux quelque chose de plus sobre". Commence la puce par "- Pour toi" ou "- Au final" ou "- Franchement".`;
+      // Cas 2 : restrictions matchées, score >= 13, 1 seule restriction
+      return `CLOSING (DERNIÈRE PUCE, obligatoire) : nuance l'usage de manière constructive. Indique dans quelles conditions ce produit peut convenir (ponctuellement, zone corporelle précise, fréquence réduite) ET ce qu'il faudrait vérifier sur la prochaine formule. INTERDIT ABSOLU : ne jamais écrire "ya mieux ailleurs", "évite ce produit", ni aucune formulation équivalente. Commence par "- Pour toi" ou "- Au final".`;
     }
     if (hasRestrictions || hasProfile) {
-      return `CLOSING (DERNIÈRE PUCE, obligatoire) : recommandation douce personnalisée qui relie le verdict de la formule au profil/restrictions de l'utilisateur. Tu PEUX dire "pour toi", "vise plutôt", "à toi de voir", "au final pour ton profil". Commence par "- Pour toi" ou "- Au final".`;
+      // Cas 3 : profil ou restrictions définis, aucun match
+      return `CLOSING (DERNIÈRE PUCE, obligatoire) : conseil pratique positif qui relie le verdict de la formule au profil/restrictions de l'utilisateur. INTERDIT ABSOLU : ne jamais écrire "ya mieux ailleurs", ni aucune formulation équivalente. Commence par "- Pour toi" ou "- Au final".`;
     }
-    return `CLOSING (DERNIÈRE PUCE, obligatoire) : 1 phrase de prise de recul factuelle SUIVIE d'un soft nudge à compléter le profil. Exemple : "- Au final, c'est un anti-transpirant efficace mais chargé en parfum. Tu peux remplir ton profil ou tes restrictions dans l'app si tu veux qu'on te dise précisément si ce produit te va."`;
+    // Cas 4 : aucun profil ni restriction
+    return `CLOSING (DERNIÈRE PUCE, obligatoire) : 1 phrase factuelle sur le caractère de la formule SUIVIE d'un soft nudge à compléter le profil dans l'app. INTERDIT : "ya mieux ailleurs". Exemple : "- Au final, c'est un anti-transpirant efficace mais chargé en parfum. Tu peux remplir ton profil ou tes restrictions dans l'app si tu veux qu'on te dise précisément si ce produit te va."`;
   })();
 
   const user = `Rédige la synthèse de l'analyse INCI ci-dessous en suivant la STRUCTURE imposée.

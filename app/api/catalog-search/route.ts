@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
   });
 
   if (error || !data) {
+    if (error) console.error("[catalog-search] RPC error:", error.message, error.details, error.hint);
     return NextResponse.json({ products: [] });
   }
 

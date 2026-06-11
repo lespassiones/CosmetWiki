@@ -16,7 +16,7 @@ import { AddToRoutineButton } from "./routine/AddToRoutineButton";
 import { RestrictionWarning } from "./analyse/RestrictionWarning";
 import { EssentielView, EssentielToggleButton } from "./analyse/EssentielView";
 import { VerdictGauge } from "./analyse/VerdictGauge";
-import { computeEssentiel } from "@/lib/essentiel/engine";
+import { computeEssentiel, verdictToneFromScore } from "@/lib/essentiel/engine";
 import type { VerdictTone } from "@/lib/essentiel/engine";
 import { categoryLabel, type ProductCategory } from "@/lib/categoryLabel";
 
@@ -291,7 +291,7 @@ export function AnalyseResultPanel({
         breadcrumb={trail}
         analysisId={analysisId}
         alreadyInRoutine={alreadyInRoutine}
-        verdictTone={essentiel.verdict.tone}
+        verdictTone={verdictToneFromScore(result.score)}
       />
       {!existingCoherenceId && (
         <PromesseFlowModal
@@ -339,7 +339,7 @@ export function AnalyseResultPanel({
             stack — see `hideToggle` note above. */}
         <div className="hidden lg:flex lg:shrink-0 lg:items-stretch">
           <VerdictGauge
-            tone={essentiel.verdict.tone}
+            tone={verdictToneFromScore(result.score)}
             orientation="vertical"
             className="h-full justify-around rounded-full bg-white/85 px-1.5 py-3 ring-1 ring-black/[0.06] backdrop-blur-md"
           />
@@ -1299,17 +1299,25 @@ function SynthesisCard({
   streamDelayMs?: number;
 }) {
   const fullText = synthesis ?? "";
-  // Build a name → colorRating lookup so bold INCI names in the synthesis
-  // can be tinted with their rating colour. Indexed on both the canonical
-  // name and the user-typed token so spelling variants resolve.
-  const colorByName = useMemo(() => {
-    const m = new Map<string, ColorRating>();
+  const pathname = usePathname();
+  const fromParam = encodeURIComponent(pathname || "/");
+  // Build name → colorRating and name → slug lookups so bold INCI names in
+  // the synthesis can be tinted and made clickable. Indexed on both the
+  // canonical name and the user-typed token so spelling variants resolve.
+  const { colorByName, slugByName } = useMemo(() => {
+    const colorByName = new Map<string, ColorRating>();
+    const slugByName = new Map<string, string>();
     for (const it of items) {
-      if (!it.colorRating) continue;
-      if (it.name) m.set(normaliseSynthesisToken(it.name), it.colorRating);
-      if (it.input) m.set(normaliseSynthesisToken(it.input), it.colorRating);
+      const keys = [
+        it.name ? normaliseSynthesisToken(it.name) : null,
+        it.input ? normaliseSynthesisToken(it.input) : null,
+      ].filter(Boolean) as string[];
+      for (const key of keys) {
+        if (it.colorRating) colorByName.set(key, it.colorRating);
+        if (it.slug) slugByName.set(key, it.slug);
+      }
     }
-    return m;
+    return { colorByName, slugByName };
   }, [items]);
   // Characters revealed so far (the streaming effect). Starts at 0 once we
   // have text, gets incremented on a timer until we reach the full length.
@@ -1367,7 +1375,7 @@ function SynthesisCard({
             if (block.type === "p") {
               return (
                 <p key={i}>
-                  {renderBoldMarkdown(block.text, colorByName)}
+                  {renderBoldMarkdown(block.text, colorByName, slugByName, fromParam)}
                   {showCursor ? <StreamCursor /> : null}
                 </p>
               );
@@ -1391,7 +1399,7 @@ function SynthesisCard({
                         className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${bulletBgForRating(bulletRating)}`}
                       />
                       <span className="flex-1">
-                        {renderBoldMarkdown(item, colorByName)}
+                        {renderBoldMarkdown(item, colorByName, slugByName, fromParam)}
                         {showCursor && lastItem ? <StreamCursor /> : null}
                       </span>
                     </li>
@@ -1470,6 +1478,8 @@ function balanceBold(text: string): string {
 function renderBoldMarkdown(
   s: string,
   colorByName?: Map<string, ColorRating>,
+  slugByName?: Map<string, string>,
+  fromParam?: string,
 ): React.ReactNode {
   const parts = s.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((p, i) => {
@@ -1478,23 +1488,24 @@ function renderBoldMarkdown(
       const normalised = normaliseSynthesisToken(inner);
       const rating = colorByName?.get(normalised);
       const tone = rating ? colorForRating(rating) : "text-ink";
+      const slug = slugByName?.get(normalised);
+      const href = slug && fromParam ? `/i/${slug}?from=${fromParam}` : null;
       // Grand-public translation: if we know "AQUA" as "eau", render
       // "**eau** (Aqua)" so the body copy reads naturally while keeping the
       // INCI token visible for label cross-reference. Only triggered when
       // the mapping has an entry - other tokens render unchanged.
       const common = commonNameFor(normalised);
-      if (common) {
-        return (
-          <span key={i}>
-            <strong className={`font-semibold ${tone}`}>{common}</strong>
-            <span className="text-ink-subtle"> ({prettyInci(inner)})</span>
-          </span>
-        );
-      }
-      return (
-        <strong key={i} className={`font-semibold ${tone}`}>
-          {inner}
+      const label = common ?? inner;
+      const strong = (
+        <strong className={`font-semibold ${tone}${href ? " cursor-pointer underline-offset-2 hover:underline" : ""}`}>
+          {label}
         </strong>
+      );
+      return (
+        <span key={i}>
+          {href ? <Link href={href}>{strong}</Link> : strong}
+          {common ? <span className="text-ink-subtle"> ({prettyInci(inner)})</span> : null}
+        </span>
       );
     }
     return <span key={i}>{p}</span>;

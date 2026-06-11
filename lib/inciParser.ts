@@ -251,6 +251,8 @@ export function computeScore(
 ): number {
   if (totalPositions === 0) return 0;
   let score = 20;
+  let countOrange = 0;
+  let countRouge = 0;
   for (const m of matches) {
     if (!m.color_rating) continue;
     const p = m.position;
@@ -258,7 +260,13 @@ export function computeScore(
     // Logarithmic position weight: 1.0 for the first ingredient, ~0.05 for the last
     const weight = Math.log(N - p + 1) / Math.log(N + 1);
     score -= PENALTY[m.color_rating] * weight;
+    if (m.color_rating === 'Orange') countOrange++;
+    if (m.color_rating === 'Rouge') countRouge++;
   }
+  // Cocktail effect : pénalité supplémentaire quand les ingrédients
+  // problématiques s'accumulent (aligné sur INCI Beauty).
+  score -= Math.max(0, countOrange - 3) * 0.4;
+  score -= Math.max(0, countRouge - 2) * 0.8;
   return Math.max(0, Math.min(20, score));
 }
 

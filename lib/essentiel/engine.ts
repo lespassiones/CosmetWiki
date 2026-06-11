@@ -32,6 +32,21 @@ export type VerdictTone =
   | "high-risk"
   | "unknown";
 
+/**
+ * Dérive le tone de la pastille directement depuis le score 0-20.
+ * Seuils identiques à la table catalog et à l'app mobile.
+ * À utiliser pour le VerdictGauge sur l'écran d'analyse afin que la
+ * pastille affichée soit cohérente avec celle du catalogue/recherche.
+ */
+export function verdictToneFromScore(score: number | null | undefined): VerdictTone {
+  if (score == null || Number.isNaN(score)) return "unknown";
+  if (score >= 17) return "very-safe";
+  if (score >= 13) return "safe";
+  if (score >= 9)  return "caution";
+  if (score >= 5)  return "warning";
+  return "danger";
+}
+
 export type Verdict = {
   tone: VerdictTone;
   phrase: string;
@@ -968,7 +983,7 @@ const TAG_CONSEQUENCES: Record<string, string> = {
   "ammonium-quaternaire": "doux immédiat mais irritation possible à long terme",
   "allergene-parfumant": "risque accru d'allergie sur peau sensible",
   conservateur: "peuvent irriter ou sensibiliser les peaux réactives",
-  "parfum-synthese": "source fréquente d'irritation des peaux réactives",
+  "parfum-synthese": "à surveiller sur peaux sensibles",
   "huile-essentielle": "peuvent sensibiliser, à éviter sur peaux fragiles",
   "peg-ppg": "issus de l'éthoxylation, traces de résidus possibles",
   "polymere-synthese": "non biodégradables, persistent dans l'environnement",

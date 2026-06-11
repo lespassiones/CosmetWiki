@@ -54,12 +54,12 @@ type Tile = {
 // compact right column. NEW badge stays on the latest addition (URL).
 const LEFT_TILES: Tile[] = [
   { action: { kind: "view", view: "barcode" }, title: "Code-barres", subtitle: "Scan rapide en magasin", icon: BarcodeIcon },
-  { action: { kind: "route", href: "/scan/photo" }, title: "Photo de la composition", subtitle: "OCR de l'étiquette", icon: CameraIcon },
+  // { action: { kind: "route", href: "/scan/photo" }, title: "Photo de la composition", subtitle: "OCR de l'étiquette", icon: CameraIcon },
 ];
 
 const RIGHT_TILES: Tile[] = [
   { action: { kind: "view", view: "paste" }, title: "Coller la composition", icon: ClipboardIcon },
-  { action: { kind: "view", view: "url" }, title: "Coller le lien", icon: LinkIcon, isNew: true },
+  // { action: { kind: "view", view: "url" }, title: "Coller le lien", icon: LinkIcon, isNew: true },
   { action: { kind: "route", href: "/produits" }, title: "Rechercher un produit", icon: SearchIcon },
 ];
 
@@ -265,45 +265,44 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
 
         <div className="px-5">
           {isPicker ? (
-            // Asymmetric 2+3 grid: two large square tiles on the left for the
-            // "physical product in hand" flows (barcode + photo), three
-            // compact tiles on the right for the "data-only" flows (paste,
-            // URL, search). Both columns share the same height via the
-            // outer grid so the layout stays balanced regardless of how
-            // many subtitles render.
+            // Grille asymétrique : 1 grande tuile à gauche (icon haut, texte bas),
+            // 2 tuiles compactes à droite. Même proportion que le mobile.
             <div className="grid grid-cols-2 gap-3">
-              {/* Left column — 2 large tiles */}
-              <div className="grid grid-rows-2 gap-3">
+              {/* Colonne gauche — 1 grande tuile qui remplit la hauteur */}
+              <div className="flex">
                 {LEFT_TILES.map((tile) => (
                   <button
                     key={tile.title}
                     type="button"
                     onClick={() => pickTile(tile)}
-                    className="relative flex flex-col items-center justify-center text-center bg-white border border-[#E5E7EB] rounded-2xl p-4 hover:border-[#111111] transition"
+                    className="relative flex flex-col w-full min-h-[160px] bg-white border border-[#E5E7EB] rounded-2xl p-4 hover:border-[#111111] transition"
                   >
                     {tile.isNew && (
                       <span className="absolute top-2 right-2 bg-[#F43F5E] text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
                         NEW
                       </span>
                     )}
-                    <tile.icon className="h-8 w-8 text-[#111111] mb-2" />
-                    <div className="text-[14px] font-semibold leading-snug">{tile.title}</div>
-                    {tile.subtitle && (
-                      <div className="text-[12px] text-[#6B7280] mt-1 leading-snug">{tile.subtitle}</div>
-                    )}
+                    <div className="flex-1 flex items-center justify-center">
+                      <tile.icon className="h-14 w-14 text-[#111111]" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-[14px] font-semibold leading-snug">{tile.title}</div>
+                      {tile.subtitle && (
+                        <div className="text-[11px] text-[#6B7280] mt-0.5 leading-snug">{tile.subtitle}</div>
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>
 
-              {/* Right column — 3 compact tiles. Horizontal layout
-                  (icon + title) so the rows stay short. */}
-              <div className="grid grid-rows-3 gap-3">
+              {/* Colonne droite — 2 tuiles compactes (icon gauche, titre droit) */}
+              <div className="flex flex-col gap-3">
                 {RIGHT_TILES.map((tile) => (
                   <button
                     key={tile.title}
                     type="button"
                     onClick={() => pickTile(tile)}
-                    className="relative flex flex-row items-center text-left gap-3 bg-white border border-[#E5E7EB] rounded-2xl p-3 hover:border-[#111111] transition"
+                    className="relative flex flex-row items-center text-left gap-3 flex-1 bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 hover:border-[#111111] transition"
                   >
                     {tile.isNew && (
                       <span className="absolute top-1.5 right-1.5 bg-[#F43F5E] text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-full">
@@ -311,9 +310,7 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
                       </span>
                     )}
                     <tile.icon className="h-5 w-5 shrink-0 text-[#111111]" />
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[13px] font-semibold leading-snug">{tile.title}</div>
-                    </div>
+                    <div className="text-[13px] font-semibold leading-snug">{tile.title}</div>
                   </button>
                 ))}
               </div>

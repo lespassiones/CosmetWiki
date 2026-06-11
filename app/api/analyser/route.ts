@@ -1019,7 +1019,7 @@ export async function POST(req: NextRequest) {
             p_score: Number(score.toFixed(4)),
             p_score_label: scoreLabelText,
             p_score_tone: scoreTone,
-            p_algo_version: "v1.1",
+            p_algo_version: "v1.2",
           });
       } catch { /* non-blocking */ }
     })();
@@ -1039,7 +1039,7 @@ export async function POST(req: NextRequest) {
           p_score: Number(score.toFixed(4)),
           p_score_label: scoreLabelText,
           p_score_tone: scoreTone,
-          p_algo_version: "v1.1",
+          p_algo_version: "v1.2",
         });
     } catch { /* non-blocking */ }
   })();

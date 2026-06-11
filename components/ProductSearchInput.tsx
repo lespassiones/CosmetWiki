@@ -1,9 +1,30 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { ProductSearchResult, ProductSearchHit } from "@/lib/productSearch/types";
 import type { OpenBeautyFactsCandidate } from "@/lib/productSearch/openBeautyFacts";
 import type { DuckDuckGoCandidate } from "@/lib/productSearch/duckduckgo";
+
+// Module-level cache: survives re-renders, cleared on page reload.
+// Key is the normalised query (lowercase + no accents + sorted words) so
+// "Crème Garnier", "garnier creme", "GARNIER CRÈME" share one entry.
+const SEARCH_CACHE_TTL = 60_000;
+type CacheEntry = { data: SuggestResponse; ts: number };
+const _searchCache = new Map<string, CacheEntry>();
+
+function normaliseCacheKey(q: string): string {
+  return q
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .sort()
+    .join(" ");
+}
 
 /** "Voir plus" affiche 8 candidats supplémentaires à chaque clic. Le 1er
  *  call backend ramène jusqu'à 24 candidats (= 3 pages locales de 8). Une
@@ -45,13 +66,10 @@ type SuggestResponse = {
   candidates: OpenBeautyFactsCandidate[];
   hasMore: boolean;
   page: number;
-  /** Web fallback candidates surfaced automatically by the server when the
-   *  catalogue (cache + OBF + INCIDecoder) returned too few hits. Only present
-   *  on page 1. Same shape and click behaviour as the deep-search webCandidates. */
-  webCandidates?: DuckDuckGoCandidate[];
 };
 
 export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -168,9 +186,20 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
       return;
     }
     setError(null);
-    setBusy(true);
     resetCandidates();
 
+    // Client-side cache hit: avoid redundant API calls for equivalent queries.
+    const cacheKey = normaliseCacheKey(q);
+    const hit = _searchCache.get(cacheKey);
+    if (hit && Date.now() - hit.ts < SEARCH_CACHE_TTL) {
+      setCandidates(hit.data.candidates);
+      setHasMore(hit.data.hasMore);
+      setPage(hit.data.page);
+      setSearched(true);
+      return;
+    }
+
+    setBusy(true);
     if (inFlightRef.current) inFlightRef.current.abort();
     const ctrl = new AbortController();
     inFlightRef.current = ctrl;
@@ -187,16 +216,11 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
         return;
       }
       const data = (await r.json()) as SuggestResponse;
+      _searchCache.set(cacheKey, { data, ts: Date.now() });
       setCandidates(data.candidates);
       setHasMore(data.hasMore);
       setPage(data.page);
       setSearched(true);
-      // Server already attached web fallback candidates when catalogue
-      // results were scarce - hydrate them directly so the user doesn't
-      // need to click "Recherche approfondie".
-      if (data.webCandidates && data.webCandidates.length > 0) {
-        setWebCandidates(data.webCandidates);
-      }
     } catch (err) {
       if ((err as DOMException)?.name === "AbortError") return;
       setError((err as Error).message ?? "Erreur réseau");
@@ -297,15 +321,40 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
     });
   }
 
-  // Last-resort: when the OBF suggest returned nothing, the user can ask for
-  // the full cascade (INCIDecoder + DDG + Mistral). This is the original
-  // /api/product-search call. May return either:
+  // Manual internet cascade: debit 1 credit then call /api/product-search.
+  // Never triggered automatically — only on explicit user button click.
+  // May return either:
   //  - a single canonical hit (found=true) → show one card and exit
   //  - a list of web candidates → show 4 with a "Voir plus" pager, lazy-fetch
   //    INCI on click via /api/deep-fetch
   async function runDeepSearch() {
     const q = query.trim();
     if (q.length < 3) return;
+
+    // Debit 1 credit before touching external APIs.
+    try {
+      const creditRes = await fetch("/api/credits/consume", { method: "POST" });
+      if (!creditRes.ok) {
+        if (creditRes.status === 401) {
+          setError("Connecte-toi pour utiliser la recherche approfondie.");
+          return;
+        }
+        const body = (await creditRes.json().catch(() => ({}))) as {
+          creditExhausted?: boolean;
+          error?: string;
+        };
+        if (creditRes.status === 429 && body.creditExhausted) {
+          router.push("/offre");
+          return;
+        }
+        setError(body.error ?? "Impossible de lancer la recherche approfondie.");
+        return;
+      }
+    } catch {
+      setError("Erreur réseau lors de la vérification des crédits.");
+      return;
+    }
+
     setDeepSearching(true);
     setError(null);
     setWebCandidates([]);
