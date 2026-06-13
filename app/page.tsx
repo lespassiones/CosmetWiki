@@ -160,7 +160,7 @@ function buildHomeJsonLd() {
         url: SITE_URL,
         logo: {
           "@type": "ImageObject",
-          url: `${SITE_URL}/icon.png`,
+          url: `${SITE_URL}/pwa/icon.png`,
           width: 512,
           height: 512,
         },
