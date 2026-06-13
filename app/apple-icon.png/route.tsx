@@ -15,7 +15,7 @@ export async function GET() {
           alignItems: "center",
           justifyContent: "center",
           background:
-            "linear-gradient(135deg, #FB7185 0%, #F472B6 50%, #FB7185 100%)",
+            "linear-gradient(135deg, #8B5CF6 0%, #A78BFA 50%, #8B5CF6 100%)",
         }}
       >
         <svg

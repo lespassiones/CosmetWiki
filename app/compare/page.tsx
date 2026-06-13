@@ -287,8 +287,6 @@ function renderBold(text: string) {
   );
 }
 
-const INCI_PER_GROUP = 4;
-
 function AttentionCard({ name, groups }: { name: string; groups: FamilyGroup[] }) {
   return (
     <article className={`${GLASS_CARD_ROSE} p-4`}>
@@ -303,27 +301,18 @@ function AttentionCard({ name, groups }: { name: string; groups: FamilyGroup[] }
       </header>
 
       <ul className="space-y-1.5">
-        {groups.map((g) => {
-          const visible = g.items.slice(0, INCI_PER_GROUP);
-          const extra = g.items.length - visible.length;
-          return (
-            <li key={g.label} className="text-[13px] leading-snug">
-              <span
-                aria-hidden
-                className={`inline-block h-2 w-2 rounded-full mr-2 align-middle ${
-                  g.color === "Rouge" ? "bg-rose-500" : "bg-orange-500"
-                }`}
-              />
-              <span className="font-semibold text-rose-900">{g.label}</span>
-              <span className="text-rose-700/80"> ({g.items.length})</span>
-              <span className="text-rose-700"> : </span>
-              <span className="text-rose-800">
-                {visible.map((i) => i.name).join(", ")}
-                {extra > 0 ? `, +${extra}` : ""}
-              </span>
-            </li>
-          );
-        })}
+        {groups.map((g) => (
+          <li key={g.label} className="text-[13px] leading-snug">
+            <span
+              aria-hidden
+              className={`inline-block h-2 w-2 rounded-full mr-2 align-middle ${
+                g.color === "Rouge" ? "bg-rose-500" : "bg-orange-500"
+              }`}
+            />
+            <span className="font-semibold text-rose-900">{g.label}</span>
+            <span className="text-rose-700/80"> ({g.items.length})</span>
+          </li>
+        ))}
       </ul>
     </article>
   );

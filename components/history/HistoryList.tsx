@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { HistoryItemActions } from "@/components/history/HistoryItemActions";
 import { IngredientBlob, type BlobCounts } from "@/components/blob/IngredientBlob";
 import { categoryLabel, type ProductCategory } from "@/lib/categoryLabel";
+import { decodeHtml } from "@/lib/decodeHtml";
 
 type Row = {
   id: string;
@@ -191,8 +192,9 @@ export function HistoryList({ rows }: { rows: Row[] }) {
       <ul className="mt-6 space-y-3">
         {filteredRows.map((a) => {
           const tone = scoreTone(a.score);
-          const displayName =
-            a.name ?? a.product_label ?? `Analyse du ${formatDate(a.created_at)}`;
+          const displayName = decodeHtml(
+            a.name ?? a.product_label ?? `Analyse du ${formatDate(a.created_at)}`,
+          );
           const isSelected = selected.has(a.id);
 
           if (selectMode) {

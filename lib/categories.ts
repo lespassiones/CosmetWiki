@@ -670,3 +670,34 @@ export function isLeafPath(path: readonly string[]): boolean {
   const node = findNodeByPath(path)
   return !!node && (!node.children || node.children.length === 0)
 }
+
+/**
+ * Resolves a full catalog category slug (e.g. "coiffure/shampooing/shampooing-classique")
+ * to its human-readable display name (e.g. "Shampooing classique").
+ *
+ * Takes the last path segment and reverse-looks it up in the CATEGORIES tree by
+ * comparing each node's generated slug (accounting for LEAF_SLUG_OVERRIDES).
+ * Falls back to a prettified slug ("deodorant-spray" → "Deodorant spray") when
+ * no matching node is found.
+ */
+export function categorySlugToDisplayName(fullSlug: string): string {
+  const lastSegment = fullSlug.split('/').pop()
+  if (!lastSegment) return ''
+
+  function searchNodes(nodes: readonly CategoryNode[]): string | null {
+    for (const node of nodes) {
+      const raw = nameToSlug(node.name)
+      const effective = LEAF_SLUG_OVERRIDES[raw] ?? raw
+      if (effective === lastSegment || raw === lastSegment) return node.name
+      if (node.children) {
+        const found = searchNodes(node.children)
+        if (found) return found
+      }
+    }
+    return null
+  }
+
+  const found = searchNodes(CATEGORIES)
+  if (found) return found
+  return lastSegment.replace(/-/g, ' ').replace(/^\w/, (c) => c.toUpperCase())
+}

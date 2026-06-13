@@ -331,12 +331,14 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
                 <SearchBar
                   size="md"
                   alwaysAsList
-                  onAnalyseList={(text) =>
+                  onAnalyseList={(text) => {
+                    const nameHint = pasteProductName || null;
+                    setPasteProductName("");
                     submitForAnalysis({
                       ingredientsText: text,
-                      productNameHint: pasteProductName || null,
-                    })
-                  }
+                      productNameHint: nameHint,
+                    });
+                  }}
                 />
               </div>
 

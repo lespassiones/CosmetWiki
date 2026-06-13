@@ -154,4 +154,12 @@ export type AnalyseResponse = {
    *  card (e.g. "Agent fixant" on a deodorant becomes "lie les ingrédients"
    *  instead of the wrong "fixe la coiffure"). */
   category?: ProductCategory | null;
+  /** Full catalog category slug (e.g. "coiffure/shampooing/shampooing-classique")
+   *  resolved from `catalog.category` when the product's EAN is known. More
+   *  specific than `category` and used to display "sous-catégorie · marque"
+   *  on the analysis screen. */
+  catalogCategory?: string | null;
+  /** Public image URL from the catalog entry, when available. Used by the
+   *  "Outils" section to decide whether to offer the "add photo" row. */
+  imageUrl?: string | null;
 };

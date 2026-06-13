@@ -29,6 +29,7 @@ export function EssentielView({
   expanded,
   onToggle,
   hideToggle = false,
+  scoreTone,
 }: {
   data: EssentielData;
   expanded: boolean;
@@ -39,6 +40,9 @@ export function EssentielView({
    *  with the desktop verdict gauge — keeps the gauge's `items-stretch`
    *  matching only the 3 cards' height, not including the toggle). */
   hideToggle?: boolean;
+  /** When provided, overrides the badge icon of the VerdictCard with the
+   *  score-derived tone so it stays identical to the VerdictGauge. */
+  scoreTone?: VerdictTone;
 }) {
   return (
     <section className="mt-4 space-y-3 lg:max-w-3xl" aria-label="Aperçu essentiel de l'analyse">
@@ -48,7 +52,7 @@ export function EssentielView({
           render — subsequent re-renders (toggle expand/collapse) keep the
           cards visible. */}
       <div className="stagger-up" style={staggerDelay(0)}>
-        <VerdictCard verdict={data.verdict} />
+        <VerdictCard verdict={data.verdict} scoreTone={scoreTone} />
       </div>
       {data.positives.length > 0 ? (
         <div className="stagger-up" style={staggerDelay(120)}>
@@ -112,8 +116,9 @@ export function EssentielToggleButton({
 
 // ─── Cards ────────────────────────────────────────────────────────────────
 
-function VerdictCard({ verdict }: { verdict: EssentielData["verdict"] }) {
-  const v = VERDICT_VISUAL[verdict.tone];
+function VerdictCard({ verdict, scoreTone }: { verdict: EssentielData["verdict"]; scoreTone?: VerdictTone }) {
+  const badgeTone = scoreTone ?? verdict.tone;
+  const v = VERDICT_VISUAL[badgeTone];
   const Icon = v.Icon;
   return (
     <article className="neu flex items-center gap-4 p-4">
@@ -139,10 +144,10 @@ function PositivesCard({ positives }: { positives: EssentielData["positives"] })
   return (
     <article className="neu flex items-start gap-4 p-4">
       <div
-        className="h-10 w-10 shrink-0 rounded-full bg-emerald-100 flex items-center justify-center mt-0.5"
+        className="h-10 w-10 shrink-0 rounded-xl bg-emerald-500 flex items-center justify-center mt-0.5"
         aria-hidden
       >
-        <LeafIcon className="h-5 w-5 text-emerald-600" />
+        <ShieldCheckIcon className="h-[18px] w-[18px] text-white" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-1.5">
@@ -364,6 +369,24 @@ function CheckIcon({ className, strokeWidth = 2.2 }: IconProps) {
       aria-hidden
     >
       <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
+function ShieldCheckIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <path d="M12 2 4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3z" />
+      <polyline points="9 12 11 14 15 10" />
     </svg>
   );
 }

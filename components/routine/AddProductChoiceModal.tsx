@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
+import { decodeHtml } from "@/lib/decodeHtml";
 import { addToRoutine } from "@/app/routine/actions";
 
 export type EligibleAnalysis = {
@@ -189,10 +190,11 @@ export function AddProductChoiceModal({
               ) : (
                 <ul className="space-y-1.5 max-h-[420px] overflow-auto pr-1">
                   {filtered.map((a) => {
-                    const label =
+                    const label = decodeHtml(
                       a.product_label
                       ?? a.name
-                      ?? `Analyse du ${formatDate(a.created_at)}`;
+                      ?? `Analyse du ${formatDate(a.created_at)}`,
+                    );
                     const score = typeof a.score === "number" ? a.score.toFixed(1) : "-";
                     const isPendingThis = pendingId === a.id && isPending;
                     return (

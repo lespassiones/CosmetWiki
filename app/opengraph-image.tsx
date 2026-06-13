@@ -36,7 +36,7 @@ export default async function Image() {
               height: 56,
               borderRadius: 16,
               background:
-                "linear-gradient(135deg, #a78bfa 0%, #f472b6 100%)",
+                "linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)",
             }}
           />
           <div style={{ fontSize: 36, fontWeight: 700, color: "#1a0f2e" }}>

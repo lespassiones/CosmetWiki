@@ -135,6 +135,21 @@ const TOP_LIST_WINDOW = 5;
 
 const DIACRITICS_RE = new RegExp("[\\u0300-\\u036f]", "g");
 
+// Maps the internal ProductCategory classifier to the nearest leaf slug in
+// the catalog taxonomy. Used when persisting a newly discovered internet
+// product so it appears in category browsing without a second LLM call.
+// Broad categories (maquillage, parfum, autre) are intentionally excluded —
+// they would require more context (gender, product sub-type) to be accurate.
+const PRODUCT_CATEGORY_TO_CATALOG_SLUG: Partial<Record<ProductCategory, string>> = {
+  creme_visage:     "soin-du-corps-et-visage/creme-hydratante/creme-visage",
+  creme_corps:      "soin-du-corps-et-visage/creme-hydratante/hydratant-pour-le-corps",
+  shampooing:       "coiffure/shampooing/shampooing-classique",
+  apres_shampooing: "coiffure/soin-capillaire/apres-shampooing",
+  solaire:          "produit-solaire/creme-solaire",
+  nettoyant_visage: "soin-du-corps-et-visage/nettoyant-visage/gel-nettoyant-visage",
+  deodorant:        "hygiene-du-corps/deodorant/deodorant-spray",
+};
+
 /**
  * Heuristic that says "this INCI text looks already clean — no AI parser /
  * validator needed". Tuned to match the output of the product-search and
@@ -209,17 +224,47 @@ export async function POST(req: NextRequest) {
   // pipeline. No credit charged: the result was computed by the ETL or by a
   // previous live analysis. We still save to user history so the scan appears
   // in /history. Uses the anon client (public SELECT RLS policy).
+  //
+  // catalog.score is fetched in parallel: it holds the INCI Beauty score which
+  // is the source of truth for all known products. We override the stored
+  // computed score with it before returning.
   const productEan = body.productEan?.trim() || null;
+  let ibScore: number | null = null;
+  let ibCatalogCategory: string | null = null;
+  let ibImageUrl: string | null = null;
+
   if (productEan) {
     try {
-      const { data: precomputed } = await supabaseAnon()
-        .rpc("cosme_check_get_product_analysis", { p_ean: productEan });
+      const [catalogResult, { data: precomputed }] = await Promise.all([
+        supabaseAnon()
+          .schema("cosme_check")
+          .from("catalog")
+          .select("score, category, image_url")
+          .eq("ean", productEan)
+          .maybeSingle(),
+        supabaseAnon()
+          .rpc("cosme_check_get_product_analysis", { p_ean: productEan }),
+      ]);
+
+      const rawCatalogData = catalogResult.data as { score: number | null; category: string | null; image_url: string | null } | null;
+      if (rawCatalogData?.score != null) ibScore = rawCatalogData.score;
+      ibCatalogCategory = rawCatalogData?.category ?? null;
+      ibImageUrl = rawCatalogData?.image_url ?? null;
 
       if (precomputed) {
         const cached_result = precomputed as AnalyseResponse;
         // Recompute thresholdContext from items (stored as null by ETL).
         cached_result.items = recomputeThresholdContext(cached_result.items ?? []);
         cached_result.synthesis = null;
+        // Override with the catalog IB score (source of truth) when available.
+        if (ibScore !== null) {
+          const lb = scoreLabel(ibScore);
+          cached_result.score = ibScore;
+          cached_result.scoreLabel = lb.label;
+          cached_result.scoreTone = lb.tone;
+        }
+        if (ibCatalogCategory) cached_result.catalogCategory = ibCatalogCategory;
+        cached_result.imageUrl = ibImageUrl;
 
         // Save to user history without charging credits.
         let savedAnalysisId: string | null = null;
@@ -526,11 +571,19 @@ export async function POST(req: NextRequest) {
   const matched = enriched.length - counts["Non reconnu"];
 
   // Score (suggestions ignored)
-  const score = computeScore(
+  let score = computeScore(
     enriched.map((r) => ({ color_rating: r.effective_color, position: r.position_idx })),
     enriched.length,
   );
-  const { label: scoreLabelText, tone: scoreTone } = scoreLabel(score);
+  let { label: scoreLabelText, tone: scoreTone } = scoreLabel(score);
+
+  // For known catalog products, replace the computed score with the INCI Beauty
+  // score fetched earlier. The computed score is only the fallback for new /
+  // internet-only products that INCI Beauty hasn't rated yet.
+  if (ibScore !== null) {
+    score = ibScore;
+    ({ label: scoreLabelText, tone: scoreTone } = scoreLabel(ibScore));
+  }
 
   // Tag aggregation : count + list of ingredients per tag
   const tagCounts: Record<string, number> = {};
@@ -920,6 +973,8 @@ export async function POST(req: NextRequest) {
     synthesis,
     productType: body.productType?.slice(0, 120) ?? null,
     category: resolvedCategory,
+    catalogCategory: ibCatalogCategory ?? null,
+    imageUrl: ibImageUrl ?? null,
   };
   // Silence unused-import noise in some narrow code paths.
   void EU_FRAGRANCE_ALLERGENS;
@@ -1054,10 +1109,16 @@ export async function POST(req: NextRequest) {
           brand: body.brand ?? null,
           name: body.productLabel ?? null,
           ingredientsText: body.text ?? null,
-          score: Number(score.toFixed(4)),
-          scoreLabel: scoreLabelText,
-          scoreTone: scoreTone,
+          // When a catalog IB score already exists, pass null so the COALESCE
+          // in the RPC keeps it intact. Only store the computed score for new /
+          // internet-only products that INCI Beauty hasn't rated yet.
+          score: ibScore !== null ? null : Number(score.toFixed(4)),
+          scoreLabel: ibScore !== null ? null : scoreLabelText,
+          scoreTone: ibScore !== null ? null : scoreTone,
           countTotal: itemsResponse.length,
+          // Categorize internet-sourced products on first write so they appear
+          // in category browsing without a future re-fetch.
+          category: PRODUCT_CATEGORY_TO_CATALOG_SLUG[resolvedCategory ?? "autre"] ?? null,
         });
       } catch { /* non-blocking */ }
     })();

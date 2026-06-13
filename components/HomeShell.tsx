@@ -416,6 +416,7 @@ export function HomeShell({
                 sourceUrl: productSource.sourceUrl,
                 brand: productSource.brand,
               } : null}
+              ean={productSource?.ean ?? null}
               analysisId={analysisId}
               alreadyInRoutine={addedToRoutine}
               brand={productSource?.brand ?? null}

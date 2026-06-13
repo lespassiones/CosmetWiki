@@ -119,26 +119,21 @@ function pickTone(
 }
 
 function pickPhrase(tone: VerdictTone, counts: AnalyseResponse["counts"]): string {
-  const flagged = counts.jaune + counts.orange + counts.rouge;
+  const penalisant = counts.orange + counts.rouge;
+  const suffix =
+    penalisant > 1
+      ? `, ${penalisant} ingrédients pénalisants.`
+      : penalisant === 1
+      ? ", un ingrédient pénalisant."
+      : ".";
   switch (tone) {
-    case "very-safe":
-      return "Formule très douce, rien à signaler.";
-    case "safe":
-      return counts.jaune <= 1
-        ? "Formule globalement saine, un ingrédient à connaître."
-        : `Formule globalement saine, ${counts.jaune} ingrédients à connaître.`;
-    case "caution":
-      return `Formule correcte, ${counts.jaune} ingrédients à surveiller.`;
-    case "warning":
-      return counts.orange === 1
-        ? "Formule moyenne, un ingrédient pénalisant."
-        : `Formule moyenne, ${counts.orange} ingrédients pénalisants.`;
+    case "very-safe":  return `Formule très douce${suffix}`;
+    case "safe":       return `Formule globalement saine${suffix}`;
+    case "caution":    return `Formule correcte${suffix}`;
+    case "warning":    return `Formule moyenne${suffix}`;
     case "danger":
-      return "Formule à examiner attentivement.";
-    case "high-risk":
-      return `Plusieurs ingrédients à risque (${flagged} au total). À considérer avec attention.`;
-    case "unknown":
-      return "On n'a pas réussi à analyser cette formule.";
+    case "high-risk":  return `Formule à examiner attentivement${suffix}`;
+    case "unknown":    return "On n'a pas réussi à analyser cette formule.";
   }
 }
 
@@ -861,13 +856,29 @@ function synthesiseFunctions(
   };
 }
 
+const WATER_INCI_TOKENS = new Set(["AQUA", "WATER", "EAU"]);
+
+function isWaterIngredient(rawName: string): boolean {
+  const tokens = rawName.toUpperCase().split(/[\s/,]+/).filter(Boolean);
+  return tokens.length > 0 && tokens.every((t) => WATER_INCI_TOKENS.has(t));
+}
+
+function isAlcoholName(rawName: string): boolean {
+  const n = rawName.toLowerCase();
+  return n.includes("alcool") || n.includes("alcohol");
+}
+
+const EMULSIFIER_FUNCTIONS = new Set(["Agent émulsifiant", "Stabilisateur d'émulsion"]);
+
 /** Best green ingredients first (by INCI position = highest concentration).
  *
  *  We walk the green ingredients ordered by position and stop once we have
  *  three positives with a context-valid verb. If an ingredient has no verb
  *  in the current context (e.g. "Conditionneur capillaire" on a deodorant)
  *  we silently skip it rather than burn a slot — that way a body lotion
- *  with one mismatched green ingredient still shows three valid bullets. */
+ *  with one mismatched green ingredient still shows three valid bullets.
+ *  Water (Aqua / Water / Eau) is excluded: its verb ("dissout les autres
+ *  ingrédients") is technically correct but uninformative to the user. */
 function pickPositives(items: AnalyseItem[], category: ProductCategory | null): Positive[] {
   const greens = items
     .filter((it) => it.colorRating === "Vert")
@@ -878,6 +889,10 @@ function pickPositives(items: AnalyseItem[], category: ProductCategory | null): 
     if (out.length >= 3) break;
     const rawName = (it.name ?? it.input ?? "").trim();
     if (!rawName) continue;
+    if (isWaterIngredient(rawName)) continue;
+    if (isAlcoholName(rawName)) continue;
+    const allFns = it.allFunctions?.length ? it.allFunctions : it.primaryFunction ? [it.primaryFunction] : [];
+    if (allFns.some((f) => EMULSIFIER_FUNCTIONS.has(f))) continue;
     const synth = synthesiseFunctions(it, category);
     if (!synth) continue;
     // Display-name priority:
@@ -1095,6 +1110,24 @@ export type EssentielData = {
   concerns: Concern[];
 };
 
+/**
+ * Apply a color-based safety floor to the display score (pastille only —
+ * does NOT modify the stored score). Rules:
+ *   - ≥1 rouge OR ≥3 orange → cap at 8.9  (pastille ≤ triangle)
+ *   - 1–2 orange            → cap at 12.9 (pastille ≤ œil)
+ *   - else                  → no cap
+ * Using `min(score, cap)` so a score already below the cap is never raised.
+ */
+export function colorCapScore(
+  score: number,
+  counts: Pick<AnalyseResponse["counts"], "orange" | "rouge">,
+): number {
+  const { orange, rouge } = counts;
+  if (rouge >= 1 || orange >= 3) return Math.min(score, 8.9);
+  if (orange >= 1)               return Math.min(score, 12.9);
+  return score;
+}
+
 export type EssentielOptions = {
   /** Closed-enum product category (from the backend's LLM categorisation).
    *  Takes precedence over `productType` when both are provided. */
@@ -1109,7 +1142,8 @@ export function computeEssentiel(
   result: AnalyseResponse,
   opts?: EssentielOptions,
 ): EssentielData {
-  const tone = pickTone(result.counts, result.items);
+  const cappedScore = colorCapScore(result.score, result.counts);
+  const tone = verdictToneFromScore(cappedScore);
   const phrase = pickPhrase(tone, result.counts);
   const resolvedCategory: ProductCategory | null =
     (opts?.category && opts.category !== "autre" ? opts.category : null)

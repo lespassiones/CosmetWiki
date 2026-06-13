@@ -16,9 +16,14 @@ import { AddToRoutineButton } from "./routine/AddToRoutineButton";
 import { RestrictionWarning } from "./analyse/RestrictionWarning";
 import { EssentielView, EssentielToggleButton } from "./analyse/EssentielView";
 import { VerdictGauge } from "./analyse/VerdictGauge";
-import { computeEssentiel, verdictToneFromScore } from "@/lib/essentiel/engine";
+import { computeEssentiel, verdictToneFromScore, colorCapScore } from "@/lib/essentiel/engine";
 import type { VerdictTone } from "@/lib/essentiel/engine";
 import { categoryLabel, type ProductCategory } from "@/lib/categoryLabel";
+import { AlternativesCarousel } from "./analyse/AlternativesCarousel";
+import { ToolsSection } from "./analyse/ToolsSection";
+import { ScoreExplanationModal } from "./analyse/ScoreExplanationModal";
+import { decodeHtml } from "@/lib/decodeHtml";
+import { categorySlugToDisplayName } from "@/lib/categories";
 
 // Lazy-load : la modale n'est ouverte que sur clic utilisateur, on évite
 // d'embarquer son JS (et celui de ses dépendances OpenAI/Markdown) au LCP.
@@ -44,6 +49,7 @@ export function AnalyseResultPanel({
   originalText,
   productLabel = null,
   productSource = null,
+  ean = null,
   analysisId = null,
   brand = null,
   productType = null,
@@ -65,6 +71,8 @@ export function AnalyseResultPanel({
     sourceUrl: string | null;
     brand: string | null;
   } | null;
+  /** EAN of the analysed product. When present enables the alternatives carousel. */
+  ean?: string | null;
   /**
    * Supabase id of the persisted analyses row. When present, the
    * "Analyser la promesse" flow can PATCH the row with the marketing
@@ -109,7 +117,7 @@ export function AnalyseResultPanel({
    */
   breadcrumb?: BreadcrumbItem[] | null;
 }) {
-  const title = productLabel?.trim() || "Analyse de votre liste";
+  const title = decodeHtml(productLabel?.trim() || "") || "Analyse de votre liste";
   // The "Analyser la promesse" CTA is always offered - the flow handles
   // the "no product name" case gracefully: the web-search step tries the
   // INCI alone, and if nothing crédible comes back the modal falls through
@@ -157,7 +165,9 @@ export function AnalyseResultPanel({
     () => computeEssentiel(result, { category: result.category ?? null, productType }),
     [result, productType],
   );
+  const cappedTone = verdictToneFromScore(colorCapScore(result.score, result.counts));
   const [detailsExpanded, setDetailsExpanded] = useState(false);
+  const [scoreExplOpen, setScoreExplOpen] = useState(false);
   const detailsRef = useRef<HTMLDivElement | null>(null);
   // True once we've finished the post-mount sessionStorage read — keeps the
   // auto-save effect below from clobbering the persisted value with the
@@ -285,13 +295,14 @@ export function AnalyseResultPanel({
         productSource={productSource}
         category={result.category ?? null}
         productType={productType ?? result.productType ?? null}
+        catalogCategory={result.catalogCategory ?? null}
         onAnalysePromesse={() => setPromesseOpen(true)}
         existingCoherenceId={existingCoherenceId}
         onShare={() => shareReport(originalText)}
         breadcrumb={trail}
         analysisId={analysisId}
         alreadyInRoutine={alreadyInRoutine}
-        verdictTone={verdictToneFromScore(result.score)}
+        verdictTone={cappedTone}
       />
       {!existingCoherenceId && (
         <PromesseFlowModal
@@ -328,6 +339,7 @@ export function AnalyseResultPanel({
             expanded={detailsExpanded}
             onToggle={() => setDetailsExpanded((v) => !v)}
             hideToggle
+            scoreTone={cappedTone}
           />
         </div>
         {/* Desktop verdict gauge — same chrome as the mobile toolbar pill
@@ -339,7 +351,7 @@ export function AnalyseResultPanel({
             stack — see `hideToggle` note above. */}
         <div className="hidden lg:flex lg:shrink-0 lg:items-stretch">
           <VerdictGauge
-            tone={verdictToneFromScore(result.score)}
+            tone={cappedTone}
             orientation="vertical"
             className="h-full justify-around rounded-full bg-white/85 px-1.5 py-3 ring-1 ring-black/[0.06] backdrop-blur-md"
           />
@@ -496,6 +508,33 @@ export function AnalyseResultPanel({
           }}
         />
       ) : null}
+
+      {/* Alternatives carousel — appears right after the toggle button when
+          the analysis is collapsed (detailsExpanded = false), and at the very
+          bottom once expanded, since the `detailsExpanded` block sits between
+          the toggle and this element. */}
+      <AlternativesCarousel
+        ean={ean ?? null}
+        brand={brand}
+        productName={productLabel}
+      />
+
+      <ToolsSection
+        ean={ean ?? null}
+        productLabel={productLabel ?? null}
+        imageUrl={result.imageUrl ?? null}
+        brand={brand ?? null}
+        catalogCategory={result.catalogCategory ?? null}
+        onOpenScoreExpl={() => setScoreExplOpen(true)}
+      />
+
+      {scoreExplOpen ? (
+        <ScoreExplanationModal
+          result={result}
+          productLabel={title}
+          onClose={() => setScoreExplOpen(false)}
+        />
+      ) : null}
     </section>
   );
 }
@@ -610,6 +649,7 @@ function TitleBar({
   productSource,
   category,
   productType,
+  catalogCategory,
   onAnalysePromesse,
   existingCoherenceId,
   onShare,
@@ -622,6 +662,10 @@ function TitleBar({
   productSource: { source: string; sourceUrl: string | null; brand: string | null } | null;
   category: ProductCategory | null;
   productType: string | null;
+  /** Full catalog category slug (e.g. "hygiene-du-corps/deodorant/deodorant-spray").
+   *  When present, the last segment is resolved to a display name and shown
+   *  as "sous-catégorie · marque" below the product title. */
+  catalogCategory?: string | null;
   onAnalysePromesse: () => void;
   existingCoherenceId: string | null;
   onShare: () => void;
@@ -632,7 +676,10 @@ function TitleBar({
    *  share button. Same rules-based value as the L'ESSENTIEL card. */
   verdictTone: VerdictTone;
 }) {
-  const brand = productSource?.brand ?? null;
+  const brand = productSource?.brand ? decodeHtml(productSource.brand) : null;
+  const subCategoryDisplay = catalogCategory
+    ? categorySlugToDisplayName(catalogCategory)
+    : (categoryLabel(category) ?? productType ?? null);
   // Standard convention: last item is the current location (not clickable).
   const trail = breadcrumb ? breadcrumb.slice(0, -1) : [];
   const current = breadcrumb ? breadcrumb[breadcrumb.length - 1] : undefined;
@@ -663,9 +710,19 @@ function TitleBar({
         <h1 className="mt-1 text-balance text-2xl font-bold tracking-tight text-ink sm:text-3xl">
           {title}
         </h1>
-        {(categoryLabel(category) ?? productType) ? (
-          <p className="mt-2 inline-flex items-center rounded-full bg-black/[0.06] px-2.5 py-0.5 text-[11px] font-medium text-ink-subtle capitalize">
-            {categoryLabel(category) ?? productType}
+        {(subCategoryDisplay || brand) ? (
+          <p className="mt-2 flex items-center gap-1.5 text-[12px] text-ink-subtle">
+            {subCategoryDisplay ? (
+              <span className="inline-flex items-center rounded-full bg-black/[0.06] px-2.5 py-0.5 font-medium capitalize">
+                {subCategoryDisplay}
+              </span>
+            ) : null}
+            {subCategoryDisplay && brand ? (
+              <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle/40 shrink-0" />
+            ) : null}
+            {brand ? (
+              <span className="font-medium text-ink-muted">{brand}</span>
+            ) : null}
           </p>
         ) : null}
       </div>

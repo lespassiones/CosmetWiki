@@ -11,6 +11,7 @@ import { supabaseServer } from "@/lib/supabase";
 import { RestrictionsProvider } from "@/components/restrictions/RestrictionsProvider";
 import { loadIngredientFamilies } from "@/lib/restrictions/families";
 import { EMPTY_RESTRICTIONS, readUserRestrictions } from "@/lib/restrictions/types";
+import { readSkinProfile } from "@/lib/skin/profile";
 import "./globals.css";
 
 type InitialCredits = { used: number; limit: number; remaining: number };
@@ -61,9 +62,10 @@ const inter = Inter({
 });
 
 const SITE_NAME = "Cosme Check";
-const DEFAULT_TITLE = "Cosme Check - Une beauté consciente, au-delà des simples notes";
+const DEFAULT_TITLE =
+  "CosmeCheck, l'application qui t'aide à choisir les cosmétiques les plus adaptés à tes besoins.";
 const DEFAULT_DESCRIPTION =
-  "L'application qui décode tes cosmétiques : composition, promesses marketing, ingrédients clefs. Une beauté consciente, vraiment.";
+  "CosmeCheck analyse les ingrédients, vérifie les promesses, compare les produits et te guide grâce à des conseils personnalisés pour t'aider à obtenir de meilleurs résultats avec moins d'essais, moins de déceptions et moins d'argent dépensé inutilement.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -211,6 +213,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     ? readUserRestrictions(profile?.preferences ?? null)
     : EMPTY_RESTRICTIONS;
   const families = signedIn ? familiesResult : [];
+  const allergiesFreeform = signedIn
+    ? (readSkinProfile(profile?.preferences ?? null).allergiesFreeform ?? undefined)
+    : undefined;
 
   const creditsData = (creditsRaw as { data: unknown }).data as {
     ok?: boolean; used?: number; limit?: number; remaining?: number;
@@ -228,7 +233,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           href={process.env.NEXT_PUBLIC_SUPABASE_URL}
           crossOrigin="anonymous"
         />
-        <RestrictionsProvider restrictions={restrictions} families={families}>
+        <RestrictionsProvider restrictions={restrictions} families={families} allergiesFreeform={allergiesFreeform}>
           <AppShell signedIn={signedIn} firstName={firstName} hideOnPaths={hideOnPaths} initialCredits={initialCredits}>
             {children}
             <ConditionalLandingFooter signedIn={signedIn} />

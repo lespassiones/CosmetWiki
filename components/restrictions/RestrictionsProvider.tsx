@@ -9,12 +9,15 @@ type Ctx = {
   families: IngredientFamily[];
   /** Quick lookup: ingredient tag slug → display family name. */
   familyNameByTag: Map<string, string>;
+  /** Free-form allergy text from the user's skin profile (used for substring filtering). */
+  allergiesFreeform?: string;
 };
 
 const DEFAULT: Ctx = {
   restrictions: EMPTY_RESTRICTIONS,
   families: [],
   familyNameByTag: new Map(),
+  allergiesFreeform: undefined,
 };
 
 const RestrictionsContext = createContext<Ctx>(DEFAULT);
@@ -31,10 +34,12 @@ const RestrictionsContext = createContext<Ctx>(DEFAULT);
 export function RestrictionsProvider({
   restrictions,
   families,
+  allergiesFreeform,
   children,
 }: {
   restrictions: UserRestrictions;
   families: IngredientFamily[];
+  allergiesFreeform?: string;
   children: React.ReactNode;
 }) {
   const value = useMemo<Ctx>(() => {
@@ -42,8 +47,8 @@ export function RestrictionsProvider({
     for (const f of families) {
       if (f.tagSlug) map.set(f.tagSlug, f.name);
     }
-    return { restrictions, families, familyNameByTag: map };
-  }, [restrictions, families]);
+    return { restrictions, families, familyNameByTag: map, allergiesFreeform };
+  }, [restrictions, families, allergiesFreeform]);
 
   return (
     <RestrictionsContext.Provider value={value}>
