@@ -9,6 +9,8 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: Metadata
   { path: "/fonctionnalites", priority: 0.9, changeFrequency: "monthly" },
   { path: "/comment-ca-marche", priority: 0.6, changeFrequency: "monthly" },
   { path: "/blog", priority: 0.7, changeFrequency: "weekly" },
+  { path: "/blog/routine-peau-joueurs-foot", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/blog/deodorant-sels-aluminium-verite", priority: 0.7, changeFrequency: "monthly" },
   { path: "/blog/spf-50-visage-7-erreurs", priority: 0.7, changeFrequency: "monthly" },
   { path: "/blog/perturbateurs-endocriniens-cosmetiques-2026", priority: 0.7, changeFrequency: "monthly" },
   { path: "/blog/serums-visage-guide", priority: 0.7, changeFrequency: "monthly" },

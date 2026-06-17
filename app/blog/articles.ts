@@ -36,6 +36,28 @@ export type Article = {
 
 export const ARTICLES: Article[] = [
   {
+    id: "routine-peau-joueurs-foot",
+    title: "Skincare des stars du foot : la routine de Ronaldo, Mbappé & co décryptée",
+    excerpt:
+      "Coupe du monde oblige, leurs visages sont partout. Quelle routine peau suivent vraiment les stars du ballon, quels ingrédients privilégier et la version simple à copier en 3 minutes par jour.",
+    category: "Routines",
+    date: "17 juin 2026",
+    published: "2026-06-17",
+    readingTime: "4 min",
+    image: "/image/blog/foot-skincare/hero.webp",
+  },
+  {
+    id: "deodorant-sels-aluminium-verite",
+    title: "Déodorant ou anti-transpirant : faut-il vraiment fuir les sels d'aluminium ?",
+    excerpt:
+      "Cancer, Alzheimer, déos « naturels »… on démêle ce que dit vraiment la science sur les sels d'aluminium, la différence déodorant / anti-transpirant et comment lire l'INCI de ton déo cet été.",
+    category: "Ingrédients",
+    date: "17 juin 2026",
+    published: "2026-06-17",
+    readingTime: "4 min",
+    image: "/image/blog/deodorant-aluminium/hero.webp",
+  },
+  {
     id: "serums-visage-guide",
     title: "Sérums visage : vitamine C, acide hyaluronique, peptides, lequel choisir ?",
     excerpt:
