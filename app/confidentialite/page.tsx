@@ -4,7 +4,7 @@ import { LEGAL } from "@/lib/legal";
 
 const TITLE = "Politique de confidentialité";
 const DESCRIPTION =
-  "Comment Cosme Check collecte, utilise et protège tes données personnelles dans le respect du RGPD.";
+  "Quelles données Cosme Check collecte, comment elles sont utilisées, stockées et protégées, et quels sont tes droits (accès, rectification, suppression) dans le respect du RGPD.";
 
 export const metadata: Metadata = {
   title: TITLE,

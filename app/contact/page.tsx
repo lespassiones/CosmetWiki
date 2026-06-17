@@ -5,7 +5,7 @@ import { LEGAL } from "@/lib/legal";
 
 const TITLE = "Contact";
 const DESCRIPTION =
-  "Une question, un souci, une idée ? Écris-nous, on lit chaque message et on répond rapidement.";
+  "Une question sur Cosme Check, un bug à signaler, une idée de fonctionnalité ou un partenariat ? Écris-nous : on lit chaque message et on répond en général sous 48 heures.";
 
 export const metadata: Metadata = {
   title: TITLE,
