@@ -15,6 +15,7 @@ type Row = {
   score: number | null;
   created_at: string;
   counts: BlobCounts | null;
+  favori?: boolean | null;
   /** When set, the user has already run a coherence (promise) analysis on
    *  this analyse - the per-card CTA links straight to that result instead
    *  of relaunching the modal. */
@@ -27,14 +28,6 @@ type Row = {
   /** Raw free-form product type from OCR, used as fallback when category is absent. */
   productType?: string | null;
 };
-
-function scoreTone(score: number | null) {
-  if (score === null) return { text: "text-[#6B7280]", label: "-" };
-  if (score >= 17) return { text: "text-emerald-700", label: "Très bien" };
-  if (score >= 13) return { text: "text-amber-700", label: "Bien" };
-  if (score >= 9) return { text: "text-orange-700", label: "Moyen" };
-  return { text: "text-rose-700", label: "À éviter" };
-}
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("fr-FR", {
@@ -51,21 +44,36 @@ export function HistoryList({ rows }: { rows: Row[] }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
   const [openActionsId, setOpenActionsId] = useState<string | null>(null);
+  const [showFavOnly, setShowFavOnly] = useState(false);
+  const [favoris, setFavoris] = useState<Record<string, boolean>>({});
   const router = useRouter();
 
   const selectedCount = selected.size;
   const canCompare = selectedCount === 2;
 
   const filteredRows = useMemo(() => {
+    let result = rows;
+
+    if (showFavOnly) {
+      result = result.filter((r) => {
+        const favState = favoris[r.id] !== undefined ? favoris[r.id] : (r.favori ?? false);
+        return favState;
+      });
+    }
+
     const q = query.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((r) => {
+    if (!q) return result;
+    return result.filter((r) => {
       const label = (r.product_label ?? r.name ?? "").toLowerCase();
       if (label.includes(q)) return true;
       const tokens = r.ingredientTokens ?? [];
       return tokens.some((t) => t.includes(q));
     });
-  }, [rows, query]);
+  }, [rows, query, showFavOnly, favoris]);
+
+  const hasFavoris = rows.some((r) => {
+    return favoris[r.id] !== undefined ? favoris[r.id] : (r.favori ?? false);
+  });
 
   function toggle(id: string) {
     setSelected((prev) => {
@@ -98,6 +106,21 @@ export function HistoryList({ rows }: { rows: Row[] }) {
     router.push(`/compare?ids=${ids}`);
   }
 
+  async function toggleFavori(id: string, current: boolean) {
+    const next = !current;
+    setFavoris((prev) => ({ ...prev, [id]: next }));
+    try {
+      await fetch(`/api/analyses/${id}/favori`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ favori: next }),
+      });
+    } catch {
+      // revert on error
+      setFavoris((prev) => ({ ...prev, [id]: current }));
+    }
+  }
+
   const hint = useMemo(() => {
     if (!selectMode) return null;
     if (selectedCount === 0) return "Sélectionne 2 analyses à comparer";
@@ -111,13 +134,35 @@ export function HistoryList({ rows }: { rows: Row[] }) {
           by the parent route), before the toolbar / count subline. */}
       <div className="-mx-5 h-px bg-[#c5ccd6] lg:mx-0" />
 
-      {/* Discrete toolbar - only the "Comparer" entry point is visible when idle */}
-      <div className="mt-3 flex items-center justify-between">
-        <p className="text-sm text-[#6B7280]">
-          {rows.length === 0
-            ? "Aucune analyse pour l'instant."
-            : `${rows.length} analyse${rows.length > 1 ? "s" : ""}.`}
-        </p>
+      {/* Toolbar - Tout / Favoris toggle on the left, Comparer on the right,
+          all on the same line. */}
+      <div className="mt-3 flex items-center justify-between gap-2">
+        {/* Tout / Favoris toggle (only shown when at least one favori exists) */}
+        {!selectMode && rows.length > 0 && (hasFavoris || showFavOnly) ? (
+          <div className="inline-flex rounded-full bg-black/[0.06] p-0.5 gap-0.5">
+            <button
+              type="button"
+              onClick={() => setShowFavOnly(false)}
+              className={`rounded-full px-3.5 py-1.5 text-[12px] font-medium transition ${
+                !showFavOnly ? "bg-white shadow text-[#111111]" : "text-[#6B7280] hover:text-[#111111]"
+              }`}
+            >
+              Tout
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowFavOnly(true)}
+              className={`rounded-full px-3.5 py-1.5 text-[12px] font-medium transition ${
+                showFavOnly ? "bg-white shadow text-[#111111]" : "text-[#6B7280] hover:text-[#111111]"
+              }`}
+            >
+              Favoris
+            </button>
+          </div>
+        ) : (
+          <span />
+        )}
+
         {rows.length >= 2 && !selectMode && (
           <button
             type="button"
@@ -191,7 +236,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
 
       <ul className="mt-6 space-y-3">
         {filteredRows.map((a) => {
-          const tone = scoreTone(a.score);
+          const isFavori = favoris[a.id] !== undefined ? favoris[a.id] : (a.favori ?? false);
           const displayName = decodeHtml(
             a.name ?? a.product_label ?? `Analyse du ${formatDate(a.created_at)}`,
           );
@@ -237,21 +282,13 @@ export function HistoryList({ rows }: { rows: Row[] }) {
             );
           }
 
-          // The pill is shown on every card now - earlier we hid it when no
-          // product_label was set, which was inconsistent: on the detail
-          // page the same analyse showed "Voir l'analyse de la promesse"
-          // (because of the "Analyse du …" fallback title). Always visible
-          // here too - the modal handles the "no name" case by searching
-          // on the INCI alone and falling back to manual description.
           const canAnalysePromesse = true;
           return (
             <li key={a.id} className={`relative${openActionsId === a.id ? " z-[60]" : ""}`}>
               <div
-                className="neu neu-hover relative flex items-center gap-4 p-4 pr-16"
+                className="neu neu-hover relative flex items-center gap-4 p-4 pr-24"
               >
-                {/* Card-wide click target - kept underneath the action buttons
-                    so the dedicated "Analyser la promesse" link / kebab menu
-                    receive their own clicks. */}
+                {/* Card-wide click target */}
                 <Link
                   href={`/history/${a.id}`}
                   aria-label={`Ouvrir ${displayName}`}
@@ -264,15 +301,12 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                   />
                 </div>
                 <div className="relative z-[1] min-w-0 flex-1 pointer-events-none">
-                  <div className="font-semibold text-[#111111] truncate">{displayName}</div>
+                  <div className="font-semibold text-[#111111] truncate mb-0.5">{displayName}</div>
                   {(categoryLabel(a.category) ?? a.productType) ? (
                     <span className="mt-0.5 inline-flex items-center rounded-full bg-black/[0.06] px-2 py-0.5 text-[10px] font-medium text-[#6B7280] capitalize">
                       {categoryLabel(a.category) ?? a.productType}
                     </span>
                   ) : null}
-                  <div className="text-[12px] text-[#6B7280]">
-                    {formatDate(a.created_at)}
-                  </div>
                   {canAnalysePromesse && (
                     a.latestCoherenceId ? (
                       <Link
@@ -292,6 +326,19 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                   )}
                 </div>
               </div>
+
+              {/* Bookmark button */}
+              <button
+                type="button"
+                aria-label={isFavori ? "Retirer des favoris" : "Ajouter aux favoris"}
+                onClick={() => toggleFavori(a.id, isFavori)}
+                className={`absolute right-12 top-1/2 -translate-y-1/2 z-[2] h-8 w-8 flex items-center justify-center rounded-full transition hover:bg-black/[0.06] ${
+                  isFavori ? "text-amber-500" : "text-[#9CA3AF]"
+                }`}
+              >
+                <BookmarkIcon filled={isFavori} />
+              </button>
+
               <div className="absolute right-3 top-1/2 -translate-y-1/2 z-[2]">
                 <HistoryItemActions
                   id={a.id}
@@ -304,6 +351,23 @@ export function HistoryList({ rows }: { rows: Row[] }) {
         })}
       </ul>
     </div>
+  );
+}
+
+function BookmarkIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+      aria-hidden
+    >
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    </svg>
   );
 }
 

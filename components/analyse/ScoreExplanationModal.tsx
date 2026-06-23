@@ -104,7 +104,7 @@ export function ScoreExplanationModal({ result, productLabel, onClose }: Props) 
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" aria-hidden />
 
       <div
-        className="relative z-10 w-full sm:max-w-lg max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-white/96 backdrop-blur-2xl shadow-2xl animate-[fadeIn_180ms_ease-out]"
+        className="relative z-10 w-full sm:max-w-lg max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl animate-[fadeIn_180ms_ease-out]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag handle (mobile) */}

@@ -20,6 +20,7 @@ const SKIP_AUTH_PREFIXES = [
   "/comment-ca-marche",
   "/offre",
   "/i/",
+  "/a/", // analyses partagées en lecture publique (jamais de session lue)
 ];
 
 function isSkipAuthPath(pathname: string): boolean {

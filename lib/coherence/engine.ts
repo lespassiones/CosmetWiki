@@ -132,16 +132,8 @@ function deriveVerdict({
 }
 
 /**
- * Unified score 0–100 - same scale for catalogue AND open promises so the
- * progress bars are visually comparable.
- *
- * Anchored on the verdict tier (predictable colour + rough position), with a
- * small bonus per additional active so users see "more support" within the
- * same tier:
- *   - tenue   (well dosed documented)         → 80 + 5×(extra wells), max 100
- *   - partielle (only in-trace documented)    → 35 + 5×(extra traces), max 60
- *   - marketing (only cosmetic actives)       → 20 + 5×(extra cosmetics), max 35
- *   - non_demontree                            → 0
+ * Unified score 0–100 - used by the catalogue path (resolvePromise) which
+ * doesn't distinguish documented vs supportive evidence.
  */
 function unifiedScore({
   wellDosed,
@@ -156,6 +148,47 @@ function unifiedScore({
   if (inTrace > 0) return Math.min(60, 35 + (inTrace - 1) * 5);
   if (cosmetic > 0) return Math.min(35, 20 + (cosmetic - 1) * 5);
   return 0;
+}
+
+/**
+ * Grade an open (LLM-explored) promise using the v3 formula that separates
+ * "documented" evidence (peer-reviewed studies on the specific effect) from
+ * "supportive" evidence (indirect or correlational).
+ *
+ * Priority ladder:
+ *   docWellDosed >= 1 → tenue,   80 + 5×(docWD-1 + supWD),  max 100
+ *   supWellDosed >= 2 → tenue,   72 + 5×(supWD-2),          max 90
+ *   supWellDosed == 1 → partielle, 55
+ *   docTrace+supTrace >= 1 → partielle, 35
+ *   cosmetic >= 1         → partielle, 30
+ *   else                  → non_demontree, 0
+ */
+function gradeEffect(
+  docWellDosed: number,
+  docTrace: number,
+  supWellDosed: number,
+  supTrace: number,
+  cosmetic: number,
+): { verdict: CoherenceVerdict; score: number } {
+  if (docWellDosed >= 1) {
+    return {
+      verdict: "tenue",
+      score: Math.min(100, 80 + 5 * (docWellDosed - 1 + supWellDosed)),
+    };
+  }
+  if (supWellDosed >= 2) {
+    return { verdict: "tenue", score: Math.min(90, 72 + 5 * (supWellDosed - 2)) };
+  }
+  if (supWellDosed === 1) {
+    return { verdict: "partielle", score: 55 };
+  }
+  if (docTrace + supTrace >= 1) {
+    return { verdict: "partielle", score: 35 };
+  }
+  if (cosmetic >= 1) {
+    return { verdict: "partielle", score: 30 };
+  }
+  return { verdict: "non_demontree", score: 0 };
 }
 
 // -----------------------------------------------------------------------------
@@ -483,14 +516,40 @@ export function resolveAbsencePromise(
   const tag = cat.forbiddenTag;
   let offenders = items.filter((it) => (it.tags ?? []).includes(tag));
 
-  // Filtre contextuel pour "sans allergène parfumant" : les substances
-  // dual-use (Benzyl Alcohol, Benzyl Benzoate, Benzyl Salicylate) ne
-  // comptent comme allergène parfumant que si la formule contient un
-  // parfum déclaré.
+  // Cas particulier « sans allergène parfumant » + formule SANS parfum déclaré.
+  // Les substances dual-use (Benzyl Alcohol…) servent alors à leur autre
+  // fonction (conservateur/solvant). Nuance (Feature 1.B) :
+  //   - si elles sont les SEULS fautifs → verdict « partielle » (50, à nuancer),
+  //     l'ingrédient reste signalé dans contradictingActives ;
+  //   - s'il existe AUSSI un vrai allergène (Limonene, Linalool…) → on garde
+  //     « contredite » sur les vrais fautifs (les dual-use sont écartés).
   if (tag === "allergene-parfumant" && !formulaHasDeclaredFragrance(items)) {
-    offenders = offenders.filter(
+    const dualUse = offenders.filter(
+      (it) => it.slug != null && DUAL_USE_ANNEX_III_SLUGS.has(it.slug),
+    );
+    const real = offenders.filter(
       (it) => !it.slug || !DUAL_USE_ANNEX_III_SLUGS.has(it.slug),
     );
+    if (real.length === 0 && dualUse.length > 0) {
+      const sorted = dualUse.slice().sort((a, b) => a.position - b.position);
+      return {
+        slug: cat.slug,
+        label: cat.label,
+        excerpt: proposal.excerpt,
+        verdict: "partielle",
+        expectedActives: [],
+        foundActives: [],
+        cosmeticActives: [],
+        missingActives: [],
+        contradictingActives: sorted.slice(0, 5).map((it) => ({
+          name: it.name ?? it.input,
+          slug: it.slug,
+          position: it.position,
+        })),
+        score: 50,
+      };
+    }
+    offenders = real;
   }
 
   if (offenders.length === 0) {
@@ -573,7 +632,9 @@ export function resolveOpenPromise(
     })
     .filter((x): x is { match: OpenLlmMatch; item: AnalyseItem } => x !== null);
 
+  // v3: split by evidence tier for gradeEffect.
   const foundDocumented: CoherencePromise["foundActives"] = [];
+  const foundSupportive: CoherencePromise["foundActives"] = [];
   const foundCosmetic: CoherencePromise["cosmeticActives"] = [];
 
   // De-dupe by item position - the LLM might cite the same item twice.
@@ -590,6 +651,13 @@ export function resolveOpenPromise(
         inTrace: isInTrace(item),
         note: match.reason.trim().slice(0, 80) || "effet visuel/sensoriel",
       });
+    } else if (match.evidence === "supportive") {
+      foundSupportive.push({
+        name: item.name ?? match.item_name,
+        slug: item.slug,
+        position: item.position,
+        inTrace: isInTrace(item),
+      });
     } else {
       foundDocumented.push({
         name: item.name ?? match.item_name,
@@ -600,37 +668,23 @@ export function resolveOpenPromise(
     }
   }
 
-  // Documenté + cosmétique : tout ingrédient confirmant compte.
-  const wellDosed =
-    foundDocumented.filter((f) => !f.inTrace).length
-    + foundCosmetic.filter((c) => !c.inTrace).length;
-  const trace =
-    foundDocumented.filter((f) => f.inTrace).length
-    + foundCosmetic.filter((c) => c.inTrace).length;
-  const verdict = deriveVerdict({
-    confirmingFound: foundDocumented.length + foundCosmetic.length,
-    confirmingWellDosed: wellDosed,
-  });
-
-  // Same unified scale as catalogue path - keeps progress bars comparable
-  // across catalogue and open promises (a "partielle" verdict shows ~35-60 %
-  // either way, instead of 6 % vs 40 %).
-  const score = unifiedScore({
-    wellDosed,
-    inTrace: trace,
-    cosmetic: 0,
-  });
+  const docWellDosed = foundDocumented.filter((f) => !f.inTrace).length;
+  const docTrace    = foundDocumented.filter((f) => f.inTrace).length;
+  const supWellDosed = foundSupportive.filter((f) => !f.inTrace).length;
+  const supTrace    = foundSupportive.filter((f) => f.inTrace).length;
+  const cosmeticCount = foundCosmetic.length;
+  const { verdict, score } = gradeEffect(docWellDosed, docTrace, supWellDosed, supTrace, cosmeticCount);
 
   return {
     slug: proposal.category_slug || "autre",
     label: proposal.label || "Promesse libre",
     excerpt: proposal.excerpt,
     verdict,
-    expectedActives: foundDocumented
+    expectedActives: [...foundDocumented, ...foundSupportive]
       .map((f) => f.name)
       .concat(llmMissing.slice(0, 5))
       .slice(0, 8),
-    foundActives: foundDocumented,
+    foundActives: [...foundDocumented, ...foundSupportive],
     cosmeticActives: foundCosmetic,
     missingActives: llmMissing.slice(0, 5),
     score,

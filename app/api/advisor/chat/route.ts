@@ -20,7 +20,6 @@ export const maxDuration = 25;
 
 const MODEL = "gpt-4o-mini";
 const MISTRAL_MODEL = "mistral-small-latest";
-const MAX_MESSAGES_PER_DAY = 30;
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -162,19 +161,23 @@ export async function POST(req: NextRequest) {
     return new Response(JSON.stringify({ error: "Non connecté." }), { status: 401 });
   }
 
-  // Three independent reads - fan them out in parallel so the chat doesn't
-  // wait 3× the network roundtrip. The daily cap check still gates the
-  // response, but profile + routine are fetched concurrently for free.
-  const since = new Date();
-  since.setHours(0, 0, 0, 0);
-  const [usedTodayRes, profileRes, routineRes] = await Promise.all([
-    sb
-      .schema("cosme_check")
-      .from("ai_logs")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .eq("feature", "synthesis")
-      .gte("created_at", since.toISOString()),
+  // Crédit : 1 par message (handoff §7 : advisor = 1/msg), prélevé sur le même
+  // compteur quotidien partagé que cohérence / routine_suggest / compare. On
+  // débite AVANT l'appel LLM ; si le solde est épuisé -> paywall (429).
+  const { data: creditData } = await sb.rpc("cosme_check_consume_credit", {
+    p_feature: "advisor",
+  });
+  const credit = (creditData ?? { ok: false }) as { ok: boolean };
+  if (!credit.ok) {
+    return new Response(
+      JSON.stringify({ error: "Tu as utilisé tous tes crédits du jour. Reviens demain !" }),
+      { status: 429, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  // Two independent reads - fan them out in parallel so the chat doesn't wait
+  // 2× the network roundtrip.
+  const [profileRes, routineRes] = await Promise.all([
     sb
       .schema("cosme_check")
       .from("user_profiles")
@@ -188,14 +191,6 @@ export async function POST(req: NextRequest) {
       .eq("user_id", user.id)
       .limit(12),
   ]);
-
-  const usedToday = usedTodayRes.count;
-  if ((usedToday ?? 0) > MAX_MESSAGES_PER_DAY) {
-    return new Response(
-      JSON.stringify({ error: `Limite quotidienne atteinte (${MAX_MESSAGES_PER_DAY}/jour). À demain !` }),
-      { status: 429, headers: { "Content-Type": "application/json" } },
-    );
-  }
 
   const profileRow = profileRes.data;
   const skin = readSkinProfile((profileRow?.preferences ?? null) as Record<string, unknown> | null);
@@ -334,7 +329,7 @@ Quand l'utilisateur évoque un produit, vérifie d'abord si la formule contient 
           }
           controller.close();
           logAI({
-            feature: "synthesis",
+            feature: "advisor",
             provider: "openai",
             status: "success",
             tokens_in: totalIn,
@@ -347,7 +342,7 @@ Quand l'utilisateur évoque un produit, vérifie d'abord si la formule contient 
           if (hasEmitted || !hasMistral()) {
             // Mid-stream error OR no fallback available - can't recover.
             logAI({
-              feature: "synthesis",
+              feature: "advisor",
               provider: "openai",
               status: "error",
               duration_ms: Date.now() - t0,
@@ -360,7 +355,7 @@ Quand l'utilisateur évoque un produit, vérifie d'abord si la formule contient 
           // Mistral. Log the OpenAI failure as `fallback` so the metric
           // distinguishes it from a hard error.
           logAI({
-            feature: "synthesis",
+            feature: "advisor",
             provider: "openai",
             status: "fallback",
             duration_ms: Date.now() - t0,
@@ -383,7 +378,7 @@ Quand l'utilisateur évoque un produit, vérifie d'abord si la formule contient 
         if (usage.tokensOut > 0) hasEmitted = true;
         controller.close();
         logAI({
-          feature: "synthesis",
+          feature: "advisor",
           provider: "mistral",
           // "fallback" when OpenAI was tried first, "success" when Mistral
           // ran primary (OpenAI key absent).
@@ -395,7 +390,7 @@ Quand l'utilisateur évoque un produit, vérifie d'abord si la formule contient 
         });
       } catch (err) {
         logAI({
-          feature: "synthesis",
+          feature: "advisor",
           provider: "mistral",
           status: "error",
           duration_ms: Date.now() - tM,

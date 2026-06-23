@@ -196,665 +196,15 @@ export function normalizeProductTypeToCategory(
 /**
  * One bullet point in the "Ce qui est bien" card.
  *
- * - `verb`      : the primary role verb (the most user-facing benefit the
- *                 ingredient brings to this category — comes from the
- *                 highest-priority family present on the ingredient).
- * - `secondary` : optional short complement verb describing a second family
- *                 of functions the ingredient also serves (e.g. "parfume
- *                 naturellement" pour une huile aussi parfumante).
+ * - `name`      : public display name of the ingredient.
+ * - `functions` : its real documented functions (1 to 3), straight from the
+ *                 DB, deduplicated, with "Non classé" filtered out.
  *
- * The UI renders them as `{name} → {verb} · {secondary}` so a 15-year-old
- * reader gets a mini-story in one line instead of a flat single verb that
- * may hide most of what the ingredient actually does.
+ * The UI renders them as `{name} -> {fn1} · {fn2} · {fn3}`. No verb table, no
+ * family logic: we show the raw functions so the card stays trivial to
+ * maintain and consistent with the mobile app (handoff §4).
  */
-export type Positive = { name: string; verb: string; secondary?: string };
-
-/**
- * A function's verb can be a plain string (universal — same effect regardless
- * of product type) or a contextual map. Use `null` in `by` or `default` to
- * mark the function as IRRELEVANT for that context: pickPositives will then
- * skip the ingredient rather than show a wrong-context bullet point.
- */
-type VerbsByCategory = {
-  /** Verb used when the category is null/autre or not present in `by`.
-   *  `null` means: skip this ingredient when the context isn't matched. */
-  default: string | null;
-  /** Per-category overrides. Use `null` to skip in that exact category. */
-  by?: Partial<Record<ProductCategory, string | null>>;
-};
-
-type VerbConfig = string | VerbsByCategory;
-
-/**
- * Short action verb attached to each primaryFunction value we see in the DB.
- * The full list of ~75 function names was extracted from
- * `cosme_check.ingredients.functions[].name`.
- *
- * Two flavours:
- *   - plain string  : universal verb, applied regardless of product category.
- *   - VerbsByCategory : default fallback + optional per-category overrides.
- *
- * Contextual entries exist to avoid wrong-context phrases such as
- * "fixe la coiffure" surfacing on a deodorant (where "Agent fixant" really
- * means "binding agent", not hair fixative).
- */
-const FUNCTION_VERBS: Record<string, VerbConfig> = {
-  // ─── Universal verbs (safe in any category) ──────────────────────────
-  // 2026-05 phrasing rewrite: replaced one-word verbs ("nettoie", "épaissit")
-  // with short descriptive sentences (4-7 words) that explain WHAT the
-  // ingredient does in the formula and WHY it's there. Matches the style
-  // already used on the "À surveiller" side ("asséchants en grande
-  // quantité", "agent chélateur, non biodégradable").
-  "Agent d'entretien de la peau": "maintient la peau en bon état",
-  "Agent d'entretien de la peau - Divers": "maintient l'équilibre de la peau",
-  "Agent d'entretien de la peau - Humectant": "attire l'eau dans les couches superficielles",
-  "Agent d'entretien de la peau - Occlusif": "verrouille l'hydratation à la surface",
-  "Emollient": "adoucit et assouplit la peau",
-  "Agent émulsifiant": "lie l'eau et les corps gras",
-  "Agent parfumant": "parfume naturellement",
-  "Agent masquant": "masque les autres odeurs",
-  "Agent de contrôle de la viscosité": "donne sa texture à la formule",
-  "Antioxydant": "protège la formule de l'oxydation",
-  "Agent de protection de la peau": "renforce la barrière cutanée",
-  "Humectant": "attire l'eau dans la peau",
-  "Agent filmogène": "forme un film protecteur en surface",
-  "Antistatique": {
-    default: null,
-    by: {
-      shampooing: "réduit l'électricité statique des cheveux",
-      apres_shampooing: "réduit l'électricité statique des cheveux",
-    },
-  },
-  "Antimicrobien": "limite la prolifération bactérienne",
-  "Solvant": "dissout les autres ingrédients de la formule",
-  "Astringent": "resserre les pores et tonifie la peau",
-  "Stabilisateur d'émulsion": "garde le mélange eau/huile homogène",
-  "Tonifiant": "apporte un effet tonifiant immédiat",
-  "Agent Abrasif": "exfolie mécaniquement les cellules mortes",
-  "Colorant cosmétique": "donne sa couleur au produit",
-  "Sinergiste de mousse": {
-    default: null,
-    by: {
-      shampooing: "rend la mousse plus dense",
-      nettoyant_visage: "rend la mousse plus dense",
-      creme_corps: "rend la mousse plus dense",
-    },
-  },
-  "Régulateur de pH": "équilibre le pH au plus près de la peau",
-  "Opacifiant": "rend la formule opaque visuellement",
-  "Agent de foisonnement": "épaissit pour stabiliser la texture",
-  "Conservateur": "protège la formule des micro-organismes",
-  "Agent apaisant": "calme les rougeurs et tiraillements",
-  "Agent Absorbant": "absorbe l'excès de sébum et l'humidité",
-  "Agent arômatisant": "donne son arôme au produit",
-  "Agent stabilisant": "garde la formule stable dans le temps",
-  "Non classé": "rôle non documenté dans la base",
-  "Agent de chélation": "neutralise les métaux de l'eau du robinet",
-  "Agent plastifiant": "assouplit les films cosmétiques",
-  "Anti Agglomérant": "empêche les poudres de s'agglomérer",
-  "Hydrotrope": "aide à dissoudre les ingrédients peu solubles",
-  "Anti-séborrhée": "régule la production de sébum",
-  "Hydratant": "apporte de l'eau à la peau",
-  "Agent réducteur": "joue un rôle chimique de réduction",
-  "Agent rafraîchissant": "procure une sensation de fraîcheur",
-  "Agent lissant": "lisse la surface de la peau",
-  "Dénaturant": "rend l'alcool impropre à la consommation",
-  "Anti-moussant": "limite la formation de mousse indésirable",
-  "Agent Oxydant": "joue un rôle chimique d'oxydation",
-  "Gélifiant": "donne sa consistance gélifiée au produit",
-  "Anticorrosif": "protège le contenant de la corrosion",
-  "Kératolytique": "élimine les cellules mortes en surface",
-  "Agent propulseur": "propulse le produit hors de l'aérosol",
-  "Agent de restauration lipidique": "reconstitue le film lipidique de la peau",
-  "Modificateurs de glissement": "améliore le toucher et l'étalement",
-  "Dispersion des agents de surface": "disperse les actifs uniformément",
-  "Ajusteurs de pH": "ajuste le pH au niveau cutané",
-  "Exfoliant": "élimine les cellules mortes de surface",
-  "Dispersant non tensioactif": "disperse pigments et poudres",
-  "Agent tensioactif - Solubilisant": "solubilise les huiles dans l'eau",
-  "Modificateur de surface": "modifie la texture de surface",
-  "Agent nacrant": "donne un effet nacré au produit",
-
-  // ─── Context-aware verbs ─────────────────────────────────────────────
-
-  /** Binding / cohesion agent (NOT a hair fixative). The old mapping naively
-   *  said "fixe la coiffure" everywhere — which is wrong on a deodorant,
-   *  cream, etc. Real hair-fixative chemistry sits under
-   *  "Agent de fixation capillaire" below. */
-  "Agent fixant": {
-    default: "lie les ingrédients entre eux",
-    by: {
-      shampooing: "lie les ingrédients entre eux",
-      apres_shampooing: "tient la coiffure en place",
-    },
-  },
-
-  /** True hair fixative — only relevant in hair-care contexts. Skipped in
-   *  any other category so it doesn't surface as "tient la coiffure" on a
-   *  body lotion. */
-  "Agent de fixation capillaire": {
-    default: null,
-    by: {
-      shampooing: "tient la coiffure en place",
-      apres_shampooing: "tient la coiffure en place",
-    },
-  },
-
-  "Conditionneur capillaire": {
-    default: null,
-    by: {
-      shampooing: "lisse et démêle les cheveux",
-      apres_shampooing: "lisse et démêle les cheveux",
-    },
-  },
-
-  "Agent colorant pour cheveux": {
-    default: null,
-    by: {
-      shampooing: "colore les cheveux durablement",
-      apres_shampooing: "colore les cheveux durablement",
-    },
-  },
-
-  "Antipelliculaire": {
-    default: null,
-    by: {
-      shampooing: "limite la formation de pellicules",
-      apres_shampooing: "limite la formation de pellicules",
-    },
-  },
-
-  "Agent bouclant ou lissant (coiffant)": {
-    default: null,
-    by: {
-      shampooing: "discipline boucles et frisottis",
-      apres_shampooing: "discipline boucles et frisottis",
-    },
-  },
-
-  "Agent démêlant": {
-    default: null,
-    by: {
-      shampooing: "démêle pour faciliter le coiffage",
-      apres_shampooing: "démêle pour faciliter le coiffage",
-    },
-  },
-
-  /** A deodorising agent on a non-deodorant (e.g. magnesium hydroxide in a
-   *  cream) doesn't really "limit body odour" in the worn-product sense —
-   *  it's there for pH or scent masking. We keep a soft default verb but
-   *  the strong claim only fires for true deodorants. */
-  "Déodorant": {
-    default: "neutralise les odeurs corporelles",
-    by: {
-      deodorant: "limite les odeurs sous les aisselles",
-    },
-  },
-
-  "Anti-transpirant": {
-    default: null,
-    by: {
-      deodorant: "réduit la transpiration des aisselles",
-    },
-  },
-
-  "Filtre UV": {
-    default: null,
-    by: {
-      solaire: "filtre les rayons UV nocifs",
-      creme_visage: "filtre les rayons UV nocifs",
-      creme_corps: "filtre les rayons UV nocifs",
-      maquillage: "filtre les rayons UV nocifs",
-    },
-  },
-
-  "Absorbant UV": {
-    default: null,
-    by: {
-      solaire: "absorbe une partie des rayons UV",
-      creme_visage: "absorbe une partie des rayons UV",
-      creme_corps: "absorbe une partie des rayons UV",
-      maquillage: "absorbe une partie des rayons UV",
-    },
-  },
-
-  "Dépilatoire": {
-    default: null,
-    // "autre" covers depilatory creams which we don't have as their own
-    // category — better to show the verb than skip it entirely.
-    by: { autre: "élimine les poils au contact" },
-  },
-
-  "Agent de bronzage": {
-    default: null,
-    by: {
-      creme_visage: "donne un effet bronzé sans soleil",
-      creme_corps: "donne un effet bronzé sans soleil",
-      autre: "donne un effet bronzé sans soleil",
-    },
-  },
-
-  "Agent éclaircissant": {
-    default: null,
-    by: {
-      creme_visage: "éclaircit progressivement le teint",
-      creme_corps: "éclaircit progressivement le teint",
-      maquillage: "éclaircit progressivement le teint",
-    },
-  },
-
-  /** Oral hygiene — only meaningful on dental products (not in our 10-cat
-   *  enum). Falls back to "autre" so a toothpaste tagged as autre still
-   *  surfaces the right verb. */
-  "Agent d'hygiène buccale": {
-    default: null,
-    by: { autre: "contribue à l'hygiène bucco-dentaire" },
-  },
-
-  "Antiplaque": {
-    default: null,
-    by: { autre: "limite la formation de plaque dentaire" },
-  },
-
-  "Agent d'entretien des ongles": {
-    default: null,
-    by: {
-      maquillage: "entretient et fortifie les ongles",
-      autre: "entretient et fortifie les ongles",
-    },
-  },
-
-  "Sculpture des ongles": {
-    default: null,
-    by: {
-      maquillage: "sculpte et structure les ongles",
-      autre: "sculpte et structure les ongles",
-    },
-  },
-
-  /** Cleansing surfactants — every category gets a cleansing verb but we
-   *  tune the phrasing so it stays natural (a deodorant doesn't say
-   *  "nettoie en douceur"). */
-  "Tensioactif": {
-    default: "nettoie en captant sébum et impuretés",
-    by: {
-      shampooing: "détache le sébum du cuir chevelu",
-      nettoyant_visage: "nettoie la peau en douceur",
-      apres_shampooing: "détache le sébum du cuir chevelu",
-    },
-  },
-
-  "Agent nettoyant": {
-    default: "nettoie en captant sébum et impuretés",
-    by: {
-      shampooing: "lave les cheveux et le cuir chevelu",
-      nettoyant_visage: "lave la peau sans la décaper",
-      apres_shampooing: "lave les cheveux et le cuir chevelu",
-    },
-  },
-
-  "Agent moussant": {
-    default: "génère la mousse au contact de l'eau",
-    by: {
-      shampooing: "génère la mousse au contact de l'eau",
-      nettoyant_visage: "génère la mousse au contact de l'eau",
-      apres_shampooing: "génère la mousse au contact de l'eau",
-    },
-  },
-};
-
-/**
- * Resolve a primaryFunction to its action verb for the given product
- * category. Returns `null` when the function is contextually irrelevant —
- * callers should skip the ingredient entirely instead of falling back to a
- * raw function-name string (which historically produced bullets like
- * "Magnesium carbonate hydroxide — agent fixant" on a deodorant).
- */
-function verbForFunction(
-  fn: string | null,
-  category: ProductCategory | null,
-): string | null {
-  if (!fn) return null;
-  const entry = FUNCTION_VERBS[fn];
-  if (entry === undefined) {
-    // Unknown function — soft fallback so the engine still renders something
-    // readable when the DB introduces a brand-new function name.
-    return fn.toLowerCase();
-  }
-  if (typeof entry === "string") return entry;
-  if (category && entry.by && Object.prototype.hasOwnProperty.call(entry.by, category)) {
-    // Explicit per-category override — including an explicit `null` which
-    // means "skip in this exact category".
-    const override = entry.by[category];
-    return override ?? null;
-  }
-  return entry.default;
-}
-
-// ─── Function families ────────────────────────────────────────────────────
-//
-// An ingredient typically carries several INCI functions (Olea Europaea =
-// "Agent masquant" + "Agent d'entretien de la peau" + "Agent parfumant").
-// Showing only the first verb often misses the point ("masque les odeurs"
-// alors que l'huile d'olive est là pour nourrir la peau).
-//
-// Instead, we group functions into 7 user-meaningful families, pick the
-// highest-priority family present as the **primary** role, and the next
-// family as a short **secondary** complement. Within a family, multiple
-// functions collapse into a single verb (we pick the most specific one
-// available — Hydratant > Emollient > Humectant > … > generic "entretien").
-//
-// Result: a Vert ingredient with 3-4 functions surfaces as
-//   `nom → verbe principal · verbe secondaire`
-// instead of arbitrarily picking one of the functions.
-
-type FunctionFamily =
-  | "soin"
-  | "cheveu"
-  | "protection"
-  | "nettoyage"
-  | "parfum"
-  | "texture"
-  | "technique";
-
-/**
- * Family priority — first family present on an ingredient wins as the
- * primary role; second present family becomes the secondary complement.
- * Ordering encodes "what matters to the user reading the analysis":
- * a skin benefit beats a texture role beats a purely technical role.
- */
-const FAMILY_PRIORITY: ReadonlyArray<FunctionFamily> = [
-  "soin",
-  "cheveu",
-  "protection",
-  "nettoyage",
-  "parfum",
-  "texture",
-  "technique",
-];
-
-/**
- * Mapping from each known DB function name to its family. The list mirrors
- * the 76 distinct values found in `cosme_check.ingredients.functions[].name`
- * (audit done 2026-06-01). Unknown future functions fall back to "technique".
- */
-const FUNCTION_TO_FAMILY: Record<string, FunctionFamily> = {
-  // 🌿 Soin — bénéfices peau / ongles user-facing
-  "Agent d'entretien de la peau": "soin",
-  "Agent d'entretien de la peau - Divers": "soin",
-  "Agent d'entretien de la peau - Humectant": "soin",
-  "Agent d'entretien de la peau - Occlusif": "soin",
-  "Emollient": "soin",
-  "Humectant": "soin",
-  "Hydratant": "soin",
-  "Agent de protection de la peau": "soin",
-  "Agent de restauration lipidique": "soin",
-  "Agent apaisant": "soin",
-  "Agent éclaircissant": "soin",
-  "Anti-séborrhée": "soin",
-  "Agent lissant": "soin",
-  "Agent rafraîchissant": "soin",
-  "Tonifiant": "soin",
-  "Astringent": "soin",
-  "Kératolytique": "soin",
-  "Exfoliant": "soin",
-  "Agent Abrasif": "soin",
-  "Dépilatoire": "soin",
-  "Agent de bronzage": "soin",
-  "Agent d'entretien des ongles": "soin",
-  "Sculpture des ongles": "soin",
-
-  // 💆 Cheveu — fonctions spécifiquement capillaires
-  "Conditionneur capillaire": "cheveu",
-  "Agent démêlant": "cheveu",
-  "Antipelliculaire": "cheveu",
-  "Agent de fixation capillaire": "cheveu",
-  "Agent bouclant ou lissant (coiffant)": "cheveu",
-  "Agent colorant pour cheveux": "cheveu",
-  "Antistatique": "cheveu",
-  // "Agent fixant" is context-dependent (binding agent on most products vs
-  // hair fixative on shampoo/après-shampooing). The verb mapping handles
-  // the binding-agent default; here we keep it in the hair family so that
-  // the verb resolver can route the right phrasing per category.
-  "Agent fixant": "cheveu",
-
-  // ☀️ Protection — préserve formule / peau / cheveux des agressions
-  "Filtre UV": "protection",
-  "Absorbant UV": "protection",
-  "Antioxydant": "protection",
-  "Conservateur": "protection",
-  "Antimicrobien": "protection",
-  "Anti-transpirant": "protection",
-  "Déodorant": "protection",
-  "Agent d'hygiène buccale": "protection",
-  "Antiplaque": "protection",
-
-  // 🧼 Nettoyage — fonctions tensioactives, lavantes, moussantes
-  "Tensioactif": "nettoyage",
-  "Agent nettoyant": "nettoyage",
-  "Agent moussant": "nettoyage",
-  "Sinergiste de mousse": "nettoyage",
-  "Agent tensioactif - Solubilisant": "nettoyage",
-
-  // 🌸 Parfum — odeur, masquage, arôme
-  "Agent parfumant": "parfum",
-  "Agent masquant": "parfum",
-  "Agent arômatisant": "parfum",
-
-  // 🫧 Texture — structure et rendu visuel de la formule
-  "Agent émulsifiant": "texture",
-  "Stabilisateur d'émulsion": "texture",
-  "Agent de contrôle de la viscosité": "texture",
-  "Agent filmogène": "texture",
-  "Opacifiant": "texture",
-  "Gélifiant": "texture",
-  "Agent stabilisant": "texture",
-  "Agent de foisonnement": "texture",
-  "Agent plastifiant": "texture",
-  "Agent nacrant": "texture",
-  "Colorant cosmétique": "texture",
-  "Agent Absorbant": "texture",
-  "Modificateurs de glissement": "texture",
-  "Modificateur de surface": "texture",
-
-  // ⚙️ Technique — fallback de dernier recours, rarement parlant pour un user
-  "Solvant": "technique",
-  "Régulateur de pH": "technique",
-  "Ajusteurs de pH": "technique",
-  "Agent de chélation": "technique",
-  "Anti Agglomérant": "technique",
-  "Hydrotrope": "technique",
-  "Agent réducteur": "technique",
-  "Agent Oxydant": "technique",
-  "Dénaturant": "technique",
-  "Anti-moussant": "technique",
-  "Anticorrosif": "technique",
-  "Agent propulseur": "technique",
-  "Dispersion des agents de surface": "technique",
-  "Dispersant non tensioactif": "technique",
-  "Non classé": "technique",
-};
-
-/**
- * Within each family, an ordered list of functions from MOST specific to
- * LEAST specific. When an ingredient carries multiple functions in the same
- * family, we walk this list to pick the verb of the most informative one.
- *
- * Example — Glycérine has both `Humectant` and `Agent d'entretien de la peau`
- * in the Soin family. The list says Humectant > Agent d'entretien, so we
- * emit "attire l'eau dans la peau" rather than the generic "maintient la
- * peau en bon état".
- */
-const FAMILY_FUNCTION_PRIORITY: Record<FunctionFamily, ReadonlyArray<string>> = {
-  soin: [
-    "Hydratant",
-    "Emollient",
-    "Humectant",
-    "Agent d'entretien de la peau - Humectant",
-    "Agent de protection de la peau",
-    "Agent d'entretien de la peau - Occlusif",
-    "Agent de restauration lipidique",
-    "Agent apaisant",
-    "Agent éclaircissant",
-    "Anti-séborrhée",
-    "Agent lissant",
-    "Agent rafraîchissant",
-    "Tonifiant",
-    "Astringent",
-    "Kératolytique",
-    "Exfoliant",
-    "Agent Abrasif",
-    "Dépilatoire",
-    "Agent de bronzage",
-    "Agent d'entretien des ongles",
-    "Sculpture des ongles",
-    "Agent d'entretien de la peau",
-    "Agent d'entretien de la peau - Divers",
-  ],
-  cheveu: [
-    "Antipelliculaire",
-    "Agent colorant pour cheveux",
-    "Agent bouclant ou lissant (coiffant)",
-    "Agent démêlant",
-    "Conditionneur capillaire",
-    "Agent de fixation capillaire",
-    "Antistatique",
-    "Agent fixant",
-  ],
-  protection: [
-    "Filtre UV",
-    "Absorbant UV",
-    "Anti-transpirant",
-    "Déodorant",
-    "Antiplaque",
-    "Agent d'hygiène buccale",
-    "Antimicrobien",
-    "Conservateur",
-    "Antioxydant",
-  ],
-  nettoyage: [
-    "Agent moussant",
-    "Sinergiste de mousse",
-    "Agent tensioactif - Solubilisant",
-    "Agent nettoyant",
-    "Tensioactif",
-  ],
-  parfum: [
-    "Agent parfumant",
-    "Agent arômatisant",
-    "Agent masquant",
-  ],
-  texture: [
-    "Colorant cosmétique",
-    "Agent nacrant",
-    "Agent émulsifiant",
-    "Gélifiant",
-    "Opacifiant",
-    "Agent filmogène",
-    "Stabilisateur d'émulsion",
-    "Agent Absorbant",
-    "Agent plastifiant",
-    "Agent de contrôle de la viscosité",
-    "Agent de foisonnement",
-    "Agent stabilisant",
-    "Modificateurs de glissement",
-    "Modificateur de surface",
-  ],
-  technique: [
-    "Agent de chélation",
-    "Régulateur de pH",
-    "Ajusteurs de pH",
-    "Anti Agglomérant",
-    "Hydrotrope",
-    "Anti-moussant",
-    "Agent propulseur",
-    "Dénaturant",
-    "Anticorrosif",
-    "Agent réducteur",
-    "Agent Oxydant",
-    "Dispersion des agents de surface",
-    "Dispersant non tensioactif",
-    "Solvant",
-    "Non classé",
-  ],
-};
-
-/**
- * Group an ingredient's function list into families → preserved order
- * (each family contains only functions present on this ingredient,
- * sorted by within-family priority).
- */
-function groupFunctionsByFamily(fns: ReadonlyArray<string>): Map<FunctionFamily, string[]> {
-  const byFamily = new Map<FunctionFamily, string[]>();
-  for (const fn of fns) {
-    const fam = FUNCTION_TO_FAMILY[fn] ?? "technique";
-    if (!byFamily.has(fam)) byFamily.set(fam, []);
-    byFamily.get(fam)!.push(fn);
-  }
-  for (const [fam, list] of byFamily) {
-    const order = FAMILY_FUNCTION_PRIORITY[fam];
-    list.sort((a, b) => {
-      const ia = order.indexOf(a);
-      const ib = order.indexOf(b);
-      // Unknown-in-priority-list functions go last but stay deterministic
-      return (ia < 0 ? Number.POSITIVE_INFINITY : ia) - (ib < 0 ? Number.POSITIVE_INFINITY : ib);
-    });
-  }
-  return byFamily;
-}
-
-/**
- * Synthesise an ingredient's function list into a `(primary, secondary?)`
- * pair of context-aware verbs. Returns `null` when no function resolves
- * to a verb in the current category — callers should skip the ingredient
- * rather than emit an empty bullet.
- *
- * Algorithm :
- *   1. Group all functions by family (Soin / Cheveu / …).
- *   2. Walk families in FAMILY_PRIORITY order.
- *   3. For each family present, walk its functions (within-family priority)
- *      until one resolves to a non-null verb via verbForFunction(fn, cat).
- *   4. Collect up to TWO resolved verbs (primary + secondary). Return.
- */
-function synthesiseFunctions(
-  item: AnalyseItem,
-  category: ProductCategory | null,
-): { primary: string; secondary?: string } | null {
-  const fns: string[] = item.allFunctions?.length
-    ? [...item.allFunctions]
-    : item.primaryFunction
-    ? [item.primaryFunction]
-    : [];
-  if (!fns.length) return null;
-
-  const byFamily = groupFunctionsByFamily(fns);
-  const resolved: string[] = [];
-
-  for (const fam of FAMILY_PRIORITY) {
-    const present = byFamily.get(fam);
-    if (!present?.length) continue;
-    // Technique = fallback only. Used as PRIMARY when no other family is
-    // available, but never as a SECONDARY complement. We don't want a soin
-    // verb followed by "dissout les autres ingrédients" — that's noise.
-    if (fam === "technique" && resolved.length > 0) break;
-    for (const fn of present) {
-      const v = verbForFunction(fn, category);
-      if (v) {
-        // Avoid emitting the same verb twice if two families happen to map
-        // their selected function to identical text (rare but possible).
-        if (!resolved.includes(v)) resolved.push(v);
-        break;
-      }
-    }
-    if (resolved.length >= 2) break;
-  }
-
-  if (resolved.length === 0) return null;
-  return {
-    primary: resolved[0],
-    secondary: resolved[1],
-  };
-}
+export type Positive = { name: string; functions: string[] };
 
 const WATER_INCI_TOKENS = new Set(["AQUA", "WATER", "EAU"]);
 
@@ -863,23 +213,19 @@ function isWaterIngredient(rawName: string): boolean {
   return tokens.length > 0 && tokens.every((t) => WATER_INCI_TOKENS.has(t));
 }
 
-function isAlcoholName(rawName: string): boolean {
-  const n = rawName.toLowerCase();
-  return n.includes("alcool") || n.includes("alcohol");
-}
+const NON_CLASSE = "non classé";
 
-const EMULSIFIER_FUNCTIONS = new Set(["Agent émulsifiant", "Stabilisateur d'émulsion"]);
-
-/** Best green ingredients first (by INCI position = highest concentration).
+/** The 3 best-placed green ingredients (by INCI position = highest
+ *  concentration), shown with their REAL documented functions.
  *
- *  We walk the green ingredients ordered by position and stop once we have
- *  three positives with a context-valid verb. If an ingredient has no verb
- *  in the current context (e.g. "Conditionneur capillaire" on a deodorant)
- *  we silently skip it rather than burn a slot — that way a body lotion
- *  with one mismatched green ingredient still shows three valid bullets.
- *  Water (Aqua / Water / Eau) is excluded: its verb ("dissout les autres
- *  ingrédients") is technically correct but uninformative to the user. */
-function pickPositives(items: AnalyseItem[], category: ProductCategory | null): Positive[] {
+ *  Deterministic, no verb table, no family logic (handoff §4):
+ *   - only water (Aqua / Water / Eau) is excluded, everything else is kept;
+ *   - functions are shown as-is (1 to 3), deduplicated, "Non classé" dropped;
+ *   - a green ingredient with no documented function left is skipped rather
+ *     than burning a slot, so a formula with one bare green still fills the
+ *     three bullets when other greens have functions.
+ *  Display-name priority: FR translation -> grand-public name -> raw INCI. */
+function pickPositives(items: AnalyseItem[]): Positive[] {
   const greens = items
     .filter((it) => it.colorRating === "Vert")
     .sort((a, b) => a.position - b.position);
@@ -890,24 +236,30 @@ function pickPositives(items: AnalyseItem[], category: ProductCategory | null): 
     const rawName = (it.name ?? it.input ?? "").trim();
     if (!rawName) continue;
     if (isWaterIngredient(rawName)) continue;
-    if (isAlcoholName(rawName)) continue;
-    const allFns = it.allFunctions?.length ? it.allFunctions : it.primaryFunction ? [it.primaryFunction] : [];
-    if (allFns.some((f) => EMULSIFIER_FUNCTIONS.has(f))) continue;
-    const synth = synthesiseFunctions(it, category);
-    if (!synth) continue;
-    // Display-name priority:
-    //   1. it.translationFr  — DB French translation shown in the full
-    //      "Liste des ingrédients" sheet (e.g. "Glycérine / Glycérol",
-    //      "Ferment de radis"). Already properly cased, use as-is.
-    //   2. commonNameForRaw  — grand-public override for the ~50 most
-    //      visible ingredients (Aqua → eau, Persea Gratissima → huile
-    //      d'avocat) when translationFr is missing.
-    //   3. raw INCI          — final fallback, capitalised.
+
+    const rawFns = it.allFunctions?.length
+      ? it.allFunctions
+      : it.primaryFunction
+      ? [it.primaryFunction]
+      : [];
+    // Real functions, as-is: trim, drop empties + "Non classé", dedup
+    // (case-insensitive), keep at most 3 in their original order.
+    const seen = new Set<string>();
+    const functions: string[] = [];
+    for (const f of rawFns) {
+      const fn = (f ?? "").trim();
+      if (!fn || fn.toLowerCase() === NON_CLASSE) continue;
+      const key = fn.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      functions.push(fn);
+      if (functions.length >= 3) break;
+    }
+    if (functions.length === 0) continue;
+
     const trFr = it.translationFr?.trim();
-    const displayName = trFr
-      ? trFr
-      : capitalise(commonNameForRaw(rawName) ?? rawName);
-    out.push({ name: displayName, verb: synth.primary, secondary: synth.secondary });
+    const displayName = trFr ? trFr : capitalise(commonNameForRaw(rawName) ?? rawName);
+    out.push({ name: displayName, functions });
   }
   return out;
 }
@@ -1145,11 +497,11 @@ export function computeEssentiel(
   const cappedScore = colorCapScore(result.score, result.counts);
   const tone = verdictToneFromScore(cappedScore);
   const phrase = pickPhrase(tone, result.counts);
-  const resolvedCategory: ProductCategory | null =
-    (opts?.category && opts.category !== "autre" ? opts.category : null)
-    ?? normalizeProductTypeToCategory(opts?.productType)
-    ?? (opts?.category ?? null);
-  const positives = pickPositives(result.items, resolvedCategory);
+  // `opts` (category / productType) is no longer needed for the positives card
+  // since we display raw functions, not context-aware verbs. Kept in the public
+  // signature for API stability and potential future use.
+  void opts;
+  const positives = pickPositives(result.items);
   const concerns: Concern[] = [];
   for (const tier of ["rouge", "orange", "jaune"] as const) {
     const c = buildConcern(result.items, tier);
@@ -1163,10 +515,8 @@ export function computeEssentiel(
 }
 
 // ─── Test-only exports ────────────────────────────────────────────────────
-// Kept module-private under a single namespace so the integration tests can
-// poke at the verb mapping without us widening the public API.
+// Kept module-private under a single namespace so the regression tests can
+// poke at the positives selection without us widening the public API.
 export const __testing = {
-  verbForFunction,
   pickPositives,
-  FUNCTION_VERBS,
 };

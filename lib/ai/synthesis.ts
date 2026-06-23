@@ -54,7 +54,12 @@ export type SynthesisInput = {
 // v11 (2026-05-23): removed the "Sans parabens, sans sulfates..." absences
 // bullet — it duplicates the dedicated Observations panel.
 // v12 (2026-06-09): closingRule rewritten — 4 cases, no "ya mieux ailleurs".
-const PROMPT_VERSION = 12;
+// v13 (2026-06-17): BLOC 2 now OPENS with a "BON POUR TOI" block (1-2 bullets)
+//   highlighting GREEN ingredients whose documented role matches the user's
+//   profile (skin type / concerns / goals), with no invented benefit. Falls
+//   back to a single "Bon à savoir" green bullet when nothing matches / no
+//   profile. Aligns the web synthèse with the mobile "conseiller" (handoff §3).
+const PROMPT_VERSION = 13;
 
 function makeCacheKey(input: SynthesisInput): string {
   const list = input.enriched
@@ -181,7 +186,16 @@ BLOC 1 (prose, 2 à 3 phrases, pas de puce) :
 - Phrase 3 (TRANSITION, courte) : "Voici ce qui mérite ton attention :" ou similaire.
 - ANTI-DOUBLON : ne cite jamais deux fois le même ingrédient dans le bloc 1. Si tu utilises la traduction française ("l'eau", "le beurre de karité"), n'ajoute pas le nom INCI entre parenthèses. Choisis UNE formulation par ingrédient.
 
-BLOC 2 (puces, chaque ligne commence par "- ", 4 à 7 puces max) :
+BLOC 2 (puces, chaque ligne commence par "- ", 5 à 8 puces max) :
+
+0. BON POUR TOI (1 à 2 puces, OBLIGATOIREMENT EN PREMIER dans le bloc 2) :
+${hasProfile
+  ? `- Mets en avant le ou les ingrédients VERTS (liste "VERTS notables" ci-dessous) dont la FONCTION DOCUMENTÉE répond DIRECTEMENT à une préoccupation, un objectif ou un type de peau du profil de l'utilisateur. Format : "- **NOM** : <ce que sa fonction apporte>, bon pour <le point du profil>." Exemples d'accroche : "bon pour ta peau sèche", "intéressant pour tes imperfections", "utile pour ta sensibilité".
+- N'INVENTE AUCUN bénéfice : appuie-toi UNIQUEMENT sur la fonction fournie. Ne relie au profil que si le lien est évident (un humectant/occlusif pour une peau sèche, un apaisant pour une peau réactive, un séborégulateur pour les imperfections, etc.).
+- Si AUCUN vert ne correspond vraiment au profil → 1 SEULE puce "Bon à savoir" sur un vert notable (Niacinamide, Acide Hyaluronique, Panthénol, Centella Asiatica, beurres/huiles végétales), sans le relier au profil.`
+  : `- L'utilisateur n'a pas de profil exploitable ici : fais 1 SEULE puce "Bon à savoir" sur un vert notable (Niacinamide, Acide Hyaluronique, Panthénol, Centella Asiatica, beurres/huiles végétales) en décrivant sa fonction, SANS inventer de bénéfice et SANS le relier à un profil.`}
+- Ignore toujours eau / glycérine / propanediol / sodium hydroxide / ajusteurs de pH (trop banals pour une accroche).
+- Si AUCUN vert notable n'est disponible, saute ce point (n'invente pas de puce).
 
 1. ROUGES : 1 puce par ingrédient rouge, avec un DANGER CONCRET BREF. Format :
 "- **NOM** (famille + rôle simple${hasMatches ? ", et si flag [restriction], ajouter \", dans tes restrictions\"" : ""}) : danger concret en 1 phrase. Position en fin de phrase si dispo."
@@ -194,15 +208,13 @@ BLOC 2 (puces, chaque ligne commence par "- ", 4 à 7 puces max) :
 - 1 à 3 jaunes notables → 1 puce courte chacun.
 - Plus de 3 → 1 puce groupée "À surveiller selon les peaux sensibles : **NOM1**, **NOM2**, **NOM3**...".
 
-4. BONUS optionnel (max 1) :
-- "Bon à savoir" sur UN VERT notable (Niacinamide, Acide Hyaluronique, Panthénol, Centella Asiatica). Ignore eau / glycérine / propanediol / sodium hydroxide / pH ajusteurs.
-- INTERDIT : ne jamais énumérer ce qui est absent (style "Sans parabens, sans sulfates..."). Cette information est déjà affichée dans le panneau Observations, la répéter ici alourdit la synthèse.
+4. INTERDIT : ne jamais énumérer ce qui est absent (style "Sans parabens, sans sulfates..."). Cette information est déjà affichée dans le panneau Observations, la répéter ici alourdit la synthèse. (Le point positif sur un vert est déjà traité par "BON POUR TOI" en tête de bloc, ne le répète pas en fin de bloc.)
 
 5. CLOSING (DERNIÈRE PUCE, obligatoire) — règle :
    ${closingRule}
 
 CONTRAINTES STRICTES :
-- Total puces (bloc 2) : 4 à 7 max, closing comprise.
+- Total puces (bloc 2) : 5 à 8 max, "BON POUR TOI" et closing comprises.
 - Chaque puce : 1 à 2 phrases courtes. Pas de pavé.
 - Pas de jargon médical (dermatite, eczéma, comédogène, sébo-régulateur). Préfère "peut irriter", "peut boucher les pores".
 - INTERDIT absolu : les verbes "soigne", "traite", "guérit", "cicatrise", "régénère", "répare", "restaure" — réservés aux médicaments (Règlement CE 1223/2009). Utilise à la place : "entretient la peau", "maintient en bon état", "hydrate", "adoucit", "protège", "reconstitue".

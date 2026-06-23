@@ -16,6 +16,7 @@ type AnalysisRow = {
   product_label: string | null;
   score: number | null;
   created_at: string;
+  favori: boolean | null;
   counts: { vert: number; jaune: number; orange: number; rouge: number } | null;
   /** Id of the most recent coherence_analysis attached to this analyse, if
    *  any. When non-null, the "Analyser la promesse" entry point becomes
@@ -41,6 +42,7 @@ type RawRow = {
   product_label: string | null;
   score: number | null;
   created_at: string;
+  favori?: boolean | null;
   category?: ProductCategory | null;
   result_json:
     | {
@@ -89,7 +91,7 @@ async function HistoryContent() {
     sb
       .schema("cosme_check")
       .from("analyses")
-      .select("id, name, product_label, score, created_at, result_json, category")
+      .select("id, name, product_label, score, created_at, result_json, category, favori")
       .order("created_at", { ascending: false })
       .limit(50),
     sb
@@ -125,6 +127,7 @@ async function HistoryContent() {
       name: r.name,
       product_label: r.product_label,
       score: r.score,
+      favori: r.favori ?? null,
       created_at: r.created_at,
       counts: r.result_json?.counts
         ? {

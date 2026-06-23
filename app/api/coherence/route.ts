@@ -12,7 +12,6 @@ import {
   reclassifyOpenProposals,
   resolveAbsencePromise,
   resolveOpenPromise,
-  resolvePromise,
 } from "@/lib/coherence/engine";
 import { findCategoryBySlug, isAbsenceCategory } from "@/lib/coherence/claims";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
@@ -25,7 +24,7 @@ import { loadRestrictionsForPrompt } from "@/lib/restrictions/promptFormat";
 import { hashInci, hashDescription } from "@/lib/cacheHash";
 import { supabaseAnon, supabaseService } from "@/lib/supabase";
 
-const COHERENCE_ALGO_VERSION = "v1.0";
+const COHERENCE_ALGO_VERSION = "v3";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -125,6 +124,16 @@ export async function POST(req: NextRequest) {
 
   if (inciHash) {
     try {
+      // NOTE: the prod RPC signature is (p_inci_hash, p_description_hash) only —
+      // it does NOT take p_algo_version. Passing it made PostgREST fail to
+      // resolve the function, so the cache read errored every time and every
+      // coherence analysis recomputed + charged a credit. We call it with the
+      // 2 supported args. The write still stamps COHERENCE_ALGO_VERSION ('v3'),
+      // and since the cache PK is (inci_hash, description_hash) a v3 recompute
+      // overwrites any older row. Trade-off (accepted): the read is not
+      // version-filtered, so a pre-existing v1.0 row could be served until it
+      // is recomputed. Revisit with a DB migration if strict read-side
+      // versioning is needed.
       const { data: cachedCoh } = await supabaseAnon()
         .rpc("cosme_check_get_coherence_cache", {
           p_inci_hash: inciHash,
@@ -209,14 +218,14 @@ export async function POST(req: NextRequest) {
   //   scans parent.items[].tags for the forbidden tag (no LLM step needed).
   // - open: slug = "autre" or unknown → per-promise LLM exploration that
   //   picks active candidates *from the actual formula*.
+  // Absence promises → deterministic engine (no LLM needed: tag scan).
+  // ALL effect promises → LLM exploration of the actual formula (v3).
   const cataloguePromises: CoherencePromise[] = [];
   const openProposals: typeof extraction.proposals = [];
   for (const p of dedupedProposals) {
     const cat = findCategoryBySlug(p.category_slug);
     if (cat && isAbsenceCategory(cat)) {
       cataloguePromises.push(resolveAbsencePromise(p, cat, parent.items));
-    } else if (cat) {
-      cataloguePromises.push(resolvePromise(p, parent.items));
     } else {
       openProposals.push(p);
     }

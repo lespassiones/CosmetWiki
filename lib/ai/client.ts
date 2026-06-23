@@ -30,6 +30,7 @@ export function hasMistral(): boolean {
 
 export type AIFeature =
   | "synthesis"
+  | "advisor"
   | "ocr"
   | "typo"
   | "categorize"

@@ -8,6 +8,7 @@ import { computeRoutineMetrics, type Frequency, type RoutineProduct } from "@/li
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { RoutineProductRow } from "@/components/routine/RoutineProductRow";
 import { RoutineSuggestions } from "@/components/routine/RoutineSuggestions";
+import { CatalogAlternatives } from "@/components/routine/CatalogAlternatives";
 import { TagExposureBar } from "@/components/routine/TagExposureBar";
 import { AddProductButton } from "@/components/routine/AddProductButton";
 import { RestrictionsLinkButton } from "@/components/routine/RestrictionsLinkButton";
@@ -210,6 +211,18 @@ async function RoutineContent() {
 
   const productsCount = products.length;
   const tagsTop = metrics.tagExposure.slice(0, 8);
+
+  // At-risk products (score < 13) — passed to the catalog-suggestions endpoint
+  // which resolves each one's precise category (analysis EAN -> catalog, else
+  // name classifier) and returns the single best alternative per product.
+  const atRiskProducts = products
+    .filter((p) => typeof p.score === "number" && p.score < 13)
+    .slice(0, 5)
+    .map((p) => ({
+      name: p.name,
+      category: (p.result?.catalogCategory as string | null) ?? null,
+      score: typeof p.score === "number" ? p.score : 0,
+    }));
 
   return (
     <div className="neu-page mx-auto max-w-6xl px-5 lg:px-8 pt-4 pb-8 lg:py-12">
@@ -476,6 +489,13 @@ async function RoutineContent() {
 
       {/* AI suggestions */}
       <RoutineSuggestions metrics={metrics} products={products} />
+
+      {/* Catalog alternatives for at-risk products (score < 13) */}
+      {atRiskProducts.length > 0 && (
+        <div className="mt-4">
+          <CatalogAlternatives products={atRiskProducts} />
+        </div>
+      )}
     </div>
   );
 }

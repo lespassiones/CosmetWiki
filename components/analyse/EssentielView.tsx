@@ -159,10 +159,7 @@ function PositivesCard({ positives }: { positives: EssentielData["positives"] })
               <CheckIcon className="h-3.5 w-3.5 shrink-0 mt-1 text-emerald-500" />
               <span className="text-[#111111]">
                 <span className="font-semibold">{p.name}</span>
-                <span className="text-[#6B7280]"> -&gt; {p.verb}</span>
-                {p.secondary ? (
-                  <span className="text-[#9CA3AF]"> · {p.secondary}</span>
-                ) : null}
+                <span className="text-[#6B7280]"> -&gt; {p.functions.join(" · ")}</span>
               </span>
             </li>
           ))}

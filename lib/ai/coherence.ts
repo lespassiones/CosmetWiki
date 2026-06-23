@@ -135,6 +135,12 @@ Les 12 catégories ci-dessus ne couvrent PAS tout le champ cosmétique : elles r
 
 TU PEUX (et tu DOIS) avoir PLUSIEURS entrées avec category_slug="autre" dans la même réponse - une par effet distinct. Exemples de labels : "Douceur de la peau", "Confort cutané", "Souplesse de la peau", "Nutrition de la peau", "Régulation du sébum", "Fixation des boucles", "Repulpant lèvres", "Toucher velouté", "Beauté du teint", "Réparation cutanée"… Chaque effet bio distinct = une entrée "autre" séparée, avec un label différent. Ne fusionne PAS deux effets distincts juste parce qu'ils tombent tous les deux en "autre".
 
+PRÉSENCE D'UN ACTIF NOMMÉ - RÈGLE OBLIGATOIRE :
+Quand la description dit "enrichi en X", "à la X", "au X", "contient X", "à base de X" où X est un ingrédient ou actif cosmétique NOMMÉ (spiruline, vitamine C, zinc, huile d'argan, acide hyaluronique, rétinol, niacinamide, kératine, collagène, biotine, urée, aloe vera, argile blanche, noni, provitamine B5, coenzyme Q10, etc.) → c'est une PROMESSE VÉRIFIABLE :
+  {category_slug: "autre", label: "Présence : X", excerpt: "enrichi en X"}
+Exception : si X est vague ("plantes", "extraits végétaux", "naturel", "actifs") → unverifiable (composition générale).
+La distinction clé : un actif nommé a un nom INCI précis ou un nom commun reconnu. "à base de spiruline" = Présence : Spiruline. "à base de plantes" = unverifiable.
+
 ═══ MÉTHODE SYSTÉMATIQUE (suivre dans l'ordre) ═══
 
 Étape 1 - Découpage : lis la description et coupe-la mentalement EN PHRASES. N'ignore aucune phrase.
@@ -181,7 +187,7 @@ Si une phrase ne contient aucun de (a), (b), (c) → pas une promesse, passe.
 3. promesse vs unverifiable :
    ✓ EST UNE PROMESSE = un EFFET attendu sur la peau/cheveux/etc. OU une absence d'ingrédient. Toute phrase qui décrit un état de la peau ou des cheveux visé par le produit ("rend les mains douces", "laisse la peau souple", "donne du confort", "embellit le teint", "redonne de l'éclat") est une PROMESSE - même si le verbe est ambigu. Si l'utilisateur peut dire "je vérifie si la formule contient un actif qui fait ça", c'est une promesse.
    ✗ EST UNVERIFIABLE = ni effet sur la peau/cheveux ni absence d'ingrédient :
-     - composition générale : "97 % d'origine naturelle", "à base de B5", "formule clean"
+     - composition générale VAGUE : "97 % d'origine naturelle", "à base de plantes", "formule clean" — mais PAS si X est un actif nommé (voir règle "Présence : X" ci-dessus)
      - certification : "Ecocert", "Cosmos Organic", "vegan", "cruelty-free", "bio"
      - sensoriel PUR (du produit lui-même, pas de la peau après usage) : "odeur sucrée", "texture fondante", "mousse rapidement", "fragrance fraîche du produit"
      - marketing_general : "véritable soin", "efficacité prouvée", "résultats visibles", sans cible précise
