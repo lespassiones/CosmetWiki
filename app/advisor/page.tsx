@@ -8,7 +8,7 @@ import {
   SKIN_TYPE_FACE_LABEL,
 } from "@/lib/skin/profile";
 import { BeautyProfileForm } from "@/components/profile/BeautyProfileForm";
-import { AdvisorChat } from "@/components/advisor/AdvisorChat";
+import { AdvisorPanel } from "@/components/advisor/AdvisorPanel";
 import { GLASS_CARD, GLASS_CARD_ROSE } from "@/lib/ui/glass";
 
 export const metadata = { title: "Beauty Advisor · Cosme Check" };
@@ -24,7 +24,7 @@ export default async function AdvisorPage() {
   const complete = isProfileStarted(skin);
 
   return (
-    <div className="mx-auto max-w-3xl px-5 lg:px-8 py-6 lg:py-10">
+    <div className="relative mx-auto max-w-3xl px-5 lg:px-8 py-6 lg:py-10">
       <h1 className="text-2xl lg:text-3xl font-bold mb-2 flex items-center gap-2">
         <span aria-hidden>✨</span> Beauty Advisor
       </h1>
@@ -76,7 +76,7 @@ export default async function AdvisorPage() {
             </details>
           </section>
 
-          <AdvisorChat firstName={profile?.first_name ?? "toi"} />
+          <AdvisorPanel firstName={profile?.first_name ?? "toi"} />
         </>
       )}
     </div>

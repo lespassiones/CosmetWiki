@@ -48,10 +48,14 @@ export async function POST(req: NextRequest) {
   let conversationId = body.conversationId ?? null;
 
   if (!conversationId) {
+    // Title the conversation from the first user message so the history list is
+    // readable (mirrors the mobile app).
+    const firstUserMsg = incoming.find((m) => m.role === "user");
+    const title = firstUserMsg ? firstUserMsg.content.trim().slice(0, 80) || null : null;
     const { data: conv, error: convErr } = await sb
       .schema("cosme_check")
       .from("advisor_conversations")
-      .insert({ user_id: user.id })
+      .insert({ user_id: user.id, title })
       .select("id")
       .single();
     if (convErr || !conv) {

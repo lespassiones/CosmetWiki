@@ -107,7 +107,7 @@ async function RoutineContent() {
     sb
       .schema("cosme_check")
       .from("routine_items")
-      .select("id, frequency, added_at, analysis_id, analyses(id, name, product_label, score, result_json)")
+      .select("id, frequency, added_at, analysis_id, analyses(id, name, product_label, score, result_json, ean, category_precise)")
       .order("added_at", { ascending: false })
       .limit(100),
     sb
@@ -133,6 +133,8 @@ async function RoutineContent() {
       product_label: string | null;
       score: number | null;
       result_json: AnalyseResponse;
+      ean: string | null;
+      category_precise: string | null;
     } | null;
   }[];
 
@@ -162,6 +164,8 @@ async function RoutineContent() {
       frequency: it.frequency,
       score: it.analyses!.score,
       result: it.analyses!.result_json,
+      ean: it.analyses!.ean,
+      categoryPrecise: it.analyses!.category_precise,
     }));
 
   const metrics = computeRoutineMetrics(products);
@@ -213,14 +217,19 @@ async function RoutineContent() {
   const tagsTop = metrics.tagExposure.slice(0, 8);
 
   // At-risk products (score < 13) — passed to the catalog-suggestions endpoint
-  // which resolves each one's precise category (analysis EAN -> catalog, else
-  // name classifier) and returns the single best alternative per product.
+  // which resolves each one's precise category (analysis EAN -> catalog.category,
+  // else stored category_precise, else name classifier) and returns the single
+  // best alternative per product. We MUST pass the EAN: the catalog taxonomy is
+  // the only path that exact-matches the alternatives RPC (the stored
+  // category_precise uses a different vocabulary, e.g. "shampoing" vs "shampooing").
   const atRiskProducts = products
     .filter((p) => typeof p.score === "number" && p.score < 13)
     .slice(0, 5)
     .map((p) => ({
       name: p.name,
-      category: (p.result?.catalogCategory as string | null) ?? null,
+      ean: p.ean ?? null,
+      category:
+        p.categoryPrecise ?? (p.result?.catalogCategory as string | null) ?? null,
       score: typeof p.score === "number" ? p.score : 0,
     }));
 

@@ -5,6 +5,7 @@ import { GLASS_CARD } from "@/lib/ui/glass";
 
 type AtRiskProduct = {
   name: string;
+  ean: string | null;
   category: string | null;
   score: number;
 };
@@ -40,7 +41,7 @@ export function CatalogAlternatives({ products }: Props) {
   const [suggestions, setSuggestions] = useState<Suggestion[] | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error" | "credits">("idle");
 
-  if (products.length === 0) return null;
+  if (!products || products.length === 0) return null;
 
   async function load() {
     setStatus("loading");

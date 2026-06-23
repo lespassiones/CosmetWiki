@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 25;
 
 /** One at-risk product the routine page wants alternatives for. */
-type ReqItem = { name: string; category: string | null; score: number };
+type ReqItem = { name: string; ean: string | null; category: string | null; score: number };
 
 type Suggestion = {
   product: string;
@@ -26,15 +26,44 @@ type Suggestion = {
 const EXACT_LIMIT = 30;
 
 /**
- * Resolve a product's precise catalog category (handoff §2.2 step 1).
- * Prefer the category already resolved by the analysis (EAN -> catalog.category);
- * otherwise classify by the product NAME via the kNN-vote classifier.
+ * Look up the REAL catalog taxonomy path for a barcode (cosme_check.catalog is
+ * publicly readable for active rows). This is the ONLY category that exact-matches
+ * the alternatives RPC — the stored `category_precise` uses a divergent vocabulary
+ * (e.g. "shampoing" vs the catalog's "shampooing") and matches nothing.
+ */
+async function categoryFromEan(
+  sb: ReturnType<typeof supabaseAnon>,
+  ean: string | null,
+): Promise<string | null> {
+  if (!ean || !ean.trim()) return null;
+  try {
+    const { data } = await sb
+      .schema("cosme_check")
+      .from("catalog")
+      .select("category")
+      .eq("ean", ean.trim())
+      .maybeSingle();
+    const cat = (data as { category?: string | null } | null)?.category;
+    return cat && cat.trim() ? cat.trim() : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Resolve a product's precise catalog category (handoff §2.2 step 1), in order:
+ *   1. EAN -> catalog.category (real taxonomy, the reliable path — mirrors mobile);
+ *   2. the precise category passed by the client (analysis category_precise);
+ *   3. classify by the product NAME via the kNN-vote classifier.
  */
 async function resolveCategory(
   sb: ReturnType<typeof supabaseAnon>,
+  ean: string | null,
   precise: string | null,
   name: string,
 ): Promise<string | null> {
+  const fromEan = await categoryFromEan(sb, ean);
+  if (fromEan) return fromEan;
   if (precise && precise.trim()) return precise.trim();
   try {
     const { data, error } = await sb.rpc("cosme_check_classify_product_category", {
@@ -101,6 +130,7 @@ export async function POST(req: NextRequest) {
           if (!name) return null;
           return {
             name: name.slice(0, 200),
+            ean: typeof o.ean === "string" && o.ean.trim() ? o.ean.trim().slice(0, 40) : null,
             category: typeof o.category === "string" && o.category.trim() ? o.category.trim() : null,
             score: typeof o.score === "number" ? o.score : 0,
           } satisfies ReqItem;
@@ -125,7 +155,7 @@ export async function POST(req: NextRequest) {
   // ── Stage 1+2+3: per product, resolve category -> alternatives -> best ──
   const drafts = await Promise.all(
     items.map(async (item): Promise<Suggestion & { resolvedCategory: string | null }> => {
-      const category = await resolveCategory(sb, item.category, item.name);
+      const category = await resolveCategory(sb, item.ean, item.category, item.name);
       if (!category) {
         return { product: item.name, category: null, alternative: null, resolvedCategory: null };
       }
@@ -159,7 +189,7 @@ export async function POST(req: NextRequest) {
           draft.alternative = null; // no better path -> drop
           return;
         }
-        const reCategory = await resolveCategory(sb, null, reType);
+        const reCategory = await resolveCategory(sb, null, null, reType);
         if (!reCategory || reCategory === draft.resolvedCategory) {
           draft.alternative = null;
           return;

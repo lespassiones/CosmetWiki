@@ -36,6 +36,10 @@ export type RoutineProduct = {
   frequency: Frequency;
   score: number | null;  // /20
   result: AnalyseResponse;
+  /** Catalog barcode (when known) — used to resolve the real catalog category. */
+  ean?: string | null;
+  /** Precomputed catalog category path (fallback when no EAN match). */
+  categoryPrecise?: string | null;
 };
 
 export type RoutineMetrics = {

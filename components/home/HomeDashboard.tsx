@@ -76,14 +76,24 @@ function LeafIcon({ className }: { className?: string }) {
   );
 }
 
-const PENALTY_PILL = {
-  emerald: "bg-emerald-50 text-emerald-700",
-  amber: "bg-amber-50 text-amber-700",
-  orange: "bg-orange-50 text-orange-700",
-  rose: "bg-rose-50 text-rose-700",
+// Couleur du texte (sans fond surligné) pour le libellé "X % sans pénalité".
+const PENALTY_TEXT = {
+  emerald: "text-emerald-700",
+  amber: "text-amber-700",
+  orange: "text-orange-700",
+  rose: "text-rose-700",
 } as const;
 
-type PenaltyTone = keyof typeof PENALTY_PILL;
+// Couleurs des pastilles rondes utilisées dans la liste de répartition de la
+// routine (style mobile : un point coloré + texte, sans fond surligné).
+const PENALTY_DOT = {
+  emerald: "bg-emerald-500",
+  amber: "bg-amber-400",
+  orange: "bg-orange-500",
+  rose: "bg-rose-500",
+} as const;
+
+type PenaltyTone = keyof typeof PENALTY_TEXT;
 
 function PenaltyPill({
   pct,
@@ -96,14 +106,11 @@ function PenaltyPill({
   tone: PenaltyTone;
   size?: "sm" | "md";
 }) {
-  const sizeCls
-    = size === "sm"
-      ? "gap-0.5 px-1.5 py-0 text-[10px]"
-      : "gap-1 px-2 py-0.5 text-[12px]";
+  const sizeCls = size === "sm" ? "gap-0.5 text-[10px]" : "gap-1 text-[12px]";
   const iconCls = size === "sm" ? "h-2.5 w-2.5" : "h-3 w-3";
   return (
     <span
-      className={`inline-flex items-center rounded-md ${sizeCls} ${PENALTY_PILL[tone]}`}
+      className={`inline-flex items-center ${sizeCls} ${PENALTY_TEXT[tone]}`}
     >
       <LeafIcon className={iconCls} />
       <span className="font-semibold">{pct} %</span>
@@ -374,16 +381,21 @@ function RoutineCard({
         </div>
         <span className="text-[12px] text-[#F43F5E] font-medium">Voir →</span>
       </div>
-      <div className="mt-1 flex items-end gap-4">
+      <div className="mt-1 flex items-center gap-4">
         <div className="min-w-0 flex-1">
           <div className="text-[17px] font-semibold text-[#111111]">
             {count} produit{count > 1 ? "s" : ""} actif{count > 1 ? "s" : ""}
           </div>
           {breakdown.length > 0 && (
-            <ul className="mt-0.5 flex flex-wrap gap-x-1 gap-y-0.5">
+            <ul className="mt-1.5 space-y-1">
               {breakdown.map((b) => (
-                <li key={b.label}>
-                  <PenaltyPill pct={b.pct} label={b.label} tone={b.tone} size="sm" />
+                <li key={b.label} className="flex items-center gap-2 text-[12px]">
+                  <span
+                    aria-hidden
+                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${PENALTY_DOT[b.tone]}`}
+                  />
+                  <span className="font-semibold text-[#111111]">{b.pct} %</span>
+                  <span className="italic text-[#6B7280]">{b.label}</span>
                 </li>
               ))}
             </ul>
