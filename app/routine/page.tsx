@@ -5,7 +5,7 @@ import Link from "next/link";
 import { getProfile, getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { computeRoutineMetrics, type Frequency, type RoutineProduct } from "@/lib/routine/engine";
-import { colorCapScore } from "@/lib/essentiel/engine";
+import { selectAtRiskProducts } from "@/lib/routine/atRisk";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { RoutineProductRow } from "@/components/routine/RoutineProductRow";
 import { RoutineSuggestions } from "@/components/routine/RoutineSuggestions";
@@ -217,34 +217,10 @@ async function RoutineContent() {
   const productsCount = products.length;
   const tagsTop = metrics.tagExposure.slice(0, 8);
 
-  // At-risk products — passed to the catalog-suggestions endpoint which resolves
-  // each one's precise category (analysis EAN -> catalog.category, else stored
-  // category_precise, else name classifier) and returns the single best
-  // alternative per product. We MUST pass the EAN: the catalog taxonomy is the
-  // only path that exact-matches the alternatives RPC (the stored category_precise
-  // uses a different vocabulary, e.g. "shampoing" vs "shampooing"). We also
-  // compute the CAPPED score + danger colour here (the deck cards need the tier
-  // pastilles + "À éviter / À surveiller" badge — mirror mobile computeOptimizeInfo).
-  const atRiskProducts = products
-    .map((p) => {
-      const counts = p.result?.counts;
-      const capped = colorCapScore(typeof p.score === "number" ? p.score : 0, {
-        orange: counts?.orange ?? 0,
-        rouge: counts?.rouge ?? 0,
-      });
-      return {
-        id: p.id,
-        name: p.name,
-        ean: p.ean ?? null,
-        category: p.categoryPrecise ?? (p.result?.catalogCategory as string | null) ?? null,
-        score: typeof p.score === "number" ? p.score : 0,
-        cappedScore: capped,
-        dangerColor: (capped < 5 ? "rouge" : "orange") as "rouge" | "orange",
-      };
-    })
-    // « À optimiser » : note PLAFONNÉE hors zone verte (< 13), comme sur mobile.
-    .filter((p) => p.cappedScore < 13)
-    .slice(0, 5);
+  // At-risk products (capped score < 13) → the "Suggestions intelligentes" CTA.
+  // The dedicated /routine/suggestions page recomputes the exact same set and
+  // resolves the best catalog alternative per product. Mirror mobile.
+  const atRiskProducts = selectAtRiskProducts(products);
 
   return (
     <div className="neu-page mx-auto max-w-6xl px-5 lg:px-8 pt-4 pb-8 lg:py-12">

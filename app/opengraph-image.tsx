@@ -30,15 +30,11 @@ export default async function Image() {
             marginBottom: 30,
           }}
         >
-          <div
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: 16,
-              background:
-                "linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)",
-            }}
-          />
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 9999, background: "#F6099B" }} />
+            <div style={{ width: 44, height: 44, borderRadius: 9999, background: "#54D41D" }} />
+            <div style={{ width: 44, height: 44, borderRadius: 9999, background: "#5F1EE1" }} />
+          </div>
           <div style={{ fontSize: 36, fontWeight: 700, color: "#1a0f2e" }}>
             Cosme Check
           </div>

@@ -92,6 +92,24 @@ describe("pickBestAlternative", () => {
     expect(pickBestAlternative(12, alts, NO_RESTRICTIONS)).toBeNull();
   });
 
+  it("never proposes a yellow alternative (capped < 13) for an orange product", () => {
+    const product = 7; // orange
+    const alts = [
+      alternative({ ean: "yellow", score: 16, count_orange: 1 }), // capped 12.9 -> yellow, rejected
+      alternative({ ean: "alsoYellow", score: 12 }), // 12 -> rejected
+    ];
+    expect(pickBestAlternative(product, alts, NO_RESTRICTIONS)).toBeNull();
+  });
+
+  it("accepts the green alternative and skips the yellow one", () => {
+    const product = 7;
+    const alts = [
+      alternative({ ean: "yellow", score: 16, count_orange: 1 }), // capped 12.9 -> rejected
+      alternative({ ean: "green", score: 14 }), // capped 14 -> green, kept
+    ];
+    expect(pickBestAlternative(product, alts, NO_RESTRICTIONS)?.ean).toBe("green");
+  });
+
   it("returns null for an empty candidate list", () => {
     expect(pickBestAlternative(10, [], NO_RESTRICTIONS)).toBeNull();
   });

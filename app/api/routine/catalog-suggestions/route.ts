@@ -14,8 +14,19 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 25;
 
-/** One at-risk product the routine page wants alternatives for. */
-type ReqItem = { name: string; ean: string | null; category: string | null; score: number };
+/**
+ * One at-risk product the routine page wants alternatives for.
+ * `cappedScore` is the colour-capped score (the value the app actually displays);
+ * it — NOT the raw score — is the eligibility baseline, exactly like mobile
+ * (buildSuggestions: `cappedOf(a) > own + 0.5` with `own = cappedScore`).
+ */
+type ReqItem = {
+  name: string;
+  ean: string | null;
+  category: string | null;
+  score: number;
+  cappedScore: number;
+};
 
 type Suggestion = {
   product: string;
@@ -26,28 +37,31 @@ type Suggestion = {
 const EXACT_LIMIT = 30;
 
 /**
- * Look up the REAL catalog taxonomy path for a barcode (cosme_check.catalog is
- * publicly readable for active rows). This is the ONLY category that exact-matches
- * the alternatives RPC — the stored `category_precise` uses a divergent vocabulary
- * (e.g. "shampoing" vs the catalog's "shampooing") and matches nothing.
+ * Batch EAN -> catalog.category in a SINGLE query (cosme_check.catalog is publicly
+ * readable for active rows). This is the only category that exact-matches the
+ * alternatives RPC — the stored `category_precise` uses a divergent vocabulary
+ * (e.g. "shampoing" vs the catalog's "shampooing"). One round-trip for all
+ * products instead of one per product.
  */
-async function categoryFromEan(
+async function categoriesByEan(
   sb: ReturnType<typeof supabaseAnon>,
-  ean: string | null,
-): Promise<string | null> {
-  if (!ean || !ean.trim()) return null;
+  eans: string[],
+): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (eans.length === 0) return out;
   try {
     const { data } = await sb
       .schema("cosme_check")
       .from("catalog")
-      .select("category")
-      .eq("ean", ean.trim())
-      .maybeSingle();
-    const cat = (data as { category?: string | null } | null)?.category;
-    return cat && cat.trim() ? cat.trim() : null;
+      .select("ean, category")
+      .in("ean", eans);
+    for (const r of (data as { ean: string; category: string | null }[] | null) ?? []) {
+      if (r.category && r.category.trim()) out.set(String(r.ean), r.category.trim());
+    }
   } catch {
-    return null;
+    /* ignore — falls back to precise/classifier per product */
   }
+  return out;
 }
 
 /**
@@ -55,26 +69,32 @@ async function categoryFromEan(
  *   1. EAN -> catalog.category (real taxonomy, the reliable path — mirrors mobile);
  *   2. the precise category passed by the client (analysis category_precise);
  *   3. classify by the product NAME via the kNN-vote classifier.
+ * NB: even the EAN path can land on an over-broad / mislabelled catalog category
+ * (e.g. a self-tanner filed alongside temporary tattoos), so the LLM guardrail
+ * below still runs on every pair — that's what keeps the suggestions logical.
  */
 async function resolveCategory(
-  sb: ReturnType<typeof supabaseAnon>,
   ean: string | null,
   precise: string | null,
   name: string,
+  catByEan: Map<string, string>,
+  sb: ReturnType<typeof supabaseAnon>,
 ): Promise<string | null> {
-  const fromEan = await categoryFromEan(sb, ean);
+  const fromEan = ean && ean.trim() ? catByEan.get(ean.trim()) ?? null : null;
   if (fromEan) return fromEan;
   if (precise && precise.trim()) return precise.trim();
   try {
     const { data, error } = await sb.rpc("cosme_check_classify_product_category", {
       p_query: name,
     });
-    if (error || !Array.isArray(data) || data.length === 0) return null;
-    const top = data[0] as { category?: string };
-    return top.category?.trim() || null;
+    if (!error && Array.isArray(data) && data.length > 0) {
+      const cat = (data[0] as { category?: string }).category?.trim();
+      if (cat) return cat;
+    }
   } catch {
-    return null;
+    /* ignore */
   }
+  return null;
 }
 
 /** Fetch exact-category alternatives for a category path (handoff §2.2 step 2). */
@@ -128,11 +148,14 @@ export async function POST(req: NextRequest) {
           const o = (it ?? {}) as Record<string, unknown>;
           const name = typeof o.name === "string" ? o.name.trim() : "";
           if (!name) return null;
+          const score = typeof o.score === "number" ? o.score : 0;
           return {
             name: name.slice(0, 200),
             ean: typeof o.ean === "string" && o.ean.trim() ? o.ean.trim().slice(0, 40) : null,
             category: typeof o.category === "string" && o.category.trim() ? o.category.trim() : null,
-            score: typeof o.score === "number" ? o.score : 0,
+            score,
+            // Older clients may not send the capped score → fall back to raw.
+            cappedScore: typeof o.cappedScore === "number" ? o.cappedScore : score,
           } satisfies ReqItem;
         })
         .filter((x): x is ReqItem => x !== null)
@@ -147,27 +170,38 @@ export async function POST(req: NextRequest) {
   if (!gate.ok) return gate.response;
   const { user } = gate;
 
-  const profile = await getProfile();
+  const sb = supabaseAnon();
+
+  // Profile + the batched EAN->category lookup run concurrently (independent).
+  const eans = Array.from(new Set(items.map((i) => i.ean).filter((e): e is string => Boolean(e))));
+  const [profile, catByEan] = await Promise.all([getProfile(), categoriesByEan(sb, eans)]);
   const restrictions: UserRestrictions = readUserRestrictions(profile?.preferences ?? null);
 
-  const sb = supabaseAnon();
+  type Draft = Suggestion & { resolvedCategory: string | null };
 
   // ── Stage 1+2+3: per product, resolve category -> alternatives -> best ──
   const drafts = await Promise.all(
-    items.map(async (item): Promise<Suggestion & { resolvedCategory: string | null }> => {
-      const category = await resolveCategory(sb, item.ean, item.category, item.name);
+    items.map(async (item): Promise<Draft> => {
+      const category = await resolveCategory(item.ean, item.category, item.name, catByEan, sb);
       if (!category) {
         return { product: item.name, category: null, alternative: null, resolvedCategory: null };
       }
       const alts = await fetchAlternatives(sb, category);
-      const best = pickBestAlternative(item.score, alts, restrictions);
+      // Baseline = CAPPED score (mirror mobile): a dangerous product's raw score
+      // is far above its capped score, so using raw would inflate the threshold
+      // and reject almost every alternative — that's why only one survived.
+      const best = pickBestAlternative(item.cappedScore, alts, restrictions);
       return { product: item.name, category, alternative: best, resolvedCategory: category };
     }),
   );
 
-  // ── Stage 4: AI guardrail on the (product, alternative) pairs ──
+  // ── Stage 4: AI guardrail on EVERY (product, alternative) pair ──
+  // Required for logic: an exact catalog category can be over-broad/mislabelled
+  // (e.g. self-tanner grouped with temporary tattoos), so without this check
+  // absurd pairs slip through. One batched LLM call; the whole result is cached
+  // client-side, so this cost is paid once per routine change, not per visit.
   const withAlt = drafts
-    .map((d, i) => ({ d, i, score: items[i].score }))
+    .map((d, i) => ({ d, i, cappedScore: items[i].cappedScore }))
     .filter((x) => x.d.alternative !== null);
 
   if (withAlt.length > 0) {
@@ -189,13 +223,13 @@ export async function POST(req: NextRequest) {
           draft.alternative = null; // no better path -> drop
           return;
         }
-        const reCategory = await resolveCategory(sb, null, null, reType);
+        const reCategory = await resolveCategory(null, null, reType, catByEan, sb);
         if (!reCategory || reCategory === draft.resolvedCategory) {
           draft.alternative = null;
           return;
         }
         const reAlts = await fetchAlternatives(sb, reCategory);
-        const reBest = pickBestAlternative(x.score, reAlts, restrictions);
+        const reBest = pickBestAlternative(x.cappedScore, reAlts, restrictions);
         draft.alternative = reBest; // may be null -> dropped
         draft.category = reCategory;
       }),

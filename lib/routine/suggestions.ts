@@ -8,8 +8,10 @@
  *   1. apply the color cap to every candidate alternative (same cap as the
  *      search / browse lists, never the raw catalog score);
  *   2. drop candidates that hit one of the user's ingredient restrictions;
- *   3. keep only candidates whose CAPPED score is strictly better than the
- *      product (> score + 0.5);
+ *   3. keep only candidates that are BOTH in the green zone (capped >= 13, i.e.
+ *      tier "Bien"/"Très bien") AND strictly better than the product (> +0.5).
+ *      A smart suggestion must never recommend a yellow/orange product — only a
+ *      genuinely clean replacement counts. If none qualify, suggest nothing.
  *   4. return the single best (highest capped score), or null if none qualify.
  */
 
@@ -41,6 +43,9 @@ export type ScoredAlternative = CatalogAlternative & {
 
 /** Minimum capped-score gain over the product for an alternative to qualify. */
 export const MIN_IMPROVEMENT = 0.5;
+
+/** Capped-score floor for the green zone ("Bien"). Suggestions must clear it. */
+export const GREEN_MIN = 13;
 
 const DIACRITICS_RE = new RegExp("[\\u0300-\\u036f]", "g");
 
@@ -93,7 +98,8 @@ export function pickBestAlternative(
   const eligible = alternatives
     .filter((a) => !altHitsRestriction(a, restrictions))
     .map(scoreAlternative)
-    .filter((a) => a.score > threshold)
+    // Green AND strictly better: never propose a yellow/orange "improvement".
+    .filter((a) => a.score >= GREEN_MIN && a.score > threshold)
     .sort((a, b) => b.score - a.score);
   return eligible[0] ?? null;
 }

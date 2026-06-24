@@ -1,5 +1,15 @@
-import Image from "next/image";
 import Link from "next/link";
+
+/** Brand mark — the three coloured dots only, on a transparent background. */
+export function LogoMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="58 196 396 120" className={className} aria-hidden role="img">
+      <circle cx="117" cy="256" r="55.5" fill="#F6099B" />
+      <circle cx="256" cy="256" r="55.5" fill="#54D41D" />
+      <circle cx="395" cy="256" r="55.5" fill="#5F1EE1" />
+    </svg>
+  );
+}
 
 export function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const text =
@@ -8,15 +18,7 @@ export function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
 
   return (
     <Link href="/" className="group inline-flex items-center gap-2">
-      <Image
-        src="/image/logo-cc.webp"
-        alt=""
-        aria-hidden
-        width={337}
-        height={96}
-        priority
-        className={`${mark} w-auto`}
-      />
+      <LogoMark className={`${mark} w-auto`} />
       <span className={`font-semibold tracking-tight ${text}`}>
         <span className="text-ink">Cosme </span>
         <span className="bg-gradient-to-r from-rose-400 to-pink-400 bg-clip-text text-transparent">

@@ -56,8 +56,8 @@ export function RoutineSuggestions({
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
             <h2 className="text-[15px] font-semibold flex items-center gap-2">
-              <span aria-hidden>✨</span>
-              Suggestions intelligentes
+              <span aria-hidden>💡</span>
+              Conseils pour ta routine
             </h2>
             <p className="text-[12px] text-[#374151] mt-1">
               Idées concrètes pour réduire ton exposition cumulée, basées sur ta routine actuelle.
@@ -83,8 +83,8 @@ export function RoutineSuggestions({
     <section className="neu p-5 mb-6">
       <div className="flex items-center justify-between gap-3 mb-3">
         <h2 className="text-[15px] font-semibold flex items-center gap-2">
-          <span aria-hidden>✨</span>
-          Suggestions intelligentes
+          <span aria-hidden>💡</span>
+          Conseils pour ta routine
         </h2>
         <button
           type="button"

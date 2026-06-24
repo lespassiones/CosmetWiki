@@ -406,6 +406,8 @@ export function AnalyseResultPanel({
               }}
               matched={result.counts.matched}
               total={result.counts.total}
+              imageUrl={result.imageUrl ?? null}
+              productLabel={productLabel ?? null}
             />
           </Reveal>
 
@@ -791,62 +793,41 @@ function BigScoreCard({
   counts,
   matched,
   total,
+  imageUrl,
+  productLabel,
 }: {
   counts: BlobCounts;
   matched: number;
   total: number;
+  imageUrl: string | null;
+  productLabel?: string | null;
 }) {
-  // Share of recognised ingredients flagged as "no penalty" (vert). Computed
-  // against `matched` (not `total`) - non-recognised ingredients aren't
-  // classified, so it would be misleading to count them as either safe or
-  // penalising.
-  const pctSansPenalite =
-    matched > 0 ? Math.round((counts.vert / matched) * 100) : null;
-
+  // Same layout on every viewport (per design): product photo on the left, the
+  // arc-only gauge on the right, and the recognised-ingredients ratio
+  // underneath. No centre count and no "% sans pénalité" line — that figure is
+  // already carried by the PenaltySummaryStrip right below this card.
   return (
     <article className="rounded-2xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
-      {/* MOBILE - clean donut with just the centred count, followed by the
-          "% sans pénalité" line and the recognised-ingredients ratio. The
-          per-colour labels around the donut were removed because they
-          overflowed on narrow phones and the % below already carries the
-          headline. */}
-      <div className="flex flex-col items-center gap-2 lg:hidden">
-        <IngredientBlob
-          counts={counts}
-          variant="md"
-          showCenter
-          animate
-        />
-        {pctSansPenalite !== null && (
-          <p className="mt-1 text-[13px] italic text-emerald-700">
-            <span className="font-semibold not-italic">{pctSansPenalite} %</span> sans pénalité
+      <div className="flex w-full items-center gap-4 sm:gap-5">
+        {imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageUrl}
+            alt={productLabel ?? "Produit analysé"}
+            className="h-32 w-32 shrink-0 rounded-xl object-cover ring-1 ring-black/[0.06] sm:h-40 sm:w-40"
+          />
+        ) : null}
+        {/* Gauge column pushed to the far right (ml-auto); the ratio text sits
+            centred under the gauge (not under the whole card). The gauge width
+            is capped so it reads ~10% smaller than the photo's growth. */}
+        <div className="ml-auto flex flex-col items-center gap-2">
+          <div className="w-[170px] sm:w-[200px]">
+            <IngredientBlob counts={counts} variant="md" animate />
+          </div>
+          <p className="text-[12px] text-ink-subtle">
+            <span className="font-semibold text-ink">{matched}</span> / {total} ingrédients reconnus
           </p>
-        )}
-        <p className="text-[11px] text-ink-subtle">
-          <span className="font-semibold text-ink">{matched}</span> / {total} ingrédients reconnus
-        </p>
-      </div>
-
-      {/* DESKTOP - larger blob without the corner labels (same reason as the
-          mobile version), the "% sans pénalité" subtitle slot, and the ratio
-          underneath. */}
-      <div className="hidden lg:flex lg:flex-col lg:items-center">
-        <IngredientBlob
-          counts={counts}
-          variant="lg"
-          showCenter
-          animate
-          subtitle={
-            pctSansPenalite !== null ? (
-              <p className="text-[14px] italic text-emerald-700">
-                <span className="font-semibold not-italic">{pctSansPenalite} %</span> sans pénalité
-              </p>
-            ) : null
-          }
-        />
-        <p className="mt-3 text-[12px] text-ink-subtle">
-          <span className="font-semibold text-ink">{matched}</span> / {total} ingrédients reconnus
-        </p>
+        </div>
       </div>
     </article>
   );

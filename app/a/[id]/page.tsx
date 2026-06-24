@@ -55,7 +55,7 @@ export async function generateMetadata({
   const desc = r?.synthesis
     ? r.synthesis.slice(0, 160)
     : `Décryptage de la composition INCI${a.brand ? ` — ${a.brand}` : ""} par Cosme Check.`;
-  const img = r?.imageUrl ?? `${SITE_URL}/logoCC.png`;
+  const img = r?.imageUrl ?? `${SITE_URL}/pwa/icon.png`;
   const url = `${SITE_URL}/a/${id}`;
 
   return {
