@@ -5,7 +5,7 @@
 //  - Stale-while-revalidate for static assets (so the home screen launch
 //    feels instant after the first visit) without going stale forever.
 
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC_CACHE = `cw-static-${VERSION}`;
 const RUNTIME_CACHE = `cw-runtime-${VERSION}`;
 const OFFLINE_URL = "/offline.html";
@@ -36,12 +36,24 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// En développement (localhost), on laisse TOUTES les requêtes filer au réseau.
+// Mettre en cache les chunks /_next/ en SWR fait resservir un ancien bundle JS
+// après un redémarrage / une recompilation du serveur dev : l'app tourne alors
+// sur du vieux code (ex. la recherche qui « ne marche plus »). Le handler fetch
+// reste présent pour l'installabilité, mais ne met rien en cache en local.
+const IS_DEV =
+  self.location.hostname === "localhost" ||
+  self.location.hostname === "127.0.0.1";
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
+  // Dev : pass-through réseau, jamais de cache (évite les bundles périmés).
+  if (IS_DEV) return;
 
   // Never cache API or auth-sensitive endpoints — they must always hit network.
   if (url.pathname.startsWith("/api/")) return;

@@ -226,8 +226,8 @@ function Headline({ mobile = false }: { mobile?: boolean }) {
 /** Ligne de 3 KPIs sur mobile (chiffre + label, séparés par un fin trait). */
 function KpiRow() {
   const items = [
-    { value: "1M+", label: "Produits" },
-    { value: "4.8★", label: "Satisfaction" },
+    { value: "400K+", label: "Produits" },
+    { value: "15K+", label: "Ingrédients" },
     { value: "+10K", label: "Marques" },
   ];
   return (
