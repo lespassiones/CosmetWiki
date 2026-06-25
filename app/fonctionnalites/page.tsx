@@ -7,7 +7,7 @@ import { SITE_URL } from "@/lib/siteUrl";
 
 const TITLE = "Fonctionnalités";
 const DESCRIPTION =
-  "Découvre tous les outils Cosme Check pour mieux comprendre tes produits : analyse INCI (photo, scan, liste, recherche, lien), analyse de promesses marketing, routine, comparaison, recherche d'ingrédients, coach IA.";
+  "Découvre tous les outils Cosme Check pour mieux comprendre tes produits : analyse INCI (photo, scan, liste, recherche, lien), analyse de promesses marketing, recherche de produits par mots-clés, routine, recommandations personnalisées, comparaison, coach IA.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -19,7 +19,8 @@ export const metadata: Metadata = {
     "analyse promesse marketing cosmétique",
     "routine beauté",
     "comparateur cosmétiques",
-    "recherche ingrédient cosmétique",
+    "recherche produit cosmétique",
+    "recommandations cosmétiques personnalisées",
     "coach IA beauté",
   ],
   alternates: { canonical: "/fonctionnalites" },
@@ -39,10 +40,11 @@ export const metadata: Metadata = {
 const NAV: NavItem[] = [
   { id: "inci", number: "01", label: "Analyse des produits" },
   { id: "promesses", number: "02", label: "Promesses vs Formule" },
-  { id: "routine", number: "03", label: "Ma routine" },
-  { id: "comparer", number: "04", label: "Comparer 2 produits" },
-  { id: "recherche", number: "05", label: "Recherche d'ingrédient" },
-  { id: "advisor", number: "06", label: "Beauty Advisor" },
+  { id: "recherche-produits", number: "03", label: "Recherche produits par mots-clés" },
+  { id: "routine", number: "04", label: "Ma routine" },
+  { id: "recommandations", number: "05", label: "Recommandations personnalisées" },
+  { id: "comparer", number: "06", label: "Comparer 2 produits" },
+  { id: "advisor", number: "07", label: "Beauty Advisor" },
 ];
 
 type Benefit = { title: string; body: string };
@@ -96,7 +98,7 @@ const SECTIONS: Section[] = [
     eyebrow: "Le cœur de l'application",
     title: "Analyse des produits",
     description:
-      "Décrypte la composition complète d'un produit, ingrédient par ingrédient. Lance l'analyse comme tu veux — photo de l'étiquette, scan caméra en direct, liste INCI collée, recherche par nom de produit ou simple lien — puis chaque ligne reçoit une couleur (vert, jaune, orange, rouge) qui résume sa pénalité selon des données scientifiques publiques, dans un système clair et indépendant.",
+      "Décrypte la composition complète d'un produit, ingrédient par ingrédient. Lance l'analyse comme tu veux : photo de l'étiquette, scan caméra en direct, liste INCI collée, recherche par nom de produit ou simple lien. Chaque ligne reçoit ensuite une couleur (vert, jaune, orange, rouge) qui résume sa pénalité selon des données scientifiques publiques, dans un système clair et indépendant.",
     keywords: [
       "photo de l'étiquette",
       "scan caméra",
@@ -186,8 +188,46 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    id: "routine",
+    id: "recherche-produits",
     number: "03",
+    eyebrow: "Trouve avant d'analyser",
+    title: "Recherche produits par mots-clés",
+    description:
+      "Tape un nom de produit, une marque ou quelques mots-clés et retrouve-le directement dans notre catalogue, sans scanner ni coller la moindre liste. Tu accèdes à sa composition déjà décryptée en un instant, même sans le flacon sous la main.",
+    keywords: [
+      "nom de produit",
+      "marque",
+      "mots-clés",
+      "catalogue",
+      "composition déjà décryptée",
+    ],
+    useCases: [
+      "Tu as repéré un sérum sur les réseaux. Tu tapes son nom, tu lis sa composition avant même de l'acheter.",
+      "Tu ne te souviens plus de la référence exacte : quelques mots-clés suffisent à la retrouver.",
+      "Tu compares deux marques de crème : tu les cherches l'une après l'autre, sans aucune étiquette en main.",
+    ],
+    benefits: [
+      {
+        title: "Recherche par nom ou marque",
+        body: "Tape ce dont tu te souviens (un nom, une marque, un type de produit) et la recherche remonte les correspondances les plus proches.",
+      },
+      {
+        title: "Résultats déjà analysés",
+        body: "Les produits du catalogue s'affichent avec leur composition décryptée et leur répartition couleur, prêts à lire.",
+      },
+      {
+        title: "Tolérante aux approximations",
+        body: "Faute de frappe, nom partiel, formulation grand public : la recherche comprend quand même ce que tu vises.",
+      },
+      {
+        title: "Aucun produit en main requis",
+        body: "Pas besoin du flacon ni du code-barres : tu te renseignes depuis ton canapé, avant l'achat.",
+      },
+    ],
+  },
+  {
+    id: "routine",
+    number: "04",
     eyebrow: "Au quotidien",
     title: "Ma routine",
     description:
@@ -222,8 +262,49 @@ const SECTIONS: Section[] = [
     ],
   },
   {
+    id: "recommandations",
+    number: "05",
+    eyebrow: "Pensé pour toi",
+    title: "Recommandations personnalisées",
+    description:
+      "À partir de ton profil (type de peau, objectifs, problèmes ciblés, ingrédients que tu évites) et de ta routine, Cosme Check repère tes produits les plus pénalisants et te propose, pour chacun, un remplaçant mieux noté de la même catégorie : toujours plus propre, jamais un produit moyen, et adapté à ce que tu recherches.",
+    keywords: [
+      "ton profil",
+      "objectifs",
+      "problèmes ciblés",
+      "ta routine",
+      "remplaçant mieux noté",
+      "même catégorie",
+    ],
+    pullQuote:
+      "Pas la peine de chercher mieux à l'aveugle : on part de TES produits et on ne te propose qu'une formule réellement plus propre.",
+    useCases: [
+      "Ton déodorant tire ta routine vers l'orange : on te suggère une alternative verte du même type.",
+      "Tu évites un ingrédient précis : aucune suggestion ne le contiendra, jamais.",
+      "Tu gardes une alternative en favori et tu compares les deux compositions côte à côte.",
+    ],
+    benefits: [
+      {
+        title: "Basé sur ton profil et ta routine",
+        body: "Type de peau, objectifs, problèmes ciblés, ingrédients que tu évites, produits que tu utilises vraiment : tes recommandations partent de qui tu es, pas d'un profil moyen ni d'un classement sponsorisé.",
+      },
+      {
+        title: "Toujours une formule plus propre",
+        body: "Une alternative n'est proposée que si elle est nettement mieux notée. Jamais un produit jaune ou moyen présenté comme un progrès.",
+      },
+      {
+        title: "Respecte tes restrictions",
+        body: "Les ingrédients et familles que tu as exclus sont automatiquement écartés : on ne te recommandera rien que tu évites.",
+      },
+      {
+        title: "Même catégorie, vrai remplaçant",
+        body: "Un shampoing est remplacé par un shampoing, un déo par un déo. La suggestion a du sens, jamais une comparaison absurde.",
+      },
+    ],
+  },
+  {
     id: "comparer",
-    number: "04",
+    number: "06",
     eyebrow: "Pour choisir",
     title: "Comparer 2 produits",
     description:
@@ -254,45 +335,8 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    id: "recherche",
-    number: "05",
-    eyebrow: "La bibliothèque",
-    title: "Recherche d'ingrédient",
-    description:
-      "Une base de plus de 15 700 ingrédients cosmétiques classés et expliqués. Tu cherches le rétinol, le niacinamide ou un nom barbare lu sur une étiquette : tu tapes, tu lis. Chaque ingrédient possède sa fiche dédiée, mise à jour selon les dernières évaluations réglementaires.",
-    keywords: [
-      "15 700 ingrédients",
-      "rétinol",
-      "niacinamide",
-      "fiche dédiée",
-    ],
-    useCases: [
-      "Tu lis un nom barbare sur une étiquette. Tu tapes les premières lettres, tu sais.",
-      "Tu cherches une alternative plus douce à un ingrédient connu pour irriter.",
-      "Tu explores la famille chimique d'un actif pour comprendre son rôle réel.",
-    ],
-    benefits: [
-      {
-        title: "Fiches complètes",
-        body: "Pour chaque ingrédient : couleur, fonctions cosmétiques, prévalence dans la base, statut réglementaire, description claire.",
-      },
-      {
-        title: "Suggestions intelligentes",
-        body: "On reconnaît les fautes de frappe et les noms commerciaux usuels en plus de la dénomination INCI officielle.",
-      },
-      {
-        title: "Couleur instantanée",
-        body: "Vert, jaune, orange, rouge : tu sais en deux secondes si l'ingrédient te convient ou s'il appelle la prudence.",
-      },
-      {
-        title: "Liens entre ingrédients",
-        body: "Famille chimique, alternatives plus douces, produits qui en contiennent : tout est relié dans une exploration cohérente.",
-      },
-    ],
-  },
-  {
     id: "advisor",
-    number: "06",
+    number: "07",
     eyebrow: "Conseiller personnel",
     title: "Beauty Advisor",
     description:
@@ -461,7 +505,7 @@ function FeatureSection({ section }: { section: Section }) {
         {highlight(description, keywords)}
       </p>
 
-      {/* Pull quote — uniquement la fonctionnalité phare en bénéficie. */}
+      {/* Pull quote : uniquement la fonctionnalité phare en bénéficie. */}
       {pullQuote ? (
         <blockquote className="mt-8 border-l-2 border-ink/30 pl-5">
           <p className="max-w-2xl text-balance text-[18px] font-medium italic leading-snug text-ink sm:text-[20px]">
@@ -470,7 +514,7 @@ function FeatureSection({ section }: { section: Section }) {
         </blockquote>
       ) : null}
 
-      {/* En pratique — cas d'usage concrets en liste à puces sobres. */}
+      {/* En pratique : cas d'usage concrets en liste à puces sobres. */}
       {useCases && useCases.length > 0 ? (
         <div className="mt-8 rounded-2xl bg-black/[0.02] p-5 ring-1 ring-black/[0.04] sm:p-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
