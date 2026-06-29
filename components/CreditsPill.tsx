@@ -1,128 +1,47 @@
-"use client";
-
-import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-
-type CreditsState = { used: number; limit: number; remaining: number } | null;
+﻿'use client'
 
 /**
- * Gold-coin styled credits pill.
- *
- * When `initialCredits` is provided (pre-fetched server-side in layout.tsx),
- * the pill renders immediately without a client-side fetch on mount. It still
- * re-fetches on tab focus and on `cosmecheck:credits-updated` events so the
- * count stays fresh after a credit-consuming call.
- *
- * Without `initialCredits` (legacy usage), falls back to fetching on mount.
- *
- * Layout: [🪙 1390] [+] — "+" links to /offre for the Premium upsell.
+ * CreditsPill — Affiche les crédits restants de l'utilisateur
+ * Avec indicateur de couleur (rouge si vide, orange si faible)
  */
-export function CreditsPill({
-  className = "",
-  initialCredits,
-}: {
-  className?: string;
-  initialCredits?: CreditsState;
-}) {
-  const [credits, setCredits] = useState<CreditsState>(initialCredits ?? null);
-  const [hidden, setHidden] = useState(false);
 
-  const refresh = useCallback(async () => {
-    try {
-      const r = await fetch("/api/credits");
-      if (r.status === 401) {
-        setHidden(true);
-        return;
-      }
-      if (!r.ok) return;
-      const data = await r.json();
-      if (data && data.ok && typeof data.remaining === "number") {
-        setCredits({ used: data.used, limit: data.limit, remaining: data.remaining });
-      }
-    } catch {
-      // ignore - pill stays in last known state
-    }
-  }, []);
+import { useCredits } from '@/lib/credits/hooks'
+import { useRouter } from 'next/navigation'
 
-  useEffect(() => {
-    // Skip the initial fetch when SSR-provided credits are available —
-    // they are fresh from the same request that rendered the page.
-    if (!initialCredits) void refresh();
-    const onFocus = () => void refresh();
-    const onUpdate = () => void refresh();
-    window.addEventListener("focus", onFocus);
-    window.addEventListener("cosmecheck:credits-updated", onUpdate as EventListener);
-    return () => {
-      window.removeEventListener("focus", onFocus);
-      window.removeEventListener("cosmecheck:credits-updated", onUpdate as EventListener);
-    };
-  // initialCredits is intentionally excluded: it's stable for the lifetime of
-  // the component and we only want the "no initialCredits → do initial fetch"
-  // branch to fire once on mount, not on every credits update.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refresh]);
+export function CreditsPill() {
+  const { remaining, limit, isLoading, error } = useCredits()
+  const router = useRouter()
 
-  if (hidden || !credits) return null;
+  if (error) {
+    return (
+      <div className="text-xs text-red-600">
+        Erreur crédits
+      </div>
+    )
+  }
 
-  const { used, limit, remaining } = credits;
-  // Number tint dims to a rose tone when remaining < 10% so the user notices.
-  const ratio = limit > 0 ? remaining / limit : 0;
-  const numberTone = ratio < 0.1 ? "text-rose-200" : "text-amber-50";
+  // Déterminer la couleur
+  const ratio = limit > 0 ? remaining / limit : 0
+  const bgColor = remaining === 0
+    ? 'bg-red-100 text-red-700'
+    : ratio < 0.2
+      ? 'bg-orange-100 text-orange-700'
+      : 'bg-emerald-100 text-emerald-700'
 
   return (
-    <div
-      className={`inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-zinc-800 to-black pl-1.5 pr-1 py-1 ring-1 ring-amber-400/30 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.08)] ${className}`}
-      title={`${used} crédits utilisés sur ${limit} aujourd'hui`}
-      aria-label={`${remaining} crédits restants sur ${limit}`}
+    <button
+      onClick={() => router.push('/profile')}
+      className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium transition-colors ${bgColor} hover:opacity-80`}
+      disabled={isLoading}
     >
-      {/* Gold coin */}
-      <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" aria-hidden>
-        <defs>
-          <radialGradient id="cw-coin-grad" cx="35%" cy="35%" r="70%">
-            <stop offset="0%" stopColor="#fef3c7" />
-            <stop offset="35%" stopColor="#fcd34d" />
-            <stop offset="75%" stopColor="#f59e0b" />
-            <stop offset="100%" stopColor="#b45309" />
-          </radialGradient>
-        </defs>
-        <circle cx="12" cy="12" r="10" fill="url(#cw-coin-grad)" />
-        <circle
-          cx="12"
-          cy="12"
-          r="7.5"
-          fill="none"
-          stroke="#fde68a"
-          strokeWidth="0.8"
-          opacity="0.65"
-        />
-        <text
-          x="12"
-          y="15.5"
-          textAnchor="middle"
-          fontSize="9.5"
-          fontWeight="800"
-          fill="#7c2d12"
-          fontFamily="ui-sans-serif, system-ui, sans-serif"
-        >
-          C
-        </text>
-      </svg>
-
-      {/* Count */}
-      <span
-        className={`text-[12px] font-semibold tabular-nums leading-none ${numberTone}`}
-      >
-        {remaining}
-      </span>
-
-      {/* + button → upsell */}
-      <Link
-        href="/offre"
-        aria-label="Obtenir plus de crédits"
-        className="inline-flex h-[22px] w-[22px] items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-amber-500 text-amber-950 font-bold text-[15px] leading-none ring-1 ring-amber-200/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] hover:brightness-110 active:scale-95 transition"
-      >
-        +
-      </Link>
-    </div>
-  );
+      <span>⭐</span>
+      {isLoading ? (
+        <span>...</span>
+      ) : (
+        <span>
+          {remaining} / {limit}
+        </span>
+      )}
+    </button>
+  )
 }

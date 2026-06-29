@@ -427,11 +427,10 @@ async function RoutineContent() {
         </div>
       </section>
 
-      {/* Simulation - only rendered if there's at least one penalizing
-          product to remove. Otherwise the suggestion is dishonest: removing a
-          well-scored product just to bump the average doesn't reflect a real
-          improvement. */}
-      {metrics.simulation.removableCount > 0 && (
+      {/* Simulation - DÉSACTIVÉE (masquée à la demande). Pour la réafficher,
+          remettre la condition `metrics.simulation.removableCount > 0` à la
+          place de `false` ci-dessous. Le code reste intact volontairement. */}
+      {false && (
         <section className="neu p-5 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             <div className="min-w-0 flex-1">

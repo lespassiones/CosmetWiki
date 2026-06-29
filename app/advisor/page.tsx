@@ -8,7 +8,7 @@ import {
   SKIN_TYPE_FACE_LABEL,
 } from "@/lib/skin/profile";
 import { BeautyProfileForm } from "@/components/profile/BeautyProfileForm";
-import { AdvisorPanel } from "@/components/advisor/AdvisorPanel";
+import { AdvisorPageWrapper } from "./AdvisorPageWrapper";
 import { GLASS_CARD, GLASS_CARD_ROSE } from "@/lib/ui/glass";
 
 export const metadata = { title: "Beauty Advisor · Cosme Check" };
@@ -76,7 +76,7 @@ export default async function AdvisorPage() {
             </details>
           </section>
 
-          <AdvisorPanel firstName={profile?.first_name ?? "toi"} />
+          <AdvisorPageWrapper firstName={profile?.first_name ?? "toi"} />
         </>
       )}
     </div>

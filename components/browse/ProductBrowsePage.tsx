@@ -53,11 +53,15 @@ export function ProductBrowsePage() {
   const [browseLoading, setBrowseLoading] = useState(false);
   const [browseLoadingMore, setBrowseLoadingMore] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [searchOffset, setSearchOffset] = useState(0);
+  const [searchHasMore, setSearchHasMore] = useState(false);
+  const [searchLoadingMore, setSearchLoadingMore] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Quand true, le useEffect sur `path` saute le fetch (restoration depuis sessionStorage)
   const skipNextPathEffectRef = useRef(false);
 
   const BROWSE_PAGE = 24;
+  const SEARCH_PAGE = 50;
 
   // Restauration de l'état browse depuis sessionStorage (retour depuis /analyse)
   useEffect(() => {
@@ -76,23 +80,54 @@ export function ProductBrowsePage() {
   // Debounce search query
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => setDebouncedQuery(query), 350);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedQuery(query);
+      setSearchResults([]); // Reset results on new query
+    }, 350);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [query]);
 
-  // Fetch search results
+  // Fetch search results (paginated, 50 per page)
   useEffect(() => {
     if (debouncedQuery.length < 2) {
       setSearchResults([]);
+      setSearchOffset(0);
+      setSearchHasMore(false);
       return;
     }
     setSearchLoading(true);
-    fetch(`/api/catalog-search?q=${encodeURIComponent(debouncedQuery)}`)
+    fetch(`/api/catalog-search?q=${encodeURIComponent(debouncedQuery)}&limit=${SEARCH_PAGE}&offset=0`)
       .then((r) => r.json() as Promise<{ products: BrowseProduct[] }>)
-      .then((data) => setSearchResults(data.products ?? []))
-      .catch(() => setSearchResults([]))
+      .then((data) => {
+        const products = data.products ?? [];
+        setSearchResults(products);
+        setSearchHasMore(products.length === SEARCH_PAGE);
+        setSearchOffset(SEARCH_PAGE);
+      })
+      .catch(() => {
+        setSearchResults([]);
+        setSearchHasMore(false);
+      })
       .finally(() => setSearchLoading(false));
   }, [debouncedQuery]);
+
+  const loadMoreSearch = useCallback(() => {
+    if (debouncedQuery.length < 2 || searchLoadingMore) return;
+    setSearchLoadingMore(true);
+    fetch(`/api/catalog-search?q=${encodeURIComponent(debouncedQuery)}&limit=${SEARCH_PAGE}&offset=${searchOffset}`)
+      .then((r) => r.json() as Promise<{ products: BrowseProduct[] }>)
+      .then((data) => {
+        const products = data.products ?? [];
+        setSearchResults((prev) => {
+          const seen = new Set(prev.map((p) => p.ean));
+          return [...prev, ...products.filter((p) => !seen.has(p.ean))];
+        });
+        setSearchHasMore(products.length === SEARCH_PAGE);
+        setSearchOffset((prev) => prev + SEARCH_PAGE);
+      })
+      .catch(() => {})
+      .finally(() => setSearchLoadingMore(false));
+  }, [debouncedQuery, searchOffset, searchLoadingMore]);
 
   // Fetch products only when path reaches a leaf.
   // Skipped once after sessionStorage restoration to avoid re-fetching already loaded products.
@@ -226,7 +261,7 @@ export function ProductBrowsePage() {
               <p className="text-sm text-ink-muted text-center py-12">Aucun résultat pour « {debouncedQuery} »</p>
             )}
             {!searchLoading && searchResults.length > 0 && (
-              <p className="text-[12px] text-ink-muted mb-3">{searchResults.length} produit{searchResults.length > 1 ? "s" : ""}</p>
+              <p className="text-[12px] text-ink-muted mb-3">{searchResults.length}{searchHasMore ? "+" : ""} produit{searchResults.length > 1 ? "s" : ""}</p>
             )}
             <div className="space-y-2">
               {searchResults.map((p) => (
@@ -250,6 +285,24 @@ export function ProductBrowsePage() {
                 </button>
               ))}
             </div>
+            {searchHasMore && (
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={loadMoreSearch}
+                  disabled={searchLoadingMore}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white ring-1 ring-black/[0.08] text-[14px] font-medium text-ink hover:ring-[#F43F5E]/40 hover:bg-rose-50/40 transition-all disabled:opacity-60"
+                >
+                  {searchLoadingMore ? (
+                    <div className="w-4 h-4 border-2 border-[#F43F5E]/30 border-t-[#F43F5E] rounded-full animate-spin" />
+                  ) : (
+                    <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current text-ink-muted" aria-hidden>
+                      <path d="M8 3v10M3 8l5 5 5-5"/>
+                    </svg>
+                  )}
+                  Voir plus
+                </button>
+              </div>
+            )}
           </div>
         )}
 
