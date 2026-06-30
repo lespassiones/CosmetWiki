@@ -325,15 +325,15 @@ export function AnalyseResultPanel({
       {/* Product header: image left + title/brand right ALWAYS SIDE-BY-SIDE */}
       <div className="flex flex-col gap-4 mb-6 lg:max-w-[900px]">
         {/* Carte commune : image + titre/marque + boutons d'action regroupés */}
-        <div className="neu p-4 lg:p-5 flex flex-col gap-4">
+        <div className="neu p-3 lg:p-4 flex flex-col gap-4">
           {/* Image + Title/Brand (always horizontal) */}
           <div className="flex flex-row gap-4 items-start">
-          {/* Image — fixed size, no grow */}
+          {/* Image — agrandie (portrait), occupe la hauteur du bloc titre+marque */}
           {productImageUrl ? (
             <img
               src={productImageUrl}
               alt={productLabel || "Product image"}
-              className="w-24 h-24 shrink-0 rounded-lg object-cover shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)]"
+              className="w-[104px] h-[118px] shrink-0 rounded-lg object-cover shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)]"
             />
           ) : null}
 
@@ -364,7 +364,7 @@ export function AnalyseResultPanel({
             {existingCoherenceId ? (
               <Link
                 href={`/promesses/${existingCoherenceId}`}
-                className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 px-3 py-2 text-xs font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
+                className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
               >
                 <PromesseIcon className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate">Voir l&apos;analyse de la promesse</span>
@@ -373,7 +373,7 @@ export function AnalyseResultPanel({
               <button
                 type="button"
                 onClick={() => setPromesseOpen(true)}
-                className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 px-3 py-2 text-xs font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
+                className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
               >
                 <PromesseIcon className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate">Analyser la promesse</span>

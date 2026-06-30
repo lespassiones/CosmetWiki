@@ -5,6 +5,7 @@ import { supabaseAnon, type ColorRating } from "@/lib/supabase";
 import { SITE_URL } from "@/lib/siteUrl";
 import { RATING_DOT } from "@/lib/colors";
 import { getAppConfig } from "@/lib/appConfig";
+import { computeEssentiel } from "@/lib/essentiel/engine";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 // Page publique d'une analyse PARTAGÉE (lien envoyé depuis l'app mobile).
@@ -105,6 +106,14 @@ export default async function PublicAnalysisPage({
   const counts = r?.counts;
   const imageUrl = r?.imageUrl ?? null;
 
+  // Analyse OBJECTIVE (déterministe, sans IA ni profil) : ce qui est bien /
+  // à surveiller au niveau de la formule. La lecture PERSONNALISÉE (3 blocs IA
+  // selon le profil) reste réservée aux comptes → teaser + CTA plus bas.
+  const essentiel = r?.items ? computeEssentiel(r) : null;
+  const positives = essentiel?.positives ?? [];
+  const concerns = essentiel?.concerns ?? [];
+  const TIER_DOT: Record<string, ColorRating> = { jaune: "Jaune", orange: "Orange", rouge: "Rouge" };
+
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-8">
       {/* En-tête produit */}
@@ -170,14 +179,85 @@ export default async function PublicAnalysisPage({
           </div>
         ) : null}
 
-        {/* Synthèse */}
-        {r?.synthesis ? (
-          <div className="mt-5 rounded-2xl bg-black/[0.025] p-4 ring-1 ring-black/[0.05]">
-            <p className="whitespace-pre-line text-[14px] leading-relaxed text-[#222222]">
-              {r.synthesis}
-            </p>
+        {/* Ce qui est bien (objectif, formule) */}
+        {positives.length > 0 ? (
+          <div className="mt-5">
+            <p className="mb-2 text-[13px] font-bold text-[#111111]">Ce qui est bien</p>
+            <ul className="space-y-1.5">
+              {positives.map((p, i) => (
+                <li key={i} className="flex items-start gap-2 text-[13px] leading-snug">
+                  <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${RATING_DOT.Vert}`} aria-hidden />
+                  <span className="text-[#111111]">
+                    <span className="font-semibold">{p.name}</span>
+                    {p.functions?.length ? (
+                      <span className="text-ink-subtle"> — {p.functions.join(" · ")}</span>
+                    ) : null}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         ) : null}
+
+        {/* À surveiller (objectif, formule) */}
+        {concerns.length > 0 ? (
+          <div className="mt-5">
+            <p className="mb-2 text-[13px] font-bold text-[#111111]">À surveiller</p>
+            <ul className="space-y-1.5">
+              {concerns.map((c, i) => (
+                <li key={i} className="flex items-start gap-2 text-[13px] leading-snug">
+                  <span
+                    className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${RATING_DOT[TIER_DOT[c.tier] ?? "Jaune"]}`}
+                    aria-hidden
+                  />
+                  <span className="text-[#111111]">
+                    <span className="font-semibold">{c.family}</span>
+                    <span className="text-ink-subtle"> — {c.effect}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Teaser : l'analyse PERSONNALISÉE (3 blocs IA selon le profil) est
+          réservée aux comptes → pousse à créer un compte. */}
+      <div className="mt-5 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/[0.06]">
+        <div className="relative">
+          {/* Aperçu flouté des 3 blocs perso */}
+          <div className="space-y-3 p-5 blur-[5px] select-none" aria-hidden>
+            {["Correspond à tes objectifs", "Adapté à ta peau", "À surveiller pour toi"].map((t) => (
+              <div key={t} className="flex items-center gap-3">
+                <span className="h-10 w-10 shrink-0 rounded-full bg-emerald-100" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-[14px] font-bold text-[#111111]">{t}</div>
+                  <div className="mt-1 h-2.5 w-4/5 rounded-full bg-black/10" />
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Voile + cadenas + CTA */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/55 px-5 text-center">
+            <div className="mb-2 grid h-11 w-11 place-items-center rounded-full bg-violet-100 text-violet-600">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5">
+                <rect x="5" y="11" width="14" height="9" rx="2" />
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+              </svg>
+            </div>
+            <p className="text-[15px] font-bold text-[#111111]">Ton analyse personnalisée</p>
+            <p className="mt-1 max-w-sm text-[13px] text-ink-subtle">
+              Crée ton compte pour savoir si ce produit correspond à TES objectifs, ta peau
+              et tes restrictions.
+            </p>
+            <Link
+              href="/"
+              className="mt-3 inline-flex items-center justify-center rounded-full bg-[#111111] px-6 py-2.5 text-[14px] font-semibold text-white shadow-sm transition hover:brightness-110"
+            >
+              Créer mon compte gratuit
+            </Link>
+          </div>
+        </div>
       </div>
 
       {/* CTA vers le web twin (fonctionnel) — l'app mobile arrive bientôt */}
