@@ -13,6 +13,7 @@ import {
 import { readUserRestrictions } from "@/lib/restrictions/types";
 import { loadIngredientFamilies } from "@/lib/restrictions/families";
 import { getClientIp } from "@/lib/ratelimit";
+import { getAppConfig } from "@/lib/appConfig";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 export const runtime = "nodejs";
@@ -106,6 +107,16 @@ async function streamMistralChat(opts: {
 }
 
 export async function POST(req: NextRequest) {
+  // Feature flag (admin Paramètres). Gate before any work so a disabled
+  // advisor costs nothing. Fail-open: getAppConfig defaults flag_advisor=true.
+  const cfg = await getAppConfig();
+  if (!cfg.flag_advisor) {
+    return new Response(
+      JSON.stringify({ error: "Le Beauty Advisor est momentanément indisponible." }),
+      { status: 503, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
   const ip = getClientIp(req.headers);
   // Hard per-IP rate limit (Postgres-backed, shared across Vercel instances).
   const svc = supabaseService();

@@ -285,6 +285,7 @@ export async function POST(req: NextRequest) {
                 input_text: rawText,
                 result_json: cached_result,
                 score: Number((cached_result.score ?? 0).toFixed(2)),
+                ean: productEan?.slice(0, 32) ?? null,
               })
               .select("id")
               .single();
@@ -328,6 +329,7 @@ export async function POST(req: NextRequest) {
               input_text: rawText,
               result_json: cached_result,
               score: Number((cached_result.score ?? 0).toFixed(2)),
+              ean: productEan?.slice(0, 32) ?? null,
             })
             .select("id")
             .single();
@@ -1011,6 +1013,7 @@ export async function POST(req: NextRequest) {
         input_text: text,
         result_json: responsePayload,
         score: Number(score.toFixed(2)),
+        ean: productEan?.slice(0, 32) ?? null,
       })
       .select("id")
       .single();
@@ -1142,6 +1145,46 @@ export async function POST(req: NextRequest) {
           sourceUrl: null,
           confidence: 0.90,
         });
+      } catch { /* non-blocking */ }
+    })();
+
+    // Parité mobile : produit internet sans EAN → on tente de retrouver son
+    // code-barres sur Open Beauty Facts (gratuit). Trouvé → upsert catalogue
+    // (rejoint la base, devient cherchable par le prochain utilisateur via la
+    // recherche normale). Échec → file `cosme_check.web_products` pour
+    // résolution EAN (LLM/manuelle) côté admin, puis promotion au catalogue.
+    // Fire-and-forget : ne bloque jamais la réponse d'analyse.
+    void (async () => {
+      try {
+        const eanBrand = body.brand!;
+        const eanLabel = body.productLabel!;
+        const catSlug = PRODUCT_CATEGORY_TO_CATALOG_SLUG[resolvedCategory ?? "autre"] ?? null;
+        const { lookupEanByName } = await import("@/lib/productSearch/eanLookup");
+        const obf = await lookupEanByName(eanBrand, eanLabel);
+        if (obf) {
+          const { upsertCatalogProduct } = await import("@/lib/db/catalog");
+          await upsertCatalogProduct({
+            ean: obf.ean,
+            brand: eanBrand,
+            name: eanLabel,
+            ingredientsText: obf.ingredientsText ?? body.text,
+            category: catSlug,
+            // Produit internet-only : pas de score INCI Beauty, on stocke le
+            // score calculé sur la liste d'ingrédients.
+            score: Number(score.toFixed(4)),
+            scoreLabel: scoreLabelText,
+            scoreTone: scoreTone,
+            countTotal: itemsResponse.length,
+          });
+        } else {
+          const { logWebProduct } = await import("@/lib/db/webProducts");
+          await logWebProduct({
+            brand: eanBrand,
+            name: eanLabel,
+            category: catSlug,
+            ingredientsText: body.text ?? null,
+          });
+        }
       } catch { /* non-blocking */ }
     })();
   }

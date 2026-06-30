@@ -49,6 +49,7 @@ const TONE: Record<string, { text: string; dot: string }> = {
 // ─── Fetch + filter hook ──────────────────────────────────────────────────────
 function useAlternatives(
   ean: string | null,
+  category: string | null,
   restrictions: UserRestrictions,
   allergiesFreeform: string | undefined,
 ) {
@@ -56,8 +57,14 @@ function useAlternatives(
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!ean) return;
-    const resolvedEan = ean; // narrow to string for async closure
+    // Clé de recherche : EAN prioritaire, sinon catégorie exacte (produit sans
+    // EAN). Sans EAN ni catégorie, rien à faire.
+    const queryParam = ean
+      ? `ean=${encodeURIComponent(ean)}`
+      : category
+        ? `category=${encodeURIComponent(category)}`
+        : null;
+    if (!queryParam) return;
     let cancelled = false;
 
     async function load() {
@@ -80,7 +87,7 @@ function useAlternatives(
 
         while (results.length < CAROUSEL_TARGET && offset < RAW_SAFETY_LIMIT) {
           const res = await fetch(
-            `/api/alternatives?ean=${encodeURIComponent(resolvedEan)}&limit=${RAW_PAGE}&offset=${offset}`,
+            `/api/alternatives?${queryParam}&limit=${RAW_PAGE}&offset=${offset}`,
           );
           if (!res.ok || cancelled) break;
           const { alternatives: batch } = (await res.json()) as {
@@ -106,7 +113,7 @@ function useAlternatives(
 
     load();
     return () => { cancelled = true; };
-  }, [ean, restrictions, allergiesFreeform]);
+  }, [ean, category, restrictions, allergiesFreeform]);
 
   return { alternatives, loading };
 }
@@ -187,16 +194,19 @@ function AlternativesShimmer() {
 // ─── Main component ───────────────────────────────────────────────────────────
 export function AlternativesCarousel({
   ean,
+  category = null,
   brand,
   productName,
 }: {
   ean: string | null;
+  /** Catégorie catalogue exacte — repli quand le produit n'a pas d'EAN. */
+  category?: string | null;
   brand: string | null;
   productName: string | null;
 }) {
   const router = useRouter();
   const { restrictions, allergiesFreeform } = useRestrictions();
-  const { alternatives, loading } = useAlternatives(ean, restrictions, allergiesFreeform);
+  const { alternatives, loading } = useAlternatives(ean, category, restrictions, allergiesFreeform);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   function handleSelect(alt: AlternativeRow) {
@@ -220,8 +230,9 @@ export function AlternativesCarousel({
     );
   }
 
-  // Nothing to show — hide the section entirely
-  if (!ean) return null;
+  // Nothing to show — hide the section entirely. On affiche dès qu'on a un EAN
+  // OU une catégorie catalogue (produit sans EAN), comme le mobile.
+  if (!ean && !category) return null;
   if (loading) return <AlternativesShimmer />;
   if (alternatives.length === 0) {
     return (

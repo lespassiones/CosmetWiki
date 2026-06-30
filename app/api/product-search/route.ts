@@ -5,6 +5,7 @@ import { collectOpenAIWebCandidates } from "@/lib/productSearch/openaiSearch";
 import { prevalidateCandidates } from "@/lib/productSearch/prevalidate";
 import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import { normalizeProductQuery } from "@/lib/ai/productNormalize";
+import { getAppConfig } from "@/lib/appConfig";
 
 /** Combien de candidats web pré-validés on garde au final pour l'affichage.
  *  La pré-validation = on extrait l'INCI en parallèle pour chaque candidat,
@@ -100,6 +101,23 @@ export async function POST(req: NextRequest) {
     : [];
   const isLoadMore = exclude.length > 0;
 
+  // Feature flag (admin Paramètres) : « recherche approfondie internet ». Quand
+  // elle est OFF, on garde la recherche catalogue mais on coupe l'expansion web
+  // (OpenAI Web Search / DDG), la partie coûteuse en API externes. Fail-open.
+  const cfg = await getAppConfig();
+  const deepSearchEnabled = cfg.flag_deep_search;
+
+  // « Voir plus » est purement web : sans recherche approfondie, plus rien à
+  // paginer.
+  if (isLoadMore && !deepSearchEnabled) {
+    return NextResponse.json({
+      found: false,
+      reason: "deep_search_disabled",
+      webCandidates: [],
+      normalization: { kind: "load_more" },
+    });
+  }
+
   // Mode "Voir plus" : on saute la cascade catalogue (déjà passée au 1er hit)
   // et on appelle directement OpenAI Web Search avec la liste d'exclusion,
   // puis on pré-valide pour ne renvoyer que des candidats cliquables.
@@ -130,7 +148,7 @@ export async function POST(req: NextRequest) {
   // HTML scrape, used only when OpenAI returns nothing (key missing, quota,
   // timeout). DDG is free but bot-walled on datacenter IPs, hence the order.
   let webCandidates: Awaited<ReturnType<typeof collectDuckDuckGoCandidates>> = [];
-  if (!result.found) {
+  if (!result.found && deepSearchEnabled) {
     let raw = await collectOpenAIWebCandidates(refinedQuery, FIRST_BATCH_LIMIT);
     if (raw.length === 0) {
       raw = await collectDuckDuckGoCandidates(refinedQuery, FIRST_BATCH_LIMIT);

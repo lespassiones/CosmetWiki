@@ -30,6 +30,8 @@ export function EssentielView({
   onToggle,
   hideToggle = false,
   scoreTone,
+  restrictedCount,
+  onShowFamilies,
 }: {
   data: EssentielData;
   expanded: boolean;
@@ -43,6 +45,10 @@ export function EssentielView({
   /** When provided, overrides the badge icon of the VerdictCard with the
    *  score-derived tone so it stays identical to the VerdictGauge. */
   scoreTone?: VerdictTone;
+  /** Number of restricted items found in this analysis */
+  restrictedCount?: number;
+  /** Callback to show families modal */
+  onShowFamilies?: () => void;
 }) {
   return (
     <section className="mt-4 space-y-3 lg:max-w-3xl" aria-label="Aperçu essentiel de l'analyse">
@@ -52,7 +58,12 @@ export function EssentielView({
           render — subsequent re-renders (toggle expand/collapse) keep the
           cards visible. */}
       <div className="stagger-up" style={staggerDelay(0)}>
-        <VerdictCard verdict={data.verdict} scoreTone={scoreTone} />
+        <VerdictCard
+          verdict={data.verdict}
+          scoreTone={scoreTone}
+          restrictedCount={restrictedCount}
+          onShowFamilies={onShowFamilies}
+        />
       </div>
       {data.positives.length > 0 ? (
         <div className="stagger-up" style={staggerDelay(120)}>
@@ -116,12 +127,27 @@ export function EssentielToggleButton({
 
 // ─── Cards ────────────────────────────────────────────────────────────────
 
-function VerdictCard({ verdict, scoreTone }: { verdict: EssentielData["verdict"]; scoreTone?: VerdictTone }) {
+function VerdictCard({
+  verdict,
+  scoreTone,
+  restrictedCount = 0,
+  onShowFamilies,
+}: {
+  verdict: EssentielData["verdict"];
+  scoreTone?: VerdictTone;
+  restrictedCount?: number;
+  onShowFamilies?: () => void;
+}) {
   const badgeTone = scoreTone ?? verdict.tone;
   const v = VERDICT_VISUAL[badgeTone];
   const Icon = v.Icon;
+  const hasRestriction = restrictedCount && restrictedCount > 0;
+  const restrictionText = hasRestriction
+    ? `Contient ${restrictedCount} de vos restrictions`
+    : "Ne contient aucune de vos restrictions";
+
   return (
-    <article className="neu flex items-center gap-4 p-4">
+    <article className="neu flex items-start gap-4 p-4">
       <div
         className={`h-10 w-10 shrink-0 rounded-full flex items-center justify-center ${v.badgeClass}`}
         aria-hidden
@@ -132,6 +158,23 @@ function VerdictCard({ verdict, scoreTone }: { verdict: EssentielData["verdict"]
         <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-1">
           L&apos;essentiel
         </div>
+
+        {/* Restriction line - clickable if families modal available */}
+        <button
+          onClick={onShowFamilies}
+          disabled={!onShowFamilies}
+          className={`w-full text-left flex items-center justify-between gap-2 px-3 py-2 rounded-lg mb-2 transition ${
+            hasRestriction
+              ? "bg-rose-50 text-rose-700 hover:bg-rose-100"
+              : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+          } ${!onShowFamilies ? "cursor-default" : "cursor-pointer"}`}
+        >
+          <span className="text-[13px] font-medium">{restrictionText}</span>
+          {onShowFamilies && (
+            <span className="text-[12px] text-opacity-70 shrink-0">Voir</span>
+          )}
+        </button>
+
         <p className="text-[14px] font-semibold text-[#111111] leading-snug">
           {verdict.phrase}
         </p>

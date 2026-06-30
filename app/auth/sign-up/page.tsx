@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
+import { getAppConfig } from "@/lib/appConfig";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 
 export const metadata = { title: "Créer un compte · Cosme Check" };
@@ -21,7 +22,27 @@ export default async function SignUpPage({ searchParams }: Props) {
   const user = await getUser();
   if (user) redirect(next);
 
+  const cfg = await getAppConfig();
   const signInHref = next === "/" ? "/auth/sign-in" : `/auth/sign-in?next=${encodeURIComponent(next)}`;
+
+  if (!cfg.signups_open) {
+    return (
+      <main className="min-h-svh flex items-center justify-center px-5 py-10 bg-[#FAFAFA]">
+        <section className="w-full max-w-md rounded-2xl border border-[#E5E7EB] bg-white p-6 sm:p-8 text-center shadow-[0_8px_24px_-12px_rgba(17,17,17,0.08)]">
+          <h1 className="text-[24px] font-bold tracking-tight">Inscriptions fermées</h1>
+          <p className="mt-3 text-sm text-[#6B7280]">
+            La création de compte est temporairement désactivée. Reviens un peu plus tard.
+          </p>
+          <p className="mt-6 text-center text-sm text-[#6B7280]">
+            Déjà un compte ?{" "}
+            <Link href={signInHref} className="text-[#F43F5E] font-medium hover:underline">
+              Se connecter
+            </Link>
+          </p>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-svh flex items-center justify-center px-5 py-10 bg-[#FAFAFA]">

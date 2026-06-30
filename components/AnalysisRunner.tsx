@@ -8,6 +8,7 @@ import { AnalyseResultPanel } from "./AnalyseResultPanel";
 import { PENDING_ADD_TO_ROUTINE_KEY } from "./routine/AddProductButton";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { apiFetch } from "@/lib/clientApi";
+import { resolveAndCacheProductImage } from "@/lib/storage/productImageCache";
 
 const PENDING_SOURCE_KEY = "cw:pendingProductSource";
 // Authoritative INCI handoff: callers (ScanSheet, PhotoOcrFlow, …) write the
@@ -144,6 +145,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
   // "Analyser la promesse" flow to PATCH the analyses row with the
   // marketing description once the user picks a candidate.
   const [analysisId, setAnalysisId] = useState<string | null>(null);
+  const [productImageUrl, setProductImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const inFlightRef = useRef<AbortController | null>(null);
 
@@ -356,6 +358,39 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
     }
   }
 
+  // Image produit : priorité au `imageUrl` déjà porté par result (chemin cache
+  // EAN de l'analyser), sinon résolution déterministe par EAN EXACT (catalogue).
+  // Garantit l'image à gauche aussi sur /analyse (clic alternative), identique
+  // à mobile/web pour un même EAN.
+  useEffect(() => {
+    if (!result) {
+      setProductImageUrl(null);
+      return;
+    }
+    if (result.imageUrl) {
+      setProductImageUrl(result.imageUrl);
+      return;
+    }
+    const ean = productSource?.ean ?? null;
+    if (!ean) {
+      setProductImageUrl(null);
+      return;
+    }
+    let cancelled = false;
+    const cacheKey = analysisId ?? `ean:${ean}`;
+    void resolveAndCacheProductImage(
+      cacheKey,
+      ean,
+      productSource?.brand ?? null,
+      productSource?.productName ?? null,
+    ).then((url) => {
+      if (!cancelled) setProductImageUrl(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [result, productSource, analysisId]);
+
   function resetHome() {
     clearRunCache();
     setResult(null);
@@ -460,6 +495,7 @@ export function AnalysisRunner({ initialInci }: { initialInci: string }) {
           } : null}
           ean={productSource?.ean ?? null}
           analysisId={analysisId}
+          productImageUrl={productImageUrl}
           alreadyInRoutine={addedToRoutine}
           brand={productSource?.brand ?? null}
           productType={productSource?.productType ?? null}

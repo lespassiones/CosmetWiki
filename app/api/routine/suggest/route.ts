@@ -6,6 +6,7 @@ import { generateRoutineSuggestions } from "@/lib/ai/routineSuggest";
 import { loadProfileForPrompt } from "@/lib/skin/promptFormat";
 import { loadRestrictionsForPrompt } from "@/lib/restrictions/promptFormat";
 import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { getAppConfig } from "@/lib/appConfig";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 export const runtime = "nodejs";
@@ -13,6 +14,15 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 25;
 
 export async function POST(req: NextRequest) {
+  // Feature flag (admin Paramètres). Fail-open: defaults flag_suggestions=true.
+  const cfg = await getAppConfig();
+  if (!cfg.flag_suggestions) {
+    return NextResponse.json(
+      { error: "Les suggestions sont momentanément indisponibles." },
+      { status: 503 },
+    );
+  }
+
   const ip = getClientIp(req.headers);
   const rl = checkRateLimit(ip, 12, 60_000);
   if (!rl.ok) {

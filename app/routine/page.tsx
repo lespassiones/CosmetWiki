@@ -17,6 +17,7 @@ import { RoutineSimulationModal } from "@/components/routine/RoutineSimulationMo
 import { InfoBadge, Tooltip } from "@/components/Tooltip";
 import { IngredientBlob } from "@/components/blob/IngredientBlob";
 import { readUserRestrictions } from "@/lib/restrictions/types";
+import { loadIngredientFamilies } from "@/lib/restrictions/families";
 
 export const metadata = { title: "Ma routine · Cosme Check" };
 export const dynamic = "force-dynamic";
@@ -220,7 +221,8 @@ async function RoutineContent() {
   // At-risk products (capped score < 13) → the "Suggestions intelligentes" CTA.
   // The dedicated /routine/suggestions page recomputes the exact same set and
   // resolves the best catalog alternative per product. Mirror mobile.
-  const atRiskProducts = selectAtRiskProducts(products);
+  const families = await loadIngredientFamilies();
+  const atRiskProducts = selectAtRiskProducts(products, { restrictions, families });
 
   return (
     <div className="neu-page mx-auto max-w-6xl px-5 lg:px-8 pt-4 pb-8 lg:py-12">
@@ -337,7 +339,7 @@ async function RoutineContent() {
       </section>
 
       {/* 2-column: bar chart + product list */}
-      <section className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-3 lg:gap-4 mb-6">
+      <section className="grid grid-cols-1 lg:grid-cols-[1.6fr_minmax(0,1fr)] gap-3 lg:gap-4 mb-6">
         {/* Left: exposition par catégorie d'ingrédients */}
         <div className="neu p-5">
           <div className="flex items-center gap-2 mb-1">

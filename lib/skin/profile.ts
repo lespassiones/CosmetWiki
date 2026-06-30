@@ -347,6 +347,27 @@ export function readSkinProfile(prefs: Record<string, unknown> | null | undefine
 }
 
 /**
+ * Compact one-line skin summary (<= ~300 chars) for prompt injection where a
+ * full block is overkill — e.g. the suggestions guardrail (validateSuggestions),
+ * which only needs enough signal to flag a profile-inappropriate alternative.
+ * Mirrors the mobile `skinContextSummary`. Returns null when there's no signal.
+ */
+export function skinContextSummary(p: SkinProfile): string | null {
+  const parts: string[] = [];
+  if (p.skinTypeFace) parts.push(`Peau ${SKIN_TYPE_FACE_LABEL[p.skinTypeFace].toLowerCase()}`);
+  if (p.concerns?.length) {
+    parts.push(
+      `Préoccupations: ${p.concerns.slice(0, 3).map((c) => SKIN_CONCERN_LABEL[c]).join(", ")}`,
+    );
+  }
+  if (p.goals?.length) {
+    parts.push(`Objectifs: ${p.goals.slice(0, 3).map((g) => PROFILE_GOAL_LABEL[g]).join(", ")}`);
+  }
+  if (p.allergiesFreeform) parts.push(`Allergies: ${p.allergiesFreeform.slice(0, 80)}`);
+  return parts.length > 0 ? parts.join(". ") : null;
+}
+
+/**
  * Used by `/advisor` to decide whether to show its own profile prompt or
  * jump straight to the chat. Returns true as soon as the user has filled at
  * least one signal — the chat can already adapt with any data point.

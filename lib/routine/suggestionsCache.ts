@@ -7,9 +7,11 @@
  * avoir touché à sa routine = ré-affichage instantané, sans re-débiter de crédit,
  * et ce indéfiniment (jusqu'à ce que le navigateur soit vidé). Une seule entrée.
  */
-// v3: l'alternative doit désormais être VERTE (plafonné >= 13) — v2 pouvait
-// cacher des suggestions jaunes. v2: garde-fou IA sur toutes les paires. Bump = purge.
-const KEY = "cosmecheck:routine_suggestions:v3";
+// v5: critère « à optimiser » élargi (orange/rouge >= 1) + re-route sur catégorie
+// vide via classifyByName + contexte peau passé à la validation IA (parité mobile
+// complète). v4: top 8 trié sévérité + verts restreints inclus. v3: alternative
+// VERTE (plafonné >= 13). Bump = purge du cache local (force le recalcul).
+const KEY = "cosmecheck:routine_suggestions:v5";
 
 /** Champs d'un produit à risque qui influent sur la suggestion renvoyée. */
 type SigProduct = {

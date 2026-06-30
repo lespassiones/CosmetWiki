@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase";
 import { SITE_URL } from "@/lib/siteUrl";
 import { resolveOnboardingDestination } from "@/lib/onboarding/resolve";
+import { getAppConfig } from "@/lib/appConfig";
 
 export type AuthResult = { ok: true } | { ok: false; error: string };
 
@@ -38,6 +39,14 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
   if (!/[a-z]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins une minuscule." };
   if (!/[A-Z]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins une majuscule." };
   if (!/[0-9]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins un chiffre." };
+
+  // Inscriptions gelées depuis l'admin (Paramètres → inscriptions). Le trigger
+  // DB handle_new_user refuse aussi la création, mais on intercepte ici pour
+  // renvoyer un message clair plutôt qu'une erreur Postgres brute.
+  const cfg = await getAppConfig();
+  if (!cfg.signups_open) {
+    return { ok: false, error: "Les inscriptions sont temporairement fermées. Réessaie plus tard." };
+  }
 
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);

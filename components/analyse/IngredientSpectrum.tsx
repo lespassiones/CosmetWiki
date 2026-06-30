@@ -92,7 +92,7 @@ export function IngredientSpectrum({
   return (
     <section
       aria-label="Spectre des premiers ingrédients"
-      className={`${GLASS_CARD} p-5`}
+      className={`${GLASS_CARD} p-5 overflow-hidden`}
     >
       <div className="mb-3 flex items-center gap-2">
         <h3 className="text-[15px] font-semibold">Spectre top 5</h3>

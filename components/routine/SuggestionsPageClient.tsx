@@ -79,7 +79,7 @@ export function SuggestionsPageClient({
         const r = await fetch("/api/routine/catalog-suggestions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ items: products.slice(0, 5) }),
+          body: JSON.stringify({ items: products.slice(0, 8) }),
         });
         if (r.status === 429) return setStatus("credits");
         if (!r.ok) return setStatus("error");

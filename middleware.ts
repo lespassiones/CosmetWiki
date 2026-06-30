@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { getAppConfig } from "@/lib/appConfig";
 
 const SUSPICIOUS_UA_RE =
   /(curl|wget|python-requests|go-http|scrapy|httpx|libwww|java\/|axios\/|node-fetch|aiohttp|okhttp|MJ12bot|PetalBot|SemrushBot|AhrefsBot|DotBot|MegaIndex|GPTBot|ClaudeBot|anthropic-ai|CCBot|Bytespider)/i;
@@ -21,6 +22,7 @@ const SKIP_AUTH_PREFIXES = [
   "/offre",
   "/i/",
   "/a/", // analyses partagées en lecture publique (jamais de session lue)
+  "/maintenance",
 ];
 
 function isSkipAuthPath(pathname: string): boolean {
@@ -132,6 +134,23 @@ export async function middleware(req: NextRequest) {
   // tous les cas, donc rien n'est perdu.
   if (pathname.startsWith("/api/")) {
     return NextResponse.next({ request: { headers: withPathnameHeader(req, pathname) } });
+  }
+
+  // ── Maintenance mode ──────────────────────────────────────────────────
+  // When the admin flips maintenance on (Paramètres → mode maintenance), every
+  // user-facing page is rewritten to /maintenance. The URL is preserved so a
+  // simple refresh restores the page once maintenance ends. API routes are
+  // exempt (handled above) so health checks and the page's own assets keep
+  // working. getAppConfig is cached (~60 s) and FAIL-OPEN: a DB hiccup defaults
+  // to maintenance_mode = false, so this can never wrongly lock users out.
+  if (pathname !== "/maintenance") {
+    const cfg = await getAppConfig();
+    if (cfg.maintenance_mode) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/maintenance";
+      url.search = "";
+      return NextResponse.rewrite(url);
+    }
   }
 
   // ── Auth refresh / gating ─────────────────────────────────────────────

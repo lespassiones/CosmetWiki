@@ -14,6 +14,9 @@ import { InfoBadge, Tooltip } from "./Tooltip";
 import { commonNameFor, prettyInci } from "@/lib/inciCommonNames";
 import { AddToRoutineButton } from "./routine/AddToRoutineButton";
 import { RestrictionWarning } from "./analyse/RestrictionWarning";
+import { useRestrictions } from "@/components/restrictions/RestrictionsProvider";
+import { checkRestrictions } from "@/lib/restrictions/check";
+import type { IngredientFamily } from "@/lib/restrictions/types";
 import { EssentielView, EssentielToggleButton } from "./analyse/EssentielView";
 import { VerdictGauge } from "./analyse/VerdictGauge";
 import { computeEssentiel, verdictToneFromScore, colorCapScore } from "@/lib/essentiel/engine";
@@ -58,6 +61,7 @@ export function AnalyseResultPanel({
   alreadyInRoutine = false,
   onResetHome,
   breadcrumb,
+  productImageUrl = null,
 }: {
   result: AnalyseResponse;
   originalText: string;
@@ -116,6 +120,8 @@ export function AnalyseResultPanel({
    * which renders its own back button instead.
    */
   breadcrumb?: BreadcrumbItem[] | null;
+  /** URL of the product image (from catalog / OBF / web). Displayed at the top left. */
+  productImageUrl?: string | null;
 }) {
   const title = decodeHtml(productLabel?.trim() || "") || "Analyse de votre liste";
   // The "Analyser la promesse" CTA is always offered - the flow handles
@@ -127,6 +133,7 @@ export function AnalyseResultPanel({
   // the button active) and surprising for users who pasted an INCI without
   // a name.
   const [promesseOpen, setPromesseOpen] = useState(autoOpenPromesse);
+  const [familiesModalOpen, setFamiliesModalOpen] = useState(false);
   const pathname = usePathname();
   // Persist the "is the full analysis open?" / "is the ingredients modal
   // open?" flags in sessionStorage keyed by analysisId. That way:
@@ -169,6 +176,27 @@ export function AnalyseResultPanel({
   const [detailsExpanded, setDetailsExpanded] = useState(false);
   const [scoreExplOpen, setScoreExplOpen] = useState(false);
   const detailsRef = useRef<HTMLDivElement | null>(null);
+
+  // Calculate restricted items count for the verdict card
+  const { restrictions, families } = useRestrictions();
+  // Familles + ingrédients restreints RÉELLEMENT présents dans le produit
+  // (détection par tag, identique au mobile et au backend analyser).
+  // Compte = familles uniques + ingrédients uniques → "Contient N de vos
+  // restrictions" STRICTEMENT identique entre web et mobile.
+  const { restrictedCount, restrictedFamilies } = useMemo(() => {
+    const matches = checkRestrictions(result.items, restrictions, families);
+    const uniqueFamilySlugs = new Set(
+      matches.filter((m) => m.kind === "family").map((m) => m.slug)
+    );
+    const uniqueIngredientSlugs = new Set(
+      matches.filter((m) => m.kind === "ingredient").map((m) => m.slug)
+    );
+    const filtered = families.filter((f) => uniqueFamilySlugs.has(f.slug));
+    return {
+      restrictedCount: uniqueFamilySlugs.size + uniqueIngredientSlugs.size,
+      restrictedFamilies: filtered,
+    };
+  }, [result.items, restrictions, families]);
   // True once we've finished the post-mount sessionStorage read — keeps the
   // auto-save effect below from clobbering the persisted value with the
   // default `false` BEFORE we've had a chance to restore it.
@@ -290,20 +318,91 @@ export function AnalyseResultPanel({
 
   return (
     <section id="analyse-results" className="pt-2">
-      <TitleBar
-        title={title}
-        productSource={productSource}
-        category={result.category ?? null}
-        productType={productType ?? result.productType ?? null}
-        catalogCategory={result.catalogCategory ?? null}
-        onAnalysePromesse={() => setPromesseOpen(true)}
-        existingCoherenceId={existingCoherenceId}
-        onShare={() => shareReport(originalText)}
-        breadcrumb={trail}
-        analysisId={analysisId}
-        alreadyInRoutine={alreadyInRoutine}
-        verdictTone={cappedTone}
-      />
+      {/* Product header: image left + title/brand right ALWAYS SIDE-BY-SIDE */}
+      <div className="flex flex-col gap-4 mb-6 lg:max-w-[900px]">
+        {/* Row 1: Image + Title/Brand (always horizontal) */}
+        <div className="flex flex-row gap-4 items-start">
+          {/* Image — fixed size, no grow */}
+          {productImageUrl ? (
+            <img
+              src={productImageUrl}
+              alt={productLabel || "Product image"}
+              className="w-24 h-24 shrink-0 rounded-lg object-cover shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)]"
+            />
+          ) : null}
+
+          {/* Content: title + brand (flex-1 to use remaining space) */}
+          <div className="flex-1 flex flex-col gap-1 min-w-0">
+            {/* Title — truncate if too long */}
+            <TitleBar
+              title={title}
+              category={result.category ?? null}
+              productType={productType ?? result.productType ?? null}
+              catalogCategory={result.catalogCategory ?? null}
+              breadcrumb={trail}
+            />
+
+            {/* Brand + Subcategory — truncate to stay beside image */}
+            {(brand || result.catalogCategory) && (
+              <div className="text-[13px] font-medium text-ink-muted truncate">
+                {brand && <>{brand}</>}
+                {brand && result.catalogCategory && <> · </>}
+                {result.catalogCategory && <>{categorySlugToDisplayName(result.catalogCategory)}</>}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Row 2: Action buttons (below image + title) */}
+        <div className="flex flex-col gap-2">
+          {/* Green + Pink buttons — grow until lg breakpoint (when pastilles go vertical) */}
+          <div className="flex flex-row items-center gap-2">
+            {existingCoherenceId ? (
+              <Link
+                href={`/promesses/${existingCoherenceId}`}
+                className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 px-3 py-2 text-xs font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
+              >
+                <PromesseIcon className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">Voir l&apos;analyse de la promesse</span>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setPromesseOpen(true)}
+                className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 px-3 py-2 text-xs font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
+              >
+                <PromesseIcon className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">Analyser la promesse</span>
+              </button>
+            )}
+            {analysisId ? (
+              <AddToRoutineButton
+                analysisId={analysisId}
+                alreadyInRoutine={alreadyInRoutine}
+                className="flex-1 min-w-0"
+              />
+            ) : null}
+          </div>
+
+          {/* Partager + Pastilles — grow until lg, then stop at that width */}
+          <div className="flex flex-1 items-center gap-2.5 rounded-full bg-white/85 px-3 py-1.5 ring-1 ring-black/[0.06] backdrop-blur-md transition-all hover:bg-white/95 hover:shadow-[0_6px_20px_-8px_rgba(15,23,42,0.15)]">
+            <button
+              type="button"
+              onClick={() => shareReport(originalText)}
+              aria-label="Partager cette analyse"
+              className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-ink transition hover:text-rose-700"
+            >
+              <ShareIcon className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">Partager</span>
+            </button>
+            <span aria-hidden className="lg:hidden h-4 w-px shrink-0 bg-black/10" />
+            <VerdictGauge
+              tone={cappedTone}
+              className="lg:hidden flex-1 justify-between"
+            />
+          </div>
+        </div>
+      </div>
       {!existingCoherenceId && (
         <PromesseFlowModal
           open={promesseOpen}
@@ -340,6 +439,8 @@ export function AnalyseResultPanel({
             onToggle={() => setDetailsExpanded((v) => !v)}
             hideToggle
             scoreTone={cappedTone}
+            restrictedCount={restrictedCount}
+            onShowFamilies={() => setFamiliesModalOpen(true)}
           />
         </div>
         {/* Desktop verdict gauge — same chrome as the mobile toolbar pill
@@ -406,8 +507,6 @@ export function AnalyseResultPanel({
               }}
               matched={result.counts.matched}
               total={result.counts.total}
-              imageUrl={result.imageUrl ?? null}
-              productLabel={productLabel ?? null}
             />
           </Reveal>
 
@@ -517,18 +616,23 @@ export function AnalyseResultPanel({
           the toggle and this element. */}
       <AlternativesCarousel
         ean={ean ?? null}
+        category={result.catalogCategory ?? null}
         brand={brand}
         productName={productLabel}
       />
 
-      <ToolsSection
-        ean={ean ?? null}
-        productLabel={productLabel ?? null}
-        imageUrl={result.imageUrl ?? null}
-        brand={brand ?? null}
-        catalogCategory={result.catalogCategory ?? null}
-        onOpenScoreExpl={() => setScoreExplOpen(true)}
-      />
+      {/* Petit espace pour décoller le bloc Outils du bouton « Voir l'analyse
+          complète » (et du carrousel d'alternatives quand il est présent). */}
+      <div className="mt-5">
+        <ToolsSection
+          ean={ean ?? null}
+          productLabel={productLabel ?? null}
+          imageUrl={result.imageUrl ?? null}
+          brand={brand ?? null}
+          catalogCategory={result.catalogCategory ?? null}
+          onOpenScoreExpl={() => setScoreExplOpen(true)}
+        />
+      </div>
 
       {scoreExplOpen ? (
         <ScoreExplanationModal
@@ -537,6 +641,9 @@ export function AnalyseResultPanel({
           onClose={() => setScoreExplOpen(false)}
         />
       ) : null}
+
+      {/* Modale : familles restreintes du produit */}
+      <FamiliesModalWeb open={familiesModalOpen} onClose={() => setFamiliesModalOpen(false)} families={restrictedFamilies} />
     </section>
   );
 }
@@ -648,37 +755,20 @@ function IngredientsModal({
 
 function TitleBar({
   title,
-  productSource,
   category,
   productType,
   catalogCategory,
-  onAnalysePromesse,
-  existingCoherenceId,
-  onShare,
   breadcrumb,
-  analysisId,
-  alreadyInRoutine,
-  verdictTone,
 }: {
   title: string;
-  productSource: { source: string; sourceUrl: string | null; brand: string | null } | null;
   category: ProductCategory | null;
   productType: string | null;
   /** Full catalog category slug (e.g. "hygiene-du-corps/deodorant/deodorant-spray").
    *  When present, the last segment is resolved to a display name and shown
    *  as "sous-catégorie · marque" below the product title. */
   catalogCategory?: string | null;
-  onAnalysePromesse: () => void;
-  existingCoherenceId: string | null;
-  onShare: () => void;
   breadcrumb: BreadcrumbItem[] | null;
-  analysisId: string | null;
-  alreadyInRoutine: boolean;
-  /** Computed verdict tier rendered as the 5-pastille gauge next to the
-   *  share button. Same rules-based value as the L'ESSENTIEL card. */
-  verdictTone: VerdictTone;
 }) {
-  const brand = productSource?.brand ? decodeHtml(productSource.brand) : null;
   const subCategoryDisplay = catalogCategory
     ? categorySlugToDisplayName(catalogCategory)
     : (categoryLabel(category) ?? productType ?? null);
@@ -686,7 +776,7 @@ function TitleBar({
   const trail = breadcrumb ? breadcrumb.slice(0, -1) : [];
   const current = breadcrumb ? breadcrumb[breadcrumb.length - 1] : undefined;
   return (
-    <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <header className="flex flex-col gap-3">
       <div className="min-w-0">
         {breadcrumb ? (
           <nav className="flex flex-wrap items-center gap-1.5 text-[12px] text-ink-subtle" aria-label="Fil d'Ariane">
@@ -709,81 +799,9 @@ function TitleBar({
             ) : null}
           </nav>
         ) : null}
-        <h1 className="mt-1 text-balance text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+        <h1 className="mt-1 line-clamp-2 text-lg font-bold tracking-tight text-ink sm:text-2xl">
           {title}
         </h1>
-        {(subCategoryDisplay || brand) ? (
-          <p className="mt-2 flex items-center gap-1.5 text-[12px] text-ink-subtle">
-            {subCategoryDisplay ? (
-              <span className="inline-flex items-center rounded-full bg-black/[0.06] px-2.5 py-0.5 font-medium capitalize">
-                {subCategoryDisplay}
-              </span>
-            ) : null}
-            {subCategoryDisplay && brand ? (
-              <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle/40 shrink-0" />
-            ) : null}
-            {brand ? (
-              <span className="font-medium text-ink-muted">{brand}</span>
-            ) : null}
-          </p>
-        ) : null}
-      </div>
-      <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
-        {/* Primary CTA pair — "Analyser la promesse" + "Ajouter à ma
-            routine" — locked on the SAME row at every width. They share the
-            available width with flex-1 + min-w-0 on mobile, then keep their
-            natural size on sm+ where the toolbar is on a single line anyway.
-            Labels truncate ("…") before the buttons would have to wrap. */}
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          {existingCoherenceId ? (
-            // Coherence already exists for this analyse - short-circuit to it
-            // instead of re-running the (paid) web search + LLM round-trip.
-            <Link
-              href={`/promesses/${existingCoherenceId}`}
-              className="flex-1 sm:flex-initial min-w-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 px-3 sm:px-4 py-2 text-xs sm:text-[13px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
-            >
-              <PromesseIcon className="h-3.5 w-3.5 shrink-0" />
-              <span className="min-w-0 truncate">Voir l&apos;analyse de la promesse</span>
-            </Link>
-          ) : (
-            <button
-              type="button"
-              onClick={onAnalysePromesse}
-              className="flex-1 sm:flex-initial min-w-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 px-3 sm:px-4 py-2 text-xs sm:text-[13px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
-            >
-              <PromesseIcon className="h-3.5 w-3.5 shrink-0" />
-              <span className="min-w-0 truncate">Analyser la promesse</span>
-            </button>
-          )}
-          {analysisId ? (
-            <AddToRoutineButton
-              analysisId={analysisId}
-              alreadyInRoutine={alreadyInRoutine}
-              className="flex-1 sm:flex-initial min-w-0"
-            />
-          ) : null}
-        </div>
-        {/* White pill — on mobile groups "Partager" + the 5-pastille
-            horizontal gauge; on desktop only contains "Partager" (the gauge
-            is moved to a vertical column next to the EssentielView cards).
-            NB: pill stays non-clipping (no `overflow-hidden`) so the active
-            pastille's ring can "pop" above/below on mobile. */}
-        <div className="flex w-full items-center gap-2.5 rounded-full bg-white/85 px-3 py-1.5 ring-1 ring-black/[0.06] backdrop-blur-md transition-all hover:bg-white/95 hover:shadow-[0_6px_20px_-8px_rgba(15,23,42,0.15)] sm:w-auto">
-          <button
-            type="button"
-            onClick={onShare}
-            aria-label="Partager cette analyse"
-            className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-ink transition hover:text-rose-700"
-          >
-            <ShareIcon className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">Partager</span>
-          </button>
-          <span aria-hidden className="lg:hidden h-4 w-px shrink-0 bg-black/10" />
-          <VerdictGauge
-            tone={verdictTone}
-            className="lg:hidden flex-1 justify-between sm:flex-initial sm:justify-start sm:gap-1.5"
-          />
-        </div>
       </div>
     </header>
   );
@@ -793,34 +811,22 @@ function BigScoreCard({
   counts,
   matched,
   total,
-  imageUrl,
-  productLabel,
 }: {
   counts: BlobCounts;
   matched: number;
   total: number;
-  imageUrl: string | null;
-  productLabel?: string | null;
 }) {
-  // Same layout on every viewport (per design): product photo on the left, the
-  // arc-only gauge on the right, and the recognised-ingredients ratio
-  // underneath. No centre count and no "% sans pénalité" line — that figure is
-  // already carried by the PenaltySummaryStrip right below this card.
+  // Same layout on every viewport (per design): half-donut gauge on the right,
+  // and the recognised-ingredients ratio underneath. Product photo is now
+  // displayed in the header above the title (like mobile). No centre count and
+  // no "% sans pénalité" line — that figure is already carried by the
+  // PenaltySummaryStrip right below this card.
   return (
     <article className="rounded-2xl bg-white/65 p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl">
-      <div className="flex w-full items-center gap-4 sm:gap-5">
-        {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={imageUrl}
-            alt={productLabel ?? "Produit analysé"}
-            className="h-32 w-32 shrink-0 rounded-xl object-cover ring-1 ring-black/[0.06] sm:h-40 sm:w-40"
-          />
-        ) : null}
-        {/* Gauge column pushed to the far right (ml-auto); the ratio text sits
-            centred under the gauge (not under the whole card). The gauge width
-            is capped so it reads ~10% smaller than the photo's growth. */}
-        <div className="ml-auto flex flex-col items-center gap-2">
+      <div className="flex w-full justify-center">
+        {/* Gauge column centred; the ratio text sits centred under the gauge.
+            The gauge width is capped so it reads properly. */}
+        <div className="flex flex-col items-center gap-2">
           <div className="w-[170px] sm:w-[200px]">
             <IngredientBlob counts={counts} variant="md" animate />
           </div>
@@ -846,21 +852,21 @@ function PenaltySummaryStrip({ counts }: { counts: AnalyseResponse["counts"] }) 
   const stats = [
     {
       key: "safe",
-      icon: <ShieldCheckIcon className="h-4 w-4 text-emerald-600" />,
+      icon: <ShieldCheckIcon className="h-3.5 w-3.5 text-emerald-600" />,
       iconBg: "bg-emerald-50",
       value: `${pctSafe} %`,
       label: "sans pénalité",
     },
     {
       key: "penalty",
-      icon: <WarningIcon className="h-4 w-4 text-amber-600" />,
+      icon: <WarningIcon className="h-3.5 w-3.5 text-amber-600" />,
       iconBg: "bg-amber-50",
       value: `${pctPenalised} %`,
       label: "avec pénalité",
     },
     {
       key: "risk",
-      icon: <XSquareIcon className="h-4 w-4 text-rose-600" />,
+      icon: <XSquareIcon className="h-3.5 w-3.5 text-rose-600" />,
       iconBg: "bg-rose-50",
       value: `${atRisk}`,
       label: "à risque fort",
@@ -868,24 +874,24 @@ function PenaltySummaryStrip({ counts }: { counts: AnalyseResponse["counts"] }) 
   ];
 
   return (
-    <article className="rounded-2xl bg-white/65 p-2.5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl sm:p-3">
-      <ul className="grid grid-cols-3 gap-1 sm:gap-2">
+    <article className="rounded-2xl bg-white/65 p-1.5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-white/70 backdrop-blur-2xl sm:p-2">
+      <ul className="grid grid-cols-3 gap-0.5 sm:gap-1">
         {stats.map((s, i) => (
           <li
             key={s.key}
-            className="stagger-up flex min-w-0 items-center gap-1.5 p-1 sm:gap-2.5 sm:p-1.5"
+            className="stagger-up flex min-w-0 items-center gap-0.5 p-0 sm:gap-1 sm:p-0.5"
             style={{ ["--stagger-delay" as string]: `${60 + i * 80}ms` } as React.CSSProperties}
           >
             <div
-              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg sm:h-9 sm:w-9 sm:rounded-xl ${s.iconBg}`}
+              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-sm sm:h-6 sm:w-6 sm:rounded-md ${s.iconBg}`}
             >
               {s.icon}
             </div>
             <div className="min-w-0">
-              <p className="text-base font-bold tabular-nums leading-none text-ink sm:text-lg">
+              <p className="text-[11px] font-bold tabular-nums leading-tight text-ink sm:text-xs">
                 {s.value}
               </p>
-              <p className="mt-1 whitespace-nowrap text-[10px] text-ink-subtle sm:text-[11px]">
+              <p className="whitespace-nowrap text-[8px] text-ink-subtle sm:text-[9px]">
                 {s.label}
               </p>
             </div>
@@ -1220,7 +1226,7 @@ function ObservationLabel({ obs }: { obs: Observation }) {
             ? "text-sky-700"
             : "text-ink-muted";
     return (
-      <span className="flex-1 text-ink">
+      <span className="flex-1 min-w-0 overflow-hidden text-ink">
         {obs.label}{" "}
         <span className={tone}>{obs.message}</span>
         {inlineTooltip}
@@ -1243,7 +1249,7 @@ function ObservationLabel({ obs }: { obs: Observation }) {
         ? "text-sky-700"
         : "text-ink-muted";
   return (
-    <span className="flex-1 text-ink">
+    <span className="flex-1 min-w-0 overflow-hidden text-ink">
       {obs.label}{" "}
       <span className={suffixTone}>{suffix}</span>
       {inlineTooltip}
@@ -1771,13 +1777,13 @@ function ItemsTable({
           names wrap naturally in column 1 instead of forcing horizontal
           overflow. Padding shrinks on mobile so the 3 visible columns always
           fit even on a 360 px viewport. */}
-      <div className="w-full">
+      <div className="w-full overflow-x-auto">
         <table className="w-full text-left text-[13px] table-fixed">
           <colgroup>
             <col />
-            <col className="hidden md:table-column w-[130px]" />
-            <col className="w-[92px]" />
-            <col className="w-[68px] sm:w-[80px]" />
+            <col className="hidden md:table-column w-[100px]" />
+            <col className="w-[60px]" />
+            <col className="w-[40px]" />
           </colgroup>
           <thead>
             <tr className="text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
@@ -1811,9 +1817,9 @@ function ItemsTable({
                 // Padding scales down on mobile so the 3 visible columns
                 // (Ingrédient + Tolérance + Détails) always fit a 360 px modal
                 // without the rightmost cell being clipped.
-                const cellPad = compact ? "px-3 py-2" : "px-3 sm:px-5 py-3";
-                const ratingCellPad = compact ? "px-2 py-2" : "px-2 sm:px-5 py-3";
-                const arrowCellPad = compact ? "px-1 py-2" : "px-2 sm:px-5 py-3";
+                const cellPad = compact ? "px-2 py-1.5" : "px-3 sm:px-4 py-2.5";
+                const ratingCellPad = compact ? "px-1.5 py-1.5" : "px-2 sm:px-3 py-2.5";
+                const arrowCellPad = compact ? "px-0.5 py-1.5" : "px-1 sm:px-2 py-2.5";
                 return (
                 <tr
                   key={`${i.position}-${i.input}`}
@@ -1823,18 +1829,18 @@ function ItemsTable({
                   <td className={cellPad}>
                     {/* Truncate with ellipsis on phones so a long INCI name
                         like "Vp/Acrylates/Lauryl Methacrylate Copolymer"
-                        doesn't blow the row up to 3-4 lines. On ≥sm there's
-                        enough room to let it wrap normally. The full name is
+                        doesn't blow the row up to 3-4 lines. On ≥sm limit to 2 lines
+                        with line-clamp-2 to prevent overflow. The full name is
                         kept in `title` so a long-press / hover still reveals it. */}
                     <div
-                      className={`font-semibold text-ink truncate sm:whitespace-normal sm:overflow-visible ${compact ? "text-[13px]" : ""}`}
+                      className={`font-semibold text-ink truncate sm:line-clamp-2 ${compact ? "text-[13px]" : ""}`}
                       title={prettyName(i.name ?? i.input)}
                     >
                       {prettyName(i.name ?? i.input)}
                     </div>
                     {i.translationFr ? (
                       <div
-                        className="text-[11px] text-ink-muted truncate sm:whitespace-normal sm:overflow-visible"
+                        className="text-[11px] text-ink-muted truncate sm:line-clamp-2"
                         title={i.translationFr}
                       >
                         {i.translationFr}
@@ -2019,6 +2025,58 @@ async function shareReport(text: string) {
   } catch {
     /* user dismissed */
   }
+}
+
+// ============================================================
+// Familles Modal
+// ============================================================
+function FamiliesModalWeb({ open, onClose, families: restrictedFamilies }: { open: boolean; onClose: () => void; families: IngredientFamily[] }) {
+  if (!open || restrictedFamilies.length === 0) return null;
+
+  return (
+    <div className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity ${open ? "opacity-100" : "opacity-0 pointer-events-none"}`} style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}>
+      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-xs mx-4 max-h-[70vh] overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <h3 className="text-base font-semibold text-gray-900">Familles restreintes</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition"
+            aria-label="Fermer"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="px-6 py-4 space-y-3">
+          {restrictedFamilies.map((family, idx) => {
+            const familyName = family?.name || family?.slug || String(family);
+            return (
+              <div key={family.slug || idx} className="flex items-center gap-3">
+                <svg className="w-5 h-5 text-rose-600 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2 15 8l6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z" />
+                </svg>
+                <span className="text-sm font-medium text-gray-900">{familyName}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Button */}
+        <div className="px-6 py-4 border-t border-gray-200">
+          <Link
+            href="/profile/restrictions"
+            className="block w-full bg-rose-50 text-rose-700 font-medium py-2.5 rounded-lg text-center hover:bg-rose-100 transition"
+          >
+            Voir toutes mes familles
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ============================================================

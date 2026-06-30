@@ -5,8 +5,10 @@ import { supabaseServer } from "@/lib/supabase";
 import type { Frequency, RoutineProduct } from "@/lib/routine/engine";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { readUserRestrictions } from "@/lib/restrictions/types";
+import { loadIngredientFamilies } from "@/lib/restrictions/families";
 import { selectAtRiskProducts } from "@/lib/routine/atRisk";
 import { SuggestionsPageClient } from "@/components/routine/SuggestionsPageClient";
+import { getAppConfig } from "@/lib/appConfig";
 
 export const metadata = { title: "Suggestions intelligentes · Cosme Check" };
 export const dynamic = "force-dynamic";
@@ -21,9 +23,13 @@ export default async function SuggestionsPage() {
   const user = await getUser();
   if (!user) redirect("/auth/sign-in");
 
+  // Feature flag (admin Paramètres) : suggestions désactivées → retour routine.
+  const cfg = await getAppConfig();
+  if (!cfg.flag_suggestions) redirect("/routine");
+
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
-  const [{ data }, profile] = await Promise.all([
+  const [{ data }, profile, families] = await Promise.all([
     sb
       .schema("cosme_check")
       .from("routine_items")
@@ -33,6 +39,7 @@ export default async function SuggestionsPage() {
       .order("added_at", { ascending: false })
       .limit(100),
     getProfile(),
+    loadIngredientFamilies(),
   ]);
 
   const rows = (data ?? []) as unknown as {
@@ -60,12 +67,14 @@ export default async function SuggestionsPage() {
       categoryPrecise: it.analyses!.category_precise,
     }));
 
-  const atRiskProducts = selectAtRiskProducts(products);
+  // Restrictions AVANT la sélection : un produit vert mais restreint doit
+  // compter comme « à optimiser » (parité mobile).
+  const restrictions = readUserRestrictions(profile?.preferences ?? null);
+  const atRiskProducts = selectAtRiskProducts(products, { restrictions, families });
   if (atRiskProducts.length === 0) redirect("/routine");
 
   // Empreinte des restrictions (familles + ingrédients) : intégrée à la clé de
   // cache côté client → modifier ses restrictions invalide les suggestions cachées.
-  const restrictions = readUserRestrictions(profile?.preferences ?? null);
   const restrictionsSig = [
     [...restrictions.families].sort().join(","),
     restrictions.ingredients

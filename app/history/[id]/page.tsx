@@ -3,7 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
-import { AnalyseResultPanel } from "@/components/AnalyseResultPanel";
+import { AnalyseResultPanelClient } from "@/components/AnalyseResultPanelClient";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { HistoryItemActions } from "@/components/history/HistoryItemActions";
 import { enrichAnalyseWithDbColors } from "@/lib/analysisEnrichment";
@@ -35,7 +35,7 @@ export default async function HistoryDetailPage({
       .schema("cosme_check")
       .from("analyses")
       .select(
-        "id, name, product_label, brand, product_type, product_description, score, input_text, result_json, category, created_at",
+        "id, name, product_label, brand, product_type, product_description, score, input_text, result_json, category, created_at, ean",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -124,13 +124,14 @@ export default async function HistoryDetailPage({
         </div>
       </div>
 
-      <AnalyseResultPanel
+      <AnalyseResultPanelClient
         result={result}
         originalText={data.input_text ?? ""}
         productLabel={displayName}
         analysisId={data.id}
-        brand={(data as { brand?: string | null }).brand ?? null}
-        productType={(data as { product_type?: string | null }).product_type ?? null}
+        brand={data.brand ?? null}
+        productType={data.product_type ?? null}
+        ean={(data as { ean?: string | null }).ean ?? null}
         existingCoherenceId={existingCoherenceId}
         autoOpenPromesse={sp.promesse === "auto"}
         alreadyInRoutine={inRoutine}

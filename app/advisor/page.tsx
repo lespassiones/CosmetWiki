@@ -10,12 +10,31 @@ import {
 import { BeautyProfileForm } from "@/components/profile/BeautyProfileForm";
 import { AdvisorPageWrapper } from "./AdvisorPageWrapper";
 import { GLASS_CARD, GLASS_CARD_ROSE } from "@/lib/ui/glass";
+import { getAppConfig } from "@/lib/appConfig";
 
 export const metadata = { title: "Beauty Advisor · Cosme Check" };
+export const dynamic = "force-dynamic";
 
 export default async function AdvisorPage() {
   const user = await getUser();
   if (!user) redirect("/auth/sign-in?next=/advisor");
+
+  const cfg = await getAppConfig();
+  if (!cfg.flag_advisor) {
+    return (
+      <div className="relative mx-auto max-w-3xl px-5 lg:px-8 py-10">
+        <h1 className="text-2xl lg:text-3xl font-bold mb-4 flex items-center gap-2">
+          <span aria-hidden>✨</span> Beauty Advisor
+        </h1>
+        <section className={`${GLASS_CARD} p-5 lg:p-7`}>
+          <h2 className="text-lg font-semibold mb-1">Bientôt de retour</h2>
+          <p className="text-sm text-[#6B7280]">
+            Le Beauty Advisor est momentanément indisponible. Reviens un peu plus tard.
+          </p>
+        </section>
+      </div>
+    );
+  }
 
   const profile = await getProfile();
   const skin = readSkinProfile((profile?.preferences ?? null) as Record<string, unknown> | null);

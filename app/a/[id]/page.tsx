@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { supabaseAnon, type ColorRating } from "@/lib/supabase";
 import { SITE_URL } from "@/lib/siteUrl";
 import { RATING_DOT } from "@/lib/colors";
+import { getAppConfig } from "@/lib/appConfig";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
 // Page publique d'une analyse PARTAGÉE (lien envoyé depuis l'app mobile).
@@ -28,6 +29,10 @@ type PublicAnalysis = {
 async function fetchShared(id: string): Promise<PublicAnalysis | null> {
   // UUID basique : évite un appel DB sur une URL malformée.
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
+  // Feature flag (admin Paramètres) : le partage public peut être coupé. Quand
+  // il est OFF, les liens partagés répondent comme introuvables. Fail-open.
+  const cfg = await getAppConfig();
+  if (!cfg.flag_public_share) return null;
   const { data, error } = await supabaseAnon().rpc(
     "cosme_check_get_public_analysis",
     { p_id: id },

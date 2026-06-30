@@ -3,6 +3,7 @@ import { supabaseAnon } from "@/lib/supabase";
 import { apiGate } from "@/lib/apiGate";
 import { getProfile } from "@/lib/auth";
 import { readUserRestrictions, type UserRestrictions } from "@/lib/restrictions/types";
+import { readSkinProfile, skinContextSummary } from "@/lib/skin/profile";
 import {
   pickBestAlternative,
   type CatalogAlternative,
@@ -65,6 +66,34 @@ async function categoriesByEan(
 }
 
 /**
+ * Classify a product to a REAL catalog category path from its NAME, via the
+ * kNN-vote classifier RPC (`cosme_check_classify_product_category`). Unlike the
+ * stored `category_precise` — whose vocabulary diverges from the catalog (e.g.
+ * "shampoing" vs the catalog's "shampooing") and therefore exact-matches no
+ * alternatives — this always returns a path the alternatives RPC can match.
+ * This is the path the mobile app trusts (it never reuses category_precise).
+ */
+async function classifyByName(
+  sb: ReturnType<typeof supabaseAnon>,
+  name: string,
+): Promise<string | null> {
+  const q = name.trim();
+  if (q.length < 3) return null;
+  try {
+    const { data, error } = await sb.rpc("cosme_check_classify_product_category", {
+      p_query: q,
+    });
+    if (!error && Array.isArray(data) && data.length > 0) {
+      const cat = (data[0] as { category?: string }).category?.trim();
+      if (cat) return cat;
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+/**
  * Resolve a product's precise catalog category (handoff §2.2 step 1), in order:
  *   1. EAN -> catalog.category (real taxonomy, the reliable path — mirrors mobile);
  *   2. the precise category passed by the client (analysis category_precise);
@@ -72,6 +101,9 @@ async function categoriesByEan(
  * NB: even the EAN path can land on an over-broad / mislabelled catalog category
  * (e.g. a self-tanner filed alongside temporary tattoos), so the LLM guardrail
  * below still runs on every pair — that's what keeps the suggestions logical.
+ * When the resolved category yields ZERO green alternative, the caller retries
+ * via `classifyByName` (handoff §2.2 re-route) — that's how the web reaches the
+ * same coverage as mobile instead of silently dropping the product.
  */
 async function resolveCategory(
   ean: string | null,
@@ -83,18 +115,7 @@ async function resolveCategory(
   const fromEan = ean && ean.trim() ? catByEan.get(ean.trim()) ?? null : null;
   if (fromEan) return fromEan;
   if (precise && precise.trim()) return precise.trim();
-  try {
-    const { data, error } = await sb.rpc("cosme_check_classify_product_category", {
-      p_query: name,
-    });
-    if (!error && Array.isArray(data) && data.length > 0) {
-      const cat = (data[0] as { category?: string }).category?.trim();
-      if (cat) return cat;
-    }
-  } catch {
-    /* ignore */
-  }
-  return null;
+  return classifyByName(sb, name);
 }
 
 /** Fetch exact-category alternatives for a category path (handoff §2.2 step 2). */
@@ -159,7 +180,7 @@ export async function POST(req: NextRequest) {
           } satisfies ReqItem;
         })
         .filter((x): x is ReqItem => x !== null)
-        .slice(0, 5)
+        .slice(0, 8)
     : [];
 
   if (items.length === 0) return NextResponse.json({ suggestions: [] });
@@ -176,22 +197,43 @@ export async function POST(req: NextRequest) {
   const eans = Array.from(new Set(items.map((i) => i.ean).filter((e): e is string => Boolean(e))));
   const [profile, catByEan] = await Promise.all([getProfile(), categoriesByEan(sb, eans)]);
   const restrictions: UserRestrictions = readUserRestrictions(profile?.preferences ?? null);
+  // Skin context for the AI guardrail: lets it also reject alternatives that are
+  // logical-but-inappropriate for the user's skin (mirror mobile, which sends
+  // skinContext to validate-suggestions). Null when the profile carries no signal.
+  const skinContext = skinContextSummary(readSkinProfile(profile?.preferences ?? null));
 
   type Draft = Suggestion & { resolvedCategory: string | null };
 
   // ── Stage 1+2+3: per product, resolve category -> alternatives -> best ──
   const drafts = await Promise.all(
     items.map(async (item): Promise<Draft> => {
-      const category = await resolveCategory(item.ean, item.category, item.name, catByEan, sb);
-      if (!category) {
-        return { product: item.name, category: null, alternative: null, resolvedCategory: null };
-      }
-      const alts = await fetchAlternatives(sb, category);
+      let category = await resolveCategory(item.ean, item.category, item.name, catByEan, sb);
       // Baseline = CAPPED score (mirror mobile): a dangerous product's raw score
       // is far above its capped score, so using raw would inflate the threshold
       // and reject almost every alternative — that's why only one survived.
-      const best = pickBestAlternative(item.cappedScore, alts, restrictions);
-      return { product: item.name, category, alternative: best, resolvedCategory: category };
+      let best = category
+        ? pickBestAlternative(item.cappedScore, await fetchAlternatives(sb, category), restrictions)
+        : null;
+      // Re-route on EMPTY (handoff §2.2): a divergent stored `category_precise`
+      // ("shampoing" vs catalog "shampooing") or an over-broad / mislabelled
+      // catalog row yields 0 green alternative. Reclassify by NAME — the real
+      // catalog taxonomy the mobile app trusts — and retry once. This is the gap
+      // that made the web surface 2 suggestions where mobile surfaces 5.
+      if (!best) {
+        const byName = await classifyByName(sb, item.name);
+        if (byName && byName !== category) {
+          const reBest = pickBestAlternative(
+            item.cappedScore,
+            await fetchAlternatives(sb, byName),
+            restrictions,
+          );
+          if (reBest) {
+            category = byName;
+            best = reBest;
+          }
+        }
+      }
+      return { product: item.name, category: best ? category : null, alternative: best, resolvedCategory: category };
     }),
   );
 
@@ -209,7 +251,7 @@ export async function POST(req: NextRequest) {
       product: x.d.product,
       alternative: x.d.alternative!.name ?? x.d.alternative!.ean,
     }));
-    const verdicts = await validateSuggestions(pairs, user.id);
+    const verdicts = await validateSuggestions(pairs, user.id, skinContext);
 
     await Promise.all(
       withAlt.map(async (x, k) => {
@@ -223,7 +265,7 @@ export async function POST(req: NextRequest) {
           draft.alternative = null; // no better path -> drop
           return;
         }
-        const reCategory = await resolveCategory(null, null, reType, catByEan, sb);
+        const reCategory = await classifyByName(sb, reType);
         if (!reCategory || reCategory === draft.resolvedCategory) {
           draft.alternative = null;
           return;

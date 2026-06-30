@@ -21,7 +21,13 @@ export type AlternativeRow = {
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const ean = (url.searchParams.get("ean") ?? "").trim();
-  if (!ean) return NextResponse.json({ alternatives: [] }, { status: 400 });
+  // Repli par catégorie quand le produit n'a pas d'EAN (produit internet /
+  // saisie manuelle) — miroir du mobile useAlternatives. Sans cela, le web
+  // n'affichait AUCUNE alternative dès que l'EAN manquait.
+  const category = (url.searchParams.get("category") ?? "").trim();
+  if (!ean && !category) {
+    return NextResponse.json({ alternatives: [] }, { status: 400 });
+  }
 
   const limit = Math.min(
     40,
@@ -32,10 +38,19 @@ export async function GET(req: NextRequest) {
     parseInt(url.searchParams.get("offset") ?? "0", 10) || 0,
   );
 
-  const { data, error } = await supabaseAnon().rpc(
-    "cosme_check_get_alternatives",
-    { p_ean: ean, p_limit: limit, p_offset: offset },
-  );
+  // EAN prioritaire (même catégorie via la ligne catalogue) ; sinon match exact
+  // de catégorie. Les deux RPC renvoient la même forme AlternativeRow.
+  const { data, error } = ean
+    ? await supabaseAnon().rpc("cosme_check_get_alternatives", {
+        p_ean: ean,
+        p_limit: limit,
+        p_offset: offset,
+      })
+    : await supabaseAnon().rpc("cosme_check_alternatives_by_category_exact", {
+        p_category: category,
+        p_limit: limit,
+        p_offset: offset,
+      });
 
   if (error) {
     console.error("[alternatives] RPC error:", error.message);
