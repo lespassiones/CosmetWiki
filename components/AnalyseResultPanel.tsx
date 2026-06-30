@@ -18,6 +18,7 @@ import { useRestrictions } from "@/components/restrictions/RestrictionsProvider"
 import { checkRestrictions } from "@/lib/restrictions/check";
 import type { IngredientFamily } from "@/lib/restrictions/types";
 import { EssentielView, EssentielToggleButton } from "./analyse/EssentielView";
+import { PersonalInsightsCards, type PersonalBlocks } from "./analyse/PersonalInsightsCards";
 import { VerdictGauge } from "./analyse/VerdictGauge";
 import { computeEssentiel, verdictToneFromScore, colorCapScore } from "@/lib/essentiel/engine";
 import type { VerdictTone } from "@/lib/essentiel/engine";
@@ -240,12 +241,13 @@ export function AnalyseResultPanel({
       // Storage quota / Safari private mode — non-fatal.
     }
   }, [uiStorageKey, detailsExpanded, ingredientsModalOpen]);
-  // The AI synthesis is no longer computed in the initial /api/analyser call
-  // (saved 2-8 s of LLM latency on the scan path). We fetch it lazily on the
-  // first expand via /api/synthesis. If the result already carries one
-  // (history page revisit on a previously-generated synthesis), we keep it.
-  const [synthesis, setSynthesis] = useState<string | null>(result.synthesis ?? null);
-  const [synthesisLoading, setSynthesisLoading] = useState(false);
+  // Synthèse SUPPRIMÉE : remplacée par les 3 blocs IA personnalisés
+  // (<PersonalInsightsCards/>, rendus sous L'ESSENTIEL). « Voir l'analyse
+  // complète » ne déclenche plus d'IA → gratuit.
+  const personalBlocks =
+    (result as { personalBlocks?: PersonalBlocks | null }).personalBlocks ?? null;
+  const personalBlocksKey =
+    (result as { personalBlocksKey?: string | null }).personalBlocksKey ?? null;
   useEffect(() => {
     if (autoOpenPromesse) {
       setPromesseOpen(true);
@@ -262,43 +264,6 @@ export function AnalyseResultPanel({
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   }, [detailsExpanded]);
-
-  // Lazy synthesis fetch — only the first time the user expands the full
-  // analysis. After that the synthesis is persisted on the analyses row, so
-  // a second visit (history page) gets it instantly from `result.synthesis`.
-  useEffect(() => {
-    if (!detailsExpanded) return;
-    if (synthesis !== null) return;
-    if (!analysisId) return;
-    const ctrl = new AbortController();
-    setSynthesisLoading(true);
-    // apiFetch : sur 429-with-credits, ouvre automatiquement la modale
-    // « Crédits épuisés » (→ /offre). La synthèse débite 1 crédit à la 1ère
-    // génération uniquement (persistée ensuite → relecture gratuite).
-    apiFetch("/api/synthesis", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ analysisId }),
-      signal: ctrl.signal,
-    })
-      .then(async (r) => {
-        if (!r.ok) return null;
-        const j = (await r.json()) as { synthesis?: string | null };
-        return j.synthesis ?? null;
-      })
-      .then((text) => {
-        if (ctrl.signal.aborted) return;
-        if (text) setSynthesis(text);
-      })
-      .catch(() => {
-        // Network/abort errors are non-fatal — SynthesisCard simply stays empty
-        // and the rest of the analysis remains usable.
-      })
-      .finally(() => {
-        if (!ctrl.signal.aborted) setSynthesisLoading(false);
-      });
-    return () => ctrl.abort();
-  }, [detailsExpanded, synthesis, analysisId]);
 
   // Ferme la modal au Escape pour cohérence avec PromesseFlowModal.
   useEffect(() => {
@@ -463,6 +428,12 @@ export function AnalyseResultPanel({
         </div>
       </div>
 
+      {/* 3 blocs IA personnalisés (objectifs / peau / à surveiller) — lazy,
+          1 crédit à la génération, verrouillés→/offre si 0 crédit. */}
+      <div className="mt-3 lg:max-w-[640px]">
+        <PersonalInsightsCards analysisId={analysisId} initialBlocks={personalBlocks} initialBlocksKey={personalBlocksKey} />
+      </div>
+
       {/* Toggle button — rendered OUTSIDE the flex pair above so the gauge's
           stretched height matches only the 3 cards (not cards + button).
           `lg:max-w-[640px]` mirrors the cards column above so the button is
@@ -549,23 +520,8 @@ export function AnalyseResultPanel({
             <ObservationsCard observations={result.observations} />
           </Reveal>
 
-          <Reveal delayMs={REVEAL_SYNTHESIS_MS} className="[grid-area:synthesis]">
-            {synthesisLoading && !synthesis ? (
-              <SynthesisLoadingCard />
-            ) : (
-              <MobileExpander
-                expandLabel="Voir la synthèse complète"
-                collapsedMaxHeight={160}
-                desktopCollapsedMaxHeight={320}
-              >
-                <SynthesisCard
-                  synthesis={synthesis}
-                  items={result.items}
-                  streamDelayMs={REVEAL_SYNTHESIS_MS}
-                />
-              </MobileExpander>
-            )}
-          </Reveal>
+          {/* Synthèse supprimée — remplacée par les 3 blocs IA personnalisés
+              (PersonalInsightsCards) rendus en haut, sous L'ESSENTIEL. */}
         </div>
 
         <Reveal delayMs={1000} className="[grid-area:items]">

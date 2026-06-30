@@ -36,6 +36,6 @@ describe("scoreLabel thresholds", () => {
     expect(scoreLabel(17)).toEqual({ label: "Très bien", tone: "green" });
     expect(scoreLabel(13)).toEqual({ label: "Bien", tone: "amber" });
     expect(scoreLabel(9)).toEqual({ label: "Moyen", tone: "orange" });
-    expect(scoreLabel(8.9)).toEqual({ label: "À éviter", tone: "rose" });
+    expect(scoreLabel(8.9)).toEqual({ label: "Faible", tone: "rose" });
   });
 });

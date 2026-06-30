@@ -282,7 +282,7 @@ function ComparisonGauge({
 
       {/* Extrémités */}
       <div className="flex justify-between text-[10px] text-ink-subtle mt-1 mb-3">
-        <span>À éviter</span>
+        <span>Faible</span>
         <span>Très bien</span>
       </div>
 

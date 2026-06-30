@@ -65,18 +65,8 @@ export function EssentielView({
           onShowFamilies={onShowFamilies}
         />
       </div>
-      {data.positives.length > 0 ? (
-        <div className="stagger-up" style={staggerDelay(120)}>
-          <PositivesCard positives={data.positives} />
-        </div>
-      ) : null}
-      <div className="stagger-up" style={staggerDelay(240)}>
-        {data.concerns.length > 0 ? (
-          <ConcernsCard concerns={data.concerns} />
-        ) : (
-          <AllClearCard />
-        )}
-      </div>
+      {/* « Ce qui est bien » / « À surveiller » remplacés par les 3 blocs IA
+          personnalisés (PersonalInsightsCards), rendus par le parent. */}
 
       {hideToggle ? null : (
         <div className="stagger-up flex justify-center pt-2" style={staggerDelay(360)}>
@@ -176,29 +166,35 @@ function VerdictCard({
       <div className="flex items-center gap-4">
         <HaloIcon Icon={Icon} bgClass={v.badgeClass} iconClass={v.iconClass} />
         <div className="min-w-0 flex-1">
-          <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-2">
+          <div className="text-[15px] tracking-tight font-extrabold text-[#111111] mb-2">
             L&apos;essentiel
           </div>
 
-          {/* Restriction line - clickable if families modal available */}
-          <button
-            onClick={onShowFamilies}
-            disabled={!onShowFamilies}
-            className={`w-full text-left flex items-center justify-between gap-2 px-3 py-2 rounded-lg mb-2 transition ${
-              hasRestriction
-                ? "bg-rose-50 text-rose-700 hover:bg-rose-100"
-                : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-            } ${!onShowFamilies ? "cursor-default" : "cursor-pointer"}`}
-          >
-            <span className="text-[13px] font-medium">{restrictionText}</span>
-            {onShowFamilies && (
-              <span className="text-[12px] text-opacity-70 shrink-0">Voir</span>
-            )}
-          </button>
-
-          <p className="text-[14px] font-semibold text-[#111111] leading-snug">
-            {verdict.phrase}
-          </p>
+          {/* Restriction line : si une restriction matche -> ouvre la modale des
+              familles ; sinon -> lien vers la page de gestion des restrictions
+              (parité mobile « Gérer »). */}
+          {hasRestriction ? (
+            <button
+              onClick={onShowFamilies}
+              disabled={!onShowFamilies}
+              className={`w-full text-left flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition bg-rose-50 text-rose-700 hover:bg-rose-100 ${
+                !onShowFamilies ? "cursor-default" : "cursor-pointer"
+              }`}
+            >
+              <span className="text-[12px] font-medium">{restrictionText}</span>
+              {onShowFamilies && (
+                <span className="text-[12px] text-opacity-70 shrink-0">Voir</span>
+              )}
+            </button>
+          ) : (
+            <a
+              href="/profile/restrictions"
+              className="w-full text-left flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition bg-emerald-50 text-emerald-700 hover:bg-emerald-100 cursor-pointer"
+            >
+              <span className="text-[12px] font-medium">{restrictionText}</span>
+              <span className="text-[12px] text-opacity-70 shrink-0">Gérer</span>
+            </a>
+          )}
         </div>
       </div>
     </article>

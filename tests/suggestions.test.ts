@@ -12,7 +12,7 @@ describe("scoreAlternative (color cap applied to candidates)", () => {
   it("caps the raw catalog score and attaches label/tone", () => {
     const a = scoreAlternative(alternative({ score: 18, count_rouge: 1 }));
     expect(a.score).toBe(8.9);
-    expect(a.score_label).toBe("À éviter");
+    expect(a.score_label).toBe("Faible");
     expect(a.score_tone).toBe("rose");
   });
 

@@ -256,10 +256,56 @@ export async function POST(req: NextRequest) {
         // Recompute thresholdContext from items (stored as null by ETL).
         cached_result.items = recomputeThresholdContext(cached_result.items ?? []);
         cached_result.synthesis = null;
+        // GARANTIE D'INTÉGRITÉ : le cache peut être réduit à {items}. On
+        // (re)calcule TOUJOURS counts, sinon le result_json persisté sort sans
+        // counts -> l'écran affiche « illisible ». (bug juin 2026)
+        {
+          const its = cached_result.items ?? [];
+          const c = { vert: 0, jaune: 0, orange: 0, rouge: 0, unknown: 0 };
+          for (const it of its) {
+            switch ((it as { colorRating?: string | null }).colorRating) {
+              case "Vert": c.vert++; break;
+              case "Jaune": c.jaune++; break;
+              case "Orange": c.orange++; break;
+              case "Rouge": c.rouge++; break;
+              default: c.unknown++;
+            }
+          }
+          cached_result.counts = { total: its.length, matched: its.length - c.unknown, ...c };
+          // Spectre (5/10 premières positions) si absent/vide.
+          const bySpec = [...its].sort(
+            (a, b) =>
+              Number((a as { position?: number }).position ?? 0) -
+              Number((b as { position?: number }).position ?? 0),
+          );
+          const pickSpec = (n: number) =>
+            Array.from(
+              { length: Math.min(n, bySpec.length) },
+              (_, i) => (bySpec[i] as { colorRating?: ColorRating | null }).colorRating ?? null,
+            );
+          const sp = cached_result.spectrum as { top5?: unknown[] } | null | undefined;
+          if (!sp || !Array.isArray(sp.top5) || sp.top5.length === 0) {
+            cached_result.spectrum = { top5: pickSpec(5), top10: pickSpec(10) };
+          }
+        }
         // Override with the catalog IB score (source of truth) when available.
         if (ibScore !== null) {
           const lb = scoreLabel(ibScore);
           cached_result.score = ibScore;
+          cached_result.scoreLabel = lb.label;
+          cached_result.scoreTone = lb.tone;
+        } else if (typeof cached_result.score !== "number") {
+          // Pas de score catalogue ET cache sans score -> recalcul depuis items.
+          const its = cached_result.items ?? [];
+          const computed = computeScore(
+            its.map((it) => ({
+              color_rating: ((it as { colorRating?: ColorRating | null }).colorRating ?? null),
+              position: Number((it as { position?: number }).position ?? 0),
+            })),
+            its.length,
+          );
+          const lb = scoreLabel(computed);
+          cached_result.score = computed;
           cached_result.scoreLabel = lb.label;
           cached_result.scoreTone = lb.tone;
         }
@@ -272,24 +318,18 @@ export async function POST(req: NextRequest) {
           try {
             const autoName = body.productLabel?.slice(0, 200)
               ?? `Analyse du ${new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
-            const { data: inserted } = await sbAuth
-              .schema("cosme_check")
-              .from("analyses")
-              .insert({
-                user_id: user.id,
-                name: autoName,
-                product_label: body.productLabel?.slice(0, 200) ?? null,
-                brand: body.brand?.slice(0, 120) ?? null,
-                product_type: body.productType?.slice(0, 120) ?? null,
-                category: cached_result.category ?? null,
-                input_text: rawText,
-                result_json: cached_result,
-                score: Number((cached_result.score ?? 0).toFixed(2)),
-                ean: productEan?.slice(0, 32) ?? null,
-              })
-              .select("id")
-              .single();
-            savedAnalysisId = (inserted?.id as string) ?? null;
+            const { data: upsertedId } = await sbAuth.rpc("cosme_check_upsert_analysis", {
+              p_name: autoName,
+              p_product_label: body.productLabel?.slice(0, 200) ?? null,
+              p_brand: body.brand?.slice(0, 120) ?? null,
+              p_product_type: body.productType?.slice(0, 120) ?? null,
+              p_category: cached_result.category ?? null,
+              p_input_text: rawText,
+              p_result_json: cached_result,
+              p_score: Number((cached_result.score ?? 0).toFixed(2)),
+              p_ean: productEan?.slice(0, 32) ?? null,
+            });
+            savedAnalysisId = (upsertedId as string) ?? null;
           } catch { /* history save failure must not block the response */ }
         }
 
@@ -316,24 +356,18 @@ export async function POST(req: NextRequest) {
         try {
           const autoName = body.productLabel?.slice(0, 200)
             ?? `Analyse du ${new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
-          const { data: inserted } = await sbAuth
-            .schema("cosme_check")
-            .from("analyses")
-            .insert({
-              user_id: user.id,
-              name: autoName,
-              product_label: body.productLabel?.slice(0, 200) ?? null,
-              brand: body.brand?.slice(0, 120) ?? null,
-              product_type: body.productType?.slice(0, 120) ?? null,
-              category: cached_result.category ?? null,
-              input_text: rawText,
-              result_json: cached_result,
-              score: Number((cached_result.score ?? 0).toFixed(2)),
-              ean: productEan?.slice(0, 32) ?? null,
-            })
-            .select("id")
-            .single();
-          savedAnalysisId = (inserted?.id as string) ?? null;
+          const { data: upsertedId } = await sbAuth.rpc("cosme_check_upsert_analysis", {
+            p_name: autoName,
+            p_product_label: body.productLabel?.slice(0, 200) ?? null,
+            p_brand: body.brand?.slice(0, 120) ?? null,
+            p_product_type: body.productType?.slice(0, 120) ?? null,
+            p_category: cached_result.category ?? null,
+            p_input_text: rawText,
+            p_result_json: cached_result,
+            p_score: Number((cached_result.score ?? 0).toFixed(2)),
+            p_ean: productEan?.slice(0, 32) ?? null,
+          });
+          savedAnalysisId = (upsertedId as string) ?? null;
         } catch { /* history save failure must not block the response */ }
       }
 
@@ -341,8 +375,9 @@ export async function POST(req: NextRequest) {
     }
   } catch { /* cache miss or network error — fall through to full pipeline */ }
 
-  const charge = await gate.consumeCredit("analyser");
-  if (!charge.ok) return charge.response;
+  // Analyse GRATUITE (déterministe) : le scan ne débite plus de crédit. Seule
+  // la personnalisation IA (/api/personal-insights, les 3 encarts perso) coûte
+  // 1 crédit. Permet à un utilisateur à 0 crédit de voir classement + restrictions.
 
   // Fast-path: when the input is already a well-formed comma-separated INCI
   // list (typical of barcode/product-search/clean paste), we skip the three
@@ -1005,37 +1040,37 @@ export async function POST(req: NextRequest) {
       ?? `Analyse du ${new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
     // We need the inserted row id when the caller wants the analysis pushed
     // to their routine, so use .select().single() instead of a bare insert.
-    const { data: inserted, error: insertError } = await sbAuth
-      .schema("cosme_check")
-      .from("analyses")
-      .insert({
-        user_id: user.id,
-        name: autoName,
-        product_label: body.productLabel?.slice(0, 200) ?? null,
-        brand: body.brand?.slice(0, 120) ?? null,
-        product_type: body.productType?.slice(0, 120) ?? null,
+    // Upsert dédupliqué : ré-analyser le même produit met à jour la ligne
+    // existante (un produit = une seule entrée d'historique).
+    const { data: upsertedId, error: insertError } = await sbAuth.rpc(
+      "cosme_check_upsert_analysis",
+      {
+        p_name: autoName,
+        p_product_label: body.productLabel?.slice(0, 200) ?? null,
+        p_brand: body.brand?.slice(0, 120) ?? null,
+        p_product_type: body.productType?.slice(0, 120) ?? null,
         // Best-effort category from the 1.5 s race in responsePayload. May
         // be overwritten below if the LLM answer arrives after the race
         // timeout — `categoryPromise` is the SAME promise that started
         // before synthesis so we don't pay for a second LLM call.
-        category: resolvedCategory,
-        input_text: text,
-        result_json: responsePayload,
-        score: Number(score.toFixed(2)),
-        ean: productEan?.slice(0, 32) ?? null,
-      })
-      .select("id")
-      .single();
+        p_category: resolvedCategory,
+        p_input_text: text,
+        p_result_json: responsePayload,
+        p_score: Number(score.toFixed(2)),
+        p_ean: productEan?.slice(0, 32) ?? null,
+      },
+    );
+    const insertedId = (upsertedId as string) ?? null;
     if (insertError) {
       logError("analyser.history_insert", insertError, { userId: user.id, code: insertError.code });
-    } else if (inserted?.id) {
-      savedAnalysisId = inserted.id as string;
+    } else if (insertedId) {
+      savedAnalysisId = insertedId;
       if (body.addToRoutine === true) {
         const { error: routineErr } = await sbAuth
           .schema("cosme_check")
           .from("routine_items")
           .upsert(
-            { user_id: user.id, analysis_id: inserted.id, frequency: "daily" },
+            { user_id: user.id, analysis_id: insertedId, frequency: "daily" },
             { onConflict: "user_id,analysis_id" },
           );
         if (routineErr) {
@@ -1048,7 +1083,7 @@ export async function POST(req: NextRequest) {
       // duplicate LLM call thanks to the in-memory dedupe + cache). When it
       // resolves to a non-"autre" value that differs from what we already
       // wrote, patch the row so the DB ends up with the LLM's answer.
-      const categorizeId = inserted.id as string;
+      const categorizeId = insertedId;
       void categoryPromise
         .then(async (cat) => {
           if (!cat || cat === resolvedCategory) return;

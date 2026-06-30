@@ -95,7 +95,7 @@ export function TipCarousel({ tips }: { tips: string[] }) {
             type="button"
             onClick={() => go(index - 1)}
             aria-label="Astuce précédente"
-            className="neu-sm h-6 w-6 flex items-center justify-center text-violet-600 transition"
+            className="h-7 w-7 rounded-xl flex items-center justify-center bg-violet-100 text-violet-600 hover:bg-violet-200 transition"
           >
             <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden>
               <path d="m15 6-6 6 6 6" />
@@ -122,7 +122,7 @@ export function TipCarousel({ tips }: { tips: string[] }) {
             type="button"
             onClick={() => go(index + 1)}
             aria-label="Astuce suivante"
-            className="neu-sm h-6 w-6 flex items-center justify-center text-violet-600 transition"
+            className="h-7 w-7 rounded-xl flex items-center justify-center bg-violet-100 text-violet-600 hover:bg-violet-200 transition"
           >
             <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden>
               <path d="m9 6 6 6-6 6" />

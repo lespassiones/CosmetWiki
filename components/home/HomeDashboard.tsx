@@ -25,7 +25,7 @@ function scoreTone(s: number | null) {
   if (s >= 17) return { fg: "text-emerald-700", label: "Très bien" };
   if (s >= 13) return { fg: "text-amber-700", label: "Bien" };
   if (s >= 9) return { fg: "text-orange-700", label: "Moyen" };
-  return { fg: "text-rose-700", label: "À éviter" };
+  return { fg: "text-rose-700", label: "Faible" };
 }
 
 function ShieldCheckIcon({ className }: { className?: string }) {
