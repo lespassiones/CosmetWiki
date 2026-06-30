@@ -28,6 +28,14 @@ function formatDate(iso: string): string {
   });
 }
 
+/** Ring colour by kept-% verdict (vert / jaune / orange / rouge). */
+function ringColor(pct: number): string {
+  if (pct >= 80) return "#16A34A";
+  if (pct >= 60) return "#FBBF24";
+  if (pct >= 35) return "#F97316";
+  return "#F43F5E";
+}
+
 export default async function PromessesPage() {
   const user = await getUser();
   if (!user) redirect("/auth/sign-in?next=/promesses");
@@ -90,28 +98,44 @@ export default async function PromessesPage() {
             // changed are still displayed with the current logic.
             const m = computeMetrics(r.result_json.promises);
             const supported = m.tenueCount + m.partielleCount;
+            const col = ringColor(m.tenuePct);
+            const ringR = 28;
+            const ringC = 2 * Math.PI * ringR;
+            const ringOff = ringC * (1 - Math.min(100, Math.max(0, m.tenuePct)) / 100);
             return (
               <li key={r.id} className="relative">
                 <Link
                   href={`/promesses/${r.id}`}
                   className="neu neu-hover flex items-center gap-4 p-4 pr-16"
                 >
-                  <div className="neu-sm flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
-                    <span className="inline-flex items-baseline gap-0.5">
-                      <span className="text-base font-bold leading-none">
-                        {m.tenuePct}
+                  <div className="relative h-16 w-16 shrink-0">
+                    <svg viewBox="0 0 64 64" className="h-16 w-16 -rotate-90">
+                      <circle cx="32" cy="32" r={ringR} fill="none" stroke="#E5E7EB" strokeWidth="6" />
+                      <circle
+                        cx="32"
+                        cy="32"
+                        r={ringR}
+                        fill="none"
+                        stroke={col}
+                        strokeWidth="6"
+                        strokeLinecap="round"
+                        strokeDasharray={ringC}
+                        strokeDashoffset={ringOff}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="inline-flex items-baseline gap-0.5 text-[#111111]">
+                        <span className="text-lg font-bold leading-none">{m.tenuePct}</span>
+                        <span className="text-[10px] font-semibold">%</span>
                       </span>
-                      <span className="text-[10px]">%</span>
-                    </span>
+                    </div>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold text-[#111111] truncate">{productName}</div>
-                    <div className="text-[12px] text-[#6B7280]">
+                    <div className="text-[13px] font-medium mt-0.5" style={{ color: col }}>
                       {supported} / {m.totalPromises} promesse
                       {m.totalPromises > 1 ? "s" : ""} soutenue
-                      {supported > 1 ? "s" : ""} · indice marketing {m.marketingIndex} %
-                      <span className="mx-1">·</span>
-                      {formatDate(r.created_at)}
+                      {supported > 1 ? "s" : ""}
                     </div>
                   </div>
                 </Link>

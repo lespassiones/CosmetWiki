@@ -38,9 +38,7 @@ export function CreditsPill() {
       {isLoading ? (
         <span>...</span>
       ) : (
-        <span>
-          {remaining} / {limit}
-        </span>
+        <span>{remaining}</span>
       )}
     </button>
   )

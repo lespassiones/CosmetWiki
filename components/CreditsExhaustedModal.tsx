@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type Detail = { used?: number; limit?: number };
@@ -18,19 +17,30 @@ type Detail = { used?: number; limit?: number };
  *     }));
  *   }
  *
- * Closing the modal (backdrop click, Escape, "Plus tard") always navigates
- * the user back to "/" - the dashboard is the only sensible landing when
- * every action that follows would 429 again.
+ * Closing the modal (backdrop click, Escape, "Plus tard") simply dismisses it
+ * and KEEPS the user exactly where they were. "Découvrir Premium" pushes to
+ * /offre (so a browser back returns to the origin page) and records the origin
+ * in `returnAfterPaywall` so OffrePageClient can offer a direct "Retour".
  */
 export function CreditsExhaustedModal() {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<Detail>({});
 
   const close = useCallback(() => {
     setOpen(false);
-    router.push("/");
-  }, [router]);
+  }, []);
+
+  const goPremium = useCallback(() => {
+    try {
+      sessionStorage.setItem(
+        "returnAfterPaywall",
+        window.location.pathname + window.location.search,
+      );
+    } catch {
+      /* sessionStorage indisponible */
+    }
+    setOpen(false);
+  }, []);
 
   useEffect(() => {
     const onShow = (e: Event) => {
@@ -82,7 +92,7 @@ export function CreditsExhaustedModal() {
         <div className="mt-5 space-y-2">
           <Link
             href="/offre"
-            onClick={() => setOpen(false)}
+            onClick={goPremium}
             className="block w-full rounded-xl bg-[#111111] py-3 text-center text-sm font-semibold text-white hover:brightness-110 transition"
           >
             Découvrir Premium

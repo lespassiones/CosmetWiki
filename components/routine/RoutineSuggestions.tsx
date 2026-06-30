@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { RoutineMetrics, RoutineProduct } from "@/lib/routine/engine";
+import { apiFetch } from "@/lib/clientApi";
 
 type Suggestion = {
   text: string;
@@ -36,7 +37,7 @@ export function RoutineSuggestions({
     setError(null);
     startTransition(async () => {
       try {
-        const r = await fetch("/api/routine/suggest", { method: "POST" });
+        const r = await apiFetch("/api/routine/suggest", { method: "POST" });
         if (!r.ok) {
           const j = (await r.json().catch(() => ({}))) as { error?: string };
           setError(j.error ?? "Erreur");

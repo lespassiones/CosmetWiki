@@ -179,10 +179,19 @@ export async function POST(req: NextRequest) {
   const { data: creditData } = await sb.rpc("cosme_check_consume_credit", {
     p_feature: "advisor",
   });
-  const credit = (creditData ?? { ok: false }) as { ok: boolean };
+  const credit = (creditData ?? { ok: false }) as {
+    ok: boolean;
+    used?: number;
+    limit?: number;
+  };
   if (!credit.ok) {
+    // payload `credits` → le client (apiFetch) ouvre la modale « Crédits
+    // épuisés » (→ /offre), comme les autres features.
     return new Response(
-      JSON.stringify({ error: "Tu as utilisé tous tes crédits du jour. Reviens demain !" }),
+      JSON.stringify({
+        error: "Tu as utilisé tous tes crédits du jour. Reviens demain !",
+        credits: { used: credit.used ?? 0, limit: credit.limit ?? 100, remaining: 0 },
+      }),
       { status: 429, headers: { "Content-Type": "application/json" } },
     );
   }

@@ -70,6 +70,27 @@ export async function POST(req: NextRequest) {
       result: it.analyses!.result_json,
     }));
 
+  // Crédit : 1 débité pour la génération de conseils (action IA explicite,
+  // déclenchée par le bouton « Générer » / « Régénérer »). Épuisé → 429 +
+  // payload `credits` pour que le client (apiFetch) ouvre la modale → /offre.
+  const { data: creditData } = await sb.rpc("cosme_check_consume_credit", {
+    p_feature: "routine_suggest",
+  });
+  const consume = (creditData ?? { ok: false }) as {
+    ok: boolean;
+    used?: number;
+    limit?: number;
+  };
+  if (!consume.ok) {
+    return NextResponse.json(
+      {
+        error: "Tu as utilisé tous tes crédits du jour. Reviens demain.",
+        credits: { used: consume.used ?? 0, limit: consume.limit ?? 100, remaining: 0 },
+      },
+      { status: 429, headers: { "Retry-After": "86400" } },
+    );
+  }
+
   const metrics = computeRoutineMetrics(products);
   const result = await generateRoutineSuggestions(
     metrics,

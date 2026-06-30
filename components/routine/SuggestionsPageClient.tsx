@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SuggestionCard, type DeckAlternative } from "./SuggestionCard";
 import type { AtRiskProduct } from "@/lib/routine/atRisk";
+import { apiFetch } from "@/lib/clientApi";
 import {
   suggestionsSignature,
   readSuggestionsCache,
@@ -76,7 +77,9 @@ export function SuggestionsPageClient({
     }
     (async () => {
       try {
-        const r = await fetch("/api/routine/catalog-suggestions", {
+        // apiFetch : sur 429-with-credits, ouvre la modale « Crédits épuisés »
+        // (→ /offre). On garde aussi l'état inline "credits" pour le message.
+        const r = await apiFetch("/api/routine/catalog-suggestions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ items: products.slice(0, 8) }),
@@ -213,11 +216,23 @@ export function SuggestionsPageClient({
       </p>
 
       {status === "loading" && (
-        <ul className="space-y-4" aria-busy aria-label="Chargement des suggestions">
-          {Array.from({ length: Math.max(1, Math.min(products.length, 3)) }).map((_, i) => (
-            <li key={i} className="h-[360px] animate-pulse rounded-3xl bg-white/60" />
-          ))}
-        </ul>
+        <div aria-busy aria-label="Chargement des suggestions">
+          {/* Bandeau visible "en cours" : spinner + message qui rassurent l'utilisateur */}
+          <div className="mb-4 flex items-center gap-3 rounded-2xl bg-white/80 px-4 py-3 ring-1 ring-black/[0.06]">
+            <Spinner className="h-5 w-5 shrink-0 text-[#FF5A8A]" />
+            <span className="text-[13px] font-medium text-ink">
+              Recherche des meilleures alternatives…
+            </span>
+          </div>
+          <ul className="space-y-4">
+            {Array.from({ length: Math.max(1, Math.min(products.length, 3)) }).map((_, i) => (
+              <li
+                key={i}
+                className="h-[360px] animate-pulse rounded-3xl bg-gradient-to-br from-black/[0.06] to-black/[0.02] ring-1 ring-black/[0.04]"
+              />
+            ))}
+          </ul>
+        </div>
       )}
 
       {status === "ready" && (
@@ -258,6 +273,20 @@ function Notice({ children }: { children: React.ReactNode }) {
     <div className="rounded-3xl bg-white/70 p-5 text-[13px] text-ink-subtle ring-1 ring-black/[0.06]">
       {children}
     </div>
+  );
+}
+
+function Spinner({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={`animate-spin ${className ?? ""}`} aria-hidden>
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-20" />
+      <path
+        d="M12 2a10 10 0 0 1 10 10"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 

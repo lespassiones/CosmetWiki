@@ -27,6 +27,7 @@ import { ToolsSection } from "./analyse/ToolsSection";
 import { ScoreExplanationModal } from "./analyse/ScoreExplanationModal";
 import { decodeHtml } from "@/lib/decodeHtml";
 import { categorySlugToDisplayName } from "@/lib/categories";
+import { apiFetch } from "@/lib/clientApi";
 
 // Lazy-load : la modale n'est ouverte que sur clic utilisateur, on évite
 // d'embarquer son JS (et celui de ses dépendances OpenAI/Markdown) au LCP.
@@ -271,7 +272,10 @@ export function AnalyseResultPanel({
     if (!analysisId) return;
     const ctrl = new AbortController();
     setSynthesisLoading(true);
-    fetch("/api/synthesis", {
+    // apiFetch : sur 429-with-credits, ouvre automatiquement la modale
+    // « Crédits épuisés » (→ /offre). La synthèse débite 1 crédit à la 1ère
+    // génération uniquement (persistée ensuite → relecture gratuite).
+    apiFetch("/api/synthesis", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ analysisId }),
@@ -320,8 +324,10 @@ export function AnalyseResultPanel({
     <section id="analyse-results" className="pt-2">
       {/* Product header: image left + title/brand right ALWAYS SIDE-BY-SIDE */}
       <div className="flex flex-col gap-4 mb-6 lg:max-w-[900px]">
-        {/* Row 1: Image + Title/Brand (always horizontal) */}
-        <div className="flex flex-row gap-4 items-start">
+        {/* Carte commune : image + titre/marque + boutons d'action regroupés */}
+        <div className="neu p-4 lg:p-5 flex flex-col gap-4">
+          {/* Image + Title/Brand (always horizontal) */}
+          <div className="flex flex-row gap-4 items-start">
           {/* Image — fixed size, no grow */}
           {productImageUrl ? (
             <img
@@ -353,9 +359,7 @@ export function AnalyseResultPanel({
           </div>
         </div>
 
-        {/* Row 2: Action buttons (below image + title) */}
-        <div className="flex flex-col gap-2">
-          {/* Green + Pink buttons — grow until lg breakpoint (when pastilles go vertical) */}
+          {/* Boutons d'action (vert / rose) dans la carte commune */}
           <div className="flex flex-row items-center gap-2">
             {existingCoherenceId ? (
               <Link
@@ -383,9 +387,10 @@ export function AnalyseResultPanel({
               />
             ) : null}
           </div>
+        </div>
 
-          {/* Partager + Pastilles — grow until lg, then stop at that width */}
-          <div className="flex flex-1 items-center gap-2.5 rounded-full bg-white/85 px-3 py-1.5 ring-1 ring-black/[0.06] backdrop-blur-md transition-all hover:bg-white/95 hover:shadow-[0_6px_20px_-8px_rgba(15,23,42,0.15)]">
+        {/* Partager + Pastilles — en dehors de la carte commune */}
+        <div className="flex flex-1 items-center gap-2.5 rounded-full bg-white/85 px-3 py-1.5 ring-1 ring-black/[0.06] backdrop-blur-md transition-all hover:bg-white/95 hover:shadow-[0_6px_20px_-8px_rgba(15,23,42,0.15)]">
             <button
               type="button"
               onClick={() => shareReport(originalText)}
@@ -401,7 +406,6 @@ export function AnalyseResultPanel({
               className="lg:hidden flex-1 justify-between"
             />
           </div>
-        </div>
       </div>
       {!existingCoherenceId && (
         <PromesseFlowModal

@@ -9,6 +9,8 @@ export const VERDICT_TONE: Record<
   CoherenceVerdict,
   {
     label: string;
+    /** Short label for inline row badges ("Tenu", "Partiel"…). */
+    badge: string;
     /** Solid background swatch (used for dots / fills). */
     bg: string;
     /** Soft pastel background for pills. */
@@ -23,6 +25,7 @@ export const VERDICT_TONE: Record<
 > = {
   tenue: {
     label: "Tenue",
+    badge: "Tenu",
     bg: "bg-emerald-500",
     bgSoft: "bg-emerald-50",
     ringSoft: "ring-emerald-200",
@@ -31,6 +34,7 @@ export const VERDICT_TONE: Record<
   },
   partielle: {
     label: "Partielle",
+    badge: "Partiel",
     bg: "bg-amber-400",
     bgSoft: "bg-amber-50",
     ringSoft: "ring-amber-200",
@@ -39,6 +43,7 @@ export const VERDICT_TONE: Record<
   },
   marketing: {
     label: "Marketing",
+    badge: "Marketing",
     bg: "bg-orange-400",
     bgSoft: "bg-orange-50",
     ringSoft: "ring-orange-200",
@@ -47,6 +52,7 @@ export const VERDICT_TONE: Record<
   },
   non_demontree: {
     label: "Non démontré",
+    badge: "Non démontré",
     bg: "bg-red-500",
     bgSoft: "bg-red-50",
     ringSoft: "ring-red-200",
@@ -58,6 +64,7 @@ export const VERDICT_TONE: Record<
   // couldn't find a documented active". Different hue so the two never blur.
   contredite: {
     label: "Contredite",
+    badge: "Contredite",
     bg: "bg-red-600",
     bgSoft: "bg-red-50",
     ringSoft: "ring-red-300",
@@ -65,6 +72,22 @@ export const VERDICT_TONE: Record<
     hex: "#DC2626",
   },
 };
+
+/** Plural FR label for the hero summary chips. */
+export function verdictChipLabel(verdict: CoherenceVerdict, count: number): string {
+  switch (verdict) {
+    case "tenue":
+      return `${count} tenue${count > 1 ? "s" : ""}`;
+    case "partielle":
+      return `${count} partielle${count > 1 ? "s" : ""}`;
+    case "marketing":
+      return `${count} marketing`;
+    case "non_demontree":
+      return `${count} non démontrée${count > 1 ? "s" : ""}`;
+    case "contredite":
+      return `${count} contredite${count > 1 ? "s" : ""}`;
+  }
+}
 
 /** Friendly French label for the unverifiable claim "reason" enum. */
 export const UNVERIFIABLE_REASON_LABEL: Record<string, string> = {

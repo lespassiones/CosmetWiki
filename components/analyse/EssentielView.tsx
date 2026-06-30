@@ -125,6 +125,31 @@ export function EssentielToggleButton({
   );
 }
 
+// ─── Halo icon (pale two-tone disc + soft shadow, always circular) ─────────
+// Twin of the mobile HaloIcon: a translucent pale ring behind + a solid pale
+// inner circle + a soft drop shadow. Used by the 4 blocks (incl. "Ce qui est
+// bien" which used to be a solid square).
+function HaloIcon({
+  Icon,
+  bgClass,
+  iconClass,
+}: {
+  Icon: ComponentType<IconProps>;
+  bgClass: string;
+  iconClass: string;
+}) {
+  return (
+    <span className="relative grid place-items-center h-[54px] w-[54px] shrink-0" aria-hidden>
+      <span className={`absolute inset-0 rounded-full ${bgClass} opacity-40`} />
+      <span
+        className={`relative grid place-items-center h-11 w-11 rounded-full ${bgClass} shadow-[0_3px_6px_-1px_rgba(15,23,42,0.12)]`}
+      >
+        <Icon className={`h-6 w-6 ${iconClass}`} />
+      </span>
+    </span>
+  );
+}
+
 // ─── Cards ────────────────────────────────────────────────────────────────
 
 function VerdictCard({
@@ -147,37 +172,34 @@ function VerdictCard({
     : "Ne contient aucune de vos restrictions";
 
   return (
-    <article className="neu flex items-start gap-4 p-4">
-      <div
-        className={`h-10 w-10 shrink-0 rounded-full flex items-center justify-center ${v.badgeClass}`}
-        aria-hidden
-      >
-        <Icon className={`h-5 w-5 ${v.iconClass}`} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-1">
-          L&apos;essentiel
+    <article className="neu p-4">
+      <div className="flex items-center gap-4">
+        <HaloIcon Icon={Icon} bgClass={v.badgeClass} iconClass={v.iconClass} />
+        <div className="min-w-0 flex-1">
+          <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-2">
+            L&apos;essentiel
+          </div>
+
+          {/* Restriction line - clickable if families modal available */}
+          <button
+            onClick={onShowFamilies}
+            disabled={!onShowFamilies}
+            className={`w-full text-left flex items-center justify-between gap-2 px-3 py-2 rounded-lg mb-2 transition ${
+              hasRestriction
+                ? "bg-rose-50 text-rose-700 hover:bg-rose-100"
+                : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+            } ${!onShowFamilies ? "cursor-default" : "cursor-pointer"}`}
+          >
+            <span className="text-[13px] font-medium">{restrictionText}</span>
+            {onShowFamilies && (
+              <span className="text-[12px] text-opacity-70 shrink-0">Voir</span>
+            )}
+          </button>
+
+          <p className="text-[14px] font-semibold text-[#111111] leading-snug">
+            {verdict.phrase}
+          </p>
         </div>
-
-        {/* Restriction line - clickable if families modal available */}
-        <button
-          onClick={onShowFamilies}
-          disabled={!onShowFamilies}
-          className={`w-full text-left flex items-center justify-between gap-2 px-3 py-2 rounded-lg mb-2 transition ${
-            hasRestriction
-              ? "bg-rose-50 text-rose-700 hover:bg-rose-100"
-              : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-          } ${!onShowFamilies ? "cursor-default" : "cursor-pointer"}`}
-        >
-          <span className="text-[13px] font-medium">{restrictionText}</span>
-          {onShowFamilies && (
-            <span className="text-[12px] text-opacity-70 shrink-0">Voir</span>
-          )}
-        </button>
-
-        <p className="text-[14px] font-semibold text-[#111111] leading-snug">
-          {verdict.phrase}
-        </p>
       </div>
     </article>
   );
@@ -185,28 +207,25 @@ function VerdictCard({
 
 function PositivesCard({ positives }: { positives: EssentielData["positives"] }) {
   return (
-    <article className="neu flex items-start gap-4 p-4">
-      <div
-        className="h-10 w-10 shrink-0 rounded-xl bg-emerald-500 flex items-center justify-center mt-0.5"
-        aria-hidden
-      >
-        <ShieldCheckIcon className="h-[18px] w-[18px] text-white" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-1.5">
-          Ce qui est bien
+    <article className="neu p-4">
+      <div className="flex items-start gap-4">
+        <HaloIcon Icon={ShieldCheckIcon} bgClass="bg-emerald-100" iconClass="text-emerald-600" />
+        <div className="min-w-0 flex-1">
+          <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-2">
+            Ce qui est bien
+          </div>
+          <ul className="space-y-1.5">
+            {positives.map((p, i) => (
+              <li key={i} className="flex items-start gap-2 text-[13px] leading-snug">
+                <CheckIcon className="h-3.5 w-3.5 shrink-0 mt-1 text-emerald-500" />
+                <span className="text-[#111111]">
+                  <span className="font-semibold">{p.name}</span>
+                  <span className="text-[#6B7280]"> -&gt; {p.functions.join(" · ")}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
-        <ul className="space-y-1.5">
-          {positives.map((p, i) => (
-            <li key={i} className="flex items-start gap-2 text-[13px] leading-snug">
-              <CheckIcon className="h-3.5 w-3.5 shrink-0 mt-1 text-emerald-500" />
-              <span className="text-[#111111]">
-                <span className="font-semibold">{p.name}</span>
-                <span className="text-[#6B7280]"> -&gt; {p.functions.join(" · ")}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
       </div>
     </article>
   );
@@ -219,34 +238,31 @@ function ConcernsCard({ concerns }: { concerns: EssentielData["concerns"] }) {
   const v = CONCERN_VISUAL[worst.tier];
   const Icon = v.Icon;
   return (
-    <article className="neu flex items-start gap-4 p-4">
-      <div
-        className={`h-10 w-10 shrink-0 rounded-full ${v.badgeClass} flex items-center justify-center mt-0.5`}
-        aria-hidden
-      >
-        <Icon className={`h-5 w-5 ${v.iconClass}`} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-1.5">
-          À surveiller
+    <article className="neu p-4">
+      <div className="flex items-start gap-4">
+        <HaloIcon Icon={Icon} bgClass={v.badgeClass} iconClass={v.iconClass} />
+        <div className="min-w-0 flex-1">
+          <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-2">
+            À surveiller
+          </div>
+          <ul className="space-y-1.5">
+            {concerns.map((c, i) => {
+              const cv = CONCERN_VISUAL[c.tier];
+              return (
+                <li key={i} className="flex items-start gap-2 text-[13px] leading-snug">
+                  <span
+                    aria-hidden
+                    className={`h-2 w-2 shrink-0 mt-1.5 rounded-full ${cv.dotClass}`}
+                  />
+                  <span className="text-[#111111]">
+                    <span className="font-semibold">{c.family}</span>
+                    <span className="text-[#6B7280]"> -&gt; {c.effect}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
         </div>
-        <ul className="space-y-1.5">
-          {concerns.map((c, i) => {
-            const cv = CONCERN_VISUAL[c.tier];
-            return (
-              <li key={i} className="flex items-start gap-2 text-[13px] leading-snug">
-                <span
-                  aria-hidden
-                  className={`h-2 w-2 shrink-0 mt-1.5 rounded-full ${cv.dotClass}`}
-                />
-                <span className="text-[#111111]">
-                  <span className="font-semibold">{c.family}</span>
-                  <span className="text-[#6B7280]"> -&gt; {c.effect}</span>
-                </span>
-              </li>
-            );
-          })}
-        </ul>
       </div>
     </article>
   );
@@ -254,20 +270,17 @@ function ConcernsCard({ concerns }: { concerns: EssentielData["concerns"] }) {
 
 function AllClearCard() {
   return (
-    <article className="neu flex items-center gap-4 p-4">
-      <div
-        className="h-10 w-10 shrink-0 rounded-full bg-emerald-100 flex items-center justify-center"
-        aria-hidden
-      >
-        <CheckIcon className="h-5 w-5 text-emerald-600" strokeWidth={2.6} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-1">
-          Tout va bien
+    <article className="neu p-4">
+      <div className="flex items-center gap-4">
+        <HaloIcon Icon={CheckIcon} bgClass="bg-emerald-100" iconClass="text-emerald-600" />
+        <div className="min-w-0 flex-1">
+          <div className="text-[11px] uppercase tracking-wide font-semibold text-[#6B7280] mb-2">
+            Tout va bien
+          </div>
+          <p className="text-[14px] font-semibold text-[#111111] leading-snug">
+            Aucun ingrédient à signaler dans cette formule.
+          </p>
         </div>
-        <p className="text-[14px] font-semibold text-[#111111] leading-snug">
-          Aucun ingrédient à signaler dans cette formule.
-        </p>
       </div>
     </article>
   );

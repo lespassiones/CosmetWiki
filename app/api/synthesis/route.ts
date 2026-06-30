@@ -82,6 +82,29 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  // Crédit : 1 débité À LA GÉNÉRATION uniquement. La synthèse est persistée dans
+  // result_json → revoir une analyse déjà synthétisée repasse par le
+  // court-circuit ci-dessus (gratuit). Épuisé → 429 + payload `credits` pour que
+  // le client (apiFetch) ouvre la modale « Crédits épuisés » → /offre.
+  const { data: creditData } = await sb.rpc("cosme_check_consume_credit", {
+    p_feature: "synthesis",
+  });
+  const consume = (creditData ?? { ok: false }) as {
+    ok: boolean;
+    used?: number;
+    limit?: number;
+    remaining?: number;
+  };
+  if (!consume.ok) {
+    return NextResponse.json(
+      {
+        error: "Tu as utilisé tous tes crédits du jour. Reviens demain.",
+        credits: { used: consume.used ?? 0, limit: consume.limit ?? 100, remaining: 0 },
+      },
+      { status: 429, headers: { "Retry-After": "86400" } },
+    );
+  }
+
   try {
     const [profileBlock, restrictionsCtx] = await Promise.all([
       loadProfileForPrompt(user.id),

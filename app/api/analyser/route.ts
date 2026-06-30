@@ -371,12 +371,21 @@ export async function POST(req: NextRequest) {
     // Pre-flight: bail out on garbage input (cheap local checks + AI for the
     // borderline cases). The AI defaults to "valid" if unavailable so we never
     // block a real user.
-    const validation = await validateInciInput(text);
-    if (!validation.valid) {
-      return NextResponse.json(
-        { error: validation.reason ?? "Ceci ne ressemble pas à une liste INCI." },
-        { status: 400 },
-      );
+    //
+    // EXCEPTION — vetted catalog products (known EAN with an INCI Beauty score):
+    // the gate exists to reject random free-text paste, NOT products the catalog
+    // already references and rated. Oral-care items (toothpaste/dentifrice) and
+    // other borderline categories legitimately trip the "is this cosmetic?"
+    // classifier, which would wrongly block analysing a product recommended by
+    // the advisor. For these, we skip the gate and analyse the list directly.
+    if (ibScore === null) {
+      const validation = await validateInciInput(text);
+      if (!validation.valid) {
+        return NextResponse.json(
+          { error: validation.reason ?? "Ceci ne ressemble pas à une liste INCI." },
+          { status: 400 },
+        );
+      }
     }
   }
 

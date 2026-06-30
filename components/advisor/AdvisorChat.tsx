@@ -9,6 +9,7 @@ import {
   type RecoCriteria,
 } from "@/lib/advisor/recoBlock";
 import type { AdvisorProduct } from "@/app/api/advisor/recommendations/route";
+import { apiFetch } from "@/lib/clientApi";
 
 // ─── sessionStorage keys (mirror ScanSheet / AlternativesCarousel) ───────────
 const PENDING_INCI_KEY = "cw:pendingInci";
@@ -400,7 +401,7 @@ export function AdvisorChat({
     let finalCriteria: RecoCriteria | null = null;
 
     try {
-      const r = await fetch("/api/advisor/chat", {
+      const r = await apiFetch("/api/advisor/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: apiMessages }),
