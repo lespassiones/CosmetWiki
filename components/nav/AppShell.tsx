@@ -309,7 +309,7 @@ function DesktopSidebar({
             <span className="text-[12px] font-medium text-[#6B7280]">
               Vos crédits restants
             </span>
-            <CreditsPill initialCredits={initialCredits} />
+            <CreditsPill />
           </div>
         </div>
       )}

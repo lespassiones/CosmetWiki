@@ -10,7 +10,9 @@ export function LegalLayout({
   children,
 }: {
   title: string;
-  current: "confidentialite" | "cgu" | "mentions-legales";
+  // Inclut la route publique anglaise `/privacy` (URL de confidentialité
+  // exigée par les stores). Aucun onglet FR ne s'y allume, c'est voulu.
+  current: "confidentialite" | "cgu" | "mentions-legales" | "privacy";
   children: React.ReactNode;
 }) {
   const tabs: { href: string; label: string; key: typeof current }[] = [
