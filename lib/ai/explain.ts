@@ -10,7 +10,7 @@
  *      user is exposed to this ingredient in their own routine - this
  *      personal line is NOT cached (it depends on the caller).
  */
-import { AI_MODEL, callWithFallback, hasOpenAI, openai } from "./client";
+import { AI_MODEL, hasMistral, hasOpenAI, openai } from "./client";
 import { NO_LONG_DASHES_RULE, stripLongDashes } from "./sanitize";
 import { supabaseService } from "@/lib/supabase";
 
@@ -68,7 +68,7 @@ export async function explainIngredient(ctx: ExplainContext, userId?: string | n
   }
 
   // 2. No AI available → graceful degradation.
-  if (!hasOpenAI()) {
+  if (!hasMistral() && !hasOpenAI()) {
     return {
       text: "Pas d'explication disponible pour le moment.",
       personalLine: buildPersonalLine(ctx),
@@ -88,53 +88,52 @@ Tags : ${tags}
 
 Réponds avec UNIQUEMENT le texte de l'explication (3 phrases sur 3 lignes).`;
 
-  try {
-    const text = await callWithFallback<string>({
-      feature: "explain",
-      userId: userId ?? null,
-      timeoutMs: 10_000,
-      primary: async () => {
-        const r = await openai().chat.completions.create({
-          model: AI_MODEL,
-          temperature: 0.4,
-          max_tokens: 220,
-          messages: [
-            { role: "system", content: system },
-            { role: "user", content: user },
-          ],
-        });
-        const raw = r.choices?.[0]?.message?.content?.trim() ?? "";
-        const value = stripLongDashes(raw);
-        return {
-          value,
-          tokensIn: r.usage?.prompt_tokens,
-          tokensOut: r.usage?.completion_tokens,
-        };
-      },
-      fallback: async () => ({
-        value: "Pas d'explication disponible pour le moment.",
-        provider: "openai",
-      }),
-    });
+  const messages = [
+    { role: "system" as const, content: system },
+    { role: "user" as const, content: user },
+  ];
+  const FALLBACK_TEXT = "Pas d'explication disponible pour le moment.";
 
-    if (text && text !== "Pas d'explication disponible pour le moment.") {
-      // Permanent cache (one row per inci_id).
-      await sb
-        .schema("cosme_check")
-        .from("ingredient_explanations")
-        .upsert({ inci_id: ctx.inciId, explanation: text }, { onConflict: "inci_id" });
+  // 3. Génération : MISTRAL PRIMAIRE → GPT en repli.
+  let text = "";
+  if (hasMistral()) {
+    try {
+      const r = await fetch("https://api.mistral.ai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.MISTRAL_API_KEY}`,
+        },
+        body: JSON.stringify({ model: "mistral-small-latest", temperature: 0.4, max_tokens: 220, messages }),
+      });
+      if (r.ok) {
+        const j = (await r.json()) as { choices?: { message?: { content?: string } }[] };
+        text = stripLongDashes((j.choices?.[0]?.message?.content ?? "").trim());
+      }
+    } catch {
+      // bascule GPT
     }
-
-    return {
-      text,
-      personalLine: buildPersonalLine(ctx),
-      cached: false,
-    };
-  } catch {
-    return {
-      text: "Pas d'explication disponible pour le moment.",
-      personalLine: buildPersonalLine(ctx),
-      cached: false,
-    };
   }
+
+  // Repli GPT si Mistral indisponible / vide.
+  if (!text && hasOpenAI()) {
+    try {
+      const r = await openai().chat.completions.create({ model: AI_MODEL, temperature: 0.4, max_tokens: 220, messages });
+      text = stripLongDashes((r.choices?.[0]?.message?.content ?? "").trim());
+    } catch {
+      // laisse text vide
+    }
+  }
+
+  if (!text) {
+    return { text: FALLBACK_TEXT, personalLine: buildPersonalLine(ctx), cached: false };
+  }
+
+  // Permanent cache (one row per inci_id).
+  await sb
+    .schema("cosme_check")
+    .from("ingredient_explanations")
+    .upsert({ inci_id: ctx.inciId, explanation: text }, { onConflict: "inci_id" });
+
+  return { text, personalLine: buildPersonalLine(ctx), cached: false };
 }

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useCredits } from "@/lib/credits/hooks";
 
 const FEATURES = [
+  "Expérience personnalisée",
   "Analyses INCI illimitées",
   "Analyses « Promesses vs Formule » illimitées",
   "Comparaison de produits illimitée",
