@@ -86,10 +86,12 @@ export async function getCached<T = unknown>(cacheKey: string): Promise<T | null
       .eq("cache_key", cacheKey)
       .maybeSingle();
     if (!data) return null;
-    // Compteur de hits supprimé : la RPC cosme_check_increment_ai_cache_hit
-    // n'existait pas en DB et chaque cache hit générait un 404 polluant les
-    // logs Supabase. Si on a besoin de cette métrique plus tard, ajouter
-    // d'abord la migration `CREATE FUNCTION cosme_check_increment_ai_cache_hit`.
+    // Compteur de hits (fire-and-forget) → alimente le « cache hit rate » admin.
+    // RPC cosme_check_bump_ai_cache_hit (SECURITY DEFINER) désormais en DB.
+    void sb
+      .schema("cosme_check")
+      .rpc("cosme_check_bump_ai_cache_hit", { p_key: cacheKey })
+      .then(() => undefined);
     return data.result as T;
   } catch {
     return null;

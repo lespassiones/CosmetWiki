@@ -18,27 +18,16 @@ import { PublicHeader } from "@/components/PublicHeader";
  */
 export function LandingHero() {
   return (
-    <section className="relative w-full bg-[#FAFAFA]">
-      {/* Bloc rose : sa hauteur suit son contenu (titre + image), donc
-          rétrécit/grandit proportionnellement avec le contenu — pas avec le
-          viewport. Pas de min-h en vh. */}
-      <div className="relative overflow-hidden">
-        <Image
-          src="/image/landing2/banniere.webp"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center"
-        />
-        <div
-          aria-hidden
-          className="grain-overlay pointer-events-none absolute inset-0 opacity-[0.22] mix-blend-multiply"
-        />
-
-        {/* Contenu desktop : container 1280, alignement bas */}
-        <div className="relative z-10 mx-auto hidden w-full max-w-[1280px] items-end gap-6 px-6 pt-32 sm:px-8 lg:flex">
-          <div className="flex-1 pb-16 reveal-on-mount">
+    <section className="relative w-full bg-white">
+      {/* Fond blanc uni : l'ancienne image de fond rose (banniere.webp) et
+          l'overlay de grain ont été retirés. La hauteur suit le contenu
+          (titre + image), pas le viewport. */}
+      <div className="relative overflow-hidden bg-white">
+        {/* Contenu desktop : le groupe texte + téléphone est centré avec un
+            gap contrôlé, pour que le texte reste proche du mockup (pas de
+            grand vide au milieu). */}
+        <div className="relative z-10 mx-auto hidden w-full max-w-[1180px] items-center justify-center gap-10 px-6 pt-32 sm:px-8 lg:flex xl:gap-16">
+          <div className="w-full max-w-[560px] pb-8 reveal-on-mount">
             <Headline />
             <div className="mt-10">
               <KpiRow />
@@ -47,17 +36,17 @@ export function LandingHero() {
               <StoreBadges align="left" />
             </div>
           </div>
-          <div className="flex flex-[1.6] items-end justify-end reveal-on-mount reveal-delay-150">
+          <div className="flex shrink-0 items-end reveal-on-mount reveal-delay-150">
             <div
-              className="relative w-full max-w-[884px]"
-              style={{ aspectRatio: "1350 / 1063" }}
+              className="relative w-[415px] shrink-0 xl:w-[485px]"
+              style={{ aspectRatio: "1122 / 1402" }}
             >
               <Image
-                src="/image/landing2/herodroites.webp"
+                src="/image/landing2/nouvellehero.webp"
                 alt="Aperçu de l'application Cosme Check"
                 fill
                 priority
-                sizes="884px"
+                sizes="485px"
                 className="object-contain object-bottom"
               />
             </div>
@@ -68,9 +57,9 @@ export function LandingHero() {
             titre → image (halo) → description → KPIs → badges → CTA */}
         <div className="relative z-10 flex flex-col items-center gap-6 px-5 pb-10 pt-28 text-center lg:hidden">
           <h1 className="reveal-on-mount font-bold leading-[1.05] tracking-tight text-ink text-[34px] sm:text-[40px]">
-            <span className="text-[#111111]">Check tes </span>
+            <span className="text-[#111111]">Le scan qui te dit si ce produit est vraiment </span>
             <span className="relative inline-block whitespace-nowrap">
-              <span className="text-[#F43F5E]">cosmétiques</span>&nbsp;♡
+              <span className="text-[#F43F5E]">fait pour toi</span>
               <svg
                 aria-hidden
                 viewBox="0 0 200 14"
@@ -100,35 +89,31 @@ export function LandingHero() {
             />
             <div
               className="relative"
-              style={{ aspectRatio: "1350 / 1063" }}
+              style={{ aspectRatio: "1122 / 1402" }}
             >
               <Image
-                src="/image/landing2/herodroites.webp"
+                src="/image/landing2/nouvellehero.webp"
                 alt="Aperçu de l'application Cosme Check"
                 fill
                 priority
                 sizes="340px"
                 className="object-contain object-bottom"
               />
-              {/* Dégradé concave en bas pour fondre dans le background */}
+              {/* Dégradé concave en bas pour fondre dans le fond blanc */}
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3"
                 style={{
                   background:
-                    "radial-gradient(ellipse 90% 100% at 50% 100%, rgba(228,165,168,0.85) 0%, rgba(228,165,168,0.3) 50%, transparent 80%)",
+                    "radial-gradient(ellipse 90% 100% at 50% 100%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.3) 50%, transparent 80%)",
                 }}
               />
             </div>
           </div>
 
           <p className="reveal-on-mount reveal-delay-160 max-w-[32rem] text-[15px] leading-relaxed text-ink-muted">
-            <span className="font-semibold text-ink">
-              Au-delà des notes, la vérité de tes cosmétiques.
-            </span>
-            <br />
-            Décode la composition, vérifie les promesses marketing, identifie
-            ce qui agit vraiment sur ta peau.
+            On analyse chaque produit pour te dire s'il est vraiment adapté à
+            toi, et on vérifie ses promesses pour valider son efficacité.
           </p>
 
           <div className="reveal-on-mount reveal-delay-220">
@@ -157,7 +142,7 @@ export function LandingHero() {
 }
 
 /**
- * Headline block - H1 with squiggle underline on "montre", subtitle, CTA.
+ * Headline block - H1 with squiggle underline on "fait pour toi", subtitle, CTA.
  * `mobile` prop centers everything and tightens the type sizes.
  */
 function Headline({ mobile = false }: { mobile?: boolean }) {
@@ -166,12 +151,14 @@ function Headline({ mobile = false }: { mobile?: boolean }) {
     <div className={align}>
       <h1
         className={`font-bold leading-[1.05] tracking-tight text-ink ${
-          mobile ? "text-[28px] sm:text-[32px]" : "text-[38px] xl:text-[46px]"
+          mobile
+            ? "text-[28px] sm:text-[32px]"
+            : "text-[clamp(30px,3.2vw,46px)]"
         }`}
       >
-        <span className="text-[#111111]">Check tes </span>
+        <span className="text-[#111111]">Le scan qui te dit si ce produit est vraiment </span>
         <span className="relative inline-block whitespace-nowrap">
-          <span className="text-[#F43F5E]">cosmétiques</span>&nbsp;♡
+          <span className="text-[#F43F5E]">fait pour toi</span>
           <svg
             aria-hidden
             viewBox="0 0 200 14"
@@ -195,15 +182,11 @@ function Headline({ mobile = false }: { mobile?: boolean }) {
         className={`text-ink-muted leading-relaxed ${
           mobile
             ? "mt-4 text-[14px] sm:text-[15px] mx-auto max-w-[28rem]"
-            : "mt-6 text-[18px] xl:text-[19px] max-w-[30rem]"
+            : "mt-6 text-[clamp(15px,1.25vw,19px)] max-w-[30rem]"
         }`}
       >
-        <span className="font-semibold text-ink">
-          Au-delà des notes, la vérité de tes cosmétiques.
-        </span>
-        <br />
-        Décode la composition, vérifie les promesses marketing, identifie ce
-        qui agit vraiment sur ta peau.
+        On analyse chaque produit pour te dire s'il est vraiment adapté à toi,
+        et on vérifie ses promesses pour valider son efficacité.
       </p>
 
       <Link
