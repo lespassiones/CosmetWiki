@@ -19,7 +19,7 @@
 
 -- ============================================================================
 -- (A) Revoke EXECUTE on admin RPCs from anon/authenticated.
---     Only service_role can call them (used by scripts/scrape_ingredient_details.py
+--     Only service_role can call them (used by internal ETL scripts
 --     and lib/productSearch/cache.ts via supabaseService()).
 -- ============================================================================
 

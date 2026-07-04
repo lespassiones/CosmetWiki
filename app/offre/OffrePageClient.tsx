@@ -168,7 +168,7 @@ function PlanCard({
       <button className={`w-full py-2 rounded-lg font-medium transition ${
         highlight
           ? "bg-white text-rose-600 hover:bg-gray-50"
-          : "bg-rose-600 text-white hover:bg-rose-700"
+          : "bg-emerald-600 text-white hover:bg-emerald-700"
       }`}>
         Choisir
       </button>

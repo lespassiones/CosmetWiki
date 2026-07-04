@@ -1,7 +1,7 @@
 /**
  * Taxonomy: 12 French top-level categories + ~60 subcategories.
  *
- * Structure mirrors INCI Beauty's hierarchy. Products are classified at the
+ * Structure follows our proprietary taxonomy hierarchy. Products are classified at the
  * subcategory level; the top-level category is derived from it.
  *
  * Classification priority:

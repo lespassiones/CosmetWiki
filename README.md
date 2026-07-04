@@ -1,6 +1,6 @@
 # Cosme Check
 
-Application qui décode les cosmétiques : composition, promesses marketing, ingrédients clefs. **15 722 ingrédients** indexés depuis incibeauty.com, classés par tolérance (vert / jaune / orange / rouge), avec autocomplete fuzzy et fiches détaillées.
+Application qui décode les cosmétiques : composition, promesses marketing, ingrédients clefs. **15 722 ingrédients** indexés, classés par tolérance (vert / jaune / orange / rouge), avec autocomplete fuzzy et fiches détaillées.
 
 > **Stack** : Next.js 15 + React 19 + Tailwind CSS 3 + Supabase free tier.
 > **Aucun service payant.** Light mode strict.
@@ -48,14 +48,8 @@ Cosme Check/
 │   └── colors.ts                     ← palette + classes Tailwind par rating
 ├── middleware.ts                     ← filtre UA + bot traps
 ├── scripts/                          ← pipeline Python (indépendant du site)
-│   ├── scrape_incibeauty.py          ← phase 1 ✅ (index alphabétique)
-│   ├── load_ingredients_to_supabase.py ← phase 2 ✅ (15 722 lignes en BDD)
-│   ├── scrape_ingredient_details.py  ← phase 3 (à lancer pour enrichir)
-│   ├── build_excel.py / build_pdf.py ← utilitaires
+│   └── (scripts ETL internes)
 ├── data/
-│   ├── ingredients_raw.json          ← 15 722 ingrédients
-│   ├── incibeauty_ingredients.xlsx
-│   ├── incibeauty_ingredients.pdf
 │   └── reference/
 └── docs/cahier-des-charges.md        ← spec complète
 ```
@@ -67,25 +61,9 @@ Le scraping est **séparé** du site. Quatre phases :
 1. **Phase 1 - index alphabétique** ✅ (15 722 ingrédients en JSON).
 2. **Phase 2 - chargement Supabase** ✅ (table `cosme_check.ingredients` peuplée).
 3. **Phase 3 - enrichissement détaillé** ⏳ (CAS, fonctions, prévalence, produits scrapés progressivement).
-4. **Phase 4 - auto-hébergement images** ✅ activé : chaque image produit est convertie en WebP (≈ 4-15 KB) et uploadée dans le bucket Supabase Storage `cosmetwiki-products`. Le site **n'a plus aucune dépendance** vers incibeauty.com pour ses ressources.
+4. **Phase 4 - auto-hébergement images** ✅ activé : chaque image produit est convertie en WebP (≈ 4-15 KB) et uploadée dans le bucket Supabase Storage `cosmetwiki-products`. Le site **n'a plus aucune dépendance** externe pour ses ressources.
 
-### Lancer l'enrichissement détaillé
-
-```bash
-# Test sur 50 (avec téléchargement + upload des images vers Storage)
-python scripts/scrape_ingredient_details.py --limit 50
-
-# Tout le reste - reprend automatiquement là où on s'était arrêté
-python scripts/scrape_ingredient_details.py
-
-# Mode rapide (skip download d'images, hotlink)
-python scripts/scrape_ingredient_details.py --no-images
-
-# Debug d'une URL
-python scripts/scrape_ingredient_details.py --debug-url https://incibeauty.com/ingredients/19762-phenoxyethanol
-```
-
-**Performances mesurées :**
+**Performances mesurées (enrichissement détaillé) :**
 - ~1.65 s/ingrédient avec téléchargement+conversion+upload d'images (4 workers, délai poli 0.5-1.5 s)
 - ~0.6 s/ingrédient sans images (`--no-images`)
 - Reprise automatique via le flag `details_scraped` en BDD

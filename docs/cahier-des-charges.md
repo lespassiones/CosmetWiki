@@ -14,7 +14,7 @@ Une application de décodage d'ingrédients cosmétiques :
 - **Fiche détaillée** par ingrédient avec données structurées et liste de produits qui en contiennent (avec images).
 - **Aucun login requis**, consultation publique uniquement.
 
-**Inspiration UX :** INCI Beauty pour le contenu, Google et Perplexity pour la simplicité d'entrée.
+**Inspiration UX :** Google et Perplexity pour la simplicité d'entrée.
 
 **Public :** consommateurs cosmétiques, formulateurs, marques en veille.
 
@@ -77,7 +77,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA cosme_check
 -- ====================================
 CREATE TABLE cosme_check.ingredients (
   id              BIGSERIAL PRIMARY KEY,
-  inci_id         INTEGER UNIQUE NOT NULL,         -- id incibeauty (ex: 20312)
+  inci_id         INTEGER UNIQUE NOT NULL,         -- identifiant ingrédient (ex: 20312)
   slug            TEXT UNIQUE NOT NULL,            -- "acid-blue-74-aluminum-lake"
   name            TEXT NOT NULL,                   -- "ACID BLUE 74 ALUMINUM LAKE"
   cas_number      TEXT,                            -- "16521-38-3"
@@ -136,7 +136,7 @@ CREATE TRIGGER ingredients_search_update
 -- ====================================
 CREATE TABLE cosme_check.products (
   id              BIGSERIAL PRIMARY KEY,
-  inci_product_id TEXT UNIQUE,                     -- id incibeauty produit
+  inci_product_id TEXT UNIQUE,                     -- identifiant produit catalogue
   brand           TEXT NOT NULL,
   name            TEXT NOT NULL,
   volume          TEXT,                            -- "170 ml"
@@ -237,13 +237,11 @@ GRANT EXECUTE ON FUNCTION cosme_check.search_ingredients(TEXT, INTEGER) TO anon,
 
 ### 4.1 Phase 1 - index alphabétique ✅ DÉJÀ FAIT
 
-Voir [scripts/scrape_incibeauty.py](../scripts/scrape_incibeauty.py). Output : [data/ingredients_raw.json](../data/ingredients_raw.json) - 15 722 ingrédients.
+Index initial constitué : 15 722 ingrédients.
 
 ### 4.2 Phase 2 - détail des fiches ingrédient (à écrire)
 
-`scripts/scrape_ingredient_details.py`
-
-Pour chaque ingrédient de `ingredients_raw.json` :
+Pour chaque ingrédient de la base initiale :
 
 1. GET `source_url`
 2. Parser la page pour extraire :

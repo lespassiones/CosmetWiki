@@ -1,7 +1,7 @@
 -- ============================================================
 -- Backfill missing tags on cosme_check.ingredients
 -- ------------------------------------------------------------
--- Three families were under-tagged in the seed data scraped from incibeauty,
+-- Three families were under-tagged in the initial seed data,
 -- which caused the analyser to report false negatives like "Composés
 -- propoxylés absents" or "Ammoniums quaternaires absents" even on formulas
 -- that contained obvious offenders (e.g. GUAR HYDROXYPROPYLTRIMONIUM

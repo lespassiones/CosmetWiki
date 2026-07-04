@@ -37,6 +37,12 @@ export type CatalogRow = {
   source_url: string | null;
   image_url: string | null;
   count_total: number | null;
+  category?: string | null;
+  score?: number | null;
+  score_tone?: string | null;
+  score_label?: string | null;
+  count_orange?: number | null;
+  count_rouge?: number | null;
 };
 
 /**
@@ -49,7 +55,7 @@ export async function getCatalogByEan(ean: string): Promise<CatalogRow | null> {
     const { data, error } = await supabaseService()
       .schema("cosme_check")
       .from("catalog")
-      .select("ean, brand, name, ingredients_text, source_url, image_url, count_total")
+      .select("ean, brand, name, ingredients_text, source_url, image_url, count_total, category, score, score_tone, score_label, count_orange, count_rouge")
       .eq("ean", ean)
       .maybeSingle();
     if (error || !data) return null;

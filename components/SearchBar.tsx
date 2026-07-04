@@ -330,7 +330,7 @@ export function SearchBar({
                 e.preventDefault();
                 submitList(query.trim());
               }}
-              className="inline-flex items-center gap-1.5 rounded-full bg-rose-600 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_4px_14px_-4px_rgba(244,63,94,0.6)] transition-all hover:bg-rose-700 hover:shadow-[0_8px_22px_-6px_rgba(244,63,94,0.7)]"
+              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_4px_14px_-4px_rgba(16,185,129,0.6)] transition-all hover:bg-emerald-700 hover:shadow-[0_8px_22px_-6px_rgba(16,185,129,0.7)]"
             >
               Analyser
               <span aria-hidden>→</span>

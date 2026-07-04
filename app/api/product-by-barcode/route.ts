@@ -161,6 +161,20 @@ export async function POST(req: NextRequest) {
         source: "cache" as const,
         sourceUrl: local.source_url,
         confidence: 0.9,
+        // Aperçu INSTANTANÉ pour la carte de scan (haut d'analyse) — lu direct
+        // du catalogue, aucune analyse lancée.
+        preview: {
+          ean: local.ean,
+          brand: local.brand,
+          name: local.name,
+          category: local.category ?? null,
+          score: typeof local.score === "number" ? local.score : null,
+          scoreTone: local.score_tone ?? null,
+          scoreLabel: local.score_label ?? null,
+          countOrange: local.count_orange ?? 0,
+          countRouge: local.count_rouge ?? 0,
+          imageUrl: local.image_url ?? null,
+        },
       } satisfies ProductSearchResult);
     }
     // EAN présent mais INCI pas encore remplie → "à compléter".

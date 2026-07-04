@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { ProductSearchResult } from "@/lib/productSearch/types";
+import type { ProductSearchResult, ScanPreview } from "@/lib/productSearch/types";
+import { ScanPreviewCard } from "@/components/scan/ScanPreviewCard";
 
 type FoundPayload = {
   ingredientsText: string;
@@ -32,6 +33,7 @@ type ScannerState =
   | { kind: "starting" }
   | { kind: "scanning" }
   | { kind: "looking-up"; barcode: string }
+  | { kind: "preview"; barcode: string; found: FoundPayload; preview: ScanPreview }
   | { kind: "error"; message: string; reason: ErrorReason }
   | { kind: "not-found"; barcode: string; reason: "incomplete" | "registered" };
 
@@ -117,14 +119,29 @@ export function BarcodeScannerInput({
           setState({ kind: "not-found", barcode, reason });
           return;
         }
-        onFoundRef.current({
+        // APERÇU INSTANTANÉ : on affiche la carte (haut d'analyse) SANS lancer
+        // l'analyse. Le tap « Voir le produit » appellera onFound (analyse).
+        const found: FoundPayload = {
           ingredientsText: data.ingredientsText,
           brand: data.brand,
           productName: data.productName,
           source: data.source,
           sourceUrl: data.sourceUrl,
           ean: barcode,
-        });
+        };
+        const preview: ScanPreview = data.preview ?? {
+          ean: barcode,
+          brand: data.brand,
+          name: data.productName,
+          category: null,
+          score: null,
+          scoreTone: null,
+          scoreLabel: null,
+          countOrange: 0,
+          countRouge: 0,
+          imageUrl: null,
+        };
+        setState({ kind: "preview", barcode, found, preview });
       } catch (e) {
         setState({
           kind: "error",
@@ -192,15 +209,44 @@ export function BarcodeScannerInput({
       }
 
       try {
-        // Prefer the rear camera on mobile (environment). On desktop the
-        // browser will fall back to the default webcam silently.
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" } },
-          audio: false,
-        });
+        // Prefer the rear camera + a HIGH resolution + continuous autofocus.
+        // iOS Safari's default stream is low-res and fixed-focus → ZXing can't
+        // decode (blurry). width/height are `ideal` (hints, never overconstrain);
+        // we still retry minimal on OverconstrainedError for old devices.
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: "environment" },
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
+              // @ts-expect-error focusMode is non-standard but honored on some devices
+              focusMode: "continuous",
+            },
+            audio: false,
+          });
+        } catch (constraintErr) {
+          const cn = (constraintErr as DOMException)?.name;
+          if (cn === "OverconstrainedError" || cn === "NotFoundError") {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: { ideal: "environment" } },
+              audio: false,
+            });
+          } else {
+            throw constraintErr;
+          }
+        }
         if (aborted) {
           stream.getTracks().forEach((t) => t.stop());
           return;
+        }
+        // iOS ignores focusMode in the initial request → request it again on the
+        // live track (best-effort; unsupported devices just skip it).
+        try {
+          const track = stream.getVideoTracks()[0];
+          // @ts-expect-error focusMode is non-standard
+          await track?.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
+        } catch {
+          /* focusMode unsupported on this device - ignore */
         }
         const video = videoRef.current;
         if (!video) return;
@@ -363,6 +409,15 @@ export function BarcodeScannerInput({
               Recherche du produit…
             </span>
           </CenteredPanel>
+        ) : null}
+
+        {/* Aperçu produit (haut d'analyse) — instantané, sans lancer l'analyse */}
+        {state.kind === "preview" ? (
+          <ScanPreviewCard
+            preview={state.preview}
+            onSeeProduct={() => onFoundRef.current(state.found)}
+            onClose={resumeScanning}
+          />
         ) : null}
       </div>
 

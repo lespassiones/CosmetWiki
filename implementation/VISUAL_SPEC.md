@@ -288,7 +288,7 @@ Identique à 3.3 **sauf** :
    - Pill "● Jaune - Pénalité légère" + paragraphe d'explication (`body`).
 5. **Card "Fonction principale"** : titre `caption`, valeur `body`.
 6. **Card "Tags"** : titre `caption` + chips horizontales (chaque tag = pill `--bg-card`, border `--border`, padding 4px 12px, `body`).
-7. **Card "Numéro CAS"** : valeur + lien `link-accent` "↗ Source INCI Beauty".
+7. **Card "Numéro CAS"** : valeur + lien `link-accent` "↗ Source publique".
 8. **Card "Position dans la formule"** : texte "Position {n} sur {N} · {threshold_label}" (ex. "Position 3 sur 13 · avant le 1er conservateur").
 9. Padding bottom 96px.
 10. Sticky bottom nav.
@@ -592,7 +592,7 @@ Chaque carte avec données dynamiques doit gérer son état vide :
 
 ### 8.1 Toutes les analyses montrées dans la spec correspondent à des produits **réels**
 
-Les noms cités (La Roche-Posay Effaclar Duo+, Bioderma Sébium Gel Moussant, Avène Cleanance SPF 50+, CeraVe Crème Hydratante…) sont des produits qui **existent** et dont la composition INCI est publique. Pour les exemples internes (storybook, tests visuels), on stocke les compositions réelles en `data/fixtures/products.json` à partir de leur fiche INCI Beauty ou Open Beauty Facts.
+Les noms cités (La Roche-Posay Effaclar Duo+, Bioderma Sébium Gel Moussant, Avène Cleanance SPF 50+, CeraVe Crème Hydratante...) sont des produits qui **existent** et dont la composition INCI est publique. Pour les exemples internes (storybook, tests visuels), on stocke les compositions réelles en `data/fixtures/products.json` à partir de sources publiques (Open Beauty Facts ou fiches produit officielles).
 
 ### 8.2 Interdictions
 

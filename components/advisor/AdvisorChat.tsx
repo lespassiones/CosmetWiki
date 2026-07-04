@@ -10,6 +10,7 @@ import {
 } from "@/lib/advisor/recoBlock";
 import type { AdvisorProduct } from "@/app/api/advisor/recommendations/route";
 import { apiFetch } from "@/lib/clientApi";
+import { scoreColor } from "@/lib/essentiel/engine";
 
 // ─── sessionStorage keys (mirror ScanSheet / AlternativesCarousel) ───────────
 const PENDING_INCI_KEY = "cw:pendingInci";
@@ -185,7 +186,8 @@ function ProductCard({
   onSelect: (p: AdvisorProduct) => void;
 }) {
   const [imgFailed, setImgFailed] = useState(false);
-  const tone = TONE[product.score_tone ?? ""] ?? TONE.rose;
+  // Couleur dérivée du SCORE (source unique), jamais du score_tone stocké.
+  const tone = TONE[scoreColor(product.score) ?? "rose"] ?? TONE.rose;
   const showImage = product.image_url && !imgFailed;
   return (
     <button
@@ -554,7 +556,7 @@ export function AdvisorChat({
                       <button
                         type="button"
                         onClick={() => acceptRelaxation(i)}
-                        className="rounded-full bg-rose-500 px-3.5 py-1.5 text-[12px] font-semibold text-white hover:bg-rose-600 transition"
+                        className="rounded-full bg-emerald-500 px-3.5 py-1.5 text-[12px] font-semibold text-white hover:bg-emerald-600 transition"
                       >
                         Voir ces {m.recoRelaxation.products.length} produits
                       </button>
@@ -615,7 +617,7 @@ export function AdvisorChat({
           type="submit"
           disabled={streaming || input.trim().length === 0}
           aria-label="Envoyer"
-          className="h-10 w-10 flex items-center justify-center rounded-full bg-rose-500 text-white disabled:opacity-40 shrink-0"
+          className="h-10 w-10 flex items-center justify-center rounded-full bg-emerald-500 text-white disabled:opacity-40 shrink-0"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
             <path d="m22 2-11 11M22 2l-7 20-4-9-9-4 20-7z" />

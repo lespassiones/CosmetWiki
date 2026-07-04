@@ -7,10 +7,12 @@ import {
 import type { UserRestrictions } from "@/lib/restrictions/types";
 import { alternative, NO_RESTRICTIONS } from "./_factories";
 
-// Handoff §2.3 — the smart-suggestion selection logic.
-describe("scoreAlternative (color cap applied to candidates)", () => {
-  it("caps the raw catalog score and attaches label/tone", () => {
-    const a = scoreAlternative(alternative({ score: 18, count_rouge: 1 }));
+// Sélection des suggestions intelligentes (plus de color cap : le score pastille
+// est déjà position-aware, donc on lui fait confiance tel quel).
+describe("scoreAlternative (pas de cap — score pastille de confiance)", () => {
+  it("garde le score du catalogue tel quel + attache label/tone", () => {
+    // Un produit avec un rouge a DÉJÀ un score pastille bas (~8.9), pas 18.
+    const a = scoreAlternative(alternative({ score: 8.9, count_rouge: 1 }));
     expect(a.score).toBe(8.9);
     expect(a.score_label).toBe("Faible");
     expect(a.score_tone).toBe("rose");
@@ -63,11 +65,11 @@ describe("pickBestAlternative", () => {
     expect(best?.score).toBe(16);
   });
 
-  it("ranks by CAPPED score, not raw score", () => {
+  it("classe par le score pastille (un rouge a déjà fait chuter le score)", () => {
     const product = 9;
     const alts = [
-      // raw 19 but 2 rouge -> capped 8.9 -> not better than 9.5 -> rejected
-      alternative({ ean: "capped", score: 19, count_rouge: 2 }),
+      // 2 rouge -> score pastille bas (~2), pas 19 -> rejeté (pas meilleur que 9.5)
+      alternative({ ean: "lowRed", score: 2, count_rouge: 2 }),
       alternative({ ean: "honest", score: 13 }),
     ];
     const best = pickBestAlternative(product, alts, NO_RESTRICTIONS);
@@ -92,20 +94,20 @@ describe("pickBestAlternative", () => {
     expect(pickBestAlternative(12, alts, NO_RESTRICTIONS)).toBeNull();
   });
 
-  it("never proposes a yellow alternative (capped < 13) for an orange product", () => {
+  it("ne propose rien si aucune alternative n'est nettement meilleure", () => {
     const product = 7; // orange
     const alts = [
-      alternative({ ean: "yellow", score: 16, count_orange: 1 }), // capped 12.9 -> yellow, rejected
-      alternative({ ean: "alsoYellow", score: 12 }), // 12 -> rejected
+      alternative({ ean: "barely", score: 7.3 }), // <= 7.5 -> rejeté
+      alternative({ ean: "worse", score: 5 }),
     ];
     expect(pickBestAlternative(product, alts, NO_RESTRICTIONS)).toBeNull();
   });
 
-  it("accepts the green alternative and skips the yellow one", () => {
+  it("choisit l'alternative au meilleur score pastille", () => {
     const product = 7;
     const alts = [
-      alternative({ ean: "yellow", score: 16, count_orange: 1 }), // capped 12.9 -> rejected
-      alternative({ ean: "green", score: 14 }), // capped 14 -> green, kept
+      alternative({ ean: "caution", score: 11 }), // caution (9-13)
+      alternative({ ean: "green", score: 15 }), // safe (13-17) -> meilleur
     ];
     expect(pickBestAlternative(product, alts, NO_RESTRICTIONS)?.ean).toBe("green");
   });

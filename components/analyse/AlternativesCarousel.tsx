@@ -6,6 +6,7 @@ import { useRestrictions } from "@/components/restrictions/RestrictionsProvider"
 import { buildExclusionSet, isExcluded } from "@/lib/alternatives/filter";
 import type { UserRestrictions } from "@/lib/restrictions/types";
 import type { AlternativeRow } from "@/app/api/alternatives/route";
+import { scoreColor } from "@/lib/essentiel/engine";
 
 // ─── sessionStorage keys (mirror ScanSheet / ProductBrowsePage) ──────────────
 const PENDING_INCI_KEY = "cw:pendingInci";
@@ -127,7 +128,8 @@ function AlternativeCard({
   onSelect: (a: AlternativeRow) => void;
 }) {
   const [imgFailed, setImgFailed] = useState(false);
-  const tone = TONE[alt.score_tone] ?? TONE.rose;
+  // Couleur dérivée du SCORE (source unique) — jamais du score_tone stocké.
+  const tone = TONE[scoreColor(alt.score) ?? "rose"] ?? TONE.rose;
   const showImage = alt.image_url && !imgFailed;
 
   return (

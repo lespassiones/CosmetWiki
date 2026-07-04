@@ -225,9 +225,9 @@ export async function POST(req: NextRequest) {
   // previous live analysis. We still save to user history so the scan appears
   // in /history. Uses the anon client (public SELECT RLS policy).
   //
-  // catalog.score is fetched in parallel: it holds the INCI Beauty score which
-  // is the source of truth for all known products. We override the stored
-  // computed score with it before returning.
+  // catalog.score is fetched in parallel: it holds the proprietary CosmeCheck
+  // catalog score, which is the reference for all known products. We override
+  // the stored computed score with it before returning.
   const productEan = body.productEan?.trim() || null;
   let ibScore: number | null = null;
   let ibCatalogCategory: string | null = null;
@@ -407,7 +407,7 @@ export async function POST(req: NextRequest) {
     // borderline cases). The AI defaults to "valid" if unavailable so we never
     // block a real user.
     //
-    // EXCEPTION — vetted catalog products (known EAN with an INCI Beauty score):
+    // EXCEPTION - vetted catalog products (known EAN with a proprietary catalog score):
     // the gate exists to reject random free-text paste, NOT products the catalog
     // already references and rated. Oral-care items (toothpaste/dentifrice) and
     // other borderline categories legitimately trip the "is this cosmetic?"
@@ -623,9 +623,9 @@ export async function POST(req: NextRequest) {
   );
   let { label: scoreLabelText, tone: scoreTone } = scoreLabel(score);
 
-  // For known catalog products, replace the computed score with the INCI Beauty
-  // score fetched earlier. The computed score is only the fallback for new /
-  // internet-only products that INCI Beauty hasn't rated yet.
+  // For known catalog products, replace the computed score with the proprietary
+  // catalog score fetched earlier. The computed score is only the fallback for
+  // new / internet-only products not yet in the catalog.
   if (ibScore !== null) {
     score = ibScore;
     ({ label: scoreLabelText, tone: scoreTone } = scoreLabel(ibScore));
@@ -1156,9 +1156,9 @@ export async function POST(req: NextRequest) {
           brand: body.brand ?? null,
           name: body.productLabel ?? null,
           ingredientsText: body.text ?? null,
-          // When a catalog IB score already exists, pass null so the COALESCE
+          // When a catalog score already exists, pass null so the COALESCE
           // in the RPC keeps it intact. Only store the computed score for new /
-          // internet-only products that INCI Beauty hasn't rated yet.
+          // internet-only products not yet in the catalog.
           score: ibScore !== null ? null : Number(score.toFixed(4)),
           scoreLabel: ibScore !== null ? null : scoreLabelText,
           scoreTone: ibScore !== null ? null : scoreTone,
@@ -1213,7 +1213,7 @@ export async function POST(req: NextRequest) {
             name: eanLabel,
             ingredientsText: obf.ingredientsText ?? body.text,
             category: catSlug,
-            // Produit internet-only : pas de score INCI Beauty, on stocke le
+            // Produit internet-only : pas de score catalogue, on stocke le
             // score calculé sur la liste d'ingrédients.
             score: Number(score.toFixed(4)),
             scoreLabel: scoreLabelText,

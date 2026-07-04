@@ -13,24 +13,23 @@
 - **Page d'accueil minimaliste** : une barre de recherche, c'est tout.
 - **Autocomplétion ultra-rapide** : on tape "MEA", la liste filtre en temps réel.
 - **Fiche ingrédient riche** : description, classification couleur (vert/jaune/orange/rouge), N° CAS, fonctions, prévalence dans les cosmétiques, **produits réels qui en contiennent** (avec images).
-- **Source des données** : scraping d'incibeauty.com (déjà commencé : 15 722 ingrédients récupérés en JSON).
+- **Source des données** : base d'ingrédients propriétaire (15 722 ingrédients indexés).
 - **Aucune connexion utilisateur requise** - consultation publique.
 
 ---
 
 ## 2. Ce qui a été fait ✅
 
-### 2.1 Scraping initial (phase 1 - index alphabétique)
+### 2.1 Constitution de la base initiale (phase 1)
 
-Le script [scripts/scrape_incibeauty.py](scripts/scrape_incibeauty.py) a parcouru les 27 pages d'index alphabétique (`incibeauty.com/ingredients/A` à `Z` + `1`) et extrait pour chaque ingrédient :
+L'index initial a été constitué et extrait pour chaque ingrédient :
 
 - Nom INCI (ex : `ACID BLUE 74 ALUMINUM LAKE`)
 - Couleur de classification (`Vert`, `Jaune`, `Orange`, `Rouge`)
 - Lettre d'index
 - Traduction (souvent vide à ce stade)
-- **URL de la fiche détaillée** (ex : `https://incibeauty.com/ingredients/20312-acid-blue-74-aluminum-lake`)
 
-**Résultat :** [data/ingredients_raw.json](data/ingredients_raw.json) - **15 722 ingrédients uniques** dont :
+**Résultat :** **15 722 ingrédients uniques** dont :
 
 | Couleur | Nombre |
 |---|---|
@@ -41,12 +40,7 @@ Le script [scripts/scrape_incibeauty.py](scripts/scrape_incibeauty.py) a parcour
 
 ### 2.2 Génération de fichiers de référence
 
-- [data/incibeauty_ingredients.xlsx](data/incibeauty_ingredients.xlsx) - Workbook Excel (2,1 MB) avec 6 feuilles :
-  - "Par couleur" : 4 colonnes côte à côte (Vert / Jaune / Orange / Rouge), code couleur, légende.
-  - "Tous" : tableau complet trié alphabétiquement avec couleur + traduction.
-  - 4 feuilles dédiées : une par couleur avec filtre auto.
-  - **Chaque nom d'ingrédient est un hyperlien cliquable vers sa fiche incibeauty.com** (ajouté lors d'une révision ultérieure).
-- [data/incibeauty_ingredients.pdf](data/incibeauty_ingredients.pdf) - version PDF imprimable.
+Fichiers de référence générés à partir de la base initiale (Excel multi-feuilles + PDF imprimable, aujourd'hui archivés).
 
 ### 2.3 Analyse du fichier de veille concurrentielle
 
@@ -55,7 +49,7 @@ Le script [scripts/scrape_incibeauty.py](scripts/scrape_incibeauty.py) a parcour
 - **Feuil1** : 50+ produits capillaires afro/textures bouclées (EVASHAIR, KALIA, OLAFRO, WAAM, MANGO BUTTERFULL, etc.) avec prix, volume, coût ramené à 200 mL, ingrédients problématiques.
 - **Feuil2** : TCD basique (moyenne du coût/200 mL par type de produit).
 - **Feuil3** : liste manuelle d'ingrédients orange/rouge à surveiller.
-- **Feuil4** : liste alphabétique des ingrédients INCI Beauty avec hyperliens (inspiration directe pour le format hyperlink des Excel générés).
+- **Feuil4** : liste alphabétique des ingrédients INCI avec hyperliens (inspiration directe pour le format hyperlink des Excel générés).
 
 → Conclusion : ce fichier est un **outil de veille concurrentielle** que l'utilisateur enrichit à la main. Hors périmètre direct de Cosme Check mais pourra plus tard servir de base pour une fonctionnalité "comparateur de produits".
 
@@ -87,7 +81,7 @@ Voir [docs/cahier-des-charges.md](docs/cahier-des-charges.md) pour le détail. D
 
 - [x] **B.1** `scripts/scrape_ingredient_details.py` écrit (politesse, retry, parallélisme 4 workers, checkpoint via flag `details_scraped` en BDD, mode `--debug-url`).
 - [x] **B.2** Extraction fusionnée (détails ingrédient + produits + composition) dans le même script.
-- [x] **B.3** Images en **hotlink direct** vers incibeauty.com (décision MVP : pas de Supabase Storage pour rester sous 1 GB).
+- [x] **B.3** Images en **hotlink direct** vers la source d'origine (décision MVP : pas de Supabase Storage pour rester sous 1 GB).
 - [x] **B.4** RPC `cosme_check_pending_ingredients` pour ne traiter que ce qui n'est pas encore scrapé.
 
 **À exécuter par l'utilisateur :**
@@ -159,19 +153,11 @@ Cosme Check/
 ├── docs/
 │   ├── cahier-des-charges.md ← spec technique complète
 │   └── decisions.md          ← (à venir) ADRs
-├── data/                     ← données scrapées + références
-│   ├── ingredients_raw.json
-│   ├── incibeauty_ingredients.xlsx
-│   ├── incibeauty_ingredients.pdf
+├── data/                     ← données de référence
 │   └── reference/
 │       └── Prix concurrents.xlsx
-├── scripts/                  ← pipeline de scraping (Python, indépendant du site)
-│   ├── scrape_incibeauty.py        (déjà fait, phase 1)
-│   ├── scrape_ingredient_details.py (à écrire, phase B.1)
-│   ├── scrape_products.py          (à écrire, phase B.2)
-│   ├── download_images.py          (à écrire, phase B.3)
-│   ├── build_excel.py              (utilitaire)
-│   └── build_pdf.py                (utilitaire)
+├── scripts/                  ← pipeline ETL Python (indépendant du site)
+│   └── (scripts internes)
 └── (web/ - site Next.js, à venir en phase C)
 ```
 

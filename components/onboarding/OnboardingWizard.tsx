@@ -342,7 +342,7 @@ export function OnboardingWizard({ initial, finalNext }: Props) {
           type="button"
           onClick={handleContinue}
           disabled={pending}
-          className="block w-full rounded-md bg-[#F43F5E] py-3.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-[#E11D48] disabled:opacity-50"
+          className="block w-full rounded-md bg-emerald-500 py-3.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-emerald-600 disabled:opacity-50"
         >
           {pending ? "Enregistrement…" : `${currentStep.ctaLabel} →`}
         </button>

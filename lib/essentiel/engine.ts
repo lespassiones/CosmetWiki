@@ -47,6 +47,23 @@ export function verdictToneFromScore(score: number | null | undefined): VerdictT
   return "danger";
 }
 
+/**
+ * COULEUR de pastille dérivée DIRECTEMENT du score (source UNIQUE) — mêmes seuils
+ * que verdictToneFromScore : très-safe + safe = vert, caution = ambre, warning =
+ * orange, danger = rose. On ne lit JAMAIS un champ `score_tone` stocké (système
+ * parallèle qui peut dériver) : la couleur d'un produit vient TOUJOURS de son
+ * score, donc identique partout (analyse, reco, recherche, browse, advisor).
+ */
+export function scoreColor(
+  score: number | null | undefined,
+): "green" | "amber" | "orange" | "rose" | null {
+  if (score == null || Number.isNaN(score)) return null;
+  if (score >= 13) return "green";
+  if (score >= 9) return "amber";
+  if (score >= 5) return "orange";
+  return "rose";
+}
+
 export type Verdict = {
   tone: VerdictTone;
   phrase: string;
@@ -463,20 +480,17 @@ export type EssentielData = {
 };
 
 /**
- * Apply a color-based safety floor to the display score (pastille only —
- * does NOT modify the stored score). Rules:
- *   - ≥1 rouge OR ≥3 orange → cap at 8.9  (pastille ≤ triangle)
- *   - 1–2 orange            → cap at 12.9 (pastille ≤ œil)
- *   - else                  → no cap
- * Using `min(score, cap)` so a score already below the cap is never raised.
+ * NEUTRALISÉ (juillet 2026) — le color cap n'est PLUS appliqué (parité mobile).
+ * Le score est désormais issu du moteur PASTILLE qui intègre déjà le plafond PAR
+ * POSITION (`lib/analysis/pastille.ts`). Re-plafonner ici (règle aveugle à la
+ * position) sur-pénaliserait à tort un produit dont le rouge est en fin de liste
+ * et divergerait du score du catalogue. Signature gardée (appelants inchangés) ;
+ * renvoie le score tel quel. À retirer quand tous les appels auront été nettoyés.
  */
 export function colorCapScore(
   score: number,
-  counts: Pick<AnalyseResponse["counts"], "orange" | "rouge">,
+  _counts: Pick<AnalyseResponse["counts"], "orange" | "rouge">,
 ): number {
-  const { orange, rouge } = counts;
-  if (rouge >= 1 || orange >= 3) return Math.min(score, 8.9);
-  if (orange >= 1)               return Math.min(score, 12.9);
   return score;
 }
 

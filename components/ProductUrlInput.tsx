@@ -207,7 +207,7 @@ export function ProductUrlInput({
             type="button"
             onClick={confirm}
             disabled={noInci}
-            className="flex-1 rounded-xl bg-gradient-to-b from-rose-500 to-pink-500 px-4 py-3 text-sm font-semibold text-white shadow hover:from-rose-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="flex-1 rounded-xl bg-gradient-to-b from-emerald-500 to-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             Oui, analyser
           </button>
@@ -240,7 +240,7 @@ export function ProductUrlInput({
           <button
             type="submit"
             disabled={busy || !isLikelyUrl(url)}
-            className="rounded-xl bg-gradient-to-b from-rose-500 to-pink-500 px-4 py-2 text-sm font-semibold text-white shadow hover:from-rose-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="rounded-xl bg-gradient-to-b from-emerald-500 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             {busy ? "…" : "Récupérer"}
           </button>

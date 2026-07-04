@@ -167,7 +167,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
           <button
             type="button"
             onClick={startSelect}
-            className="neu-shadow-rose rounded-full inline-flex items-center gap-1.5 bg-[#F43F5E] text-white px-3.5 py-1.5 text-[12px] font-semibold transition hover:bg-[#E11D48]"
+            className="neu-shadow rounded-full inline-flex items-center gap-1.5 bg-emerald-500 text-white px-3.5 py-1.5 text-[12px] font-semibold transition hover:bg-emerald-600"
           >
             Comparer 2 analyses
             <SwapHorizontalIcon className="h-3.5 w-3.5" />

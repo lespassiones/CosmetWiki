@@ -42,7 +42,7 @@ Le parser INCI traite `Aqua (Water / Eau)` comme 3 ingrédients distincts (Aqua,
 ## 0.2 🔴 Tuning fuzzy match + suggestion "Vouliez-vous dire"
 
 **Problème actuel**
-Le fuzzy match peut soit générer des faux positifs (matche un ingrédient inexistant à un proche orthographique) soit ne rien trouver. C'est exactement le défaut d'INCI Beauty qu'on veut éviter.
+Le fuzzy match peut soit générer des faux positifs (matche un ingrédient inexistant à un proche orthographique) soit ne rien trouver. C'est exactement le défaut qu'on veut éviter.
 
 **Implémentation**
 - Activer l'extension PostgreSQL `pg_trgm` sur Supabase.
@@ -678,7 +678,7 @@ usage_counters (
 - Trial de 14 jours offert au sign up.
 
 **Justification**
-- InciBeauty Premium = 1,30 €/mois. On se positionne légèrement au-dessus parce qu'on offre **copier-coller, OCR, routine cumulée et comparaison** qu'ils n'ont pas.
+- Concurrence Premium ~ 1,30 €/mois. On se positionne légèrement au-dessus parce qu'on offre **copier-coller, OCR, routine cumulée et comparaison** que les apps comparables n'ont pas.
 - Ne pas démarrer la monétisation avant **50 à 200 utilisateurs actifs** pour avoir un signal de rétention.
 
 **Priorité** : ⚪ - décision marché, pas dev.
@@ -719,7 +719,7 @@ routine_items (
 ## 6.2 🟡 Intégration Open Beauty Facts
 
 **Objectif**
-Augmenter massivement la base de données produits (~50 k via OBF vs base INCI Beauty actuelle).
+Augmenter massivement la base de données produits (~50 k via OBF vs base catalogue actuelle).
 
 **Implémentation**
 - Script ETL nocturne : récupère les produits OBF par lots via leur API JSON (`https://world.openbeautyfacts.org/api/v2/`).

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { ProductSearchResult, ProductSearchHit } from "@/lib/productSearch/types";
 import type { OpenBeautyFactsCandidate } from "@/lib/productSearch/openBeautyFacts";
 import type { DuckDuckGoCandidate } from "@/lib/productSearch/duckduckgo";
+import { scoreColor } from "@/lib/essentiel/engine";
 
 // Module-level cache: survives re-renders, cleared on page reload.
 // Key is the normalised query (lowercase + no accents + sorted words) so
@@ -505,7 +506,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
           <button
             type="submit"
             disabled={busy || query.trim().length < 3}
-            className="shrink-0 rounded-xl bg-gradient-to-b from-rose-500 to-pink-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(244,63,94,0.45),inset_0_1px_0_0_rgba(255,255,255,0.30)] transition-all hover:from-rose-600 hover:to-pink-600 disabled:cursor-not-allowed disabled:from-rose-200 disabled:to-pink-200 disabled:text-white/80 disabled:shadow-none"
+            className="shrink-0 rounded-xl bg-gradient-to-b from-emerald-500 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(16,185,129,0.45),inset_0_1px_0_0_rgba(255,255,255,0.30)] transition-all hover:from-emerald-600 hover:to-emerald-700 disabled:cursor-not-allowed disabled:from-emerald-200 disabled:to-emerald-200 disabled:text-white/80 disabled:shadow-none"
           >
             {busy ? "Recherche…" : "Rechercher"}
           </button>
@@ -616,7 +617,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
               type="button"
               onClick={runDeepSearch}
               disabled={deepSearching}
-              className="rounded-xl bg-gradient-to-b from-rose-400 to-pink-400 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(251,113,133,0.55),inset_0_1px_0_0_rgba(255,255,255,0.30)] transition-all hover:from-rose-500 hover:to-pink-500 disabled:cursor-not-allowed disabled:from-rose-200 disabled:to-pink-200"
+              className="rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(251,113,133,0.55),inset_0_1px_0_0_rgba(255,255,255,0.30)] transition-all hover:from-emerald-500 hover:to-emerald-600 disabled:cursor-not-allowed disabled:from-emerald-200 disabled:to-emerald-200"
             >
               {deepSearching ? "Recherche…" : "Lancer une recherche web approfondie"}
             </button>
@@ -718,7 +719,7 @@ export function ProductSearchInput({ onFound, onFallbackToManual }: Props) {
               type="button"
               onClick={runDeepSearch}
               disabled={deepSearching}
-              className="rounded-xl bg-gradient-to-b from-rose-400 to-pink-400 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(251, 113, 133,0.55),inset_0_1px_0_0_rgba(255,255,255,0.30)] transition-all hover:from-rose-500 hover:to-pink-500 disabled:cursor-not-allowed disabled:from-rose-200 disabled:to-pink-200"
+              className="rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(251, 113, 133,0.55),inset_0_1px_0_0_rgba(255,255,255,0.30)] transition-all hover:from-emerald-500 hover:to-emerald-600 disabled:cursor-not-allowed disabled:from-emerald-200 disabled:to-emerald-200"
             >
               {deepSearching ? "Recherche…" : "Recherche approfondie"}
             </button>
@@ -787,7 +788,8 @@ function CandidateCard({
   const sourceMeta = candidate.source ? SOURCE_BADGE[candidate.source] : null;
   const needsLoad = candidate.source === "incidecoder" && !candidate.ingredientsText;
   const isCatalog = candidate.source === "catalog";
-  const scoreToneCls = candidate.scoreTone ? (SCORE_TONE_CLS[candidate.scoreTone] ?? "text-ink") : "text-ink";
+  // Couleur dérivée du SCORE (source unique), jamais du scoreTone stocké.
+  const scoreToneCls = SCORE_TONE_CLS[scoreColor(candidate.score) ?? ""] ?? "text-ink";
   return (
     <button
       type="button"

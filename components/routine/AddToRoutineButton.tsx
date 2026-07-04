@@ -50,7 +50,7 @@ export function AddToRoutineButton({
       // class already handles translateY on hover and inset press on active.
       // min-w-0 + truncate on the label so the button can shrink in flex-1
       // slots (analyse header on mobile) without breaking the row.
-      className={`neu-shadow-rose inline-flex items-center justify-center gap-1.5 rounded-full bg-[#F43F5E] text-white text-xs sm:text-[13px] font-semibold px-3 sm:px-3.5 py-1.5 transition hover:bg-[#E11D48] disabled:opacity-60 ${className}`}
+      className={`neu-shadow inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 text-white text-xs sm:text-[13px] font-semibold px-3 sm:px-3.5 py-1.5 transition hover:bg-emerald-600 disabled:opacity-60 ${className}`}
     >
       <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <line x1="12" y1="5" x2="12" y2="19" />

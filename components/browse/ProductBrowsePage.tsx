@@ -213,6 +213,30 @@ export function ProductBrowsePage() {
   const isLeaf = isLeafPath(path);
   const currentName = path.length > 0 ? path[path.length - 1] : null;
 
+  // ── Infinite scroll : charge la page suivante automatiquement quand le
+  //    sentinel entre dans le viewport (remplace le bouton "Voir plus").
+  //    rootMargin 400px = précharge avant d'atteindre le bas → défilement fluide.
+  //    Un seul sentinel est monté à la fois (recherche XOR browse-feuille).
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const onIntersectRef = useRef<() => void>(() => {});
+  onIntersectRef.current = () => {
+    if (showSearch) {
+      if (searchHasMore && !searchLoadingMore) loadMoreSearch();
+    } else if (isLeaf) {
+      if (browseHasMore && !browseLoadingMore) loadMoreBrowse();
+    }
+  };
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => { if (entries[0]?.isIntersecting) onIntersectRef.current(); },
+      { rootMargin: "400px" },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [showSearch, isLeaf, searchHasMore, browseHasMore]);
+
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Header sticky */}
@@ -286,21 +310,10 @@ export function ProductBrowsePage() {
               ))}
             </div>
             {searchHasMore && (
-              <div className="flex justify-center mt-6">
-                <button
-                  onClick={loadMoreSearch}
-                  disabled={searchLoadingMore}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white ring-1 ring-black/[0.08] text-[14px] font-medium text-ink hover:ring-[#F43F5E]/40 hover:bg-rose-50/40 transition-all disabled:opacity-60"
-                >
-                  {searchLoadingMore ? (
-                    <div className="w-4 h-4 border-2 border-[#F43F5E]/30 border-t-[#F43F5E] rounded-full animate-spin" />
-                  ) : (
-                    <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current text-ink-muted" aria-hidden>
-                      <path d="M8 3v10M3 8l5 5 5-5"/>
-                    </svg>
-                  )}
-                  Voir plus
-                </button>
+              <div ref={loadMoreRef} className="flex justify-center items-center mt-6 h-10">
+                {searchLoadingMore && (
+                  <div className="w-5 h-5 border-2 border-[#F43F5E]/30 border-t-[#F43F5E] rounded-full animate-spin" />
+                )}
               </div>
             )}
           </div>
@@ -398,21 +411,10 @@ export function ProductBrowsePage() {
                   ))}
                 </div>
                 {browseHasMore && (
-                  <div className="flex justify-center mt-6">
-                    <button
-                      onClick={loadMoreBrowse}
-                      disabled={browseLoadingMore}
-                      className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white ring-1 ring-black/[0.08] text-[14px] font-medium text-ink hover:ring-[#F43F5E]/40 hover:bg-rose-50/40 transition-all disabled:opacity-60"
-                    >
-                      {browseLoadingMore ? (
-                        <div className="w-4 h-4 border-2 border-[#F43F5E]/30 border-t-[#F43F5E] rounded-full animate-spin" />
-                      ) : (
-                        <svg viewBox="0 0 16 16" className="w-4 h-4 fill-current text-ink-muted" aria-hidden>
-                          <path d="M8 3v10M3 8l5 5 5-5"/>
-                        </svg>
-                      )}
-                      Voir plus
-                    </button>
+                  <div ref={loadMoreRef} className="flex justify-center items-center mt-6 h-10">
+                    {browseLoadingMore && (
+                      <div className="w-5 h-5 border-2 border-[#F43F5E]/30 border-t-[#F43F5E] rounded-full animate-spin" />
+                    )}
                   </div>
                 )}
               </>

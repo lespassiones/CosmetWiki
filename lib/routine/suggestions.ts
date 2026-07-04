@@ -26,7 +26,7 @@ export type CatalogAlternative = {
   name: string | null;
   category: string | null;
   image_url?: string | null;
-  /** Raw catalog score (INCI Beauty), BEFORE the color cap. */
+  /** Raw proprietary catalog score. */
   score: number;
   ingredients_text?: string | null;
   count_orange?: number | null;

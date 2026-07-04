@@ -164,8 +164,6 @@ const EDITORIAL_DOMAINS = new Set([
   "quechoisir.org",
   "comprendrechoisir.com",
   "60millions-mag.com",
-  "incibeauty.com",
-  "inci-beauty.com",
   "incidecoder.com",
   "cosmopolitan.fr",
   "elle.fr",

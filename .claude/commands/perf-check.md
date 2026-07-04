@@ -102,7 +102,7 @@ Analyse des patterns de fetch dans les Server Components et routes API critiques
 
 4. **N+1 queries** : y a-t-il des boucles `for` ou `.map()` avec un appel Supabase à l'intérieur ? C'est le problème N+1 classique.
 
-5. **Route `/api/analyser`** : combien d'appels externes (OpenBeautyFacts, InciBeauty, OpenAI) sont faits séquentiellement ? Peuvent-ils être parallélisés ?
+5. **Route `/api/analyser`** : combien d'appels externes (OpenBeautyFacts, OpenAI) sont faits séquentiellement ? Peuvent-ils être parallélisés ?
 
 6. **Pagination absente** : les routes qui retournent des listes (history, routine, compare) ont-elles un `.limit()` ? Que retourne la requête si l'utilisateur a 500 analyses ?
 

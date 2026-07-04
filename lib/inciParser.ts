@@ -5,6 +5,8 @@
  * Handles : commas, semicolons, "/" between synonyms, parentheses,
  * asterisks, "(F.I.L. ...)", line breaks, double-spaces.
  */
+import { pastilleTone, synthScore } from "./analysis/pastille";
+
 export type ParsedToken = {
   /** Original raw value as the user pasted it (kept for display). */
   raw: string;
@@ -229,45 +231,25 @@ export function parseInciList(text: string): ParsedToken[] {
 }
 
 /**
- * Compute a /20 score from a list of matched ingredients.
- * Earlier positions weigh more (logarithmic decay). Saturating formula so
- * the score never reaches 0 on long lists (unlike the old additive formula).
- *
- *   penalty = { Vert: 0, Jaune: 0.6, Orange: 2.0, Rouge: 4.0 }
- *   weight(p) = log(N - p + 1) / log(N + 1)   ∈ [0, 1]
- *   S = Σ penalty * weight  +  cocktail_effect
- *   score = 20 / (1 + S / 8)                   ∈ (0, 20]
+ * Note /20 PROPRIÉTAIRE — pastille couleur + position, synthétisée dans la bande
+ * du ton (miroir de l'app mobile `lib/analysis/pastille.ts` et de l'Edge
+ * `analyser/score.ts`). Plus AUCUNE formule tierce (log-pénalité) ni de
+ * color cap. Signature inchangée : les appelants `computeScore(matches, total)`
+ * continuent de fonctionner et obtiennent désormais notre score pastille.
  */
 export type ColorRating = "Vert" | "Jaune" | "Orange" | "Rouge";
-
-const PENALTY: Record<ColorRating, number> = {
-  Vert: 0,
-  Jaune: 0.6,
-  Orange: 2.0,
-  Rouge: 4.0,
-};
 
 export function computeScore(
   matches: { color_rating: ColorRating | null; position: number }[],
   totalPositions: number,
 ): number {
   if (totalPositions === 0) return 0;
-  const N = Math.max(totalPositions, 1);
-  let S = 0;
-  let countOrange = 0;
-  let countRouge = 0;
-  for (const m of matches) {
-    if (!m.color_rating) continue;
-    const weight = Math.log(N - m.position + 1) / Math.log(N + 1);
-    S += PENALTY[m.color_rating] * weight;
-    if (m.color_rating === 'Orange') countOrange++;
-    if (m.color_rating === 'Rouge') countRouge++;
-  }
-  // Cocktail effect: extra penalty when problematic ingredients accumulate.
-  S += Math.max(0, countOrange - 3) * 0.4;
-  S += Math.max(0, countRouge - 2) * 0.8;
-  // Saturating formula: asymptotically approaches 0, never equals it.
-  return 20 / (1 + S / 8);
+  const p = pastilleTone(
+    matches.map((m) => ({ color: m.color_rating, position: m.position })),
+    totalPositions,
+    false,
+  );
+  return synthScore(p) ?? 0;
 }
 
 /** Map a numeric score (0-20) to a qualitative label and color. */

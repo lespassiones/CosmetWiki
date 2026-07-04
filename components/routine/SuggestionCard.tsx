@@ -123,7 +123,7 @@ export function SuggestionCard({
         onClick={onKeep}
         disabled={keeping || kept}
         className={`mt-5 flex min-h-[50px] w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold text-white transition ${
-          kept ? "bg-emerald-500" : "bg-rose-500 hover:bg-rose-600"
+          kept ? "bg-emerald-500" : "bg-emerald-600 hover:bg-emerald-700"
         } ${keeping ? "opacity-60" : ""}`}
       >
         {keeping ? (
