@@ -254,8 +254,10 @@ export function computeScore(
 
 /** Map a numeric score (0-20) to a qualitative label and color. */
 export function scoreLabel(score: number): { label: string; tone: "green" | "amber" | "orange" | "rose" } {
+  // TONE aligné sur catalog.f_score_tone (>=13 vert) = convention unique (mobile/web/DB).
   if (score >= 17) return { label: "Très bien", tone: "green" };
-  if (score >= 13) return { label: "Bien", tone: "amber" };
-  if (score >= 9) return { label: "Moyen", tone: "orange" };
+  if (score >= 13) return { label: "Bien", tone: "green" };
+  if (score >= 9) return { label: "Moyen", tone: "amber" };
+  if (score >= 5) return { label: "Faible", tone: "orange" };
   return { label: "Faible", tone: "rose" };
 }

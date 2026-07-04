@@ -6,7 +6,6 @@ import { Logo } from "@/components/Logo";
 import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { SearchTrigger } from "@/components/SearchTrigger";
-import { ProductRow } from "@/components/ProductRow";
 import { MobileMenu } from "@/components/MobileMenu";
 import { Reveal } from "@/components/Reveal";
 import { ExplainIngredient } from "@/components/ingredient/ExplainIngredient";
@@ -93,18 +92,6 @@ const loadIngredient = cache(async (slug: string): Promise<Ingredient | null> =>
   if (!data || data.length === 0) return null;
   return data[0] ?? null;
 });
-
-async function loadProducts(ingredientId: number): Promise<ProductHit[]> {
-  const { data, error } = await rpcWithTimeout<ProductHit[]>(
-    supabaseAnon().rpc("cosme_check_products_for_ingredient", {
-      p_ingredient_id: ingredientId,
-      p_limit: 12,
-    }),
-    RPC_TIMEOUT_MS,
-  );
-  if (error || !data) return [];
-  return data;
-}
 
 const RATING_META_LABEL: Record<ColorRating, string> = {
   Vert: "sans risque connu",
@@ -215,10 +202,6 @@ export default async function IngredientPage({ params, searchParams }: Props) {
   const ing = await loadIngredient(slug);
   if (!ing) notFound();
 
-  const products = await loadProducts(ing.id);
-  const visibleProducts = products.slice(0, PRODUCTS_VISIBLE);
-  const moreProductsCount = Math.max(products.length - PRODUCTS_VISIBLE, 0);
-
   const name = prettyName(ing.name);
   const subtitle = inferSubtitle(ing);
   const breakdown = ing.category_breakdown
@@ -233,9 +216,6 @@ export default async function IngredientPage({ params, searchParams }: Props) {
   const hasDescription = !!ing.description && ing.description.trim().length > 4;
   const hasRegulated = (ing.regulated_zones?.length ?? 0) > 0;
   const hasBreakdown = breakdown.length > 0;
-  const hasOtherTranslations =
-    ing.translations &&
-    Object.keys(ing.translations).filter((k) => k !== "fr").length > 0;
 
   const jsonLd = buildIngredientJsonLd(ing);
 
@@ -385,8 +365,8 @@ export default async function IngredientPage({ params, searchParams }: Props) {
           )}
         </div>
 
-        {/* About + Products */}
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1.2fr_1fr]">
+        {/* About */}
+        <div className="mt-10 max-w-3xl">
           <Reveal delayMs={850}>
             {hasDescription ? (
               <section>
@@ -466,78 +446,6 @@ export default async function IngredientPage({ params, searchParams }: Props) {
             ) : null}
 
             <TechSection ing={ing} />
-
-            {hasOtherTranslations ? (
-              <section className="mt-10 border-t border-black/[0.06] pt-8">
-                <SectionTitle>Autres langues</SectionTitle>
-                <ul className="mt-3 flex flex-wrap gap-2">
-                  {Object.entries(ing.translations!)
-                    .filter(([k]) => k !== "fr")
-                    .map(([lang, v]) => {
-                      const showLangLabel = !lang.startsWith("alt_");
-                      return (
-                        <li
-                          key={lang}
-                          className="rounded-full bg-white/60 px-3 py-1 text-sm text-ink ring-1 ring-white/60 backdrop-blur-md"
-                        >
-                          {showLangLabel ? (
-                            <>
-                              <span className="font-mono text-[11px] uppercase tracking-wider text-ink-subtle">
-                                {lang}
-                              </span>{" "}
-                              · {v}
-                            </>
-                          ) : (
-                            <span>{v}</span>
-                          )}
-                        </li>
-                      );
-                    })}
-                </ul>
-              </section>
-            ) : null}
-          </Reveal>
-
-          {/* Products column */}
-          <Reveal delayMs={1000} className="lg:sticky lg:top-6 lg:self-start">
-            <aside>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-base font-semibold text-ink">
-                {products.length > 0
-                  ? `Présent dans ${products.length} produit${products.length > 1 ? "s" : ""}`
-                  : "Produits"}
-              </h2>
-            </div>
-
-            {products.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-black/[0.08] bg-white/40 p-8 text-center backdrop-blur-md">
-                <p className="text-sm text-ink-muted">
-                  {ing.details_scraped
-                    ? "Aucun produit indexé pour cet ingrédient."
-                    : "Les produits seront indexés quand le pipeline aura enrichi cette fiche."}
-                </p>
-              </div>
-            ) : (
-              <>
-                <ul className="space-y-2.5">
-                  {visibleProducts.map((p) => (
-                    <ProductRow
-                      key={p.product_id}
-                      product={p}
-                      ratingDot={RATING_DOT[ing.color_rating]}
-                    />
-                  ))}
-                </ul>
-
-                {moreProductsCount > 0 ? (
-                  <p className="mt-3 text-center text-[12px] text-ink-subtle">
-                    +{moreProductsCount} autre{moreProductsCount > 1 ? "s" : ""} produit
-                    {moreProductsCount > 1 ? "s" : ""} dans notre base
-                  </p>
-                ) : null}
-              </>
-            )}
-            </aside>
           </Reveal>
         </div>
 

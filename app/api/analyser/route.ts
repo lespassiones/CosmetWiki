@@ -229,9 +229,9 @@ export async function POST(req: NextRequest) {
   // catalog score, which is the reference for all known products. We override
   // the stored computed score with it before returning.
   const productEan = body.productEan?.trim() || null;
-  let ibScore: number | null = null;
-  let ibCatalogCategory: string | null = null;
-  let ibImageUrl: string | null = null;
+  let catalogScore: number | null = null;
+  let catalogCategory: string | null = null;
+  let catalogImageUrl: string | null = null;
 
   if (productEan) {
     try {
@@ -247,9 +247,9 @@ export async function POST(req: NextRequest) {
       ]);
 
       const rawCatalogData = catalogResult.data as { score: number | null; category: string | null; image_url: string | null } | null;
-      if (rawCatalogData?.score != null) ibScore = rawCatalogData.score;
-      ibCatalogCategory = rawCatalogData?.category ?? null;
-      ibImageUrl = rawCatalogData?.image_url ?? null;
+      if (rawCatalogData?.score != null) catalogScore = rawCatalogData.score;
+      catalogCategory = rawCatalogData?.category ?? null;
+      catalogImageUrl = rawCatalogData?.image_url ?? null;
 
       if (precomputed) {
         const cached_result = precomputed as AnalyseResponse;
@@ -289,9 +289,9 @@ export async function POST(req: NextRequest) {
           }
         }
         // Override with the catalog IB score (source of truth) when available.
-        if (ibScore !== null) {
-          const lb = scoreLabel(ibScore);
-          cached_result.score = ibScore;
+        if (catalogScore !== null) {
+          const lb = scoreLabel(catalogScore);
+          cached_result.score = catalogScore;
           cached_result.scoreLabel = lb.label;
           cached_result.scoreTone = lb.tone;
         } else if (typeof cached_result.score !== "number") {
@@ -309,8 +309,8 @@ export async function POST(req: NextRequest) {
           cached_result.scoreLabel = lb.label;
           cached_result.scoreTone = lb.tone;
         }
-        if (ibCatalogCategory) cached_result.catalogCategory = ibCatalogCategory;
-        cached_result.imageUrl = ibImageUrl;
+        if (catalogCategory) cached_result.catalogCategory = catalogCategory;
+        cached_result.imageUrl = catalogImageUrl;
 
         // Save to user history without charging credits.
         let savedAnalysisId: string | null = null;
@@ -413,7 +413,7 @@ export async function POST(req: NextRequest) {
     // other borderline categories legitimately trip the "is this cosmetic?"
     // classifier, which would wrongly block analysing a product recommended by
     // the advisor. For these, we skip the gate and analyse the list directly.
-    if (ibScore === null) {
+    if (catalogScore === null) {
       const validation = await validateInciInput(text);
       if (!validation.valid) {
         return NextResponse.json(
@@ -626,9 +626,9 @@ export async function POST(req: NextRequest) {
   // For known catalog products, replace the computed score with the proprietary
   // catalog score fetched earlier. The computed score is only the fallback for
   // new / internet-only products not yet in the catalog.
-  if (ibScore !== null) {
-    score = ibScore;
-    ({ label: scoreLabelText, tone: scoreTone } = scoreLabel(ibScore));
+  if (catalogScore !== null) {
+    score = catalogScore;
+    ({ label: scoreLabelText, tone: scoreTone } = scoreLabel(catalogScore));
   }
 
   // Tag aggregation : count + list of ingredients per tag
@@ -1019,8 +1019,8 @@ export async function POST(req: NextRequest) {
     synthesis,
     productType: body.productType?.slice(0, 120) ?? null,
     category: resolvedCategory,
-    catalogCategory: ibCatalogCategory ?? null,
-    imageUrl: ibImageUrl ?? null,
+    catalogCategory: catalogCategory ?? null,
+    imageUrl: catalogImageUrl ?? null,
   };
   // Silence unused-import noise in some narrow code paths.
   void EU_FRAGRANCE_ALLERGENS;
@@ -1159,9 +1159,9 @@ export async function POST(req: NextRequest) {
           // When a catalog score already exists, pass null so the COALESCE
           // in the RPC keeps it intact. Only store the computed score for new /
           // internet-only products not yet in the catalog.
-          score: ibScore !== null ? null : Number(score.toFixed(4)),
-          scoreLabel: ibScore !== null ? null : scoreLabelText,
-          scoreTone: ibScore !== null ? null : scoreTone,
+          score: catalogScore !== null ? null : Number(score.toFixed(4)),
+          scoreLabel: catalogScore !== null ? null : scoreLabelText,
+          scoreTone: catalogScore !== null ? null : scoreTone,
           countTotal: itemsResponse.length,
           // Categorize internet-sourced products on first write so they appear
           // in category browsing without a future re-fetch.
