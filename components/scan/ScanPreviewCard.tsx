@@ -50,7 +50,19 @@ export function ScanPreviewCard({
   }
 
   return (
-    <div className="pointer-events-auto absolute inset-x-3 bottom-4 rounded-2xl bg-white p-4 shadow-2xl ring-1 ring-black/5">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onSeeProduct}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSeeProduct();
+        }
+      }}
+      aria-label="Ouvrir l'analyse complète"
+      className="pointer-events-auto absolute inset-x-3 bottom-4 cursor-pointer rounded-2xl bg-white p-4 text-left shadow-2xl ring-1 ring-black/5"
+    >
       <div className="flex items-start gap-3">
         <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-100">
           {preview.imageUrl ? (
@@ -82,7 +94,10 @@ export function ScanPreviewCard({
 
         <button
           type="button"
-          onClick={onClose}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
           aria-label="Fermer"
           className="shrink-0 rounded-full p-1 text-slate-400 hover:bg-slate-100"
         >
@@ -98,14 +113,20 @@ export function ScanPreviewCard({
       <div className="mt-3 flex items-center gap-2">
         <button
           type="button"
-          onClick={onShare}
+          onClick={(e) => {
+            e.stopPropagation();
+            onShare();
+          }}
           className="flex items-center gap-1.5 rounded-full bg-slate-100 px-4 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-200"
         >
           Partager
         </button>
         <button
           type="button"
-          onClick={onSeeProduct}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSeeProduct();
+          }}
           className="flex-1 rounded-full bg-emerald-500 py-2.5 text-center text-sm font-semibold text-white hover:bg-emerald-600"
         >
           Voir le produit

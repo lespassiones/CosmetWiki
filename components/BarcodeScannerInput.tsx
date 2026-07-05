@@ -421,7 +421,7 @@ export function BarcodeScannerInput({
         ) : null}
       </div>
 
-      <p className="mt-3 text-center text-[13px] text-ink-subtle">
+      <p className="mt-3 text-center text-[13px] text-white/70">
         Approche le code-barres ou le QR du produit du cadre. La caméra scanne
         en continu.
       </p>

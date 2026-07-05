@@ -134,8 +134,8 @@ export function AppShell({
         <main className="pb-24 lg:pb-12">{children}</main>
       </div>
 
-      {/* Mobile bottom nav */}
-      <MobileBottomNav pathname={pathname} onScanClick={handleScanClick} />
+      {/* Mobile bottom nav — masquée pendant le scan (plein écran immersif). */}
+      {!scanOpen && <MobileBottomNav pathname={pathname} onScanClick={handleScanClick} />}
 
       {/* Mobile burger menu (top-right) - opens a drawer mirroring the
           desktop sidebar so the user can reach pages that don't fit in the
@@ -144,14 +144,16 @@ export function AppShell({
 
       {/* Mobile floating Skin Advisor button - sits above the bottom nav,
           hidden when already on /advisor to avoid redundancy. */}
-      {!pathname.startsWith("/advisor") && (
+      {!pathname.startsWith("/advisor") && !scanOpen && (
         <Link
           href="/advisor"
           aria-label="Ouvrir Beauty Advisor"
-          className="lg:hidden fixed right-4 z-[75] h-12 w-12 rounded-full bg-gradient-to-br from-[#1F2937] via-[#111111] to-[#0A0A0A] text-white flex items-center justify-center ring-1 ring-white/[0.08] shadow-[0_10px_24px_-8px_rgba(15,23,42,0.45),inset_0_1px_0_rgba(255,255,255,0.18)] hover:brightness-110 active:scale-95 transition"
+          className="lg:hidden fixed right-4 z-[75] h-12 w-12 rounded-full bg-white text-rose-500 flex items-center justify-center ring-1 ring-black/[0.06] shadow-[0_8px_20px_-8px_rgba(15,23,42,0.25)] hover:brightness-105 active:scale-95 transition"
           style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 88px)" }}
         >
-          <SparklesIcon className="h-5 w-5 text-[#FBBF24]" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden>
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+          </svg>
         </Link>
       )}
 

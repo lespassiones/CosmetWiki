@@ -218,6 +218,49 @@ export function ScanSheet({ open, onClose }: { open: boolean; onClose: () => voi
     );
   }
 
+  // Scan code-barres = plein écran NOIR immersif (même DA que le mobile) :
+  // pas de feuille blanche par-dessus l'accueil, pas de navbar ni d'advisor
+  // (masqués par AppShell tant que la feuille est ouverte). La caméra est
+  // centrée dans l'espace noir, la fiche aperçu reste ancrée en bas du cadre.
+  if (view === "barcode") {
+    return (
+      <div
+        className="fixed inset-0 z-[100] flex flex-col bg-[#0B0B0F] animate-[fadeIn_180ms_ease-out]"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Scanne le code-barres"
+        style={{
+          paddingTop: "env(safe-area-inset-top, 0px)",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
+      >
+        {/* Header sombre : X close à gauche + titre centré */}
+        <div className="relative flex items-center justify-center px-4 pt-3 pb-2">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fermer le scan"
+            className="absolute left-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M18 6 6 18M6 6l12 12" /></svg>
+          </button>
+          <h2 className="text-center text-[17px] font-semibold text-white">Scanne le code-barres</h2>
+        </div>
+
+        {/* Caméra centrée verticalement dans l'espace noir */}
+        <div className="flex flex-1 flex-col items-center justify-center px-4">
+          <div className="w-full max-w-md">
+            <BarcodeScannerInput
+              onFound={(payload) => submitForAnalysis(payload)}
+              onFallbackToManual={() => setView("paste")}
+              onFallbackToProductSearch={() => setView("search")}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const isPicker = view === "picker";
   const heading = isPicker
     ? "Comment veux-tu analyser ?"

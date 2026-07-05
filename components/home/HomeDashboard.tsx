@@ -20,102 +20,69 @@ export type DashboardData = {
   tips: string[];
 };
 
-function scoreTone(s: number | null) {
-  if (s === null) return { fg: "text-[#6B7280]", label: "-" };
-  if (s >= 17) return { fg: "text-emerald-700", label: "Très bien" };
-  if (s >= 13) return { fg: "text-amber-700", label: "Bien" };
-  if (s >= 9) return { fg: "text-orange-700", label: "Moyen" };
-  return { fg: "text-rose-700", label: "Faible" };
-}
-
-function ShieldCheckIcon({ className }: { className?: string }) {
+function ChevronCircle({ tone }: { tone: "green" | "pink" | "purple" }) {
+  const fg =
+    tone === "green"
+      ? "text-emerald-700"
+      : tone === "pink"
+        ? "text-rose-600"
+        : "text-violet-700";
   return (
-    <svg
+    <span
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/75 ${fg}`}
       aria-hidden
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
     >
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
-  );
-}
-
-function HeartIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      aria-hidden
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    </svg>
+      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+        <path d="m9 6 6 6-6 6" />
+      </svg>
+    </span>
   );
 }
 
 function LeafIcon({ className }: { className?: string }) {
   return (
-    <svg
-      aria-hidden
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-    >
+    <svg aria-hidden viewBox="0 0 24 24" fill="currentColor" className={className}>
       <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z" />
     </svg>
   );
 }
 
-// Couleur du texte (sans fond surligné) pour le libellé "X % sans pénalité".
-const PENALTY_TEXT = {
-  emerald: "text-emerald-700",
-  amber: "text-amber-700",
-  orange: "text-orange-700",
-  rose: "text-rose-700",
-} as const;
-
-// Couleurs des pastilles rondes utilisées dans la liste de répartition de la
-// routine (style mobile : un point coloré + texte, sans fond surligné).
-const PENALTY_DOT = {
-  emerald: "bg-emerald-500",
-  amber: "bg-amber-400",
-  orange: "bg-orange-500",
-  rose: "bg-rose-500",
-} as const;
-
-type PenaltyTone = keyof typeof PENALTY_TEXT;
-
-function PenaltyPill({
-  pct,
-  label,
+/** Tuile carrée de la grille 2×2 : titre + icône/illustration + chevron. */
+function Tile({
+  href,
   tone,
-  size = "md",
+  title,
+  children,
 }: {
-  pct: number;
-  label: string;
-  tone: PenaltyTone;
-  size?: "sm" | "md";
+  href: string;
+  tone: "green" | "pink" | "purple";
+  title: ReactNode;
+  children: ReactNode;
 }) {
-  const sizeCls = size === "sm" ? "gap-0.5 text-[10px]" : "gap-1 text-[12px]";
-  const iconCls = size === "sm" ? "h-2.5 w-2.5" : "h-3 w-3";
+  const bg =
+    tone === "green"
+      ? "bg-[#E4F3E9]"
+      : tone === "pink"
+        ? "bg-[#FCE3EC]"
+        : "bg-[#ECE6FA]";
+  const fg =
+    tone === "green"
+      ? "text-emerald-700"
+      : tone === "pink"
+        ? "text-rose-600"
+        : "text-violet-700";
   return (
-    <span
-      className={`inline-flex items-center ${sizeCls} ${PENALTY_TEXT[tone]}`}
+    <Link
+      href={href}
+      className={`group relative flex min-h-[150px] flex-col overflow-hidden rounded-3xl p-4 transition ${bg}`}
+      style={{ boxShadow: "6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light)" }}
     >
-      <LeafIcon className={iconCls} />
-      <span className="font-semibold">{pct} %</span>
-      <span className="italic">{label}</span>
-    </span>
+      <div className="flex items-start justify-between">
+        <h2 className={`text-[16px] font-bold leading-tight tracking-tight ${fg}`}>{title}</h2>
+        <ChevronCircle tone={tone} />
+      </div>
+      <div className="flex flex-1 items-end justify-center pt-2">{children}</div>
+    </Link>
   );
 }
 
@@ -127,6 +94,8 @@ export function HomeDashboard({
   trendingSlot: ReactNode;
 }) {
   const greeting = data.firstName ? `Bonjour ${data.firstName} 👋` : "Bienvenue 👋";
+  const last = data.lastAnalysis;
+  const lastCounts = last?.counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 };
 
   return (
     <section aria-label="Tableau de bord" className="mx-auto w-full max-w-6xl px-5 lg:px-8 mt-2 lg:mt-6">
@@ -144,10 +113,7 @@ export function HomeDashboard({
             preserveAspectRatio="none"
             className="pointer-events-none absolute -bottom-2 left-0 h-2.5 w-full text-violet-500"
           >
-            <path
-              d="M5,11 Q100,-3 195,11 Q100,7 5,11 Z"
-              fill="currentColor"
-            />
+            <path d="M5,11 Q100,-3 195,11 Q100,7 5,11 Z" fill="currentColor" />
           </svg>
         </span>
         .
@@ -155,257 +121,54 @@ export function HomeDashboard({
 
       <TipCarousel tips={data.tips} />
 
-      <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
-        <LastAnalysisCard last={data.lastAnalysis} />
-        <RoutineCard
-          count={data.routineCount}
-          avgScore={data.routineAvgScore}
-          counts={data.routineCounts}
-        />
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
-        <Link
-          href="/advisor"
-          className="block rounded-2xl overflow-hidden transition group relative"
-          style={{ background: "linear-gradient(135deg, #6C3FD8 0%, #4F46E5 55%, #7C3AED 100%)", boxShadow: "6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light)" }}
+      {/* Grille 2×2 — 4 tuiles simples (titre + icône + chevron). */}
+      <div className="mt-4 grid grid-cols-2 gap-3 lg:gap-4">
+        <Tile
+          href={last ? `/history/${last.id}` : "/produits"}
+          tone="green"
+          title={<>Dernière<br />analyse</>}
         >
-          <div className="flex items-stretch">
-            <div className="relative w-[100px] shrink-0">
-              <Image
-                src="/image/petiteImage/portion2.webp"
-                alt=""
-                width={451}
-                height={553}
-                className="absolute bottom-0 left-1 h-[100%] lg:h-[108%] lg:translate-y-3 w-auto object-contain object-bottom drop-shadow-[0_6px_18px_rgba(0,0,0,0.28)]"
-              />
+          {last ? (
+            <div className="w-[132px]">
+              <IngredientBlob counts={lastCounts} variant="md" neumorphic />
             </div>
+          ) : (
+            <LeafIcon className="h-12 w-12 text-[#86C99A]" />
+          )}
+        </Tile>
 
-            <div className="flex-1 min-w-0 py-3 pl-3 pr-2">
-              <div className="text-[15px] lg:text-[16px] font-bold text-white tracking-tight leading-tight">
-                Beauty Advisor <span aria-hidden>✨</span>
-              </div>
-              <p className="text-[11px] lg:text-[13px] text-white/80 mt-1 leading-snug">
-                Pose tes questions sur ta routine.
-                L&apos;assistant t&apos;appuie sur ton profil et tes analyses.
-              </p>
-              <div
-                className="lg:hidden mt-2 inline-flex items-center gap-2 rounded-xl bg-white/15 px-3 py-1.5 text-[11px] text-white font-semibold"
-                style={{
-                  boxShadow:
-                    "3px 3px 8px rgba(28, 16, 64, 0.6), -3px -3px 8px rgba(255, 255, 255, 0.18)",
-                }}
-              >
-                <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-                Poser une question
-              </div>
-            </div>
+        <Tile href="/routine" tone="pink" title={<>Ta<br />routine</>}>
+          <Image
+            src="/image/petiteImage/routine.webp"
+            alt=""
+            width={440}
+            height={280}
+            className="h-[82px] w-auto object-contain"
+          />
+        </Tile>
 
-            <div className="hidden lg:flex items-center gap-3 py-4 pr-4 shrink-0">
-              <div className="self-stretch w-px bg-white/20 mx-1" />
-              <div
-                className="flex items-center gap-2 rounded-xl bg-white/15 hover:bg-white/25 transition px-4 py-2 text-[12px] text-white font-semibold"
-                style={{
-                  boxShadow:
-                    "3px 3px 8px rgba(28, 16, 64, 0.6), -3px -3px 8px rgba(255, 255, 255, 0.18)",
-                }}
-              >
-                <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-                Poser une question
-              </div>
-              <div className="h-8 w-8 rounded-xl bg-white/15 ring-1 ring-white/25 flex items-center justify-center text-white group-hover:translate-x-0.5 transition shrink-0">
-                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden>
-                  <path d="m9 6 6 6-6 6" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </Link>
+        <Tile href="/advisor" tone="purple" title={<>Beauty<br />Advisor</>}>
+          <Image
+            src="/image/petiteImage/advisor.webp"
+            alt=""
+            width={440}
+            height={325}
+            className="h-[84px] w-auto object-contain"
+          />
+        </Tile>
 
-        <Link
-          href="/promesses"
-          className="block rounded-2xl overflow-hidden transition group relative"
-          style={{ background: "linear-gradient(135deg, #D6F5D6 0%, #E8FAE8 50%, #C8F0C8 100%)", boxShadow: "6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light)" }}
-        >
-          <div className="flex items-stretch">
-            <div className="relative w-[110px] shrink-0">
-              <Image
-                src="/image/petiteImage/promesse.webp"
-                alt=""
-                width={248}
-                height={202}
-                className="absolute top-1/2 -translate-y-1/2 left-2 h-[90%] w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,100,0,0.15)]"
-              />
-            </div>
-
-            <div className="flex-1 min-w-0 py-4 pl-5 pr-4">
-              <span className="inline-block whitespace-nowrap rounded-md bg-emerald-600/15 text-emerald-700 text-[11px] lg:text-[13px] font-semibold uppercase tracking-wide px-2.5 py-0.5 mb-2">
-                Promesses vs Formule
-              </span>
-              <p className="text-[11px] lg:text-[13px] text-[#3a5a3a]/80 leading-snug">
-                Vérifie si la description marketing d&apos;un produit correspond vraiment à sa composition INCI.
-              </p>
-            </div>
-
-            <div className="flex items-center pr-4 shrink-0">
-              <div
-                className="h-8 w-8 rounded-full flex items-center justify-center text-emerald-700 group-hover:translate-x-0.5 transition"
-                style={{
-                  background: "#DFF5DF",
-                  boxShadow:
-                    "3px 3px 8px rgba(125, 173, 125, 0.6), -3px -3px 8px rgba(255, 255, 255, 0.95)",
-                }}
-              >
-                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden>
-                  <path d="m9 6 6 6-6 6" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </Link>
+        <Tile href="/promesses" tone="green" title={<>Promesses<br />vs Formule</>}>
+          <Image
+            src="/image/petiteImage/promesse.webp"
+            alt=""
+            width={248}
+            height={202}
+            className="h-[82px] w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,100,0,0.15)]"
+          />
+        </Tile>
       </div>
 
       <div className="mt-4">{trendingSlot}</div>
     </section>
-  );
-}
-
-function LastAnalysisCard({ last }: { last: DashboardData["lastAnalysis"] }) {
-  if (!last) {
-    return (
-      <div className="neu p-5">
-        <div className="flex items-center gap-1.5 text-[13px] text-emerald-600 uppercase tracking-wide font-semibold">
-          <ShieldCheckIcon className="h-4 w-4 text-emerald-600" />
-          Dernière analyse
-        </div>
-        <div className="mt-2 text-sm text-[#6B7280]">
-          Aucune analyse pour le moment. Lance ta première analyse via le bouton scan.
-        </div>
-      </div>
-    );
-  }
-  const title = last.product_label ?? last.name ?? "Analyse";
-  const counts = last.counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 };
-  const matched = counts.vert + counts.jaune + counts.orange + counts.rouge;
-  const pctSansPenalite
-    = matched > 0 ? Math.round((counts.vert / matched) * 100) : null;
-  return (
-    <Link
-      href={`/history/${last.id}`}
-      className="block neu neu-hover px-5 pt-5 pb-3 transition"
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-[13px] text-emerald-600 uppercase tracking-wide font-semibold">
-          <ShieldCheckIcon className="h-4 w-4 text-emerald-600" />
-          Dernière analyse
-        </div>
-        <span className="text-[12px] text-[#F43F5E] font-medium">Voir →</span>
-      </div>
-      <div className="mt-0.5 flex items-center gap-4">
-        <div className="min-w-0 flex-1">
-          <div className="text-[17px] font-semibold text-[#111111] truncate">{title}</div>
-          {pctSansPenalite !== null && (
-            <div className="mt-2">
-              <PenaltyPill pct={pctSansPenalite} label="sans pénalité" tone="emerald" />
-            </div>
-          )}
-        </div>
-        {/* `-mr-5` cancels the card's right `px-5` padding so the donut
-            container reaches the card's outer right edge — aligns the
-            donut's visible right with the potion image in the Astuce
-            card above, which sits at `p-4` (16 px). The half-donut SVG's
-            asymmetric viewBox (~18 px of empty space on its right, only
-            ~6 px on its left) finishes the alignment by visually
-            shrinking the right margin. */}
-        <div className="w-[140px] shrink-0 -mr-5">
-          <IngredientBlob counts={counts} variant="md" neumorphic />
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function RoutineCard({
-  count,
-  avgScore,
-  counts,
-}: {
-  count: number;
-  avgScore: number | null;
-  counts: BlobCounts | null;
-}) {
-  if (count === 0) {
-    return (
-      <Link
-        href="/routine"
-        className="block neu neu-hover p-5 transition"
-      >
-        <div className="flex items-center gap-1.5 text-[13px] text-rose-500 uppercase tracking-wide font-semibold">
-          <HeartIcon className="h-4 w-4 text-rose-500" />
-          Ta routine
-        </div>
-        <div className="mt-3 text-sm text-[#6B7280]">
-          Crée ta routine pour suivre ton exposition cumulée.
-        </div>
-        <div className="mt-2 text-[12px] text-[#F43F5E] font-medium">Commencer →</div>
-      </Link>
-    );
-  }
-  const safeCounts = counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 };
-  // Aggregate ingredient distribution across all routine products. We turn
-  // each colour count into a % of the total recognised ingredients in the
-  // routine - same numerator definition as on the analyse page so the
-  // wording stays consistent ("X % sans pénalité").
-  const total
-    = safeCounts.vert + safeCounts.jaune + safeCounts.orange + safeCounts.rouge;
-  const pct = (n: number) => (total > 0 ? Math.round((n / total) * 100) : 0);
-  const breakdown = [
-    { pct: pct(safeCounts.vert), label: "sans pénalité", tone: "emerald" as const },
-    { pct: pct(safeCounts.jaune), label: "pén. faible", tone: "amber" as const },
-    { pct: pct(safeCounts.orange), label: "pén. moyenne", tone: "orange" as const },
-    { pct: pct(safeCounts.rouge), label: "pén. forte", tone: "rose" as const },
-  ].filter((b) => b.pct > 0);
-  return (
-    <Link
-      href="/routine"
-      className="block neu neu-hover px-5 pt-5 pb-3 transition"
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-[13px] text-rose-500 uppercase tracking-wide font-semibold">
-          <HeartIcon className="h-4 w-4 text-rose-500" />
-          Ta routine
-        </div>
-        <span className="text-[12px] text-[#F43F5E] font-medium">Voir →</span>
-      </div>
-      <div className="mt-1 flex items-center gap-4">
-        <div className="min-w-0 flex-1">
-          <div className="text-[17px] font-semibold text-[#111111]">
-            {count} produit{count > 1 ? "s" : ""} actif{count > 1 ? "s" : ""}
-          </div>
-          {breakdown.length > 0 && (
-            <ul className="mt-1.5 space-y-1">
-              {breakdown.map((b) => (
-                <li key={b.label} className="flex items-center gap-2 text-[12px]">
-                  <span
-                    aria-hidden
-                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${PENALTY_DOT[b.tone]}`}
-                  />
-                  <span className="font-semibold text-[#111111]">{b.pct} %</span>
-                  <span className="italic text-[#6B7280]">{b.label}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        {/* Same alignment trick as LastAnalysisCard above. */}
-        <div className="w-[140px] shrink-0 -mr-5">
-          <IngredientBlob counts={safeCounts} variant="md" neumorphic />
-        </div>
-      </div>
-    </Link>
   );
 }

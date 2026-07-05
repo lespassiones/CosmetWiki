@@ -216,6 +216,9 @@ export default async function IngredientPage({ params, searchParams }: Props) {
   const hasDescription = !!ing.description && ing.description.trim().length > 4;
   const hasRegulated = (ing.regulated_zones?.length ?? 0) > 0;
   const hasBreakdown = breakdown.length > 0;
+  // Fiche simplifiée : blocs détaillés masqués (code conservé). `as boolean`
+  // évite que TS traite la branche comme morte (sinon narrowing de `ing` perdu).
+  const SHOW_DETAILS = false as boolean;
 
   const jsonLd = buildIngredientJsonLd(ing);
 
@@ -280,7 +283,7 @@ export default async function IngredientPage({ params, searchParams }: Props) {
               ) : null}
             </div>
 
-            {ing.cas_number ? (
+            {SHOW_DETAILS &&ing.cas_number ? (
               <div className="text-right">
                 <p className="text-[11px] font-medium uppercase tracking-wider text-ink-subtle">
                   CAS
@@ -316,7 +319,7 @@ export default async function IngredientPage({ params, searchParams }: Props) {
             </StatCard>
           </Reveal>
 
-          {hasPrevalence ? (
+          {SHOW_DETAILS &&hasPrevalence ? (
             <Reveal delayMs={350}>
               <StatCard label="Prévalence">
                 <p className="text-2xl font-semibold tracking-tight text-ink">
@@ -392,7 +395,7 @@ export default async function IngredientPage({ params, searchParams }: Props) {
 
             <ExplainIngredient slug={ing.slug} />
 
-            {hasFunctions ? (
+            {SHOW_DETAILS &&hasFunctions ? (
               <section className="mt-10 border-t border-black/[0.06] pt-8">
                 <SectionTitle>Fonctions INCI</SectionTitle>
                 <ul className="mt-4 space-y-2.5">
@@ -415,7 +418,7 @@ export default async function IngredientPage({ params, searchParams }: Props) {
               </section>
             ) : null}
 
-            {hasBreakdown ? (
+            {SHOW_DETAILS &&hasBreakdown ? (
               <section className="mt-10 border-t border-black/[0.06] pt-8">
                 <SectionTitle>Répartition par catégorie de produit</SectionTitle>
                 <ul className="mt-4 space-y-2.5">
@@ -445,7 +448,8 @@ export default async function IngredientPage({ params, searchParams }: Props) {
               </section>
             ) : null}
 
-            <TechSection ing={ing} />
+            {/* Bloc "Informations techniques" masqué (code conservé, ne pas afficher) */}
+            {SHOW_DETAILS &&<TechSection ing={ing!} />}
           </Reveal>
         </div>
 
