@@ -7,7 +7,9 @@ export const revalidate = 86400;
 const STATIC_ROUTES: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "/", priority: 1.0, changeFrequency: "daily" },
   { path: "/fonctionnalites", priority: 0.9, changeFrequency: "monthly" },
-  { path: "/comment-ca-marche", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/comment-ca-marche", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/auth/sign-in", priority: 0.8, changeFrequency: "yearly" },
+  { path: "/en-savoir-plus", priority: 0.7, changeFrequency: "monthly" },
   { path: "/blog", priority: 0.7, changeFrequency: "weekly" },
   { path: "/blog/routine-peau-joueurs-foot", priority: 0.7, changeFrequency: "monthly" },
   { path: "/blog/deodorant-sels-aluminium-verite", priority: 0.7, changeFrequency: "monthly" },

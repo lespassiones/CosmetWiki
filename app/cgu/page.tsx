@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     url: "/cgu",
     type: "website",
   },
-  robots: { index: true, follow: false },
+  robots: { index: false, follow: false },
 };
 
 export default function CGUPage() {

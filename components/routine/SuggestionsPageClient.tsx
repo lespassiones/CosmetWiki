@@ -6,11 +6,6 @@ import { useRouter } from "next/navigation";
 import { SuggestionCard, type DeckAlternative } from "./SuggestionCard";
 import type { AtRiskProduct } from "@/lib/routine/atRisk";
 import { apiFetch } from "@/lib/clientApi";
-import {
-  suggestionsSignature,
-  readSuggestionsCache,
-  writeSuggestionsCache,
-} from "@/lib/routine/suggestionsCache";
 
 // ─── sessionStorage keys (mirror AlternativesCarousel) ───────────────────────
 const PENDING_INCI_KEY = "cw:pendingInci";
@@ -18,10 +13,15 @@ const PENDING_SOURCE_KEY = "cw:pendingProductSource";
 
 type Alternative = DeckAlternative;
 
-type Suggestion = {
-  product: string;
-  category: string | null;
+/** Réponse de l'Edge Function routine-smart-suggest (une par produit qualifié). */
+type EdgeSuggestion = {
+  analysisId: string;
+  productName: string;
+  productScore: number | null;
+  dangerColor: "rouge" | "orange" | null;
   alternative: Alternative | null;
+  reason: string | null;
+  locked: boolean;
 };
 
 /** One ready-to-render suggestion row (product → best alternative). */
@@ -32,6 +32,7 @@ type Item = {
   productScore: number | null;
   dangerColor: "rouge" | "orange" | null;
   alternative: Alternative;
+  reason: string | null;
 };
 
 type Status = "loading" | "ready" | "empty" | "error" | "credits";
@@ -44,11 +45,8 @@ type Status = "loading" | "ready" | "empty" | "error" | "credits";
  */
 export function SuggestionsPageClient({
   products,
-  restrictionsSig,
 }: {
   products: AtRiskProduct[];
-  /** Empreinte des restrictions du profil — fait partie de la clé de cache. */
-  restrictionsSig: string;
 }) {
   const router = useRouter();
   const [status, setStatus] = useState<Status>("loading");
@@ -65,54 +63,53 @@ export function SuggestionsPageClient({
     // skeleton would hang forever. The guard alone prevents a double request.
     if (fetched.current) return;
     fetched.current = true;
-    // 0. Cache LOCAL persistant : routine + restrictions inchangées → ré-affichage
-    //    instantané, SANS appel réseau ni crédit (mirror mobile deckCache). Pas de
-    //    TTL : valable des semaines/mois/années jusqu'à vidage du navigateur.
-    const sig = suggestionsSignature(products, restrictionsSig);
-    const cached = readSuggestionsCache<Item>(sig);
-    if (cached && cached.length > 0) {
-      setItems(cached);
-      setStatus("ready");
-      return;
-    }
+    // Cache + crédits sont désormais AUTORITATIFS côté serveur (table
+    // routine_suggestions, par produit). On envoie TOUS les produits qualifiés ;
+    // l'Edge Function renvoie les recos déjà en cache (0 crédit) et génère les
+    // nouvelles (1 crédit/produit). Plus de cache localStorage (source de vérité
+    // = serveur, cohérent mobile/web, non contournable).
     (async () => {
       try {
-        // apiFetch : sur 429-with-credits, ouvre la modale « Crédits épuisés »
-        // (→ /offre). On garde aussi l'état inline "credits" pour le message.
+        const payload = products.map((p) => ({
+          analysisId: p.id,
+          name: p.name,
+          ean: p.ean,
+          category: p.category,
+          counts: p.counts,
+          cappedScore: p.cappedScore,
+          restrictedCount: p.restrictedCount,
+        }));
         const r = await apiFetch("/api/routine/catalog-suggestions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ items: products.slice(0, 8) }),
+          body: JSON.stringify({ items: payload }),
         });
         if (r.status === 429) return setStatus("credits");
         if (!r.ok) return setStatus("error");
-        // A credit was (potentially) consumed → refresh the credits pill.
+        // Des crédits ont pu être débités → rafraîchir la pilule.
         window.dispatchEvent(new CustomEvent("cosmecheck:credits-updated"));
-        const d = (await r.json()) as { suggestions: Suggestion[] };
-        const byName = new Map(products.map((p) => [p.name, p]));
-        const next: Item[] = (d.suggestions ?? [])
+        const d = (await r.json()) as { suggestions?: EdgeSuggestion[] };
+        const all = d.suggestions ?? [];
+        const next: Item[] = all
           .filter((s) => s.alternative !== null)
-          .map((s) => {
-            const p = byName.get(s.product);
-            return {
-              key: p?.id ?? s.alternative!.ean,
-              productAnalysisId: p?.id ?? null,
-              productTitle: s.product,
-              productScore: p?.cappedScore ?? null,
-              dangerColor: p?.dangerColor ?? null,
-              alternative: s.alternative!,
-            } satisfies Item;
-          });
-        // On ne cache QUE les résultats non vides (mirror mobile) : un résultat
-        // vide ne consomme aucun crédit, autant le laisser se retenter plus tard.
-        if (next.length > 0) writeSuggestionsCache(sig, next);
+          .map((s) => ({
+            key: s.analysisId,
+            productAnalysisId: s.analysisId,
+            productTitle: s.productName,
+            productScore: s.productScore,
+            dangerColor: s.dangerColor,
+            alternative: s.alternative!,
+            reason: s.reason,
+          }));
+        const anyLocked = all.some((s) => s.locked);
         setItems(next);
-        setStatus(next.length === 0 ? "empty" : "ready");
+        // Rien trouvé mais des produits verrouillés faute de crédits → message crédits.
+        setStatus(next.length === 0 ? (anyLocked ? "credits" : "empty") : "ready");
       } catch {
         setStatus("error");
       }
     })();
-  }, [products, restrictionsSig]);
+  }, [products]);
 
   /** Analyse l'alternative (fast-path EAN = gratuit) et renvoie son id. */
   async function ensureAlternativeAnalysis(alt: Alternative): Promise<string | null> {
@@ -244,6 +241,7 @@ export function SuggestionsPageClient({
                 productScore={s.productScore}
                 dangerColor={s.dangerColor}
                 alternative={s.alternative}
+                reason={s.reason}
                 keeping={keepingKey === s.key}
                 kept={keptKeys.has(s.key)}
                 onKeep={() => onKeep(s)}

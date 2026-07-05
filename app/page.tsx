@@ -4,6 +4,7 @@ import { HomeShell } from "@/components/HomeShell";
 import { LandingHero } from "@/components/LandingHero";
 import { LandingSteps } from "@/components/LandingSteps";
 import { LandingValues } from "@/components/LandingValues";
+import { LandingArticles } from "@/components/LandingArticles";
 import { HomeDashboard, type DashboardData } from "@/components/home/HomeDashboard";
 import { DailyPicksCard } from "@/components/home/DailyPicksCard";
 import { getProfile, getUser } from "@/lib/auth";
@@ -232,6 +233,7 @@ export default async function Home({ searchParams }: Props) {
         <LandingHero />
         <LandingSteps />
         <LandingValues />
+        <LandingArticles />
       </>
     );
   }

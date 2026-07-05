@@ -134,8 +134,8 @@ export function AppShell({
         <main className="pb-24 lg:pb-12">{children}</main>
       </div>
 
-      {/* Mobile bottom nav — masquée pendant le scan (plein écran immersif). */}
-      {!scanOpen && <MobileBottomNav pathname={pathname} onScanClick={handleScanClick} />}
+      {/* Mobile bottom nav — masquée pendant le scan et sur /offre (plein écran immersif). */}
+      {!scanOpen && !pathname.startsWith("/offre") && <MobileBottomNav pathname={pathname} onScanClick={handleScanClick} />}
 
       {/* Mobile burger menu (top-right) - opens a drawer mirroring the
           desktop sidebar so the user can reach pages that don't fit in the
@@ -143,8 +143,8 @@ export function AppShell({
       <MobileBurgerMenu pathname={pathname} items={NAV_ITEMS} />
 
       {/* Mobile floating Skin Advisor button - sits above the bottom nav,
-          hidden when already on /advisor to avoid redundancy. */}
-      {!pathname.startsWith("/advisor") && !scanOpen && (
+          hidden when already on /advisor ou /offre to avoid redundancy. */}
+      {!pathname.startsWith("/advisor") && !pathname.startsWith("/offre") && !scanOpen && (
         <Link
           href="/advisor"
           aria-label="Ouvrir Beauty Advisor"

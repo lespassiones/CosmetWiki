@@ -27,6 +27,10 @@ export type AtRiskProduct = {
   cappedScore: number;
   /** Badge colour: rouge si restriction ou capped < 5, sinon orange. */
   dangerColor: "rouge" | "orange" | null;
+  /** Compteurs couleur (envoyés à l'Edge Function pour la règle de sélection). */
+  counts: { vert: number; jaune: number; orange: number; rouge: number };
+  /** Nb d'ingrédients restreints dans CE produit. */
+  restrictedCount: number;
 };
 
 export interface AtRiskOptions {
@@ -54,6 +58,8 @@ export function selectAtRiskProducts(
   return products
     .map((p) => {
       const counts = p.result?.counts;
+      const cVert = counts?.vert ?? 0;
+      const cJaune = counts?.jaune ?? 0;
       const cOrange = counts?.orange ?? 0;
       const cRouge = counts?.rouge ?? 0;
       const capped = colorCapScore(typeof p.score === "number" ? p.score : 0, {
@@ -74,12 +80,13 @@ export function selectAtRiskProducts(
         cRouge * 40 +
         cOrange * 15 +
         Math.max(0, 20 - capped);
-      // « À optimiser » si : note plafonnée hors zone verte (< 13), OU viole une
-      // restriction, OU contient au moins un ingrédient orange/rouge. Ce dernier
-      // critère élargit la sélection : un produit peut afficher une note plafonnée
-      // verte tout en ayant un ingrédient à surveiller — il mérite quand même une
-      // alternative plus propre. La zone verte ne suffit donc plus à exclure.
-      const isAtRisk = capped < 13 || restrictedCount > 0 || cOrange >= 1 || cRouge >= 1;
+      // Règle de sélection (parité STRICTE avec l'Edge Function
+      // routine-smart-suggest → qualifiesForSuggestion, autorité finale) :
+      //   1. orange > 0 OU rouge > 0            → toujours (obligatoire)
+      //   2. sinon, ingrédient restreint présent → toujours
+      //   3. sinon (vert/jaune only)            → seulement si jaune > vert
+      const isAtRisk =
+        cOrange > 0 || cRouge > 0 || restrictedCount > 0 || cJaune > cVert;
 
       return {
         id: p.id,
@@ -91,12 +98,16 @@ export function selectAtRiskProducts(
         dangerColor: (restrictedCount > 0 || capped < 5 ? "rouge" : "orange") as
           | "rouge"
           | "orange",
+        counts: { vert: cVert, jaune: cJaune, orange: cOrange, rouge: cRouge },
+        restrictedCount,
         severity,
         isAtRisk,
       };
     })
     .filter((p) => p.isAtRisk)
     .sort((a, b) => b.severity - a.severity)
-    .slice(0, 8)
+    // Pas de cap artificiel : chaque produit concerné peut recevoir une
+    // suggestion (le crédit est débité par produit côté serveur). Garde-fou 40.
+    .slice(0, 40)
     .map(({ severity: _sev, isAtRisk: _r, ...p }) => p);
 }

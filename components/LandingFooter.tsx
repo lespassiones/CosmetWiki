@@ -38,7 +38,7 @@ export function LandingFooter() {
               <span className="text-[#F43F5E]">Check</span>
             </Link>
             <p className="mt-3 max-w-[20rem] text-[13px] font-medium leading-relaxed text-[#111111]">
-              Décode tes cosmétiques, ingrédient par ingrédient.
+              Check tes cosmétiques, ingrédient par ingrédient.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <AppleStoreBadge />

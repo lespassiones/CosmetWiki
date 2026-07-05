@@ -25,7 +25,6 @@ const PUBLIC_LANDING_PREFIXES = [
   "/comment-ca-marche",
   "/fonctionnalites",
   "/faq",
-  "/offre",
   "/en-savoir-plus",
   "/equipe",
   "/blog",
@@ -65,7 +64,7 @@ const SITE_NAME = "Cosme Check";
 const DEFAULT_TITLE =
   "CosmeCheck, l'application qui t'aide à choisir les cosmétiques les plus adaptés à tes besoins.";
 const DEFAULT_DESCRIPTION =
-  "CosmeCheck analyse les ingrédients, vérifie les promesses, compare les produits et te guide grâce à des conseils personnalisés pour t'aider à obtenir de meilleurs résultats avec moins d'essais, moins de déceptions et moins d'argent dépensé inutilement.";
+  "Choisis enfin les cosmétiques adaptés à ton profil. CosmeCheck analyse les ingrédients, vérifie les promesses des produits et recommande des alternatives plus adaptées à tes besoins.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

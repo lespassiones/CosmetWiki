@@ -137,7 +137,7 @@ export function HomeDashboard({
           )}
         </Tile>
 
-        <Tile href="/routine" tone="pink" title={<>Ta<br />routine</>}>
+        <Tile href="/routine" tone="pink" title={<>Ma<br />routine</>}>
           <Image
             src="/image/petiteImage/routine.webp"
             alt=""

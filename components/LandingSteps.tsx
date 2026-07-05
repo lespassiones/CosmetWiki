@@ -6,11 +6,12 @@ import { FadeInSection } from "@/components/FadeInSection";
 
 type Slide = {
   titleNode: ReactNode;
-  step: string;
   subtitle: string;
   description: string;
   image: string;
   alt: string;
+  imageAspect: string;
+  imageMaxW?: string;
 };
 
 const SLIDES: Slide[] = [
@@ -21,26 +22,41 @@ const SLIDES: Slide[] = [
         promesses de tes produits
       </>
     ),
-    step: "1",
     subtitle: "Analyse de promesses marketing",
     description:
       "Cosme Check identifie chaque promesse marketing affichée sur le produit, puis croise ces affirmations avec la liste complète des ingrédients (INCI) pour évaluer leur véracité.",
     image: "/image/landing2/section2.webp",
     alt: "Écran d'analyse des promesses marketing dans l'application Cosme Check",
+    imageAspect: "966/1629",
   },
   {
     titleNode: (
       <>
-        Ta routine beauté, construite{" "}
+        Ta routine beauté, analysée{" "}
         <span className="text-[#F43F5E]">intelligemment</span>
       </>
     ),
-    step: "2",
-    subtitle: "Une routine adaptée à ta peau",
+    subtitle: "Comprends ce que ta routine contient vraiment",
     description:
-      "Cosme Check analyse ton profil de peau, tes objectifs et tes préférences pour te proposer une routine 100% personnalisée avec des produits sûrs et efficaces.",
+      "CosmeCheck analyse tes produits, leurs compositions et les familles d'ingrédients auxquelles tu es exposé(e) et te propose des alternatives plus adaptées pour une routine plus saine.",
     image: "/image/landing2/section22.webp",
     alt: "Écran de routine quotidienne dans l'application Cosme Check",
+    imageAspect: "966/1629",
+  },
+  {
+    titleNode: (
+      <>
+        Des produits adaptés à ton{" "}
+        <span className="text-[#F43F5E]">profil cosmétique</span>
+      </>
+    ),
+    subtitle: "Le meilleur choix pour toi",
+    description:
+      "CosmeCheck compare chaque formule à ton profil cosmétique pour mesurer sa compatibilité et t'aider à choisir les produits les plus adaptés à tes besoins.",
+    image: "/image/landing2/section3.webp",
+    alt: "Écran de comparaison de produits cosmétiques dans l'application Cosme Check",
+    imageAspect: "1122/1402",
+    imageMaxW: "max-w-[325px] sm:max-w-[375px] lg:max-w-[425px]",
   },
 ];
 
@@ -49,14 +65,18 @@ export function LandingSteps() {
   const [isFading, setIsFading] = useState(false);
   const total = SLIDES.length;
 
-  const switchTo = (delta: number) => {
-    const next = ((active + delta) % total + total) % total;
+  const goTo = (next: number) => {
     if (next === active) return;
     setIsFading(true);
     window.setTimeout(() => {
       setActive(next);
       setIsFading(false);
     }, 200);
+  };
+
+  const switchTo = (delta: number) => {
+    const next = ((active + delta) % total + total) % total;
+    goTo(next);
   };
 
   const slide = SLIDES[active];
@@ -76,30 +96,55 @@ export function LandingSteps() {
             </h2>
           </FadeInSection>
 
-          {/* Bloc principal : image gauche + (texte + flèches) droite (desktop) /
-              image en haut + (texte + flèches) en bas (mobile).
-              `lg:items-start` => le bloc texte est aligné en haut, pas centré
-              verticalement sur l'image. */}
-          <FadeInSection delay={100} className="mt-12 flex flex-col items-center gap-12 lg:mt-20 lg:flex-row lg:items-start lg:gap-8">
-            {/* Image (téléphone) — réduite de ~30% par rapport à la version
-                précédente. */}
+          <FadeInSection
+            delay={100}
+            className="mt-12 flex flex-col items-center gap-12 lg:mt-20 lg:flex-row lg:items-start lg:gap-8"
+          >
+            {/* Image téléphone — aspect ratio adapté par slide */}
             <div className="flex flex-1 items-start justify-center">
-              <div className="relative w-full max-w-[210px] sm:max-w-[240px] lg:max-w-[280px] aspect-[966/1629]">
+              <div
+                className={`relative w-full ${slide.imageMaxW ?? "max-w-[260px] sm:max-w-[300px] lg:max-w-[340px]"}`}
+                style={{ aspectRatio: slide.imageAspect }}
+              >
                 <Image
                   src={slide.image}
                   alt={slide.alt}
                   fill
-                  sizes="(min-width: 1024px) 280px, (min-width: 640px) 240px, 210px"
+                  sizes="(min-width: 1024px) 340px, (min-width: 640px) 300px, 260px"
                   className="object-contain"
                 />
               </div>
             </div>
 
-            {/* Bloc texte + flèches, aligné en haut côté desktop */}
+            {/* Bloc texte + navigation */}
             <div className="flex flex-1 flex-col items-center text-center lg:items-start lg:text-left">
-              <div className="grid h-12 w-12 place-items-center rounded-full border border-[#F43F5E] text-[20px] font-medium text-[#F43F5E]">
-                {slide.step}
+              {/* Indicateur de pagination — 3 cercles numérotés reliés */}
+              <div className="flex items-center">
+                {SLIDES.map((_, i) => (
+                  <div key={i} className="flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => goTo(i)}
+                      aria-label={`Aller à l'étape ${i + 1}`}
+                      className={`relative grid h-11 w-11 place-items-center rounded-full border-2 text-[15px] font-semibold transition-all duration-300 ${
+                        i === active
+                          ? "border-[#F43F5E] bg-[#F43F5E] text-white shadow-[0_4px_14px_-4px_rgba(244,63,94,0.55)] scale-110"
+                          : "border-[#F43F5E]/35 bg-white text-[#F43F5E]/55 hover:border-[#F43F5E]/65 hover:text-[#F43F5E]/80"
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                    {i < SLIDES.length - 1 && (
+                      <div
+                        className={`h-[2px] w-9 transition-all duration-500 ${
+                          i < active ? "bg-[#F43F5E]" : "bg-[#F43F5E]/18"
+                        }`}
+                      />
+                    )}
+                  </div>
+                ))}
               </div>
+
               <h3 className="mt-6 text-[24px] font-bold leading-tight tracking-tight text-ink sm:text-[28px] lg:text-[30px]">
                 {slide.subtitle}
               </h3>
@@ -107,9 +152,7 @@ export function LandingSteps() {
                 {slide.description}
               </p>
 
-              {/* Flèches : juste sous le titre + description, dans la même
-                  colonne. En mobile, restent centrées via `items-center`
-                  du parent. */}
+              {/* Flèches */}
               <div className="mt-8 flex items-center gap-3">
                 <button
                   type="button"

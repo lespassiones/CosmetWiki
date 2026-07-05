@@ -22,6 +22,8 @@ type Props = {
   productScore: number | null;
   dangerColor: "rouge" | "orange" | null;
   alternative: DeckAlternative;
+  /** Justification IA personnalisée (« pour ta peau sensible… »). */
+  reason?: string | null;
   keeping: boolean;
   /** Déjà ajouté en favori → bouton verrouillé (anti-doublon). */
   kept: boolean;
@@ -41,6 +43,7 @@ export function SuggestionCard({
   productScore,
   dangerColor,
   alternative,
+  reason,
   keeping,
   kept,
   onKeep,
@@ -54,11 +57,15 @@ export function SuggestionCard({
   return (
     <div className="rounded-3xl bg-white p-5 shadow-[0_12px_24px_-6px_rgba(15,23,42,0.18)]">
       {/* En-tête */}
-      <div className="mb-4 flex items-center justify-center gap-2 rounded-full bg-[#F3EEFF] px-4 py-2">
+      <div className="mb-2 flex items-center justify-center gap-2 rounded-full bg-[#F3EEFF] px-4 py-2">
         <SparklesIcon className="h-[15px] w-[15px] text-violet-600" />
         <span className="text-[13px] font-semibold text-violet-600">Meilleur choix pour toi</span>
         <TrendingUpIcon className="h-4 w-4 text-emerald-500" />
       </div>
+
+      {reason ? (
+        <p className="mb-4 text-center text-[12px] leading-snug text-ink-muted">{reason}</p>
+      ) : null}
 
       {/* Avant → Après */}
       <div className="flex items-start gap-2">

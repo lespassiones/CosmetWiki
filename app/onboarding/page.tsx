@@ -37,12 +37,13 @@ export default async function OnboardingPage({ searchParams }: Props) {
   const { data: row } = await sb
     .schema("cosme_check")
     .from("user_profiles")
-    .select("preferences")
+    .select("preferences, first_name")
     .eq("id", user.id)
     .maybeSingle();
 
   const prefs = (row?.preferences ?? null) as Record<string, unknown> | null;
   const initial = readSkinProfile(prefs);
+  const firstName = (row?.first_name as string | null) ?? null;
 
   // Hard safety: if a user lands here by URL after already being onboarded,
   // OR is an existing user whose profile is already filled, send them back
@@ -57,12 +58,12 @@ export default async function OnboardingPage({ searchParams }: Props) {
     // Cream background + centered editorial column. No sidebar — `app/layout.tsx`
     // hides the AppShell on `/onboarding` so the wizard owns the whole screen
     // both on mobile and desktop.
-    <main className="min-h-svh bg-[#FAFAF7] px-5 py-10 sm:py-16">
-      <div className="mx-auto flex w-full max-w-2xl flex-col">
-        <p className="mb-10 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-[#9CA3AF]">
+    <main className="min-h-svh bg-[#FAFAF7] px-5 py-8 sm:py-12">
+      <div className="mx-auto flex w-full max-w-xl flex-col">
+        <p className="mb-8 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-[#9CA3AF]">
           Cosme Check
         </p>
-        <OnboardingWizard initial={initial} finalNext={next} />
+        <OnboardingWizard initial={initial} finalNext={next} firstName={firstName} />
       </div>
     </main>
   );

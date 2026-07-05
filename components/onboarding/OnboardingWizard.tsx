@@ -1,6 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+/**
+ * OnboardingWizard (web) — TWIN du mobile (components/onboarding/OnboardingWizard).
+ *
+ * Questionnaire profil en 11 MICRO-ÉTAPES (une question par écran), regroupées
+ * en 3 blocs pastel :
+ *   - Bloc « Ta peau » (violet)         : visage, corps, état des cheveux
+ *   - Bloc « Tes préoccupations » (rose): peau, cheveux, autre
+ *   - Bloc « Tes objectifs » (vert)     : visage, corps, cheveux, routine, autre
+ *
+ * Chrome : barre de progression globale (couleur du bloc), kicker + pastilles
+ * numérotées de sous-étape, titre court, cartes pleine largeur, nav bas
+ * (Suivant / « C'est parti ! »), « Passer » discret (saute une sous-question).
+ *
+ * Persistance INCHANGÉE : mêmes server actions (saveOnboardingStep par bloc,
+ * completeOnboarding) → même stockage que le mobile.
+ */
+
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   HAIR_PROBLEM_CONCERNS,
@@ -23,123 +40,115 @@ import {
 } from "@/lib/skin/profile";
 import {
   completeOnboarding,
-  dismissOnboarding,
   saveOnboardingStep,
 } from "@/app/onboarding/actions";
 
-type StepKey = "skin" | "concerns" | "goals";
+type Bloc = "skin" | "concerns" | "goals";
+type Tone = "violet" | "rose" | "vert";
 
-type StepConfig = {
-  key: StepKey;
-  romanNumeral: "I" | "II" | "III";
-  title: string;
-  subtitle: string;
-  /** Label of the primary CTA on this step. */
-  ctaLabel: string;
+const TONES: Record<Tone, { solid: string; soft: string; text: string }> = {
+  violet: { solid: "#8B5CF6", soft: "#F1ECFB", text: "#6D28D9" },
+  rose: { solid: "#F43F5E", soft: "#FCE3EC", text: "#E11D48" },
+  vert: { solid: "#16A34A", soft: "#E4F3E9", text: "#15803D" },
 };
 
-const STEPS: StepConfig[] = [
-  {
-    key: "skin",
-    romanNumeral: "I",
-    title: "Parlons de\nta peau.",
-    subtitle: "Un instant pour que chaque analyse devienne tienne.",
-    ctaLabel: "Continuer",
-  },
-  {
-    key: "concerns",
-    romanNumeral: "II",
-    title: "Tes\npréoccupations.",
-    subtitle: "On orientera nos analyses vers ce qui compte pour toi.",
-    ctaLabel: "Continuer",
-  },
-  {
-    key: "goals",
-    romanNumeral: "III",
-    title: "Tes objectifs.",
-    subtitle: "Pour orienter nos recommandations vers ce que tu veux vraiment.",
-    ctaLabel: "Entrer dans Cosme Check",
-  },
+type MicroStep = {
+  id: string;
+  bloc: Bloc;
+  blocLabel: string;
+  tone: Tone;
+  title: string;
+};
+
+const MICRO_STEPS: MicroStep[] = [
+  // Bloc 1 — Ta peau (violet)
+  { id: "face", bloc: "skin", blocLabel: "Ta peau", tone: "violet", title: "Ton type de peau au visage ?" },
+  { id: "body", bloc: "skin", blocLabel: "Ta peau", tone: "violet", title: "Et la peau de ton corps ?" },
+  { id: "hairState", bloc: "skin", blocLabel: "Ta peau", tone: "violet", title: "Comment sont tes cheveux ?" },
+  // Bloc 2 — Tes préoccupations (rose)
+  { id: "skinConcerns", bloc: "concerns", blocLabel: "Tes préoccupations", tone: "rose", title: "Qu'est-ce qui te préoccupe ?" },
+  { id: "hairConcerns", bloc: "concerns", blocLabel: "Tes préoccupations", tone: "rose", title: "Et côté cheveux ?" },
+  { id: "otherConcern", bloc: "concerns", blocLabel: "Tes préoccupations", tone: "rose", title: "Autre chose à signaler ?" },
+  // Bloc 3 — Tes objectifs (vert)
+  { id: "goalsFace", bloc: "goals", blocLabel: "Tes objectifs", tone: "vert", title: "Tes objectifs pour le visage" },
+  { id: "goalsBody", bloc: "goals", blocLabel: "Tes objectifs", tone: "vert", title: "Tes objectifs pour le corps" },
+  { id: "goalsHair", bloc: "goals", blocLabel: "Tes objectifs", tone: "vert", title: "Tes objectifs cheveux" },
+  { id: "goalsRoutine", bloc: "goals", blocLabel: "Tes objectifs", tone: "vert", title: "Et ta routine ?" },
+  { id: "otherGoal", bloc: "goals", blocLabel: "Tes objectifs", tone: "vert", title: "Un autre objectif en tête ?" },
 ];
 
+const TOTAL = MICRO_STEPS.length;
 const AUTOSAVE_DEBOUNCE_MS = 600;
+
+const goalOptions = (label: string) =>
+  PROFILE_GOAL_GROUPS.find((g) => g.label === label)!.goals.map((k) => ({
+    value: k as string,
+    label: PROFILE_GOAL_LABEL[k],
+  }));
 
 type Props = {
   initial: SkinProfile;
-  /** Where to send the user once the wizard is done or fully dismissed. */
   finalNext: string;
+  firstName?: string | null;
 };
 
-export function OnboardingWizard({ initial, finalNext }: Props) {
+export function OnboardingWizard({ initial, finalNext, firstName }: Props) {
   const router = useRouter();
-  const [stepIdx, setStepIdx] = useState(0);
+  const [index, setIndex] = useState(0);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  // ─── Step-1 state ──────────────────────────────────────────────────────
+  // ─── État (identique à l'ancien wizard, même stockage) ───────────────────
   const [skinTypeFace, setSkinTypeFace] = useState<SkinTypeFace | "autre" | "">(
     initial.skinTypeFace ?? (initial.otherSkinTypeFace ? "autre" : ""),
   );
-  const [otherSkinTypeFace, setOtherSkinTypeFace] = useState(
-    initial.otherSkinTypeFace ?? "",
-  );
+  const [otherSkinTypeFace, setOtherSkinTypeFace] = useState(initial.otherSkinTypeFace ?? "");
   const [skinTypeBody, setSkinTypeBody] = useState<SkinTypeBody | "autre" | "">(
     initial.skinTypeBody ?? (initial.otherSkinTypeBody ? "autre" : ""),
   );
-  const [otherSkinTypeBody, setOtherSkinTypeBody] = useState(
-    initial.otherSkinTypeBody ?? "",
-  );
-  const initialHairState = new Set<HairConcern>();
-  for (const c of initial.hairConcerns ?? []) {
-    if (HAIR_STATE_CONCERNS.includes(c)) initialHairState.add(c);
-  }
-  const [hairStateConcerns, setHairStateConcerns] =
-    useState<Set<HairConcern>>(initialHairState);
+  const [otherSkinTypeBody, setOtherSkinTypeBody] = useState(initial.otherSkinTypeBody ?? "");
+
+  const initHairState = new Set<HairConcern>();
+  for (const c of initial.hairConcerns ?? []) if (HAIR_STATE_CONCERNS.includes(c)) initHairState.add(c);
+  const [hairStateConcerns, setHairStateConcerns] = useState<Set<HairConcern>>(initHairState);
   const [otherHair, setOtherHair] = useState(initial.otherHair ?? "");
 
-  // ─── Step-2 state ──────────────────────────────────────────────────────
-  const [concerns, setConcerns] = useState<Set<SkinConcern>>(
-    new Set(initial.concerns ?? []),
-  );
-  const initialHairProblems = new Set<HairConcern>();
-  for (const c of initial.hairConcerns ?? []) {
-    if (HAIR_PROBLEM_CONCERNS.includes(c)) initialHairProblems.add(c);
-  }
-  const [hairProblemConcerns, setHairProblemConcerns] =
-    useState<Set<HairConcern>>(initialHairProblems);
+  const [concerns, setConcerns] = useState<Set<SkinConcern>>(new Set(initial.concerns ?? []));
+  const initHairProblems = new Set<HairConcern>();
+  for (const c of initial.hairConcerns ?? []) if (HAIR_PROBLEM_CONCERNS.includes(c)) initHairProblems.add(c);
+  const [hairProblemConcerns, setHairProblemConcerns] = useState<Set<HairConcern>>(initHairProblems);
   const [otherConcerns, setOtherConcerns] = useState(initial.otherConcerns ?? "");
-  const [allergies, setAllergies] = useState(initial.allergiesFreeform ?? "");
+  // Conservé (sans UI dédiée, comme le mobile) pour ne pas écraser une valeur existante.
+  const [allergies] = useState(initial.allergiesFreeform ?? "");
 
-  // ─── Step-3 state ──────────────────────────────────────────────────────
-  const [goals, setGoals] = useState<Set<ProfileGoal>>(
-    new Set(initial.goals ?? []),
-  );
+  const [goals, setGoals] = useState<Set<ProfileGoal>>(new Set(initial.goals ?? []));
   const [otherGoals, setOtherGoals] = useState(initial.otherGoals ?? "");
 
-  const isLast = stepIdx === STEPS.length - 1;
-  const currentStep = STEPS[stepIdx];
+  const step = MICRO_STEPS[index];
+  const bloc = step.bloc;
+  const tone = TONES[step.tone];
+  const isLast = index === TOTAL - 1;
 
-  // Compose the FormData payload for the step currently on screen.
-  const buildFormData = useMemo(() => {
-    return (): FormData => {
+  const blocSteps = MICRO_STEPS.filter((s) => s.bloc === bloc);
+  const blocPos = blocSteps.findIndex((s) => s.id === step.id);
+
+  // ─── FormData d'un bloc (mêmes champs que les server actions) ─────────────
+  const buildFormData = useCallback(
+    (b: Bloc): FormData => {
       const fd = new FormData();
-      fd.set("step", currentStep.key);
-      if (currentStep.key === "skin") {
-        if (skinTypeFace && skinTypeFace !== "autre")
-          fd.set("skin_type_face", skinTypeFace);
+      fd.set("step", b);
+      if (b === "skin") {
+        if (skinTypeFace && skinTypeFace !== "autre") fd.set("skin_type_face", skinTypeFace);
         if (skinTypeFace === "autre" && otherSkinTypeFace.trim())
           fd.set("other_skin_type_face", otherSkinTypeFace.trim());
-        if (skinTypeBody && skinTypeBody !== "autre")
-          fd.set("skin_type_body", skinTypeBody);
+        if (skinTypeBody && skinTypeBody !== "autre") fd.set("skin_type_body", skinTypeBody);
         if (skinTypeBody === "autre" && otherSkinTypeBody.trim())
           fd.set("other_skin_type_body", otherSkinTypeBody.trim());
         hairStateConcerns.forEach((c) => fd.append("hair_concerns", c));
         if (otherHair.trim()) fd.set("other_hair", otherHair.trim());
-      } else if (currentStep.key === "concerns") {
+      } else if (b === "concerns") {
         concerns.forEach((c) => fd.append("concerns", c));
-        hairProblemConcerns.forEach((c) =>
-          fd.append("hair_problem_concerns", c),
-        );
+        hairProblemConcerns.forEach((c) => fd.append("hair_problem_concerns", c));
         if (otherConcerns.trim()) fd.set("other_concerns", otherConcerns.trim());
         if (allergies.trim()) fd.set("allergies", allergies.trim());
       } else {
@@ -147,602 +156,473 @@ export function OnboardingWizard({ initial, finalNext }: Props) {
         if (otherGoals.trim()) fd.set("other_goals", otherGoals.trim());
       }
       return fd;
-    };
-  }, [
-    currentStep.key,
-    skinTypeFace,
-    otherSkinTypeFace,
-    skinTypeBody,
-    otherSkinTypeBody,
-    hairStateConcerns,
-    otherHair,
-    concerns,
-    hairProblemConcerns,
-    otherConcerns,
-    allergies,
-    goals,
-    otherGoals,
-  ]);
+    },
+    [
+      skinTypeFace,
+      otherSkinTypeFace,
+      skinTypeBody,
+      otherSkinTypeBody,
+      hairStateConcerns,
+      otherHair,
+      concerns,
+      hairProblemConcerns,
+      otherConcerns,
+      allergies,
+      goals,
+      otherGoals,
+    ],
+  );
 
-  // ─── Auto-save (debounced 600ms) ───────────────────────────────────────
-  // Persists the current step in the background each time the user touches an
-  // input, so closing the tab in the middle of the wizard doesn't lose work.
-  // The final save still happens on "Continuer" to guarantee the latest state.
+  // ─── Auto-save débouncé du bloc courant ──────────────────────────────────
   const hasMountedRef = useRef(false);
   useEffect(() => {
-    // Skip the very first render (initial mount) so we don't overwrite the
-    // freshly-read profile with itself.
     if (!hasMountedRef.current) {
       hasMountedRef.current = true;
       return;
     }
-    const handle = window.setTimeout(() => {
-      // Fire-and-forget — the user sees the next save (or the next button
-      // click) clear any UI state if needed. We swallow errors silently here
-      // to avoid flashing toasts on every keystroke; the final "Continuer"
-      // save still surfaces real errors.
-      void saveOnboardingStep(buildFormData()).catch(() => undefined);
+    const h = window.setTimeout(() => {
+      void saveOnboardingStep(buildFormData(bloc)).catch(() => undefined);
     }, AUTOSAVE_DEBOUNCE_MS);
-    return () => window.clearTimeout(handle);
-  }, [buildFormData]);
+    return () => window.clearTimeout(h);
+  }, [bloc, buildFormData]);
 
-  function commitStep(after: () => void) {
+  function goNext() {
     setError(null);
     startTransition(async () => {
-      const res = await saveOnboardingStep(buildFormData());
+      const res = await saveOnboardingStep(buildFormData(bloc));
       if (!res.ok) {
         setError(res.error);
         return;
       }
-      after();
+      setIndex((i) => Math.min(i + 1, TOTAL - 1));
     });
   }
 
-  function handleContinue() {
+  function finish() {
+    setError(null);
+    startTransition(async () => {
+      const save = await saveOnboardingStep(buildFormData(bloc));
+      if (!save.ok) {
+        setError(save.error);
+        return;
+      }
+      const done = await completeOnboarding();
+      if (!done.ok) {
+        setError(done.error);
+        return;
+      }
+      router.replace(finalNext);
+    });
+  }
+
+  function handleSkip() {
+    // « Passer » saute UNIQUEMENT la sous-question courante (avance d'une étape).
+    // Sur la dernière, il termine le questionnaire. L'auto-save a déjà persisté
+    // ce qui a éventuellement été rempli sur l'étape.
+    setError(null);
     if (isLast) {
-      // Final step: save the data AND flip `onboardingShown` to true via
-      // completeOnboarding so we never auto-show the wizard again on the
-      // next sign-in.
-      setError(null);
-      startTransition(async () => {
-        const saveRes = await saveOnboardingStep(buildFormData());
-        if (!saveRes.ok) {
-          setError(saveRes.error);
-          return;
-        }
-        const completeRes = await completeOnboarding();
-        if (!completeRes.ok) {
-          setError(completeRes.error);
-          return;
-        }
-        router.replace(finalNext);
-      });
+      finish();
       return;
     }
-    commitStep(() => setStepIdx((i) => i + 1));
-  }
-
-  function handleSkipStep() {
-    // "Passer" advances by ONE step without saving anything for the current
-    // one. Existing data on previously-saved steps stays untouched. On the
-    // last step we just mark onboarding as shown and head to the dashboard.
-    setError(null);
-    startTransition(async () => {
-      const res = await dismissOnboarding();
-      if (!res.ok) {
-        setError(res.error);
-        return;
-      }
-      if (isLast) {
-        router.replace(finalNext);
-      } else {
-        setStepIdx((i) => i + 1);
-      }
-    });
+    setIndex((i) => Math.min(i + 1, TOTAL - 1));
   }
 
   function handleBack() {
-    if (stepIdx === 0) return;
-    setStepIdx((i) => i - 1);
+    if (index > 0) setIndex((i) => i - 1);
   }
 
-  const progressPct = ((stepIdx + 1) / STEPS.length) * 100;
+  const toggle = <T,>(setter: (v: Set<T>) => void, set: Set<T>, key: T) => {
+    const next = new Set(set);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    setter(next);
+  };
+
+  const kicker = index === 0 && firstName ? `Bonjour ${firstName}` : step.blocLabel;
+  const progressPct = ((index + 1) / TOTAL) * 100;
 
   return (
     <div className="w-full">
-      {/* Header: roman-numeral step indicator + "Passer" link (top-right). */}
-      <header className="mb-7 flex items-center justify-between">
-        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#6B7280]">
-          Étape {currentStep.romanNumeral} / III
-        </p>
+      <style>{`@keyframes obFade{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}`}</style>
+
+      {/* Header : retour (gauche) + Passer (droite) */}
+      <div className="flex min-h-[40px] items-center justify-between">
+        {index > 0 ? (
+          <button
+            type="button"
+            onClick={handleBack}
+            disabled={pending}
+            aria-label="Précédent"
+            className="-ml-1 flex h-9 w-9 items-center justify-center rounded-full text-[#111111] transition hover:bg-black/5 disabled:opacity-40"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+        ) : (
+          <span className="h-9 w-9" />
+        )}
         <button
           type="button"
-          onClick={handleSkipStep}
+          onClick={handleSkip}
           disabled={pending}
-          className="text-[12px] font-medium text-[#9CA3AF] transition hover:text-[#374151] disabled:opacity-40"
+          className="text-[13px] font-medium text-[#9CA3AF] transition hover:text-[#374151] disabled:opacity-40"
         >
-          Plus tard
+          Passer
         </button>
-      </header>
+      </div>
 
-      {/* Progress bar */}
-      <div className="-mt-3 mb-8 h-[3px] w-full overflow-hidden rounded-full bg-[#F3F4F6]">
+      {/* Barre de progression (couleur du bloc) */}
+      <div className="mt-2 h-[5px] w-full overflow-hidden rounded-full bg-[#EDEDED]">
         <div
-          className="h-full bg-[#F43F5E] transition-all duration-500"
-          style={{ width: `${progressPct}%` }}
+          className="h-full rounded-full transition-all duration-300"
+          style={{ width: `${progressPct}%`, backgroundColor: tone.solid }}
         />
       </div>
 
-      {/* Editorial title + subtitle */}
-      <header className="mb-8">
-        <h1
-          className="font-serif text-[40px] sm:text-[52px] font-semibold leading-[1.05] tracking-tight text-[#111111]"
-          style={{ whiteSpace: "pre-line" }}
-        >
-          {currentStep.title}
-        </h1>
-        <p className="mt-3 text-[14px] sm:text-[15px] leading-relaxed text-[#4B4B4B]">
-          {currentStep.subtitle}
+      {/* Kicker + pastilles numérotées du bloc */}
+      <div className="mt-7 flex items-center justify-between">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: tone.text }}>
+          {kicker}
         </p>
-      </header>
+        <div className="flex gap-1.5">
+          {blocSteps.map((s, i) => {
+            const active = i === blocPos;
+            const done = i < blocPos;
+            return (
+              <span
+                key={s.id}
+                className="flex h-[22px] w-[22px] items-center justify-center rounded-full text-[11px] font-semibold"
+                style={
+                  active
+                    ? { backgroundColor: tone.solid, color: "#fff" }
+                    : done
+                      ? { backgroundColor: tone.soft, color: tone.text }
+                      : { backgroundColor: "#EDEDED", color: "#9CA3AF" }
+                }
+              >
+                {i + 1}
+              </span>
+            );
+          })}
+        </div>
+      </div>
 
-      <div className="space-y-8">
-        {currentStep.key === "skin" && (
-          <SkinStep
-            skinTypeFace={skinTypeFace}
-            setSkinTypeFace={setSkinTypeFace}
-            otherSkinTypeFace={otherSkinTypeFace}
-            setOtherSkinTypeFace={setOtherSkinTypeFace}
-            skinTypeBody={skinTypeBody}
-            setSkinTypeBody={setSkinTypeBody}
-            otherSkinTypeBody={otherSkinTypeBody}
-            setOtherSkinTypeBody={setOtherSkinTypeBody}
-            hairStateConcerns={hairStateConcerns}
-            setHairStateConcerns={setHairStateConcerns}
-            otherHair={otherHair}
-            setOtherHair={setOtherHair}
+      {/* Titre + corps (animé au changement d'étape) */}
+      <div key={step.id} style={{ animation: "obFade 260ms ease-out" }} className="mt-6">
+        <h1 className="mb-6 text-[26px] font-bold leading-tight tracking-tight text-[#111111]">
+          {step.title}
+        </h1>
+
+        {step.id === "face" && (
+          <SingleSelect
+            tone={step.tone}
+            options={SKIN_TYPES_FACE.map((k) => ({ value: k as string, label: SKIN_TYPE_FACE_LABEL[k] }))}
+            value={skinTypeFace}
+            onPick={(k) => setSkinTypeFace((cur) => (cur === k ? "" : (k as SkinTypeFace | "autre")))}
+            otherPlaceholder="Décris ta peau du visage"
+            otherValue={otherSkinTypeFace}
+            onOtherChange={setOtherSkinTypeFace}
           />
         )}
 
-        {currentStep.key === "concerns" && (
-          <ConcernsStep
-            concerns={concerns}
-            setConcerns={setConcerns}
-            hairProblemConcerns={hairProblemConcerns}
-            setHairProblemConcerns={setHairProblemConcerns}
-            otherConcerns={otherConcerns}
-            setOtherConcerns={setOtherConcerns}
-            allergies={allergies}
-            setAllergies={setAllergies}
+        {step.id === "body" && (
+          <SingleSelect
+            tone={step.tone}
+            options={SKIN_TYPES_BODY.map((k) => ({ value: k as string, label: SKIN_TYPE_BODY_LABEL[k] }))}
+            value={skinTypeBody}
+            onPick={(k) => setSkinTypeBody((cur) => (cur === k ? "" : (k as SkinTypeBody | "autre")))}
+            otherPlaceholder="Décris la peau de ton corps"
+            otherValue={otherSkinTypeBody}
+            onOtherChange={setOtherSkinTypeBody}
           />
         )}
 
-        {currentStep.key === "goals" && (
-          <GoalsStep
-            goals={goals}
-            setGoals={setGoals}
-            otherGoals={otherGoals}
-            setOtherGoals={setOtherGoals}
+        {step.id === "hairState" && (
+          <MultiSelect
+            tone={step.tone}
+            options={HAIR_STATE_CONCERNS.map((k) => ({ value: k as string, label: HAIR_CONCERN_LABEL[k] }))}
+            values={hairStateConcerns as Set<string>}
+            onToggle={(k) => toggle(setHairStateConcerns, hairStateConcerns, k as HairConcern)}
+            otherPlaceholder="Décris l'état de tes cheveux (boucles, colorés…)"
+            otherValue={otherHair}
+            onOtherChange={setOtherHair}
+          />
+        )}
+
+        {step.id === "skinConcerns" && (
+          <MultiSelect
+            tone={step.tone}
+            options={SKIN_CONCERNS.map((k) => ({ value: k as string, label: SKIN_CONCERN_LABEL[k] }))}
+            values={concerns as Set<string>}
+            onToggle={(k) => toggle(setConcerns, concerns, k as SkinConcern)}
+          />
+        )}
+
+        {step.id === "hairConcerns" && (
+          <MultiSelect
+            tone={step.tone}
+            options={HAIR_PROBLEM_CONCERNS.map((k) => ({ value: k as string, label: HAIR_CONCERN_LABEL[k] }))}
+            values={hairProblemConcerns as Set<string>}
+            onToggle={(k) => toggle(setHairProblemConcerns, hairProblemConcerns, k as HairConcern)}
+          />
+        )}
+
+        {step.id === "otherConcern" && (
+          <FreeText
+            value={otherConcerns}
+            onChange={setOtherConcerns}
+            placeholder="ex : tiraillements, allergie connue, ingrédient à éviter…"
+          />
+        )}
+
+        {step.id === "goalsFace" && (
+          <MultiSelect
+            tone={step.tone}
+            options={goalOptions("Visage")}
+            values={goals as Set<string>}
+            onToggle={(k) => toggle(setGoals, goals, k as ProfileGoal)}
+          />
+        )}
+        {step.id === "goalsBody" && (
+          <MultiSelect
+            tone={step.tone}
+            options={goalOptions("Corps")}
+            values={goals as Set<string>}
+            onToggle={(k) => toggle(setGoals, goals, k as ProfileGoal)}
+          />
+        )}
+        {step.id === "goalsHair" && (
+          <MultiSelect
+            tone={step.tone}
+            options={goalOptions("Cheveux")}
+            values={goals as Set<string>}
+            onToggle={(k) => toggle(setGoals, goals, k as ProfileGoal)}
+          />
+        )}
+        {step.id === "goalsRoutine" && (
+          <MultiSelect
+            tone={step.tone}
+            options={goalOptions("Routine")}
+            values={goals as Set<string>}
+            onToggle={(k) => toggle(setGoals, goals, k as ProfileGoal)}
+          />
+        )}
+        {step.id === "otherGoal" && (
+          <FreeText
+            value={otherGoals}
+            onChange={setOtherGoals}
+            placeholder="Un objectif qui n'est pas dans la liste ?"
           />
         )}
       </div>
 
       {error && (
-        <p
-          role="alert"
-          className="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-[12px] text-rose-700"
-        >
+        <p role="alert" className="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-[12px] text-rose-700">
           {error}
         </p>
       )}
 
-      {/* Footer actions — back link on the left, primary CTA below full-width. */}
-      <div className="mt-10 space-y-4">
+      {/* Nav bas — bouton principal couleur du bloc */}
+      <div className="mt-9">
         <button
           type="button"
-          onClick={handleContinue}
+          onClick={isLast ? finish : goNext}
           disabled={pending}
-          className="block w-full rounded-md bg-emerald-500 py-3.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-emerald-600 disabled:opacity-50"
+          className="block h-[54px] w-full rounded-full text-[15px] font-semibold text-white shadow-[0_6px_16px_-6px_rgba(15,23,42,0.35)] transition disabled:opacity-60"
+          style={{ backgroundColor: tone.solid }}
         >
-          {pending ? "Enregistrement…" : `${currentStep.ctaLabel} →`}
+          {pending ? "Enregistrement…" : isLast ? "C'est parti !" : "Suivant"}
         </button>
-        {stepIdx > 0 ? (
-          <button
-            type="button"
-            onClick={handleBack}
-            disabled={pending}
-            className="block text-[12px] font-medium text-[#6B7280] transition hover:text-[#111111] disabled:opacity-40"
-          >
-            ← Retour
-          </button>
-        ) : null}
       </div>
     </div>
   );
 }
 
-// ─── Step components ────────────────────────────────────────────────────────
+// ─── Cartes d'option ─────────────────────────────────────────────────────────
 
-function SkinStep(props: {
-  skinTypeFace: SkinTypeFace | "autre" | "";
-  setSkinTypeFace: (v: SkinTypeFace | "autre" | "") => void;
-  otherSkinTypeFace: string;
-  setOtherSkinTypeFace: (v: string) => void;
-  skinTypeBody: SkinTypeBody | "autre" | "";
-  setSkinTypeBody: (v: SkinTypeBody | "autre" | "") => void;
-  otherSkinTypeBody: string;
-  setOtherSkinTypeBody: (v: string) => void;
-  hairStateConcerns: Set<HairConcern>;
-  setHairStateConcerns: (v: Set<HairConcern>) => void;
-  otherHair: string;
-  setOtherHair: (v: string) => void;
-}) {
-  return (
-    <>
-      <Section legend="Visage">
-        <ChipGroup
-          name="skin_type_face"
-          options={SKIN_TYPES_FACE.map((s) => ({
-            value: s,
-            label: SKIN_TYPE_FACE_LABEL[s],
-          }))}
-          value={props.skinTypeFace}
-          onChange={(v) => props.setSkinTypeFace(v as SkinTypeFace | "autre" | "")}
-          allowOther
-        />
-        {props.skinTypeFace === "autre" && (
-          <TextInput
-            placeholder="Décris-le brièvement"
-            value={props.otherSkinTypeFace}
-            onChange={props.setOtherSkinTypeFace}
-            maxLength={120}
-          />
-        )}
-      </Section>
+type Opt = { value: string; label: string };
 
-      <Section legend="Corps">
-        <ChipGroup
-          name="skin_type_body"
-          options={SKIN_TYPES_BODY.map((s) => ({
-            value: s,
-            label: SKIN_TYPE_BODY_LABEL[s],
-          }))}
-          value={props.skinTypeBody}
-          onChange={(v) => props.setSkinTypeBody(v as SkinTypeBody | "autre" | "")}
-          allowOther
-        />
-        {props.skinTypeBody === "autre" && (
-          <TextInput
-            placeholder="Décris-le brièvement"
-            value={props.otherSkinTypeBody}
-            onChange={props.setOtherSkinTypeBody}
-            maxLength={120}
-          />
-        )}
-      </Section>
-
-      <Section legend="Cheveux">
-        <ChipMulti
-          options={HAIR_STATE_CONCERNS.map((c) => ({
-            value: c,
-            label: HAIR_CONCERN_LABEL[c],
-          }))}
-          values={props.hairStateConcerns}
-          onToggle={(v) => {
-            const next = new Set(props.hairStateConcerns);
-            if (next.has(v as HairConcern)) next.delete(v as HairConcern);
-            else next.add(v as HairConcern);
-            props.setHairStateConcerns(next);
-          }}
-        />
-        <TextInput
-          placeholder="Autre (boucles, colorés, longueurs cassantes…)"
-          value={props.otherHair}
-          onChange={props.setOtherHair}
-          maxLength={200}
-        />
-      </Section>
-    </>
-  );
-}
-
-function ConcernsStep(props: {
-  concerns: Set<SkinConcern>;
-  setConcerns: (v: Set<SkinConcern>) => void;
-  hairProblemConcerns: Set<HairConcern>;
-  setHairProblemConcerns: (v: Set<HairConcern>) => void;
-  otherConcerns: string;
-  setOtherConcerns: (v: string) => void;
-  allergies: string;
-  setAllergies: (v: string) => void;
-}) {
-  // Compose a single mixed grid (skin concerns first, hair problems after),
-  // each chip labelled in plain French.
-  return (
-    <>
-      <Section legend="Tes préoccupations">
-        <ChipMixedMulti
-          skinOptions={SKIN_CONCERNS.map((c) => ({
-            value: c,
-            label: SKIN_CONCERN_LABEL[c],
-          }))}
-          skinValues={props.concerns}
-          onToggleSkin={(v) => {
-            const next = new Set(props.concerns);
-            if (next.has(v as SkinConcern)) next.delete(v as SkinConcern);
-            else next.add(v as SkinConcern);
-            props.setConcerns(next);
-          }}
-          hairOptions={HAIR_PROBLEM_CONCERNS.map((c) => ({
-            value: c,
-            label: HAIR_CONCERN_LABEL[c],
-          }))}
-          hairValues={props.hairProblemConcerns}
-          onToggleHair={(v) => {
-            const next = new Set(props.hairProblemConcerns);
-            if (next.has(v as HairConcern)) next.delete(v as HairConcern);
-            else next.add(v as HairConcern);
-            props.setHairProblemConcerns(next);
-          }}
-        />
-        <TextInput
-          placeholder="Autre (eczéma, rosacée, cicatrices…)"
-          value={props.otherConcerns}
-          onChange={props.setOtherConcerns}
-          maxLength={300}
-        />
-      </Section>
-
-      <Section legend="Allergies ou intolérances">
-        <TextArea
-          placeholder="Ex : nickel, parfum, lanoline, sulfates…"
-          value={props.allergies}
-          onChange={props.setAllergies}
-          maxLength={500}
-          rows={2}
-        />
-      </Section>
-    </>
-  );
-}
-
-function GoalsStep(props: {
-  goals: Set<ProfileGoal>;
-  setGoals: (v: Set<ProfileGoal>) => void;
-  otherGoals: string;
-  setOtherGoals: (v: string) => void;
-}) {
-  return (
-    <>
-      {PROFILE_GOAL_GROUPS.map((group) => (
-        <Section key={group.label} legend={group.label}>
-          <ChipMulti
-            options={group.goals.map((g) => ({
-              value: g,
-              label: PROFILE_GOAL_LABEL[g],
-            }))}
-            values={props.goals as Set<string>}
-            onToggle={(v) => {
-              const next = new Set(props.goals);
-              if (next.has(v as ProfileGoal)) next.delete(v as ProfileGoal);
-              else next.add(v as ProfileGoal);
-              props.setGoals(next);
-            }}
-          />
-        </Section>
-      ))}
-
-      <Section legend="Autre objectif">
-        <TextArea
-          placeholder="Ex : « Je veux comprendre les étiquettes » ou « J'aimerais une routine simple pour ma peau mixte »…"
-          value={props.otherGoals}
-          onChange={props.setOtherGoals}
-          maxLength={300}
-          rows={3}
-        />
-      </Section>
-    </>
-  );
-}
-
-// ─── Shared inputs ─────────────────────────────────────────────────────────
-
-function Section({
-  legend,
-  children,
+function OptionCard({
+  label,
+  selected,
+  tone,
+  multi = false,
+  onClick,
 }: {
-  legend: string;
-  children: React.ReactNode;
+  label: string;
+  selected: boolean;
+  tone: Tone;
+  multi?: boolean;
+  onClick: () => void;
 }) {
+  const t = TONES[tone];
   return (
-    <fieldset className="border-t border-[#EDE9E4] pt-5">
-      <legend className="float-left -mt-[11px] bg-[#FAFAF7] pr-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#4B4B4B]">
-        {legend}
-      </legend>
-      <div className="mt-2 space-y-3">{children}</div>
-    </fieldset>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className="flex w-full items-center justify-between rounded-2xl border-[1.5px] px-5 py-4 text-left transition"
+      style={
+        selected
+          ? { backgroundColor: t.soft, borderColor: t.solid }
+          : { backgroundColor: "#fff", borderColor: "#E5E5E0" }
+      }
+    >
+      <span className="pr-3 text-[15px] font-medium" style={{ color: selected ? t.text : "#111111" }}>
+        {label}
+      </span>
+      <span
+        className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center border-2 ${multi ? "rounded-md" : "rounded-full"}`}
+        style={{
+          borderColor: selected ? t.solid : "#D1D5DB",
+          backgroundColor: selected && multi ? t.solid : "transparent",
+        }}
+      >
+        {selected && multi ? (
+          <svg className="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12l5 5 9-12" />
+          </svg>
+        ) : selected ? (
+          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: t.solid }} />
+        ) : null}
+      </span>
+    </button>
   );
 }
 
-function ChipGroup({
-  name,
-  options,
+function OtherInput({
   value,
-  onChange,
-  allowOther = false,
-}: {
-  name: string;
-  options: { value: string; label: string }[];
-  value: string;
-  onChange: (v: string) => void;
-  allowOther?: boolean;
-}) {
-  const all = allowOther
-    ? [...options, { value: "autre", label: "Autre…" }]
-    : options;
-  return (
-    <div className="flex flex-wrap gap-2">
-      {all.map((opt) => {
-        const active = value === opt.value;
-        return (
-          <button
-            key={`${name}-${opt.value}`}
-            type="button"
-            onClick={() => onChange(active ? "" : opt.value)}
-            className={`rounded-md border px-4 py-2 text-[13px] transition ${
-              active
-                ? "border-[#111111] bg-[#111111] text-white"
-                : "border-[#E5E5E0] bg-white text-[#111111] hover:border-[#111111]"
-            }`}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function ChipMulti({
-  options,
-  values,
-  onToggle,
-}: {
-  options: { value: string; label: string }[];
-  values: Set<string>;
-  onToggle: (v: string) => void;
-}) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {options.map((opt) => {
-        const active = values.has(opt.value);
-        return (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => onToggle(opt.value)}
-            aria-pressed={active}
-            className={`rounded-md border px-4 py-2 text-[13px] transition ${
-              active
-                ? "border-[#111111] bg-[#111111] text-white"
-                : "border-[#E5E5E0] bg-white text-[#111111] hover:border-[#111111]"
-            }`}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-/**
- * Step-2 picker that mixes skin concerns + hair problems in a single
- * rectangular-chip grid. Two callbacks under the hood so the wizard can
- * route each toggle into the right storage bucket (skin → `concerns`,
- * hair → `hairConcerns`).
- */
-function ChipMixedMulti({
-  skinOptions,
-  skinValues,
-  onToggleSkin,
-  hairOptions,
-  hairValues,
-  onToggleHair,
-}: {
-  skinOptions: { value: string; label: string }[];
-  skinValues: Set<SkinConcern>;
-  onToggleSkin: (v: string) => void;
-  hairOptions: { value: string; label: string }[];
-  hairValues: Set<HairConcern>;
-  onToggleHair: (v: string) => void;
-}) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {skinOptions.map((opt) => {
-        const active = skinValues.has(opt.value as SkinConcern);
-        return (
-          <button
-            key={`s-${opt.value}`}
-            type="button"
-            onClick={() => onToggleSkin(opt.value)}
-            aria-pressed={active}
-            className={`rounded-md border px-4 py-2 text-[13px] transition ${
-              active
-                ? "border-[#111111] bg-[#111111] text-white"
-                : "border-[#E5E5E0] bg-white text-[#111111] hover:border-[#111111]"
-            }`}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
-      {hairOptions.map((opt) => {
-        const active = hairValues.has(opt.value as HairConcern);
-        return (
-          <button
-            key={`h-${opt.value}`}
-            type="button"
-            onClick={() => onToggleHair(opt.value)}
-            aria-pressed={active}
-            className={`rounded-md border px-4 py-2 text-[13px] transition ${
-              active
-                ? "border-[#111111] bg-[#111111] text-white"
-                : "border-[#E5E5E0] bg-white text-[#111111] hover:border-[#111111]"
-            }`}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function TextInput({
   placeholder,
-  value,
   onChange,
-  maxLength,
 }: {
-  placeholder: string;
   value: string;
+  placeholder: string;
   onChange: (v: string) => void;
-  maxLength: number;
 }) {
   return (
     <input
       type="text"
-      placeholder={placeholder}
+      autoFocus
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      maxLength={maxLength}
-      className="w-full rounded-md border border-[#E5E5E0] bg-white px-3 py-2.5 text-[13px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none"
+      placeholder={placeholder}
+      maxLength={200}
+      className="mt-1 w-full rounded-xl border-[1.5px] border-[#E5E5E0] bg-white px-4 py-3 text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none"
     />
   );
 }
 
-function TextArea({
-  placeholder,
+function SingleSelect({
+  tone,
+  options,
+  value,
+  onPick,
+  otherPlaceholder,
+  otherValue,
+  onOtherChange,
+}: {
+  tone: Tone;
+  options: Opt[];
+  value: string;
+  onPick: (key: string) => void;
+  otherPlaceholder?: string;
+  otherValue?: string;
+  onOtherChange?: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      {options.map((opt) => (
+        <OptionCard
+          key={opt.value}
+          label={opt.label}
+          selected={value === opt.value}
+          tone={tone}
+          onClick={() => onPick(opt.value)}
+        />
+      ))}
+      {otherPlaceholder && (
+        <OptionCard
+          label="Autre"
+          selected={value === "autre"}
+          tone={tone}
+          onClick={() => onPick("autre")}
+        />
+      )}
+      {otherPlaceholder && value === "autre" && onOtherChange && (
+        <OtherInput value={otherValue ?? ""} placeholder={otherPlaceholder} onChange={onOtherChange} />
+      )}
+    </div>
+  );
+}
+
+function MultiSelect({
+  tone,
+  options,
+  values,
+  onToggle,
+  otherPlaceholder,
+  otherValue,
+  onOtherChange,
+}: {
+  tone: Tone;
+  options: Opt[];
+  values: Set<string>;
+  onToggle: (key: string) => void;
+  otherPlaceholder?: string;
+  otherValue?: string;
+  onOtherChange?: (v: string) => void;
+}) {
+  const [otherOpen, setOtherOpen] = useState(Boolean(otherValue));
+  return (
+    <div className="flex flex-col gap-3">
+      {options.map((opt) => (
+        <OptionCard
+          key={opt.value}
+          label={opt.label}
+          selected={values.has(opt.value)}
+          tone={tone}
+          multi
+          onClick={() => onToggle(opt.value)}
+        />
+      ))}
+      {otherPlaceholder && (
+        <OptionCard
+          label="Autre"
+          selected={otherOpen}
+          tone={tone}
+          multi
+          onClick={() => {
+            const next = !otherOpen;
+            setOtherOpen(next);
+            if (!next) onOtherChange?.("");
+          }}
+        />
+      )}
+      {otherPlaceholder && otherOpen && onOtherChange && (
+        <OtherInput value={otherValue ?? ""} placeholder={otherPlaceholder} onChange={onOtherChange} />
+      )}
+    </div>
+  );
+}
+
+function FreeText({
   value,
   onChange,
-  maxLength,
-  rows = 3,
+  placeholder,
 }: {
-  placeholder: string;
   value: string;
   onChange: (v: string) => void;
-  maxLength: number;
-  rows?: number;
+  placeholder: string;
 }) {
   return (
     <textarea
-      placeholder={placeholder}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      maxLength={maxLength}
-      rows={rows}
-      className="w-full resize-none rounded-md border border-[#E5E5E0] bg-white px-3 py-2.5 text-[13px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none"
+      placeholder={placeholder}
+      maxLength={300}
+      rows={4}
+      className="w-full resize-none rounded-2xl border-[1.5px] border-[#E5E5E0] bg-white px-4 py-3 text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none"
     />
   );
 }

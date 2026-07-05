@@ -138,6 +138,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: name,
     description,
     alternates: { canonical: path },
+    robots: { index: false, follow: true },
     openGraph: {
       title: `${name} · Cosme Check`,
       description,

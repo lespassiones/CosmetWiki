@@ -3,7 +3,10 @@ import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
 import { SignInForm } from "@/components/auth/SignInForm";
 
-export const metadata = { title: "Se connecter · Cosme Check" };
+export const metadata = {
+  title: "Connexion / Inscription · Cosme Check",
+  description: "Connecte-toi à Cosme Check ou crée ton compte pour analyser ta composition cosmétique et obtenir des recommandations personnalisées.",
+};
 
 type Props = {
   searchParams?: Promise<{ next?: string }>;

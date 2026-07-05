@@ -73,15 +73,7 @@ export default async function SuggestionsPage() {
   const atRiskProducts = selectAtRiskProducts(products, { restrictions, families });
   if (atRiskProducts.length === 0) redirect("/routine");
 
-  // Empreinte des restrictions (familles + ingrédients) : intégrée à la clé de
-  // cache côté client → modifier ses restrictions invalide les suggestions cachées.
-  const restrictionsSig = [
-    [...restrictions.families].sort().join(","),
-    restrictions.ingredients
-      .map((i) => i.name)
-      .sort()
-      .join(","),
-  ].join(";");
-
-  return <SuggestionsPageClient products={atRiskProducts} restrictionsSig={restrictionsSig} />;
+  // Le cache + les crédits sont gérés côté serveur (Edge Function + table
+  // routine_suggestions), par produit et par empreinte de profil.
+  return <SuggestionsPageClient products={atRiskProducts} />;
 }

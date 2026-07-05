@@ -13,23 +13,23 @@ const VALUES: Value[] = [
   {
     image: "/image/section3/image1.webp",
     alt: "Illustration : décodage ingrédient par ingrédient d'une formule cosmétique",
-    title: "Au-delà des notes",
+    title: "Chaque ingrédient compte",
     subtitle:
-      "On ne te colle pas une étiquette. On décode chaque ingrédient de ta formule, un par un.",
+      "Nous analysons chaque ingrédient de ta formule, un par un, avant d'évaluer le produit dans son ensemble.",
   },
   {
     image: "/image/section3/image2.webp",
     alt: "Illustration : deux profils de peau différents, deux analyses personnalisées",
-    title: "Personnalisé pour toi",
+    title: "Adapté à ton profil",
     subtitle:
-      "Le même produit n'agit pas pareil sur tout le monde. Ton analyse dépend de ton profil.",
+      "Le même produit ne convient pas à tout le monde. Chaque analyse prend en compte ton profil cosmétique pour évaluer sa compatibilité avec tes besoins.",
   },
   {
     image: "/image/section3/image3.webp",
     alt: "Illustration : indépendance vis-à-vis des marques cosmétiques",
     title: "100% indépendant",
     subtitle:
-      "Aucune marque ne nous paie. On suit la réglementation européenne, point.",
+      "Nos analyses ne sont influencées par aucune marque. Elles reposent sur la réglementation européenne, les données scientifiques et ton profil.",
   },
   {
     image: "/image/section3/image4.webp",
