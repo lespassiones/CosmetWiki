@@ -174,7 +174,7 @@ export function OffrePageClient() {
             type="button"
             onClick={handleSubscribe}
             disabled={loading}
-            className="h-14 w-full rounded-full bg-[#F43F5E] text-[15px] font-semibold text-white transition hover:brightness-105 active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
+            className="h-14 w-full rounded-full bg-emerald-500 text-[15px] font-semibold text-white transition hover:bg-emerald-600 active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loading ? "Chargement…" : "Commencer l’essai gratuit"}
           </button>
@@ -220,24 +220,24 @@ function PlanCol({
       type="button"
       onClick={onSelect}
       className={`relative flex flex-col items-center rounded-3xl border-2 bg-white px-3 pb-4 pt-6 shadow-[0_6px_16px_-10px_rgba(15,23,42,0.18)] transition ${
-        selected ? "border-[#F43F5E]" : "border-[#ECECEC]"
+        selected ? "border-emerald-500" : "border-[#ECECEC]"
       }`}
     >
       {badge && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#F43F5E] px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white">
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white">
           {badge}
         </span>
       )}
       <span className="text-[15px] font-semibold text-[#111111]">{name}</span>
-      <span className={`mt-1 text-[26px] font-bold ${selected ? "text-[#F43F5E]" : "text-[#111111]"}`}>{price}</span>
+      <span className={`mt-1 text-[26px] font-bold ${selected ? "text-emerald-600" : "text-emerald-700"}`}>{price}</span>
       <span className="mt-0.5 text-[13px] text-[#6B7280]">{sub}</span>
       <span
         aria-hidden
         className={`mt-3 grid h-5 w-5 place-items-center rounded-full border-2 ${
-          selected ? "border-[#F43F5E]" : "border-[#CBD5E1]"
+          selected ? "border-emerald-500" : "border-[#CBD5E1]"
         }`}
       >
-        {selected && <span className="h-2.5 w-2.5 rounded-full bg-[#F43F5E]" />}
+        {selected && <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />}
       </span>
     </button>
   );

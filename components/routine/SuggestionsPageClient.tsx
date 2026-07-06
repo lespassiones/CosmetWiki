@@ -18,6 +18,7 @@ type EdgeSuggestion = {
   analysisId: string;
   productName: string;
   productScore: number | null;
+  productImageUrl: string | null;
   dangerColor: "rouge" | "orange" | null;
   alternative: Alternative | null;
   reason: string | null;
@@ -30,6 +31,7 @@ type Item = {
   productAnalysisId: string | null;
   productTitle: string;
   productScore: number | null;
+  productImageUrl: string | null;
   dangerColor: "rouge" | "orange" | null;
   alternative: Alternative;
   reason: string | null;
@@ -97,6 +99,7 @@ export function SuggestionsPageClient({
             productAnalysisId: s.analysisId,
             productTitle: s.productName,
             productScore: s.productScore,
+            productImageUrl: s.productImageUrl,
             dangerColor: s.dangerColor,
             alternative: s.alternative!,
             reason: s.reason,
@@ -239,6 +242,7 @@ export function SuggestionsPageClient({
               <SuggestionCard
                 productTitle={s.productTitle}
                 productScore={s.productScore}
+                productImageUrl={s.productImageUrl}
                 dangerColor={s.dangerColor}
                 alternative={s.alternative}
                 reason={s.reason}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { saveSkinProfile } from "@/app/advisor/actions";
 import { GLASS_PILL, GLASS_PILL_DARK } from "@/lib/ui/glass";
 import {
@@ -41,13 +42,16 @@ export function BeautyProfileForm({
   onCancel,
   submitLabel = "Enregistrer",
   showCancel = true,
+  redirectAfterSave,
 }: {
   initial: SkinProfile;
   onSaved?: () => void;
   onCancel?: () => void;
   submitLabel?: string;
   showCancel?: boolean;
+  redirectAfterSave?: string;
 }) {
+  const router = useRouter();
   const [skinTypeFace, setSkinTypeFace] = useState<
     SkinTypeFace | typeof SELECT_OTHER | ""
   >(initial.skinTypeFace ?? (initial.otherSkinTypeFace ? SELECT_OTHER : ""));
@@ -152,6 +156,7 @@ export function BeautyProfileForm({
         return;
       }
       onSaved?.();
+      if (redirectAfterSave) router.push(redirectAfterSave);
     });
   }
 

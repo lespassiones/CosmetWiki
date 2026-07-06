@@ -40,14 +40,14 @@ export function AppShell({
   signedIn,
   firstName,
   initialCredits = null,
+  tier = "free",
 }: {
   children: React.ReactNode;
-  /** Path prefixes where the shell (bottom nav + sidebar) should be hidden. */
   hideOnPaths?: string[];
   signedIn: boolean;
   firstName?: string | null;
-  /** Credits pre-fetched server-side in layout.tsx — skips the client fetch on mount. */
   initialCredits?: { used: number; limit: number; remaining: number } | null;
+  tier?: "free" | "premium";
 }) {
   const pathname = usePathname() ?? "/";
   const [scanOpen, setScanOpen] = useState(false);
@@ -89,7 +89,7 @@ export function AppShell({
     if (credits && credits.remaining <= 0) {
       window.dispatchEvent(
         new CustomEvent("cosmecheck:credits-exhausted", {
-          detail: { used: credits.used, limit: credits.limit },
+          detail: { used: credits.used, limit: credits.limit, isPremium: tier === "premium" },
         }),
       );
       return;

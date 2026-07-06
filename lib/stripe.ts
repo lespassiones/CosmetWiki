@@ -11,4 +11,5 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 export const STRIPE_PRICES = {
   monthly: process.env.STRIPE_PRICE_MONTHLY!,
   yearly: process.env.STRIPE_PRICE_YEARLY!,
+  creditPack: process.env.STRIPE_PRICE_CREDIT_PACK!,
 } as const;

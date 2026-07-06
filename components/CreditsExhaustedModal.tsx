@@ -3,32 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 
-type Detail = { used?: number; limit?: number };
+type Detail = { used?: number; limit?: number; isPremium?: boolean };
 
-/**
- * Listens for a `cosmecheck:credits-exhausted` event and opens a modal.
- * Dispatch it from anywhere in the client after a 429 response with a
- * `credits` payload, e.g.:
- *
- *   const data = await res.json();
- *   if (res.status === 429 && data.credits) {
- *     window.dispatchEvent(new CustomEvent("cosmecheck:credits-exhausted", {
- *       detail: data.credits,
- *     }));
- *   }
- *
- * Closing the modal (backdrop click, Escape, "Plus tard") simply dismisses it
- * and KEEPS the user exactly where they were. "Découvrir Premium" pushes to
- * /offre (so a browser back returns to the origin page) and records the origin
- * in `returnAfterPaywall` so OffrePageClient can offer a direct "Retour".
- */
 export function CreditsExhaustedModal() {
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<Detail>({});
+  const [buyLoading, setBuyLoading] = useState(false);
 
-  const close = useCallback(() => {
-    setOpen(false);
-  }, []);
+  const close = useCallback(() => setOpen(false), []);
 
   const goPremium = useCallback(() => {
     try {
@@ -36,10 +18,25 @@ export function CreditsExhaustedModal() {
         "returnAfterPaywall",
         window.location.pathname + window.location.search,
       );
-    } catch {
-      /* sessionStorage indisponible */
-    }
+    } catch { /* sessionStorage indisponible */ }
     setOpen(false);
+  }, []);
+
+  const buyCredits = useCallback(async () => {
+    setBuyLoading(true);
+    try {
+      const res = await fetch("/api/checkout/credits", { method: "POST" });
+      const data = await res.json() as { url?: string; error?: string };
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error ?? "Une erreur est survenue.");
+        setBuyLoading(false);
+      }
+    } catch {
+      alert("Une erreur est survenue. Vérifie ta connexion.");
+      setBuyLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -48,9 +45,7 @@ export function CreditsExhaustedModal() {
       setDetail(ev.detail ?? {});
       setOpen(true);
     };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
     window.addEventListener("cosmecheck:credits-exhausted", onShow as EventListener);
     document.addEventListener("keydown", onKey);
     return () => {
@@ -61,7 +56,7 @@ export function CreditsExhaustedModal() {
 
   if (!open) return null;
 
-  const limit = detail.limit ?? 100;
+  const isPremium = detail.isPremium === true;
 
   return (
     <div
@@ -82,29 +77,61 @@ export function CreditsExhaustedModal() {
           </svg>
         </div>
 
-        <h2 id="credits-exhausted-title" className="text-center text-[17px] font-semibold tracking-tight">
-          Tu as utilisé tes {limit} crédits du jour
-        </h2>
-        <p className="mt-2 text-center text-[13px] leading-relaxed text-[#6B7280]">
-          Reviens demain pour de nouveaux crédits, ou passe Premium pour des analyses illimitées.
-        </p>
+        {isPremium ? (
+          <>
+            <h2 id="credits-exhausted-title" className="text-center text-[17px] font-semibold tracking-tight">
+              Tes 100 crédits du mois sont épuisés
+            </h2>
+            <p className="mt-2 text-center text-[13px] leading-relaxed text-[#6B7280]">
+              Tu peux acheter un pack de 50 crédits supplémentaires, valables 30 jours.
+            </p>
 
-        <div className="mt-5 space-y-2">
-          <Link
-            href="/offre"
-            onClick={goPremium}
-            className="block w-full rounded-xl bg-[#111111] py-3 text-center text-sm font-semibold text-white hover:brightness-110 transition"
-          >
-            Découvrir Premium
-          </Link>
-          <button
-            type="button"
-            onClick={close}
-            className="block w-full rounded-xl bg-white py-3 text-center text-sm font-medium text-[#6B7280] hover:text-[#111111] transition"
-          >
-            Plus tard
-          </button>
-        </div>
+            <div className="mt-5 space-y-2">
+              <button
+                type="button"
+                onClick={buyCredits}
+                disabled={buyLoading}
+                className="flex w-full items-center justify-between rounded-xl bg-[#111111] px-4 py-3 text-sm font-semibold text-white hover:brightness-110 transition disabled:opacity-60"
+              >
+                <span>{buyLoading ? "Chargement…" : "Acheter 50 crédits"}</span>
+                <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[12px] font-bold">4,99 €</span>
+              </button>
+              <button
+                type="button"
+                onClick={close}
+                className="block w-full rounded-xl bg-white py-3 text-center text-sm font-medium text-[#6B7280] hover:text-[#111111] transition"
+              >
+                Plus tard
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <h2 id="credits-exhausted-title" className="text-center text-[17px] font-semibold tracking-tight">
+              Tu as utilisé tes crédits du jour
+            </h2>
+            <p className="mt-2 text-center text-[13px] leading-relaxed text-[#6B7280]">
+              Reviens demain pour de nouveaux crédits, ou passe Premium pour 100 crédits par mois.
+            </p>
+
+            <div className="mt-5 space-y-2">
+              <Link
+                href="/offre"
+                onClick={goPremium}
+                className="block w-full rounded-xl bg-[#111111] py-3 text-center text-sm font-semibold text-white hover:brightness-110 transition"
+              >
+                Découvrir Premium
+              </Link>
+              <button
+                type="button"
+                onClick={close}
+                className="block w-full rounded-xl bg-white py-3 text-center text-sm font-medium text-[#6B7280] hover:text-[#111111] transition"
+              >
+                Plus tard
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

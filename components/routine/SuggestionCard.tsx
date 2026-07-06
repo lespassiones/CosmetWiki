@@ -20,6 +20,8 @@ type Props = {
   productTitle: string;
   /** Score plafonné du produit à optimiser. */
   productScore: number | null;
+  /** Photo du produit de la routine (catalogue), sinon placeholder. */
+  productImageUrl?: string | null;
   dangerColor: "rouge" | "orange" | null;
   alternative: DeckAlternative;
   /** Justification IA personnalisée (« pour ta peau sensible… »). */
@@ -41,6 +43,7 @@ type Props = {
 export function SuggestionCard({
   productTitle,
   productScore,
+  productImageUrl,
   dangerColor,
   alternative,
   reason,
@@ -51,8 +54,10 @@ export function SuggestionCard({
   onOpenAlternative,
 }: Props) {
   const [imgFailed, setImgFailed] = useState(false);
+  const [prodImgFailed, setProdImgFailed] = useState(false);
   const altTitle = alternative.name ?? "Alternative";
   const showImage = alternative.image_url && !imgFailed;
+  const showProductImage = productImageUrl && !prodImgFailed;
 
   return (
     <div className="rounded-3xl bg-white p-5 shadow-[0_12px_24px_-6px_rgba(15,23,42,0.18)]">
@@ -71,8 +76,19 @@ export function SuggestionCard({
       <div className="flex items-start gap-2">
         {/* Produit à optimiser */}
         <div className="flex flex-1 flex-col items-center gap-2">
-          <div className="flex h-[158px] w-[104px] items-center justify-center rounded-xl bg-[#F3F4F6]">
-            <CubeIcon className="h-7 w-7 text-[#9CA3AF]" />
+          <div className="flex h-[158px] w-[104px] items-center justify-center overflow-hidden rounded-xl bg-[#F3F4F6]">
+            {showProductImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={productImageUrl!}
+                alt=""
+                className="h-full w-full object-contain"
+                loading="lazy"
+                onError={() => setProdImgFailed(true)}
+              />
+            ) : (
+              <CubeIcon className="h-7 w-7 text-[#9CA3AF]" />
+            )}
           </div>
           <p className="min-h-[34px] text-center text-[11px] font-semibold leading-snug text-ink line-clamp-2">
             {productTitle}

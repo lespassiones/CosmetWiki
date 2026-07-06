@@ -169,7 +169,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             crossOrigin="anonymous"
           />
           <RestrictionsProvider restrictions={EMPTY_RESTRICTIONS} families={[]}>
-            <AppShell signedIn={signedIn} firstName={null} hideOnPaths={hideOnPaths} initialCredits={null}>
+            <AppShell signedIn={signedIn} firstName={null} hideOnPaths={hideOnPaths} initialCredits={null} tier="free">
               {children}
               <ConditionalLandingFooter signedIn={signedIn} />
             </AppShell>
@@ -233,7 +233,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           crossOrigin="anonymous"
         />
         <RestrictionsProvider restrictions={restrictions} families={families} allergiesFreeform={allergiesFreeform}>
-          <AppShell signedIn={signedIn} firstName={firstName} hideOnPaths={hideOnPaths} initialCredits={initialCredits}>
+          <AppShell signedIn={signedIn} firstName={firstName} hideOnPaths={hideOnPaths} initialCredits={initialCredits} tier={(profile?.tier as "free" | "premium") ?? "free"}>
             {children}
             <ConditionalLandingFooter signedIn={signedIn} />
           </AppShell>
