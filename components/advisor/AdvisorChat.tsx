@@ -2,15 +2,27 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  parseRecoBlock,
-  stripRecoBlock,
-  buildRecoBlock,
-  type RecoCriteria,
-} from "@/lib/advisor/recoBlock";
+import type { RecoCriteria } from "@/lib/advisor/recoBlock";
 import type { AdvisorProduct } from "@/app/api/advisor/recommendations/route";
 import { apiFetch } from "@/lib/clientApi";
 import { scoreColor } from "@/lib/essentiel/engine";
+
+/** Messages de chargement rotatifs déterministes affichés pendant l'attente de
+ *  l'agent (3-17 s). Twin du mobile lib/advisor/agentClient.ADVISOR_LOADING_STEPS. */
+const ADVISOR_LOADING_STEPS = [
+  "Je lis ta demande…",
+  "Je cherche de vrais produits notés…",
+  "Je vérifie les compositions…",
+  "Je garde seulement ce qui te convient…",
+  "Je prépare ta réponse…",
+];
+function advisorLoadingMessage(tick: number): string {
+  const n = ADVISOR_LOADING_STEPS.length;
+  return ADVISOR_LOADING_STEPS[((tick % n) + n) % n];
+}
+
+/** Produit renvoyé par l'agent (superset d'AdvisorProduct : category/count_total en plus). */
+type AgentProduct = AdvisorProduct & { category?: string | null; count_total?: number | null };
 
 // ─── sessionStorage keys (mirror ScanSheet / AlternativesCarousel) ───────────
 const PENDING_INCI_KEY = "cw:pendingInci";
@@ -62,21 +74,14 @@ function getTime() {
 }
 
 /**
- * Construit l'historique envoyé à l'API : retire les messages purement UI et
- * RECONSTRUIT le bloc RECO sur les réponses assistant passées (à partir de
- * `recoCriteria`). CRITIQUE multi-tours : sans ça l'IA voit son propre
- * historique SANS bloc, imite ce schéma et arrête d'émettre le bloc.
+ * Historique envoyé à l'agent : plain {role, content}, sans les messages
+ * purement UI (accueil). L'agent ne parse pas de bloc technique : le contenu
+ * visible suffit (le serveur tronque aux 12 derniers tours).
  */
 function buildApiMessages(history: ChatMsg[], newUserText: string) {
   const past = history
     .filter((m) => !m.uiOnly)
-    .map((m) => ({
-      role: m.role,
-      content:
-        m.role === "assistant" && m.recoCriteria
-          ? `${m.content}\n${buildRecoBlock(m.recoCriteria)}`
-          : m.content,
-    }));
+    .map((m) => ({ role: m.role, content: m.content }));
   return [...past, { role: "user" as const, content: newUserText }];
 }
 
@@ -318,6 +323,8 @@ export function AdvisorChat({
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Tick pour faire tourner les messages de chargement pendant l'attente.
+  const [loadingTick, setLoadingTick] = useState(0);
   // Id de la conversation courante (créée à la volée au 1er message).
   const convIdRef = useRef<string | null>(conversationId);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -325,6 +332,14 @@ export function AdvisorChat({
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  // Messages de chargement rotatifs pendant l'attente de l'agent.
+  useEffect(() => {
+    if (!streaming) return;
+    setLoadingTick(0);
+    const id = setInterval(() => setLoadingTick((t) => t + 1), 2200);
+    return () => clearInterval(id);
+  }, [streaming]);
 
   async function persistMessages(userMsg: ChatMsg, assistantMsg: ChatMsg) {
     try {
@@ -400,81 +415,52 @@ export function AdvisorChat({
 
     let finalContent = "";
     let finalProducts: AdvisorProduct[] = [];
-    let finalCriteria: RecoCriteria | null = null;
 
     try {
+      // Agent : réponse JSON en UN appel (texte + produits DÉJÀ vérifiés côté
+      // serveur). Plus de streaming ni de bloc technique à parser, plus de 2ᵉ
+      // appel /recommendations : les cartes sont celles que l'agent a validées.
       const r = await apiFetch("/api/advisor/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: apiMessages }),
       });
       if (!r.ok) {
+        // apiFetch gère déjà la modale « Crédits épuisés » sur 429 no_credits.
         const j = (await r.json().catch(() => ({}))) as { error?: string };
         setError(j.error ?? `Erreur ${r.status}`);
         setMessages((prev) => prev.slice(0, -1));
         setStreaming(false);
         return;
       }
-      const reader = r.body?.getReader();
-      if (!reader) {
+      const data = (await r.json().catch(() => null)) as
+        | { reply?: string; products?: AgentProduct[]; followup?: string | null }
+        | null;
+      if (!data) {
         setError("Pas de réponse.");
         setMessages((prev) => prev.slice(0, -1));
         setStreaming(false);
         return;
       }
-      const decoder = new TextDecoder();
-      let buffer = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        // On masque le bloc technique <<<RECO>>> dès qu'il commence à arriver.
-        updateLastAssistant({ content: stripRecoBlock(buffer) });
-      }
 
-      const visible = stripRecoBlock(buffer).trim();
-      finalContent = visible || "Je n'ai pas pu générer de réponse cette fois-ci.";
-      updateLastAssistant({ content: finalContent });
+      finalContent = (data.reply ?? "").trim() || "Je n'ai pas pu générer de réponse cette fois-ci.";
+      finalProducts = Array.isArray(data.products) ? (data.products as AdvisorProduct[]) : [];
+      updateLastAssistant({
+        content: finalContent,
+        products: finalProducts,
+        recoTried: finalProducts.length > 0,
+        recoLoading: false,
+        recoEmptyReason: null,
+        recoRelaxation: null,
+        recoCriteria: null,
+      });
 
-      // Si l'advisor a émis un bloc RECO, on récupère les produits sûrs et on
-      // les affiche en carrousel sous la réponse.
-      const reco = parseRecoBlock(buffer);
-      if (reco) {
-        finalCriteria = reco;
-        updateLastAssistant({ recoTried: true, recoLoading: true, recoCriteria: reco });
-        try {
-          const rec = await fetch("/api/advisor/recommendations", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(reco),
-          });
-          if (rec.ok) {
-            const d = (await rec.json()) as {
-              products: AdvisorProduct[];
-              emptyReason: "restrictions" | "none" | null;
-              relaxation: RecoRelaxation | null;
-            };
-            finalProducts = d.products ?? [];
-            updateLastAssistant({
-              products: finalProducts,
-              recoLoading: false,
-              recoEmptyReason: d.emptyReason ?? null,
-              recoRelaxation: d.relaxation ?? null,
-            });
-          } else {
-            updateLastAssistant({ products: [], recoLoading: false, recoEmptyReason: "none" });
-          }
-        } catch {
-          updateLastAssistant({ products: [], recoLoading: false, recoEmptyReason: "none" });
-        }
-      }
-
-      // Persiste l'échange (avec produits + critères) en arrière-plan.
+      // Persiste l'échange (avec produits vérifiés) en arrière-plan.
       persistMessages(userMsg, {
         role: "assistant",
         content: finalContent,
         products: finalProducts,
-        recoCriteria: finalCriteria,
+        recoCriteria: null,
       });
     } catch {
       setError("Connexion interrompue.");
@@ -519,10 +505,13 @@ export function AdvisorChat({
                       m.content ? (
                         <MarkdownMessage content={m.content} />
                       ) : streaming && i === messages.length - 1 ? (
-                        <span className="flex gap-1 items-center py-0.5">
-                          <span className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full animate-bounce [animation-delay:0ms]" />
-                          <span className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full animate-bounce [animation-delay:150ms]" />
-                          <span className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full animate-bounce [animation-delay:300ms]" />
+                        <span className="flex gap-2 items-center py-0.5">
+                          <span className="flex gap-1 items-center">
+                            <span className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full animate-bounce [animation-delay:0ms]" />
+                            <span className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full animate-bounce [animation-delay:150ms]" />
+                            <span className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full animate-bounce [animation-delay:300ms]" />
+                          </span>
+                          <span className="text-[12.5px] text-[#6B7280]">{advisorLoadingMessage(loadingTick)}</span>
                         </span>
                       ) : (
                         ""
