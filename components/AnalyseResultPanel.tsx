@@ -579,6 +579,7 @@ export function AnalyseResultPanel({
         category={result.catalogCategory ?? null}
         brand={brand}
         productName={productLabel}
+        seed={analysisId ?? null}
       />
 
       {/* Petit espace pour décoller le bloc Outils du bouton « Voir l'analyse

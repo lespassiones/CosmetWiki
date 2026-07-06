@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRestrictions } from "@/components/restrictions/RestrictionsProvider";
 import { buildExclusionSet, isExcluded } from "@/lib/alternatives/filter";
+import { orderByTierShuffled } from "@/lib/alternatives/tierShuffle";
 import type { UserRestrictions } from "@/lib/restrictions/types";
 import type { AlternativeRow } from "@/app/api/alternatives/route";
 import { scoreColor } from "@/lib/essentiel/engine";
@@ -16,6 +17,8 @@ const PENDING_SOURCE_KEY = "cw:pendingProductSource";
 const RAW_PAGE = 40;
 const RAW_SAFETY_LIMIT = 240;
 const CAROUSEL_TARGET = 10;
+/** Vivier accumulé avant mélange (variété par analyse dans chaque tier). */
+const POOL_TARGET = 32;
 
 // ─── Family names cache (module-level, 1 h TTL) ───────────────────────────────
 const FAMILY_CACHE_TTL = 3_600_000;
@@ -53,6 +56,7 @@ function useAlternatives(
   category: string | null,
   restrictions: UserRestrictions,
   allergiesFreeform: string | undefined,
+  seed: string | null,
 ) {
   const [alternatives, setAlternatives] = useState<AlternativeRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -86,7 +90,10 @@ function useAlternatives(
         const results: AlternativeRow[] = [];
         let offset = 0;
 
-        while (results.length < CAROUSEL_TARGET && offset < RAW_SAFETY_LIMIT) {
+        // On accumule un VIVIER (POOL_TARGET) quand on mélange (graine), pour
+        // que le tirage dans chaque tier ait de la variété ; sinon juste la cible.
+        const fillTarget = seed ? POOL_TARGET : CAROUSEL_TARGET;
+        while (results.length < fillTarget && offset < RAW_SAFETY_LIMIT) {
           const res = await fetch(
             `/api/alternatives?${queryParam}&limit=${RAW_PAGE}&offset=${offset}`,
           );
@@ -99,14 +106,19 @@ function useAlternatives(
           for (const candidate of batch) {
             if (!isExcluded(candidate.ingredients_text, excl)) {
               results.push(candidate);
-              if (results.length >= CAROUSEL_TARGET) break;
+              if (results.length >= fillTarget) break;
             }
           }
           offset += RAW_PAGE;
           if (batch.length < RAW_PAGE) break; // last page
         }
 
-        if (!cancelled) setAlternatives(results);
+        // Mélange « aléatoire contrôlé » DANS chaque tier de pastille si une
+        // graine (ID d'analyse) est fournie ; sinon ordre par score.
+        const ordered = seed
+          ? orderByTierShuffled(results, seed, (r) => r.score)
+          : results;
+        if (!cancelled) setAlternatives(ordered.slice(0, CAROUSEL_TARGET));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -114,7 +126,7 @@ function useAlternatives(
 
     load();
     return () => { cancelled = true; };
-  }, [ean, category, restrictions, allergiesFreeform]);
+  }, [ean, category, restrictions, allergiesFreeform, seed]);
 
   return { alternatives, loading };
 }
@@ -199,16 +211,19 @@ export function AlternativesCarousel({
   category = null,
   brand,
   productName,
+  seed = null,
 }: {
   ean: string | null;
   /** Catégorie catalogue exacte — repli quand le produit n'a pas d'EAN. */
   category?: string | null;
   brand: string | null;
   productName: string | null;
+  /** Graine du mélange (ID d'analyse) → alternatives mélangées par tier. */
+  seed?: string | null;
 }) {
   const router = useRouter();
   const { restrictions, allergiesFreeform } = useRestrictions();
-  const { alternatives, loading } = useAlternatives(ean, category, restrictions, allergiesFreeform);
+  const { alternatives, loading } = useAlternatives(ean, category, restrictions, allergiesFreeform, seed);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   function handleSelect(alt: AlternativeRow) {
