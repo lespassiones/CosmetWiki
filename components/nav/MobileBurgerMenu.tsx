@@ -60,7 +60,7 @@ export function MobileBurgerMenu({
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Ouvrir le menu"
-        className="lg:hidden fixed top-3 right-3 z-40 h-11 w-11 rounded-full bg-white/85 backdrop-blur-md ring-1 ring-black/[0.06] shadow-[0_4px_14px_-4px_rgba(15,23,42,0.18),inset_0_1px_0_rgba(255,255,255,0.95)] flex items-center justify-center text-ink hover:bg-white transition active:scale-95"
+        className="touch-manipulation lg:hidden fixed top-3 right-3 z-40 h-11 w-11 rounded-full bg-white/85 backdrop-blur-md ring-1 ring-black/[0.06] shadow-[0_4px_14px_-4px_rgba(15,23,42,0.18),inset_0_1px_0_rgba(255,255,255,0.95)] flex items-center justify-center text-ink hover:bg-white transition active:scale-95"
       >
         <MenuIcon className="h-5 w-5" />
       </button>
@@ -78,12 +78,13 @@ export function MobileBurgerMenu({
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Fermer le menu"
-            className="absolute inset-0 bg-black/45 animate-[fadeIn_180ms_ease-out]"
+            className="touch-manipulation absolute inset-0 bg-black/45 animate-[fadeIn_120ms_ease-out]"
           />
 
-          {/* Drawer - slides in from the right */}
+          {/* Drawer - slides in from the right. Animation courte + composition
+              GPU (transform-gpu) pour une ouverture qui « claque » sur iOS. */}
           <aside
-            className="absolute top-0 right-0 h-full w-[78%] max-w-[320px] bg-[#FAFAFA] shadow-[-12px_0_40px_-8px_rgba(15,23,42,0.30)] animate-[slideInRight_220ms_ease-out] flex flex-col"
+            className="absolute top-0 right-0 h-full w-[78%] max-w-[320px] bg-[#FAFAFA] shadow-[-12px_0_40px_-8px_rgba(15,23,42,0.30)] transform-gpu animate-[slideInRight_170ms_ease-out] flex flex-col"
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.04]">
               <span className="text-[15px] font-bold tracking-tight">
