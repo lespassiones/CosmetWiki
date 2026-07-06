@@ -10,12 +10,39 @@
     --neu-shadow-dark: #c5ccd6;
   }
 
+  html {
+    /* Empêche iOS d'agrandir la taille du texte en paysage et de retarder les
+       taps. */
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   html,
   body {
     background: #fafafa;
     color: #1f2937;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Coupe le « rubber-band » iOS : la page ne rebondit plus / ne « coulisse »
+       plus, elle se comporte comme une app native fixe. */
+    overscroll-behavior: none;
+    /* Empêche tout défilement / débordement horizontal (éléments coupés à
+       droite sur iPhone). `clip` plutôt que `hidden` pour ne PAS casser les
+       position: sticky utilisées ailleurs dans l'app. */
+    overflow-x: clip;
+  }
+
+  /* Supprime le délai de tap (~300 ms) qu'iOS applique aux pages zoomables :
+     rend le burger menu et les boutons instantanés. `manipulation` conserve le
+     pinch-zoom (accessibilité) — il ne désactive que le double-tap-to-zoom. */
+  a,
+  button,
+  [role="button"],
+  input,
+  label,
+  select,
+  textarea {
+    touch-action: manipulation;
   }
 
   body {
@@ -58,6 +85,18 @@
     100% {
       transform: translateX(400%);
     }
+  }
+
+  /* Overlay + tiroir du burger menu mobile. Déclarées globalement (et non via
+     styled-jsx dans le composant) pour éviter le renommage de keyframe scopé
+     et l'injection de <style> au premier tap — le tiroir s'ouvre instantané. */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
   }
 
   .gradient-text {

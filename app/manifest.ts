@@ -10,8 +10,11 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#FAFAFA",
-    theme_color: "#8A4ADC",
+    // Fond blanc pour l'écran de lancement / splash généré à l'installation
+    // (« Ajouter à l'écran d'accueil »). Les icônes sont désormais opaques
+    // sur fond blanc — plus de fond noir sur iOS.
+    background_color: "#FFFFFF",
+    theme_color: "#FFFFFF",
     lang: "fr-FR",
     categories: ["health", "lifestyle", "utilities"],
     icons: [

@@ -160,11 +160,6 @@ export function MobileBurgerMenu({
               </div>
             </nav>
           </aside>
-
-          <style jsx>{`
-            @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-            @keyframes slideInRight { from { transform: translateX(100%) } to { transform: translateX(0) } }
-          `}</style>
         </div>
       )}
     </>

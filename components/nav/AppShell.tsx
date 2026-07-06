@@ -302,48 +302,46 @@ function DesktopSidebar({
         })}
       </ul>
 
-      {/* Credits status - same labelled card as on mobile (in the burger
-          drawer), positioned just above the Premium upsell for visual
-          continuity. */}
-      {signedIn && (
-        <div className="mt-auto pt-6">
-          <div className="flex items-center justify-between rounded-2xl bg-white/70 ring-1 ring-black/[0.04] px-3.5 py-2.5 mb-3">
+      {/* Bas de sidebar — Premium, crédits et profil regroupés et collés tout
+          en bas via un UNIQUE mt-auto. Deux mt-auto séparés répartissaient
+          l'espace libre entre eux, ce qui faisait « flotter » la carte crédits
+          au milieu. */}
+      <div className="mt-auto flex flex-col gap-3 pt-6">
+        {/* Premium upsell — masqué sur /offre (inutile de pitcher quelqu'un qui
+            regarde déjà l'offre). */}
+        {signedIn && !pathname.startsWith("/offre") && <PremiumCard />}
+
+        {/* Crédits restants — juste au-dessus du profil, tout en bas. */}
+        {signedIn && (
+          <div className="flex items-center justify-between rounded-2xl bg-white/70 ring-1 ring-black/[0.04] px-3.5 py-2.5">
             <span className="text-[12px] font-medium text-[#6B7280]">
               Vos crédits restants
             </span>
             <CreditsPill />
           </div>
-        </div>
-      )}
-
-      {/* Premium upsell sits right above the avatar, hidden when the user is
-          already on /offre (no point pitching to someone who's looking at
-          the offer). */}
-      {signedIn && !pathname.startsWith("/offre") && (
-        <div>
-          <PremiumCard />
-        </div>
-      )}
-
-      <div className={`${signedIn && !pathname.startsWith("/offre") ? "mt-3" : "mt-auto"} pt-6 border-t border-white/60`}>
-        {signedIn ? (
-          <SidebarProfileMenu firstName={firstName} />
-        ) : (
-          <div className="space-y-2">
-            <Link
-              href="/auth/sign-in"
-              className="block text-center text-sm font-semibold rounded-full bg-white/65 ring-1 ring-white/80 backdrop-blur-xl shadow-[0_8px_22px_-8px_rgba(15,23,42,0.14),inset_0_1px_0_rgba(255,255,255,0.9)] py-2 hover:bg-white/85 transition"
-            >
-              Se connecter
-            </Link>
-            <Link
-              href="/auth/sign-up"
-              className="block text-center text-sm font-medium text-[#F43F5E] hover:underline"
-            >
-              Créer un compte
-            </Link>
-          </div>
         )}
+
+        {/* Profil / déconnexion — ancré en bas de la sidebar. */}
+        <div className="border-t border-white/60 pt-3">
+          {signedIn ? (
+            <SidebarProfileMenu firstName={firstName} />
+          ) : (
+            <div className="space-y-2">
+              <Link
+                href="/auth/sign-in"
+                className="block text-center text-sm font-semibold rounded-full bg-white/65 ring-1 ring-white/80 backdrop-blur-xl shadow-[0_8px_22px_-8px_rgba(15,23,42,0.14),inset_0_1px_0_rgba(255,255,255,0.9)] py-2 hover:bg-white/85 transition"
+              >
+                Se connecter
+              </Link>
+              <Link
+                href="/auth/sign-up"
+                className="block text-center text-sm font-medium text-[#F43F5E] hover:underline"
+              >
+                Créer un compte
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     </aside>
   );

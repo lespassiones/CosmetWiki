@@ -71,10 +71,6 @@ export function HistoryList({ rows }: { rows: Row[] }) {
     });
   }, [rows, query, showFavOnly, favoris]);
 
-  const hasFavoris = rows.some((r) => {
-    return favoris[r.id] !== undefined ? favoris[r.id] : (r.favori ?? false);
-  });
-
   function toggle(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -137,8 +133,10 @@ export function HistoryList({ rows }: { rows: Row[] }) {
       {/* Toolbar - Tout / Favoris toggle on the left, Comparer on the right,
           all on the same line. */}
       <div className="mt-3 flex items-center justify-between gap-2">
-        {/* Tout / Favoris toggle (only shown when at least one favori exists) */}
-        {!selectMode && rows.length > 0 && (hasFavoris || showFavOnly) ? (
+        {/* Tout / Favoris toggle — toujours affiché dès qu'il y a une analyse,
+            pour un rendu cohérent sur tous les appareils (l'onglet Favoris
+            affiche un état vide s'il n'y a encore aucun favori). */}
+        {!selectMode && rows.length > 0 ? (
           <div className="inline-flex rounded-full bg-black/[0.06] p-0.5 gap-0.5">
             <button
               type="button"
@@ -232,6 +230,12 @@ export function HistoryList({ rows }: { rows: Row[] }) {
             </p>
           )}
         </div>
+      )}
+
+      {!selectMode && showFavOnly && !query.trim() && filteredRows.length === 0 && (
+        <p className="mt-6 text-center text-[13px] text-[#6B7280]">
+          Aucun favori pour l&apos;instant. Touche le marque-page sur une analyse pour l&apos;ajouter ici.
+        </p>
       )}
 
       <ul className="mt-6 space-y-3">

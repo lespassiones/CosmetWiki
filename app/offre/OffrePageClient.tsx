@@ -122,9 +122,6 @@ export function OffrePageClient() {
         {/* Bénéfices — tous personnalisés « pour toi » */}
         <div className="mt-6 rounded-3xl bg-white p-5 shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)] ring-1 ring-black/[0.04]">
           <BenefitRow>
-            <b className="font-semibold">100 crédits</b> chaque mois pour analyser tes produits
-          </BenefitRow>
-          <BenefitRow>
             Analyse de chaque produit <b className="font-semibold">personnalisée</b> à ton profil
           </BenefitRow>
           <BenefitRow>
@@ -138,6 +135,9 @@ export function OffrePageClient() {
           </BenefitRow>
           <BenefitRow>
             Amélioration de ta routine, <b className="font-semibold">sur-mesure</b>
+          </BenefitRow>
+          <BenefitRow>
+            <b className="font-semibold">100 crédits/mois</b> pour trouver les produits faits pour toi
           </BenefitRow>
         </div>
 
@@ -167,8 +167,10 @@ export function OffrePageClient() {
         </div>
       </div>
 
-      {/* Footer CTA — toujours visible, ne scrolle pas. */}
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-black/[0.06] bg-[#FBF6EF]/95 backdrop-blur">
+      {/* Footer CTA — toujours visible, ne scrolle pas. Décalé de la largeur de
+          la sidebar sur desktop (lg:left-60) : il ne chevauche plus la sidebar
+          et son contenu centré s'aligne avec la colonne de la page. */}
+      <div className="fixed bottom-0 left-0 right-0 lg:left-60 z-50 border-t border-black/[0.06] bg-[#FBF6EF]/95 backdrop-blur">
         <div className="mx-auto w-full max-w-[460px] px-5 pt-3 pb-5">
           <button
             type="button"
