@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Beauty Advisor : texte de chargement avec balayage lumineux sur les lettres. */
+.advisor-shimmer {
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: advisorShimmer 1.5s linear infinite;
+}
+@keyframes advisorShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -60% 0; }
+}
+
 @layer base {
   :root {
     color-scheme: light only;

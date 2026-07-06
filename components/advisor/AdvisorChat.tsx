@@ -7,18 +7,72 @@ import type { AdvisorProduct } from "@/app/api/advisor/recommendations/route";
 import { apiFetch } from "@/lib/clientApi";
 import { scoreColor } from "@/lib/essentiel/engine";
 
-/** Messages de chargement rotatifs déterministes affichés pendant l'attente de
- *  l'agent (3-17 s). Twin du mobile lib/advisor/agentClient.ADVISOR_LOADING_STEPS. */
+/** Pool de ~50 phrases de chargement (ordre mélangé à chaque envoi), affichées
+ *  pendant l'attente de l'agent. Twin du mobile lib/advisor/agentClient. */
 const ADVISOR_LOADING_STEPS = [
   "Je lis ta demande…",
+  "Je cerne ton besoin…",
+  "Je fouille le catalogue…",
   "Je cherche de vrais produits notés…",
+  "Je compare les compositions…",
+  "Je vérifie les ingrédients…",
+  "J’écarte les formules douteuses…",
+  "Je garde le meilleur pour ta peau…",
   "Je vérifie les compositions…",
-  "Je garde seulement ce qui te convient…",
-  "Je prépare ta réponse…",
+  "Je traque les bons actifs…",
+  "J’analyse les étiquettes…",
+  "Je fais le tri dans les INCI…",
+  "Je repère les pépites…",
+  "Je vérifie la douceur des formules…",
+  "Je croise avec ton profil…",
+  "Je respecte tes restrictions…",
+  "Je chasse le superflu…",
+  "Je sélectionne les valeurs sûres…",
+  "Je pèse le pour et le contre…",
+  "Je vérifie les notes…",
+  "Je décrypte les listes d’ingrédients…",
+  "Je cherche ce qui te convient vraiment…",
+  "Je mets de côté les irritants…",
+  "Je compare les scores…",
+  "Je regarde ce qui est vraiment clean…",
+  "Je peaufine ma sélection…",
+  "Je vérifie deux fois…",
+  "Je m’assure que c’est adapté…",
+  "Je fais parler la composition…",
+  "J’affine les résultats…",
+  "Je cherche la perle rare…",
+  "Je vérifie l’absence d’allergènes…",
+  "Je passe les formules au crible…",
+  "Je garde seulement le pertinent…",
+  "Je consulte les meilleures références…",
+  "Je vérifie que ça colle à ton besoin…",
+  "Je prépare mes recommandations…",
+  "Je rassemble mes trouvailles…",
+  "Je vérifie une dernière chose…",
+  "Je finalise ma réponse…",
+  "Je réfléchis à la meilleure option…",
+  "Je fais le point sur les actifs utiles…",
+  "Je vérifie les concentrations…",
+  "Je compare marque par marque…",
+  "Je cherche le juste équilibre…",
+  "Je vérifie la tolérance des formules…",
+  "Je mets ta peau au centre…",
+  "Je trie par qualité…",
+  "Je boucle ma sélection…",
+  "Presque prêt…",
 ];
-function advisorLoadingMessage(tick: number): string {
-  const n = ADVISOR_LOADING_STEPS.length;
-  return ADVISOR_LOADING_STEPS[((tick % n) + n) % n];
+const ADVISOR_LOADING_COLORS = ["#F43F5E", "#8B5CF6", "#0EA5A4", "#3B82F6", "#F59E0B", "#EC4899"];
+function makeLoadingSequence(): string[] {
+  const arr = [...ADVISOR_LOADING_STEPS];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function advisorLoadingColor(tick: number): string {
+  const n = ADVISOR_LOADING_COLORS.length;
+  return ADVISOR_LOADING_COLORS[((tick % n) + n) % n];
 }
 
 /** Produit renvoyé par l'agent (superset d'AdvisorProduct : category/count_total en plus). */
@@ -325,6 +379,8 @@ export function AdvisorChat({
   const [error, setError] = useState<string | null>(null);
   // Tick pour faire tourner les messages de chargement pendant l'attente.
   const [loadingTick, setLoadingTick] = useState(0);
+  // Ordre aléatoire des phrases de chargement, régénéré à chaque envoi.
+  const loadingSeqRef = useRef<string[]>(ADVISOR_LOADING_STEPS.slice());
   // Id de la conversation courante (créée à la volée au 1er message).
   const convIdRef = useRef<string | null>(conversationId);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -333,12 +389,21 @@ export function AdvisorChat({
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  // Messages de chargement rotatifs pendant l'attente de l'agent.
+  // Messages de chargement rotatifs : intervalle ALÉATOIRE (1,4 s à 3,2 s) pour
+  // un rythme naturel, pas mécanique.
   useEffect(() => {
     if (!streaming) return;
     setLoadingTick(0);
-    const id = setInterval(() => setLoadingTick((t) => t + 1), 2200);
-    return () => clearInterval(id);
+    let id: ReturnType<typeof setTimeout>;
+    const tick = () => {
+      const delay = 1400 + Math.random() * 1800;
+      id = setTimeout(() => {
+        setLoadingTick((t) => t + 1);
+        tick();
+      }, delay);
+    };
+    tick();
+    return () => clearTimeout(id);
   }, [streaming]);
 
   async function persistMessages(userMsg: ChatMsg, assistantMsg: ChatMsg) {
@@ -396,6 +461,8 @@ export function AdvisorChat({
     const text = rawText.trim();
     if (!text || streaming) return;
     setError(null);
+    // Nouvel ordre aléatoire des phrases de chargement pour cet envoi.
+    loadingSeqRef.current = makeLoadingSequence();
     setStreaming(true);
 
     const userMsg: ChatMsg = { role: "user", content: text, time: getTime() };
@@ -420,10 +487,17 @@ export function AdvisorChat({
       // Agent : réponse JSON en UN appel (texte + produits DÉJÀ vérifiés côté
       // serveur). Plus de streaming ni de bloc technique à parser, plus de 2ᵉ
       // appel /recommendations : les cartes sont celles que l'agent a validées.
+      // EAN déjà affichés → l'agent les exclut pour que « montre-m'en d'autres »
+      // renvoie de NOUVEAUX produits (pas les mêmes).
+      const seenEans = Array.from(
+        new Set(
+          messages.flatMap((m) => (m.products ?? []).map((p) => p.ean)).filter(Boolean),
+        ),
+      );
       const r = await apiFetch("/api/advisor/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages }),
+        body: JSON.stringify({ messages: apiMessages, seen_eans: seenEans }),
       });
       if (!r.ok) {
         // apiFetch gère déjà la modale « Crédits épuisés » sur 429 no_credits.
@@ -445,15 +519,28 @@ export function AdvisorChat({
 
       finalContent = (data.reply ?? "").trim() || "Je n'ai pas pu générer de réponse cette fois-ci.";
       finalProducts = Array.isArray(data.products) ? (data.products as AdvisorProduct[]) : [];
-      updateLastAssistant({
-        content: finalContent,
-        products: finalProducts,
-        recoTried: finalProducts.length > 0,
-        recoLoading: false,
-        recoEmptyReason: null,
-        recoRelaxation: null,
-        recoCriteria: null,
-      });
+
+      // Effet « streaming » côté client : 1) le texte se dévoile en machine à
+      // écrire (~1,2 s max), 2) PUIS les cartes produit apparaissent.
+      const steps = Math.min(finalContent.length, 46);
+      const chunk = Math.max(1, Math.ceil(finalContent.length / steps));
+      for (let i = chunk; i < finalContent.length; i += chunk) {
+        updateLastAssistant({ content: finalContent.slice(0, i) });
+        await new Promise((r) => setTimeout(r, 26));
+      }
+      updateLastAssistant({ content: finalContent });
+
+      if (finalProducts.length > 0) {
+        await new Promise((r) => setTimeout(r, 180));
+        updateLastAssistant({
+          products: finalProducts,
+          recoTried: true,
+          recoLoading: false,
+          recoEmptyReason: null,
+          recoRelaxation: null,
+          recoCriteria: null,
+        });
+      }
 
       // Persiste l'échange (avec produits vérifiés) en arrière-plan.
       persistMessages(userMsg, {
@@ -511,7 +598,14 @@ export function AdvisorChat({
                             <span className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full animate-bounce [animation-delay:150ms]" />
                             <span className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full animate-bounce [animation-delay:300ms]" />
                           </span>
-                          <span className="text-[12.5px] text-[#6B7280]">{advisorLoadingMessage(loadingTick)}</span>
+                          <span
+                            className="text-[12.5px] font-medium advisor-shimmer"
+                            style={{
+                              backgroundImage: `linear-gradient(100deg, ${advisorLoadingColor(loadingTick)} 0%, ${advisorLoadingColor(loadingTick)} 42%, #ffffff 50%, ${advisorLoadingColor(loadingTick)} 58%, ${advisorLoadingColor(loadingTick)} 100%)`,
+                            }}
+                          >
+                            {loadingSeqRef.current[loadingTick % loadingSeqRef.current.length]}
+                          </span>
                         </span>
                       ) : (
                         ""

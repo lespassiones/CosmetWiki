@@ -18,7 +18,7 @@ export type PersonalBlocks = { goals: Block; skin: Block; watch: Block };
 
 // DOIT rester synchro avec PERSONAL_PROMPT_VERSION (lib/ai/personalInsights.ts).
 // Détecte des blocs persistés périmés → refresh silencieux (gratuit, déjà payé).
-const PERSONAL_BLOCKS_VERSION = 5;
+const PERSONAL_BLOCKS_VERSION = 7;
 
 const TONE: Record<Tone, { bg: string; text: string }> = {
   vert: { bg: "bg-emerald-100", text: "text-emerald-600" },
@@ -34,10 +34,11 @@ function FlagIcon({ className }: { className?: string }) {
     </svg>
   );
 }
-function LeafIcon({ className }: { className?: string }) {
+// Ampoule (« à quoi ça sert », bloc pédagogique) — remplace la feuille.
+function BulbIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
-      <path d="M11 20A7 7 0 0 1 4 13V8a7 7 0 0 1 7-7h7v6a7 7 0 0 1-7 7h-3" /><path d="M2 21c4-5 7-7 14-9" />
+      <path d="M9 18h6" /><path d="M10 22h4" /><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V18h6v-1.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z" />
     </svg>
   );
 }
@@ -51,7 +52,7 @@ function EyeIcon({ className }: { className?: string }) {
 
 const BLOCKS: { key: keyof PersonalBlocks; Icon: (p: { className?: string }) => React.ReactElement }[] = [
   { key: "goals", Icon: FlagIcon },
-  { key: "skin", Icon: LeafIcon },
+  { key: "skin", Icon: BulbIcon },
   { key: "watch", Icon: EyeIcon },
 ];
 

@@ -227,7 +227,7 @@ export default async function PublicAnalysisPage({
         <div className="relative">
           {/* Aperçu flouté des 3 blocs perso */}
           <div className="space-y-3 p-5 blur-[5px] select-none" aria-hidden>
-            {["Correspond à tes objectifs", "Adapté à ta peau", "À surveiller pour toi"].map((t) => (
+            {["Correspond à tes objectifs", "À quoi sert ce produit", "À surveiller pour toi"].map((t) => (
               <div key={t} className="flex items-center gap-3">
                 <span className="h-10 w-10 shrink-0 rounded-full bg-emerald-100" />
                 <div className="min-w-0 flex-1">

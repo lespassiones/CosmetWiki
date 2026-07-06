@@ -48,9 +48,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let body: { messages?: unknown };
+  let body: { messages?: unknown; seen_eans?: unknown };
   try {
-    body = (await req.json()) as { messages?: unknown };
+    body = (await req.json()) as { messages?: unknown; seen_eans?: unknown };
   } catch {
     return new Response(JSON.stringify({ error: "Invalid body" }), { status: 400 });
   }
@@ -58,6 +58,9 @@ export async function POST(req: NextRequest) {
   if (messages.length === 0) {
     return new Response(JSON.stringify({ error: "Pas de message" }), { status: 400 });
   }
+  const seenEans = Array.isArray(body.seen_eans)
+    ? body.seen_eans.filter((e): e is string => typeof e === "string")
+    : [];
 
   // Auth : on récupère le token de session pour le relayer à l'edge function.
   const cookieStore = await cookies();
@@ -85,7 +88,7 @@ export async function POST(req: NextRequest) {
         Authorization: `Bearer ${token}`,
         apikey: anon,
       },
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({ messages, seen_eans: seenEans }),
     });
     // Relaie le corps + le status tels quels (429 no_credits inclus).
     const text = await res.text();
