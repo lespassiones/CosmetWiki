@@ -16,6 +16,7 @@ import {
 } from "@/lib/coherence/engine";
 import { findCategoryBySlug, isAbsenceCategory } from "@/lib/coherence/claims";
 import { descriptionSupportsAbsenceClaim } from "@/lib/coherence/absenceGuard";
+import { isUsageInstruction } from "@/lib/coherence/usageInstructionGuard";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 import type { CoherencePromise, ProductType } from "@/lib/coherence/types";
 import { apiGate } from "@/lib/apiGate";
@@ -33,7 +34,11 @@ import { supabaseService } from "@/lib/supabase";
  * conclusion personnalisée d'un user servie à un autre). Le cache est donc
  * PARTAGÉ entre web et mobile : même clé, même format.
  */
-const COHERENCE_ALGO_VERSION = "v4";
+// v5 = garde déterministe des MODES D'EMPLOI (usageInstructionGuard) : une
+// consigne d'usage ("appliquer avant le coucher") n'est plus comptée comme une
+// promesse "non démontrée" + règle prompt correspondante. PARITÉ mobile (edge
+// coherence-analyze ALGO_VERSION="v5"). Bumper invalide coherence_cache (v4).
+const COHERENCE_ALGO_VERSION = "v5";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -235,6 +240,9 @@ export async function POST(req: NextRequest) {
       // présence de X dans la formule = verdict "contredite" à tort — on
       // accuserait la marque d'une promesse jamais faite (audit prod 07/2026).
       const guardedProposals = dedupedProposals.filter((p) => {
+        // Écarte les modes d'emploi ("appliquer avant le coucher", "masser…") :
+        // ce ne sont pas des promesses vérifiables dans la formule.
+        if (isUsageInstruction(p.label, p.excerpt)) return false;
         const cat = findCategoryBySlug(p.category_slug);
         if (cat && isAbsenceCategory(cat)) {
           return descriptionSupportsAbsenceClaim(cat.slug, description);

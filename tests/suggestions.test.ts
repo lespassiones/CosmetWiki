@@ -15,7 +15,9 @@ describe("scoreAlternative (pas de cap — score pastille de confiance)", () => 
     const a = scoreAlternative(alternative({ score: 8.9, count_rouge: 1 }));
     expect(a.score).toBe(8.9);
     expect(a.score_label).toBe("Faible");
-    expect(a.score_tone).toBe("rose");
+    // Convention unifiée 4 juil 2026 : 8.9 tombe dans la tranche >=5 = orange
+    // (rose est réservé à <5).
+    expect(a.score_tone).toBe("orange");
   });
 
   it("leaves a clean candidate untouched", () => {

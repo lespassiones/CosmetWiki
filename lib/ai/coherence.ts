@@ -204,6 +204,11 @@ Si une phrase ne contient aucun de (a), (b), (c) → pas une promesse, passe.
    "douceur" ≠ "démêlage" : ce sont deux effets distincts. Si le texte dit "douceur" sans mentionner "démêlage", extrais "Douceur capillaire" (autre), PAS "Démêlage". De même : "brillance" ≠ "fortification", "légèreté" ≠ "sans silicone".
    Règle générale : n'extrais QUE ce que le texte dit EXPLICITEMENT ou implique DIRECTEMENT (ex: "fixe les boucles" → "Fixation des boucles"). Ne construis pas de promesse par déduction à plusieurs étapes.
 
+8. MODE D'EMPLOI / CONSIGNES D'USAGE ≠ PROMESSE :
+   Les instructions qui disent QUAND, COMMENT ou COMBIEN DE FOIS utiliser le produit ne sont PAS des promesses et ne se vérifient PAS dans la formule. NE LES METS NI dans \`promises\` NI dans \`out_of_scope\` — ignore-les (au besoin \`unverifiable\` reason "autre").
+   Exemples à IGNORER : "appliquer avant le coucher", "masser jusqu'à pénétration", "utiliser matin et soir", "laisser poser 5 minutes", "rincer abondamment", "à appliquer sur peau propre et sèche", "renouveler l'application si besoin", "éviter le contour des yeux".
+   ATTENTION à ne PAS confondre avec un EFFET, qui LUI reste une promesse : "peau plus douce après 7 jours d'utilisation" (effet douceur), "améliore la sensation cutanée pendant l'utilisation" (effet confort). La différence : un mode d'emploi COMMENCE par un verbe d'action adressé à l'utilisateur (applique, masse, rince, laisse poser…) ; un effet DÉCRIT un résultat sur la peau/les cheveux.
+
 ═══ EXEMPLE 1 (cheveux, claim pertinent) ═══
 
 Type : Cheveux

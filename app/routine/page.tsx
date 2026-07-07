@@ -10,12 +10,10 @@ import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { RoutineProductRow } from "@/components/routine/RoutineProductRow";
 import { RoutineSuggestions } from "@/components/routine/RoutineSuggestions";
 import { CatalogAlternatives } from "@/components/routine/CatalogAlternatives";
-import { TagExposureBar } from "@/components/routine/TagExposureBar";
 import { AddProductButton } from "@/components/routine/AddProductButton";
 import { RestrictionsLinkButton } from "@/components/routine/RestrictionsLinkButton";
-import { RoutineSimulationModal } from "@/components/routine/RoutineSimulationModal";
-import { InfoBadge, Tooltip } from "@/components/Tooltip";
-import { IngredientBlob } from "@/components/blob/IngredientBlob";
+import { Tooltip } from "@/components/Tooltip";
+import { ExposureSummaryCard } from "@/components/routine/ExposureSummaryCard";
 import { readUserRestrictions } from "@/lib/restrictions/types";
 import { loadIngredientFamilies } from "@/lib/restrictions/families";
 
@@ -42,13 +40,6 @@ function RoutineSkeleton() {
       </div>
     </div>
   );
-}
-
-function exposureFg(label: string): string {
-  if (label === "Faible") return "text-emerald-700";
-  if (label === "Modérée") return "text-amber-700";
-  if (label === "Élevée") return "text-orange-700";
-  return "text-rose-700";
 }
 
 /**
@@ -171,7 +162,6 @@ async function RoutineContent() {
     }));
 
   const metrics = computeRoutineMetrics(products);
-  const exposureFgCls = exposureFg(metrics.exposureLabel);
 
   // Details for the "Produits pénalisants" tooltip.
   const penalizingDetails = products
@@ -216,7 +206,6 @@ async function RoutineContent() {
   }
 
   const productsCount = products.length;
-  const tagsTop = metrics.tagExposure.slice(0, 8);
 
   // At-risk products (capped score < 13) → the "Suggestions intelligentes" CTA.
   // The dedicated /routine/suggestions page recomputes the exact same set and
@@ -269,21 +258,12 @@ async function RoutineContent() {
           `lg:contents` on the mobile-only wrapper lets the 2 small cards
           re-join the parent grid on lg+. */}
       <section className="mt-6 mb-6 grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4">
-        <div className="neu p-5 flex items-center gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="text-[11px] uppercase tracking-wide text-black mb-1">Exposition cumulée</div>
-            <div className="flex items-baseline gap-1.5">
-              <span className={`text-3xl font-bold tabular-nums ${exposureFgCls}`}>
-                {metrics.exposureScore.toFixed(1)}
-              </span>
-              <span className="text-sm text-[#6B7280]">/20</span>
-            </div>
-            <div className={`mt-1 text-[12px] font-semibold ${exposureFgCls}`}>{metrics.exposureLabel}</div>
-          </div>
-          <div className="w-[120px] shrink-0">
-            <IngredientBlob counts={metrics.colorCounts} variant="md" neumorphic />
-          </div>
-        </div>
+        <ExposureSummaryCard
+          exposureScore={metrics.exposureScore}
+          exposureLabel={metrics.exposureLabel}
+          colorCounts={metrics.colorCounts}
+          href="/routine/exposition"
+        />
 
         <div className="grid grid-cols-2 gap-3 lg:contents">
           <div className="neu p-3.5 lg:p-5">
@@ -338,66 +318,10 @@ async function RoutineContent() {
         </div>
       </section>
 
-      {/* 2-column: bar chart + product list */}
-      <section className="grid grid-cols-1 lg:grid-cols-[1.6fr_minmax(0,1fr)] gap-3 lg:gap-4 mb-6">
-        {/* Left: exposition par catégorie d'ingrédients */}
-        <div className="neu p-5">
-          <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-[15px] font-semibold">Exposition cumulée par catégorie d&apos;ingrédients</h2>
-            <Tooltip
-              maxWidth={320}
-              content={
-                <>
-                  Cette section regarde tous tes produits ensemble et compte combien
-                  de fois chaque <b>famille d&apos;ingrédients</b> revient dans ta
-                  routine, en tenant compte de la fréquence d&apos;usage (un produit
-                  quotidien pèse plus qu&apos;un hebdo).
-                  <br />
-                  <br />
-                  Exemples de familles : <b>conservateurs</b> (Phenoxyethanol,
-                  Sodium Benzoate…), <b>sulfates</b> (SLS, SLES…),{" "}
-                  <b>parfums de synthèse</b>, <b>silicones</b>,{" "}
-                  <b>allergènes parfumants</b> (Limonene, Linalool…).
-                  <br />
-                  <br />
-                  Plus une barre est longue, plus tu es exposé·e à cette famille
-                  au quotidien. Ce n&apos;est pas un verdict de danger : c&apos;est
-                  juste une mesure de présence, utile pour repérer les doublons
-                  (par exemple : 3 produits qui contiennent tous des allergènes
-                  parfumants).
-                </>
-              }
-            >
-              <button
-                type="button"
-                aria-label="À quoi sert cette section ?"
-                className="inline-flex items-center"
-              >
-                <InfoBadge />
-              </button>
-            </Tooltip>
-          </div>
-          <p className="text-[11px] text-[#374151] mb-4">
-            Plus la barre est longue, plus la catégorie est présente dans ta routine.
-          </p>
-          {tagsTop.length === 0 ? (
-            <p className="text-sm text-[#6B7280]">Aucune catégorie pénalisante détectée dans cette routine.</p>
-          ) : (
-            <ul className="space-y-2.5">
-              {tagsTop.map((t) => (
-                <TagExposureBar
-                  key={t.tag}
-                  label={t.label}
-                  count={t.cumulativeCount}
-                  max={tagsTop[0].cumulativeCount || 1}
-                  colorSegments={t.colorSegments}
-                />
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Right: liste produits */}
+      {/* Liste produits (pleine largeur). Le détail d'exposition (barres par
+          catégorie + allergènes en doublon) a migré vers /routine/exposition,
+          atteint via la carte « Exposition cumulée » ci-dessus. */}
+      <section className="mb-6">
         <div className="neu p-5">
           <h2 className="text-[15px] font-semibold mb-3">Mes produits</h2>
           <ul className="divide-y divide-[#F0F0F0]">
@@ -428,63 +352,6 @@ async function RoutineContent() {
           </ul>
         </div>
       </section>
-
-      {/* Simulation - DÉSACTIVÉE (masquée à la demande). Pour la réafficher,
-          remettre la condition `metrics.simulation.removableCount > 0` à la
-          place de `false` ci-dessous. Le code reste intact volontairement. */}
-      {false && (
-        <section className="neu p-5 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-            <div className="min-w-0 flex-1">
-              <h2 className="text-[15px] font-semibold mb-1">Simulation</h2>
-              <p className="text-[13px] text-[#374151]">
-                {metrics.simulation.removableCount === 1
-                  ? "Que se passe-t-il si je retire le produit le plus pénalisant ?"
-                  : "Que se passe-t-il si je retire les 2 produits les plus pénalisants ?"}
-              </p>
-            </div>
-            <div className="flex items-center gap-4 flex-wrap">
-              <div className="text-[12px] text-[#6B7280]">
-                Nouvelle exposition :{" "}
-                <span className="text-xl font-bold text-[#111111] tabular-nums">
-                  {metrics.simulation.minus2.exposureScore.toFixed(1)}
-                </span>
-                <span className="text-sm text-[#6B7280]">/20</span>
-              </div>
-              <div className="text-[12px] font-semibold text-emerald-600 flex items-center gap-1">
-                <span aria-hidden>↑</span>
-                <span className="tabular-nums">
-                  {(metrics.simulation.minus2.exposureScore - metrics.exposureScore).toFixed(1)}
-                </span>
-              </div>
-              <RoutineSimulationModal metrics={metrics} currentScore={metrics.exposureScore} />
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Allergen overlap warning */}
-      {metrics.allergenOverlap.length > 0 && (
-        <section className="neu-amber p-4 mb-6">
-          <h2 className="text-sm font-semibold text-amber-900 mb-2">
-            ⚠️ Allergènes parfumants en doublon
-          </h2>
-          <p className="text-[13px] text-amber-800 leading-relaxed mb-2">
-            Ces substances UE apparaissent dans plusieurs de tes produits :
-          </p>
-          <ul className="flex flex-wrap gap-2">
-            {metrics.allergenOverlap.map((a) => (
-              <li
-                key={a.inciName}
-                className="inline-flex items-center gap-1.5 rounded-full bg-white/70 backdrop-blur-md text-amber-800 text-[12px] font-medium px-2.5 py-1 ring-1 ring-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]"
-              >
-                {a.label}
-                <span className="text-amber-600 text-[10px]">×{a.productCount}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
 
       {/* AI suggestions */}
       <RoutineSuggestions metrics={metrics} products={products} />

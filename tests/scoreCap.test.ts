@@ -16,10 +16,14 @@ describe("colorCapScore (neutralisé)", () => {
 });
 
 describe("scoreLabel thresholds", () => {
-  it("maps to the 4 tiers at the boundaries", () => {
+  // Seuils UNIFIÉS (4 juil 2026, convention unique mobile/web/DB) :
+  // >=17 vert "Très bien", >=13 vert "Bien", >=9 ambre "Moyen",
+  // >=5 orange "Faible", <5 rose "Faible".
+  it("maps to the tiers at the boundaries (convention >=13 vert)", () => {
     expect(scoreLabel(17)).toEqual({ label: "Très bien", tone: "green" });
-    expect(scoreLabel(13)).toEqual({ label: "Bien", tone: "amber" });
-    expect(scoreLabel(9)).toEqual({ label: "Moyen", tone: "orange" });
-    expect(scoreLabel(8.9)).toEqual({ label: "Faible", tone: "rose" });
+    expect(scoreLabel(13)).toEqual({ label: "Bien", tone: "green" });
+    expect(scoreLabel(9)).toEqual({ label: "Moyen", tone: "amber" });
+    expect(scoreLabel(8.9)).toEqual({ label: "Faible", tone: "orange" });
+    expect(scoreLabel(4.9)).toEqual({ label: "Faible", tone: "rose" });
   });
 });
