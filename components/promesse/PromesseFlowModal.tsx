@@ -234,15 +234,15 @@ export function PromesseFlowModal({
           </div>
 
           {step === "identifying" && (
-            <Loader headline="Recherche du produit…" subline="On parcourt le web pour retrouver ta référence à partir de la composition." />
+            <Loader headline="Recherche du produit…" />
           )}
 
           {step === "fetchingDescription" && (
-            <Loader headline="Récupération de la promesse…" subline="On lit la fiche officielle pour extraire les claims marketing." />
+            <Loader headline="Récupération de la promesse…" />
           )}
 
           {step === "runningCoherence" && (
-            <Loader headline="Analyse de cohérence en cours…" subline="On compare les promesses marketing à ce qu'il y a vraiment dans la formule." />
+            <Loader headline="Analyse de cohérence en cours…" />
           )}
 
           {step === "pickCandidate" && (
@@ -356,7 +356,7 @@ export function PromesseFlowModal({
           )}
 
           {step === "redirecting" && (
-            <Loader headline="Préparation de l'analyse…" subline="On t'emmène vers l'analyse de cohérence." />
+            <Loader headline="Préparation de l'analyse…" />
           )}
 
           {step === "error" && (
@@ -401,12 +401,14 @@ export function PromesseFlowModal({
   );
 }
 
-function Loader({ headline, subline }: { headline: string; subline: string }) {
+function Loader({ headline, subline }: { headline: string; subline?: string }) {
   return (
     <div className="flex flex-col items-center justify-center text-center py-10">
       <div className="h-10 w-10 rounded-full border-2 border-rose-200 border-t-rose-500 animate-spin" />
       <p className="mt-3 text-[14px] font-semibold text-ink">{headline}</p>
-      <p className="mt-1 text-[12px] text-[#6B7280] max-w-xs">{subline}</p>
+      {subline ? (
+        <p className="mt-1 text-[12px] text-[#6B7280] max-w-xs">{subline}</p>
+      ) : null}
     </div>
   );
 }

@@ -439,6 +439,21 @@ const DUAL_USE_ANNEX_III_SLUGS: ReadonlySet<string> = new Set([
   "benzyl-salicylate",
 ]);
 
+/**
+ * Détection dual-use robuste : par slug quand il existe, sinon par nom
+ * normalisé (certains items n'ont pas de slug). PARITÉ STRICTE avec l'edge
+ * coherence-analyze et lib/coherence mobile.
+ */
+function isDualUseAllergen(it: AnalyseItem): boolean {
+  if (it.slug && DUAL_USE_ANNEX_III_SLUGS.has(it.slug)) return true;
+  const n = norm(it.name ?? it.input ?? "");
+  return (
+    n.includes("benzylalcohol")
+    || n.includes("benzylbenzoate")
+    || n.includes("benzylsalicylate")
+  );
+}
+
 /** INCI names that explicitly signal a fragrance composition in the formula. */
 const FRAGRANCE_MARKER_NAMES: ReadonlySet<string> = new Set([
   "PARFUM",
@@ -461,10 +476,7 @@ function formulaHasDeclaredFragrance(items: AnalyseItem[]): boolean {
     if (FRAGRANCE_MARKER_NAMES.has(upperName)) return true;
     const tags = it.tags ?? [];
     if (tags.includes("parfum-synthese")) return true;
-    if (
-      tags.includes("allergene-parfumant")
-      && (!it.slug || !DUAL_USE_ANNEX_III_SLUGS.has(it.slug))
-    ) {
+    if (tags.includes("allergene-parfumant") && !isDualUseAllergen(it)) {
       return true;
     }
   }
@@ -524,12 +536,8 @@ export function resolveAbsencePromise(
   //   - s'il existe AUSSI un vrai allergène (Limonene, Linalool…) → on garde
   //     « contredite » sur les vrais fautifs (les dual-use sont écartés).
   if (tag === "allergene-parfumant" && !formulaHasDeclaredFragrance(items)) {
-    const dualUse = offenders.filter(
-      (it) => it.slug != null && DUAL_USE_ANNEX_III_SLUGS.has(it.slug),
-    );
-    const real = offenders.filter(
-      (it) => !it.slug || !DUAL_USE_ANNEX_III_SLUGS.has(it.slug),
-    );
+    const dualUse = offenders.filter((it) => isDualUseAllergen(it));
+    const real = offenders.filter((it) => !isDualUseAllergen(it));
     if (real.length === 0 && dualUse.length > 0) {
       const sorted = dualUse.slice().sort((a, b) => a.position - b.position);
       return {

@@ -121,3 +121,28 @@ describe("resolveOpenPromise — gradeEffect barème", () => {
     expect(r.score).toBe(0);
   });
 });
+
+// Parité v4 (7 juil 2026) — mêmes cas que lib/__tests__/coherenceGolden.test.ts
+// côté mobile : les 3 copies du moteur DOIVENT rendre ces verdicts exacts.
+describe("Parité v4 — dual-use Annexe III élargi + union keywords", () => {
+  const allergen = absenceCategory("allergene-parfumant");
+
+  it("Benzyl BENZOATE seul (sans parfum déclaré) → partielle 50 (dual-use, pas seulement benzyl alcohol)", () => {
+    const r = resolveAbsencePromise(proposal(), allergen, [
+      item({ position: 1, name: "Aqua" }),
+      item({ position: 2, name: "Benzyl Benzoate", slug: "benzyl-benzoate", tags: ["allergene-parfumant"] }),
+    ]);
+    expect(r.verdict).toBe("partielle");
+    expect(r.score).toBe(50);
+    expect(r.contradictingActives?.[0].name).toBe("Benzyl Benzoate");
+  });
+
+  it("Benzyl Alcohol + Limonene → contredite, les DEUX cités (le vrai allergène vaut parfum déclaré)", () => {
+    const r = resolveAbsencePromise(proposal(), allergen, [
+      item({ position: 1, name: "Benzyl Alcohol", slug: "benzyl-alcohol", tags: ["allergene-parfumant"] }),
+      item({ position: 2, name: "Limonene", slug: "limonene", tags: ["allergene-parfumant"] }),
+    ]);
+    expect(r.verdict).toBe("contredite");
+    expect(r.contradictingActives?.map((c) => c.name)).toEqual(["Benzyl Alcohol", "Limonene"]);
+  });
+});

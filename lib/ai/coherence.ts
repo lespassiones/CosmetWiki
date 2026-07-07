@@ -207,17 +207,18 @@ Si une phrase ne contient aucun de (a), (b), (c) → pas une promesse, passe.
 ═══ EXEMPLE 1 (cheveux, claim pertinent) ═══
 
 Type : Cheveux
-Description : "Cette gelée hydrate les cheveux, fixe les boucles et limite les frisottis. Sans sulfate ni silicone, formulée à 96 % naturel, odeur de vanille."
+Description : "Cette gelée enrichie en spiruline hydrate les cheveux, fixe les boucles et limite les frisottis. Sans sulfate ni silicone, formulée à 96 % naturel, odeur de vanille."
 
 Sortie :
 - promises:
+  · {category_slug: "autre", label: "Présence : Spiruline", excerpt: "enrichie en spiruline"}  ← actif NOMMÉ → promesse de présence (vérifiable dans l'INCI), PAS unverifiable
   · {category_slug: "hydratation", label: "Hydratation", excerpt: "hydrate les cheveux"}
   · {category_slug: "autre", label: "Fixation des boucles", excerpt: "fixe les boucles"}
   · {category_slug: "anti_frisottis", label: "Anti-frisottis", excerpt: "limite les frisottis"}
   · {category_slug: "absence_sulfate", label: "Sans sulfate", excerpt: "sans sulfate"}
   · {category_slug: "absence_silicone", label: "Sans silicone", excerpt: "ni silicone"}
 - unverifiable:
-  · {excerpt: "formulée à 96 % naturel", reason: "composition"}
+  · {excerpt: "formulée à 96 % naturel", reason: "composition"}  ← composition VAGUE sans actif nommé → unverifiable
   · {excerpt: "odeur de vanille", reason: "sensoriel"}
 - out_of_scope: []
 
@@ -704,7 +705,12 @@ RÈGLES STRICTES (anti-hallucination) :
 3. Si AUCUN ingrédient de la liste ne soutient la promesse, retourne matches: [].
 4. Sois conservateur. Mieux vaut sous-citer que sur-citer. Si tu n'es pas sûr, ne cite pas.
 5. Pas plus de 6 matches au total.
-6. Tu peux aussi lister jusqu'à 5 actifs documentés qui auraient typiquement été utilisés pour cette promesse mais qui ne sont PAS dans la liste (champ "missing"). Noms en français de préférence.`;
+6. Tu peux aussi lister jusqu'à 5 actifs documentés qui auraient typiquement été utilisés pour cette promesse mais qui ne sont PAS dans la liste (champ "missing"). Noms en français de préférence.
+7. PROMESSE DE PRÉSENCE ("Présence : X") : la promesse affirme simplement que l'actif X est dans le produit. Avant de conclure à une absence, TRADUIS X vers son (ou ses) nom(s) INCI probable(s), PUIS cherche-le dans la liste. Trois traductions à tenter systématiquement :
+   a) Nom courant / vitamine → INCI : "spiruline" → "Spirulina Maxima/Platensis Extract", "vitamine B3" → "Niacinamide", "acide hyaluronique" → "Sodium Hyaluronate", "provitamine B5" → "Panthenol".
+   b) Nom BOTANIQUE français → binôme latin INCI : "huile d'abyssinie" → "Crambe Abyssinica Seed Oil", "beurre de karité" → "Butyrospermum Parkii Butter", "huile de ricin" → "Ricinus Communis Seed Oil", "huile de jojoba" → "Simmondsia Chinensis Seed Oil", "nigelle" → "Nigella Sativa Seed Oil". Règle générale : "huile/beurre/extrait de <plante>" = "<Genre Espèce> Oil/Butter/Extract" en latin.
+   c) Nom BREVETÉ / marque déposée → sa source INCI réelle. Un actif breveté est presque toujours un extrait végétal ou une molécule dont le nom INCI diffère du nom commercial. Ex : "Viniférine" (Caudalie) → dérivé de vigne, cherche "Vitis Vinifera ... Extract" OU "Palmitoyl Grapevine Shoot Extract" ; "Pro-Xylane" → "Hydroxypropyl Tetrahydropyrantriol". Si tu connais la source botanique/chimique de l'actif breveté, cherche CETTE source dans la liste.
+   S'il y est sous l'un quelconque de ces noms → 1 match "documented" sur cet ingrédient. S'il N'y est VRAIMENT PAS après avoir essayé les équivalents INCI → matches: [] (présence non confirmée). Ne mets JAMAIS X dans "missing".`;
 
   const user = `Promesse à vérifier : "${promiseLabel}"
 Phrase exacte de la description : "${promiseExcerpt}"

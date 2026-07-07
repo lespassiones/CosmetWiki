@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { createHash } from "node:crypto";
 import {
   detectProductType,
   exploreOpenPromise,
@@ -14,6 +15,7 @@ import {
   resolveOpenPromise,
 } from "@/lib/coherence/engine";
 import { findCategoryBySlug, isAbsenceCategory } from "@/lib/coherence/claims";
+import { descriptionSupportsAbsenceClaim } from "@/lib/coherence/absenceGuard";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 import type { CoherencePromise, ProductType } from "@/lib/coherence/types";
 import { apiGate } from "@/lib/apiGate";
@@ -21,10 +23,17 @@ import { idempotencyKey, idempotencyLookup, idempotencyStore } from "@/lib/idemp
 import { logError } from "@/lib/log";
 import { loadProfileForPrompt } from "@/lib/skin/promptFormat";
 import { loadRestrictionsForPrompt } from "@/lib/restrictions/promptFormat";
-import { hashInci, hashDescription } from "@/lib/cacheHash";
-import { supabaseAnon, supabaseService } from "@/lib/supabase";
+import { supabaseService } from "@/lib/supabase";
 
-const COHERENCE_ALGO_VERSION = "v3";
+/**
+ * Version du moteur de cohérence. v4 = resynchronisation stricte avec l'edge
+ * coherence-analyze (dual-use Annexe III 3 slugs + formulaHasDeclaredFragrance
+ * + keywords demelage unifiés) + HASH UNIFIÉ (items slug/name triés, plus le
+ * texte INCI brut) + cache des conclusions PAR SIGNATURE de profil (fini la
+ * conclusion personnalisée d'un user servie à un autre). Le cache est donc
+ * PARTAGÉ entre web et mobile : même clé, même format.
+ */
+const COHERENCE_ALGO_VERSION = "v4";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -35,19 +44,23 @@ type Body = {
   description?: string;
 };
 
+const sha256Hex = (s: string) => createHash("sha256").update(s, "utf8").digest("hex");
+
 /**
  * POST /api/coherence
  * Body: { analysis_id, description }
  *
- * Pipeline:
- *   1. Auth + look up the parent analysis (must belong to the user).
- *   2. LLM extracts promises + unverifiable claims from the description
- *      (constrained JSON schema).
- *   3. Engine resolves each promise mechanically against the parent items.
- *   4. LLM writes a one-sentence conclusion based on the verdicts.
- *   5. Persist the full result in cosme_check.coherence_analyses.
+ * MIROIR EXACT de l'edge `coherence-analyze` (mobile) :
+ *   1. Auth + rate-limit IP (0 crédit) + idempotence.
+ *   2. RÉ-ANALYSE = PURE LECTURE : si CE user a déjà une coherence_analysis
+ *      pour (analysis_id, description) → on la renvoie. 0 IA, 0 crédit.
+ *   3. Cache cross-user `coherence_cache` (inci_hash items triés + desc hash,
+ *      algo v4) : steps 0-3 servis sans IA ; conclusion servie sans IA si une
+ *      signature de profil identique est déjà passée.
+ *   4. Débit de 1 crédit UNIQUEMENT sur cache MISS (pipeline IA complet).
+ *   5. Persist dans coherence_analyses + upsert du cache partagé.
  *
- * Returns: { id, result }
+ * Returns: { id, result, cache: "user" | "full" | "partial" | "miss" }
  */
 export async function POST(req: NextRequest) {
   let body: Body;
@@ -86,245 +99,267 @@ export async function POST(req: NextRequest) {
   if (cachedIdem) return cachedIdem;
 
   try {
-  // Look up the parent analysis. RLS already restricts to the user's own
-  // rows; we add an explicit user_id check as belt-and-braces.
-  // We also pull `product_type` (string hint from OCR / identification) and
-  // `brand` so we can give the type detector richer context. `input_text` is
-  // pulled to compute the INCI hash for the shared cohérence cache lookup.
-  const { data: analysisRow, error: analysisErr } = await sb
-    .schema("cosme_check")
-    .from("analyses")
-    .select("id, user_id, name, product_label, product_type, brand, result_json, input_text")
-    .eq("id", analysisId)
-    .eq("user_id", user.id)
-    .maybeSingle();
+    // Look up the parent analysis. RLS already restricts to the user's own
+    // rows; we add an explicit user_id check as belt-and-braces.
+    const { data: analysisRow, error: analysisErr } = await sb
+      .schema("cosme_check")
+      .from("analyses")
+      .select("id, user_id, name, product_label, product_type, brand, result_json")
+      .eq("id", analysisId)
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-  if (analysisErr || !analysisRow) {
-    return NextResponse.json(
-      { error: "Analyse INCI introuvable ou inaccessible." },
-      { status: 404 },
-    );
-  }
-
-  const parent = analysisRow.result_json as AnalyseResponse;
-  if (!parent || !Array.isArray(parent.items) || parent.items.length === 0) {
-    return NextResponse.json(
-      { error: "L'analyse INCI source est invalide ou vide." },
-      { status: 400 },
-    );
-  }
-
-  // Shared coherence cache — clé composite (hash INCI, hash description).
-  // Si un autre user a déjà analysé la même promesse sur la même formule, on
-  // retourne le résultat instantanément, on l'écrit dans l'historique perso
-  // de l'user, et on ne débite aucun crédit (cohérent avec analyser).
-  const inciSource = (analysisRow.input_text as string | null)?.trim() || "";
-  const inciHash = inciSource ? hashInci(inciSource) : null;
-  const descHash = hashDescription(description);
-
-  if (inciHash) {
-    try {
-      // NOTE: the prod RPC signature is (p_inci_hash, p_description_hash) only —
-      // it does NOT take p_algo_version. Passing it made PostgREST fail to
-      // resolve the function, so the cache read errored every time and every
-      // coherence analysis recomputed + charged a credit. We call it with the
-      // 2 supported args. The write still stamps COHERENCE_ALGO_VERSION ('v3'),
-      // and since the cache PK is (inci_hash, description_hash) a v3 recompute
-      // overwrites any older row. Trade-off (accepted): the read is not
-      // version-filtered, so a pre-existing v1.0 row could be served until it
-      // is recomputed. Revisit with a DB migration if strict read-side
-      // versioning is needed.
-      const { data: cachedCoh } = await supabaseAnon()
-        .rpc("cosme_check_get_coherence_cache", {
-          p_inci_hash: inciHash,
-          p_description_hash: descHash,
-        });
-
-      if (cachedCoh) {
-        const cachedResult = cachedCoh as Record<string, unknown>;
-        const { data: saved } = await sb
-          .schema("cosme_check")
-          .from("coherence_analyses")
-          .insert({
-            user_id: user.id,
-            analysis_id: analysisId,
-            description,
-            result_json: cachedResult,
-          })
-          .select("id")
-          .single();
-
-        const response = NextResponse.json({ id: saved?.id ?? null, result: cachedResult });
-        await idempotencyStore(idemKey, response);
-        return response;
-      }
-    } catch { /* cache miss or RPC error — fall through to full pipeline */ }
-  }
-
-  // Cache miss → débite 1 crédit puis lance le pipeline LLM complet.
-  const charge = await gate.consumeCredit("coherence");
-  if (!charge.ok) return charge.response;
-
-  const productLabel
-    = (analysisRow.product_label as string | null)
-    ?? (analysisRow.name as string | null)
-    ?? null;
-
-  // ─── Step 0: detect product type (silent LLM call). ─────────────────────
-  // The hint comes from the OCR'd front photo + the brand name. The detector
-  // returns one of 8 enums (+ "autre"). The full description is the strongest
-  // signal so we pass it as the primary input; the hint disambiguates when
-  // the description is short or generic.
-  const typeHint = [
-    analysisRow.product_type as string | null,
-    productLabel,
-    analysisRow.brand as string | null,
-  ]
-    .filter((s): s is string => Boolean(s && s.trim()))
-    .join(" - ");
-  const productType: ProductType = await detectProductType(
-    description,
-    typeHint || null,
-    user.id,
-  );
-
-  // ─── Step 1: extract promises from the description (LLM, JSON schema strict) ─
-  const extraction = await extractPromisesFromDescription(
-    description,
-    productType,
-    user.id,
-  );
-  // Re-classify "autre" proposals whose label/excerpt actually matches a
-  // catalogue category compatible with the product type. Fixes the case
-  // where the LLM keeps a phrasing variant ("Éclat de la fibre capillaire")
-  // out of the catalogue while the equivalent catalogue slug ("Brillance")
-  // is also in the list — without this, the same concept would surface as
-  // two contradictory bars (0 % vs 100 %) because each row goes through a
-  // different resolver. After reclassification the dedup step below merges
-  // the twin into a single row.
-  const reclassifiedProposals = reclassifyOpenProposals(
-    extraction.proposals,
-    productType,
-  );
-  // Mechanical safety net: collapse any duplicate proposals the LLM may have
-  // emitted despite the prompt rule (cf. dedupProposals docstring).
-  const dedupedProposals = dedupProposals(reclassifiedProposals);
-
-  // ─── Step 2: split proposals between catalogue (effect), catalogue
-  // (absence), and open ───────────────────────────────────────────────────
-  // - catalogue effect: slug ∈ CLAIM_CATEGORIES without forbiddenTag → engine
-  //   matches catalogue actives against parent.items.
-  // - catalogue absence: slug ∈ CLAIM_CATEGORIES with forbiddenTag → engine
-  //   scans parent.items[].tags for the forbidden tag (no LLM step needed).
-  // - open: slug = "autre" or unknown → per-promise LLM exploration that
-  //   picks active candidates *from the actual formula*.
-  // Absence promises → deterministic engine (no LLM needed: tag scan).
-  // ALL effect promises → LLM exploration of the actual formula (v3).
-  const cataloguePromises: CoherencePromise[] = [];
-  const openProposals: typeof extraction.proposals = [];
-  for (const p of dedupedProposals) {
-    const cat = findCategoryBySlug(p.category_slug);
-    if (cat && isAbsenceCategory(cat)) {
-      cataloguePromises.push(resolveAbsencePromise(p, cat, parent.items));
-    } else {
-      openProposals.push(p);
+    if (analysisErr || !analysisRow) {
+      return NextResponse.json(
+        { error: "Analyse INCI introuvable ou inaccessible." },
+        { status: 404 },
+      );
     }
-  }
 
-  // ─── Step 3: open promises - explore the formula via LLM in parallel ─────
-  // The LLM only sees items with a slug (those we can match back) and is
-  // constrained to cite slugs from the list it receives. resolveOpenPromise
-  // re-validates every cited slug against the items as defence-in-depth.
-  const itemsForLlm: FormulaItemForLlm[] = parent.items
-    .filter((it): it is typeof it & { slug: string; name: string } =>
-      Boolean(it.slug) && Boolean(it.name),
-    )
-    .map((it) => ({
-      slug: it.slug,
-      name: it.name,
-      primaryFunction: it.primaryFunction,
-    }));
+    const parent = analysisRow.result_json as AnalyseResponse;
+    if (!parent || !Array.isArray(parent.items) || parent.items.length === 0) {
+      return NextResponse.json(
+        { error: "L'analyse INCI source est invalide ou vide." },
+        { status: 400 },
+      );
+    }
 
-  const openPromises: CoherencePromise[] = await Promise.all(
-    openProposals.map(async (p) => {
-      const exploration = await exploreOpenPromise(
-        p.label,
-        p.excerpt,
-        itemsForLlm,
+    const productLabel
+      = (analysisRow.product_label as string | null)
+      ?? (analysisRow.name as string | null)
+      ?? null;
+
+    // ─── RÉ-ANALYSE = PURE LECTURE (même user, même produit, même promesse) ─
+    const { data: existingRows } = await sb
+      .schema("cosme_check")
+      .from("coherence_analyses")
+      .select("id, result_json")
+      .eq("user_id", user.id)
+      .eq("analysis_id", analysisId)
+      .eq("description", description)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    const existing = existingRows?.[0] ?? null;
+    if (existing?.result_json) {
+      return NextResponse.json(
+        { id: existing.id, result: existing.result_json, cache: "user" },
+        { headers: { "X-Coherence-Cache": "user" } },
+      );
+    }
+
+    // ─── Cache cross-user : HASH UNIFIÉ avec l'edge (items slug/name triés) ─
+    const inciHash = sha256Hex(
+      parent.items
+        .map((it) => (it.slug || it.name || ""))
+        .filter(Boolean)
+        .sort()
+        .join("|"),
+    ).slice(0, 40);
+    const descHash = sha256Hex(description.toLowerCase()).slice(0, 40);
+
+    type Extraction = Awaited<ReturnType<typeof extractPromisesFromDescription>>;
+    type CacheVal = {
+      promises: CoherencePromise[];
+      unverifiable: Extraction["unverifiable"];
+      outOfScope: Extraction["outOfScope"];
+      conclusions?: Record<string, string>;
+    };
+
+    let promises: CoherencePromise[];
+    let unverifiable: Extraction["unverifiable"];
+    let outOfScope: Extraction["outOfScope"];
+    let productType: ProductType;
+
+    const svc = supabaseService();
+    const [cacheRead, profileBlock, restrictionsBlock] = await Promise.all([
+      svc
+        .schema("cosme_check")
+        .from("coherence_cache")
+        .select("result_json, product_type")
+        .eq("inci_hash", inciHash)
+        .eq("description_hash", descHash)
+        .eq("algo_version", COHERENCE_ALGO_VERSION)
+        .maybeSingle(),
+      loadProfileForPrompt(user.id),
+      loadRestrictionsForPrompt(user.id),
+    ]);
+    const personalSig = sha256Hex(`${profileBlock ?? ""}|${restrictionsBlock ?? ""}`).slice(0, 16);
+
+    const cachedVal = (cacheRead.data as
+      | { result_json: CacheVal; product_type: string | null }
+      | null) ?? null;
+
+    let cacheState: "full" | "partial" | "miss" = "miss";
+    let cachedConclusion: string | null = null;
+
+    if (cachedVal && Array.isArray(cachedVal.result_json?.promises)) {
+      // HIT cross-user : on saute les LLM coûteux (steps 0-3). Pas de débit
+      // (même règle que `analyser` sur cache EAN).
+      promises = cachedVal.result_json.promises;
+      unverifiable = cachedVal.result_json.unverifiable;
+      outOfScope = cachedVal.result_json.outOfScope;
+      productType = (cachedVal.product_type ?? "autre") as ProductType;
+      cachedConclusion = cachedVal.result_json.conclusions?.[personalSig] ?? null;
+      cacheState = cachedConclusion ? "full" : "partial";
+    } else {
+      // MISS → pipeline IA complet. Débit AVANT le travail.
+      const charge = await gate.consumeCredit("coherence");
+      if (!charge.ok) return charge.response;
+
+      // ─── Step 0: detect product type (silent LLM call). ─────────────────
+      const typeHint = [
+        analysisRow.product_type as string | null,
+        productLabel,
+        analysisRow.brand as string | null,
+      ]
+        .filter((s): s is string => Boolean(s && s.trim()))
+        .join(" - ");
+      productType = await detectProductType(description, typeHint || null, user.id);
+
+      // ─── Step 1: extract promises (LLM, JSON schema strict) ─────────────
+      const extraction = await extractPromisesFromDescription(
+        description,
+        productType,
         user.id,
       );
-      return resolveOpenPromise(p, parent.items, exploration.matches, exploration.missing);
-    }),
-  );
+      const reclassifiedProposals = reclassifyOpenProposals(
+        extraction.proposals,
+        productType,
+      );
+      const dedupedProposals = dedupProposals(reclassifiedProposals);
 
-  const directPromises = [...cataloguePromises, ...openPromises];
-  const promises = directPromises;
+      // ─── Step 2: absence (déterministe, par tag) vs effet (LLM validé) ───
+      // Garde anti-hallucination : on écarte une promesse d'absence si la
+      // description ne l'affirme pas LITTÉRALEMENT (token ingrédient + marqueur
+      // "sans/0 %/free" proche). Sans ça, un "sans X" inventé par le LLM + la
+      // présence de X dans la formule = verdict "contredite" à tort — on
+      // accuserait la marque d'une promesse jamais faite (audit prod 07/2026).
+      const guardedProposals = dedupedProposals.filter((p) => {
+        const cat = findCategoryBySlug(p.category_slug);
+        if (cat && isAbsenceCategory(cat)) {
+          return descriptionSupportsAbsenceClaim(cat.slug, description);
+        }
+        return true;
+      });
 
-  // ─── Step 4: build the full structured result (engine, deterministic) ────
-  // ─── Step 5: write the conclusion sentence (LLM, only sees the verdicts)
-  // Load skin profile so the conclusion can flag verdicts that specifically
-  // matter for this user (sensible peau, allergies, etc.). Best-effort: a
-  // missing profile just yields a generic conclusion.
-  const [profileBlock, restrictionsBlock] = await Promise.all([
-    loadProfileForPrompt(user.id),
-    loadRestrictionsForPrompt(user.id),
-  ]);
-  const conclusion = await generateConclusion(
-    promises,
-    productLabel,
-    user.id,
-    profileBlock,
-    restrictionsBlock,
-  );
-  const result = buildCoherenceResult({
-    description,
-    promises,
-    unverifiable: extraction.unverifiable,
-    outOfScope: extraction.outOfScope,
-    productType,
-    parent,
-    conclusion,
-  });
+      const cataloguePromises: CoherencePromise[] = [];
+      const openProposals: typeof extraction.proposals = [];
+      for (const p of guardedProposals) {
+        const cat = findCategoryBySlug(p.category_slug);
+        if (cat && isAbsenceCategory(cat)) {
+          cataloguePromises.push(resolveAbsencePromise(p, cat, parent.items));
+        } else {
+          openProposals.push(p);
+        }
+      }
 
-  // Step 4: persist
-  const { data: saved, error: saveErr } = await sb
-    .schema("cosme_check")
-    .from("coherence_analyses")
-    .insert({
-      user_id: user.id,
-      analysis_id: analysisId,
-      description,
-      result_json: result,
-    })
-    .select("id")
-    .single();
+      // ─── Step 3: open promises - explore the formula via LLM in parallel ─
+      const itemsForLlm: FormulaItemForLlm[] = parent.items
+        .filter((it): it is typeof it & { slug: string; name: string } =>
+          Boolean(it.slug) && Boolean(it.name),
+        )
+        .map((it) => ({
+          slug: it.slug,
+          name: it.name,
+          primaryFunction: it.primaryFunction,
+        }));
 
-  if (saveErr || !saved) {
-    return NextResponse.json(
-      { error: "Échec de sauvegarde de l'analyse de cohérence." },
-      { status: 500 },
-    );
-  }
+      const openPromises: CoherencePromise[] = await Promise.all(
+        openProposals.map(async (p) => {
+          const exploration = await exploreOpenPromise(
+            p.label,
+            p.excerpt,
+            itemsForLlm,
+            user.id,
+          );
+          return resolveOpenPromise(p, parent.items, exploration.matches, exploration.missing);
+        }),
+      );
 
-    // Background: alimente le cache partagé pour que le prochain user
-    // (même formule + même description) court-circuite tout le pipeline LLM.
-    if (inciHash) {
+      promises = [...cataloguePromises, ...openPromises];
+      unverifiable = extraction.unverifiable;
+      outOfScope = extraction.outOfScope;
+    }
+
+    // ─── Step 5: conclusion (LLM, only sees verdicts) + personnalisation ───
+    // Servie depuis le cache si un profil identique est déjà passé (0 IA).
+    const conclusion = cachedConclusion
+      ?? (await generateConclusion(
+        promises,
+        productLabel,
+        user.id,
+        profileBlock,
+        restrictionsBlock,
+      ));
+
+    // Écriture/mise à jour du cache cross-user : steps 0-3 + la conclusion de
+    // CE profil (map bornée aux 20 dernières signatures).
+    if (cacheState !== "full") {
+      const prevConclusions = cachedVal?.result_json?.conclusions ?? {};
+      const conclusionEntries = [
+        ...Object.entries(prevConclusions).filter(([k]) => k !== personalSig),
+        [personalSig, conclusion] as const,
+      ].slice(-20);
+      const val: CacheVal = {
+        promises,
+        unverifiable,
+        outOfScope,
+        conclusions: Object.fromEntries(conclusionEntries),
+      };
       void (async () => {
         try {
-          await supabaseService()
+          await svc
             .schema("cosme_check")
-            .rpc("cosme_check_upsert_coherence_cache", {
-              p_inci_hash: inciHash,
-              p_description_hash: descHash,
-              p_result_json: result,
-              p_product_type: productType,
-              p_algo_version: COHERENCE_ALGO_VERSION,
-            });
+            .from("coherence_cache")
+            .upsert(
+              {
+                inci_hash: inciHash,
+                description_hash: descHash,
+                result_json: val,
+                product_type: productType,
+                algo_version: COHERENCE_ALGO_VERSION,
+              },
+              { onConflict: "inci_hash,description_hash" },
+            );
         } catch { /* non-blocking */ }
       })();
     }
 
-    const response = NextResponse.json({ id: saved.id, result });
+    // ─── Step 4: build the full structured result (engine, deterministic) ──
+    const result = buildCoherenceResult({
+      description,
+      promises,
+      unverifiable,
+      outOfScope,
+      productType,
+      parent,
+      conclusion,
+    });
+
+    // Persist dans l'historique perso du user.
+    const { data: saved, error: saveErr } = await sb
+      .schema("cosme_check")
+      .from("coherence_analyses")
+      .insert({
+        user_id: user.id,
+        analysis_id: analysisId,
+        description,
+        result_json: result,
+      })
+      .select("id")
+      .single();
+
+    if (saveErr || !saved) {
+      return NextResponse.json(
+        { error: "Échec de sauvegarde de l'analyse de cohérence." },
+        { status: 500 },
+      );
+    }
+
+    const response = NextResponse.json(
+      { id: saved.id, result, cache: cacheState },
+      { headers: { "X-Coherence-Cache": cacheState } },
+    );
     await idempotencyStore(idemKey, response);
     return response;
   } catch (err) {
