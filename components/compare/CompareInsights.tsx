@@ -8,7 +8,13 @@ type Insights = {
   portraitB: string;
   common: string;
   howToChoose: string;
+  /** Recommended product (green badge). Absent from pre-v5 cache → score fallback. */
+  winner?: "A" | "B";
 };
+
+/** Status reported to the parent: drives the green badge (winner) + the
+ *  "Voir l'analyse complète" button and the deterministic blocks. */
+export type CompareInsightsStatus = "loading" | "ready" | "error";
 
 /**
  * Renders the AI-generated comparison narrative (two portraits, what they
@@ -25,6 +31,8 @@ export function CompareInsights({
   nameB,
   shortNameA,
   shortNameB,
+  showFull = false,
+  onResult,
 }: {
   aId: string;
   bId: string;
@@ -36,9 +44,22 @@ export function CompareInsights({
    *  (api/compare/insights computes the same value with shortenProductName). */
   shortNameA: string;
   shortNameB: string;
+  /** When false, only "Comment choisir ?" shows; portraits + common are hidden
+   *  until the parent's "Voir l'analyse complète" reveals them. */
+  showFull?: boolean;
+  /** Reports status + recommended product to the parent (badge + button). */
+  onResult?: (r: { status: CompareInsightsStatus; winner?: "A" | "B" }) => void;
 }) {
   const [data, setData] = useState<Insights | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Report status upward (winner badge + button/blocks visibility).
+  useEffect(() => {
+    const status: CompareInsightsStatus = error ? "error" : data ? "ready" : "loading";
+    onResult?.({ status, winner: data?.winner });
+    // onResult is a stable parent setter; excluded from deps to avoid a loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, error]);
 
   useEffect(() => {
     let cancelled = false;
@@ -89,53 +110,16 @@ export function CompareInsights({
 
   if (!cleaned) {
     return (
-      <>
-        <section className={`${GLASS_CARD} p-5 mb-4`}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-            <PortraitSkeleton name={shortNameA} />
-            <PortraitSkeleton name={shortNameB} />
-          </div>
-        </section>
-        <section className={`${GLASS_CARD} p-5 mb-4`}>
-          <div className="h-3 w-1/3 rounded bg-[#F3F4F6] animate-pulse mb-2" />
-          <div className="h-3 w-5/6 rounded bg-[#F3F4F6] animate-pulse" />
-        </section>
-      </>
+      <section className={`${GLASS_CARD} p-5 mb-4 bg-gradient-to-br from-sky-50/80 to-white/70`}>
+        <div className="h-3 w-1/3 rounded bg-[#F3F4F6] animate-pulse mb-2" />
+        <div className="h-3 w-5/6 rounded bg-[#F3F4F6] animate-pulse" />
+      </section>
     );
   }
 
   return (
     <>
-      {/* Portraits - one card per product, no winner badge. */}
-      <section className="mb-4">
-        <h2 className="text-[15px] font-semibold mb-3 px-1">Portrait des deux produits</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-          <Portrait
-            shortName={shortNameA}
-            text={cleaned.portraitA}
-            tone="A"
-            otherShortName={shortNameB}
-          />
-          <Portrait
-            shortName={shortNameB}
-            text={cleaned.portraitB}
-            tone="B"
-            otherShortName={shortNameA}
-          />
-        </div>
-      </section>
-
-      {/* What they share */}
-      <section className={`${GLASS_CARD} p-5 mb-4`}>
-        <h3 className="text-[13px] font-semibold uppercase tracking-wide text-ink-subtle mb-2">
-          Ce qu&apos;ils ont en commun
-        </h3>
-        <p className="text-[14px] leading-relaxed text-ink">
-          {renderWithProductHighlights(cleaned.common, shortNameA, shortNameB)}
-        </p>
-      </section>
-
-      {/* How to choose - no verdict, just guidance */}
+      {/* How to choose - the verdict first, always visible. */}
       <section className={`${GLASS_CARD} p-5 mb-4 bg-gradient-to-br from-sky-50/80 to-white/70`}>
         <h3 className="text-[13px] font-semibold uppercase tracking-wide text-sky-700 mb-2">
           Comment choisir ?
@@ -144,6 +128,40 @@ export function CompareInsights({
           {renderWithProductHighlights(cleaned.howToChoose, shortNameA, shortNameB)}
         </p>
       </section>
+
+      {/* Detail (portraits + common) - revealed via the parent's
+          "Voir l'analyse complète" button. */}
+      {showFull && (
+        <>
+          <section className="mb-4">
+            <h2 className="text-[15px] font-semibold mb-3 px-1">Portrait des deux produits</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              <Portrait
+                shortName={shortNameA}
+                text={cleaned.portraitA}
+                tone="A"
+                otherShortName={shortNameB}
+              />
+              <Portrait
+                shortName={shortNameB}
+                text={cleaned.portraitB}
+                tone="B"
+                otherShortName={shortNameA}
+              />
+            </div>
+          </section>
+
+          {/* What they share */}
+          <section className={`${GLASS_CARD} p-5 mb-4`}>
+            <h3 className="text-[13px] font-semibold uppercase tracking-wide text-ink-subtle mb-2">
+              Ce qu&apos;ils ont en commun
+            </h3>
+            <p className="text-[14px] leading-relaxed text-ink">
+              {renderWithProductHighlights(cleaned.common, shortNameA, shortNameB)}
+            </p>
+          </section>
+        </>
+      )}
     </>
   );
 }
@@ -173,19 +191,6 @@ function Portrait({
       <p className="text-[13px] leading-relaxed text-ink">
         {renderWithProductHighlights(text, shortName, otherShortName, tone)}
       </p>
-    </article>
-  );
-}
-
-function PortraitSkeleton({ name }: { name: string }) {
-  return (
-    <article className={`${GLASS_CARD} p-5`}>
-      <h3 className="text-[14px] font-semibold mb-3 truncate">{name}</h3>
-      <div className="space-y-2">
-        <div className="h-3 w-full rounded bg-[#F3F4F6] animate-pulse" />
-        <div className="h-3 w-5/6 rounded bg-[#F3F4F6] animate-pulse" />
-        <div className="h-3 w-2/3 rounded bg-[#F3F4F6] animate-pulse" />
-      </div>
     </article>
   );
 }

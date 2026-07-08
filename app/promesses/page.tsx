@@ -65,13 +65,18 @@ export default async function PromessesPage() {
         </p>
         {/* Pill horizontal - rose pastel sur fond clair pour cohérence
             avec le bouton "+ Ajouter un produit" de la routine. Une seule
-            ligne grâce à whitespace-nowrap. */}
-        <Link
-          href="/promesses/nouvelle"
-          className="neu-btn rounded-full inline-flex items-center gap-1.5 hover:bg-rose-50 text-rose-700 px-4 py-2 text-[13px] font-semibold whitespace-nowrap"
-        >
-          <span aria-hidden>+</span> Nouvelle analyse
-        </Link>
+            ligne grâce à whitespace-nowrap.
+            N'apparaît qu'une fois au moins une analyse faite : sur un compte
+            neuf, seul le CTA "Lancer ma première analyse" de l'état vide
+            s'affiche (plus de doublon). */}
+        {rows.length > 0 ? (
+          <Link
+            href="/promesses/choisir"
+            className="neu-btn rounded-full inline-flex items-center gap-1.5 hover:bg-rose-50 text-rose-700 px-4 py-2 text-[13px] font-semibold whitespace-nowrap"
+          >
+            <span aria-hidden>+</span> Nouvelle analyse
+          </Link>
+        ) : null}
       </div>
 
       {rows.length === 0 ? (
@@ -81,7 +86,7 @@ export default async function PromessesPage() {
             réelle. On te dit ce qui est tenu et ce qui relève du marketing.
           </p>
           <Link
-            href="/promesses/nouvelle"
+            href="/promesses/choisir"
             className="neu-btn-primary inline-block rounded-full px-5 py-2.5 text-sm"
           >
             Lancer ma première analyse

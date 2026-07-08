@@ -131,6 +131,7 @@ export async function POST(req: NextRequest) {
       },
       score: Number(row.score ?? 0),
       scoreLabel: (resultJson as unknown as { scoreLabel?: string }).scoreLabel ?? "",
+      scoreTone: (resultJson as unknown as { scoreTone?: string | null }).scoreTone ?? null,
       productLabel: row.product_label ?? null,
       category: row.product_type ?? resultJson.catalogCategory ?? (row.category as string | null) ?? null,
       userId: user.id,

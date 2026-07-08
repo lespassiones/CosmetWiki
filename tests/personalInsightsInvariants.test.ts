@@ -55,4 +55,24 @@ describe("enforceInvariants", () => {
     expect(out.watch.title).toBe("Ingrédients à surveiller");
     expect(out.watch.description).toContain("parfum");
   });
+
+  it("note verte + 0 orange/rouge -> goals forcé vert (un jaune seul ne dégrade pas)", () => {
+    const b = base();
+    b.goals.tone = "ambre"; // LLM a rétrogradé à tort à cause d'un jaune
+    const out = enforceInvariants(b, {
+      orange: 0,
+      red: 0,
+      restrictionHit: false,
+      signalCats: [],
+      scoreTone: "green",
+    });
+    expect(out.goals.tone).toBe("vert");
+  });
+
+  it("sans scoreTone, le comportement d'origine est préservé (pas de remontée forcée)", () => {
+    const b = base();
+    b.goals.tone = "neutre";
+    const out = enforceInvariants(b, { orange: 0, red: 0, restrictionHit: false, signalCats: [] });
+    expect(out.goals.tone).toBe("neutre");
+  });
 });

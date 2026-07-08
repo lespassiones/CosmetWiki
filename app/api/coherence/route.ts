@@ -1,24 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createHash } from "node:crypto";
 import {
-  detectProductType,
-  exploreOpenPromise,
-  extractPromisesFromDescription,
+  analyzeCoherence,
   generateConclusion,
   type FormulaItemForLlm,
 } from "@/lib/ai/coherence";
-import {
-  buildCoherenceResult,
-  dedupProposals,
-  reclassifyOpenProposals,
-  resolveAbsencePromise,
-  resolveOpenPromise,
-} from "@/lib/coherence/engine";
-import { findCategoryBySlug, isAbsenceCategory } from "@/lib/coherence/claims";
-import { descriptionSupportsAbsenceClaim } from "@/lib/coherence/absenceGuard";
-import { isUsageInstruction } from "@/lib/coherence/usageInstructionGuard";
+import { buildCoherenceResult } from "@/lib/coherence/engine";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
-import type { CoherencePromise, ProductType } from "@/lib/coherence/types";
+import type {
+  CoherencePromise,
+  OutOfScopePromise,
+  ProductType,
+  UnverifiableClaim,
+} from "@/lib/coherence/types";
 import { apiGate } from "@/lib/apiGate";
 import { idempotencyKey, idempotencyLookup, idempotencyStore } from "@/lib/idempotency";
 import { logError } from "@/lib/log";
@@ -38,7 +32,11 @@ import { supabaseService } from "@/lib/supabase";
 // consigne d'usage ("appliquer avant le coucher") n'est plus comptée comme une
 // promesse "non démontrée" + règle prompt correspondante. PARITÉ mobile (edge
 // coherence-analyze ALGO_VERSION="v5"). Bumper invalide coherence_cache (v4).
-const COHERENCE_ALGO_VERSION = "v5";
+// v10 = PARITÉ avec l'edge : analyse en UNE passe LLM (description + INCI →
+// promesses vérifiées, ingrédients réels cités) + filet déterministe anti-bruit
+// + lecture-pure versionnée (anti-cache-empoisonné). Même clé/format que le
+// mobile → cache cross-user PARTAGÉ entre web et app.
+const COHERENCE_ALGO_VERSION = "v10";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -145,7 +143,12 @@ export async function POST(req: NextRequest) {
       .order("created_at", { ascending: false })
       .limit(1);
     const existing = existingRows?.[0] ?? null;
-    if (existing?.result_json) {
+    const existingVer =
+      (existing?.result_json as { algoVersion?: string } | null)?.algoVersion ?? null;
+    // Lecture-pure UNIQUEMENT si calculé par la version courante. Un résultat
+    // d'une version antérieure (ancien moteur) N'EST PAS re-servi → régénéré
+    // (gratis depuis le cache cross-user si dispo). Anti-cache-empoisonné.
+    if (existing?.result_json && existingVer === COHERENCE_ALGO_VERSION) {
       return NextResponse.json(
         { id: existing.id, result: existing.result_json, cache: "user" },
         { headers: { "X-Coherence-Cache": "user" } },
@@ -162,17 +165,16 @@ export async function POST(req: NextRequest) {
     ).slice(0, 40);
     const descHash = sha256Hex(description.toLowerCase()).slice(0, 40);
 
-    type Extraction = Awaited<ReturnType<typeof extractPromisesFromDescription>>;
     type CacheVal = {
       promises: CoherencePromise[];
-      unverifiable: Extraction["unverifiable"];
-      outOfScope: Extraction["outOfScope"];
+      unverifiable: UnverifiableClaim[];
+      outOfScope: OutOfScopePromise[];
       conclusions?: Record<string, string>;
     };
 
     let promises: CoherencePromise[];
-    let unverifiable: Extraction["unverifiable"];
-    let outOfScope: Extraction["outOfScope"];
+    let unverifiable: UnverifiableClaim[];
+    let outOfScope: OutOfScopePromise[];
     let productType: ProductType;
 
     const svc = supabaseService();
@@ -207,61 +209,10 @@ export async function POST(req: NextRequest) {
       cachedConclusion = cachedVal.result_json.conclusions?.[personalSig] ?? null;
       cacheState = cachedConclusion ? "full" : "partial";
     } else {
-      // MISS → pipeline IA complet. Débit AVANT le travail.
+      // MISS → analyse IA en UNE passe. Débit AVANT le travail.
       const charge = await gate.consumeCredit("coherence");
       if (!charge.ok) return charge.response;
 
-      // ─── Step 0: detect product type (silent LLM call). ─────────────────
-      const typeHint = [
-        analysisRow.product_type as string | null,
-        productLabel,
-        analysisRow.brand as string | null,
-      ]
-        .filter((s): s is string => Boolean(s && s.trim()))
-        .join(" - ");
-      productType = await detectProductType(description, typeHint || null, user.id);
-
-      // ─── Step 1: extract promises (LLM, JSON schema strict) ─────────────
-      const extraction = await extractPromisesFromDescription(
-        description,
-        productType,
-        user.id,
-      );
-      const reclassifiedProposals = reclassifyOpenProposals(
-        extraction.proposals,
-        productType,
-      );
-      const dedupedProposals = dedupProposals(reclassifiedProposals);
-
-      // ─── Step 2: absence (déterministe, par tag) vs effet (LLM validé) ───
-      // Garde anti-hallucination : on écarte une promesse d'absence si la
-      // description ne l'affirme pas LITTÉRALEMENT (token ingrédient + marqueur
-      // "sans/0 %/free" proche). Sans ça, un "sans X" inventé par le LLM + la
-      // présence de X dans la formule = verdict "contredite" à tort — on
-      // accuserait la marque d'une promesse jamais faite (audit prod 07/2026).
-      const guardedProposals = dedupedProposals.filter((p) => {
-        // Écarte les modes d'emploi ("appliquer avant le coucher", "masser…") :
-        // ce ne sont pas des promesses vérifiables dans la formule.
-        if (isUsageInstruction(p.label, p.excerpt)) return false;
-        const cat = findCategoryBySlug(p.category_slug);
-        if (cat && isAbsenceCategory(cat)) {
-          return descriptionSupportsAbsenceClaim(cat.slug, description);
-        }
-        return true;
-      });
-
-      const cataloguePromises: CoherencePromise[] = [];
-      const openProposals: typeof extraction.proposals = [];
-      for (const p of guardedProposals) {
-        const cat = findCategoryBySlug(p.category_slug);
-        if (cat && isAbsenceCategory(cat)) {
-          cataloguePromises.push(resolveAbsencePromise(p, cat, parent.items));
-        } else {
-          openProposals.push(p);
-        }
-      }
-
-      // ─── Step 3: open promises - explore the formula via LLM in parallel ─
       const itemsForLlm: FormulaItemForLlm[] = parent.items
         .filter((it): it is typeof it & { slug: string; name: string } =>
           Boolean(it.slug) && Boolean(it.name),
@@ -272,21 +223,70 @@ export async function POST(req: NextRequest) {
           primaryFunction: it.primaryFunction,
         }));
 
-      const openPromises: CoherencePromise[] = await Promise.all(
-        openProposals.map(async (p) => {
-          const exploration = await exploreOpenPromise(
-            p.label,
-            p.excerpt,
-            itemsForLlm,
-            user.id,
-          );
-          return resolveOpenPromise(p, parent.items, exploration.matches, exploration.missing);
-        }),
-      );
+      const analysis = await analyzeCoherence(description, itemsForLlm, user.id);
+      productType = analysis.productType;
 
-      promises = [...cataloguePromises, ...openPromises];
-      unverifiable = extraction.unverifiable;
-      outOfScope = extraction.outOfScope;
+      const bySlug = new Map(parent.items.map((it) => [it.slug, it] as const));
+      // Filet déterministe : phrases de TOLÉRANCE / PUBLIC / USAGE non vérifiables
+      // par un ingrédient → reclassées en « unverifiable » quel que soit le LLM.
+      const NOISE =
+        /(non\s+com[eé]dog|non\s+photosensibilis|non\s+gras|non\s+irritant|hypoallerg|test[eé].{0,18}dermatolog|recommand[eé]\s+pour|d[eé]conseill|facile\s+[aà]\s+appliquer|convient\s+[aà]\s+tous|sans\s+enfants|enfants?\s+de\s+\d|\d\s*ans\s+et\s+moins|toute\s+la\s+famille)/i;
+      const noiseUnver: UnverifiableClaim[] = [];
+      const built: CoherencePromise[] = [];
+      for (const p of analysis.promises) {
+        if (NOISE.test(`${p.label} ${p.excerpt}`)) {
+          noiseUnver.push({ excerpt: p.excerpt.slice(0, 200), reason: "composition" });
+          continue;
+        }
+        const foundActives = p.foundSlugs.flatMap((slug) => {
+          const it = bySlug.get(slug);
+          if (!it) return [];
+          return [{
+            name: it.name ?? slug,
+            slug,
+            position: it.position,
+            inTrace: (it.thresholdContext ?? "").startsWith("after"),
+          }];
+        });
+
+        let verdict = p.verdict;
+        let score = p.score;
+        let missing = p.missing;
+        if (p.isAbsence) {
+          if (verdict !== "contredite") {
+            verdict = "tenue";
+            if (!score) score = 100;
+          }
+          missing = [];
+        } else if (
+          (verdict === "tenue" || verdict === "partielle") &&
+          foundActives.length === 0
+        ) {
+          verdict = "non_demontree";
+          score = 0;
+        }
+        const slug =
+          p.label
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "")
+            .slice(0, 40) || "autre";
+        built.push({
+          slug,
+          label: p.label,
+          excerpt: p.excerpt,
+          verdict,
+          expectedActives: [],
+          foundActives,
+          cosmeticActives: [],
+          missingActives: missing,
+          score,
+        });
+      }
+      promises = built;
+      unverifiable = [...analysis.unverifiable, ...noiseUnver];
+      outOfScope = [];
     }
 
     // ─── Step 5: conclusion (LLM, only sees verdicts) + personnalisation ───
@@ -343,6 +343,7 @@ export async function POST(req: NextRequest) {
       parent,
       conclusion,
     });
+    result.algoVersion = COHERENCE_ALGO_VERSION; // tampon anti-poison (lecture-pure versionnée)
 
     // Persist dans l'historique perso du user.
     const { data: saved, error: saveErr } = await sb

@@ -9,6 +9,7 @@ import { ConclusionCard } from "@/components/coherence/ConclusionCard";
 import { IngredientsPositionChart } from "@/components/coherence/IngredientsPositionChart";
 import { DescriptionKeywordsCard } from "@/components/coherence/DescriptionKeywordsCard";
 import { MarketingIndexCard } from "@/components/coherence/MarketingIndexCard";
+import { CoherenceMoreSection } from "@/components/coherence/CoherenceMoreSection";
 import { Reveal } from "@/components/Reveal";
 import { computeMetrics } from "@/lib/coherence/engine";
 import type { CoherenceResult } from "@/lib/coherence/types";
@@ -120,21 +121,18 @@ export default async function PromesseDetailPage({
         </Reveal>
       </section>
 
-      <Reveal delayMs={500}>
+      {/* Blocs détaillés masqués par défaut derrière "Voir plus d'analyse". */}
+      <CoherenceMoreSection>
         <IngredientsPositionChart snapshot={result.positionSnapshot} />
-      </Reveal>
 
-      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4 lg:gap-5">
-        <Reveal delayMs={650}>
+        <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4 lg:gap-5">
           <DescriptionKeywordsCard
             promises={result.promises}
             unverifiable={result.unverifiable}
           />
-        </Reveal>
-        <Reveal delayMs={750}>
           <MarketingIndexCard metrics={result.metrics} />
-        </Reveal>
-      </section>
+        </section>
+      </CoherenceMoreSection>
     </div>
   );
 }

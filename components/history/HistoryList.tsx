@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { HistoryItemActions } from "@/components/history/HistoryItemActions";
-import { IngredientBlob, type BlobCounts } from "@/components/blob/IngredientBlob";
+import { type BlobCounts } from "@/components/blob/IngredientBlob";
 import { categoryLabel, type ProductCategory } from "@/lib/categoryLabel";
 import { decodeHtml } from "@/lib/decodeHtml";
 
@@ -15,6 +15,8 @@ type Row = {
   score: number | null;
   created_at: string;
   counts: BlobCounts | null;
+  /** Image produit résolue via EAN côté serveur (null si hors catalogue). */
+  imageUrl?: string | null;
   favori?: boolean | null;
   /** When set, the user has already run a coherence (promise) analysis on
    *  this analyse - the per-card CTA links straight to that result instead
@@ -253,13 +255,13 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                   type="button"
                   onClick={() => toggle(a.id)}
                   aria-pressed={isSelected}
-                  className={`neu neu-hover w-full flex items-center gap-4 p-4 text-left ${
+                  className={`neu neu-hover w-full flex items-stretch gap-4 p-4 text-left ${
                     isSelected ? "ring-2 ring-[#111111]" : ""
                   }`}
                 >
                   <span
                     aria-hidden
-                    className={`h-5 w-5 shrink-0 rounded-full border-2 flex items-center justify-center ${
+                    className={`h-5 w-5 shrink-0 self-center rounded-full border-2 flex items-center justify-center ${
                       isSelected ? "bg-[#111111] border-[#111111]" : "border-[#9CA3AF]"
                     }`}
                   >
@@ -269,18 +271,14 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                       </svg>
                     )}
                   </span>
-                  <div className="h-12 w-16 shrink-0">
-                    <IngredientBlob
-                      counts={a.counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 }}
-                      variant="sm"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-semibold text-[#111111] truncate">{displayName}</div>
+                  <ProductThumb url={a.imageUrl} className="-my-2.5 -ml-2.5 w-14 min-h-[56px]" />
+                  <div className="min-w-0 flex-1 self-center">
+                    <div className="font-semibold text-[#111111] line-clamp-2">{displayName}</div>
                     <div className="text-[12px] text-[#6B7280]">
                       {formatDate(a.created_at)}
                     </div>
                   </div>
+                  <ProportionRing counts={a.counts} size={36} stroke={6} className="self-center" />
                 </button>
               </li>
             );
@@ -290,7 +288,7 @@ export function HistoryList({ rows }: { rows: Row[] }) {
           return (
             <li key={a.id} className={`relative${openActionsId === a.id ? " z-[60]" : ""}`}>
               <div
-                className="neu neu-hover relative flex items-center gap-4 p-4 pr-24"
+                className="neu neu-hover relative flex min-h-[92px] items-stretch gap-4 p-4 pr-24"
               >
                 {/* Card-wide click target */}
                 <Link
@@ -298,13 +296,11 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                   aria-label={`Ouvrir ${displayName}`}
                   className="absolute inset-0 z-0"
                 />
-                <div className="relative z-[1] h-12 w-16 shrink-0 pointer-events-none">
-                  <IngredientBlob
-                    counts={a.counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 }}
-                    variant="sm"
-                  />
-                </div>
-                <div className="relative z-[1] min-w-0 flex-1 pointer-events-none">
+                <ProductThumb
+                  url={a.imageUrl}
+                  className="relative z-[1] -my-2.5 -ml-2.5 w-16 min-h-[64px] pointer-events-none"
+                />
+                <div className="relative z-[1] min-w-0 flex-1 self-center pointer-events-none">
                   <div className="font-semibold text-[#111111] truncate mb-0.5">{displayName}</div>
                   {(categoryLabel(a.category) ?? a.productType) ? (
                     <span className="mt-0.5 inline-flex items-center rounded-full bg-black/[0.06] px-2 py-0.5 text-[10px] font-medium text-[#6B7280] capitalize">
@@ -331,29 +327,120 @@ export function HistoryList({ rows }: { rows: Row[] }) {
                 </div>
               </div>
 
-              {/* Bookmark button */}
-              <button
-                type="button"
-                aria-label={isFavori ? "Retirer des favoris" : "Ajouter aux favoris"}
-                onClick={() => toggleFavori(a.id, isFavori)}
-                className={`absolute right-12 top-1/2 -translate-y-1/2 z-[2] h-8 w-8 flex items-center justify-center rounded-full transition hover:bg-black/[0.06] ${
-                  isFavori ? "text-amber-500" : "text-[#9CA3AF]"
-                }`}
-              >
-                <BookmarkIcon filled={isFavori} />
-              </button>
-
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 z-[2]">
-                <HistoryItemActions
-                  id={a.id}
-                  currentName={a.name ?? displayName}
-                  onOpenChange={(isOpen) => setOpenActionsId(isOpen ? a.id : null)}
-                />
+              {/* Colonne droite : anneau de proportion des ingrédients
+                  juste au-dessus du favori (signet) et du menu (•••). */}
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 z-[2] flex flex-col items-center gap-1.5">
+                <ProportionRing counts={a.counts} size={40} stroke={7} />
+                <div className="flex items-center">
+                  <button
+                    type="button"
+                    aria-label={isFavori ? "Retirer des favoris" : "Ajouter aux favoris"}
+                    onClick={() => toggleFavori(a.id, isFavori)}
+                    className={`h-8 w-8 flex items-center justify-center rounded-full transition hover:bg-black/[0.06] ${
+                      isFavori ? "text-amber-500" : "text-[#9CA3AF]"
+                    }`}
+                  >
+                    <BookmarkIcon filled={isFavori} />
+                  </button>
+                  <HistoryItemActions
+                    id={a.id}
+                    currentName={a.name ?? displayName}
+                    onOpenChange={(isOpen) => setOpenActionsId(isOpen ? a.id : null)}
+                  />
+                </div>
               </div>
             </li>
           );
         })}
       </ul>
+    </div>
+  );
+}
+
+const RING_ORDER = ["vert", "jaune", "orange", "rouge"] as const;
+const RING_COLORS: Record<(typeof RING_ORDER)[number], string> = {
+  vert: "#10B981",
+  jaune: "#FBBF24",
+  orange: "#FB923C",
+  rouge: "#F43F5E",
+};
+
+/** Anneau plein (donut) : proportion des ingrédients par couleur. */
+function ProportionRing({
+  counts,
+  size = 40,
+  stroke = 7,
+  className,
+}: {
+  counts: BlobCounts | null;
+  size?: number;
+  stroke?: number;
+  className?: string;
+}) {
+  const c = counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 };
+  const total = c.vert + c.jaune + c.orange + c.rouge;
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const cx = size / 2;
+  const cy = size / 2;
+  let acc = 0;
+  const segments = RING_ORDER.flatMap((k) => {
+    const v = c[k];
+    if (total <= 0 || v <= 0) return [];
+    const frac = v / total;
+    const seg = { k, frac, offset: acc };
+    acc += frac;
+    return [seg];
+  });
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      className={`shrink-0 ${className ?? ""}`}
+      aria-hidden
+    >
+      <g transform={`rotate(-90 ${cx} ${cy})`}>
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#E5E7EB" strokeWidth={stroke} />
+        {segments.map((s) => (
+          <circle
+            key={s.k}
+            cx={cx}
+            cy={cy}
+            r={r}
+            fill="none"
+            stroke={RING_COLORS[s.k]}
+            strokeWidth={stroke}
+            strokeDasharray={`${s.frac * circ} ${circ - s.frac * circ}`}
+            strokeDashoffset={-s.offset * circ}
+          />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+/** Vignette produit : largeur fixe, hauteur étirée sur toute la carte. */
+function ProductThumb({ url, className }: { url: string | null | undefined; className?: string }) {
+  return (
+    <div
+      className={`relative shrink-0 self-stretch overflow-hidden rounded-xl bg-gray-100 ${className ?? ""}`}
+    >
+      {url ? (
+        // Position absolue : l'image remplit le conteneur SANS que son ratio
+        // intrinsèque ne dicte la hauteur de la carte (sinon un tube en portrait
+        // fait exploser la hauteur du bloc).
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={url} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+      ) : (
+        <span className="grid h-full w-full place-items-center text-gray-300">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="h-6 w-6" aria-hidden>
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <path d="m21 15-5-5L5 21" />
+          </svg>
+        </span>
+      )}
     </div>
   );
 }

@@ -158,6 +158,9 @@ export type OutOfScopePromise = {
 export type CoherenceResult = {
   /** ISO timestamp at the moment the result was computed. */
   computedAt: string;
+  /** Version du moteur qui a produit ce résultat (anti-cache-empoisonné :
+   *  un résultat d'une version antérieure n'est pas re-servi). */
+  algoVersion?: string;
   /** The original description text the user pasted. */
   description: string;
   /** All extracted promises with their verdicts. */

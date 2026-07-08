@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   CATEGORY_EMOJI,
@@ -43,6 +43,12 @@ function scoreVisual(score: number): { bg: string; fg: string; icon: React.React
 
 export function ProductBrowsePage() {
   const router = useRouter();
+  // Destination du bouton retour : la page d'origine (?from=…) si elle est un
+  // chemin interne, sinon l'accueil. Permet d'ouvrir la recherche depuis
+  // /promesses/choisir et d'y revenir.
+  const searchParams = useSearchParams();
+  const fromParam = searchParams.get("from");
+  const backHref = fromParam && fromParam.startsWith("/") ? fromParam : "/";
   const [path, setPath] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -243,7 +249,7 @@ export function ProductBrowsePage() {
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-black/[0.06] px-4 py-3">
         <div className="mx-auto max-w-2xl flex items-center gap-3">
           <Link
-            href="/"
+            href={backHref}
             className="shrink-0 flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/[0.05] transition-colors"
             aria-label="Retour"
           >

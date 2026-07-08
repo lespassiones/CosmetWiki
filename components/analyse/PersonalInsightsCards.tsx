@@ -18,7 +18,7 @@ export type PersonalBlocks = { goals: Block; skin: Block; watch: Block };
 
 // DOIT rester synchro avec PERSONAL_PROMPT_VERSION (lib/ai/personalInsights.ts).
 // Détecte des blocs persistés périmés → refresh silencieux (gratuit, déjà payé).
-const PERSONAL_BLOCKS_VERSION = 7;
+const PERSONAL_BLOCKS_VERSION = 10;
 
 const TONE: Record<Tone, { bg: string; text: string }> = {
   vert: { bg: "bg-emerald-100", text: "text-emerald-600" },

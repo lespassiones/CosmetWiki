@@ -157,7 +157,7 @@ export function HomeDashboard({
           />
         </Tile>
 
-        <Tile href="/promesses" tone="green" title={<>Promesses<br />vs Formule</>}>
+        <Tile href="/promesses/choisir" tone="green" title={<>Promesses<br />vs Formule</>}>
           <Image
             src="/image/petiteImage/promesse.webp"
             alt=""

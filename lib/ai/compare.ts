@@ -18,10 +18,10 @@ import {
 import { NO_LONG_DASHES_RULE, stripLongDashes } from "./sanitize";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 
-// Bumped to 4 when we taught the prompt to use real product names instead
-// of "produit A" / "produit B" - old cache entries can't be reused since
-// the text content now changes per pair (was previously canonical with A/B).
-const PROMPT_VERSION = 4;
+// Bumped to 5 when we added the `winner` field (recommended product → green
+// badge on the client). v4 taught the prompt to use real product names instead
+// of "produit A" / "produit B". Bumping busts old cache entries that lack winner.
+const PROMPT_VERSION = 5;
 
 export type CompareSideInput = {
   name: string;
@@ -33,6 +33,9 @@ export type CompareInsights = {
   portraitB: string;
   common: string;
   howToChoose: string;
+  /** Recommended product (green badge). Optional: pre-v5 cache entries lack it,
+   *  and the client falls back to the higher score when absent. */
+  winner?: "A" | "B";
 };
 
 function fingerprint(side: CompareSideInput): string {
@@ -108,23 +111,24 @@ NOMS À UTILISER DANS LE TEXTE (verbatim, ne les modifie pas) :
 - Pour le produit 1 : "${a.name}"
 - Pour le produit 2 : "${b.name}"
 
-Rends un JSON avec exactement ces 4 clés :
+Rends un JSON avec exactement ces 5 clés :
 
 {
   "portraitA": "1 à 2 phrases qui décrivent la formule de \"${a.name}\" : son caractère (eau-glycérine, huileux, moussant, à base d'alcool…), ce qu'elle apporte, son point d'attention principal si pertinent. Cite \"${a.name}\" par son nom au moins une fois. Ne dis jamais qu'elle est bonne ou mauvaise.",
   "portraitB": "Idem pour \"${b.name}\". Cite \"${b.name}\" par son nom au moins une fois.",
   "common": "1 phrase concrète qui résume ce que les deux produits ont en commun (type de formule, point de vigilance partagé, ou rien de notable). Si rien d'intéressant en commun, dis 'Les deux suivent des logiques de formulation très différentes.' Tu peux écrire \"les deux produits\" ou citer les noms.",
-  "howToChoose": "1 à 2 phrases qui aident le lecteur à choisir SANS trancher. Ex : 'Si tu cherches un soin doux pour peau réactive, ${a.name} correspond à ce profil. Si tu privilégies un nettoyant moussant efficace, ${b.name} est conçu pour ça.' Pas de 'meilleur', pas de 'préfère X'. JAMAIS \"A\" / \"B\" / \"produit A\" / \"produit B\" - toujours les vrais noms."
+  "howToChoose": "1 à 2 phrases qui aident le lecteur à choisir SANS trancher. Ex : 'Si tu cherches un soin doux pour peau réactive, ${a.name} correspond à ce profil. Si tu privilégies un nettoyant moussant efficace, ${b.name} est conçu pour ça.' Pas de 'meilleur', pas de 'préfère X'. JAMAIS \"A\" / \"B\" / \"produit A\" / \"produit B\" - toujours les vrais noms.",
+  "winner": "UNIQUEMENT la lettre A ou B (rien d'autre) : le produit qui correspond globalement le mieux au lecteur d'après ton 'howToChoose'. Choisis A ou B, jamais vide, jamais 'égalité'. A = ${a.name}, B = ${b.name}. C'est une donnée machine (badge), pas une phrase, elle n'apparaît jamais telle quelle."
 }
 
 CONTRAINTES
 - JSON valide, rien d'autre.
-- Chaque champ : 1 à 2 phrases max, jamais de liste à puces.
+- Chaque champ texte : 1 à 2 phrases max, jamais de liste à puces.
 - Ne cite pas les notes /20.
 - Ne mentionne pas le mot "score" ou "note".
-- Ne dis pas qu'un produit est meilleur, gagnant, recommandé, déconseillé.
+- Ne dis pas dans le TEXTE qu'un produit est meilleur, gagnant, recommandé, déconseillé (le champ 'winner' est la seule exception, il vaut exactement "A" ou "B").
 - Tu peux citer un ingrédient INCI en **gras** (avec doubles astérisques) si ça enrichit, max 2 par champ.
-- INTERDIT : "produit A", "produit B", "le produit A", "le produit B", "A pourrait...", "B est conçu...". Utilise toujours les vrais noms ci-dessus.`;
+- INTERDIT dans le texte : "produit A", "produit B", "le produit A", "le produit B", "A pourrait...", "B est conçu...". Utilise toujours les vrais noms ci-dessus.`;
 
   return { system, user };
 }
@@ -149,6 +153,7 @@ function tryParse(raw: string): CompareInsights | null {
         portraitB: stripLongDashes(obj.portraitB),
         common: stripLongDashes(obj.common),
         howToChoose: stripLongDashes(obj.howToChoose),
+        winner: obj.winner === "A" || obj.winner === "B" ? obj.winner : undefined,
       };
     }
   } catch {

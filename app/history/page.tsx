@@ -17,6 +17,8 @@ type AnalysisRow = {
   score: number | null;
   created_at: string;
   favori: boolean | null;
+  /** URL image produit résolue via EAN (source de vérité), null si hors catalogue. */
+  imageUrl: string | null;
   counts: { vert: number; jaune: number; orange: number; rouge: number } | null;
   /** Id of the most recent coherence_analysis attached to this analyse, if
    *  any. When non-null, the "Analyser la promesse" entry point becomes
@@ -43,6 +45,7 @@ type RawRow = {
   score: number | null;
   created_at: string;
   favori?: boolean | null;
+  ean?: string | null;
   category?: ProductCategory | null;
   result_json:
     | {
@@ -91,7 +94,7 @@ async function HistoryContent() {
     sb
       .schema("cosme_check")
       .from("analyses")
-      .select("id, name, product_label, score, created_at, result_json, category, favori")
+      .select("id, name, product_label, score, created_at, result_json, category, favori, ean")
       .order("created_at", { ascending: false })
       .limit(50),
     sb
@@ -113,6 +116,23 @@ async function HistoryContent() {
     }
   }
 
+  // Résolution image en LOT (EAN = source de vérité) : une seule requête catalog
+  // pour tous les EAN de la page, au lieu de 50 appels côté client.
+  const eans = Array.from(
+    new Set(raw.map((r) => r.ean).filter((e): e is string => Boolean(e))),
+  );
+  const imageByEan = new Map<string, string>();
+  if (eans.length > 0) {
+    const { data: catRows } = await sb
+      .schema("cosme_check")
+      .from("catalog")
+      .select("ean, image_url")
+      .in("ean", eans);
+    for (const c of (catRows ?? []) as { ean: string; image_url: string | null }[]) {
+      if (c.image_url) imageByEan.set(c.ean, c.image_url);
+    }
+  }
+
   const analyses: AnalysisRow[] = raw.map((r) => {
     const items = r.result_json?.items ?? [];
     const tokenSet = new Set<string>();
@@ -129,6 +149,7 @@ async function HistoryContent() {
       score: r.score,
       favori: r.favori ?? null,
       created_at: r.created_at,
+      imageUrl: r.ean ? imageByEan.get(r.ean) ?? null : null,
       counts: r.result_json?.counts
         ? {
             vert: r.result_json.counts.vert ?? 0,
@@ -148,7 +169,7 @@ async function HistoryContent() {
     return (
       <div className="neu p-8 text-center mt-6">
         <p className="text-sm text-[#6B7280] mb-4">
-          Lance ta première analyse depuis la page d&apos;accueil.
+          Vérifie si un produit te correspond vraiment. Tes analyses apparaîtront ici.
         </p>
         <Link
           href="/"
