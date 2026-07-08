@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Cosme Check - Une beauté consciente, au-delà des simples notes";
+export const alt = "Cosme Check, l'application qui te dit les cosmétiques faits pour toi.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -49,7 +49,7 @@ export default async function Image() {
             maxWidth: 980,
           }}
         >
-          Une beauté consciente, au-delà des simples notes
+          L'application qui te dit les cosmétiques faits pour toi.
         </div>
         <div
           style={{
@@ -59,7 +59,7 @@ export default async function Image() {
             maxWidth: 900,
           }}
         >
-          L'application qui décode tes cosmétiques : composition, promesses marketing, ingrédients clefs.
+          Cosme Check décode les ingrédients, vérifie les promesses marketing et te dit si le produit te correspond vraiment.
         </div>
       </div>
     ),

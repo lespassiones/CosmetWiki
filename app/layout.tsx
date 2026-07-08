@@ -62,9 +62,9 @@ const inter = Inter({
 
 const SITE_NAME = "Cosme Check";
 const DEFAULT_TITLE =
-  "CosmeCheck, l'application qui t'aide à choisir les cosmétiques les plus adaptés à tes besoins.";
+  "Cosme Check, l'application qui te dit les cosmétiques faits pour toi.";
 const DEFAULT_DESCRIPTION =
-  "Choisis enfin les cosmétiques adaptés à ton profil. CosmeCheck analyse les ingrédients, vérifie les promesses des produits et recommande des alternatives plus adaptées à tes besoins.";
+  "Cosme Check décode les ingrédients, vérifie les promesses marketing et te dit si le produit te correspond vraiment.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
