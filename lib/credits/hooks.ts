@@ -2,7 +2,7 @@
 
 /**
  * useCredits — Hook pour récupérer les crédits de l'utilisateur
- * Polling automatique toutes les 10s pour détecter les changements admin
+ * Polling automatique toutes les 60s pour détecter les changements admin
  * Synchronisé avec CosmeCheck mobile
  */
 
@@ -10,7 +10,10 @@ import { useEffect, useState, useCallback } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import type { Credits, CreditConfig, RenewalPeriod } from './types'
 
-const POLLING_INTERVAL = 10000 // 10 secondes
+// 60s : le débit de crédit est déjà reflété au moment de l'action ; ce polling
+// ne sert qu'à capter les changements admin (rares). 10s multipliait par 6 le
+// trafic de fond sur cosme_check_get_credits pour rien.
+const POLLING_INTERVAL = 60000 // 60 secondes
 
 export function useCredits(): CreditConfig {
   const [credits, setCredits] = useState<Credits | null>(null)
