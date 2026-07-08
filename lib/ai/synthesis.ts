@@ -59,7 +59,11 @@ export type SynthesisInput = {
 //   profile (skin type / concerns / goals), with no invented benefit. Falls
 //   back to a single "Bon à savoir" green bullet when nothing matches / no
 //   profile. Aligns the web synthèse with the mobile "conseiller" (handoff §3).
-const PROMPT_VERSION = 13;
+// v14 (2026-07-09): CONCENTRATION awareness (INCI order). greenWithFunction is
+//   sorted by position and carries its #N rank; a rule forbids crowning a
+//   famous-but-low-dosed ingredient over more concentrated ones with the same
+//   benefit (mobile parity — the "huile de coco vs tournesol/avocat" fix).
+const PROMPT_VERSION = 14;
 
 function makeCacheKey(input: SynthesisInput): string {
   const list = input.enriched
@@ -97,10 +101,15 @@ function buildPrompt(input: SynthesisInput): { system: string; user: string } {
     .slice(0, 3)
     .map((r) => `${r.name ?? r.input_raw}${r.primary_function ? ` (${r.primary_function})` : ""}`);
 
+  // Verts triés par ordre INCI (position croissante = dose décroissante), avec
+  // leur rang #N, pour que le LLM privilégie / regroupe les plus concentrés au
+  // lieu d'isoler un ingrédient mineur mais célèbre.
   const greenWithFunction = green
     .filter((r) => r.primary_function && r.name)
-    .slice(0, 6)
-    .map((r) => `- ${r.name} : ${r.primary_function}`);
+    .slice()
+    .sort((a, b) => a.position_idx - b.position_idx)
+    .slice(0, 8)
+    .map((r) => `- ${r.name} (#${r.position_idx + 1} dans la liste INCI) : ${r.primary_function}`);
 
   // Per-ingredient row. Includes [tags], [position] and [restriction] flags
   // when present. The LLM uses [restriction] to surface the match inside
@@ -116,10 +125,23 @@ function buildPrompt(input: SynthesisInput): { system: string; user: string } {
   const hasRestrictions = Boolean(input.restrictionsBlock);
   const hasMatches = restrictedIngredients.length > 0;
 
+  // Règle partagée (system + user) : ne jamais braquer le projecteur sur un
+  // ingrédient célèbre mais peu dosé.
+  const CONCENTRATION_RULE =
+    "RÈGLE DE CONCENTRATION (INCI) : la liste est classée par dose décroissante ; "
+    + "le #N à côté de chaque vert est sa position (plus N est petit, plus l'ingrédient est concentré). "
+    + "Quand plusieurs verts partagent un bénéfice similaire (plusieurs huiles ou beurres végétaux nourrissants, plusieurs actifs hydratants...), "
+    + "PRIVILÉGIE ceux au plus petit #N, ou REGROUPE-les en UNE puce qui cite les 2 à 3 premiers en gras "
+    + "(ex : \"Riche en huiles végétales nourrissantes : **NOM1**, **NOM2**, **NOM3**\"). "
+    + "N'isole JAMAIS un ingrédient bénéfique placé bas dans la liste (donc peu dosé) en passant sous silence "
+    + "des ingrédients au bénéfice équivalent placés plus haut. Un ingrédient très connu mais peu dosé "
+    + "ne doit pas voler la vedette aux ingrédients dominants de la formule.";
+
   const baseSystem =
     "Tu écris la synthèse d'une analyse cosmétique INCI pour un consommateur français.\n\n"
     + "TON & STYLE : comme un pote bien informé qui te parle franchement, sans tourner autour du pot. Phrases courtes, vocabulaire simple mais jamais enfantin. Tu peux dire \"franchement\", \"honnêtement\", \"au final\", \"bonne nouvelle\", \"là, attention\", \"tu peux respirer\", \"ya pas de mystère\". Tu utilises \"tu\" et la 2e personne. Pas d'emoji, pas de marketing (\"idéal\", \"généreux\", \"rassurant\", \"agréable\"), pas de description sensorielle (texture, odeur, fini), pas de conseil médical.\n\n"
     + "MISE EN FORME : **gras** UNIQUEMENT pour les noms INCI. Pas de titre, pas de préambule, pas de signature.\n\n"
+    + CONCENTRATION_RULE + "\n\n"
     + NO_LONG_DASHES_RULE + "\n\n"
     + "RESTRICTIONS : quand une ligne d'ingrédient porte [restriction: X], cet ingrédient est dans les restrictions de l'utilisateur (X est le libellé). DANS la puce concernée, mentionne-le clairement, par exemple en glissant \"(..., dans tes restrictions)\" juste après le nom + rôle. Pas de paragraphe dédié.\n\n"
     + "ROUGES ET ORANGES : pour chaque rouge, fais 1 puce avec un DANGER CONCRET BREF (1 phrase, exemples : \"peut provoquer des bronchospasmes chez l'asthmatique\", \"soupçonné de favoriser des kystes\", \"lié à des cas d'irritation sévère documentés\", \"libère du formaldéhyde, classé cancérigène\"). Pour les oranges :\n"
@@ -194,6 +216,7 @@ ${hasProfile
 - N'INVENTE AUCUN bénéfice : appuie-toi UNIQUEMENT sur la fonction fournie. Ne relie au profil que si le lien est évident (un humectant/occlusif pour une peau sèche, un apaisant pour une peau réactive, un séborégulateur pour les imperfections, etc.).
 - Si AUCUN vert ne correspond vraiment au profil → 1 SEULE puce "Bon à savoir" sur un vert notable (Niacinamide, Acide Hyaluronique, Panthénol, Centella Asiatica, beurres/huiles végétales), sans le relier au profil.`
   : `- L'utilisateur n'a pas de profil exploitable ici : fais 1 SEULE puce "Bon à savoir" sur un vert notable (Niacinamide, Acide Hyaluronique, Panthénol, Centella Asiatica, beurres/huiles végétales) en décrivant sa fonction, SANS inventer de bénéfice et SANS le relier à un profil.`}
+- ${CONCENTRATION_RULE}
 - Ignore toujours eau / glycérine / propanediol / sodium hydroxide / ajusteurs de pH (trop banals pour une accroche).
 - Si AUCUN vert notable n'est disponible, saute ce point (n'invente pas de puce).
 
@@ -240,7 +263,7 @@ ${orange.length ? orange.map(fmt).join("\n") : "(aucun)"}
 JAUNES (jusqu'à 8 cités) :
 ${yellow.length ? yellow.slice(0, 8).map(fmt).join("\n") + (yellow.length > 8 ? `\n- et ${yellow.length - 8} autres` : "") : "(aucun)"}
 
-VERTS notables (utilise UN seul pour la puce "Bon à savoir" si pertinent) :
+VERTS notables, triés par ordre INCI (#N = position ; plus le numéro est petit, plus l'ingrédient est concentré). Quand plusieurs verts ont un bénéfice similaire, privilégie les plus petits #N ou regroupe-les :
 ${greenWithFunction.length ? greenWithFunction.join("\n") : "(aucun avec fonction connue)"}
 
 Écris maintenant la synthèse en suivant la structure (Bloc 1 prose, ligne vide, Bloc 2 puces). Pas de titre, pas de préambule, pas de signature.`;
