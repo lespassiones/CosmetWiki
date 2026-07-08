@@ -27,33 +27,36 @@ const TONE: Record<Tone, { bg: string; text: string }> = {
   neutre: { bg: "bg-gray-100", text: "text-gray-500" },
 };
 
-function FlagIcon({ className }: { className?: string }) {
+// Icônes illustrées line-art (PNG line-art dans /public/icons/analyse) rendues
+// via CSS mask + background-color:currentColor → elles héritent de la couleur de
+// ton du bloc (text-emerald-600, etc.), exactement comme les anciens SVG. Le
+// système de couleurs reste inchangé.
+function MaskIcon({ src, className }: { src: string; className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
-      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" y1="22" x2="4" y2="15" />
-    </svg>
-  );
-}
-// Ampoule (« à quoi ça sert », bloc pédagogique) — remplace la feuille.
-function BulbIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
-      <path d="M9 18h6" /><path d="M10 22h4" /><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V18h6v-1.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z" />
-    </svg>
-  );
-}
-function EyeIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
-      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" />
-    </svg>
+    <span
+      className={className}
+      style={{
+        display: "inline-block",
+        backgroundColor: "currentColor",
+        WebkitMaskImage: `url(${src})`,
+        maskImage: `url(${src})`,
+        WebkitMaskRepeat: "no-repeat",
+        maskRepeat: "no-repeat",
+        WebkitMaskPosition: "center",
+        maskPosition: "center",
+        WebkitMaskSize: "contain",
+        maskSize: "contain",
+      }}
+      aria-hidden
+    />
   );
 }
 
-const BLOCKS: { key: keyof PersonalBlocks; Icon: (p: { className?: string }) => React.ReactElement }[] = [
-  { key: "goals", Icon: FlagIcon },
-  { key: "skin", Icon: BulbIcon },
-  { key: "watch", Icon: EyeIcon },
+// Potion = objectifs, silhouette = peau, silhouette + loupe = à surveiller.
+const BLOCKS: { key: keyof PersonalBlocks; src: string }[] = [
+  { key: "goals", src: "/icons/analyse/potion.png" },
+  { key: "skin", src: "/icons/analyse/body.png" },
+  { key: "watch", src: "/icons/analyse/bodyloop.png" },
 ];
 
 type State =
@@ -199,14 +202,14 @@ export function PersonalInsightsCards({
 
   return (
     <div className="space-y-3">
-      {BLOCKS.map(({ key, Icon }) => {
+      {BLOCKS.map(({ key, src }) => {
         const b = state.blocks[key];
         const c = TONE[b.tone] ?? TONE.neutre;
         return (
           <article key={key} className="neu p-4">
             <div className="flex items-start gap-3">
               <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${c.bg}`}>
-                <Icon className={`h-5 w-5 ${c.text}`} />
+                <MaskIcon src={src} className={`h-7 w-7 ${c.text}`} />
               </span>
               <div className="min-w-0 flex-1">
                 <h3 className="text-[15px] font-bold leading-tight text-[#111111]">{b.title}</h3>
