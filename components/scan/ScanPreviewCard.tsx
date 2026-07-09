@@ -61,7 +61,11 @@ export function ScanPreviewCard({
         }
       }}
       aria-label="Ouvrir l'analyse complète"
-      className="pointer-events-auto absolute inset-x-3 bottom-4 cursor-pointer rounded-2xl bg-white p-4 text-left shadow-2xl ring-1 ring-black/5"
+      // Ancrée en bas de l'ÉCRAN (fixed), pas au bas de la boîte caméra : la
+      // fiche produit ne recouvre plus le champ vidéo, elle occupe l'espace
+      // vide sous la caméra. Centrée + largeur max, safe-area iOS respectée.
+      className="pointer-events-auto fixed inset-x-3 z-[110] mx-auto max-w-md cursor-pointer rounded-2xl bg-white p-4 text-left shadow-2xl ring-1 ring-black/5"
+      style={{ bottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
     >
       <div className="flex items-start gap-3">
         <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-100">

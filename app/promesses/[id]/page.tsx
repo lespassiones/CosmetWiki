@@ -73,27 +73,28 @@ export default async function PromesseDetailPage({
 
   return (
     <div className="mx-auto max-w-[90rem] px-5 lg:px-10 xl:px-14 py-6 lg:py-10 space-y-4 lg:space-y-5">
-      {/* Breadcrumb + title */}
-      <nav className="text-[12px] text-[#6B7280] flex flex-wrap items-center gap-1">
-        <Link href="/" className="hover:text-ink">
-          Accueil
-        </Link>
-        <span aria-hidden>›</span>
-        <Link href="/promesses" className="hover:text-ink">
-          Promesses
-        </Link>
-        <span aria-hidden>›</span>
-        <Link href={`/history/${row.analysis_id}`} className="hover:text-ink truncate max-w-[180px]">
-          {productName}
-        </Link>
-        <span aria-hidden>›</span>
-        <span className="text-ink-subtle">Cohérence</span>
-      </nav>
-
+      {/* Title, then breadcrumb, then description. */}
       <header>
         <h1 className="text-2xl lg:text-3xl font-bold leading-tight">
           Promesses vs formule réelle
         </h1>
+
+        <nav className="mt-2 text-[12px] text-[#6B7280] flex flex-wrap items-center gap-1">
+          <Link href="/" className="hover:text-ink">
+            Accueil
+          </Link>
+          <span aria-hidden>›</span>
+          <Link href="/promesses" className="hover:text-ink">
+            Promesses
+          </Link>
+          <span aria-hidden>›</span>
+          <Link href={`/history/${row.analysis_id}`} className="hover:text-ink truncate max-w-[180px]">
+            {productName}
+          </Link>
+          <span aria-hidden>›</span>
+          <span className="text-ink-subtle">Cohérence</span>
+        </nav>
+
         <p className="mt-2 text-[13px] text-[#6B7280]">
           Nous comparons les promesses de{" "}
           <span className="font-medium text-ink">{productName}</span> à sa formule réelle.
