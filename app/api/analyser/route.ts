@@ -135,20 +135,8 @@ const TOP_LIST_WINDOW = 5;
 
 const DIACRITICS_RE = new RegExp("[\\u0300-\\u036f]", "g");
 
-// Maps the internal ProductCategory classifier to the nearest leaf slug in
-// the catalog taxonomy. Used when persisting a newly discovered internet
-// product so it appears in category browsing without a second LLM call.
-// Broad categories (maquillage, parfum, autre) are intentionally excluded —
-// they would require more context (gender, product sub-type) to be accurate.
-const PRODUCT_CATEGORY_TO_CATALOG_SLUG: Partial<Record<ProductCategory, string>> = {
-  creme_visage:     "soin-du-corps-et-visage/creme-hydratante/creme-visage",
-  creme_corps:      "soin-du-corps-et-visage/creme-hydratante/hydratant-pour-le-corps",
-  shampooing:       "coiffure/shampooing/shampooing-classique",
-  apres_shampooing: "coiffure/soin-capillaire/apres-shampooing",
-  solaire:          "produit-solaire/creme-solaire",
-  nettoyant_visage: "soin-du-corps-et-visage/nettoyant-visage/gel-nettoyant-visage",
-  deodorant:        "hygiene-du-corps/deodorant/deodorant-spray",
-};
+// (PRODUCT_CATEGORY_TO_CATALOG_SLUG retiré : plus de mapping enum→slug au runtime.
+//  Le scan est en lecture seule ; on n'écrit plus la catégorie devinée au catalogue.)
 
 /**
  * Heuristic that says "this INCI text looks already clean — no AI parser /
@@ -699,7 +687,10 @@ export async function POST(req: NextRequest) {
     .slice(0, 5)
     .map((r) => r.effective_name ?? r.input_raw)
     .filter((n): n is string => Boolean(n));
-  const categoryPromise: Promise<ProductCategory> = categoryTop5Names.length > 0
+  // Catégorisation LLM UNIQUEMENT hors catalogue : un produit déjà catalogué garde
+  // SA catégorie curée (source de vérité). Scan = lecture seule, pas de re-catégorisation.
+  const needsCategory = !catalogCategory;
+  const categoryPromise: Promise<ProductCategory> = needsCategory && categoryTop5Names.length > 0
     ? categorizeProduct(categoryTop5Names, user.id).catch(() => "autre" as ProductCategory)
     : Promise.resolve("autre" as ProductCategory);
 
@@ -1083,25 +1074,29 @@ export async function POST(req: NextRequest) {
       // duplicate LLM call thanks to the in-memory dedupe + cache). When it
       // resolves to a non-"autre" value that differs from what we already
       // wrote, patch the row so the DB ends up with the LLM's answer.
-      const categorizeId = insertedId;
-      void categoryPromise
-        .then(async (cat) => {
-          if (!cat || cat === resolvedCategory) return;
-          const { error: catUpdateError } = await sbAuth
-            .schema("cosme_check")
-            .from("analyses")
-            .update({ category: cat })
-            .eq("id", categorizeId);
-          if (catUpdateError) {
-            logWarn("[analyser] categorize update failed", {
-              error: catUpdateError.message,
-              userId: user.id,
-            });
-          }
-        })
-        .catch((catErr) => {
-          logWarn("[analyser] categorize failed", { error: (catErr as Error).message });
-        });
+      // Patch catégorie en arrière-plan UNIQUEMENT hors catalogue. Un produit
+      // catalogué garde sa catégorie catalogue : aucun patch LLM, aucun écrasement.
+      if (needsCategory) {
+        const categorizeId = insertedId;
+        void categoryPromise
+          .then(async (cat) => {
+            if (!cat || cat === resolvedCategory) return;
+            const { error: catUpdateError } = await sbAuth
+              .schema("cosme_check")
+              .from("analyses")
+              .update({ category: cat })
+              .eq("id", categorizeId);
+            if (catUpdateError) {
+              logWarn("[analyser] categorize update failed", {
+                error: catUpdateError.message,
+                userId: user.id,
+              });
+            }
+          })
+          .catch((catErr) => {
+            logWarn("[analyser] categorize failed", { error: (catErr as Error).message });
+          });
+      }
     }
   } catch (err) {
     logError("analyser.history_save", err, { userId: user.id });
@@ -1146,30 +1141,9 @@ export async function POST(req: NextRequest) {
     } catch { /* non-blocking */ }
   })();
 
-  // Persist product in catalog with full analysis score.
-  if (productEan) {
-    void (async () => {
-      try {
-        const { upsertCatalogProduct } = await import("@/lib/db/catalog");
-        await upsertCatalogProduct({
-          ean: productEan,
-          brand: body.brand ?? null,
-          name: body.productLabel ?? null,
-          ingredientsText: body.text ?? null,
-          // When a catalog score already exists, pass null so the COALESCE
-          // in the RPC keeps it intact. Only store the computed score for new /
-          // internet-only products not yet in the catalog.
-          score: catalogScore !== null ? null : Number(score.toFixed(4)),
-          scoreLabel: catalogScore !== null ? null : scoreLabelText,
-          scoreTone: catalogScore !== null ? null : scoreTone,
-          countTotal: itemsResponse.length,
-          // Categorize internet-sourced products on first write so they appear
-          // in category browsing without a future re-fetch.
-          category: PRODUCT_CATEGORY_TO_CATALOG_SLUG[resolvedCategory ?? "autre"] ?? null,
-        });
-      } catch { /* non-blocking */ }
-    })();
-  }
+  // Écriture catalogue SUPPRIMÉE : le scan est en LECTURE SEULE. Le catalogue
+  // (catégorie + score propriétaire) est la source de vérité, jamais alimenté ni
+  // écrasé au runtime. Un produit hors catalogue part en curation (ci-dessous).
 
   // Action 2: when product comes from OCR (no EAN) but brand + productLabel
   // are known, save to product_inci_cache so future name searches get a
@@ -1192,43 +1166,21 @@ export async function POST(req: NextRequest) {
       } catch { /* non-blocking */ }
     })();
 
-    // Parité mobile : produit internet sans EAN → on tente de retrouver son
-    // code-barres sur Open Beauty Facts (gratuit). Trouvé → upsert catalogue
-    // (rejoint la base, devient cherchable par le prochain utilisateur via la
-    // recherche normale). Échec → file `cosme_check.web_products` pour
-    // résolution EAN (LLM/manuelle) côté admin, puis promotion au catalogue.
-    // Fire-and-forget : ne bloque jamais la réponse d'analyse.
+    // Produit hors catalogue (sans EAN) → file de curation `cosme_check.web_products`
+    // UNIQUEMENT. On ne résout plus d'EAN via Open Beauty Facts et on n'écrit JAMAIS
+    // dans le catalogue au runtime (c'était la source de la pollution : doublons EAN
+    // OBF avec catégorie LLM + score recalculé). L'analyse affichée est PROVISOIRE ;
+    // la curation admin fait entrer le produit au catalogue (vraie catégorie + score
+    // propriétaire). Fire-and-forget : ne bloque jamais la réponse d'analyse.
     void (async () => {
       try {
-        const eanBrand = body.brand!;
-        const eanLabel = body.productLabel!;
-        const catSlug = PRODUCT_CATEGORY_TO_CATALOG_SLUG[resolvedCategory ?? "autre"] ?? null;
-        const { lookupEanByName } = await import("@/lib/productSearch/eanLookup");
-        const obf = await lookupEanByName(eanBrand, eanLabel);
-        if (obf) {
-          const { upsertCatalogProduct } = await import("@/lib/db/catalog");
-          await upsertCatalogProduct({
-            ean: obf.ean,
-            brand: eanBrand,
-            name: eanLabel,
-            ingredientsText: obf.ingredientsText ?? body.text,
-            category: catSlug,
-            // Produit internet-only : pas de score catalogue, on stocke le
-            // score calculé sur la liste d'ingrédients.
-            score: Number(score.toFixed(4)),
-            scoreLabel: scoreLabelText,
-            scoreTone: scoreTone,
-            countTotal: itemsResponse.length,
-          });
-        } else {
-          const { logWebProduct } = await import("@/lib/db/webProducts");
-          await logWebProduct({
-            brand: eanBrand,
-            name: eanLabel,
-            category: catSlug,
-            ingredientsText: body.text ?? null,
-          });
-        }
+        const { logWebProduct } = await import("@/lib/db/webProducts");
+        await logWebProduct({
+          brand: body.brand!,
+          name: body.productLabel!,
+          category: resolvedCategory,
+          ingredientsText: body.text ?? null,
+        });
       } catch { /* non-blocking */ }
     })();
   }
