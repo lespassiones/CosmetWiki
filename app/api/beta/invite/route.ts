@@ -52,9 +52,11 @@ export async function POST(req: Request) {
     const token = t.token as string;
     const accessUrl = `${SITE_URL}/auth/sign-up`;
     const feedbackUrl = `${SITE_URL}/beta/retour?token=${token}`;
+    // Lien d'accès tracké : /beta/go note le clic puis redirige vers sign-up.
+    const goUrl = `${SITE_URL}/beta/go?token=${token}`;
 
-    // Ajoute à la liste Brevo (avec BETA_URL) puis envoie l'invitation.
-    await addBetaContact({ email, firstName, feedbackUrl });
+    // Ajoute à la liste Brevo (avec BETA_URL + BETA_GO) puis envoie l'invitation.
+    await addBetaContact({ email, firstName, feedbackUrl, goUrl });
     const sent = await sendBetaInvitationEmail({ email, firstName, accessUrl, feedbackUrl });
     if (!sent.synced) {
       failed.push(email);

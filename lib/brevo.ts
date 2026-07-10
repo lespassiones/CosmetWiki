@@ -209,6 +209,10 @@ export async function addBetaContact(input: {
    *  BETA_URL pour que l'email de relance Brevo puisse l'injecter via
    *  {{ contact.BETA_URL }}. */
   feedbackUrl?: string | null;
+  /** Lien d'accès TRACKÉ (/beta/go?token=…) → attribut BETA_GO, utilisé par
+   *  les boutons des templates 1 (accès) et 2 (relance). Le passage par
+   *  /beta/go marque clicked_at avant de rediriger vers l'inscription. */
+  goUrl?: string | null;
 }): Promise<BrevoSyncResult> {
   try {
     const apiKey = process.env.BREVO_API_KEY;
@@ -227,6 +231,7 @@ export async function addBetaContact(input: {
     const attributes: Record<string, unknown> = {};
     if (firstName) attributes.PRENOM = firstName;
     if (input.feedbackUrl) attributes.BETA_URL = input.feedbackUrl;
+    if (input.goUrl) attributes.BETA_GO = input.goUrl;
     const hasAttrs = Object.keys(attributes).length > 0;
     const withAttrs = hasAttrs ? { ...base, attributes } : base;
 

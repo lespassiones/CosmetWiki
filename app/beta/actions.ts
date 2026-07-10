@@ -9,16 +9,9 @@
 
 import { after } from "next/server";
 import { supabaseService } from "@/lib/supabase";
-import { setBetaFeedbackDone } from "@/lib/brevo";
+import { sendBetaTemplateEmail, setBetaFeedbackDone } from "@/lib/brevo";
 
 export type BetaResult = { ok: true } | { ok: false; error: string };
-
-function clampInt(v: FormDataEntryValue | null, min: number, max: number): number | null {
-  const n = Number(String(v ?? "").trim());
-  if (!Number.isFinite(n)) return null;
-  const r = Math.round(n);
-  return r < min || r > max ? null : r;
-}
 
 /** Inscription d'un bêta testeur : enregistre juste ses coordonnées + son
  *  consentement. AUCUN email n'est envoyé ici — l'invitation part plus tard,
@@ -70,54 +63,94 @@ export async function joinBeta(formData: FormData): Promise<BetaResult> {
   return { ok: true };
 }
 
-/** Enregistre le retour d'un bêta testeur identifié par son token, et coupe
- *  ses relances (drapeau Brevo BETA_FEEDBACK=true). */
-export async function submitBetaFeedback(formData: FormData): Promise<BetaResult> {
-  const token = String(formData.get("token") ?? "").trim();
+/** Clés de réponses acceptées par le formulaire de retour (questions 1..20). */
+const ANSWER_KEYS = new Set(Array.from({ length: 20 }, (_, i) => `q${i + 1}`));
+
+/**
+ * Sauvegarde (par étape) les réponses du formulaire de retour dans
+ * beta_feedback.answers (jsonb, fusionné). Appelé à chaque « Suivant » du
+ * wizard pour ne rien perdre si le testeur abandonne en cours de route.
+ *
+ * `final = true` (dernière étape) marque le retour comme reçu :
+ *   - beta_testers.status = 'feedback_recu' (stoppe les relances CRON)
+ *   - attribut Brevo BETA_FEEDBACK = true
+ *   - email de remerciement (template 4) envoyé immédiatement, UNE seule fois
+ *     (thanked_at le garantit même si le testeur re-soumet).
+ */
+export async function saveBetaFeedback(input: {
+  token: string;
+  answers: Record<string, string>;
+  final: boolean;
+}): Promise<BetaResult> {
+  const token = (input.token ?? "").trim();
   if (!token) return { ok: false, error: "Lien invalide." };
 
-  const ratingOverall = clampInt(formData.get("rating_overall"), 1, 5);
-  const recommend = clampInt(formData.get("recommend"), 0, 10);
-  const liked = String(formData.get("liked") ?? "").trim().slice(0, 2000) || null;
-  const bugs = String(formData.get("bugs") ?? "").trim().slice(0, 2000) || null;
-  const missing = String(formData.get("missing") ?? "").trim().slice(0, 2000) || null;
+  // Ne garder que q1..q20, valeurs texte bornées.
+  const clean: Record<string, string> = {};
+  for (const [k, v] of Object.entries(input.answers ?? {})) {
+    if (!ANSWER_KEYS.has(k)) continue;
+    const val = String(v ?? "").trim().slice(0, 2000);
+    if (val) clean[k] = val;
+  }
 
   const sb = supabaseService();
 
   const { data: tester, error: tErr } = await sb
     .schema("cosme_check")
     .from("beta_testers")
-    .select("id, email")
+    .select("id, email, first_name, thanked_at")
     .eq("token", token)
     .maybeSingle();
 
   if (tErr || !tester) return { ok: false, error: "Lien de retour invalide ou expiré." };
 
+  // Fusion avec les réponses déjà sauvegardées (une ligne par testeur).
+  const { data: existing } = await sb
+    .schema("cosme_check")
+    .from("beta_feedback")
+    .select("answers")
+    .eq("beta_tester_id", tester.id)
+    .maybeSingle();
+
+  const merged = {
+    ...((existing?.answers as Record<string, unknown> | null) ?? {}),
+    ...clean,
+  };
+
   const { error } = await sb
     .schema("cosme_check")
     .from("beta_feedback")
-    .insert({
-      beta_tester_id: tester.id,
-      rating_overall: ratingOverall,
-      recommend,
-      liked,
-      bugs,
-      missing,
-    });
+    .upsert(
+      { beta_tester_id: tester.id, answers: merged },
+      { onConflict: "beta_tester_id" },
+    );
 
   if (error) {
-    console.warn("[beta] feedback insert failed:", error.message);
+    console.warn("[beta] feedback save failed:", error.message);
     return { ok: false, error: "Une erreur est survenue. Réessaie." };
   }
 
-  await sb
-    .schema("cosme_check")
-    .from("beta_testers")
-    .update({ status: "feedback_recu", updated_at: new Date().toISOString() })
-    .eq("id", tester.id);
+  if (input.final) {
+    await sb
+      .schema("cosme_check")
+      .from("beta_testers")
+      .update({
+        status: "feedback_recu",
+        thanked_at: tester.thanked_at ?? new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", tester.id);
 
-  const email = tester.email as string;
-  after(() => setBetaFeedbackDone(email));
+    const email = tester.email as string;
+    const firstName = (tester.first_name as string | null) ?? null;
+    const alreadyThanked = Boolean(tester.thanked_at);
+    after(async () => {
+      await setBetaFeedbackDone(email);
+      if (!alreadyThanked) {
+        await sendBetaTemplateEmail("merci", { email, firstName });
+      }
+    });
+  }
 
   return { ok: true };
 }

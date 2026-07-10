@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { supabaseService } from "@/lib/supabase";
-import { BetaFeedbackForm } from "@/components/beta/BetaFeedbackForm";
+import { BetaFeedbackWizard } from "@/components/beta/BetaFeedbackWizard";
 
 export const metadata: Metadata = {
   title: "Ton retour · Cosme Check",
@@ -49,9 +49,10 @@ export default async function BetaRetourPage({ searchParams }: Props) {
                 {tester.first_name ? `${tester.first_name}, ton avis 🙏` : "Ton avis 🙏"}
               </h1>
               <p className="mt-2 mb-6 text-[15px] leading-6 text-[#6B7280]">
-                2 minutes pour nous aider à améliorer Cosme Check.
+                Quelques minutes pour nous aider à améliorer Cosme Check. Tes
+                réponses sont sauvegardées à chaque étape.
               </p>
-              <BetaFeedbackForm token={token} />
+              <BetaFeedbackWizard token={token} />
             </>
           )}
         </div>
