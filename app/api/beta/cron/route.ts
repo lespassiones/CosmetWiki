@@ -26,7 +26,11 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 const MAX_SENDS_PER_RUN = 100;
-const DAY_MS = 24 * 60 * 60 * 1000;
+// Unité des délais de relance. En prod : jours. Pour TESTER le parcours en
+// quelques minutes, poser BETA_RELANCE_UNIT=minutes sur Vercel → les délais
+// (2, 3, 5) comptent alors en minutes au lieu de jours. Retirer la variable
+// après le test pour revenir au comportement normal.
+const UNIT_MS = process.env.BETA_RELANCE_UNIT === "minutes" ? 60 * 1000 : 24 * 60 * 60 * 1000;
 
 type TesterRow = {
   id: string;
@@ -40,9 +44,9 @@ type TesterRow = {
   feedback_ask_last_at: string | null;
 };
 
-function olderThan(iso: string | null, days: number, now: number): boolean {
+function olderThan(iso: string | null, n: number, now: number): boolean {
   if (!iso) return false;
-  return now - new Date(iso).getTime() >= days * DAY_MS;
+  return now - new Date(iso).getTime() >= n * UNIT_MS;
 }
 
 export async function GET(req: Request) {
