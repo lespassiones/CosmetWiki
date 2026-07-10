@@ -20,60 +20,46 @@ type Q =
   | { id: string; type: "short" | "textarea"; label: string; required?: boolean; placeholder?: string }
   | { id: string; type: "radio" | "checkbox"; label: string; required?: boolean; options: string[] };
 
-const INTAKE_GROUPS: { title: string; questions: Q[] }[] = [
+const INTAKE_QUESTIONS: Q[] = [
   {
-    title: "Un peu de contexte",
-    questions: [
-      { id: "i1", type: "radio", label: "Quel est ton âge ?", options: ["Moins de 20 ans", "21-30 ans", "31-40 ans", "41-50 ans", "Plus de 50 ans"] },
-      { id: "i2", type: "short", label: "Ta profession ?", placeholder: "ex : étudiante, infirmière..." },
-      { id: "i3", type: "textarea", label: "Comment décrirais-tu ta peau et tes cheveux ?" },
-      { id: "i4", type: "textarea", label: "As-tu des problématiques ou des objectifs particuliers ?" },
-    ],
+    id: "i1",
+    type: "textarea",
+    required: true,
+    label:
+      "Raconte-moi la dernière fois où tu as acheté un cosmétique pour répondre à un besoin particulier de ta peau ou de tes cheveux, et où ça n'a pas marché. Qu'est-ce qu'il s'est passé ?",
   },
   {
-    title: "Tes habitudes d'achat",
-    questions: [
-      { id: "i5", type: "textarea", label: "Raconte-nous ton dernier achat cosmétique (quel produit, pourquoi, où) ?" },
-      { id: "i6", type: "textarea", label: "Comment as-tu choisi ce produit ?" },
-      {
-        id: "i7",
-        type: "checkbox",
-        label: "Qu'as-tu consulté pour décider ?",
-        options: ["Les ingrédients", "Des avis en ligne", "Google", "Les réseaux sociaux", "Une application", "Un pharmacien", "Un dermatologue", "Rien"],
-      },
-      { id: "i8", type: "short", label: "Combien de cosmétiques as-tu achetés cette année (environ) ?" },
-      { id: "i9", type: "short", label: "Combien ne t'ont finalement pas convenu ?" },
-    ],
+    id: "i2",
+    type: "textarea",
+    required: true,
+    label: "Avant de l'acheter, qu'est-ce que tu avais fait pour essayer d'être sûr(e) que ce produit te conviendrait ?",
   },
   {
-    title: "Difficultés & budget",
-    questions: [
-      { id: "i10", type: "textarea", label: "Qu'est-ce qui est le plus difficile quand tu choisis un cosmétique ?" },
-      { id: "i11", type: "textarea", label: "Que fais-tu des produits qui ne te conviennent pas ?" },
-      {
-        id: "i12",
-        type: "radio",
-        label: "Combien estimes-tu perdre par an en achats inadaptés ?",
-        options: ["Moins de 20 €", "20 à 50 €", "50 à 100 €", "Plus de 100 €", "Je ne sais pas"],
-      },
-      { id: "i13", type: "textarea", label: "Qu'utilises-tu aujourd'hui pour choisir tes cosmétiques ? Qu'est-ce qui manque ?" },
-    ],
+    id: "i3",
+    type: "textarea",
+    required: true,
+    label:
+      "Avec le recul, pourquoi penses-tu que tu t'es trompé(e) dans ton choix ? Qu'est-ce qui t'a manqué au moment de l'achat ?",
   },
   {
-    title: "Ta vision",
-    questions: [
-      { id: "i14", type: "textarea", label: "À quoi ressemblerait la solution idéale pour choisir tes cosmétiques ?" },
-      { id: "i15", type: "radio", label: "Serais-tu prêt·e à payer pour éviter les mauvais achats ?", options: ["Oui", "Non", "Peut-être"] },
-      { id: "i16", type: "radio", label: "Si oui, quel budget par mois ?", options: ["Moins de 5 €", "5 à 10 €", "Plus de 10 €"] },
-      { id: "i17", type: "textarea", label: "Un dernier conseil pour nous ?" },
-    ],
+    id: "i4",
+    type: "textarea",
+    required: true,
+    label: "Si tu pouvais revenir en arrière, qu'est-ce qui t'aurait permis de choisir le bon produit du premier coup ?",
+  },
+  {
+    id: "i5",
+    type: "textarea",
+    required: true,
+    label:
+      "Combien de fois as-tu vécu une telle expérience, et combien ça t'a coûté : en argent ? en temps ? en frustration ou en stress ?",
   },
 ];
 
 const INTAKE_LABELS: Record<string, string> = {};
-INTAKE_GROUPS.forEach((g) => g.questions.forEach((q) => (INTAKE_LABELS[q.id] = q.label)));
+INTAKE_QUESTIONS.forEach((q) => (INTAKE_LABELS[q.id] = q.label));
 
-const ALL_QUESTIONS = INTAKE_GROUPS.flatMap((g) => g.questions);
+const ALL_QUESTIONS = INTAKE_QUESTIONS;
 
 export function BetaIntakeWizard({ source }: { source?: string }) {
   const router = useRouter();
@@ -176,54 +162,53 @@ export function BetaIntakeWizard({ source }: { source?: string }) {
           </label>
         </div>
       ) : (
-        <div className="space-y-10">
-          {INTAKE_GROUPS.map((group) => (
-            <div key={group.title} className="space-y-7">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF]">
-                {group.title}
+        <div className="space-y-8">
+          <div>
+            <h2 className="text-[15px] font-semibold text-[#111111]">Ton expérience</h2>
+            <p className="mt-1 text-[13px] leading-5 text-[#9CA3AF]">
+              Réponds librement, il n'y a pas de mauvaise réponse.
+            </p>
+          </div>
+          {INTAKE_QUESTIONS.map((q) => (
+            <div key={q.id}>
+              <p className="mb-2.5 text-[14px] font-medium leading-5 text-[#111111]">
+                {q.label}
+                {q.required && <span className="text-[#111111]"> *</span>}
               </p>
-              {group.questions.map((q) => (
-                <div key={q.id}>
-                  <p className="mb-2.5 text-[14px] font-medium leading-5 text-[#111111]">
-                    {q.label}
-                    {q.required && <span className="text-[#111111]"> *</span>}
-                  </p>
-                  {q.type === "radio" && (
-                    <div className="flex flex-col gap-2">
-                      {q.options.map((opt) => (
-                        <OptionButton key={opt} label={opt} selected={answers[q.id] === opt} onClick={() => setAnswer(q.id, answers[q.id] === opt ? "" : opt)} />
-                      ))}
-                    </div>
-                  )}
-                  {q.type === "checkbox" && (
-                    <div className="flex flex-col gap-2">
-                      {q.options.map((opt) => (
-                        <OptionButton key={opt} label={opt} selected={(answers[q.id] ?? "").split(" · ").includes(opt)} multi onClick={() => toggleCheckbox(q.id, opt)} />
-                      ))}
-                    </div>
-                  )}
-                  {q.type === "short" && (
-                    <input
-                      type="text"
-                      value={answers[q.id] ?? ""}
-                      onChange={(e) => setAnswer(q.id, e.target.value)}
-                      maxLength={2000}
-                      placeholder={q.placeholder}
-                      className="w-full border-0 border-b border-[#E5E5E0] bg-transparent px-0 py-2 text-[15px] text-[#111111] placeholder:text-[#C4C4BE] focus:border-[#111111] focus:outline-none"
-                    />
-                  )}
-                  {q.type === "textarea" && (
-                    <textarea
-                      value={answers[q.id] ?? ""}
-                      onChange={(e) => setAnswer(q.id, e.target.value)}
-                      rows={2}
-                      maxLength={2000}
-                      placeholder="Ta réponse..."
-                      className="w-full resize-none border-0 border-b border-[#E5E5E0] bg-transparent px-0 py-2 text-[15px] leading-6 text-[#111111] placeholder:text-[#C4C4BE] focus:border-[#111111] focus:outline-none"
-                    />
-                  )}
+              {q.type === "radio" && (
+                <div className="flex flex-col gap-2">
+                  {q.options.map((opt) => (
+                    <OptionButton key={opt} label={opt} selected={answers[q.id] === opt} onClick={() => setAnswer(q.id, answers[q.id] === opt ? "" : opt)} />
+                  ))}
                 </div>
-              ))}
+              )}
+              {q.type === "checkbox" && (
+                <div className="flex flex-col gap-2">
+                  {q.options.map((opt) => (
+                    <OptionButton key={opt} label={opt} selected={(answers[q.id] ?? "").split(" · ").includes(opt)} multi onClick={() => toggleCheckbox(q.id, opt)} />
+                  ))}
+                </div>
+              )}
+              {q.type === "short" && (
+                <input
+                  type="text"
+                  value={answers[q.id] ?? ""}
+                  onChange={(e) => setAnswer(q.id, e.target.value)}
+                  maxLength={2000}
+                  placeholder={q.placeholder}
+                  className="w-full border-0 border-b border-[#E5E5E0] bg-transparent px-0 py-2 text-[15px] text-[#111111] placeholder:text-[#C4C4BE] focus:border-[#111111] focus:outline-none"
+                />
+              )}
+              {q.type === "textarea" && (
+                <textarea
+                  value={answers[q.id] ?? ""}
+                  onChange={(e) => setAnswer(q.id, e.target.value)}
+                  rows={3}
+                  maxLength={2000}
+                  placeholder="Ta réponse..."
+                  className="w-full resize-none border-0 border-b border-[#E5E5E0] bg-transparent px-0 py-2 text-[15px] leading-6 text-[#111111] placeholder:text-[#C4C4BE] focus:border-[#111111] focus:outline-none"
+                />
+              )}
             </div>
           ))}
         </div>
