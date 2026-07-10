@@ -12,6 +12,10 @@ export function SignUpForm({ next = "/" }: { next?: string }) {
   const [password, setPassword] = useState("");
   const [pwdFocus, setPwdFocus] = useState(false);
   const showChecklist = pwdFocus || password.length > 0;
+  // Consentements : marketing = opt-in optionnel (décoché par défaut, RGPD) ;
+  // CGU = obligatoire (bloque la soumission tant qu'elle n'est pas cochée).
+  const [acceptCgu, setAcceptCgu] = useState(false);
+  const [acceptMarketing, setAcceptMarketing] = useState(false);
 
   return (
     <div>
@@ -55,6 +59,59 @@ export function SignUpForm({ next = "/" }: { next?: string }) {
 
       {showChecklist && <PasswordRequirements password={password} />}
 
+      {/* Consentements — marketing (optionnel) en haut, CGU (obligatoire) en bas */}
+      <div className="space-y-2.5 pt-1">
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            name="accept_marketing"
+            checked={acceptMarketing}
+            onChange={(e) => setAcceptMarketing(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#D1D5DB] accent-[#111111]"
+          />
+          <span className="text-[12px] leading-4 text-[#6B7280]">
+            J&apos;accepte de recevoir les actualités, offres et newsletters de
+            Cosme Check par email.{" "}
+            <span className="text-[#9CA3AF]">(optionnel)</span>
+          </span>
+        </label>
+
+        <div className="flex items-start gap-3">
+          <input
+            id="accept_cgu"
+            type="checkbox"
+            name="accept_cgu"
+            required
+            checked={acceptCgu}
+            onChange={(e) => setAcceptCgu(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#D1D5DB] accent-[#111111]"
+          />
+          <label htmlFor="accept_cgu" className="cursor-pointer text-[12px] leading-4 text-[#6B7280]">
+            J&apos;accepte les{" "}
+            <a
+              href="/cgu"
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="font-medium text-[#111111] underline underline-offset-2"
+            >
+              conditions d&apos;utilisation
+            </a>{" "}
+            et la{" "}
+            <a
+              href="/confidentialite"
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="font-medium text-[#111111] underline underline-offset-2"
+            >
+              politique de confidentialité
+            </a>
+            .
+          </label>
+        </div>
+      </div>
+
       {error && (
         <p role="alert" className="text-sm text-[#E11D48] bg-rose-50 border border-rose-100 rounded-xl px-3 py-2">
           {error}
@@ -63,15 +120,11 @@ export function SignUpForm({ next = "/" }: { next?: string }) {
 
       <button
         type="submit"
-        disabled={pending}
-        className="w-full rounded-xl bg-[#111111] text-white text-sm font-semibold py-3 hover:brightness-110 transition disabled:opacity-50"
+        disabled={pending || !acceptCgu}
+        className="w-full rounded-xl bg-[#111111] text-white text-sm font-semibold py-3 hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {pending ? "Création…" : "Créer mon compte"}
       </button>
-
-      <p className="text-[11px] leading-4 text-[#9CA3AF] text-center">
-        En continuant tu acceptes nos CGU et notre politique de confidentialité.
-      </p>
     </form>
     </div>
   );

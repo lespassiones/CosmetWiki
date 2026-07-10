@@ -2,10 +2,13 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { supabaseServer } from "@/lib/supabase";
 import { SITE_URL } from "@/lib/siteUrl";
 import { resolveOnboardingDestination } from "@/lib/onboarding/resolve";
 import { getAppConfig } from "@/lib/appConfig";
+import { buildConsent } from "@/lib/consent";
+import { syncBrevoContact } from "@/lib/brevo";
 
 export type AuthResult = { ok: true } | { ok: false; error: string };
 
@@ -32,6 +35,10 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   const next = safeNext(formData.get("next"));
+  // Cases à cocher : présentes dans le FormData uniquement si cochées. CGU =
+  // obligatoire ; marketing = opt-in newsletter (synchro Brevo).
+  const acceptCgu = Boolean(formData.get("accept_cgu"));
+  const marketing = Boolean(formData.get("accept_marketing"));
 
   if (firstName.length < 1) return { ok: false, error: "Prénom requis." };
   if (!email.includes("@")) return { ok: false, error: "Email invalide." };
@@ -39,6 +46,11 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
   if (!/[a-z]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins une minuscule." };
   if (!/[A-Z]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins une majuscule." };
   if (!/[0-9]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins un chiffre." };
+  // Garde-fou serveur : le bouton est déjà désactivé côté client tant que la
+  // case CGU n'est pas cochée, mais on revalide ici.
+  if (!acceptCgu) {
+    return { ok: false, error: "Tu dois accepter les conditions d'utilisation pour créer ton compte." };
+  }
 
   // Inscriptions gelées depuis l'admin (Paramètres → inscriptions). Le trigger
   // DB handle_new_user refuse aussi la création, mais on intercepte ici pour
@@ -60,6 +72,40 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
   });
 
   if (error) return { ok: false, error: error.message };
+
+  // Persiste le consentement dans preferences.consent (best-effort — le trigger
+  // handle_new_user a déjà créé la ligne user_profiles dans la même transaction
+  // que l'insert auth.users, donc elle existe ici). Un échec ne bloque pas
+  // l'inscription : le modal de consentement de l'onboarding sert de filet.
+  const consent = buildConsent(marketing);
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (user) {
+      const { data: row } = await sb
+        .schema("cosme_check")
+        .from("user_profiles")
+        .select("preferences")
+        .eq("id", user.id)
+        .maybeSingle();
+      const prefs = (row?.preferences ?? {}) as Record<string, unknown>;
+      await sb
+        .schema("cosme_check")
+        .from("user_profiles")
+        .update({
+          preferences: { ...prefs, consent },
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user.id);
+    }
+  } catch (e) {
+    console.warn("[auth] signUp consent persist failed:", e);
+  }
+
+  // Synchro Brevo APRÈS la réponse (after) pour ne pas rallonger la latence de
+  // l'inscription. TOUT LE MONDE va dans « Tous les inscrits » ; les opt-in vont
+  // en plus dans « Newsletter » (géré par syncBrevoContact, fail-open).
+  after(() => syncBrevoContact({ email, firstName, marketing }));
+
   // Send fresh signups through the 3-step onboarding wizard. The wizard
   // forwards to `next` once the user finishes or dismisses. A returning user
   // would never hit this branch (signUp creates a new account here).

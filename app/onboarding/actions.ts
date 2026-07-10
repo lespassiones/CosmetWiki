@@ -1,8 +1,11 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase";
+import { buildConsent } from "@/lib/consent";
+import { syncBrevoContact } from "@/lib/brevo";
 import {
   HAIR_CONCERNS,
   PROFILE_GOAL_LABEL,
@@ -273,5 +276,51 @@ export async function dismissOnboarding(): Promise<OnboardingResult> {
     .eq("id", user.id);
 
   if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+/**
+ * Enregistre le consentement (CGU obligatoire + opt-in marketing) capté par le
+ * modal affiché AVANT les questions de profil. Cible principalement les
+ * inscriptions Google, qui ne passent pas par le formulaire email (où le
+ * consentement est déjà recueilli). Stocke dans preferences.consent et, si
+ * l'opt-in marketing est coché, synchronise le contact vers Brevo après la
+ * réponse (fail-open).
+ */
+export async function saveConsent(marketing: boolean): Promise<OnboardingResult> {
+  const cookieStore = await cookies();
+  const sb = supabaseServer(cookieStore);
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return { ok: false, error: "Non connecté." };
+
+  const { data: existing } = await sb
+    .schema("cosme_check")
+    .from("user_profiles")
+    .select("preferences, first_name")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const prefs = (existing?.preferences ?? {}) as Record<string, unknown>;
+  const consent = buildConsent(marketing);
+
+  const { error } = await sb
+    .schema("cosme_check")
+    .from("user_profiles")
+    .update({
+      preferences: { ...prefs, consent },
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (error) return { ok: false, error: error.message };
+
+  // Synchro Brevo pour TOUS les inscrits (liste « Tous les inscrits ») ; l'opt-in
+  // marketing les ajoute en plus à « Newsletter » (géré par syncBrevoContact).
+  if (user.email) {
+    const firstName = (existing?.first_name as string | null) ?? null;
+    const email = user.email;
+    after(() => syncBrevoContact({ email, firstName, marketing }));
+  }
+
   return { ok: true };
 }

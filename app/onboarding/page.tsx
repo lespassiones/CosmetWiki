@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { supabaseServer } from "@/lib/supabase";
 import { isProfileComplete, readOnboardingShown, readSkinProfile } from "@/lib/skin/profile";
-import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
+import { hasConsent } from "@/lib/consent";
+import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 
 export const metadata = { title: "Bienvenue · Cosme Check" };
 
@@ -54,6 +55,11 @@ export default async function OnboardingPage({ searchParams }: Props) {
     redirect(next);
   }
 
+  // Consentement pas encore recueilli (cas des inscriptions Google) → le flux
+  // affiche d'abord le modal CGU/newsletter avant les questions. Les inscrits
+  // par email ont déjà consenti au formulaire → on va droit aux questions.
+  const needsConsent = !hasConsent(prefs);
+
   return (
     // Cream background + centered editorial column. No sidebar — `app/layout.tsx`
     // hides the AppShell on `/onboarding` so the wizard owns the whole screen
@@ -63,7 +69,12 @@ export default async function OnboardingPage({ searchParams }: Props) {
         <p className="mb-8 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-[#9CA3AF]">
           Cosme Check
         </p>
-        <OnboardingWizard initial={initial} finalNext={next} firstName={firstName} />
+        <OnboardingFlow
+          initial={initial}
+          finalNext={next}
+          firstName={firstName}
+          needsConsent={needsConsent}
+        />
       </div>
     </main>
   );

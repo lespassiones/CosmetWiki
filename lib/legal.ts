@@ -51,7 +51,13 @@ export const LEGAL = {
       location: "États-Unis",
       website: "https://openai.com/policies/privacy-policy",
     },
+    {
+      name: "Brevo (Sendinblue SAS)",
+      role: "Gestion des contacts inscrits pour les communications de service liées au compte, et envoi de newsletters / emails marketing uniquement aux utilisateurs ayant donné leur consentement explicite (opt-in)",
+      location: "Union européenne (France)",
+      website: "https://www.brevo.com/fr/legal/privacypolicy/",
+    },
   ],
 
-  lastUpdated: "16 mai 2026",
+  lastUpdated: "10 juillet 2026",
 } as const;
