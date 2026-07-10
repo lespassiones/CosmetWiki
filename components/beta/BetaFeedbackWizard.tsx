@@ -170,7 +170,7 @@ const STEPS: Step[] = [
   },
 ];
 
-export function BetaFeedbackWizard({ token }: { token: string }) {
+export function BetaFeedbackWizard({ token, firstName }: { token: string; firstName?: string | null }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
@@ -236,6 +236,15 @@ export function BetaFeedbackWizard({ token }: { token: string }) {
 
   return (
     <div>
+      <div className="mb-7">
+        <h1 className="text-[24px] font-bold leading-tight tracking-tight text-[#111111]">
+          {firstName ? `Merci d'avoir testé, ${firstName} 🙏` : "Merci d'avoir testé 🙏"}
+        </h1>
+        <p className="mt-2 text-[15px] leading-6 text-[#6B7280]">
+          Ton avis compte énormément : il nous aide à faire de Cosme Check l'app qu'il te
+          faut. Réponds en toute franchise, il n'y a pas de mauvaise réponse.
+        </p>
+      </div>
       {/* Progression */}
       <div className="mb-1 flex items-center justify-between">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9CA3AF]">

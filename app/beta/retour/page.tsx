@@ -44,16 +44,7 @@ export default async function BetaRetourPage({ searchParams }: Props) {
               </p>
             </>
           ) : (
-            <>
-              <h1 className="text-[24px] font-bold leading-tight tracking-tight text-[#111111]">
-                {tester.first_name ? `${tester.first_name}, ton avis 🙏` : "Ton avis 🙏"}
-              </h1>
-              <p className="mt-2 mb-6 text-[15px] leading-6 text-[#6B7280]">
-                Quelques minutes pour nous aider à améliorer Cosme Check. Tes
-                réponses sont sauvegardées à chaque étape.
-              </p>
-              <BetaFeedbackWizard token={token} />
-            </>
+            <BetaFeedbackWizard token={token} firstName={tester.first_name} />
           )}
         </div>
       </div>

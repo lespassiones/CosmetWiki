@@ -18,9 +18,9 @@ export default function BetaMerciPage() {
             Merci ! 🎉
           </h1>
           <p className="mt-3 text-[15px] leading-6 text-[#6B7280]">
-            On vient de t&apos;envoyer un email avec ton accès à Cosme Check et le
-            lien pour donner ton retour. Regarde ta boîte mail (et tes spams, au
-            cas où).
+            On a bien reçu tes réponses. La phase de bêta test démarre très bientôt :
+            dès qu&apos;elle sera lancée, tu recevras un email avec ton accès à Cosme
+            Check. À très vite !
           </p>
           <Link
             href="/"
