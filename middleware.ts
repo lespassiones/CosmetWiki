@@ -62,7 +62,7 @@ function redirectToSignIn(req: NextRequest, pathname: string): NextResponse {
 const AUTH_REFRESH_TIMEOUT_MS = 1500;
 
 // Expose the request pathname to Server Components via a custom header.
-// Server Components can't read req.nextUrl directly — the supported pattern is
+// Server Components can't read req.nextUrl directly - the supported pattern is
 // to set a request header in middleware and read it via `headers()` in the
 // layout. Used by app/layout.tsx to skip Supabase calls on public landing pages.
 function withPathnameHeader(req: NextRequest, pathname: string): Headers {
@@ -102,7 +102,7 @@ async function refreshSession(req: NextRequest, pathname: string): Promise<NextR
     ]);
   } catch {
     // Auth Supabase injoignable ou trop lente : on retourne la réponse en
-    // l'état. Pas de refresh de cookie cette fois — le prochain hit re-tentera.
+    // l'état. Pas de refresh de cookie cette fois - le prochain hit re-tentera.
   }
   return res;
 }

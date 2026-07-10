@@ -23,7 +23,7 @@ import {
 export type OnboardingResult = { ok: true } | { ok: false; error: string };
 
 /** Identifies which of the 3 onboarding steps the form belongs to. The step
- *  determines which fields we touch — every other field on `skin` is left
+ *  determines which fields we touch - every other field on `skin` is left
  *  intact (no clobbering across steps). */
 type OnboardingStep = "skin" | "concerns" | "goals";
 
@@ -34,7 +34,7 @@ const VALID_STEPS = new Set<OnboardingStep>(["skin", "concerns", "goals"]);
  *
  * - Each step touches only its own fields.
  * - Empty submissions are allowed (the user clicked "Suivant" without filling
- *   anything) — we still mark `onboardingShown` so they don't see the wizard
+ *   anything) - we still mark `onboardingShown` so they don't see the wizard
  *   again on next login.
  */
 export async function saveOnboardingStep(form: FormData): Promise<OnboardingResult> {
@@ -178,7 +178,7 @@ export async function saveOnboardingStep(form: FormData): Promise<OnboardingResu
     };
   }
 
-  // IMPORTANT — we DON'T set `onboardingShown: true` here. This action runs
+  // IMPORTANT - we DON'T set `onboardingShown: true` here. This action runs
   // on every keystroke via the auto-save effect, so flipping the flag would
   // immediately bounce the user out of the wizard (the page reads the flag
   // server-side and redirect()s when true). The flag is set only by
@@ -188,7 +188,7 @@ export async function saveOnboardingStep(form: FormData): Promise<OnboardingResu
   // We also DON'T call revalidatePath("/onboarding") here for the same
   // reason: it forces the server component to re-run and would interrupt
   // the user mid-input. Other paths (/profile, /advisor) are revalidated by
-  // the terminal actions below — no need on every keystroke either.
+  // the terminal actions below - no need on every keystroke either.
   const merged = {
     ...prefs,
     skin: updatedSkin,
@@ -249,7 +249,7 @@ export async function completeOnboarding(): Promise<OnboardingResult> {
 /**
  * Mark the onboarding as "shown" without saving any profile field. Called
  * when the user clicks "Passer" on a step (or "Plus tard" globally). Once
- * this flag is set, /onboarding won't auto-trigger on subsequent logins —
+ * this flag is set, /onboarding won't auto-trigger on subsequent logins -
  * the user can still complete the profile manually from /profile.
  */
 export async function dismissOnboarding(): Promise<OnboardingResult> {

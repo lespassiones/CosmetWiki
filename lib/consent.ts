@@ -16,9 +16,9 @@
 export const CONSENT_VERSION = 1;
 
 export type Consent = {
-  /** CGU + politique de confidentialité — obligatoire pour s'inscrire. */
+  /** CGU + politique de confidentialité - obligatoire pour s'inscrire. */
   cgu: boolean;
-  /** E-mails marketing (newsletter / offres) — opt-in optionnel. */
+  /** E-mails marketing (newsletter / offres) - opt-in optionnel. */
   marketing: boolean;
   /** Horodatage ISO du recueil du consentement. */
   acceptedAt: string;
@@ -28,7 +28,7 @@ export type Consent = {
 
 /**
  * Lit le consentement stocké. Renvoie `null` tant que les CGU obligatoires
- * n'ont pas été acceptées — un objet sans `cgu: true` n'est pas un
+ * n'ont pas été acceptées - un objet sans `cgu: true` n'est pas un
  * consentement valide.
  */
 export function readConsent(

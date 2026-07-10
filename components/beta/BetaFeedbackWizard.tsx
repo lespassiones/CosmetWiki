@@ -7,7 +7,7 @@
  * retour reçu → merci automatique + arrêt des relances pour ce testeur.
  *
  * Les captures d'écran (optionnelles) sont servies depuis
- * /public/beta-captures/qN.webp — un fichier absent masque simplement l'image.
+ * /public/beta-captures/qN.webp - un fichier absent masque simplement l'image.
  */
 
 import { useState, useTransition } from "react";

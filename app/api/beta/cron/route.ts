@@ -3,14 +3,14 @@ import { supabaseService } from "@/lib/supabase";
 import { sendBetaTemplateEmail } from "@/lib/brevo";
 
 /**
- * GET /api/beta/cron — CRON quotidien du programme bêta (vercel.json).
+ * GET /api/beta/cron - CRON quotidien du programme bêta (vercel.json).
  * Vercel l'appelle avec `Authorization: Bearer ${CRON_SECRET}`.
  *
  * 1. Synchronise les états via la RPC cosme_check_beta_sync_states :
  *    compte créé (auth.users) + a testé (≥1 activité app).
- * 2. Relance A « pas encore testé » (template 2) — invités SANS compte :
+ * 2. Relance A « pas encore testé » (template 2) - invités SANS compte :
  *    J+2 après l'invitation, puis une dernière relance 3 jours plus tard.
- * 3. Demande de retour (template 3) — compte créé SANS feedback :
+ * 3. Demande de retour (template 3) - compte créé SANS feedback :
  *    J+2 après la création du compte, relance +3 j, dernière +5 j.
  *
  * Les relances s'arrêtent dès que status = 'feedback_recu' (formulaire rempli).
@@ -90,7 +90,7 @@ export async function GET(req: Request) {
 
     if (!t.account_created_at) {
       // ── Étage A : invité mais pas de compte (pas ouvert / pas cliqué /
-      //    cliqué sans compte — même lot). Max 2 relances : J+2 puis +3 j.
+      //    cliqué sans compte - même lot). Max 2 relances : J+2 puis +3 j.
       const due =
         (t.no_test_relances === 0 && olderThan(t.invited_at, 2, now)) ||
         (t.no_test_relances === 1 && olderThan(t.no_test_last_at, 3, now));

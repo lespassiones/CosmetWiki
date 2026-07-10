@@ -1,6 +1,6 @@
 -- 20260710_beta_tracking.sql
 -- ============================================================================
--- Programme BÊTA — Lot 2 : tracking d'état + relances automatiques par CRON.
+-- Programme BÊTA - Lot 2 : tracking d'état + relances automatiques par CRON.
 --
 -- États d'un testeur (recoupés par le CRON /api/beta/cron) :
 --   invited_at          → invitation envoyée (Lot 1)

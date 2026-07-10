@@ -8,7 +8,7 @@ import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 export const metadata = { title: "Bienvenue · Cosme Check" };
 
 // Onboarding is a one-shot post-signup flow. If the user lands here without a
-// session (rare — middleware would normally catch this), we send them to
+// session (rare - middleware would normally catch this), we send them to
 // sign-in. If they've already been through the wizard, we just bounce them to
 // `next` so manually visiting /onboarding later doesn't loop.
 
@@ -49,7 +49,7 @@ export default async function OnboardingPage({ searchParams }: Props) {
   // Hard safety: if a user lands here by URL after already being onboarded,
   // OR is an existing user whose profile is already filled, send them back
   // to `next` without showing the wizard. The redirect helpers in the auth
-  // actions normally catch this, but the page must self-defend too — a
+  // actions normally catch this, but the page must self-defend too - a
   // bookmark to /onboarding shouldn't keep haunting the user.
   if (readOnboardingShown(prefs) || isProfileComplete(initial)) {
     redirect(next);
@@ -61,7 +61,7 @@ export default async function OnboardingPage({ searchParams }: Props) {
   const needsConsent = !hasConsent(prefs);
 
   return (
-    // Cream background + centered editorial column. No sidebar — `app/layout.tsx`
+    // Cream background + centered editorial column. No sidebar - `app/layout.tsx`
     // hides the AppShell on `/onboarding` so the wizard owns the whole screen
     // both on mobile and desktop.
     <main className="min-h-svh bg-[#FAFAF7] px-5 py-8 sm:py-12">

@@ -1,5 +1,5 @@
 /**
- * Crédits bêta — CÔTÉ SERVEUR UNIQUEMENT.
+ * Crédits bêta - CÔTÉ SERVEUR UNIQUEMENT.
  *
  * Les 50 crédits non renouvelables sont accordés quand l'inscription vient du
  * LIEN bêta (cookie `cc_beta` posé par /beta/go), quel que soit l'email ou la

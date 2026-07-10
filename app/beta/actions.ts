@@ -19,7 +19,7 @@ type IntakeAnswer = { q: string; a: string };
 
 /** Nettoie les réponses persona : clés `i1..i99`, objets { q, a } bornés,
  *  max 60 entrées. Le contenu des questions vit côté client (BetaIntakeWizard)
- *  et peut évoluer librement — c'est pourquoi on stocke aussi l'intitulé. */
+ *  et peut évoluer librement - c'est pourquoi on stocke aussi l'intitulé. */
 function sanitizeIntake(raw: unknown): Record<string, IntakeAnswer> | null {
   if (!raw || typeof raw !== "object") return null;
   const out: Record<string, IntakeAnswer> = {};
@@ -39,7 +39,7 @@ function sanitizeIntake(raw: unknown): Record<string, IntakeAnswer> | null {
 }
 
 /** Inscription d'un bêta testeur : coordonnées + consentement + réponses du
- *  questionnaire persona (intake). AUCUN email n'est envoyé ici — l'invitation
+ *  questionnaire persona (intake). AUCUN email n'est envoyé ici - l'invitation
  *  part plus tard, au « lancement » manuel (bouton admin → /api/beta/invite).
  *  Permet plusieurs vagues de recrutement. */
 export async function joinBeta(input: {

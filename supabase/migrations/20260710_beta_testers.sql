@@ -1,6 +1,6 @@
 -- 20260710_beta_testers.sql
 -- ============================================================================
--- Programme BÊTA — capture des bêta testeurs (page /beta) + leurs retours.
+-- Programme BÊTA - capture des bêta testeurs (page /beta) + leurs retours.
 --
 -- ÉPHÉMÈRE : quand la bêta se termine, tout se démonte proprement avec
 --   DROP TABLE cosme_check.beta_feedback, cosme_check.beta_testers CASCADE;

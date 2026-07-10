@@ -1,23 +1,23 @@
 /**
- * Synchro Brevo — CÔTÉ SERVEUR UNIQUEMENT (ne jamais importer côté client :
+ * Synchro Brevo - CÔTÉ SERVEUR UNIQUEMENT (ne jamais importer côté client :
  * la clé BREVO_API_KEY est un secret).
  *
  * Modèle à DEUX listes (décidé avec l'utilisateur) :
  *   - « Tous les inscrits » (BREVO_LIST_ALL_ID)  : TOUT LE MONDE, opt-in ou non.
- *     Sert aux communications de SERVICE (panne, info importante) — pas de pub.
+ *     Sert aux communications de SERVICE (panne, info importante) - pas de pub.
  *   - « Newsletter » (BREVO_LIST_NEWSLETTER_ID)  : uniquement les inscrits ayant
  *     coché l'opt-in marketing. Sert aux newsletters / offres.
  *
  * L'attribut booléen Brevo `OPT_IN` reflète le choix marketing (segmentation).
  *
  * Robustesse : tout est FAIL-OPEN. Si la clé est absente, si Brevo répond une
- * erreur ou si le réseau lâche, on log et on renvoie `{ synced: false }` — on
+ * erreur ou si le réseau lâche, on log et on renvoie `{ synced: false }` - on
  * ne bloque JAMAIS l'inscription de l'utilisateur pour un souci Brevo.
  */
 
 const API_BASE = "https://api.brevo.com/v3";
-const LIST_ALL_NAME = "Cosme Check — Tous les inscrits";
-const LIST_NEWSLETTER_NAME = "Cosme Check — Newsletter";
+const LIST_ALL_NAME = "Cosme Check - Tous les inscrits";
+const LIST_NEWSLETTER_NAME = "Cosme Check - Newsletter";
 const TIMEOUT_MS = 5000;
 
 export type BrevoSyncInput = {
@@ -162,13 +162,13 @@ export async function syncBrevoContact(
 }
 
 // ─── Programme BÊTA ─────────────────────────────────────────────────────────
-// Liste dédiée « Cosme Check — Bêta testeurs » + email transactionnel d'accès.
+// Liste dédiée « Cosme Check - Bêta testeurs » + email transactionnel d'accès.
 // L'attribut BETA_FEEDBACK (booléen) sert de drapeau « retour donné » : laissé
 // absent à l'inscription (= relance possible) puis passé à true quand le
 // testeur remplit /beta/retour → le scénario d'automatisation Brevo lit ce
 // drapeau pour arrêter les relances. Tout est fail-open.
 
-const LIST_BETA_NAME = "Cosme Check — Bêta testeurs";
+const LIST_BETA_NAME = "Cosme Check - Bêta testeurs";
 let cachedBetaListId: number | null | undefined;
 
 function betaSender(): { name: string; email: string } {
@@ -277,10 +277,10 @@ export async function setBetaFeedbackDone(email: string): Promise<BrevoSyncResul
 // IDs des templates transactionnels Brevo du programme bêta. Le CONTENU des
 // emails vit dans Brevo (modifiable dans l'UI sans redéploiement) ; le code ne
 // fait qu'envoyer par templateId. La personnalisation ({{contact.PRENOM}},
-// {{contact.BETA_URL}}) est résolue par Brevo depuis les attributs du contact —
+// {{contact.BETA_URL}}) est résolue par Brevo depuis les attributs du contact -
 // addBetaContact doit donc avoir été appelé AVANT tout envoi.
 const BETA_TEMPLATES = {
-  /** 1. Accès — invitation au lancement d'une phase. */
+  /** 1. Accès - invitation au lancement d'une phase. */
   access: () => parseId(process.env.BREVO_TPL_BETA_ACCESS) ?? 1,
   /** 2. Relance « pas encore testé » (pas ouvert / pas cliqué / pas de compte). */
   relance: () => parseId(process.env.BREVO_TPL_BETA_RELANCE) ?? 2,
@@ -327,7 +327,7 @@ export async function sendBetaTemplateEmail(
 }
 
 /** Email d'INVITATION (envoyé au lancement d'une phase) via le template Brevo
- *  « Bêta — 1. Accès ». Le lien de retour (BETA_URL) et le prénom (PRENOM)
+ *  « Bêta - 1. Accès ». Le lien de retour (BETA_URL) et le prénom (PRENOM)
  *  sont lus depuis les attributs du contact. Fail-open. */
 export async function sendBetaInvitationEmail(input: {
   email: string;

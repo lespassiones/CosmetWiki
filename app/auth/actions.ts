@@ -74,7 +74,7 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
 
   if (error) return { ok: false, error: error.message };
 
-  // Persiste le consentement dans preferences.consent (best-effort — le trigger
+  // Persiste le consentement dans preferences.consent (best-effort - le trigger
   // handle_new_user a déjà créé la ligne user_profiles dans la même transaction
   // que l'insert auth.users, donc elle existe ici). Un échec ne bloque pas
   // l'inscription : le modal de consentement de l'onboarding sert de filet.

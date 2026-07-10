@@ -59,7 +59,7 @@ export function SignUpForm({ next = "/" }: { next?: string }) {
 
       {showChecklist && <PasswordRequirements password={password} />}
 
-      {/* Consentements — marketing (optionnel) en haut, CGU (obligatoire) en bas */}
+      {/* Consentements - marketing (optionnel) en haut, CGU (obligatoire) en bas */}
       <div className="space-y-2.5 pt-1">
         <label className="flex cursor-pointer items-start gap-3">
           <input

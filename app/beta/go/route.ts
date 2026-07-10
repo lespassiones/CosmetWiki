@@ -4,7 +4,7 @@ import { SITE_URL } from "@/lib/siteUrl";
 import { BETA_COOKIE } from "@/lib/beta-credits";
 
 /**
- * GET /beta/go?token=… — lien d'accès TRACKÉ des emails bêta (attribut Brevo
+ * GET /beta/go?token=… - lien d'accès TRACKÉ des emails bêta (attribut Brevo
  * BETA_GO). Si le token est valide : marque `clicked_at` ET pose un cookie
  * `cc_beta` → le compte créé ensuite (quel que soit l'email, email/mot de passe
  * OU Google) recevra 50 crédits bêta. Puis redirige vers l'inscription.

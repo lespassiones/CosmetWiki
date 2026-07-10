@@ -55,7 +55,7 @@ export function ConsentModal({
         </p>
 
         <div className="mt-6 space-y-3">
-          {/* Opt-in marketing (optionnel) — en haut */}
+          {/* Opt-in marketing (optionnel) - en haut */}
           <label className="flex cursor-pointer items-start gap-3">
             <input
               type="checkbox"
@@ -70,7 +70,7 @@ export function ConsentModal({
             </span>
           </label>
 
-          {/* CGU + confidentialité (obligatoire) — en bas */}
+          {/* CGU + confidentialité (obligatoire) - en bas */}
           <div className="flex items-start gap-3">
             <input
               id="ob_cgu"

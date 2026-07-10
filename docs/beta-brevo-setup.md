@@ -1,11 +1,11 @@
-# Programme Bêta — mode d'emploi & ce qu'il reste à faire
+# Programme Bêta - mode d'emploi & ce qu'il reste à faire
 
 Architecture (validée avec Brian) : on **collecte** les emails sur `/beta`, puis
 on **lance une phase** manuellement depuis le back-office (bouton), ce qui envoie
 l'email d'accès à tous les inscrits en attente. Plusieurs vagues possibles.
 
 ## Parcours
-1. `/beta` (public, non indexé, lien diffusé manuellement — QR pharmacie, réseaux…) :
+1. `/beta` (public, non indexé, lien diffusé manuellement - QR pharmacie, réseaux…) :
    nom + prénom + email + case RGPD. **Aucun email envoyé à ce stade.**
 2. Back-office **CosmeCheckAdmin → Bêta test** : bouton **« Envoyer les invitations (N) »**
    → appelle le main app `POST /api/beta/invite` → envoie l'email d'accès + le lien
@@ -14,28 +14,28 @@ l'email d'accès à tous les inscrits en attente. Plusieurs vagues possibles.
 3. Le testeur crée son compte, teste, et remplit `/beta/retour?token=…`
    (déjà en ligne) → `status = feedback_recu`.
 
-## ✅ Lot 1 — FAIT (capture + lancement manuel + invitation + formulaire)
+## ✅ Lot 1 - FAIT (capture + lancement manuel + invitation + formulaire)
 - Main app : page `/beta` (nom+prénom+source+consentement), `POST /api/beta/invite`
   (sécurisé par `BETA_INVITE_SECRET`), email d'invitation enrichi (Brevo transac),
   formulaire `/beta/retour`.
 - Admin : page **Bêta test** (stats + bouton d'envoi + derniers inscrits).
 - DB : `beta_testers` (+ `last_name`, `invited_at`, `source`), `beta_feedback`.
-- Brevo : liste **« Cosme Check — Bêta testeurs » (id 6)**, attributs `PRENOM`,
+- Brevo : liste **« Cosme Check - Bêta testeurs » (id 6)**, attributs `PRENOM`,
   `BETA_FEEDBACK`, `BETA_URL`.
 
 ### Ce que tu dois faire pour activer le Lot 1
-1. **Vercel — projet main app (CosmetWiki)** : Environment Variables (Production+Preview) puis redeploy :
+1. **Vercel - projet main app (CosmetWiki)** : Environment Variables (Production+Preview) puis redeploy :
    `BREVO_API_KEY`, `BREVO_LIST_ALL_ID=4`, `BREVO_LIST_NEWSLETTER_ID=5`,
    `BREVO_BETA_LIST_ID=6`, `BREVO_SENDER_EMAIL=contact@cosme-check.com`,
    **`BETA_INVITE_SECRET=74f4fd02a299c31254ab9cfe3a9f36174e670ec67abc6bec`**
-2. **Vercel — projet admin (CosmeCheckAdmin)** : Environment Variables puis redeploy :
+2. **Vercel - projet admin (CosmeCheckAdmin)** : Environment Variables puis redeploy :
    **`BETA_INVITE_SECRET`** (la MÊME valeur) + **`BETA_MAIN_APP_URL=https://www.cosme-check.com`**
 3. C'est tout : le bouton d'envoi marche dès que les 2 apps sont déployées avec ces variables.
 
 > Plan gratuit Brevo = **300 emails/jour**. Le bouton envoie par lots de 150 ;
 > s'il reste des inscrits, reclique (le compteur « en attente » le montre).
 
-## ⏳ Lot 2 — À CONSTRUIRE (tracking + relances segmentées via CRON)
+## ⏳ Lot 2 - À CONSTRUIRE (tracking + relances segmentées via CRON)
 Pas encore fait. Objectif : relancer automatiquement selon l'ÉTAT du testeur.
 - **Tracking** : `/beta/go?token=` (clic), recoupage email → compte créé,
   activité (≥1 analyse/scan) → « a testé », `feedback_at`.

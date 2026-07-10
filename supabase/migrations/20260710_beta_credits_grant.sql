@@ -1,6 +1,6 @@
 -- 20260710_beta_credits_grant.sql
 -- ============================================================================
--- Programme BÊTA — 50 crédits NON renouvelables offerts aux bêta testeurs.
+-- Programme BÊTA - 50 crédits NON renouvelables offerts aux bêta testeurs.
 --
 -- On enrichit le trigger de création de compte handle_new_user() : si l'email
 -- du nouveau compte est inscrit au programme bêta (cosme_check.beta_testers,

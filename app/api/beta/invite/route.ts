@@ -4,7 +4,7 @@ import { SITE_URL } from "@/lib/siteUrl";
 import { addBetaContact, sendBetaInvitationEmail } from "@/lib/brevo";
 
 /**
- * POST /api/beta/invite — envoie l'email d'invitation aux bêta testeurs en
+ * POST /api/beta/invite - envoie l'email d'invitation aux bêta testeurs en
  * attente (`invited_at IS NULL`) et les marque comme invités. Déclenché par le
  * bouton « Envoyer les invitations (N) » du back-office CosmeCheckAdmin.
  *
