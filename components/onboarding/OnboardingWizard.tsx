@@ -188,14 +188,11 @@ export function OnboardingWizard({ initial, finalNext, firstName }: Props) {
 
   function goNext() {
     setError(null);
-    startTransition(async () => {
-      const res = await saveOnboardingStep(buildFormData(bloc));
-      if (!res.ok) {
-        setError(res.error);
-        return;
-      }
-      setIndex((i) => Math.min(i + 1, TOTAL - 1));
-    });
+    // UI instantanee : on avance tout de suite et on sauvegarde le bloc courant
+    // en arriere-plan (non bloquant). L'auto-save debounce persiste deja les
+    // changements, et finish() fait une sauvegarde finale avant la redirection.
+    void saveOnboardingStep(buildFormData(bloc)).catch(() => undefined);
+    setIndex((i) => Math.min(i + 1, TOTAL - 1));
   }
 
   function finish() {
