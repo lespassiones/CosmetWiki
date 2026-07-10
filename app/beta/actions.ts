@@ -13,21 +13,52 @@ import { sendBetaTemplateEmail, setBetaFeedbackDone } from "@/lib/brevo";
 
 export type BetaResult = { ok: true } | { ok: false; error: string };
 
-/** Inscription d'un bêta testeur : enregistre juste ses coordonnées + son
- *  consentement. AUCUN email n'est envoyé ici — l'invitation part plus tard,
- *  au « lancement » manuel (bouton admin → /api/beta/invite), pour ne traiter
- *  que les inscrits `invited_at IS NULL`. Permet plusieurs vagues de
- *  recrutement. */
-export async function joinBeta(formData: FormData): Promise<BetaResult> {
-  const firstName = String(formData.get("first_name") ?? "").trim().slice(0, 80);
-  const lastName = String(formData.get("last_name") ?? "").trim().slice(0, 80);
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const consent = Boolean(formData.get("consent"));
-  const source = String(formData.get("source") ?? "").trim().slice(0, 60) || null;
-  // Honeypot anti-bot : champ caché que seuls les bots remplissent.
-  const honeypot = String(formData.get("company") ?? "").trim();
+/** Réponse persona : l'intitulé de la question + la réponse, pour un affichage
+ *  auto-décrit dans l'admin (sans liste de labels dupliquée). */
+type IntakeAnswer = { q: string; a: string };
 
-  if (honeypot) return { ok: true }; // bot : on ne donne aucun indice
+/** Nettoie les réponses persona : clés `i1..i99`, objets { q, a } bornés,
+ *  max 60 entrées. Le contenu des questions vit côté client (BetaIntakeWizard)
+ *  et peut évoluer librement — c'est pourquoi on stocke aussi l'intitulé. */
+function sanitizeIntake(raw: unknown): Record<string, IntakeAnswer> | null {
+  if (!raw || typeof raw !== "object") return null;
+  const out: Record<string, IntakeAnswer> = {};
+  let n = 0;
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (n >= 60) break;
+    if (!/^i\d{1,2}$/.test(k) || !v || typeof v !== "object") continue;
+    const entry = v as Record<string, unknown>;
+    const q = String(entry.q ?? "").trim().slice(0, 300);
+    const a = String(entry.a ?? "").trim().slice(0, 2000);
+    if (q && a) {
+      out[k] = { q, a };
+      n++;
+    }
+  }
+  return Object.keys(out).length > 0 ? out : null;
+}
+
+/** Inscription d'un bêta testeur : coordonnées + consentement + réponses du
+ *  questionnaire persona (intake). AUCUN email n'est envoyé ici — l'invitation
+ *  part plus tard, au « lancement » manuel (bouton admin → /api/beta/invite).
+ *  Permet plusieurs vagues de recrutement. */
+export async function joinBeta(input: {
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  consent: boolean;
+  source?: string | null;
+  intake?: Record<string, { q: string; a: string }>;
+  /** Honeypot anti-bot : rempli uniquement par les bots. */
+  honeypot?: string;
+}): Promise<BetaResult> {
+  const firstName = String(input.firstName ?? "").trim().slice(0, 80);
+  const lastName = String(input.lastName ?? "").trim().slice(0, 80);
+  const email = String(input.email ?? "").trim().toLowerCase();
+  const consent = Boolean(input.consent);
+  const source = String(input.source ?? "").trim().slice(0, 60) || null;
+
+  if (input.honeypot) return { ok: true }; // bot : on ne donne aucun indice
   if (!email.includes("@") || email.length < 5) {
     return { ok: false, error: "Email invalide." };
   }
@@ -35,25 +66,26 @@ export async function joinBeta(formData: FormData): Promise<BetaResult> {
     return { ok: false, error: "Tu dois accepter d'être contacté pour rejoindre la bêta." };
   }
 
+  const intake = sanitizeIntake(input.intake);
   const sb = supabaseService();
 
   // Upsert sur l'email → un inscrit qui revient ne crée pas de doublon. On ne
   // touche PAS `invited_at` : s'il a déjà été invité, il ne le sera pas 2×.
+  const row: Record<string, unknown> = {
+    email,
+    first_name: firstName || null,
+    last_name: lastName || null,
+    consent: true,
+    consent_at: new Date().toISOString(),
+    source,
+    updated_at: new Date().toISOString(),
+  };
+  if (intake) row.intake = intake;
+
   const { error } = await sb
     .schema("cosme_check")
     .from("beta_testers")
-    .upsert(
-      {
-        email,
-        first_name: firstName || null,
-        last_name: lastName || null,
-        consent: true,
-        consent_at: new Date().toISOString(),
-        source,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "email" },
-    );
+    .upsert(row, { onConflict: "email" });
 
   if (error) {
     console.warn("[beta] upsert failed:", error.message);
@@ -79,18 +111,20 @@ const ANSWER_KEYS = new Set(Array.from({ length: 20 }, (_, i) => `q${i + 1}`));
  */
 export async function saveBetaFeedback(input: {
   token: string;
-  answers: Record<string, string>;
+  answers: Record<string, { q: string; a: string }>;
   final: boolean;
 }): Promise<BetaResult> {
   const token = (input.token ?? "").trim();
   if (!token) return { ok: false, error: "Lien invalide." };
 
-  // Ne garder que q1..q20, valeurs texte bornées.
-  const clean: Record<string, string> = {};
+  // Ne garder que q1..q20, en stockant l'intitulé + la réponse ({ q, a }) pour
+  // un affichage auto-décrit dans l'admin.
+  const clean: Record<string, { q: string; a: string }> = {};
   for (const [k, v] of Object.entries(input.answers ?? {})) {
-    if (!ANSWER_KEYS.has(k)) continue;
-    const val = String(v ?? "").trim().slice(0, 2000);
-    if (val) clean[k] = val;
+    if (!ANSWER_KEYS.has(k) || !v || typeof v !== "object") continue;
+    const q = String((v as { q?: unknown }).q ?? "").trim().slice(0, 300);
+    const a = String((v as { a?: unknown }).a ?? "").trim().slice(0, 2000);
+    if (a) clean[k] = { q, a };
   }
 
   const sb = supabaseService();

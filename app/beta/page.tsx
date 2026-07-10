@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BetaSignupForm } from "@/components/beta/BetaSignupForm";
+import { BetaIntakeWizard } from "@/components/beta/BetaIntakeWizard";
 
 // Page volontairement NON indexée : elle n'est pas listée sur le site, on
 // diffuse son lien manuellement (QR code pharmacie, réseaux sociaux, etc.).
@@ -27,12 +27,13 @@ export default async function BetaPage({ searchParams }: Props) {
           </h1>
           <p className="mt-3 text-[15px] leading-6 text-[#6B7280]">
             Merci de vouloir rejoindre l&apos;équipe bêta de <strong className="text-[#111111]">Cosme Check</strong>.
-            Tu es ici parce que tu veux tester l&apos;app en avant-première. Laisse-nous
-            ton nom et ton email : on te préviendra <strong className="text-[#111111]">dès que la phase de
-            test sera lancée</strong>, avec ton accès et le nécessaire pour tester.
+            Réponds à ce court questionnaire : on te préviendra <strong className="text-[#111111]">dès que la
+            phase de test sera lancée</strong>, avec ton accès. En échange de tes réponses, tu
+            bénéficieras de <strong className="text-[#111111]">50 crédits offerts</strong> pour tester
+            gratuitement. 💛
           </p>
           <div className="mt-6">
-            <BetaSignupForm source={source} />
+            <BetaIntakeWizard source={source} />
           </div>
         </div>
       </div>

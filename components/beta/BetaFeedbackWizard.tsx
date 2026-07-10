@@ -199,11 +199,12 @@ export function BetaFeedbackWizard({ token }: { token: string }) {
       setError("Merci de répondre aux questions obligatoires avant de continuer.");
       return;
     }
-    // Réponses de l'étape courante uniquement (le serveur fusionne).
-    const stepAnswers: Record<string, string> = {};
+    // Réponses de l'étape courante uniquement (le serveur fusionne). On joint
+    // l'intitulé à chaque réponse ({ q, a }) pour l'affichage admin.
+    const stepAnswers: Record<string, { q: string; a: string }> = {};
     for (const q of step.questions) {
       const v = (answers[q.id] ?? "").trim();
-      if (v && visible(q)) stepAnswers[q.id] = v;
+      if (v && visible(q)) stepAnswers[q.id] = { q: q.label, a: v };
     }
     startTransition(async () => {
       const res = await saveBetaFeedback({ token, answers: stepAnswers, final: isLast });
