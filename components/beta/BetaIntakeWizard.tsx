@@ -2,14 +2,13 @@
 
 /**
  * Questionnaire d'inscription bêta (page /beta), AVANT d'obtenir l'accès.
- * DEUX étapes seulement :
- *   1. Identité : prénom, nom, email, consentement RGPD.
- *   2. Questions persona (adaptées du guide « Validation Persona »), regroupées
- *      par thème sur un seul écran aéré.
+ * Le composant pilote TOUTE la mise en page :
+ *   - Étape 1 : split-screen. Gauche = branding (logo, accroche, aperçu app),
+ *     droite = identité (prénom, nom, email, consentement RGPD).
+ *   - Étape 2 : colonne centrée, SANS branding ni image (juste les questions).
  * Tout est collecté côté client puis envoyé EN UNE FOIS via joinBeta (le testeur
- * n'existe pas avant la soumission). Réponses stockées en jsonb (clés i1..iN),
- * chacune avec son intitulé pour un affichage auto-décrit dans l'admin.
- * Questions DATA-DRIVEN (INTAKE_GROUPS) : faciles à remplacer.
+ * n'existe pas avant la soumission). Réponses stockées en jsonb, chacune avec
+ * son intitulé pour un affichage auto-décrit dans l'admin.
  */
 
 import { useState, useTransition } from "react";
@@ -59,8 +58,6 @@ const INTAKE_QUESTIONS: Q[] = [
 const INTAKE_LABELS: Record<string, string> = {};
 INTAKE_QUESTIONS.forEach((q) => (INTAKE_LABELS[q.id] = q.label));
 
-const ALL_QUESTIONS = INTAKE_QUESTIONS;
-
 export function BetaIntakeWizard({ source }: { source?: string }) {
   const router = useRouter();
   const [step, setStep] = useState<0 | 1>(0);
@@ -83,11 +80,25 @@ export function BetaIntakeWizard({ source }: { source?: string }) {
     });
   }
 
+  function goToStep2() {
+    setError(null);
+    if (!email.includes("@")) {
+      setError("Merci d'indiquer un email valide.");
+      return;
+    }
+    if (!consent) {
+      setError("Merci d'accepter d'être contacté pour rejoindre la bêta.");
+      return;
+    }
+    setStep(1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   function submit() {
     setError(null);
-    for (const q of ALL_QUESTIONS) {
+    for (const q of INTAKE_QUESTIONS) {
       if (q.required && !(answers[q.id] ?? "").trim()) {
-        setError("Merci de répondre aux questions obligatoires.");
+        setError("Merci de répondre à toutes les questions.");
         return;
       }
     }
@@ -106,38 +117,21 @@ export function BetaIntakeWizard({ source }: { source?: string }) {
     });
   }
 
-  function goToStep2() {
-    setError(null);
-    if (!email.includes("@")) {
-      setError("Merci d'indiquer un email valide.");
-      return;
-    }
-    if (!consent) {
-      setError("Merci d'accepter d'être contacté pour rejoindre la bêta.");
-      return;
-    }
-    setStep(1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  return (
-    <div>
-      {/* Progression : deux traits fins */}
+  // ─── Bloc formulaire (progression + contenu de l'étape + nav), commun aux
+  //     deux mises en page. ────────────────────────────────────────────────
+  const form = (
+    <div className="w-full">
       <div className="mb-8 flex items-center gap-2">
         <span className="h-[3px] flex-1 rounded-full bg-[#111111]" />
         <span className={`h-[3px] flex-1 rounded-full transition-colors ${step === 1 ? "bg-[#111111]" : "bg-[#E5E5E0]"}`} />
-        <span className="ml-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA3AF]">
-          {step + 1} / 2
-        </span>
+        <span className="ml-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA3AF]">{step + 1} / 2</span>
       </div>
 
       {step === 0 ? (
         <div className="space-y-6">
           <div>
             <h2 className="text-[15px] font-semibold text-[#111111]">Tes informations</h2>
-            <p className="mt-1 text-[13px] leading-5 text-[#9CA3AF]">
-              Pour te prévenir dès l'ouverture et t'envoyer ton accès.
-            </p>
+            <p className="mt-1 text-[13px] leading-5 text-[#9CA3AF]">Pour te prévenir dès l'ouverture et t'envoyer ton accès.</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Prénom" value={firstName} onChange={setFirstName} autoComplete="given-name" />
@@ -165,9 +159,7 @@ export function BetaIntakeWizard({ source }: { source?: string }) {
         <div className="space-y-8">
           <div>
             <h2 className="text-[15px] font-semibold text-[#111111]">Ton expérience</h2>
-            <p className="mt-1 text-[13px] leading-5 text-[#9CA3AF]">
-              Réponds librement, il n'y a pas de mauvaise réponse.
-            </p>
+            <p className="mt-1 text-[13px] leading-5 text-[#9CA3AF]">Réponds librement, il n'y a pas de mauvaise réponse.</p>
           </div>
           {INTAKE_QUESTIONS.map((q) => (
             <div key={q.id}>
@@ -214,11 +206,7 @@ export function BetaIntakeWizard({ source }: { source?: string }) {
         </div>
       )}
 
-      {error && (
-        <p role="alert" className="mt-6 text-[13px] font-medium text-[#B91C1C]">
-          {error}
-        </p>
-      )}
+      {error && <p role="alert" className="mt-6 text-[13px] font-medium text-[#B91C1C]">{error}</p>}
 
       <div className="mt-9 flex items-center gap-4">
         {step === 1 && (
@@ -241,6 +229,47 @@ export function BetaIntakeWizard({ source }: { source?: string }) {
         </button>
       </div>
     </div>
+  );
+
+  // ─── Étape 2 : colonne centrée, sans branding ni image. ───────────────────
+  if (step === 1) {
+    return (
+      <main className="min-h-svh bg-white">
+        <div className="mx-auto max-w-xl px-5 py-14 sm:px-8">{form}</div>
+      </main>
+    );
+  }
+
+  // ─── Étape 1 : split-screen avec branding à gauche. ───────────────────────
+  return (
+    <main className="min-h-svh bg-white lg:grid lg:grid-cols-2">
+      <section className="relative flex flex-col justify-center overflow-hidden bg-[#FAFAF7] px-6 pt-14 sm:px-10 lg:px-16 lg:py-16">
+        <div className="mx-auto w-full max-w-[440px] lg:mx-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/image/logo-cc-dots.png" alt="Cosme Check" className="mb-9 h-[28px] w-auto" />
+          <h1 className="text-[34px] font-bold leading-[1.04] tracking-tight text-[#111111] sm:text-[44px]">
+            Deviens
+            <br />
+            bêta testeur.
+          </h1>
+          <p className="mt-5 max-w-[27rem] text-[16px] leading-relaxed text-[#6B7280]">
+            Teste Cosme Check en avant-première et aide-nous à le rendre meilleur. En échange de tes
+            réponses, tu reçois <strong className="font-semibold text-[#111111]">50 crédits offerts</strong> pour
+            tester gratuitement.
+          </p>
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/image/landing2/newhero.webp"
+          alt="Aperçu de l'application Cosme Check"
+          className="mx-auto mt-9 w-[190px] lg:mt-6 lg:w-[360px] lg:self-center"
+        />
+      </section>
+
+      <section className="flex items-center justify-center bg-white px-5 py-14 sm:px-10">
+        <div className="w-full max-w-md">{form}</div>
+      </section>
+    </main>
   );
 }
 
