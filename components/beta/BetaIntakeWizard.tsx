@@ -2,15 +2,14 @@
 
 /**
  * Questionnaire d'inscription bêta (page /beta), AVANT d'obtenir l'accès.
- * Étape 0 = identité (prénom, nom, email, consentement RGPD). Étapes suivantes
- * = questions persona (adaptées du guide « Validation Persona »). Tout est
- * collecté côté client puis envoyé EN UNE FOIS via joinBeta (le testeur n'existe
- * pas encore avant la soumission).
- *
- * Questions DATA-DRIVEN (tableau INTAKE_STEPS) → faciles à remplacer quand la
- * liste finale sera prête. Les réponses sont stockées en jsonb (clés i1..iN).
- * Aucune question persona n'est obligatoire pour l'instant (mettre
- * `required: true` pour en rendre une bloquante).
+ * DEUX étapes seulement :
+ *   1. Identité : prénom, nom, email, consentement RGPD.
+ *   2. Questions persona (adaptées du guide « Validation Persona »), regroupées
+ *      par thème sur un seul écran aéré.
+ * Tout est collecté côté client puis envoyé EN UNE FOIS via joinBeta (le testeur
+ * n'existe pas avant la soumission). Réponses stockées en jsonb (clés i1..iN),
+ * chacune avec son intitulé pour un affichage auto-décrit dans l'admin.
+ * Questions DATA-DRIVEN (INTAKE_GROUPS) : faciles à remplacer.
  */
 
 import { useState, useTransition } from "react";
@@ -21,12 +20,12 @@ type Q =
   | { id: string; type: "short" | "textarea"; label: string; required?: boolean; placeholder?: string }
   | { id: string; type: "radio" | "checkbox"; label: string; required?: boolean; options: string[] };
 
-const INTAKE_STEPS: { title: string; questions: Q[] }[] = [
+const INTAKE_GROUPS: { title: string; questions: Q[] }[] = [
   {
     title: "Un peu de contexte",
     questions: [
       { id: "i1", type: "radio", label: "Quel est ton âge ?", options: ["Moins de 20 ans", "21-30 ans", "31-40 ans", "41-50 ans", "Plus de 50 ans"] },
-      { id: "i2", type: "short", label: "Ta profession ?", placeholder: "ex : étudiante, infirmière…" },
+      { id: "i2", type: "short", label: "Ta profession ?", placeholder: "ex : étudiante, infirmière..." },
       { id: "i3", type: "textarea", label: "Comment décrirais-tu ta peau et tes cheveux ?" },
       { id: "i4", type: "textarea", label: "As-tu des problématiques ou des objectifs particuliers ?" },
     ],
@@ -71,16 +70,14 @@ const INTAKE_STEPS: { title: string; questions: Q[] }[] = [
   },
 ];
 
-// Map id → intitulé, pour stocker chaque réponse AVEC sa question (l'admin
-// affiche alors { question, réponse } sans dépendre d'une liste dupliquée).
 const INTAKE_LABELS: Record<string, string> = {};
-INTAKE_STEPS.forEach((s) => s.questions.forEach((q) => (INTAKE_LABELS[q.id] = q.label)));
+INTAKE_GROUPS.forEach((g) => g.questions.forEach((q) => (INTAKE_LABELS[q.id] = q.label)));
 
-const TOTAL_STEPS = INTAKE_STEPS.length + 1; // +1 pour l'étape identité
+const ALL_QUESTIONS = INTAKE_GROUPS.flatMap((g) => g.questions);
 
 export function BetaIntakeWizard({ source }: { source?: string }) {
   const router = useRouter();
-  const [stepIndex, setStepIndex] = useState(0); // 0 = identité
+  const [step, setStep] = useState<0 | 1>(0);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -89,14 +86,9 @@ export function BetaIntakeWizard({ source }: { source?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const isIdentityStep = stepIndex === 0;
-  const isLast = stepIndex === TOTAL_STEPS - 1;
-  const personaStep = isIdentityStep ? null : INTAKE_STEPS[stepIndex - 1];
-
   function setAnswer(id: string, value: string) {
     setAnswers((a) => ({ ...a, [id]: value }));
   }
-
   function toggleCheckbox(id: string, opt: string) {
     setAnswers((a) => {
       const current = (a[id] ?? "").split(" · ").filter(Boolean);
@@ -105,47 +97,21 @@ export function BetaIntakeWizard({ source }: { source?: string }) {
     });
   }
 
-  function validateStep(): string | null {
-    if (isIdentityStep) {
-      if (!email.includes("@")) return "Merci d'indiquer un email valide.";
-      if (!consent) return "Tu dois accepter d'être contacté pour rejoindre la bêta.";
-      return null;
-    }
-    for (const q of personaStep!.questions) {
+  function submit() {
+    setError(null);
+    for (const q of ALL_QUESTIONS) {
       if (q.required && !(answers[q.id] ?? "").trim()) {
-        return "Merci de répondre aux questions obligatoires avant de continuer.";
+        setError("Merci de répondre aux questions obligatoires.");
+        return;
       }
     }
-    return null;
-  }
-
-  function next() {
-    setError(null);
-    const err = validateStep();
-    if (err) {
-      setError(err);
-      return;
-    }
-    if (!isLast) {
-      setStepIndex((i) => i + 1);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-    // Dernière étape → envoi unique. On joint l'intitulé à chaque réponse.
     const intake: Record<string, { q: string; a: string }> = {};
     for (const [id, a] of Object.entries(answers)) {
       const val = (a ?? "").trim();
       if (val && INTAKE_LABELS[id]) intake[id] = { q: INTAKE_LABELS[id], a: val };
     }
     startTransition(async () => {
-      const res = await joinBeta({
-        firstName,
-        lastName,
-        email,
-        consent,
-        source: source ?? null,
-        intake,
-      });
+      const res = await joinBeta({ firstName, lastName, email, consent, source: source ?? null, intake });
       if (!res.ok) {
         setError(res.error);
         return;
@@ -154,39 +120,54 @@ export function BetaIntakeWizard({ source }: { source?: string }) {
     });
   }
 
-  const progressPct = ((stepIndex + 1) / TOTAL_STEPS) * 100;
+  function goToStep2() {
+    setError(null);
+    if (!email.includes("@")) {
+      setError("Merci d'indiquer un email valide.");
+      return;
+    }
+    if (!consent) {
+      setError("Merci d'accepter d'être contacté pour rejoindre la bêta.");
+      return;
+    }
+    setStep(1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   return (
     <div>
-      <div className="mb-1 flex items-center justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9CA3AF]">
-          Étape {stepIndex + 1} / {TOTAL_STEPS}
-        </p>
-        <p className="text-[12px] font-medium text-[#6B7280]">
-          {isIdentityStep ? "Tes infos" : personaStep!.title}
-        </p>
-      </div>
-      <div className="mb-6 h-[5px] w-full overflow-hidden rounded-full bg-[#EDEDED]">
-        <div className="h-full rounded-full bg-[#111111] transition-all duration-300" style={{ width: `${progressPct}%` }} />
+      {/* Progression : deux traits fins */}
+      <div className="mb-8 flex items-center gap-2">
+        <span className="h-[3px] flex-1 rounded-full bg-[#111111]" />
+        <span className={`h-[3px] flex-1 rounded-full transition-colors ${step === 1 ? "bg-[#111111]" : "bg-[#E5E5E0]"}`} />
+        <span className="ml-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA3AF]">
+          {step + 1} / 2
+        </span>
       </div>
 
-      {isIdentityStep ? (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+      {step === 0 ? (
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-[15px] font-semibold text-[#111111]">Tes informations</h2>
+            <p className="mt-1 text-[13px] leading-5 text-[#9CA3AF]">
+              Pour te prévenir dès l'ouverture et t'envoyer ton accès.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <Field label="Prénom" value={firstName} onChange={setFirstName} autoComplete="given-name" />
             <Field label="Nom" value={lastName} onChange={setLastName} autoComplete="family-name" />
           </div>
-          <Field label="Email" value={email} onChange={setEmail} type="email" autoComplete="email" required />
-          <label className="flex cursor-pointer items-start gap-3">
+          <Field label="Email" value={email} onChange={setEmail} type="email" autoComplete="email" />
+          <label className="flex cursor-pointer items-start gap-3 pt-1">
             <input
               type="checkbox"
               checked={consent}
               onChange={(e) => setConsent(e.target.checked)}
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#D1D5DB] accent-[#111111]"
             />
-            <span className="text-[12px] leading-4 text-[#6B7280]">
-              J&apos;accepte que mon adresse email soit utilisée pour être contacté afin de
-              tester l&apos;application Cosme Check (accès, retours et relances), conformément à la{" "}
+            <span className="text-[12px] leading-5 text-[#6B7280]">
+              J'accepte que mon adresse email soit utilisée pour être contacté afin de tester
+              l'application Cosme Check (accès, retours et relances), conformément à la{" "}
               <a href="/confidentialite" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="font-medium text-[#111111] underline underline-offset-2">
                 politique de confidentialité
               </a>
@@ -195,85 +176,83 @@ export function BetaIntakeWizard({ source }: { source?: string }) {
           </label>
         </div>
       ) : (
-        <div className="space-y-7">
-          {personaStep!.questions.map((q) => (
-            <div key={q.id}>
-              <p className="mb-2 text-[14px] font-medium leading-5 text-[#111111]">
-                {q.label}
-                {q.required && <span className="text-[#E11D48]"> *</span>}
+        <div className="space-y-10">
+          {INTAKE_GROUPS.map((group) => (
+            <div key={group.title} className="space-y-7">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF]">
+                {group.title}
               </p>
-              {q.type === "radio" && (
-                <div className="flex flex-col gap-2">
-                  {q.options.map((opt) => {
-                    const selected = answers[q.id] === opt;
-                    return (
-                      <OptionButton key={opt} label={opt} selected={selected} onClick={() => setAnswer(q.id, selected ? "" : opt)} />
-                    );
-                  })}
+              {group.questions.map((q) => (
+                <div key={q.id}>
+                  <p className="mb-2.5 text-[14px] font-medium leading-5 text-[#111111]">
+                    {q.label}
+                    {q.required && <span className="text-[#111111]"> *</span>}
+                  </p>
+                  {q.type === "radio" && (
+                    <div className="flex flex-col gap-2">
+                      {q.options.map((opt) => (
+                        <OptionButton key={opt} label={opt} selected={answers[q.id] === opt} onClick={() => setAnswer(q.id, answers[q.id] === opt ? "" : opt)} />
+                      ))}
+                    </div>
+                  )}
+                  {q.type === "checkbox" && (
+                    <div className="flex flex-col gap-2">
+                      {q.options.map((opt) => (
+                        <OptionButton key={opt} label={opt} selected={(answers[q.id] ?? "").split(" · ").includes(opt)} multi onClick={() => toggleCheckbox(q.id, opt)} />
+                      ))}
+                    </div>
+                  )}
+                  {q.type === "short" && (
+                    <input
+                      type="text"
+                      value={answers[q.id] ?? ""}
+                      onChange={(e) => setAnswer(q.id, e.target.value)}
+                      maxLength={2000}
+                      placeholder={q.placeholder}
+                      className="w-full border-0 border-b border-[#E5E5E0] bg-transparent px-0 py-2 text-[15px] text-[#111111] placeholder:text-[#C4C4BE] focus:border-[#111111] focus:outline-none"
+                    />
+                  )}
+                  {q.type === "textarea" && (
+                    <textarea
+                      value={answers[q.id] ?? ""}
+                      onChange={(e) => setAnswer(q.id, e.target.value)}
+                      rows={2}
+                      maxLength={2000}
+                      placeholder="Ta réponse..."
+                      className="w-full resize-none border-0 border-b border-[#E5E5E0] bg-transparent px-0 py-2 text-[15px] leading-6 text-[#111111] placeholder:text-[#C4C4BE] focus:border-[#111111] focus:outline-none"
+                    />
+                  )}
                 </div>
-              )}
-              {q.type === "checkbox" && (
-                <div className="flex flex-col gap-2">
-                  {q.options.map((opt) => {
-                    const selected = (answers[q.id] ?? "").split(" · ").includes(opt);
-                    return (
-                      <OptionButton key={opt} label={opt} selected={selected} multi onClick={() => toggleCheckbox(q.id, opt)} />
-                    );
-                  })}
-                </div>
-              )}
-              {q.type === "short" && (
-                <input
-                  type="text"
-                  value={answers[q.id] ?? ""}
-                  onChange={(e) => setAnswer(q.id, e.target.value)}
-                  maxLength={2000}
-                  className="w-full rounded-xl border-[1.5px] border-[#E5E5E0] bg-white px-4 py-3 text-[14px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none"
-                />
-              )}
-              {q.type === "textarea" && (
-                <textarea
-                  value={answers[q.id] ?? ""}
-                  onChange={(e) => setAnswer(q.id, e.target.value)}
-                  rows={3}
-                  maxLength={2000}
-                  placeholder="Ta réponse…"
-                  className="w-full resize-none rounded-xl border-[1.5px] border-[#E5E5E0] bg-white px-4 py-3 text-[14px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none"
-                />
-              )}
+              ))}
             </div>
           ))}
         </div>
       )}
 
       {error && (
-        <p role="alert" className="mt-5 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-sm text-[#E11D48]">
+        <p role="alert" className="mt-6 text-[13px] font-medium text-[#B91C1C]">
           {error}
         </p>
       )}
 
-      <div className="mt-7 flex items-center gap-3">
-        {stepIndex > 0 && (
+      <div className="mt-9 flex items-center gap-4">
+        {step === 1 && (
           <button
             type="button"
-            onClick={() => {
-              setError(null);
-              setStepIndex((i) => i - 1);
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
+            onClick={() => { setError(null); setStep(0); window.scrollTo({ top: 0, behavior: "smooth" }); }}
             disabled={pending}
-            className="rounded-xl bg-white px-5 py-3 text-sm font-medium text-[#111111] ring-1 ring-[#E5E7EB] transition hover:bg-[#F9FAFB] disabled:opacity-50"
+            className="text-[14px] font-medium text-[#6B7280] transition hover:text-[#111111] disabled:opacity-50"
           >
             Retour
           </button>
         )}
         <button
           type="button"
-          onClick={next}
-          disabled={pending || (isIdentityStep && !consent)}
-          className="flex-1 rounded-xl bg-[#111111] py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={step === 0 ? goToStep2 : submit}
+          disabled={pending || (step === 0 && !consent)}
+          className="ml-auto inline-flex h-[52px] items-center justify-center rounded-full bg-[#111111] px-8 text-[15px] font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {pending ? "Envoi…" : isLast ? "Rejoindre la bêta" : "Suivant"}
+          {pending ? "Envoi..." : step === 0 ? "Continuer" : "Rejoindre la bêta"}
         </button>
       </div>
     </div>
@@ -286,25 +265,22 @@ function Field({
   onChange,
   type = "text",
   autoComplete,
-  required,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   type?: string;
   autoComplete?: string;
-  required?: boolean;
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-xs font-medium text-[#6B7280]">{label}</span>
+      <span className="mb-1.5 block text-[12px] font-medium text-[#6B7280]">{label}</span>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         autoComplete={autoComplete}
-        required={required}
-        className="w-full rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#111111] outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111]"
+        className="w-full border-0 border-b border-[#E5E5E0] bg-transparent px-0 py-2 text-[15px] text-[#111111] focus:border-[#111111] focus:outline-none"
       />
     </label>
   );
@@ -326,16 +302,16 @@ function OptionButton({
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className="flex w-full items-center justify-between rounded-xl border-[1.5px] px-4 py-3 text-left text-[14px] transition"
-      style={selected ? { backgroundColor: "#111111", borderColor: "#111111", color: "#fff" } : { backgroundColor: "#fff", borderColor: "#E5E5E0", color: "#111111" }}
+      className="flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-[14px] transition"
+      style={selected ? { borderColor: "#111111", background: "#111111", color: "#fff" } : { borderColor: "#E5E5E0", background: "#fff", color: "#111111" }}
     >
-      <span>{label}</span>
       <span
-        className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center border-2 ${multi ? "rounded-md" : "rounded-full"}`}
-        style={{ borderColor: selected ? "#fff" : "#D1D5DB", backgroundColor: selected && multi ? "#fff" : "transparent" }}
+        className={`flex h-[16px] w-[16px] shrink-0 items-center justify-center border ${multi ? "rounded" : "rounded-full"}`}
+        style={{ borderColor: selected ? "#fff" : "#D1D5DB" }}
       >
-        {selected && (multi ? <span className="text-[11px] font-bold text-[#111111]">✓</span> : <span className="h-2 w-2 rounded-full bg-white" />)}
+        {selected && <span className={`bg-white ${multi ? "h-[8px] w-[8px] rounded-[1px]" : "h-[7px] w-[7px] rounded-full"}`} />}
       </span>
+      {label}
     </button>
   );
 }
