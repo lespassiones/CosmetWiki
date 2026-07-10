@@ -7,7 +7,7 @@
  * retour reçu → merci automatique + arrêt des relances pour ce testeur.
  *
  * Les captures d'écran (optionnelles) sont servies depuis
- * /public/beta-captures/qN.png — un fichier absent masque simplement l'image.
+ * /public/beta-captures/qN.webp — un fichier absent masque simplement l'image.
  */
 
 import { useState, useTransition } from "react";
@@ -72,7 +72,7 @@ const STEPS: Step[] = [
         label: "As-tu renseigné la session « RESTRICTIONS » ?",
         type: "textarea",
         required: true,
-        image: "/beta-captures/q7.png",
+        image: "/beta-captures/q7.webp",
       },
       {
         id: "q8",
@@ -80,7 +80,7 @@ const STEPS: Step[] = [
           "Les fonctionnalités, telles qu'elles sont présentées à l'accueil, ont-elles facilité ton expérience ?",
         type: "textarea",
         required: true,
-        image: "/beta-captures/q8.png",
+        image: "/beta-captures/q8.webp",
       },
     ],
   },
@@ -93,28 +93,28 @@ const STEPS: Step[] = [
           "Quel mode d'analyse as-tu le plus utilisé ou était le plus pratique pour toi ? As-tu rencontré des difficultés ? Si oui, explique-nous.",
         type: "textarea",
         required: true,
-        image: "/beta-captures/q9.png",
+        image: "/beta-captures/q9.webp",
       },
       {
         id: "q10",
         label: "Quel est ton avis sur les résultats des analyses tels qu'ils sont présentés (forme et fond) ?",
         type: "textarea",
         required: true,
-        image: "/beta-captures/q10.png",
+        image: "/beta-captures/q10.webp",
       },
       {
         id: "q11",
         label: "Que penses-tu des alternatives proposées ?",
         type: "textarea",
         required: true,
-        image: "/beta-captures/q11.png",
+        image: "/beta-captures/q11.webp",
       },
       {
         id: "q12",
         label: "Qu'as-tu pensé de la fonctionnalité dédiée à l'analyse des promesses ?",
         type: "textarea",
         required: true,
-        image: "/beta-captures/q12.png",
+        image: "/beta-captures/q12.webp",
       },
       {
         id: "q13",
@@ -122,7 +122,7 @@ const STEPS: Step[] = [
           "Que penses-tu de la possibilité, après l'analyse d'un produit, de pouvoir analyser la « PROMESSE » et d'ajouter le produit à « TA ROUTINE » ?",
         type: "textarea",
         required: true,
-        image: "/beta-captures/q13.png",
+        image: "/beta-captures/q13.webp",
       },
     ],
   },
@@ -135,7 +135,7 @@ const STEPS: Step[] = [
           "Quel est ton avis sur la fonctionnalité « MA ROUTINE », ton exposition cumulée et les suggestions intelligentes ?",
         type: "textarea",
         required: true,
-        image: "/beta-captures/q14.png",
+        image: "/beta-captures/q14.webp",
       },
       {
         id: "q15",
@@ -143,7 +143,7 @@ const STEPS: Step[] = [
           "Que penses-tu de la possibilité de comparer 2 produits selon ton profil (session historique) et de pouvoir ajouter des produits en favoris ?",
         type: "textarea",
         required: true,
-        image: "/beta-captures/q15.png",
+        image: "/beta-captures/q15.webp",
       },
       {
         id: "q16",
@@ -151,7 +151,7 @@ const STEPS: Step[] = [
           "Quel est ton avis sur la possibilité de bénéficier des conseils personnalisés du « BEAUTY ADVISOR » et de pouvoir également retrouver l'historique de tes conversations ?",
         type: "textarea",
         required: true,
-        image: "/beta-captures/q16.png",
+        image: "/beta-captures/q16.webp",
       },
       { id: "q17", label: "As-tu rencontré des difficultés ? Si oui, lesquelles ?", type: "textarea", required: true },
       { id: "q18", label: "As-tu des recommandations à nous faire ? Si oui, lesquelles ?", type: "textarea", required: true },

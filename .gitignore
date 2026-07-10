@@ -50,3 +50,6 @@ data/raw/
 
 # Supabase CLI local state (project link, generated types, etc.)
 supabase/.temp/
+
+# Originaux des captures bêta (non optimisés) : optimisés dans public/beta-captures/
+public/Beta/
