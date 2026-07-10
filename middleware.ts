@@ -23,6 +23,7 @@ const SKIP_AUTH_PREFIXES = [
   "/i/",
   "/a/", // analyses partagées en lecture publique (jamais de session lue)
   "/maintenance",
+  "/beta", // funnel bêta public (capture email + formulaire de retour)
 ];
 
 function isSkipAuthPath(pathname: string): boolean {

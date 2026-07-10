@@ -160,3 +160,177 @@ export async function syncBrevoContact(
     return { synced: false, reason: "error" };
   }
 }
+
+// ─── Programme BÊTA ─────────────────────────────────────────────────────────
+// Liste dédiée « Cosme Check — Bêta testeurs » + email transactionnel d'accès.
+// L'attribut BETA_FEEDBACK (booléen) sert de drapeau « retour donné » : laissé
+// absent à l'inscription (= relance possible) puis passé à true quand le
+// testeur remplit /beta/retour → le scénario d'automatisation Brevo lit ce
+// drapeau pour arrêter les relances. Tout est fail-open.
+
+const LIST_BETA_NAME = "Cosme Check — Bêta testeurs";
+let cachedBetaListId: number | null | undefined;
+
+function betaSender(): { name: string; email: string } {
+  return {
+    name: "Cosme Check",
+    email: process.env.BREVO_SENDER_EMAIL ?? "contact@cosme-check.com",
+  };
+}
+
+async function resolveBetaListId(apiKey: string): Promise<number | null> {
+  if (cachedBetaListId !== undefined) return cachedBetaListId;
+  let id = parseId(process.env.BREVO_BETA_LIST_ID);
+  if (id == null) {
+    try {
+      const res = await fetchWithTimeout(
+        `${API_BASE}/contacts/lists?limit=50&offset=0`,
+        { headers: apiHeaders(apiKey) },
+      );
+      if (res.ok) {
+        const data = (await res.json()) as { lists?: { id: number; name: string }[] };
+        id = data.lists?.find((l) => l.name === LIST_BETA_NAME)?.id ?? null;
+      }
+    } catch (e) {
+      console.warn("[brevo] resolveBetaListId error:", e);
+    }
+  }
+  cachedBetaListId = id;
+  return cachedBetaListId;
+}
+
+/** Ajoute (ou met à jour) le contact dans la liste « Bêta testeurs ».
+ *  On NE touche PAS BETA_FEEDBACK ici → il reste absent = éligible aux relances
+ *  (ne réinitialise pas un testeur ayant déjà répondu s'il se réinscrit). */
+export async function addBetaContact(input: {
+  email: string;
+  firstName?: string | null;
+  /** Lien de retour personnalisé (avec token) → stocké dans l'attribut
+   *  BETA_URL pour que l'email de relance Brevo puisse l'injecter via
+   *  {{ contact.BETA_URL }}. */
+  feedbackUrl?: string | null;
+}): Promise<BrevoSyncResult> {
+  try {
+    const apiKey = process.env.BREVO_API_KEY;
+    if (!apiKey) return { synced: false, reason: "no-api-key" };
+
+    const email = input.email.trim().toLowerCase();
+    if (!email.includes("@")) return { synced: false, reason: "bad-email" };
+
+    const listId = await resolveBetaListId(apiKey);
+    const base: Record<string, unknown> = {
+      email,
+      updateEnabled: true,
+      ...(listId != null ? { listIds: [listId] } : {}),
+    };
+    const firstName = (input.firstName ?? "").trim();
+    const attributes: Record<string, unknown> = {};
+    if (firstName) attributes.PRENOM = firstName;
+    if (input.feedbackUrl) attributes.BETA_URL = input.feedbackUrl;
+    const hasAttrs = Object.keys(attributes).length > 0;
+    const withAttrs = hasAttrs ? { ...base, attributes } : base;
+
+    let res = await postContact(apiKey, withAttrs);
+    if (res.status === 400 && hasAttrs) res = await postContact(apiKey, base);
+
+    if (!res.ok) {
+      console.warn("[brevo] beta contact failed:", res.status, await safeBody(res));
+      return { synced: false, reason: `http-${res.status}` };
+    }
+    return { synced: true };
+  } catch (e) {
+    console.warn("[brevo] beta contact error:", e);
+    return { synced: false, reason: "error" };
+  }
+}
+
+/** Passe BETA_FEEDBACK=true sur le contact → coupe les relances Brevo. */
+export async function setBetaFeedbackDone(email: string): Promise<BrevoSyncResult> {
+  try {
+    const apiKey = process.env.BREVO_API_KEY;
+    if (!apiKey) return { synced: false, reason: "no-api-key" };
+    const em = email.trim().toLowerCase();
+    const res = await fetchWithTimeout(
+      `${API_BASE}/contacts/${encodeURIComponent(em)}`,
+      {
+        method: "PUT",
+        headers: apiHeaders(apiKey),
+        body: JSON.stringify({ attributes: { BETA_FEEDBACK: true } }),
+      },
+    );
+    if (!res.ok) {
+      console.warn("[brevo] setBetaFeedbackDone failed:", res.status, await safeBody(res));
+      return { synced: false, reason: `http-${res.status}` };
+    }
+    return { synced: true };
+  } catch (e) {
+    console.warn("[brevo] setBetaFeedbackDone error:", e);
+    return { synced: false, reason: "error" };
+  }
+}
+
+// IDs des templates transactionnels Brevo du programme bêta. Le CONTENU des
+// emails vit dans Brevo (modifiable dans l'UI sans redéploiement) ; le code ne
+// fait qu'envoyer par templateId. La personnalisation ({{contact.PRENOM}},
+// {{contact.BETA_URL}}) est résolue par Brevo depuis les attributs du contact —
+// addBetaContact doit donc avoir été appelé AVANT tout envoi.
+const BETA_TEMPLATES = {
+  /** 1. Accès — invitation au lancement d'une phase. */
+  access: () => parseId(process.env.BREVO_TPL_BETA_ACCESS) ?? 1,
+  /** 2. Relance « pas encore testé » (pas ouvert / pas cliqué / pas de compte). */
+  relance: () => parseId(process.env.BREVO_TPL_BETA_RELANCE) ?? 2,
+  /** 3. Demande de retour (compte créé, pas encore de feedback). */
+  feedback: () => parseId(process.env.BREVO_TPL_BETA_FEEDBACK) ?? 3,
+  /** 4. Merci (formulaire rempli). */
+  merci: () => parseId(process.env.BREVO_TPL_BETA_MERCI) ?? 4,
+} as const;
+
+export type BetaTemplateKind = keyof typeof BETA_TEMPLATES;
+
+/** Envoie un email transactionnel bêta via son template Brevo. Fail-open. */
+export async function sendBetaTemplateEmail(
+  kind: BetaTemplateKind,
+  input: { email: string; firstName?: string | null },
+): Promise<BrevoSyncResult> {
+  try {
+    const apiKey = process.env.BREVO_API_KEY;
+    if (!apiKey) return { synced: false, reason: "no-api-key" };
+
+    const email = input.email.trim().toLowerCase();
+    if (!email.includes("@")) return { synced: false, reason: "bad-email" };
+    const firstName = (input.firstName ?? "").trim();
+
+    const res = await fetchWithTimeout(`${API_BASE}/smtp/email`, {
+      method: "POST",
+      headers: apiHeaders(apiKey),
+      body: JSON.stringify({
+        templateId: BETA_TEMPLATES[kind](),
+        to: [{ email, ...(firstName ? { name: firstName } : {}) }],
+        tags: [`beta-${kind}`],
+      }),
+    });
+
+    if (!res.ok) {
+      console.warn(`[brevo] beta ${kind} email failed:`, res.status, await safeBody(res));
+      return { synced: false, reason: `http-${res.status}` };
+    }
+    return { synced: true };
+  } catch (e) {
+    console.warn(`[brevo] beta ${kind} email error:`, e);
+    return { synced: false, reason: "error" };
+  }
+}
+
+/** Email d'INVITATION (envoyé au lancement d'une phase) via le template Brevo
+ *  « Bêta — 1. Accès ». Le lien de retour (BETA_URL) et le prénom (PRENOM)
+ *  sont lus depuis les attributs du contact. Fail-open. */
+export async function sendBetaInvitationEmail(input: {
+  email: string;
+  firstName?: string | null;
+  /** Conservés pour compat : les URLs vivent désormais dans le template /
+   *  les attributs du contact (BETA_URL). */
+  accessUrl?: string;
+  feedbackUrl?: string;
+}): Promise<BrevoSyncResult> {
+  return sendBetaTemplateEmail("access", input);
+}
