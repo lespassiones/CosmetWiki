@@ -9,6 +9,7 @@ import { resolveOnboardingDestination } from "@/lib/onboarding/resolve";
 import { getAppConfig } from "@/lib/appConfig";
 import { buildConsent } from "@/lib/consent";
 import { syncBrevoContact } from "@/lib/brevo";
+import { grantBetaCredits, BETA_COOKIE } from "@/lib/beta-credits";
 
 export type AuthResult = { ok: true } | { ok: false; error: string };
 
@@ -96,6 +97,18 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
           updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
+
+      // Crédits bêta : inscription venue du lien bêta (cookie cc_beta) → 50
+      // crédits non renouvelables, quel que soit l'email utilisé.
+      if (cookieStore.get(BETA_COOKIE)) {
+        const uid = user.id;
+        after(() => grantBetaCredits(uid));
+        try {
+          cookieStore.set(BETA_COOKIE, "", { path: "/", maxAge: 0 });
+        } catch {
+          // cookies immuables selon le contexte : sans gravité (idempotent)
+        }
+      }
     }
   } catch (e) {
     console.warn("[auth] signUp consent persist failed:", e);

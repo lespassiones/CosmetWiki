@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { cookies } from "next/headers";
 import { supabaseServer } from "@/lib/supabase";
 import { resolveOnboardingDestination } from "@/lib/onboarding/resolve";
+import { BETA_COOKIE, grantBetaCredits } from "@/lib/beta-credits";
 
 function safeNext(value: string | null): string {
   if (!value || !value.startsWith("/") || value.startsWith("//")) return "/";
@@ -23,12 +24,23 @@ export async function GET(request: Request) {
       // whether to route the user through /onboarding or skip straight to
       // `next` (already onboarded, or grandfathered because their profile
       // is non-empty even though the flag was never set).
+      const hasBeta = Boolean(cookieStore.get(BETA_COOKIE));
       const { data: { user } } = await sb.auth.getUser();
+
+      let dest = next;
       if (user) {
-        const dest = await resolveOnboardingDestination(sb, user.id, next);
-        return NextResponse.redirect(`${origin}${dest}`);
+        dest = await resolveOnboardingDestination(sb, user.id, next);
+        // Crédits bêta : compte créé/connecté via le lien bêta (cookie) → 50
+        // crédits non renouvelables, quel que soit l'email Google utilisé.
+        if (hasBeta) {
+          const uid = user.id;
+          after(() => grantBetaCredits(uid));
+        }
       }
-      return NextResponse.redirect(`${origin}${next}`);
+
+      const res = NextResponse.redirect(`${origin}${dest}`);
+      if (hasBeta) res.cookies.set(BETA_COOKIE, "", { path: "/", maxAge: 0 });
+      return res;
     }
   }
 
