@@ -28,7 +28,7 @@ export function RestrictionWarning({ items }: { items: AnalyseItem[] }) {
         className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-[11.5px] font-medium text-rose-600 ring-1 ring-rose-200 bg-rose-50/60 hover:bg-rose-50 transition-colors overflow-hidden"
       >
         <ShieldPlusIcon className="h-3.5 w-3.5 shrink-0" />
-        <span className="truncate">Configurez vos restrictions pour personnaliser l'analyse</span>
+        <span className="truncate">Configure tes restrictions pour personnaliser l'analyse</span>
         <ChevronRightIcon className="h-3 w-3 ml-auto shrink-0 opacity-60" />
       </Link>
     );
@@ -79,8 +79,8 @@ export function RestrictionWarning({ items }: { items: AnalyseItem[] }) {
         <ShieldAlertIcon className="h-4 w-4 text-rose-600 shrink-0" />
         <h3 className="text-[13px] font-semibold text-rose-700 leading-tight">
           {totalIngredients === 1
-            ? "1 ingrédient dans vos restrictions"
-            : `${totalIngredients} ingrédients dans vos restrictions`}
+            ? "1 ingrédient dans tes restrictions"
+            : `${totalIngredients} ingrédients dans tes restrictions`}
         </h3>
       </header>
 

@@ -258,7 +258,10 @@ export function SuggestionsPageClient({
       )}
 
       {status === "empty" && (
-        <Notice>Aucune alternative nettement mieux notée trouvée dans le catalogue.</Notice>
+        <Notice>
+          Aucune alternative plus propre et compatible trouvée pour l’instant (compte tenu de ton
+          profil et de tes restrictions).
+        </Notice>
       )}
       {status === "credits" && (
         <Notice>

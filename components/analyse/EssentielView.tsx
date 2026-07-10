@@ -158,8 +158,8 @@ function VerdictCard({
   const Icon = v.Icon;
   const hasRestriction = restrictedCount && restrictedCount > 0;
   const restrictionText = hasRestriction
-    ? `Contient ${restrictedCount} de vos restrictions`
-    : "Ne contient aucune de vos restrictions";
+    ? `Contient ${restrictedCount} de tes restrictions`
+    : "Ne contient aucune de tes restrictions";
 
   return (
     <article className="neu p-4">

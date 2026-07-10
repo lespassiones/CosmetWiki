@@ -8,7 +8,6 @@ import { computeRoutineMetrics, type Frequency, type RoutineProduct } from "@/li
 import { selectAtRiskProducts } from "@/lib/routine/atRisk";
 import type { AnalyseResponse } from "@/lib/analyseTypes";
 import { RoutineProductRow } from "@/components/routine/RoutineProductRow";
-import { RoutineSuggestions } from "@/components/routine/RoutineSuggestions";
 import { CatalogAlternatives } from "@/components/routine/CatalogAlternatives";
 import { AddProductButton } from "@/components/routine/AddProductButton";
 import { RestrictionsLinkButton } from "@/components/routine/RestrictionsLinkButton";
@@ -352,9 +351,6 @@ async function RoutineContent() {
           </ul>
         </div>
       </section>
-
-      {/* AI suggestions */}
-      <RoutineSuggestions metrics={metrics} products={products} />
 
       {/* Catalog alternatives for at-risk products (score < 13) */}
       {atRiskProducts.length > 0 && (

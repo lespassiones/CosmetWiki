@@ -65,7 +65,7 @@ export default function EnSavoirPlusPage() {
   return (
     <>
       <PublicHeader />
-      <main className="relative min-h-screen w-full bg-[#FAFAFA]">
+      <main className="relative min-h-screen w-full bg-white">
         <section className="mx-auto w-full max-w-[1280px] px-6 pb-12 pt-24 sm:px-8 lg:pb-16 lg:pt-24">
           {/* Grand titre */}
           <h1 className="text-center text-[22px] font-bold leading-[1.15] tracking-tight text-ink sm:text-[28px] lg:text-[36px]">
@@ -120,24 +120,28 @@ export default function EnSavoirPlusPage() {
           </div>
         </section>
 
-        {/* Vague de séparation */}
-        <div aria-hidden className="-mb-px w-full overflow-hidden leading-none">
-          <svg
-            viewBox="0 0 1440 72"
-            xmlns="http://www.w3.org/2000/svg"
-            className="block w-full"
-            preserveAspectRatio="none"
-          >
-            <path
-              d="M0,24 C240,72 480,0 720,36 C960,72 1200,8 1440,40 L1440,72 L0,72 Z"
-              fill="#DDEEF6"
-            />
-          </svg>
-        </div>
-
-        {/* Section équipe */}
-        <section className="w-full bg-[#DDEEF6] pb-20 pt-10 lg:pb-28">
-          <div className="mx-auto max-w-[1280px] px-6 sm:px-8">
+        {/* Section équipe — vague + grain unifiés, aucun raccord visible */}
+        <section className="relative w-full overflow-hidden bg-[#E8E1F5] pb-20 lg:pb-28">
+          {/* Grain — même texture que la page contact, couvre la vague ET la section */}
+          <div
+            aria-hidden
+            className="grain-overlay pointer-events-none absolute inset-0 z-0 opacity-[0.22] mix-blend-multiply"
+          />
+          {/* Vague blanche au sommet — prolonge la section blanche du dessus, au-dessus du grain */}
+          <div aria-hidden className="relative z-10 w-full overflow-hidden leading-none">
+            <svg
+              viewBox="0 0 1440 72"
+              xmlns="http://www.w3.org/2000/svg"
+              className="block w-full"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M0,24 C240,72 480,0 720,36 C960,72 1200,8 1440,40 L1440,0 L0,0 Z"
+                fill="white"
+              />
+            </svg>
+          </div>
+          <div className="relative z-10 mx-auto max-w-[1280px] px-6 pt-4 sm:px-8">
             <h2 className="text-center font-serif text-[26px] italic text-ink sm:text-[30px] lg:text-[34px]">
               Ceux qui font Cosme Check
             </h2>
