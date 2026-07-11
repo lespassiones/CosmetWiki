@@ -37,7 +37,7 @@ type Item = {
   reason: string | null;
 };
 
-type Status = "loading" | "ready" | "empty" | "error" | "credits";
+type Status = "loading" | "ready" | "empty" | "error" | "credits" | "retry";
 
 /**
  * Full-page "Suggestions intelligentes" view (route /routine/suggestions).
@@ -90,7 +90,7 @@ export function SuggestionsPageClient({
         if (!r.ok) return setStatus("error");
         // Des crédits ont pu être débités → rafraîchir la pilule.
         window.dispatchEvent(new CustomEvent("cosmecheck:credits-updated"));
-        const d = (await r.json()) as { suggestions?: EdgeSuggestion[] };
+        const d = (await r.json()) as { suggestions?: EdgeSuggestion[]; aiUnavailable?: boolean };
         const all = d.suggestions ?? [];
         const next: Item[] = all
           .filter((s) => s.alternative !== null)
@@ -106,8 +106,17 @@ export function SuggestionsPageClient({
           }));
         const anyLocked = all.some((s) => s.locked);
         setItems(next);
-        // Rien trouvé mais des produits verrouillés faute de crédits → message crédits.
-        setStatus(next.length === 0 ? (anyLocked ? "credits" : "empty") : "ready");
+        // Rien trouvé : crédits épuisés (verrouillés SANS lancer l'IA), IA
+        // momentanément indisponible (abstention, re-tentable), ou vraiment rien.
+        setStatus(
+          next.length === 0
+            ? anyLocked
+              ? "credits"
+              : d.aiUnavailable
+                ? "retry"
+                : "empty"
+            : "ready",
+        );
       } catch {
         setStatus("error");
       }
@@ -267,6 +276,9 @@ export function SuggestionsPageClient({
         <Notice>
           Tu as utilisé tous tes crédits du jour. Reviens demain pour de nouvelles suggestions.
         </Notice>
+      )}
+      {status === "retry" && (
+        <Notice>Analyse momentanément indisponible. Réessaie dans un instant.</Notice>
       )}
       {status === "error" && <Notice>Impossible de charger les suggestions pour le moment.</Notice>}
     </div>

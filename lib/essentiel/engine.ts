@@ -455,7 +455,11 @@ function buildConcern(items: AnalyseItem[], tier: ConcernTier): Concern | null {
   // Walk the tier from the most concentrated downwards and grab the first
   // *problematic* tag we recognise — that becomes the family + effect line.
   for (const it of tierItems) {
-    for (const tag of it.tags ?? []) {
+    // Défensif : certaines analyses cachées ont `tags` corrompu en OBJET (pas
+    // un tableau) — `?? []` ne protège pas, `for...of` crasherait (~6% des
+    // analyses avant le fix). Parité avec le mobile (lib/essentiel/engine.ts).
+    const tags = Array.isArray(it.tags) ? it.tags : [];
+    for (const tag of tags) {
       if (NEUTRAL_OR_POSITIVE_TAGS.has(tag)) continue;
       const family = TAG_LABELS[tag];
       const effect = TAG_CONSEQUENCES[tag];
