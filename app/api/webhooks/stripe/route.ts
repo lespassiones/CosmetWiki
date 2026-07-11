@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { phCapture } from "@/lib/posthogServer";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { supabaseService } from "@/lib/supabase";
@@ -96,6 +97,11 @@ export async function POST(req: NextRequest) {
             .from("user_profiles")
             .update({ stripe_customer_id: customerId })
             .eq("id", userId);
+        }
+
+        // Analytics : abonnement demarre (essai inclus). Pack de credits exclu.
+        if (mode === "subscription" && userId) {
+          phCapture("premium_started", userId, { provider: "stripe" });
         }
 
         // Pack de crédits one-time : attribuer les crédits immédiatement

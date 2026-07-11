@@ -17,6 +17,7 @@
     "@zxing/library": "^0.22.0",
     "next": "^15.0.3",
     "openai": "^6.37.0",
+    "posthog-js": "^1.399.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "stripe": "^22.3.0",

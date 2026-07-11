@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { phCapture } from "@/lib/posthogServer";
 import { supabaseAnon } from "@/lib/supabase";
 import { parseInciList, computeScore, scoreLabel, type ColorRating } from "@/lib/inciParser";
 import { hashInci } from "@/lib/cacheHash";
@@ -321,6 +322,7 @@ export async function POST(req: NextRequest) {
           } catch { /* history save failure must not block the response */ }
         }
 
+        phCapture("scan_completed", user.id, { cache: true });
         return NextResponse.json({ ...cached_result, analysisId: savedAnalysisId, addedToRoutine: false });
       }
     } catch { /* cache miss or network error — fall through to full pipeline */ }
@@ -359,7 +361,8 @@ export async function POST(req: NextRequest) {
         } catch { /* history save failure must not block the response */ }
       }
 
-      return NextResponse.json({ ...cached_result, analysisId: savedAnalysisId, addedToRoutine: false });
+      phCapture("scan_completed", user.id, { cache: true });
+        return NextResponse.json({ ...cached_result, analysisId: savedAnalysisId, addedToRoutine: false });
     }
   } catch { /* cache miss or network error — fall through to full pipeline */ }
 
@@ -1185,6 +1188,7 @@ export async function POST(req: NextRequest) {
     })();
   }
 
+  phCapture("scan_completed", user.id, { cache: false });
   const response = NextResponse.json({ ...responsePayload, analysisId: savedAnalysisId, addedToRoutine });
   await idempotencyStore(idemKey, response);
   return response;

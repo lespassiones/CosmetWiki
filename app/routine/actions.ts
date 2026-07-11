@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { phCapture } from "@/lib/posthogServer";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase";
 
@@ -23,6 +24,7 @@ export async function addToRoutine(analysisId: string): Promise<RoutineActionRes
     );
 
   if (error) return { ok: false, error: error.message };
+  phCapture("routine_item_added", user.id);
   revalidatePath("/routine");
   revalidatePath("/history");
   return { ok: true };

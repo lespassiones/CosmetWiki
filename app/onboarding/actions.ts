@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { phCapture } from "@/lib/posthogServer";
 import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase";
@@ -239,6 +240,8 @@ export async function completeOnboarding(): Promise<OnboardingResult> {
     .eq("id", user.id);
 
   if (error) return { ok: false, error: error.message };
+
+  phCapture("onboarding_completed", user.id);
 
   revalidatePath("/onboarding");
   revalidatePath("/profile");

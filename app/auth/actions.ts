@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { phCapture } from "@/lib/posthogServer";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { supabaseServer } from "@/lib/supabase";
@@ -97,6 +98,9 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
           updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
+
+      // Analytics : evenement produit (funnel PostHog), fire-and-forget.
+      phCapture("signup", user.id);
 
       // Crédits bêta : inscription venue du lien bêta (cookie cc_beta) → 50
       // crédits non renouvelables, quel que soit l'email utilisé.

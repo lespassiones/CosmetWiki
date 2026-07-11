@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { cookies, headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/next";
 import { SITE_URL } from "@/lib/siteUrl";
 import { PWARegister } from "@/components/PWARegister";
+import { PostHogInit } from "@/components/PostHogInit";
 import { AppShell } from "@/components/nav/AppShell";
 import { ConditionalLandingFooter } from "@/components/ConditionalLandingFooter";
 import { getProfile, getUser } from "@/lib/auth";
@@ -182,6 +184,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <ConditionalLandingFooter signedIn={signedIn} />
             </AppShell>
           </RestrictionsProvider>
+          <Suspense fallback={null}>
+            <PostHogInit />
+          </Suspense>
           <PWARegister />
           <Analytics />
         </body>
@@ -246,7 +251,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ConditionalLandingFooter signedIn={signedIn} />
           </AppShell>
         </RestrictionsProvider>
-        <PWARegister />
+        <Suspense fallback={null}>
+            <PostHogInit />
+          </Suspense>
+          <PWARegister />
         <Analytics />
       </body>
     </html>
