@@ -7,7 +7,7 @@ import { SITE_URL } from "@/lib/siteUrl";
 
 const TITLE = "Fonctionnalités";
 const DESCRIPTION =
-  "Découvre tous les outils Cosme Check pour mieux comprendre tes produits : analyse INCI (photo, scan, liste, recherche, lien), analyse de promesses marketing, recherche de produits par mots-clés, routine, recommandations personnalisées, comparaison, coach IA.";
+  "Découvre tous les outils Cosme Check pour mieux comprendre tes produits : analyse INCI (scan du code-barres, liste INCI collée, recherche par nom), analyse de promesses marketing, recherche de produits par mots-clés, routine, recommandations personnalisées, comparaison, coach IA.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -98,27 +98,25 @@ const SECTIONS: Section[] = [
     eyebrow: "Le cœur de l'application",
     title: "Analyse des produits",
     description:
-      "Décrypte la composition complète d'un produit, ingrédient par ingrédient. Lance l'analyse comme tu veux : photo de l'étiquette, scan caméra en direct, liste INCI collée, recherche par nom de produit ou simple lien. Chaque ligne reçoit ensuite une couleur (vert, jaune, orange, rouge) qui résume sa pénalité selon des données scientifiques publiques, dans un système clair et indépendant.",
+      "Décrypte la composition complète d'un produit, ingrédient par ingrédient. Lance l'analyse de trois façons : scan du code-barres, liste INCI collée, ou recherche par nom de produit. Chaque ligne reçoit ensuite une couleur (vert, jaune, orange, rouge) qui résume sa pénalité selon des données scientifiques publiques, dans un système clair et indépendant.",
     keywords: [
-      "photo de l'étiquette",
-      "scan caméra",
+      "scan du code-barres",
       "liste INCI collée",
       "recherche par nom de produit",
-      "lien",
       "vert, jaune, orange, rouge",
       "INCI",
       "demi-camembert",
       "indépendant",
     ],
     useCases: [
-      "Tu scannes ton sérum préféré à la caméra. Le verdict visuel apparaît en trois secondes.",
-      "Tu hésites en magasin : tu sors ton téléphone, tu filmes le produit en rayon, tu sais.",
-      "Tu reçois une crème en cadeau. Tu colles l'INCI ou tu colles le lien produit, le demi-camembert s'affiche.",
+      "Tu scannes le code-barres de ton produit en magasin : s'il est dans notre catalogue, le verdict visuel apparaît en quelques secondes.",
+      "Tu reçois une crème en cadeau. Tu colles sa liste INCI, le demi-camembert s'affiche aussitôt.",
+      "Tu te souviens juste du nom : tu le cherches et tu accèdes à sa composition déjà décryptée, sans le flacon en main.",
     ],
     benefits: [
       {
-        title: "Cinq façons de lancer l'analyse",
-        body: "Photo de l'étiquette, scan caméra en direct, liste INCI collée, recherche par nom de produit ou simple lien : tu choisis le mode qui t'arrange, le résultat est identique. Aucun compte à créer pour essayer.",
+        title: "Trois façons de lancer l'analyse",
+        body: "Scan du code-barres, liste INCI collée ou recherche par nom de produit : tu choisis le mode qui t'arrange, le résultat est identique. Aucun compte à créer pour essayer.",
       },
       {
         title: "Répartition visuelle par couleur",
@@ -134,7 +132,7 @@ const SECTIONS: Section[] = [
       },
       {
         title: "Compatible avec toutes les formes",
-        body: "Crèmes, sérums, shampoings, parfums, déodorants, soins corps : tout ce qui présente une étiquette lisible peut être analysé, même sous un angle imparfait.",
+        body: "Crèmes, sérums, shampoings, parfums, déodorants, soins corps : tout produit dont tu as le code-barres, la liste INCI ou le nom peut être analysé.",
       },
       {
         title: "Transparence totale",

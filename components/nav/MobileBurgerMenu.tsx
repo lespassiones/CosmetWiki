@@ -27,9 +27,11 @@ type NavItem = {
 export function MobileBurgerMenu({
   pathname,
   items,
+  tier = "free",
 }: {
   pathname: string;
   items: ReadonlyArray<NavItem>;
+  tier?: "free" | "premium";
 }) {
   const [open, setOpen] = useState(false);
 
@@ -135,7 +137,7 @@ export function MobileBurgerMenu({
                   </span>
                   <CreditsPill />
                 </div>
-                {!pathname.startsWith("/offre") && <PremiumCard />}
+                {tier !== "premium" && !pathname.startsWith("/offre") && <PremiumCard />}
                 <form action={signOut}>
                   <button
                     type="submit"

@@ -127,6 +127,7 @@ export function AppShell({
         signedIn={signedIn}
         firstName={firstName}
         initialCredits={initialCredits}
+        tier={tier}
       />
 
       {/* Page content */}
@@ -140,7 +141,7 @@ export function AppShell({
       {/* Mobile burger menu (top-right) - opens a drawer mirroring the
           desktop sidebar so the user can reach pages that don't fit in the
           5-slot bottom nav (Profil, Skin advisor). */}
-      <MobileBurgerMenu pathname={pathname} items={NAV_ITEMS} />
+      <MobileBurgerMenu pathname={pathname} items={NAV_ITEMS} tier={tier} />
 
       {/* Mobile floating Skin Advisor button - sits above the bottom nav,
           hidden when already on /advisor ou /offre to avoid redundancy. */}
@@ -246,12 +247,14 @@ function DesktopSidebar({
   signedIn,
   firstName,
   initialCredits,
+  tier = "free",
 }: {
   pathname: string;
   onScanClick: () => void;
   signedIn: boolean;
   firstName?: string | null;
   initialCredits?: { used: number; limit: number; remaining: number } | null;
+  tier?: "free" | "premium";
 }) {
   return (
     <aside
@@ -308,8 +311,9 @@ function DesktopSidebar({
           au milieu. */}
       <div className="mt-auto flex flex-col gap-3 pt-6">
         {/* Premium upsell — masqué sur /offre (inutile de pitcher quelqu'un qui
-            regarde déjà l'offre). */}
-        {signedIn && !pathname.startsWith("/offre") && <PremiumCard />}
+            regarde déjà l'offre) ET pour les abonnés premium (déjà convertis :
+            leur montrer « Passez Premium » n'a aucun sens). */}
+        {signedIn && tier !== "premium" && !pathname.startsWith("/offre") && <PremiumCard />}
 
         {/* Crédits restants — juste au-dessus du profil, tout en bas. */}
         {signedIn && (

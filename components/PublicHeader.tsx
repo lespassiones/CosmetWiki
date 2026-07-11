@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { LogoMark } from "@/components/Logo";
 
 const NAV_ITEMS = [
   { href: "/fonctionnalites", label: "Fonctionnalités" },
@@ -58,10 +59,17 @@ export function PublicHeader() {
         <div className="mx-auto flex h-[77px] w-full max-w-[1280px] items-center justify-between px-6 sm:px-8">
           <Link
             href="/"
-            className="text-[24px] font-bold tracking-tight sm:text-[26px]"
+            aria-label="Cosme Check, accueil"
+            className="flex items-center gap-2.5 text-[24px] font-bold tracking-tight sm:text-[26px]"
           >
-            <span className="text-[#111111]">Cosme </span>
-            <span className="text-[#F43F5E]">Check</span>
+            {/* Logo de marque (les 3 pastilles) — présent partout ailleurs
+                (pages légales, footer) mais absent de l'en-tête public.
+                Volontairement dimensionné pour rester lisible, pas minimisé. */}
+            <LogoMark className="h-6 w-auto shrink-0 sm:h-7" />
+            <span>
+              <span className="text-[#111111]">Cosme </span>
+              <span className="text-[#F43F5E]">Check</span>
+            </span>
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
@@ -126,10 +134,14 @@ export function PublicHeader() {
           <Link
             href="/"
             onClick={() => setOpen(false)}
-            className="text-[20px] font-bold tracking-tight"
+            aria-label="Cosme Check, accueil"
+            className="flex items-center gap-2 text-[20px] font-bold tracking-tight"
           >
-            <span className="text-[#111111]">Cosme </span>
-            <span className="text-[#F43F5E]">Check</span>
+            <LogoMark className="h-5 w-auto shrink-0" />
+            <span>
+              <span className="text-[#111111]">Cosme </span>
+              <span className="text-[#F43F5E]">Check</span>
+            </span>
           </Link>
           <button
             type="button"

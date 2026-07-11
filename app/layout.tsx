@@ -160,6 +160,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // (LandingFooter caché) sans payer l'aller-retour Supabase.
   if (isPublicLandingPath(pathname)) {
     const signedIn = hasAuthCookie(cookieStore);
+    // Visiteur anonyme : AppShell rend juste {children} (aucun chrome), donc on
+    // évite tout aller-retour Supabase — c'est le vrai « fast path ».
+    // Visiteur CONNECTÉ (ex. il ouvre les CGU depuis son profil) : AppShell rend
+    // le chrome dashboard complet (sidebar + burger), il faut donc son `tier`
+    // réel — sinon un abonné premium reverrait l'upsell « Passez Premium » ici.
+    // On ne charge que le profil (tier + prénom), pas familles/crédits.
+    const profileForChrome = signedIn ? await getProfile() : null;
+    const chromeTier = (profileForChrome?.tier as "free" | "premium") ?? "free";
     return (
       <html lang="fr" className={`light ${inter.variable}`} data-theme="light">
         <body className="min-h-screen antialiased">
@@ -169,7 +177,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             crossOrigin="anonymous"
           />
           <RestrictionsProvider restrictions={EMPTY_RESTRICTIONS} families={[]}>
-            <AppShell signedIn={signedIn} firstName={null} hideOnPaths={hideOnPaths} initialCredits={null} tier="free">
+            <AppShell signedIn={signedIn} firstName={profileForChrome?.first_name ?? null} hideOnPaths={hideOnPaths} initialCredits={null} tier={chromeTier}>
               {children}
               <ConditionalLandingFooter signedIn={signedIn} />
             </AppShell>
