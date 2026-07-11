@@ -60,13 +60,15 @@ export function PublicHeader() {
           <Link
             href="/"
             aria-label="Cosme Check, accueil"
-            className="flex items-center gap-2.5 text-[24px] font-bold tracking-tight sm:text-[26px]"
+            className="flex flex-col items-center gap-1 font-bold leading-none tracking-tight"
           >
-            {/* Logo de marque (les 3 pastilles) — présent partout ailleurs
-                (pages légales, footer) mais absent de l'en-tête public.
-                Volontairement dimensionné pour rester lisible, pas minimisé. */}
-            <LogoMark className="h-6 w-auto shrink-0 sm:h-7" />
-            <span>
+            {/* Logo de marque : les 3 pastilles EN HAUT, « Cosme Check » en
+                dessous (lockup vertical). Pastilles réduites de ~20 %
+                (h-6/h-7 → h-[19px]/h-[22px]).
+                Texte calé sur la MÊME largeur que les pastilles (~63/73 px) :
+                d'où les tailles réduites text-[10px]/sm:text-[12px]. */}
+            <LogoMark className="h-[19px] w-auto shrink-0 sm:h-[22px]" />
+            <span className="text-[10px] sm:text-[12px]">
               <span className="text-[#111111]">Cosme </span>
               <span className="text-[#F43F5E]">Check</span>
             </span>
@@ -135,10 +137,10 @@ export function PublicHeader() {
             href="/"
             onClick={() => setOpen(false)}
             aria-label="Cosme Check, accueil"
-            className="flex items-center gap-2 text-[20px] font-bold tracking-tight"
+            className="flex flex-col items-center gap-1 font-bold leading-none tracking-tight"
           >
-            <LogoMark className="h-5 w-auto shrink-0" />
-            <span>
+            <LogoMark className="h-4 w-auto shrink-0" />
+            <span className="text-[9px]">
               <span className="text-[#111111]">Cosme </span>
               <span className="text-[#F43F5E]">Check</span>
             </span>

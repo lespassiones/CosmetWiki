@@ -7,7 +7,7 @@ import { ProcessingOverlay, randomProcessingTotal } from "../ProcessingOverlay";
 import { ProductSearchInput } from "../ProductSearchInput";
 import { ProductUrlInput } from "../ProductUrlInput";
 import { SearchBar } from "../SearchBar";
-import { BarcodeIcon, CameraIcon, ClipboardIcon, LinkIcon, SearchIcon } from "./NavIcons";
+import { BarcodeIcon, ClipboardIcon, LinkIcon, SearchIcon } from "./NavIcons";
 
 // Lazy-load : MediaStream + BarcodeDetector, payload ~80 kb. Pas utile tant
 // que l'utilisateur n'ouvre pas l'onglet « code-barres » dans la feuille scan.
@@ -54,7 +54,6 @@ type Tile = {
 // compact right column. NEW badge stays on the latest addition (URL).
 const LEFT_TILES: Tile[] = [
   { action: { kind: "view", view: "barcode" }, title: "Code-barres", subtitle: "Scan rapide en magasin", icon: BarcodeIcon },
-  // { action: { kind: "route", href: "/scan/photo" }, title: "Photo de la composition", subtitle: "OCR de l'étiquette", icon: CameraIcon },
 ];
 
 const RIGHT_TILES: Tile[] = [

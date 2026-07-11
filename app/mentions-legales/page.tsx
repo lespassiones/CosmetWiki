@@ -49,6 +49,18 @@ export default function MentionsLegalesPage() {
           </li>
         )}
         <li>
+          <strong>SIREN</strong>&nbsp;: {LEGAL.publisher.siren}
+        </li>
+        <li>
+          <strong>RCS</strong>&nbsp;: {LEGAL.publisher.rcs}
+        </li>
+        <li>
+          <strong>TVA intracommunautaire</strong>&nbsp;: {LEGAL.publisher.tva}
+        </li>
+        <li>
+          <strong>Code APE / NAF</strong>&nbsp;: {LEGAL.publisher.ape}
+        </li>
+        <li>
           <strong>Directeur de la publication</strong>&nbsp;: {LEGAL.publisher.director}
         </li>
         <li>
@@ -57,7 +69,8 @@ export default function MentionsLegalesPage() {
         </li>
       </ul>
 
-      <h2>2. Hébergeur</h2>
+      <h2>2. Hébergeurs</h2>
+      <p>Hébergeur du site web&nbsp;:</p>
       <ul>
         <li>
           <strong>Société</strong>&nbsp;: {LEGAL.host.name}
@@ -69,6 +82,21 @@ export default function MentionsLegalesPage() {
           <strong>Site web</strong>&nbsp;:{" "}
           <a href={LEGAL.host.website} target="_blank" rel="noopener noreferrer">
             {LEGAL.host.website}
+          </a>
+        </li>
+      </ul>
+      <p>Hébergeur de la base de données et de l&apos;authentification&nbsp;:</p>
+      <ul>
+        <li>
+          <strong>Société</strong>&nbsp;: {LEGAL.dbHost.name}
+        </li>
+        <li>
+          <strong>Localisation</strong>&nbsp;: {LEGAL.dbHost.address}
+        </li>
+        <li>
+          <strong>Site web</strong>&nbsp;:{" "}
+          <a href={LEGAL.dbHost.website} target="_blank" rel="noopener noreferrer">
+            {LEGAL.dbHost.website}
           </a>
         </li>
       </ul>

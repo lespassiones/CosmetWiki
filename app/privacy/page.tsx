@@ -50,13 +50,19 @@ export default function PrivacyPage() {
           account is requested.
         </li>
         <li>
-          <strong>Analyzed Photos and INCI Lists</strong>&nbsp;: images you send
-          via the scanner and ingredient lists you paste in the analyzer are
-          processed to produce your analysis.
+          <strong>Analyzed INCI Lists</strong>&nbsp;: the ingredient lists you
+          type or paste in the analyzer, or those linked to a product identified
+          by barcode or searched in our catalog, are processed to produce your
+          analysis.
         </li>
         <li>
           <strong>Analysis History</strong>&nbsp;: if you are logged in, your
           analyses are saved so you can find them later.
+        </li>
+        <li>
+          <strong>Report Photos</strong>&nbsp;: if you send a photo to report or
+          correct a product listing, that image is retained for the time needed
+          for moderation (see section&nbsp;6).
         </li>
       </ul>
 
@@ -65,19 +71,37 @@ export default function PrivacyPage() {
         <li>
           <strong>Technical Data</strong>&nbsp;: device type, browser, IP address
           (anonymized), pages visited. Used only to measure audience and improve
-          the site (via Vercel Analytics, without tracking cookies).
+          the site, via an anonymous audience-measurement tool (PostHog, hosted
+          in the European Union). No advertising profile is built and no
+          personally identifying data (email, name) is associated with these
+          statistics.
         </li>
         <li>
           <strong>Strictly Necessary Cookies</strong>&nbsp;: an encrypted session
-          cookie to keep you logged in. No advertising or third-party tracking
-          cookies.
+          cookie to keep you logged in. The PostHog audience-measurement tool
+          uses no cookie&nbsp;: it stores an anonymous identifier in your
+          browser&apos;s local storage (localStorage). No advertising or
+          third-party tracking cookies.
         </li>
       </ul>
+
+      <h3>2.3 Artificial Intelligence</h3>
+      <p>
+        Some features (INCI list analysis, beauty assistant, personalized
+        summaries) rely on artificial-intelligence models provided by{" "}
+        <strong>OpenAI</strong> and <strong>Mistral AI</strong>. To produce these
+        results, only the strictly necessary data is sent to them&nbsp;: the
+        ingredient (INCI) lists and, where applicable, your skin profile. This
+        data is not used to train their models. Mistral AI is a French company
+        hosting its processing mainly within the European Union&nbsp;; processing
+        by OpenAI involves a transfer outside the EU, governed by the European
+        Commission&apos;s Standard Contractual Clauses.
+      </p>
 
       <h2>3. Processing Purposes</h2>
       <ul>
         <li>Allow you to create an account and log in.</li>
-        <li>Analyze the INCI lists and photos you submit to us.</li>
+        <li>Analyze the INCI lists you submit to us.</li>
         <li>Save your analysis history and routine.</li>
         <li>Improve the site (anonymous audience measurement).</li>
         <li>Respond to your email requests.</li>
@@ -130,9 +154,9 @@ export default function PrivacyPage() {
           then deleted on request or after 3 years of inactivity.
         </li>
         <li>
-          <strong>Analyzed Photos</strong>&nbsp;: images sent to OCR are not
-          retained on our servers after processing. Only the extracted text
-          (INCI list) is retained with your analysis.
+          <strong>Report Photos</strong>&nbsp;: images sent to report or correct a
+          product listing are retained for the time needed for moderation, then
+          deleted.
         </li>
         <li>
           <strong>Technical Logs</strong>&nbsp;: maximum 30 days.
@@ -183,12 +207,21 @@ export default function PrivacyPage() {
         policies.
       </p>
 
-      <h2>9. Cookies</h2>
+      <h2>9. Cookies and Audience Measurement</h2>
       <p>
         Cosme Check uses only strictly necessary cookies for site operation
         (login session). No advertising or third-party tracking cookies are
-        placed on your device. No consent banner is required in this
-        configuration.
+        placed on your device.
+      </p>
+      <p>
+        To measure its traffic, the site uses an anonymous audience-measurement
+        tool (PostHog)&nbsp;: no session replay, no cross-site behavioral
+        tracking, no advertising profile, and an anonymous technical identifier
+        stored in your browser&apos;s local storage (localStorage) rather than in
+        a cookie. This processing relies on our legitimate interest (GDPR Art.
+        6.1.f) in measuring audience anonymously. Configured this way, this tool
+        qualifies as consent-exempt audience measurement&nbsp;: no consent banner
+        is required in this configuration.
       </p>
 
       <h2>10. Minors</h2>

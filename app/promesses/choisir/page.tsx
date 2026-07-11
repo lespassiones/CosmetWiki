@@ -13,9 +13,8 @@ export const metadata = { title: "Vérifier une promesse · Cosme Check" };
  * identifier le produit dont on veut vérifier la promesse, via 4 boutons
  * verticaux :
  *   1. Rechercher le produit        → /produits (catalogue)
- *   2. Scanner le produit           → /scan/photo
- *   3. Récupérer dans l'historique  → /history
- *   4. Coller moi-même la promesse   → /promesses/nouvelle (assistant manuel)
+ *   2. Récupérer dans l'historique  → /history
+ *   3. Coller moi-même la promesse   → /promesses/nouvelle (assistant manuel)
  */
 
 type Choice = {
@@ -38,19 +37,6 @@ const CHOICES: Choice[] = [
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
         <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
         <path d="M21 21l-4.3-4.3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    href: "/scan/photo",
-    title: "Scanner le produit",
-    subtitle: "Prends une photo de l’emballage",
-    tint: "#F43F5E",
-    tintBg: "#FFE4E6",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path d="M3 8V5a2 2 0 012-2h3M16 3h3a2 2 0 012 2v3M21 16v3a2 2 0 01-2 2h-3M8 21H5a2 2 0 01-2-2v-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <circle cx="12" cy="12" r="3.2" stroke="currentColor" strokeWidth="2" />
       </svg>
     ),
   },

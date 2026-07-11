@@ -39,8 +39,9 @@ export default function CGUPage() {
           classification indicative (vert, jaune, orange, rouge)&nbsp;;
         </li>
         <li>
-          d&apos;analyser une liste INCI complète (saisie au clavier ou extraite
-          d&apos;une photo) pour en obtenir un résumé&nbsp;;
+          d&apos;analyser une liste INCI complète (saisie au clavier, produit
+          identifié par code-barres ou recherché dans notre catalogue) pour en
+          obtenir un résumé&nbsp;;
         </li>
         <li>
           de sauvegarder un historique d&apos;analyses et une routine cosmétique
@@ -52,9 +53,22 @@ export default function CGUPage() {
       <p>
         Le service est accessible gratuitement. Certaines fonctionnalités
         (sauvegarde de l&apos;historique, routine) nécessitent la création d&apos;un
-        compte. Nous nous réservons le droit d&apos;introduire à l&apos;avenir des
-        fonctionnalités payantes, qui seront clairement identifiées comme telles
-        avant tout paiement.
+        compte.
+      </p>
+      <p>
+        Un abonnement premium payant débloque des fonctionnalités avancées. Les
+        tarifs et le contenu de l&apos;offre sont clairement présentés avant tout
+        paiement. Les paiements sont traités de manière sécurisée par notre
+        prestataire Stripe&nbsp;; aucune donnée bancaire complète ne transite ni
+        n&apos;est stockée par nos serveurs.
+      </p>
+      <p>
+        Pour un abonnement souscrit en ligne, tu disposes d&apos;un droit de
+        rétractation de 14&nbsp;jours à compter de la souscription. En cas de
+        rétractation dans ce délai, seul le temps d&apos;abonnement non utilisé
+        est remboursé, au prorata de la durée déjà consommée. Tu peux résilier
+        ton abonnement à tout moment&nbsp;; l&apos;accès premium reste actif
+        jusqu&apos;à la fin de la période déjà payée.
       </p>
 
       <h2>3. Compte utilisateur</h2>

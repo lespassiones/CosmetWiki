@@ -9,20 +9,31 @@ export const LEGAL = {
   siteUrl: "https://www.cosme-check.com",
   contactEmail: "contact@cosme-check.com",
 
-  // Éditeur du site - à compléter avec ta situation réelle.
+  // Éditeur du site.
   publisher: {
-    name: "Brian Biendou",
-    status: "Particulier", // ex: "Auto-entrepreneur", "SAS Cosme Check", etc.
-    address: "À compléter", // adresse postale obligatoire
-    director: "Brian Biendou",
-    siret: null as string | null, // mets ton SIRET ici si tu es immatriculé
+    name: "Brian-Clarky BIENDOU",
+    status: "Entrepreneur individuel (EI)",
+    address: "5 Bis rue Vestrepain, 31100 Toulouse, France",
+    director: "Brian-Clarky BIENDOU", // directeur de la publication
+    siret: "919 153 189 00015" as string | null,
+    siren: "919 153 189",
+    rcs: "RCS Toulouse 919 153 189",
+    tva: "FR33919153189", // TVA intracommunautaire
+    ape: "8559B", // code APE / NAF
   },
 
-  // Hébergeur - déclaration obligatoire (LCEN, art. 6).
+  // Hébergeurs - déclaration obligatoire (LCEN, art. 6).
+  // `host` = hébergeur du site web ; `dbHost` = hébergeur de la base de données.
   host: {
     name: "Vercel Inc.",
-    address: "440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis",
+    address: "340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis",
     website: "https://vercel.com",
+  },
+  dbHost: {
+    name: "Supabase Inc.",
+    address:
+      "Base de données et authentification, hébergées sur AWS eu-west-1 (Irlande, Union européenne)",
+    website: "https://supabase.com",
   },
 
   // Base de données / Auth - pour la politique de confidentialité.
@@ -47,9 +58,27 @@ export const LEGAL = {
     },
     {
       name: "OpenAI, L.L.C.",
-      role: "Analyse OCR des photos et génération de résumés (les images ne sont pas stockées par OpenAI)",
+      role: "Analyses INCI, assistant beauté et génération de résumés (transfert hors UE encadré par les Clauses Contractuelles Types)",
       location: "États-Unis",
       website: "https://openai.com/policies/privacy-policy",
+    },
+    {
+      name: "Mistral AI SAS",
+      role: "Traitement par intelligence artificielle des analyses INCI et de l'assistant (société française, hébergement principalement dans l'Union européenne)",
+      location: "Union européenne (France)",
+      website: "https://mistral.ai/fr/terms/#privacy-policy",
+    },
+    {
+      name: "Stripe, Inc.",
+      role: "Gestion des paiements et abonnements (aucune donnée bancaire complète ne transite ni n'est stockée par nos serveurs ; transfert hors UE encadré par les Clauses Contractuelles Types)",
+      location: "États-Unis",
+      website: "https://stripe.com/fr/privacy",
+    },
+    {
+      name: "PostHog Inc.",
+      role: "Mesure d'audience anonyme (statistiques de fréquentation sans cookie publicitaire ni identifiant nominatif), hébergée dans l'Union européenne (eu.i.posthog.com)",
+      location: "Union européenne",
+      website: "https://posthog.com/privacy",
     },
     {
       name: "Brevo (Sendinblue SAS)",

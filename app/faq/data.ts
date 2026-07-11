@@ -32,7 +32,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     dot: "vert",
     question: "Comment fonctionne le scan d'un produit ?",
     answer:
-      "Tu prends en photo la liste INCI (la liste d'ingrédients au dos du produit) ou tu scannes le code-barres. Cosme Check lit la composition, identifie chaque ingrédient dans notre base de plus de 40 000 références, puis t'affiche le détail ingrédient par ingrédient en quelques secondes.",
+      "Tu scannes le code-barres, tu recherches le produit par son nom dans notre catalogue, ou tu colles directement la liste INCI (la liste d'ingrédients au dos du produit). Cosme Check lit la composition, identifie chaque ingrédient dans notre base de plus de 40 000 références, puis t'affiche le détail ingrédient par ingrédient en quelques secondes.",
     learnMore: { href: "/comment-ca-marche" },
   },
   {
@@ -44,20 +44,12 @@ export const FAQ_ITEMS: FaqItem[] = [
       "Oui : soins du visage, soins du corps, maquillage, parfums, produits capillaires, hygiène intime, déodorants, solaires, produits pour bébé. Tout ce qui possède une liste INCI réglementaire peut être analysé.",
   },
   {
-    id: "ocr-fiabilite",
-    category: "Composition",
-    dot: "jaune",
-    question: "La photo de l'étiquette est-elle toujours bien reconnue ?",
-    answer:
-      "Notre OCR (reconnaissance de texte) est optimisé pour les listes INCI, mais une photo nette, bien cadrée et sans reflet donne toujours un meilleur résultat. Si le scan échoue, tu peux coller la liste INCI manuellement ou rechercher le produit par son nom.",
-  },
-  {
     id: "produit-non-reconnu",
     category: "Composition",
     dot: "orange",
     question: "Pourquoi certains produits ne sont-ils pas reconnus ?",
     answer:
-      "Notre base s'enrichit chaque semaine, mais les nouveautés ou les références confidentielles peuvent manquer à l'appel. Dans ce cas, le scan de la liste INCI fonctionne quand même : on analyse les ingrédients, même si le produit n'est pas encore référencé.",
+      "Notre base s'enrichit chaque semaine, mais les nouveautés ou les références confidentielles peuvent manquer à l'appel. Dans ce cas, colle la liste INCI manuellement : on analyse les ingrédients, même si le produit n'est pas encore référencé.",
   },
   {
     id: "ordre-ingredients",
@@ -73,7 +65,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     dot: "vert",
     question: "Comment ajouter manuellement la composition d'un produit ?",
     answer:
-      "Depuis l'accueil, choisis l'option « Coller la liste INCI ». Tu peux copier-coller la liste depuis le site de la marque, un blog ou une photo. L'analyse se lance immédiatement.",
+      "Depuis l'accueil, choisis l'option « Coller la liste INCI ». Tu peux copier-coller la liste depuis le site de la marque ou un blog. L'analyse se lance immédiatement.",
   },
 
   // ── Couleurs ─────────────────────────────────────────────────────────────
@@ -201,7 +193,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     dot: "jaune",
     question: "Comment fonctionnent les crédits ?",
     answer:
-      "Les crédits sont utilisés pour certaines actions premium ponctuelles (analyse approfondie, suggestions IA, OCR avancé). Le compte gratuit en reçoit chaque mois ; l'offre premium en inclut un volume bien plus large.",
+      "Les crédits sont utilisés pour certaines actions premium ponctuelles (analyse approfondie, suggestions IA, comparaison avancée). Le compte gratuit en reçoit chaque mois ; l'offre premium en inclut un volume bien plus large.",
   },
   {
     id: "annulation",
@@ -242,9 +234,9 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: "stockage-photos",
     category: "Confidentialité",
     dot: "orange",
-    question: "Où sont stockées mes photos de produits ?",
+    question: "Où sont stockées les photos que j'envoie pour signaler un produit ?",
     answer:
-      "Les photos sont traitées par notre OCR puis supprimées dans la foulée. Seul le texte de la liste INCI reconnu est conservé, et uniquement si tu choisis de sauvegarder le scan dans ton historique.",
+      "Si tu envoies une photo pour signaler ou illustrer la fiche d'un produit, elle est conservée uniquement le temps de la modération par notre équipe, puis supprimée. Elle ne sert qu'à vérifier et corriger la fiche du produit.",
   },
   {
     id: "suppression-compte",

@@ -5,6 +5,7 @@ import { signOut } from "@/app/auth/actions";
 import { GLASS_CARD } from "@/lib/ui/glass";
 import { readSkinProfile, isProfileStarted } from "@/lib/skin/profile";
 import { SubscriptionManager } from "@/components/profile/SubscriptionManager";
+import { DeleteAccountButton } from "@/components/profile/DeleteAccountButton";
 
 export const metadata = { title: "Mon profil · Cosme Check" };
 
@@ -124,13 +125,16 @@ export default async function ProfilePage() {
       </section>
 
       {/* Avertissement médical */}
-      <div className="flex items-start gap-2 px-1 pb-6">
+      <div className="flex items-start gap-2 px-1 pb-2">
         <InfoIcon className="h-4 w-4 text-[#9CA3AF] mt-0.5 shrink-0" />
         <p className="text-[11px] text-[#9CA3AF] leading-relaxed italic">
           Cosme Check est un outil pédagogique. Les analyses ne constituent pas un avis médical.
           En cas de doute, consulte un professionnel de santé.
         </p>
       </div>
+
+      {/* Suppression de compte (RGPD - droit à l'effacement) */}
+      <DeleteAccountButton />
     </div>
   );
 }

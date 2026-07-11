@@ -153,7 +153,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const hdrs = await headers();
   const pathname = hdrs.get("x-pathname") ?? "";
 
-  const hideOnPaths = ["/auth", "/scan/photo", "/onboarding", "/beta"];
+  const hideOnPaths = ["/auth", "/onboarding", "/beta"];
 
   // Fast path : pages landing publiques. AppShell rend juste {children} pour
   // les visiteurs anonymes (ligne 114 du composant), donc profile / families /

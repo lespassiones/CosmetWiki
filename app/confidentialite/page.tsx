@@ -51,13 +51,19 @@ export default function ConfidentialitePage() {
           n&apos;est demandé.
         </li>
         <li>
-          <strong>Photos et listes INCI analysées</strong>&nbsp;: les images que tu
-          envoies via le scanner ainsi que les listes d&apos;ingrédients que tu
-          colles dans l&apos;analyseur sont traitées pour produire ton analyse.
+          <strong>Listes INCI analysées</strong>&nbsp;: les listes d&apos;ingrédients
+          que tu saisis, que tu colles dans l&apos;analyseur ou qui sont
+          associées à un produit identifié par code-barres ou recherché dans
+          notre catalogue sont traitées pour produire ton analyse.
         </li>
         <li>
           <strong>Historique d&apos;analyses</strong>&nbsp;: si tu es connecté, tes
           analyses sont sauvegardées pour que tu puisses les retrouver plus tard.
+        </li>
+        <li>
+          <strong>Photos de signalement</strong>&nbsp;: si tu envoies une photo pour
+          signaler ou corriger la fiche d&apos;un produit, cette image est
+          conservée le temps de la modération (voir section&nbsp;6).
         </li>
       </ul>
 
@@ -66,20 +72,39 @@ export default function ConfidentialitePage() {
         <li>
           <strong>Données techniques</strong>&nbsp;: type d&apos;appareil, navigateur,
           adresse IP (anonymisée), pages visitées. Utilisées uniquement pour
-          mesurer l&apos;audience et améliorer le site (via Vercel Analytics, sans
-          cookie de suivi).
+          mesurer l&apos;audience et améliorer le site, via un outil de mesure
+          d&apos;audience anonyme (PostHog, hébergé dans l&apos;Union européenne).
+          Aucun profil publicitaire n&apos;est constitué et aucune donnée
+          nominative (email, nom) n&apos;est associée à ces statistiques.
         </li>
         <li>
           <strong>Cookies strictement nécessaires</strong>&nbsp;: un cookie de session
-          chiffré pour te garder connecté. Aucun cookie publicitaire ou de
-          pistage tiers.
+          chiffré pour te garder connecté. L&apos;outil de mesure d&apos;audience
+          PostHog n&apos;utilise pas de cookie&nbsp;: il conserve un identifiant
+          anonyme dans le stockage local (localStorage) de ton navigateur. Aucun
+          cookie publicitaire ou de pistage tiers.
         </li>
       </ul>
+
+      <h3>2.3 Intelligence artificielle</h3>
+      <p>
+        Certaines fonctionnalités (analyse des listes INCI, assistant beauté,
+        synthèses personnalisées) reposent sur des modèles d&apos;intelligence
+        artificielle fournis par <strong>OpenAI</strong> et{" "}
+        <strong>Mistral AI</strong>. Pour produire ces résultats, seules les
+        données strictement nécessaires leur sont transmises&nbsp;: les listes
+        d&apos;ingrédients (INCI) et, le cas échéant, ton profil de peau. Ces
+        données ne servent pas à entraîner leurs modèles. Mistral AI est une
+        société française hébergeant ses traitements principalement dans
+        l&apos;Union européenne&nbsp;; les traitements réalisés par OpenAI
+        impliquent un transfert hors UE, encadré par les Clauses Contractuelles
+        Types de la Commission européenne.
+      </p>
 
       <h2>3. Finalités du traitement</h2>
       <ul>
         <li>Te permettre de créer un compte et te connecter.</li>
-        <li>Analyser les listes INCI et photos que tu nous soumets.</li>
+        <li>Analyser les listes INCI que tu nous soumets.</li>
         <li>Sauvegarder ton historique d&apos;analyses et ta routine.</li>
         <li>Améliorer le site (mesure d&apos;audience anonyme).</li>
         <li>Répondre à tes demandes par email.</li>
@@ -132,9 +157,9 @@ export default function ConfidentialitePage() {
           puis supprimé sur demande ou après 3 ans d&apos;inactivité.
         </li>
         <li>
-          <strong>Photos analysées</strong>&nbsp;: les images envoyées à l&apos;OCR ne
-          sont pas conservées sur nos serveurs après le traitement. Seul le
-          texte extrait (liste INCI) est conservé avec ton analyse.
+          <strong>Photos de signalement</strong>&nbsp;: les images envoyées pour
+          signaler ou corriger la fiche d&apos;un produit sont conservées le temps
+          nécessaire à leur modération, puis supprimées.
         </li>
         <li>
           <strong>Logs techniques</strong>&nbsp;: 30 jours maximum.
@@ -183,12 +208,22 @@ export default function ConfidentialitePage() {
         des politiques de sécurité au niveau des lignes (Row Level Security).
       </p>
 
-      <h2>9. Cookies</h2>
+      <h2>9. Cookies et mesure d&apos;audience</h2>
       <p>
         Cosme Check utilise uniquement des cookies strictement nécessaires au
         fonctionnement du site (session de connexion). Aucun cookie publicitaire
-        ni de pistage tiers n&apos;est déposé sur ton appareil. Aucune bannière de
-        consentement n&apos;est requise dans cette configuration.
+        ni de pistage tiers n&apos;est déposé sur ton appareil.
+      </p>
+      <p>
+        Pour mesurer sa fréquentation, le site utilise un outil de mesure
+        d&apos;audience anonyme (PostHog)&nbsp;: pas de session replay, pas de
+        suivi comportemental croisé entre sites, pas de profil publicitaire, et
+        un identifiant technique anonyme stocké dans le stockage local
+        (localStorage) de ton navigateur plutôt que dans un cookie. Ce traitement
+        repose sur notre intérêt légitime (art.&nbsp;6.1.f du RGPD) à mesurer
+        l&apos;audience de manière anonyme. Configuré ainsi, cet outil relève de
+        la mesure d&apos;audience exemptée de consentement&nbsp;: aucune bannière
+        de consentement n&apos;est requise dans cette configuration.
       </p>
 
       <h2>10. Mineurs</h2>
