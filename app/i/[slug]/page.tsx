@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -77,21 +78,32 @@ const RATING_BAR: Record<ColorRating, string> = {
 
 const PRODUCTS_VISIBLE = 3;
 
-// `cache()` partage l'appel entre `generateMetadata` et le render de la page
-// dans la MÊME requête : sans ça on payait 2 RPCs par hit (la metadata d'abord,
-// puis le composant page) pour les mêmes données.
-const loadIngredient = cache(async (slug: string): Promise<Ingredient | null> => {
-  const { data, error } = await rpcWithTimeout<Ingredient[]>(
-    supabaseAnon().rpc("cosme_check_get_ingredient", { p_slug: slug }),
-    RPC_TIMEOUT_MS,
-  );
-  if (error) {
-    console.warn(`[ingredient] get_ingredient slug=${slug} failed:`, error);
-    return null;
-  }
-  if (!data || data.length === 0) return null;
-  return data[0] ?? null;
-});
+// Deux couches de cache :
+//   1. `unstable_cache` (Data Cache Vercel, 30 jours par slug) : un crawl
+//      complet des 15 700 fiches par Google/Bing/GPTBot ne coûte qu'UNE RPC
+//      Supabase par fiche par mois. C'est ce qui permet d'indexer tout le
+//      catalogue sans le problème de budget IO qui avait motivé le blocage.
+//   2. `cache()` React : dédup entre `generateMetadata` et le render dans la
+//      même requête.
+// En cas d'échec RPC (timeout, erreur) on JETTE : `unstable_cache` ne stocke
+// rien, la requête suivante retente. Ne jamais cacher un échec 30 jours.
+const getIngredientCached = unstable_cache(
+  async (slug: string): Promise<Ingredient | null> => {
+    const { data, error } = await rpcWithTimeout<Ingredient[]>(
+      supabaseAnon().rpc("cosme_check_get_ingredient", { p_slug: slug }),
+      RPC_TIMEOUT_MS,
+    );
+    if (error) {
+      console.warn(`[ingredient] get_ingredient slug=${slug} failed:`, error);
+      throw new Error(`get_ingredient failed for ${slug}: ${error}`);
+    }
+    if (!data || data.length === 0) return null;
+    return data[0] ?? null;
+  },
+  ["ingredient-by-slug-v1"],
+  { revalidate: 2_592_000 },
+);
+const loadIngredient = cache(getIngredientCached);
 
 const RATING_META_LABEL: Record<ColorRating, string> = {
   Vert: "sans risque connu",
@@ -135,10 +147,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = buildMetaDescription(ing);
   const path = `/i/${ing.slug}`;
   return {
-    title: name,
+    // Le nom INCI exact en tête (la requête que tapent les gens), suivi des
+    // intentions de recherche associées ("danger", "utilité"). Le template
+    // du layout ajoute "· Cosme Check".
+    title: `${name} : danger, utilité et note (INCI)`,
     description,
     alternates: { canonical: path },
-    robots: { index: false, follow: true },
+    robots: { index: true, follow: true },
     openGraph: {
       title: `${name} · Cosme Check`,
       description,
@@ -177,6 +192,12 @@ function buildIngredientJsonLd(ing: Ingredient): object {
       {
         "@type": "ListItem",
         position: 2,
+        name: "Ingrédients",
+        item: `${SITE_URL}/ingredients`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
         name,
         item: url,
       },
@@ -217,9 +238,13 @@ export default async function IngredientPage({ params, searchParams }: Props) {
   const hasDescription = !!ing.description && ing.description.trim().length > 4;
   const hasRegulated = (ing.regulated_zones?.length ?? 0) > 0;
   const hasBreakdown = breakdown.length > 0;
-  // Fiche simplifiée : blocs détaillés masqués (code conservé). `as boolean`
-  // évite que TS traite la branche comme morte (sinon narrowing de `ing` perdu).
-  const SHOW_DETAILS = false as boolean;
+  // Blocs détaillés réactivés (2026-07) : chaque fiche expose fonctions,
+  // prévalence, répartition par catégorie et infos techniques (CAS, EINECS).
+  // Plus de contenu unique par page = meilleure indexation (Google classait
+  // 245 fiches en "explorée, non indexée" pour contenu trop mince) et
+  // meilleures citations par les moteurs IA. Repasser à `false` pour revenir
+  // à la fiche simplifiée.
+  const SHOW_DETAILS = true as boolean;
 
   const jsonLd = buildIngredientJsonLd(ing);
 
@@ -474,7 +499,9 @@ export default async function IngredientPage({ params, searchParams }: Props) {
             </>
           ) : (
             <>
-              <span>Ingrédients</span>
+              <Link href="/ingredients" className="hover:text-ink">
+                Ingrédients
+              </Link>
               <ChevronIcon className="h-3.5 w-3.5" />
             </>
           )}

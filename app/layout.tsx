@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SITE_URL } from "@/lib/siteUrl";
 import { PWARegister } from "@/components/PWARegister";
 import { PostHogInit } from "@/components/PostHogInit";
+import { SiteJsonLd } from "@/components/SiteJsonLd";
 import { RecoveryRedirect } from "./RecoveryRedirect";
 import { AppShell } from "@/components/nav/AppShell";
 import { ConditionalLandingFooter } from "@/components/ConditionalLandingFooter";
@@ -64,6 +65,9 @@ const inter = Inter({
 });
 
 const SITE_NAME = "Cosme Check";
+// Titre de marque validé par le fondateur (2026-07) : le positionnement est
+// la personnalisation (cosmétiques adaptés au profil de l'utilisateur), pas
+// l'analyse générique. Ne pas remplacer par un titre à mots-clés.
 const DEFAULT_TITLE =
   "Cosme Check, l'application qui te dit les cosmétiques faits pour toi.";
 const DEFAULT_DESCRIPTION =
@@ -174,6 +178,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     return (
       <html lang="fr" className={`light ${inter.variable}`} data-theme="light">
         <body className="min-h-screen antialiased">
+          <SiteJsonLd />
           <link
             rel="preconnect"
             href={process.env.NEXT_PUBLIC_SUPABASE_URL}
@@ -242,6 +247,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="fr" className={`light ${inter.variable}`} data-theme="light">
       <body className="min-h-screen antialiased">
+        <SiteJsonLd />
         <link
           rel="preconnect"
           href={process.env.NEXT_PUBLIC_SUPABASE_URL}

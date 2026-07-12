@@ -184,7 +184,18 @@ export default function CGUPage() {
         aux consommateurs.
       </p>
 
-      <h2>12. Contact</h2>
+      <h2>12. Statistiques d&apos;usage</h2>
+      <p>
+        Afin d&apos;améliorer l&apos;application et de comprendre comment le
+        service est utilisé, nous avons recours à un outil de mesure
+        d&apos;audience et d&apos;analyse statistique (PostHog). Il recueille des
+        données d&apos;usage (pages consultées, actions effectuées, informations
+        techniques) qui nous aident à corriger les problèmes et à faire évoluer
+        le service. Ces données servent uniquement à l&apos;amélioration de
+        Cosme Check et ne sont pas revendues à des tiers.
+      </p>
+
+      <h2>13. Contact</h2>
       <p>
         Pour toute question relative à ces CGU&nbsp;:{" "}
         <a href={`mailto:${LEGAL.contactEmail}`}>{LEGAL.contactEmail}</a>.

@@ -21,8 +21,7 @@
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { submitToIndexNow } from "@/lib/indexnow";
-import { SITE_URL } from "@/lib/siteUrl";
-import { supabaseAnon } from "@/lib/supabase";
+import { ingredientPageUrls, staticPageUrls } from "@/lib/sitemapData";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -55,32 +54,15 @@ function isAuthorized(req: NextRequest): boolean {
 }
 
 async function loadAllSitemapUrls(): Promise<string[]> {
-  const staticUrls = [
-    `${SITE_URL}/`,
-    `${SITE_URL}/fonctionnalites`,
-    `${SITE_URL}/comment-ca-marche`,
-    `${SITE_URL}/blog`,
-    `${SITE_URL}/blog/spf-50-visage-7-erreurs`,
-    `${SITE_URL}/blog/perturbateurs-endocriniens-cosmetiques-2026`,
-    `${SITE_URL}/blog/serums-visage-guide`,
-    `${SITE_URL}/blog/masque-led-visage`,
-    `${SITE_URL}/blog/lip-oils-huiles-levres`,
-    `${SITE_URL}/blog/cremes-hydratantes-reparatrices`,
-    `${SITE_URL}/blog/creme-solaire-coreenne-k-beauty`,
-    `${SITE_URL}/faq`,
-    `${SITE_URL}/contact`,
-  ];
-
-  const { data, error } = await supabaseAnon().rpc(
-    "cosme_check_list_active_slugs_json",
-  );
-  if (error || !Array.isArray(data)) return staticUrls;
-
-  const ingredientUrls = (data as unknown[])
-    .filter((s): s is string => typeof s === "string")
-    .map((slug) => `${SITE_URL}/i/${slug}`);
-
-  return [...staticUrls, ...ingredientUrls];
+  // Même source de vérité que les sitemaps (lib/sitemapData.ts). Si la RPC
+  // des slugs échoue, on soumet au moins les pages statiques.
+  const staticUrls = staticPageUrls();
+  try {
+    const ingredientUrls = await ingredientPageUrls();
+    return [...staticUrls, ...ingredientUrls];
+  } catch {
+    return staticUrls;
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -113,6 +95,30 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const result = await submitToIndexNow(urls);
+
+  return NextResponse.json(result, {
+    status: result.ok ? 200 : 502,
+    headers: { "Cache-Control": "no-store" },
+  });
+}
+
+/**
+ * GET = déclencheur du cron Vercel (vercel.json → /api/indexnow, hebdo).
+ * Vercel envoie ses crons en GET avec `Authorization: Bearer <CRON_SECRET>`
+ * (header injecté automatiquement quand la variable d'env CRON_SECRET est
+ * définie sur le projet). On accepte aussi INDEXNOW_SECRET pour pouvoir
+ * déclencher une synchro à la main avec curl.
+ * Effet : soumet TOUTES les URLs du site (statiques + 15 700 fiches) à
+ * IndexNow → Bing / DuckDuckGo / Yandex recrawlent sous quelques heures.
+ */
+export async function GET(req: NextRequest) {
+  const cronSecret = process.env.CRON_SECRET;
+  const auth = req.headers.get("authorization");
+  const isCron = Boolean(cronSecret) && auth === `Bearer ${cronSecret}`;
+  if (!isCron && !isAuthorized(req)) return unauthorized();
+
+  const urls = await loadAllSitemapUrls();
   const result = await submitToIndexNow(urls);
 
   return NextResponse.json(result, {

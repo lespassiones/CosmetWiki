@@ -3,6 +3,10 @@
     {
       "path": "/api/beta/cron",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/indexnow",
+      "schedule": "0 3 * * 1"
     }
   ]
 }
