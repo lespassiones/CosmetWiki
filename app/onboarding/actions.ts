@@ -5,7 +5,7 @@ import { phCapture } from "@/lib/posthogServer";
 import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase";
-import { buildConsent } from "@/lib/consent";
+import { buildConsent, readConsent, type Consent } from "@/lib/consent";
 import { syncBrevoContact } from "@/lib/brevo";
 import {
   HAIR_CONCERNS,
@@ -283,14 +283,14 @@ export async function dismissOnboarding(): Promise<OnboardingResult> {
 }
 
 /**
- * Enregistre le consentement (CGU obligatoire + opt-in marketing) capté par le
- * modal affiché AVANT les questions de profil. Cible principalement les
- * inscriptions Google, qui ne passent pas par le formulaire email (où le
- * consentement est déjà recueilli). Stocke dans preferences.consent et, si
- * l'opt-in marketing est coché, synchronise le contact vers Brevo après la
- * réponse (fail-open).
+ * Enregistre l'acceptation des CGU captée par le modal affiché AVANT les
+ * questions de profil (cas des inscriptions Google, qui ne passent pas par le
+ * formulaire email). Le modal ne demande QUE les CGU : le choix newsletter est
+ * proposé à la FIN de l'onboarding (étape dédiée), donc `marketingPromptSeen`
+ * reste `false` ici. Le contact est ajouté à la liste de SERVICE « Tous les
+ * inscrits » dès maintenant (marketing=false → pas encore la liste Newsletter).
  */
-export async function saveConsent(marketing: boolean): Promise<OnboardingResult> {
+export async function saveConsent(): Promise<OnboardingResult> {
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
   const { data: { user } } = await sb.auth.getUser();
@@ -304,7 +304,8 @@ export async function saveConsent(marketing: boolean): Promise<OnboardingResult>
     .maybeSingle();
 
   const prefs = (existing?.preferences ?? {}) as Record<string, unknown>;
-  const consent = buildConsent(marketing);
+  // CGU acceptées ; newsletter pas encore demandée (marketingPromptSeen=false).
+  const consent = buildConsent(false, false);
 
   const { error } = await sb
     .schema("cosme_check")
@@ -317,8 +318,58 @@ export async function saveConsent(marketing: boolean): Promise<OnboardingResult>
 
   if (error) return { ok: false, error: error.message };
 
-  // Synchro Brevo pour TOUS les inscrits (liste « Tous les inscrits ») ; l'opt-in
-  // marketing les ajoute en plus à « Newsletter » (géré par syncBrevoContact).
+  // Ajout à la liste de service « Tous les inscrits » (marketing=false → pas de
+  // liste Newsletter tant que l'utilisateur n'a pas opté à l'étape finale).
+  if (user.email) {
+    const firstName = (existing?.first_name as string | null) ?? null;
+    const email = user.email;
+    after(() => syncBrevoContact({ email, firstName, marketing: false }));
+  }
+
+  return { ok: true };
+}
+
+/**
+ * Enregistre le choix newsletter capté par l'ÉTAPE FINALE de l'onboarding.
+ * Cible les inscrits Google (le modal d'entrée n'a demandé que les CGU) ; les
+ * inscrits email ont déjà décidé sur le formulaire (marketingPromptSeen=true)
+ * et ne voient donc pas cette étape. Met à jour preferences.consent.marketing +
+ * marketingPromptSeen=true et (re)synchronise Brevo (ajout liste Newsletter si
+ * opt-in). Fail-open côté Brevo.
+ */
+export async function saveNewsletterConsent(
+  marketing: boolean,
+): Promise<OnboardingResult> {
+  const cookieStore = await cookies();
+  const sb = supabaseServer(cookieStore);
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return { ok: false, error: "Non connecté." };
+
+  const { data: existing } = await sb
+    .schema("cosme_check")
+    .from("user_profiles")
+    .select("preferences, first_name")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const prefs = (existing?.preferences ?? {}) as Record<string, unknown>;
+  const current = readConsent(prefs);
+  // Préserve l'acceptation CGU existante ; ne change que le choix marketing.
+  const consent: Consent = current
+    ? { ...current, marketing, marketingPromptSeen: true }
+    : buildConsent(marketing, true);
+
+  const { error } = await sb
+    .schema("cosme_check")
+    .from("user_profiles")
+    .update({
+      preferences: { ...prefs, consent },
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (error) return { ok: false, error: error.message };
+
   if (user.email) {
     const firstName = (existing?.first_name as string | null) ?? null;
     const email = user.email;

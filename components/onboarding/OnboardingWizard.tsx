@@ -17,7 +17,7 @@
  * completeOnboarding) → même stockage que le mobile.
  */
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   HAIR_PROBLEM_CONCERNS,
@@ -40,10 +40,11 @@ import {
 } from "@/lib/skin/profile";
 import {
   completeOnboarding,
+  saveNewsletterConsent,
   saveOnboardingStep,
 } from "@/app/onboarding/actions";
 
-type Bloc = "skin" | "concerns" | "goals";
+type Bloc = "skin" | "concerns" | "goals" | "newsletter";
 type Tone = "violet" | "rose" | "vert";
 
 const TONES: Record<Tone, { solid: string; soft: string; text: string }> = {
@@ -77,7 +78,16 @@ const MICRO_STEPS: MicroStep[] = [
   { id: "otherGoal", bloc: "goals", blocLabel: "Tes objectifs", tone: "vert", title: "Un autre objectif en tête ?" },
 ];
 
-const TOTAL = MICRO_STEPS.length;
+/** Étape finale optionnelle (opt-in newsletter) ajoutée après le questionnaire
+ *  pour les inscrits qui n'ont pas eu la case sur le formulaire (cas Google). */
+const NEWSLETTER_STEP: MicroStep = {
+  id: "newsletter",
+  bloc: "newsletter",
+  blocLabel: "Newsletter",
+  tone: "rose",
+  title: "Reste dans la boucle",
+};
+
 const AUTOSAVE_DEBOUNCE_MS = 600;
 
 const goalOptions = (label: string) =>
@@ -90,13 +100,26 @@ type Props = {
   initial: SkinProfile;
   finalNext: string;
   firstName?: string | null;
+  /** Ajoute l'étape finale « newsletter » (inscrits Google). */
+  needsNewsletterStep?: boolean;
 };
 
-export function OnboardingWizard({ initial, finalNext, firstName }: Props) {
+export function OnboardingWizard({
+  initial,
+  finalNext,
+  firstName,
+  needsNewsletterStep = false,
+}: Props) {
   const router = useRouter();
+  const STEPS = useMemo(
+    () => (needsNewsletterStep ? [...MICRO_STEPS, NEWSLETTER_STEP] : MICRO_STEPS),
+    [needsNewsletterStep],
+  );
+  const TOTAL = STEPS.length;
   const [index, setIndex] = useState(0);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [newsletterOptIn, setNewsletterOptIn] = useState(false);
 
   // ─── État (identique à l'ancien wizard, même stockage) ───────────────────
   const [skinTypeFace, setSkinTypeFace] = useState<SkinTypeFace | "autre" | "">(
@@ -124,12 +147,12 @@ export function OnboardingWizard({ initial, finalNext, firstName }: Props) {
   const [goals, setGoals] = useState<Set<ProfileGoal>>(new Set(initial.goals ?? []));
   const [otherGoals, setOtherGoals] = useState(initial.otherGoals ?? "");
 
-  const step = MICRO_STEPS[index];
+  const step = STEPS[index];
   const bloc = step.bloc;
   const tone = TONES[step.tone];
   const isLast = index === TOTAL - 1;
 
-  const blocSteps = MICRO_STEPS.filter((s) => s.bloc === bloc);
+  const blocSteps = STEPS.filter((s) => s.bloc === bloc);
   const blocPos = blocSteps.findIndex((s) => s.id === step.id);
 
   // ─── FormData d'un bloc (mêmes champs que les server actions) ─────────────
@@ -137,6 +160,7 @@ export function OnboardingWizard({ initial, finalNext, firstName }: Props) {
     (b: Bloc): FormData => {
       const fd = new FormData();
       fd.set("step", b);
+      if (b === "newsletter") return fd; // pas de données profil à cette étape
       if (b === "skin") {
         if (skinTypeFace && skinTypeFace !== "autre") fd.set("skin_type_face", skinTypeFace);
         if (skinTypeFace === "autre" && otherSkinTypeFace.trim())
@@ -180,6 +204,7 @@ export function OnboardingWizard({ initial, finalNext, firstName }: Props) {
       hasMountedRef.current = true;
       return;
     }
+    if (bloc === "newsletter") return; // rien à auto-sauver sur l'étape newsletter
     const h = window.setTimeout(() => {
       void saveOnboardingStep(buildFormData(bloc)).catch(() => undefined);
     }, AUTOSAVE_DEBOUNCE_MS);
@@ -198,10 +223,16 @@ export function OnboardingWizard({ initial, finalNext, firstName }: Props) {
   function finish() {
     setError(null);
     startTransition(async () => {
-      const save = await saveOnboardingStep(buildFormData(bloc));
-      if (!save.ok) {
-        setError(save.error);
-        return;
+      if (step.bloc === "newsletter") {
+        // Étape newsletter : enregistre l'opt-in (+ synchro Brevo côté action).
+        // Fail-open : ne bloque jamais la fin de l'onboarding.
+        await saveNewsletterConsent(newsletterOptIn).catch(() => undefined);
+      } else {
+        const save = await saveOnboardingStep(buildFormData(bloc));
+        if (!save.ok) {
+          setError(save.error);
+          return;
+        }
       }
       const done = await completeOnboarding();
       if (!done.ok) {
@@ -410,6 +441,14 @@ export function OnboardingWizard({ initial, finalNext, firstName }: Props) {
             value={otherGoals}
             onChange={setOtherGoals}
             placeholder="Un objectif qui n'est pas dans la liste ?"
+          />
+        )}
+
+        {step.id === "newsletter" && (
+          <NewsletterOptIn
+            checked={newsletterOptIn}
+            onToggle={setNewsletterOptIn}
+            tone={step.tone}
           />
         )}
       </div>
@@ -621,5 +660,66 @@ function FreeText({
       rows={4}
       className="w-full resize-none rounded-2xl border-[1.5px] border-[#E5E5E0] bg-white px-4 py-3 text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none"
     />
+  );
+}
+
+// ─── Étape finale newsletter (opt-in) ────────────────────────────────────────
+
+function NewsletterOptIn({
+  checked,
+  onToggle,
+  tone,
+}: {
+  checked: boolean;
+  onToggle: (v: boolean) => void;
+  tone: Tone;
+}) {
+  const t = TONES[tone];
+  return (
+    <div className="flex flex-col gap-5">
+      <p className="text-[15px] leading-6 text-[#374151]">
+        Reçois nos meilleurs conseils, décryptages et nouveautés par email. Un
+        envoi de temps en temps, jamais de spam.
+      </p>
+      <button
+        type="button"
+        onClick={() => onToggle(!checked)}
+        aria-pressed={checked}
+        className="flex w-full items-center justify-between rounded-2xl border-[1.5px] px-5 py-4 text-left transition"
+        style={
+          checked
+            ? { backgroundColor: t.soft, borderColor: t.solid }
+            : { backgroundColor: "#fff", borderColor: "#E5E5E0" }
+        }
+      >
+        <span
+          className="pr-3 text-[15px] font-medium"
+          style={{ color: checked ? t.text : "#111111" }}
+        >
+          Oui, je veux recevoir la newsletter
+        </span>
+        <span
+          className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-md border-2"
+          style={{
+            borderColor: checked ? t.solid : "#D1D5DB",
+            backgroundColor: checked ? t.solid : "transparent",
+          }}
+        >
+          {checked ? (
+            <svg
+              className="h-3.5 w-3.5 text-white"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={3}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M5 12l5 5 9-12" />
+            </svg>
+          ) : null}
+        </span>
+      </button>
+    </div>
   );
 }

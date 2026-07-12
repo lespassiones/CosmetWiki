@@ -146,6 +146,53 @@ function buildApiMessages(history: ChatMsg[], newUserText: string) {
   return [...past, { role: "user" as const, content: newUserText }];
 }
 
+/** Réponse finale de l'agent (identique en mode bloquant et streaming). */
+type AgentReply = { reply?: string; products?: AgentProduct[]; followup?: string | null };
+
+/**
+ * Consomme un flux SSE de l'agent : appelle `onStatus(label)` sur chaque événement
+ * de progression, et renvoie le `result` final (ou null si le flux s'est coupé
+ * sans résultat exploitable → le caller retombe alors sur le mode bloquant).
+ */
+async function consumeAdvisorStream(
+  body: ReadableStream<Uint8Array>,
+  onStatus: (label: string) => void,
+): Promise<AgentReply | null> {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let result: AgentReply | null = null;
+  try {
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let sep: number;
+      while ((sep = buffer.indexOf("\n\n")) !== -1) {
+        const frame = buffer.slice(0, sep).trim();
+        buffer = buffer.slice(sep + 2);
+        if (!frame.startsWith("data:")) continue;
+        const json = frame.slice(5).trim();
+        if (!json) continue;
+        let evt: { type?: string; label?: string } & AgentReply;
+        try {
+          evt = JSON.parse(json);
+        } catch {
+          continue;
+        }
+        if (evt.type === "status" && evt.label) onStatus(evt.label);
+        else if (evt.type === "result") {
+          result = { reply: evt.reply, products: evt.products, followup: evt.followup };
+        }
+        // evt.type === "error" → on laisse result à null (fallback bloquant).
+      }
+    }
+  } catch {
+    return result;
+  }
+  return result;
+}
+
 function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
   const nodes: React.ReactNode[] = [];
   const re = /\*\*([^*]+?)\*\*|__([^_]+?)__|_([^_]+?)_|\*([^*]+?)\*|`([^`]+?)`/g;
@@ -383,6 +430,9 @@ export function AdvisorChat({
   );
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  // Statut de progression RÉEL remonté par le flux (« Je cherche… », « J'analyse
+  // N produits… »). Quand renseigné, il remplace la phrase rotative.
+  const [liveStatus, setLiveStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   // Bouton « Montre-moi des recommandations » : une seule requête à la fois.
   const [recoRequesting, setRecoRequesting] = useState(false);
@@ -470,8 +520,10 @@ export function AdvisorChat({
     const text = rawText.trim();
     if (!text || streaming) return;
     setError(null);
-    // Nouvel ordre aléatoire des phrases de chargement pour cet envoi.
+    // Nouvel ordre aléatoire des phrases de chargement pour cet envoi (fallback
+    // si le flux ne remonte pas de statut réel).
     loadingSeqRef.current = makeLoadingSequence();
+    setLiveStatus(null);
     setStreaming(true);
 
     const userMsg: ChatMsg = { role: "user", content: text, time: getTime() };
@@ -503,26 +555,59 @@ export function AdvisorChat({
           messages.flatMap((m) => (m.products ?? []).map((p) => p.ean)).filter(Boolean),
         ),
       );
-      const r = await apiFetch("/api/advisor/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages, seen_eans: seenEans }),
-      });
-      if (!r.ok) {
-        // apiFetch gère déjà la modale « Crédits épuisés » sur 429 no_credits.
-        const j = (await r.json().catch(() => ({}))) as { error?: string };
-        setError(j.error ?? `Erreur ${r.status}`);
+
+      const failRequest = (msg: string) => {
+        setError(msg);
         setMessages((prev) => prev.slice(0, -1));
         setStreaming(false);
-        return;
+        setLiveStatus(null);
+      };
+
+      // 1) STREAMING d'abord : événements de progression réels pendant la phase
+      // outils. Le `result` final est IDENTIQUE au mode bloquant.
+      let data: AgentReply | null = null;
+      try {
+        const r = await apiFetch("/api/advisor/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: apiMessages, seen_eans: seenEans, stream: true }),
+        });
+        if (!r.ok) {
+          // apiFetch gère déjà la modale « Crédits épuisés » sur 429 no_credits.
+          const j = (await r.json().catch(() => ({}))) as { error?: string };
+          failRequest(j.error ?? `Erreur ${r.status}`);
+          return;
+        }
+        const ct = r.headers.get("content-type") ?? "";
+        if (ct.includes("text/event-stream") && r.body) {
+          data = await consumeAdvisorStream(r.body, (label) => setLiveStatus(label));
+        } else {
+          // Le proxy/edge a répondu en bloc (streaming indispo) : on lit le JSON.
+          data = (await r.json().catch(() => null)) as AgentReply | null;
+        }
+      } catch {
+        data = null; // coupure réseau → fallback bloquant ci-dessous
       }
-      const data = (await r.json().catch(() => null)) as
-        | { reply?: string; products?: AgentProduct[]; followup?: string | null }
-        | null;
+
+      // 2) FALLBACK BLOQUANT : si le flux n'a rien donné (runtime sans flux ou
+      // coupure), on rejoue en mode bloquant (mêmes données).
       if (!data) {
-        setError("Pas de réponse.");
-        setMessages((prev) => prev.slice(0, -1));
-        setStreaming(false);
+        const r = await apiFetch("/api/advisor/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: apiMessages, seen_eans: seenEans }),
+        });
+        if (!r.ok) {
+          const j = (await r.json().catch(() => ({}))) as { error?: string };
+          failRequest(j.error ?? `Erreur ${r.status}`);
+          return;
+        }
+        data = (await r.json().catch(() => null)) as AgentReply | null;
+      }
+
+      setLiveStatus(null);
+      if (!data) {
+        failRequest("Pas de réponse.");
         return;
       }
 
@@ -562,6 +647,7 @@ export function AdvisorChat({
       setError("Connexion interrompue.");
     } finally {
       setStreaming(false);
+      setLiveStatus(null);
     }
   }
 
@@ -670,7 +756,7 @@ export function AdvisorChat({
                               backgroundImage: `linear-gradient(100deg, ${advisorLoadingColor(loadingTick)} 0%, ${advisorLoadingColor(loadingTick)} 42%, #ffffff 50%, ${advisorLoadingColor(loadingTick)} 58%, ${advisorLoadingColor(loadingTick)} 100%)`,
                             }}
                           >
-                            {loadingSeqRef.current[loadingTick % loadingSeqRef.current.length]}
+                            {liveStatus ?? loadingSeqRef.current[loadingTick % loadingSeqRef.current.length]}
                           </span>
                         </span>
                       ) : (

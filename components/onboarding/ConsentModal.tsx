@@ -4,8 +4,9 @@
  * Modal de consentement affiché AVANT les questions de profil dans
  * l'onboarding. Sert de porte d'entrée pour les inscriptions qui n'ont pas
  * recueilli le consentement au formulaire (typiquement « S'inscrire avec
- * Google »). La case CGU est obligatoire ; la case marketing est un opt-in
- * optionnel (décoché par défaut, RGPD) qui déclenche la synchro Brevo.
+ * Google »). Il ne demande QUE l'acceptation des CGU (obligatoire, gate légal
+ * avant de remplir le profil). L'opt-in newsletter est proposé séparément à la
+ * FIN de l'onboarding (étape dédiée, à la façon du mobile).
  */
 
 import { useState, useTransition } from "react";
@@ -19,7 +20,6 @@ export function ConsentModal({
   onAccepted: () => void;
 }) {
   const [acceptCgu, setAcceptCgu] = useState(false);
-  const [acceptMarketing, setAcceptMarketing] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -27,7 +27,7 @@ export function ConsentModal({
     if (!acceptCgu) return;
     setError(null);
     startTransition(async () => {
-      const res = await saveConsent(acceptMarketing);
+      const res = await saveConsent();
       if (!res.ok) {
         setError(res.error);
         return;
@@ -55,22 +55,7 @@ export function ConsentModal({
         </p>
 
         <div className="mt-6 space-y-3">
-          {/* Opt-in marketing (optionnel) - en haut */}
-          <label className="flex cursor-pointer items-start gap-3">
-            <input
-              type="checkbox"
-              checked={acceptMarketing}
-              onChange={(e) => setAcceptMarketing(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#D1D5DB] accent-[#111111]"
-            />
-            <span className="text-[13px] leading-5 text-[#374151]">
-              J&apos;accepte de recevoir les actualités, offres et newsletters de
-              Cosme Check par email.{" "}
-              <span className="text-[#9CA3AF]">(optionnel)</span>
-            </span>
-          </label>
-
-          {/* CGU + confidentialité (obligatoire) - en bas */}
+          {/* CGU + confidentialité (obligatoire) */}
           <div className="flex items-start gap-3">
             <input
               id="ob_cgu"

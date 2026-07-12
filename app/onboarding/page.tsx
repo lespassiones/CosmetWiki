@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { supabaseServer } from "@/lib/supabase";
 import { isProfileComplete, readOnboardingShown, readSkinProfile } from "@/lib/skin/profile";
-import { hasConsent } from "@/lib/consent";
+import { hasConsent, needsNewsletterStep } from "@/lib/consent";
 import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 
 export const metadata = { title: "Bienvenue · Cosme Check" };
@@ -59,6 +59,9 @@ export default async function OnboardingPage({ searchParams }: Props) {
   // affiche d'abord le modal CGU/newsletter avant les questions. Les inscrits
   // par email ont déjà consenti au formulaire → on va droit aux questions.
   const needsConsent = !hasConsent(prefs);
+  // Étape finale newsletter : uniquement pour ceux qui n'ont pas déjà décidé
+  // (inscrits email = case sur le formulaire → sautée ; Google = proposée).
+  const showNewsletterStep = needsNewsletterStep(prefs);
 
   return (
     // Cream background + centered editorial column. No sidebar - `app/layout.tsx`
@@ -74,6 +77,7 @@ export default async function OnboardingPage({ searchParams }: Props) {
           finalNext={next}
           firstName={firstName}
           needsConsent={needsConsent}
+          needsNewsletterStep={showNewsletterStep}
         />
       </div>
     </main>

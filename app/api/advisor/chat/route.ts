@@ -48,9 +48,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let body: { messages?: unknown; seen_eans?: unknown };
+  let body: { messages?: unknown; seen_eans?: unknown; stream?: unknown };
   try {
-    body = (await req.json()) as { messages?: unknown; seen_eans?: unknown };
+    body = (await req.json()) as { messages?: unknown; seen_eans?: unknown; stream?: unknown };
   } catch {
     return new Response(JSON.stringify({ error: "Invalid body" }), { status: 400 });
   }
@@ -61,6 +61,8 @@ export async function POST(req: NextRequest) {
   const seenEans = Array.isArray(body.seen_eans)
     ? body.seen_eans.filter((e): e is string => typeof e === "string")
     : [];
+  // Streaming opt-in : le client demande des événements de progression (SSE).
+  const wantStream = body.stream === true;
 
   // Auth : on récupère le token de session pour le relayer à l'edge function.
   const cookieStore = await cookies();
@@ -88,13 +90,31 @@ export async function POST(req: NextRequest) {
         Authorization: `Bearer ${token}`,
         apikey: anon,
       },
-      body: JSON.stringify({ messages, seen_eans: seenEans }),
+      body: JSON.stringify({ messages, seen_eans: seenEans, stream: wantStream }),
     });
-    // Relaie le corps + le status tels quels (429 no_credits inclus).
+
+    const contentType = res.headers.get("content-type") ?? "application/json";
+
+    // Mode streaming : l'edge répond en text/event-stream → on RELAIE le flux tel
+    // quel (événements status + result). La logique de l'agent est inchangée côté
+    // edge ; on ne fait que laisser passer les octets au fur et à mesure.
+    if (wantStream && res.ok && res.body && contentType.includes("text/event-stream")) {
+      return new Response(res.body, {
+        status: res.status,
+        headers: {
+          "Content-Type": "text/event-stream; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
+          "X-Accel-Buffering": "no",
+        },
+      });
+    }
+
+    // Sinon (mode bloquant, ou erreur gate 429/502 en JSON) : relaie corps + status
+    // tels quels (429 no_credits inclus, transformé en modale par apiFetch).
     const text = await res.text();
     return new Response(text, {
       status: res.status,
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": contentType.includes("json") ? "application/json" : contentType },
     });
   } catch {
     return new Response(

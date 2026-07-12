@@ -7,13 +7,20 @@ import type { NextConfig } from "next";
 //   Images   : Supabase Storage, incibeauty.com, data: (canvas), blob: (caméra)
 //   Fonts    : 'self' — Inter est self-hosted via next/font
 //   Workers  : 'self' + blob: (certaines implémentations SW)
+// PostHog (analytics + session replay, région EU) charge dynamiquement des
+// scripts depuis eu-assets.i.posthog.com (recorder, autocapture) et envoie ses
+// événements vers eu.i.posthog.com. Sans ces origines dans script-src/connect-src,
+// la CSP bloque tout et PostHog inonde la console de centaines d'erreurs +
+// retries en boucle. Les deux hôtes doivent figurer dans les deux directives.
+const POSTHOG_HOSTS = "https://eu.i.posthog.com https://eu-assets.i.posthog.com";
+
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com ${POSTHOG_HOSTS}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.supabase.co https://incibeauty.com https://*.incibeauty.com",
   "font-src 'self'",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com",
+  `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com ${POSTHOG_HOSTS}`,
   "worker-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",

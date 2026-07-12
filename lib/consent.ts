@@ -20,6 +20,12 @@ export type Consent = {
   cgu: boolean;
   /** E-mails marketing (newsletter / offres) - opt-in optionnel. */
   marketing: boolean;
+  /** L'utilisateur a-t-il DÉJÀ vu/répondu à la question newsletter ?
+   *  - `true` : inscription email (case sur le formulaire) → décision prise.
+   *  - `false` : inscription Google (modal CGU seul) → à demander à la fin de
+   *    l'onboarding via l'étape newsletter dédiée.
+   *  Absent (comptes antérieurs) = considéré `true` (ne pas re-solliciter). */
+  marketingPromptSeen: boolean;
   /** Horodatage ISO du recueil du consentement. */
   acceptedAt: string;
   /** Version du texte de consentement acceptée. */
@@ -42,6 +48,8 @@ export function readConsent(
   return {
     cgu: true,
     marketing: r.marketing === true,
+    // Absent = compte antérieur à l'étape newsletter → traité comme déjà vu.
+    marketingPromptSeen: r.marketingPromptSeen !== false,
     acceptedAt: typeof r.acceptedAt === "string" ? r.acceptedAt : "",
     version: typeof r.version === "number" ? r.version : CONSENT_VERSION,
   };
@@ -56,12 +64,30 @@ export function hasConsent(
   return readConsent(prefs) !== null;
 }
 
-/** Construit l'objet consentement à persister (horodaté maintenant). */
-export function buildConsent(marketing: boolean): Consent {
+/**
+ * Construit l'objet consentement à persister (horodaté maintenant).
+ * `marketingPromptSeen` = la question newsletter a-t-elle déjà été posée :
+ *   - inscription email → `true` (case présente sur le formulaire) ;
+ *   - modal CGU seul (Google) → `false` (on demandera à la fin de l'onboarding).
+ */
+export function buildConsent(marketing: boolean, marketingPromptSeen = true): Consent {
   return {
     cgu: true,
     marketing,
+    marketingPromptSeen,
     acceptedAt: new Date().toISOString(),
     version: CONSENT_VERSION,
   };
+}
+
+/**
+ * `true` si l'utilisateur doit encore se voir proposer la newsletter (étape
+ * finale de l'onboarding). Vrai pour les inscrits Google (aucun consentement au
+ * chargement, ou `marketingPromptSeen: false`), faux pour les inscrits email
+ * (déjà décidé sur le formulaire) et les comptes antérieurs.
+ */
+export function needsNewsletterStep(
+  prefs: Record<string, unknown> | null | undefined,
+): boolean {
+  return readConsent(prefs)?.marketingPromptSeen !== true;
 }

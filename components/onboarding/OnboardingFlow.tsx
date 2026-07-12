@@ -18,11 +18,15 @@ export function OnboardingFlow({
   finalNext,
   firstName,
   needsConsent,
+  needsNewsletterStep,
 }: {
   initial: SkinProfile;
   finalNext: string;
   firstName?: string | null;
   needsConsent: boolean;
+  /** Ajouter l'étape finale « newsletter » (inscrits Google qui n'ont pas eu la
+   *  case sur le formulaire email). Calculé au chargement de la page. */
+  needsNewsletterStep: boolean;
 }) {
   const [consentGiven, setConsentGiven] = useState(!needsConsent);
 
@@ -33,6 +37,11 @@ export function OnboardingFlow({
   }
 
   return (
-    <OnboardingWizard initial={initial} finalNext={finalNext} firstName={firstName} />
+    <OnboardingWizard
+      initial={initial}
+      finalNext={finalNext}
+      firstName={firstName}
+      needsNewsletterStep={needsNewsletterStep}
+    />
   );
 }
