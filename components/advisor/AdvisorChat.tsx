@@ -123,6 +123,13 @@ const SUGGESTED_PROMPTS = [
   "Comment ajuster ma routine pour l'hiver ?",
 ];
 
+/**
+ * Message envoyé à l'agent quand l'utilisateur tape le bouton « Montre-moi des
+ * recommandations » (affiché sous une réponse SANS produits). Il n'apparaît pas
+ * comme bulle : seul le carrousel du message concerné se remplit. Twin mobile.
+ */
+const RECO_REQUEST_PROMPT = "Montre-moi des produits recommandés adaptés à ma demande.";
+
 function getTime() {
   return new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 }
@@ -377,6 +384,8 @@ export function AdvisorChat({
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Bouton « Montre-moi des recommandations » : une seule requête à la fois.
+  const [recoRequesting, setRecoRequesting] = useState(false);
   // Tick pour faire tourner les messages de chargement pendant l'attente.
   const [loadingTick, setLoadingTick] = useState(0);
   // Ordre aléatoire des phrases de chargement, régénéré à chaque envoi.
@@ -567,6 +576,63 @@ export function AdvisorChat({
     );
   }
 
+  /**
+   * Bouton « Montre-moi des recommandations » (sous la dernière réponse sans
+   * produits) : relance l'agent avec l'historique + une demande de reco
+   * explicite. Le texte de la bulle ne change pas ; seul le carrousel du
+   * message se remplit (skeleton pendant la recherche). Twin mobile.
+   */
+  async function requestReco(index: number) {
+    if (streaming || recoRequesting) return;
+    setRecoRequesting(true);
+    setError(null);
+    setMessages((prev) =>
+      prev.map((m, i) => (i === index ? { ...m, recoTried: true, recoLoading: true } : m)),
+    );
+    const resetButton = () =>
+      setMessages((prev) =>
+        prev.map((m, i) => (i === index ? { ...m, recoTried: false, recoLoading: false } : m)),
+      );
+    try {
+      const apiMessages = messages
+        .slice(0, index + 1)
+        .filter((m) => !m.uiOnly)
+        .map((m) => ({ role: m.role, content: m.content }));
+      const seenEans = Array.from(
+        new Set(messages.flatMap((m) => (m.products ?? []).map((p) => p.ean)).filter(Boolean)),
+      );
+      const r = await apiFetch("/api/advisor/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [...apiMessages, { role: "user", content: RECO_REQUEST_PROMPT }],
+          seen_eans: seenEans,
+        }),
+      });
+      if (!r.ok) {
+        // apiFetch gère déjà la modale « Crédits épuisés » sur 429 no_credits.
+        const j = (await r.json().catch(() => ({}))) as { error?: string };
+        setError(j.error ?? `Erreur ${r.status}`);
+        resetButton();
+        return;
+      }
+      const data = (await r.json().catch(() => null)) as { products?: AgentProduct[] } | null;
+      const products = Array.isArray(data?.products) ? (data?.products as AdvisorProduct[]) : [];
+      setMessages((prev) =>
+        prev.map((m, i) =>
+          i === index
+            ? { ...m, recoLoading: false, products, recoEmptyReason: products.length === 0 ? "none" : null }
+            : m,
+        ),
+      );
+    } catch {
+      setError("Connexion interrompue.");
+      resetButton();
+    } finally {
+      setRecoRequesting(false);
+    }
+  }
+
   const showSuggestions = messages.filter((m) => !m.uiOnly).length === 0;
 
   return (
@@ -622,6 +688,27 @@ export function AdvisorChat({
                   )}
                 </div>
               </div>
+
+              {/* Bouton « Montre-moi des recommandations » : uniquement sous la
+                  DERNIÈRE réponse de l'assistant quand aucune reco n'a été faite. */}
+              {m.role === "assistant" &&
+              !m.recoTried &&
+              !m.uiOnly &&
+              m.content &&
+              i === messages.length - 1 &&
+              !streaming ? (
+                <div className="pl-9">
+                  <button
+                    type="button"
+                    onClick={() => requestReco(i)}
+                    disabled={recoRequesting}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
+                  >
+                    <span aria-hidden>✨</span>
+                    Montre-moi des recommandations
+                  </button>
+                </div>
+              ) : null}
 
               {/* Carrousel produits sous la réponse assistant */}
               {m.role === "assistant" && m.recoTried ? (
