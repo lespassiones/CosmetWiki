@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogoMark } from "@/components/Logo";
 
 const NAV_ITEMS = [
   { href: "/fonctionnalites", label: "Fonctionnalités" },
@@ -59,19 +58,10 @@ export function PublicHeader() {
         <div className="mx-auto flex h-[77px] w-full max-w-[1280px] items-center justify-between px-6 sm:px-8">
           <Link
             href="/"
-            aria-label="Cosme Check, accueil"
-            className="flex flex-col items-center gap-1 font-bold leading-none tracking-tight"
+            className="text-[24px] font-bold tracking-tight sm:text-[26px]"
           >
-            {/* Logo de marque : les 3 pastilles EN HAUT, « Cosme Check » en
-                dessous (lockup vertical). Pastilles réduites de ~20 %
-                (h-6/h-7 → h-[19px]/h-[22px]).
-                Texte calé sur la MÊME largeur que les pastilles (~63/73 px) :
-                d'où les tailles réduites text-[10px]/sm:text-[12px]. */}
-            <LogoMark className="h-[19px] w-auto shrink-0 sm:h-[22px]" />
-            <span className="text-[10px] sm:text-[12px]">
-              <span className="text-[#111111]">Cosme </span>
-              <span className="text-[#F43F5E]">Check</span>
-            </span>
+            <span className="text-[#111111]">Cosme </span>
+            <span className="text-[#F43F5E]">Check</span>
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
@@ -136,14 +126,10 @@ export function PublicHeader() {
           <Link
             href="/"
             onClick={() => setOpen(false)}
-            aria-label="Cosme Check, accueil"
-            className="flex flex-col items-center gap-1 font-bold leading-none tracking-tight"
+            className="text-[20px] font-bold tracking-tight"
           >
-            <LogoMark className="h-4 w-auto shrink-0" />
-            <span className="text-[9px]">
-              <span className="text-[#111111]">Cosme </span>
-              <span className="text-[#F43F5E]">Check</span>
-            </span>
+            <span className="text-[#111111]">Cosme </span>
+            <span className="text-[#F43F5E]">Check</span>
           </Link>
           <button
             type="button"
