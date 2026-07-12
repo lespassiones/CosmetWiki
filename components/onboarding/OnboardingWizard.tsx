@@ -268,6 +268,9 @@ export function OnboardingWizard({
 
   const kicker = index === 0 && firstName ? `Bonjour ${firstName}` : step.blocLabel;
   const progressPct = ((index + 1) / TOTAL) * 100;
+  // Étape newsletter : « C'est parti ! » n'est actif que si l'opt-in est coché.
+  // Pour refuser la newsletter, l'utilisateur passe par « Passer ».
+  const newsletterGate = step.bloc === "newsletter" && !newsletterOptIn;
 
   return (
     <div className="w-full">
@@ -464,9 +467,13 @@ export function OnboardingWizard({
         <button
           type="button"
           onClick={isLast ? finish : goNext}
-          disabled={pending}
-          className="block h-[54px] w-full rounded-full text-[15px] font-semibold text-white shadow-[0_6px_16px_-6px_rgba(15,23,42,0.35)] transition disabled:opacity-60"
-          style={{ backgroundColor: tone.solid }}
+          disabled={pending || newsletterGate}
+          className="block h-[54px] w-full rounded-full text-[15px] font-semibold shadow-[0_6px_16px_-6px_rgba(15,23,42,0.35)] transition disabled:cursor-not-allowed disabled:opacity-60"
+          style={
+            newsletterGate
+              ? { backgroundColor: "#D1D5DB", color: "#6B7280" }
+              : { backgroundColor: tone.solid, color: "#fff" }
+          }
         >
           {pending ? "Enregistrement…" : isLast ? "C'est parti !" : "Suivant"}
         </button>

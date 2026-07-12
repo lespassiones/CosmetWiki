@@ -34,8 +34,12 @@ export function DeleteAccountButton() {
         setError("La suppression a échoué. Réessaie dans un instant.");
         return;
       }
-      // Compte purgé côté serveur : on nettoie la session locale puis on sort.
-      await sb.auth.signOut();
+      // Compte purgé côté serveur : la session serveur n'existe déjà plus, donc
+      // un signOut global (scope par défaut) POST /logout renvoie 403 Forbidden
+      // (« utilisateur introuvable ») et pollue la console. On se contente de
+      // vider la session LOCALE (scope: "local") : aucun appel serveur, pas de
+      // 403, la redirection suit normalement.
+      await sb.auth.signOut({ scope: "local" });
       router.replace("/");
       router.refresh();
     } catch {
