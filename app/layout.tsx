@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SITE_URL } from "@/lib/siteUrl";
 import { PWARegister } from "@/components/PWARegister";
 import { PostHogInit } from "@/components/PostHogInit";
+import { RecoveryRedirect } from "./RecoveryRedirect";
 import { AppShell } from "@/components/nav/AppShell";
 import { ConditionalLandingFooter } from "@/components/ConditionalLandingFooter";
 import { getProfile, getUser } from "@/lib/auth";
@@ -187,6 +188,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Suspense fallback={null}>
             <PostHogInit />
           </Suspense>
+          <RecoveryRedirect />
           <PWARegister />
           <Analytics />
         </body>
@@ -254,6 +256,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Suspense fallback={null}>
             <PostHogInit />
           </Suspense>
+          <RecoveryRedirect />
           <PWARegister />
         <Analytics />
       </body>
