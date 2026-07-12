@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { getUser } from "@/lib/auth";
-import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
+import { RecoveryGate } from "./RecoveryGate";
 
 export const metadata = { title: "Nouveau mot de passe · Cosme Check" };
 
@@ -20,29 +19,11 @@ export default async function ResetPasswordPage() {
             Nouveau mot de passe
           </h1>
           <p className="mt-3 text-sm text-[#6B7280]">
-            {user
-              ? "Choisis un nouveau mot de passe sécurisé pour ton compte."
-              : "Ce lien a expiré ou n'est plus valide. Demande un nouveau lien."}
+            Choisis un nouveau mot de passe sécurisé pour ton compte.
           </p>
         </div>
 
-        {user ? (
-          <ResetPasswordForm />
-        ) : (
-          <div className="space-y-4">
-            <Link
-              href="/auth/forgot-password"
-              className="block w-full text-center rounded-xl bg-[#111111] text-white text-sm font-semibold py-3 hover:brightness-110 transition"
-            >
-              Demander un nouveau lien
-            </Link>
-            <p className="text-center text-sm text-[#6B7280]">
-              <Link href="/auth/sign-in" className="text-[#F43F5E] font-medium hover:underline">
-                Retour à la connexion
-              </Link>
-            </p>
-          </div>
-        )}
+        <RecoveryGate hasServerSession={!!user} />
       </section>
     </main>
   );

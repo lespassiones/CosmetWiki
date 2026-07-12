@@ -14,6 +14,19 @@ export const maxDuration = 10;
 
 const DB_TIMEOUT_MS = 5000;
 
+// Health check lu depuis un autre domaine (ex. le ping navigateur de l'admin
+// cosme-check-admin.vercel.app). Sans en-tête CORS, ce fetch cross-origin est
+// bloqué et le moniteur affiche "DOWN" alors que l'endpoint répond 200.
+// Signal public non authentifié → on autorise toutes les origines.
+const CORS = { "Access-Control-Allow-Origin": "*" };
+
+export function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: { ...CORS, "Access-Control-Allow-Methods": "GET, OPTIONS" },
+  });
+}
+
 export async function GET() {
   const startedAt = Date.now();
   let db: { ok: boolean; error?: string };
@@ -35,6 +48,6 @@ export async function GET() {
 
   return NextResponse.json(
     { ok: db.ok, db: db.ok ? "ok" : db.error, latency_ms: Date.now() - startedAt, ts: new Date().toISOString() },
-    { status: db.ok ? 200 : 503, headers: { "Cache-Control": "no-store" } },
+    { status: db.ok ? 200 : 503, headers: { "Cache-Control": "no-store", ...CORS } },
   );
 }
