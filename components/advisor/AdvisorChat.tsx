@@ -102,6 +102,9 @@ type ChatMsg = {
   time?: string;
   /** Message d'accueil : exclu de l'historique envoyé à l'API. */
   uiOnly?: boolean;
+  /** Intention produit décidée par l'agent : 'offer' → bouton « Explorer quelques
+   *  pistes » quand aucun produit affiché ; 'none' → aucun bouton. */
+  productOffer?: "none" | "offer";
   /** Une recommandation produit a été demandée pour ce message. */
   recoTried?: boolean;
   /** Recherche des produits en cours. */
@@ -147,7 +150,13 @@ function buildApiMessages(history: ChatMsg[], newUserText: string) {
 }
 
 /** Réponse finale de l'agent (identique en mode bloquant et streaming). */
-type AgentReply = { reply?: string; products?: AgentProduct[]; followup?: string | null };
+type AgentReply = {
+  reply?: string;
+  products?: AgentProduct[];
+  followup?: string | null;
+  /** Intention produit décidée par l'agent : pilote le bouton « Explorer quelques pistes ». */
+  product_offer?: "none" | "offer";
+};
 
 /**
  * Consomme un flux SSE de l'agent : appelle `onStatus(label)` sur chaque événement
@@ -182,7 +191,12 @@ async function consumeAdvisorStream(
         }
         if (evt.type === "status" && evt.label) onStatus(evt.label);
         else if (evt.type === "result") {
-          result = { reply: evt.reply, products: evt.products, followup: evt.followup };
+          result = {
+            reply: evt.reply,
+            products: evt.products,
+            followup: evt.followup,
+            product_offer: evt.product_offer,
+          };
         }
         // evt.type === "error" → on laisse result à null (fallback bloquant).
       }
@@ -613,6 +627,9 @@ export function AdvisorChat({
 
       finalContent = (data.reply ?? "").trim() || "Je n'ai pas pu générer de réponse cette fois-ci.";
       finalProducts = Array.isArray(data.products) ? (data.products as AdvisorProduct[]) : [];
+      // Mémorise l'intention produit (pilote le bouton). Posée avant le typewriter :
+      // les updates de contenu la préservent (spread ...last).
+      updateLastAssistant({ productOffer: data.product_offer === "offer" ? "offer" : "none" });
 
       // Effet « streaming » côté client : 1) le texte se dévoile en machine à
       // écrire (~1,2 s max), 2) PUIS les cartes produit apparaissent.
@@ -778,6 +795,7 @@ export function AdvisorChat({
               {/* Bouton « Montre-moi des recommandations » : uniquement sous la
                   DERNIÈRE réponse de l'assistant quand aucune reco n'a été faite. */}
               {m.role === "assistant" &&
+              m.productOffer === "offer" &&
               !m.recoTried &&
               !m.uiOnly &&
               m.content &&
@@ -791,7 +809,7 @@ export function AdvisorChat({
                     className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
                   >
                     <span aria-hidden>✨</span>
-                    Montre-moi des recommandations
+                    Explorer quelques pistes
                   </button>
                 </div>
               ) : null}
@@ -800,7 +818,7 @@ export function AdvisorChat({
               {m.role === "assistant" && m.recoTried ? (
                 <div className="pl-9">
                   <p className="text-[10px] uppercase tracking-wide text-[#6B7280] mb-2 px-0.5">
-                    Quelques produits sûrs pour toi
+                    Quelques pistes à considérer
                   </p>
                   {m.recoRelaxation && !m.recoLoading && (m.products?.length ?? 0) === 0 ? (
                     <div className="rounded-2xl bg-white border border-[#F3F4F6] p-3 space-y-2.5">

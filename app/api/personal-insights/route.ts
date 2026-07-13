@@ -78,20 +78,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ blocks: resultJson.personalBlocks });
   }
 
-  // CRÉDIT : seule la PREMIÈRE génération coûte 1 crédit. Si des blocs existent
-  // déjà mais que la clé est PÉRIMÉE (nouvelle version de prompt / profil
-  // modifié), c'est une RÉGÉNÉRATION d'un contenu DÉJÀ PAYÉ → jamais re-débité.
+  // CRÉDIT — GATE (LECTURE SEULE) : on refuse AVANT tout appel IA si 0 crédit,
+  // mais on ne DÉBITE qu'APRÈS une génération réussie (plus bas). Ainsi un échec
+  // IA (timeout / 500 / 503) ne coûte JAMAIS de crédit et « Réessayer » reste
+  // gratuit tant que la génération échoue. Si des blocs existent déjà mais que la
+  // clé est PÉRIMÉE (nouvelle version de prompt / profil modifié), c'est une
+  // RÉGÉNÉRATION d'un contenu DÉJÀ PAYÉ → ni gate ni débit.
   const alreadyHasBlocks = Boolean(resultJson.personalBlocks);
   if (!alreadyHasBlocks) {
-    const { data: creditData } = await sb.rpc("cosme_check_consume_credit", {
-      p_feature: "personal_insights",
-    });
-    const consume = (creditData ?? { ok: false }) as { ok: boolean; used?: number; limit?: number };
-    if (!consume.ok) {
+    const { data: creditData } = await sb.rpc("cosme_check_get_credits");
+    const credits = (creditData ?? { ok: false }) as {
+      ok: boolean;
+      used?: number;
+      limit?: number;
+      remaining?: number;
+    };
+    if (!credits.ok || (credits.remaining ?? 0) < 1) {
       return NextResponse.json(
         {
           error: "Crédits épuisés.",
-          credits: { used: consume.used ?? 0, limit: consume.limit ?? 100, remaining: 0 },
+          credits: { used: credits.used ?? 0, limit: credits.limit ?? 100, remaining: 0 },
         },
         { status: 429, headers: { "Retry-After": "86400" } },
       );
@@ -143,6 +149,28 @@ export async function POST(req: NextRequest) {
 
     if (!blocks) {
       return NextResponse.json({ error: "Génération indisponible pour le moment." }, { status: 503 });
+    }
+
+    // DÉBIT APRÈS SUCCÈS : seule la PREMIÈRE génération réussie coûte 1 crédit.
+    // (Une régénération d'un contenu déjà payé — alreadyHasBlocks — ne débite
+    // jamais.) Placé ici, aucun échec IA (null/exception) ne peut débiter.
+    if (!alreadyHasBlocks) {
+      const { data: creditData } = await sb.rpc("cosme_check_consume_credit", {
+        p_feature: "personal_insights",
+      });
+      const consume = (creditData ?? { ok: false }) as { ok: boolean; used?: number; limit?: number };
+      if (!consume.ok) {
+        // Course rare : le crédit disponible au gate a été épuisé ailleurs entre
+        // le gate et ici. On ne persiste RIEN et on renvoie 429 (régénérable une
+        // fois les crédits rechargés) — aucun crédit n'a été débité.
+        return NextResponse.json(
+          {
+            error: "Crédits épuisés.",
+            credits: { used: consume.used ?? 0, limit: consume.limit ?? 100, remaining: 0 },
+          },
+          { status: 429, headers: { "Retry-After": "86400" } },
+        );
+      }
     }
 
     const updatedJson = { ...resultJson, personalBlocks: blocks, personalBlocksKey: sig };

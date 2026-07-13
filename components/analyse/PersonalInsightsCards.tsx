@@ -2,19 +2,27 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  fetchPersonalInsights,
+  nextStateFromResult,
+  type PersonalBlocks,
+  type State,
+  type Tone,
+} from "./personalInsightsState";
 
 /**
  * PersonalInsightsCards (web) — 3 encarts personnalisés (objectifs / peau / à
  * surveiller) via /api/personal-insights. Miroir du composant mobile.
  *   - initialBlocks présents → affichage instantané (aucun appel).
  *   - sinon : appel lazy (shimmer). 0 crédit (429) → blocs floutés + cadenas +
- *     CTA → /offre (aucun appel IA, aucun débit). Débit (1 crédit) à la 1ère
- *     génération côté serveur ; relecture gratuite.
+ *     CTA → /offre (aucun appel IA, aucun débit). Débit (1 crédit) SEULEMENT
+ *     après une génération réussie côté serveur ; relecture gratuite.
+ * La logique fetch + transition d'état vit dans ./personalInsightsState (pure,
+ * testable sans DOM).
  */
 
-type Tone = "vert" | "ambre" | "rouge" | "neutre";
-type Block = { title: string; description: string; tone: Tone };
-export type PersonalBlocks = { goals: Block; skin: Block; watch: Block };
+// Ré-export pour les consommateurs existants (ex : AnalyseResultPanel).
+export type { PersonalBlocks };
 
 // DOIT rester synchro avec PERSONAL_PROMPT_VERSION (lib/ai/personalInsights.ts).
 // Détecte des blocs persistés périmés → refresh silencieux (gratuit, déjà payé).
@@ -59,12 +67,6 @@ const BLOCKS: { key: keyof PersonalBlocks; src: string }[] = [
   { key: "watch", src: "/icons/analyse/bodyloop.png" },
 ];
 
-type State =
-  | { status: "loading" }
-  | { status: "ready"; blocks: PersonalBlocks }
-  | { status: "locked" }
-  | { status: "error" };
-
 export function PersonalInsightsCards({
   analysisId,
   initialBlocks,
@@ -87,37 +89,19 @@ export function PersonalInsightsCards({
 
   // background = refresh silencieux : pas de shimmer/verrou/erreur, on garde
   // les blocs existants et on swappe uniquement en cas de succès.
-  function run(background = false) {
+  async function run(background = false) {
     if (!analysisId) {
       if (!background) setState({ status: "error" });
       return;
     }
     if (!background) setState({ status: "loading" });
-    fetch("/api/personal-insights", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ analysisId }),
-    })
-      .then(async (r) => {
-        if (r.status === 429) {
-          if (!background) setState({ status: "locked" });
-          return;
-        }
-        if (!r.ok) {
-          if (!background) setState({ status: "error" });
-          return;
-        }
-        const j = (await r.json()) as { blocks?: PersonalBlocks };
-        if (j.blocks?.goals && j.blocks.skin && j.blocks.watch) {
-          if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("cosmecheck:credits-updated"));
-          setState({ status: "ready", blocks: j.blocks });
-        } else if (!background) {
-          setState({ status: "error" });
-        }
-      })
-      .catch(() => {
-        if (!background) setState({ status: "error" });
-      });
+    const result = await fetchPersonalInsights(analysisId);
+    const next = nextStateFromResult(result, { background });
+    if (!next) return;
+    if (next.status === "ready" && typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("cosmecheck:credits-updated"));
+    }
+    setState(next);
   }
 
   useEffect(() => {
@@ -190,10 +174,20 @@ export function PersonalInsightsCards({
   }
 
   if (state.status === "error") {
+    // Sans analysisId, « Réessayer » ne peut RIEN faire (aucun appel possible) :
+    // on le désactive au lieu de laisser un bouton mort qui ne réagit pas.
+    const retriable = Boolean(analysisId);
     return (
       <article className="neu p-4 flex items-center justify-between gap-3">
         <span className="text-[13px] text-ink-subtle">Analyse personnalisée indisponible.</span>
-        <button type="button" onClick={() => run()} className="text-[13px] font-semibold text-[#8B5CF6]">
+        <button
+          type="button"
+          onClick={() => run()}
+          disabled={!retriable}
+          className={`text-[13px] font-semibold ${
+            retriable ? "text-[#8B5CF6]" : "cursor-not-allowed text-ink-subtle/40"
+          }`}
+        >
           Réessayer
         </button>
       </article>
