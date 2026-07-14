@@ -209,7 +209,12 @@ export function ProductBrowsePage() {
         ean: p.ean,
       }));
       sessionStorage.setItem(PENDING_INCI_KEY, p.ingredients_text);
-      router.push("/analyse?inci=" + encodeURIComponent(p.ingredients_text.slice(0, 200)));
+      // slice(0, 6000) : aligné sur TOUS les autres points d'entrée vers /analyse
+      // (AlternativesCarousel, AdvisorChat, SuggestionsPageClient, ScanSheet).
+      // L'ancien slice(0, 200) tronquait l'INCI en plein mot → analyses à 9
+      // ingrédients "tout vert" (bug résolu le 14 juil 2026). Le sessionStorage
+      // ci-dessus porte de toute façon la liste COMPLÈTE (source autoritaire).
+      router.push("/analyse?inci=" + encodeURIComponent(p.ingredients_text.slice(0, 6000)));
     }
   }
 

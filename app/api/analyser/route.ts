@@ -221,6 +221,12 @@ export async function POST(req: NextRequest) {
   let catalogScore: number | null = null;
   let catalogCategory: string | null = null;
   let catalogImageUrl: string | null = null;
+  // SOURCE DE VÉRITÉ INCI (fix 14 juil 2026, twin de l'edge mobile) : pour un
+  // EAN catalogué on n'analyse PAS aveuglément le texte du client (il peut être
+  // tronqué — ex. ancien slice(0,200) de ProductBrowsePage → listes à 9
+  // ingrédients "tout vert"). On lit l'INCI COMPLET du catalogue, et on ne
+  // garde le texte client QUE s'il est plus complet (ligne catalogue stub).
+  let effectiveText = rawText;
 
   if (productEan) {
     try {
@@ -228,17 +234,25 @@ export async function POST(req: NextRequest) {
         supabaseAnon()
           .schema("cosme_check")
           .from("catalog")
-          .select("score, category, image_url")
+          .select("score, category, image_url, ingredients_text")
           .eq("ean", productEan)
           .maybeSingle(),
         supabaseAnon()
           .rpc("cosme_check_get_product_analysis", { p_ean: productEan }),
       ]);
 
-      const rawCatalogData = catalogResult.data as { score: number | null; category: string | null; image_url: string | null } | null;
+      const rawCatalogData = catalogResult.data as { score: number | null; category: string | null; image_url: string | null; ingredients_text: string | null } | null;
       if (rawCatalogData?.score != null) catalogScore = rawCatalogData.score;
       catalogCategory = rawCatalogData?.category ?? null;
       catalogImageUrl = rawCatalogData?.image_url ?? null;
+      const catalogInci = (rawCatalogData?.ingredients_text ?? "").trim();
+      if (catalogInci) {
+        const catTokenCount = parseInciList(catalogInci).length;
+        const clientTokenCount = parseInciList(rawText).length;
+        if (catTokenCount >= 5 && catTokenCount >= clientTokenCount) {
+          effectiveText = catalogInci.slice(0, 8000);
+        }
+      }
 
       if (precomputed) {
         const cached_result = precomputed as AnalyseResponse;
@@ -313,7 +327,7 @@ export async function POST(req: NextRequest) {
               p_brand: body.brand?.slice(0, 120) ?? null,
               p_product_type: body.productType?.slice(0, 120) ?? null,
               p_category: cached_result.category ?? null,
-              p_input_text: rawText,
+              p_input_text: effectiveText,
               p_result_json: cached_result,
               p_score: Number((cached_result.score ?? 0).toFixed(2)),
               p_ean: productEan?.slice(0, 32) ?? null,
@@ -331,7 +345,8 @@ export async function POST(req: NextRequest) {
   // INCI-hash cache — couvre les produits sans EAN fiable (recherche web,
   // collage manuel). Si la même liste INCI a déjà été analysée par un autre
   // user, on retourne le résultat instantanément sans débiter de crédit.
-  const inciHash = hashInci(rawText);
+  // Hash sur le texte EFFECTIVEMENT analysé (catalogue si autoritaire).
+  const inciHash = hashInci(effectiveText);
   try {
     const { data: precomputedByInci } = await supabaseAnon()
       .rpc("cosme_check_get_inci_analysis", { p_inci_hash: inciHash });
@@ -377,22 +392,24 @@ export async function POST(req: NextRequest) {
   // on the response time without sacrificing correctness — the local parser
   // handles clean lists perfectly, and the DB match step would simply ignore
   // any token it can't resolve anyway.
-  const skipAiParse = isCleanInciInput(rawText);
+  // `effectiveText` = INCI catalogue (autoritaire) pour un EAN connu, sinon le
+  // texte client. Un INCI catalogue est propre → fast-path déterministe.
+  const skipAiParse = isCleanInciInput(effectiveText);
 
   let text: string;
   if (skipAiParse) {
-    text = rawText;
+    text = effectiveText;
   } else {
     // AI-powered INCI parser cascade: Mistral (gratuit, primary) → OpenAI (fallback)
     // → regex (final fallback below). Handles lists pasted without separators,
     // OCR noise, typos. Cached by hash of input so a repeated paste is free.
-    const aiParsed = await parseInciWithAI(rawText);
+    const aiParsed = await parseInciWithAI(effectiveText);
     // If the AI reconstructed the list, feed the clean comma-separated version
     // back into the rest of the pipeline. Validation + regex parser handle
     // clean input perfectly.
     text = aiParsed && aiParsed.ingredients.length > 0
       ? aiParsed.ingredients.join(", ")
-      : rawText;
+      : effectiveText;
 
     // Pre-flight: bail out on garbage input (cheap local checks + AI for the
     // borderline cases). The AI defaults to "valid" if unavailable so we never
@@ -1111,8 +1128,10 @@ export async function POST(req: NextRequest) {
     void (async () => {
       try {
         const { supabaseService } = await import("@/lib/supabase");
-        await supabaseService()
-          .schema("cosme_check")
+        // ⚠️ La RPC vit dans le schéma PUBLIC : l'ancien `.schema("cosme_check")`
+        // cherchait la fonction au mauvais endroit → 404 avalé → la table
+        // product_analyses ne se remplissait JAMAIS (bug résolu 14 juil 2026).
+        const { error } = await supabaseService()
           .rpc("cosme_check_upsert_product_analysis", {
             p_ean: productEan,
             p_result_json: responsePayload,
@@ -1121,6 +1140,7 @@ export async function POST(req: NextRequest) {
             p_score_tone: scoreTone,
             p_algo_version: "v1.2",
           });
+        if (error) logWarn("[analyser] product_analyses upsert failed", { error: error.message });
       } catch { /* non-blocking */ }
     })();
   }
@@ -1131,8 +1151,9 @@ export async function POST(req: NextRequest) {
   void (async () => {
     try {
       const { supabaseService } = await import("@/lib/supabase");
-      await supabaseService()
-        .schema("cosme_check")
+      // ⚠️ Même bug de schéma que product_analyses : RPC dans PUBLIC, l'ancien
+      // `.schema("cosme_check")` rendait ce cache inerte (0 ligne écrite).
+      const { error } = await supabaseService()
         .rpc("cosme_check_upsert_inci_analysis", {
           p_inci_hash: inciHash,
           p_result_json: responsePayload,
@@ -1141,6 +1162,7 @@ export async function POST(req: NextRequest) {
           p_score_tone: scoreTone,
           p_algo_version: "v1.2",
         });
+      if (error) logWarn("[analyser] inci_analyses_cache upsert failed", { error: error.message });
     } catch { /* non-blocking */ }
   })();
 

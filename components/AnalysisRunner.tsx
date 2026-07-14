@@ -111,13 +111,16 @@ function clearRunCache() {
  * result to sessionStorage so an actual remount can restore it.
  */
 /**
- * Resolve the INCI to analyse, in order of priority:
- *   1. `initialInci` prop from the URL searchParam (works on the happy path)
- *   2. `cw:pendingInci` in sessionStorage (set by the caller right before
- *      router.push - covers the case where Next.js served a prefetched
- *      `/analyse` shell with empty searchParams)
- * Removes the sessionStorage entry on read so a stale value can never leak
- * into the next mount.
+ * Resolve the INCI to analyse:
+ *   - `cw:pendingInci` in sessionStorage is the AUTHORITATIVE handoff (set by
+ *     the caller right before router.push, always the FULL list).
+ *   - `initialInci` prop from the URL searchParam is the fallback / happy path.
+ * We take the LONGER of the two: the URL variant can be legitimately truncated
+ * (encodeURIComponent + slice caps at the call sites — the historical
+ * ProductBrowsePage slice(0,200) bug produced 9-ingredient "all green"
+ * analyses), while sessionStorage can be empty on a prefetched shell. Removes
+ * the sessionStorage entry on read so a stale value can never leak into the
+ * next mount.
  */
 function bootInci(propInci: string): string {
   const fromProp = propInci.trim();
@@ -126,7 +129,8 @@ function bootInci(propInci: string): string {
       const stored = sessionStorage.getItem(PENDING_INCI_KEY);
       if (stored) {
         sessionStorage.removeItem(PENDING_INCI_KEY);
-        if (!fromProp) return stored.trim();
+        const fromStore = stored.trim();
+        if (fromStore.length > fromProp.length) return fromStore;
       }
     } catch {
       /* ignore */
