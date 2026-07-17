@@ -11,7 +11,8 @@ import { sendBetaTemplateEmail } from "@/lib/brevo";
  * 2. Relance A « pas encore testé » (template 2) - invités SANS compte :
  *    J+2 après l'invitation, puis une dernière relance 3 jours plus tard.
  * 3. Demande de retour (template 3) - compte créé SANS feedback :
- *    J+2 après la création du compte, relance +3 j, dernière +5 j.
+ *    1re demande DÈS la détection du compte (au prochain passage du cron, sans
+ *    attente), puis relance +2 j, dernière +3 j.
  *
  * Les relances s'arrêtent dès que status = 'feedback_recu' (formulaire rempli).
  * L'email de remerciement (template 4) part immédiatement à la soumission du
@@ -114,11 +115,13 @@ export async function GET(req: Request) {
       sentRelance++;
     } else {
       // ── Étage B : compte créé mais pas de retour. Max 3 envois :
-      //    J+2 après le compte, puis +3 j, puis +5 j.
+      //    1re demande DÈS que le compte est détecté (feedback_asks === 0, aucune
+      //    attente — on est déjà dans la branche « compte existe »), puis +2 j,
+      //    puis +3 j.
       const due =
-        (t.feedback_asks === 0 && olderThan(t.account_created_at, 2, now)) ||
-        (t.feedback_asks === 1 && olderThan(t.feedback_ask_last_at, 3, now)) ||
-        (t.feedback_asks === 2 && olderThan(t.feedback_ask_last_at, 5, now));
+        t.feedback_asks === 0 ||
+        (t.feedback_asks === 1 && olderThan(t.feedback_ask_last_at, 2, now)) ||
+        (t.feedback_asks === 2 && olderThan(t.feedback_ask_last_at, 3, now));
       if (!due) continue;
 
       const sent = await sendBetaTemplateEmail("feedback", base);

@@ -39,10 +39,10 @@ export function LandingHero() {
           <div className="flex shrink-0 items-end reveal-on-mount reveal-delay-150">
             <div
               className="relative w-[415px] shrink-0 xl:w-[485px]"
-              style={{ aspectRatio: "1024 / 1280" }}
+              style={{ aspectRatio: "997 / 1577" }}
             >
               <Image
-                src="/image/landing2/newhero.webp"
+                src="/image/landing2/landingbeta.webp"
                 alt="Aperçu de l'application Cosme Check"
                 fill
                 priority
@@ -89,10 +89,10 @@ export function LandingHero() {
             />
             <div
               className="relative"
-              style={{ aspectRatio: "1024 / 1280" }}
+              style={{ aspectRatio: "997 / 1577" }}
             >
               <Image
-                src="/image/landing2/newhero.webp"
+                src="/image/landing2/landingbeta.webp"
                 alt="Aperçu de l'application Cosme Check"
                 fill
                 priority

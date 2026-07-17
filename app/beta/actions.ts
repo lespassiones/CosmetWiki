@@ -9,7 +9,13 @@
 
 import { after } from "next/server";
 import { supabaseService } from "@/lib/supabase";
-import { sendBetaTemplateEmail, setBetaFeedbackDone } from "@/lib/brevo";
+import { SITE_URL } from "@/lib/siteUrl";
+import {
+  addBetaContact,
+  sendBetaInvitationEmail,
+  sendBetaTemplateEmail,
+  setBetaFeedbackDone,
+} from "@/lib/brevo";
 
 export type BetaResult = { ok: true } | { ok: false; error: string };
 
@@ -39,9 +45,11 @@ function sanitizeIntake(raw: unknown): Record<string, IntakeAnswer> | null {
 }
 
 /** Inscription d'un bêta testeur : coordonnées + consentement + réponses du
- *  questionnaire persona (intake). AUCUN email n'est envoyé ici - l'invitation
- *  part plus tard, au « lancement » manuel (bouton admin → /api/beta/invite).
- *  Permet plusieurs vagues de recrutement. */
+ *  questionnaire persona (intake). L'email d'invitation (template 1 « Accès »)
+ *  part AUTOMATIQUEMENT ici, dès l'inscription — plus besoin de cliquer sur le
+ *  bouton admin (conservé en secours pour renvoyer les invitations en échec).
+ *  L'envoi passe par `after()` (réponse rapide) et reste FAIL-OPEN : si Brevo
+ *  échoue, `invited_at` reste vide et l'inscrit pourra être relancé via l'admin. */
 export async function joinBeta(input: {
   firstName?: string;
   lastName?: string;
@@ -82,14 +90,49 @@ export async function joinBeta(input: {
   };
   if (intake) row.intake = intake;
 
-  const { error } = await sb
+  const { data: saved, error } = await sb
     .schema("cosme_check")
     .from("beta_testers")
-    .upsert(row, { onConflict: "email" });
+    .upsert(row, { onConflict: "email" })
+    .select("id, token, invited_at, first_name")
+    .single();
 
-  if (error) {
-    console.warn("[beta] upsert failed:", error.message);
+  if (error || !saved) {
+    console.warn("[beta] upsert failed:", error?.message);
     return { ok: false, error: "Une erreur est survenue. Réessaie dans un instant." };
+  }
+
+  // Envoi AUTOMATIQUE de l'invitation dès l'inscription, SI la personne n'a pas
+  // déjà été invitée (une ré-inscription ne renvoie pas de 2e email). On ajoute
+  // le contact à Brevo (avec ses liens BETA_GO / BETA_URL) puis on envoie le
+  // template 1 « Accès ». `invited_at` n'est posé QUE si l'email est bien parti
+  // (fail-open : un échec Brevo laisse l'inscrit « en attente », relançable
+  // depuis l'admin).
+  if (!saved.invited_at) {
+    const testerId = saved.id as string;
+    const token = saved.token as string;
+    const betaFirstName = (saved.first_name as string | null) ?? (firstName || null);
+    const feedbackUrl = `${SITE_URL}/beta/retour?token=${token}`;
+    const goUrl = `${SITE_URL}/beta/go?token=${token}`;
+    after(async () => {
+      await addBetaContact({ email, firstName: betaFirstName, feedbackUrl, goUrl });
+      const sent = await sendBetaInvitationEmail({
+        email,
+        firstName: betaFirstName,
+        accessUrl: `${SITE_URL}/auth/sign-up`,
+        feedbackUrl,
+      });
+      if (!sent.synced) {
+        console.warn("[beta] auto-invitation failed for", email, sent.reason);
+        return;
+      }
+      const { error: upErr } = await sb
+        .schema("cosme_check")
+        .from("beta_testers")
+        .update({ invited_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+        .eq("id", testerId);
+      if (upErr) console.warn("[beta] invited_at update failed:", upErr.message);
+    });
   }
 
   return { ok: true };

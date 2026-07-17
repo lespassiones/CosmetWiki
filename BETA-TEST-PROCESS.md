@@ -24,13 +24,15 @@ Le programme bêta s'appuie sur deux applications + Supabase + Brevo :
 
 ### Le parcours complet
 
-1. **Recrutement** : on partage le lien public **https://www.cosme-check.com/beta**.
-   Les gens s'inscrivent (`app/beta/actions.ts` → `joinBeta`) → une ligne est
-   créée dans `beta_testers` (`invited_at` reste vide). Aucun email ici.
-2. **Invitation** : dans l'admin, bouton « Envoyer les invitations (N) » →
-   POST `/api/beta/invite` (app principale) avec le header
-   `x-beta-invite-secret`. Pour chaque inscrit non encore invité : ajout à
-   Brevo + envoi du **template 1 « Accès »**, puis `invited_at` est renseigné.
+1. **Recrutement + invitation AUTOMATIQUE** : on partage le lien public
+   **https://www.cosme-check.com/beta**. Dès qu'une personne s'inscrit
+   (`app/beta/actions.ts` → `joinBeta`), l'app ajoute le contact à Brevo et
+   envoie **immédiatement** le **template 1 « Accès »** (via `after()`, fail-open),
+   puis renseigne `invited_at`. Plus de déclenchement manuel.
+2. **Secours admin** : le bouton « Renvoyer aux inscrits en attente » de la page
+   Bêta test (→ POST `/api/beta/invite`, header `x-beta-invite-secret`) ne sert
+   plus qu'à rattraper les inscrits restés « en attente » (envoi auto qui a
+   échoué). Idempotent : jamais 2 invitations pour la même personne.
 3. **Relances / demandes de retour** : le cron `/api/beta/cron` (voir §3)
    envoie les templates 2 et 3 selon des délais.
 4. **Merci** : quand le testeur remplit le formulaire `/beta/retour` jusqu'au
@@ -82,9 +84,10 @@ par jour à 8h** (`vercel.json` : `"schedule": "0 8 * * *"`), avec
 **Parcours B - testeur AVEC compte** (dès qu'un compte existe, la RPC
 `cosme_check_beta_sync_states` renseigne `account_created_at` et les relances
 s'arrêtent) :
-- Demande 1 : `feedback_asks == 0` et compte depuis > **2** unités.
-- Demande 2 : `feedback_asks == 1` et dernière demande depuis > **3** unités.
-- Demande 3 : `feedback_asks == 2` et dernière demande depuis > **5** unités.
+- Demande 1 : `feedback_asks == 0` → **dès la détection du compte** (au prochain
+  passage du cron, aucune attente).
+- Demande 2 : `feedback_asks == 1` et dernière demande depuis > **2** unités.
+- Demande 3 : `feedback_asks == 2` et dernière demande depuis > **3** unités.
 - Max 3 demandes.
 
 Plafond : 100 envois par passage (quota Brevo gratuit = 300/jour).
