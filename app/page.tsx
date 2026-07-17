@@ -7,7 +7,9 @@ import { LandingValues } from "@/components/LandingValues";
 import { LandingArticles } from "@/components/LandingArticles";
 import { HomeDashboard, type DashboardData } from "@/components/home/HomeDashboard";
 import { DailyPicksCard } from "@/components/home/DailyPicksCard";
+import { WeeklyPicksCard } from "@/components/home/WeeklyPicksCard";
 import { getProfile, getUser } from "@/lib/auth";
+import { getAppConfig } from "@/lib/appConfig";
 import { supabaseServer } from "@/lib/supabase";
 import { SITE_URL } from "@/lib/siteUrl";
 import { tipsForCarousel } from "@/lib/tips";
@@ -112,8 +114,41 @@ async function loadDashboard(firstName: string | null): Promise<DashboardData> {
 // Supabase queries below. Saves ~150-300 ms of perceived TTFB on signed-in
 // home loads.
 async function DashboardSection({ firstName }: { firstName: string | null }) {
-  const data = await loadDashboard(firstName);
-  return <HomeDashboard data={data} trendingSlot={<DailyPicksCard />} />;
+  const [data, config] = await Promise.all([loadDashboard(firstName), getAppConfig()]);
+  return (
+    <HomeDashboard
+      data={data}
+      trendingSlot={
+        <div className="space-y-6">
+          {config.flag_weekly_picks && (
+            <Suspense fallback={<WeeklyPicksSkeleton />}>
+              <WeeklyPicksCard />
+            </Suspense>
+          )}
+          <DailyPicksCard />
+        </div>
+      }
+    />
+  );
+}
+
+/** Placeholder pendant le calcul serveur des pépites (streamé indépendamment). */
+function WeeklyPicksSkeleton() {
+  return (
+    <section aria-label="Pépites du jour" aria-busy className="px-0.5">
+      <div className="h-3.5 w-32 rounded bg-black/[0.06] animate-pulse" />
+      <div className="mt-2 h-3 w-28 rounded bg-black/[0.05] animate-pulse" />
+      <div className="mt-3 flex gap-3 overflow-hidden">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="shrink-0 w-[132px] h-[168px] rounded-2xl bg-black/[0.05] animate-pulse"
+            style={{ animationDelay: `${i * 80}ms` }}
+          />
+        ))}
+      </div>
+    </section>
+  );
 }
 
 function DashboardSkeleton({ firstName }: { firstName: string | null }) {

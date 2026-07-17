@@ -20,6 +20,7 @@ export type AppConfig = {
   flag_suggestions: boolean;
   flag_advisor: boolean;
   flag_public_share: boolean;
+  flag_weekly_picks: boolean;
   maintenance_mode: boolean;
   maintenance_message: string | null;
 };
@@ -30,6 +31,8 @@ const DEFAULTS: AppConfig = {
   flag_suggestions: true,
   flag_advisor: true,
   flag_public_share: true,
+  // Feature récente (RPC dédiée) : défaut OFF, la valeur en base gouverne.
+  flag_weekly_picks: false,
   maintenance_mode: false,
   maintenance_message: null,
 };
@@ -50,6 +53,7 @@ function coerce(raw: unknown): AppConfig {
     flag_suggestions: bool("flag_suggestions"),
     flag_advisor: bool("flag_advisor"),
     flag_public_share: bool("flag_public_share"),
+    flag_weekly_picks: bool("flag_weekly_picks"),
     maintenance_mode: bool("maintenance_mode"),
     maintenance_message:
       typeof o.maintenance_message === "string" ? o.maintenance_message : null,

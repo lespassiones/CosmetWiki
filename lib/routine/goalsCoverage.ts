@@ -15,6 +15,14 @@ import { PROFILE_GOAL_LABEL, type ProfileGoal } from "@/lib/skin/profile";
 export const GOALS_COVERAGE_VERSION = 1;
 export const MAX_CUSTOM_GOALS = 5;
 
+/**
+ * Objectifs sélectionnables dans le profil mais EXCLUS du bloc de couverture
+ * (« simplifier ma routine » n'est pas une couverture mesurable, retiré le
+ * 17 juil 2026). IDENTIQUE à core.COVERAGE_EXCLUDED_GOAL_KEYS (parité testée
+ * côté mobile).
+ */
+export const COVERAGE_EXCLUDED_GOAL_KEYS = new Set<string>(["simplifier_routine"]);
+
 export type CoverageTone = "vert" | "jaune" | "orange" | "rouge";
 
 export type CoverageItem = {
@@ -79,6 +87,7 @@ export function collectGoals(skin: SkinGoalsLike): GoalEntry[] {
   for (const g of skin.goals ?? []) {
     if (typeof g !== "string") continue;
     if (!(g in PROFILE_GOAL_LABEL)) continue;
+    if (COVERAGE_EXCLUDED_GOAL_KEYS.has(g)) continue; // exclu du bloc de couverture
     if (seenKeys.has(g)) continue;
     seenKeys.add(g);
     out.push({ key: g, label: PROFILE_GOAL_LABEL[g as ProfileGoal], isCustom: false });
