@@ -224,6 +224,14 @@
                -3px -3px 8px var(--neu-shadow-light);
     border-radius: 12px;
   }
+  /* Carte BLANCHE opaque (maquette juil 2026) — twin du WhiteCard mobile :
+     fond blanc pur + drop shadow douce, SANS le relief neumorphique gris.
+     Utilisée par l'en-tête produit et la carte compatibilité de l'analyse. */
+  .card-white {
+    background: #ffffff;
+    box-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.12);
+    border-radius: 20px;
+  }
   /* Soft-UI white variant of .neu-sm. Same dual shadow language, but the
      surface is white so the element reads more clearly against a neu page. */
   .neu-sm-white {

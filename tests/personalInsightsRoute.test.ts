@@ -23,6 +23,7 @@ const h = vi.hoisted(() => ({
   rpc: vi.fn(),
   generate: vi.fn(),
   loadProfile: vi.fn(),
+  loadSkinProfile: vi.fn(),
   loadRestrictions: vi.fn(),
   checkRestrictions: vi.fn(),
 }));
@@ -45,7 +46,19 @@ vi.mock("@/lib/supabase", () => {
     }),
     rpc: (...a: unknown[]) => h.rpc(...a),
   };
-  return { supabaseServer: () => sb };
+  // supabaseService : utilisé par la route UNIQUEMENT pour lire le récap
+  // « sensibilités probables » (profile_restriction_inference). Le mock renvoie
+  // une ligne vide → aucun impact sur les scénarios de crédit testés ici.
+  const svc = {
+    schema: () => ({
+      from: () => ({
+        select: () => ({
+          eq: () => ({ maybeSingle: async () => ({ data: null }) }),
+        }),
+      }),
+    }),
+  };
+  return { supabaseServer: () => sb, supabaseService: () => svc };
 });
 
 // On garde le vrai module (profileSignature réel) et on ne remplace que la
@@ -57,12 +70,19 @@ vi.mock("@/lib/ai/personalInsights", async (importOriginal) => {
 
 vi.mock("@/lib/skin/promptFormat", () => ({
   loadProfileForPrompt: (...a: unknown[]) => h.loadProfile(...a),
+  loadSkinProfile: (...a: unknown[]) => h.loadSkinProfile(...a),
 }));
 vi.mock("@/lib/restrictions/promptFormat", () => ({
   loadRestrictionsContext: (...a: unknown[]) => h.loadRestrictions(...a),
 }));
 vi.mock("@/lib/restrictions/check", () => ({
   checkRestrictions: (...a: unknown[]) => h.checkRestrictions(...a),
+}));
+// La route importe loadIngredientFamilies (catalogue pour la détection des
+// sensibilités déduites). Le vrai module importe `server-only` (indispo hors
+// runtime Next) → on le mocke. Non appelé ici (aucune sensibilité déduite).
+vi.mock("@/lib/restrictions/families", () => ({
+  loadIngredientFamilies: async () => [],
 }));
 vi.mock("@/lib/log", () => ({ logError: () => {} }));
 
@@ -115,9 +135,12 @@ beforeEach(() => {
   h.getUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
   h.single.mockResolvedValue({ data: validRow(), error: null });
   h.loadProfile.mockResolvedValue(PROFILE);
+  // Profil brut : peau renseignée (cohérent avec PROFILE) → verdict "personal".
+  h.loadSkinProfile.mockResolvedValue({ skinTypeFace: "grasse" });
   h.loadRestrictions.mockResolvedValue({ block: null, restrictions: [], families: [] });
   h.checkRestrictions.mockReturnValue([]);
-  h.generate.mockResolvedValue(fullBlocks());
+  // generatePersonalBlocks renvoie désormais un PersonalResult { blocks, compatibility }.
+  h.generate.mockResolvedValue({ blocks: fullBlocks(), compatibility: null });
   // Par défaut : utilisateur avec des crédits, débit OK.
   h.rpc.mockImplementation(async (name: string) => {
     if (name === "cosme_check_get_credits") return { data: { ok: true, used: 1, limit: 100, remaining: 99 } };

@@ -138,6 +138,7 @@ export async function saveOnboardingStep(form: FormData): Promise<OnboardingResu
       .slice(0, 500)
       .trim();
     const otherNotes = String(form.get("other_notes") ?? "").slice(0, 500).trim();
+    const otherHairConcerns = String(form.get("other_hair_concerns") ?? "").slice(0, 200).trim();
 
     // Merge step-2 hair problems into the hairConcerns array WITHOUT clobbering
     // step-1 state (Secs / Gras / Cuir chevelu sensible). We keep the step-1
@@ -159,6 +160,7 @@ export async function saveOnboardingStep(form: FormData): Promise<OnboardingResu
       concerns: concerns.length > 0 ? concerns : undefined,
       hairConcerns: mergedHair.size > 0 ? Array.from(mergedHair) : undefined,
       otherConcerns: otherConcerns || undefined,
+      otherHairConcerns: otherHairConcerns || undefined,
       allergiesFreeform: allergiesFreeform || undefined,
       otherNotes: otherNotes || undefined,
     };
@@ -171,11 +173,19 @@ export async function saveOnboardingStep(form: FormData): Promise<OnboardingResu
       // profiles (PROFILE_GOAL_LABEL has both, PROFILE_GOALS only the new).
       .filter((g): g is ProfileGoal => g in PROFILE_GOAL_LABEL);
     const otherGoals = String(form.get("other_goals") ?? "").slice(0, 300).trim();
+    const otherGoalsFace = String(form.get("other_goals_face") ?? "").slice(0, 200).trim();
+    const otherGoalsBody = String(form.get("other_goals_body") ?? "").slice(0, 200).trim();
+    const otherGoalsHair = String(form.get("other_goals_hair") ?? "").slice(0, 200).trim();
+    const otherGoalsRoutine = String(form.get("other_goals_routine") ?? "").slice(0, 200).trim();
 
     updatedSkin = {
       ...updatedSkin,
       goals: goals.length > 0 ? goals : undefined,
       otherGoals: otherGoals || undefined,
+      otherGoalsFace: otherGoalsFace || undefined,
+      otherGoalsBody: otherGoalsBody || undefined,
+      otherGoalsHair: otherGoalsHair || undefined,
+      otherGoalsRoutine: otherGoalsRoutine || undefined,
     };
   }
 

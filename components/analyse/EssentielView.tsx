@@ -96,7 +96,9 @@ export function EssentielToggleButton({
       type="button"
       onClick={onToggle}
       aria-expanded={expanded}
-      className="neu-sm-white inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-[13px] font-medium text-[#374151] hover:text-[#111111] transition"
+      // Barre VERTE pleine largeur (maquette web) : emerald-600 (même vert que
+      // l'anneau), chevron DROIT « › » (pivote vers le haut une fois ouvert).
+      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#059669] px-6 py-3 text-[14px] font-semibold text-white shadow-[0_8px_18px_rgba(5,150,105,0.35)] transition hover:bg-[#047857]"
     >
       {expanded ? "Masquer le détail" : "Voir l'analyse complète"}
       <svg
@@ -107,9 +109,9 @@ export function EssentielToggleButton({
         strokeWidth={2.2}
         strokeLinecap="round"
         strokeLinejoin="round"
-        className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`}
+        className={`h-4 w-4 transition-transform ${expanded ? "-rotate-90" : ""}`}
       >
-        <path d="m6 9 6 6 6-6" />
+        <path d="m9 18 6-6-6-6" />
       </svg>
     </button>
   );

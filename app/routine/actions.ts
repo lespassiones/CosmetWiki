@@ -26,6 +26,7 @@ export async function addToRoutine(analysisId: string): Promise<RoutineActionRes
   if (error) return { ok: false, error: error.message };
   phCapture("routine_item_added", user.id);
   revalidatePath("/routine");
+  revalidatePath("/routine/produits");
   revalidatePath("/history");
   return { ok: true };
 }
@@ -49,6 +50,7 @@ export async function setRoutineFrequency(
     .eq("user_id", user.id);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/routine");
+  revalidatePath("/routine/produits");
   return { ok: true };
 }
 
@@ -66,5 +68,6 @@ export async function removeFromRoutine(routineItemId: string): Promise<RoutineA
     .eq("user_id", user.id);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/routine");
+  revalidatePath("/routine/produits");
   return { ok: true };
 }

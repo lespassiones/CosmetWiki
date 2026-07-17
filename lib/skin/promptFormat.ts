@@ -17,6 +17,7 @@ import { cookies } from "next/headers";
 import { supabaseServer } from "../supabase";
 import {
   HAIR_CONCERN_LABEL,
+  PROFILE_GOAL_LABEL,
   readSkinProfile,
   SKIN_CONCERN_LABEL,
   SKIN_TYPE_BODY_LABEL,
@@ -67,8 +68,23 @@ export function formatSkinProfileForPrompt(skin: SkinProfile): string | null {
     hairParts.push(skin.hairConcerns.map((c) => HAIR_CONCERN_LABEL[c]).join(", "));
   }
   if (skin.otherHair) hairParts.push(skin.otherHair);
+  if (skin.otherHairConcerns) hairParts.push(skin.otherHairConcerns);
   if (hairParts.length > 0) {
     lines.push(`- Cheveux : ${hairParts.join(" ; ")}`);
+  }
+
+  // Objectifs (AJOUT juil 2026 — parité mobile : le port avait oublié `goals`,
+  // pourtant central pour le bloc « objectifs » ET le score de compatibilité).
+  const goalParts: string[] = [];
+  if (skin.goals && skin.goals.length > 0) {
+    goalParts.push(skin.goals.map((g) => PROFILE_GOAL_LABEL[g]).join(", "));
+  }
+  if (skin.otherGoals) goalParts.push(skin.otherGoals);
+  for (const og of [skin.otherGoalsFace, skin.otherGoalsBody, skin.otherGoalsHair, skin.otherGoalsRoutine]) {
+    if (og) goalParts.push(og);
+  }
+  if (goalParts.length > 0) {
+    lines.push(`- Objectifs : ${goalParts.join(" ; ")}`);
   }
 
   if (skin.allergiesFreeform) {
@@ -112,5 +128,26 @@ export async function loadProfileForPrompt(userId: string): Promise<string | nul
     // Best-effort enrichment — never let a profile-fetch error break an
     // analyse. The route just runs without personalisation.
     return null;
+  }
+}
+
+/**
+ * Charge le SkinProfile BRUT (objet) — sert au gating de pertinence du score de
+ * compatibilité (savoir si l'axe peau/cheveux du produit est renseigné).
+ * Fail-closed : renvoie {} en cas d'erreur.
+ */
+export async function loadSkinProfile(userId: string): Promise<SkinProfile> {
+  try {
+    const cookieStore = await cookies();
+    const sb = supabaseServer(cookieStore);
+    const { data } = await sb
+      .schema("cosme_check")
+      .from("user_profiles")
+      .select("preferences")
+      .eq("id", userId)
+      .maybeSingle();
+    return readSkinProfile((data?.preferences ?? null) as Record<string, unknown> | null);
+  } catch {
+    return {} as SkinProfile;
   }
 }

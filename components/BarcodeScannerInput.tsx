@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ProductSearchResult, ScanPreview } from "@/lib/productSearch/types";
 import { ScanPreviewCard } from "@/components/scan/ScanPreviewCard";
+import { ContributeProductModal } from "@/components/ContributeProductModal";
 
 type FoundPayload = {
   ingredientsText: string;
@@ -60,6 +61,8 @@ export function BarcodeScannerInput({
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [state, setState] = useState<ScannerState>({ kind: "idle" });
+  // EAN pour lequel la modale « Ajouter ce produit » est ouverte (contribution).
+  const [contributeEan, setContributeEan] = useState<string | null>(null);
   // Hold latest callbacks in refs so the camera effect doesn't re-run
   // when a parent re-render produces new function identities.
   const onFoundRef = useRef(onFound);
@@ -492,10 +495,18 @@ export function BarcodeScannerInput({
               />
             </svg>
             <p className="text-[14px] font-medium text-emerald-700">
-              Ce produit a été enregistré et sera référencé très prochainement.
+              Ce produit n'est pas encore chez nous. Aide-nous à l'ajouter en 2 photos, on le
+              décrypte pour toi et toute la communauté.
             </p>
           </div>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setContributeEan(state.barcode)}
+            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#F43F5E] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#E11D48]"
+          >
+            📷 Ajouter ce produit
+          </button>
+          <div className="mt-2 flex flex-wrap gap-2">
             <button
               type="button"
               onClick={resumeScanning}
@@ -505,6 +516,17 @@ export function BarcodeScannerInput({
             </button>
           </div>
         </div>
+      ) : null}
+
+      {contributeEan !== null ? (
+        <ContributeProductModal
+          ean={contributeEan}
+          open={contributeEan !== null}
+          onClose={() => {
+            setContributeEan(null);
+            resumeScanning();
+          }}
+        />
       ) : null}
     </div>
   );

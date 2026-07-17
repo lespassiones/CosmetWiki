@@ -2,16 +2,24 @@ import { describe, it, expect } from "vitest";
 import { colorCapScore } from "@/lib/essentiel/engine";
 import { scoreLabel } from "@/lib/inciParser";
 
-// NEUTRALISÉ (parité mobile) — le score pastille intègre déjà le plafond par
-// position ; colorCapScore renvoie le score inchangé (plus de double-plafond).
-describe("colorCapScore (neutralisé)", () => {
-  it("renvoie toujours le score inchangé, quels que soient orange/rouge", () => {
-    expect(colorCapScore(18, { orange: 0, rouge: 1 })).toBe(18);
-    expect(colorCapScore(18, { orange: 3, rouge: 0 })).toBe(18);
+// Filet d'affichage par INVARIANTS pastille (réactivé 16 juil 2026 — incident
+// « feuille verte avec 2 rouges », 870 notes corrompues recalculées en base).
+// Seules des bornes JAMAIS dépassables par le moteur pastille sont appliquées :
+// ≥1 rouge → ≤ 12,9 ; ≥2 rouges ou ≥4 oranges → ≤ 8,9. Produit sain inchangé.
+describe("colorCapScore (invariants pastille)", () => {
+  it("note corrompue « verte » avec rouge(s) → rabattue (cas réel : 13,56 / 2 rouges)", () => {
+    expect(colorCapScore(13.56, { orange: 2, rouge: 2 })).toBe(8.9); // Lady Speed Stick
+    expect(colorCapScore(18, { orange: 0, rouge: 1 })).toBe(12.9);
+    expect(colorCapScore(18, { orange: 1, rouge: 1 })).toBe(12.9);
+    expect(colorCapScore(17, { orange: 4, rouge: 0 })).toBe(8.9);
+  });
+
+  it("produit SAIN : jamais modifié (pas de sur-pénalisation)", () => {
+    expect(colorCapScore(12.5, { orange: 0, rouge: 1 })).toBe(12.5); // rouge en queue
+    expect(colorCapScore(18, { orange: 3, rouge: 0 })).toBe(18); // 1-3 oranges : légitime
     expect(colorCapScore(18, { orange: 1, rouge: 0 })).toBe(18);
     expect(colorCapScore(16.4, { orange: 0, rouge: 0 })).toBe(16.4);
     expect(colorCapScore(5, { orange: 0, rouge: 1 })).toBe(5);
-    expect(colorCapScore(18, { orange: 1, rouge: 1 })).toBe(18);
   });
 });
 

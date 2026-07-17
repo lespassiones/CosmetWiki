@@ -13,14 +13,14 @@ import { IngredientBlob, type BlobCounts } from "./blob/IngredientBlob";
 import { InfoBadge, Tooltip } from "./Tooltip";
 import { commonNameFor, prettyInci } from "@/lib/inciCommonNames";
 import { AddToRoutineButton } from "./routine/AddToRoutineButton";
-import { RestrictionWarning } from "./analyse/RestrictionWarning";
 import { useRestrictions } from "@/components/restrictions/RestrictionsProvider";
 import { checkRestrictions } from "@/lib/restrictions/check";
 import type { IngredientFamily } from "@/lib/restrictions/types";
-import { EssentielView, EssentielToggleButton } from "./analyse/EssentielView";
-import { PersonalInsightsCards, type PersonalBlocks } from "./analyse/PersonalInsightsCards";
-import { VerdictGauge } from "./analyse/VerdictGauge";
-import { computeEssentiel, verdictToneFromScore, colorCapScore } from "@/lib/essentiel/engine";
+import { EssentielToggleButton } from "./analyse/EssentielView";
+import { type PersonalBlocks } from "./analyse/PersonalInsightsCards";
+import { CompatibilityCard } from "./analyse/CompatibilityCard";
+import type { Compatibility } from "@/lib/ai/personalInsights";
+import { verdictToneFromScore, colorCapScore } from "@/lib/essentiel/engine";
 import type { VerdictTone } from "@/lib/essentiel/engine";
 import { categoryLabel, type ProductCategory } from "@/lib/categoryLabel";
 import { AlternativesCarousel } from "./analyse/AlternativesCarousel";
@@ -136,6 +136,10 @@ export function AnalyseResultPanel({
   // a name.
   const [promesseOpen, setPromesseOpen] = useState(autoOpenPromesse);
   const [familiesModalOpen, setFamiliesModalOpen] = useState(false);
+  // Nombre de lignes rendues par le titre (mesuré dans TitleBar). Titre sur 3
+  // lignes → marque + sous-catégorie sur la MÊME ligne ; 1-2 lignes → empilées
+  // (marque sous le titre, sous-catégorie en bas).
+  const [titleLines, setTitleLines] = useState(2);
   const pathname = usePathname();
   // Persist the "is the full analysis open?" / "is the ingredients modal
   // open?" flags in sessionStorage keyed by analysisId. That way:
@@ -160,20 +164,8 @@ export function AnalyseResultPanel({
   // modal AND ask it to scroll to that ingredient once its DOM is mounted.
   // `null` = just open the modal at the top of the list.
   const [targetIngredientPosition, setTargetIngredientPosition] = useState<number | null>(null);
-  // "Essentiel" snapshot is rendered first; the full analysis grid below is
-  // collapsed by default and opens when the user clicks "Voir l'analyse
-  // complète". Rules-based (no LLM), so the snapshot is instantly available.
-  //
-  // We feed the product context to the engine so verbs in "Ce qui est bien"
-  // are picked relative to the product type — e.g. "Agent fixant" surfaces
-  // as "lie les ingrédients" on a deodorant rather than the wrong-context
-  // "fixe la coiffure" we used to show. Prefer `result.category` (closed
-  // enum computed server-side) and fall back to the raw OCR `productType`
-  // (free-form) so the very first scan is already context-aware.
-  const essentiel = useMemo(
-    () => computeEssentiel(result, { category: result.category ?? null, productType }),
-    [result, productType],
-  );
+  // La carte « L'essentiel » a été absorbée par la CompatibilityCard (parité
+  // mobile) : la ligne restrictions vit désormais DANS la carte compatibilité.
   const cappedTone = verdictToneFromScore(colorCapScore(result.score, result.counts));
   const [detailsExpanded, setDetailsExpanded] = useState(false);
   const [scoreExplOpen, setScoreExplOpen] = useState(false);
@@ -185,18 +177,25 @@ export function AnalyseResultPanel({
   // (détection par tag, identique au mobile et au backend analyser).
   // Compte = familles uniques + ingrédients uniques → "Contient N de vos
   // restrictions" STRICTEMENT identique entre web et mobile.
-  const { restrictedCount, restrictedFamilies } = useMemo(() => {
+  const { restrictedCount, restrictedFamilies, restrictedIngredients } = useMemo(() => {
     const matches = checkRestrictions(result.items, restrictions, families);
     const uniqueFamilySlugs = new Set(
       matches.filter((m) => m.kind === "family").map((m) => m.slug)
     );
-    const uniqueIngredientSlugs = new Set(
-      matches.filter((m) => m.kind === "ingredient").map((m) => m.slug)
-    );
+    // Restrictions INGRÉDIENT (ex : Aluminum Chlorohydrate) : uniques par slug,
+    // avec leur libellé — la modale doit les lister AUSSI (bug « contient 3 »
+    // mais 2 affichées : seules les familles étaient montrées).
+    const ingredientLabels = new Map<string, string>();
+    for (const m of matches) {
+      if (m.kind === "ingredient" && !ingredientLabels.has(m.slug)) {
+        ingredientLabels.set(m.slug, m.label);
+      }
+    }
     const filtered = families.filter((f) => uniqueFamilySlugs.has(f.slug));
     return {
-      restrictedCount: uniqueFamilySlugs.size + uniqueIngredientSlugs.size,
+      restrictedCount: uniqueFamilySlugs.size + ingredientLabels.size,
       restrictedFamilies: filtered,
+      restrictedIngredients: [...ingredientLabels.values()],
     };
   }, [result.items, restrictions, families]);
   // True once we've finished the post-mount sessionStorage read — keeps the
@@ -248,6 +247,8 @@ export function AnalyseResultPanel({
     (result as { personalBlocks?: PersonalBlocks | null }).personalBlocks ?? null;
   const personalBlocksKey =
     (result as { personalBlocksKey?: string | null }).personalBlocksKey ?? null;
+  const compatibility =
+    (result as { compatibility?: Compatibility | null }).compatibility ?? null;
   useEffect(() => {
     if (autoOpenPromesse) {
       setPromesseOpen(true);
@@ -289,16 +290,16 @@ export function AnalyseResultPanel({
     <section id="analyse-results" className="pt-2">
       {/* Product header: image left + title/brand right ALWAYS SIDE-BY-SIDE */}
       <div className="flex flex-col gap-4 mb-6 lg:max-w-[900px]">
-        {/* Carte commune : image + titre/marque + boutons d'action regroupés */}
-        <div className="neu p-3 lg:p-4 flex flex-col gap-4">
+        {/* Carte commune : image + titre/marque + boutons d'action regroupés. */}
+        <div className="card-white relative p-4 flex flex-col gap-4">
           {/* Image + Title/Brand (always horizontal) */}
           <div className="flex flex-row gap-4 items-start">
-          {/* Image — agrandie (portrait), occupe la hauteur du bloc titre+marque */}
+          {/* Image — PORTRAIT haute (maquette) : couvre breadcrumb + titre + marque */}
           {productImageUrl ? (
             <img
               src={productImageUrl}
               alt={productLabel || "Product image"}
-              className="w-[104px] h-[118px] shrink-0 rounded-lg object-cover shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)]"
+              className="w-[108px] h-[148px] shrink-0 rounded-xl object-cover shadow-[0_8px_28px_-12px_rgba(15,23,42,0.10)]"
             />
           ) : null}
 
@@ -311,16 +312,41 @@ export function AnalyseResultPanel({
               productType={productType ?? result.productType ?? null}
               catalogCategory={result.catalogCategory ?? null}
               breadcrumb={trail}
+              onLines={setTitleLines}
             />
 
-            {/* Brand + Subcategory — truncate to stay beside image */}
-            {(brand || result.catalogCategory) && (
-              <div className="text-[13px] font-medium text-ink-muted truncate">
-                {brand && <>{brand}</>}
-                {brand && result.catalogCategory && <> · </>}
-                {result.catalogCategory && <>{categorySlugToDisplayName(result.catalogCategory)}</>}
-              </div>
-            )}
+            {/* Marque en BADGE encadré (demande user) + sous-catégorie.
+                Titre sur 3 lignes → sous-catégorie + marque sur la MÊME ligne
+                (place comptée). Titre sur 1-2 lignes → empilé, marque sous le
+                titre puis sous-catégorie en bas. */}
+            {(brand || result.catalogCategory) &&
+              (titleLines >= 3 ? (
+                <div className="min-w-0 flex flex-row flex-wrap items-center gap-x-2 gap-y-1">
+                  {result.catalogCategory && (
+                    <span className="text-[12px] text-ink-subtle truncate">
+                      {categorySlugToDisplayName(result.catalogCategory)}
+                    </span>
+                  )}
+                  {brand && (
+                    <span className="inline-flex max-w-full items-center truncate rounded-lg bg-[#FBF3DF] px-2.5 py-1 text-[12px] font-semibold text-[#8B6B21] ring-1 ring-[#B48A2A]/35">
+                      {brand}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <div className="min-w-0 flex flex-col items-start gap-1">
+                  {brand && (
+                    <span className="inline-flex max-w-full items-center truncate rounded-lg bg-[#FBF3DF] px-2.5 py-1 text-[12px] font-semibold text-[#8B6B21] ring-1 ring-[#B48A2A]/35">
+                      {brand}
+                    </span>
+                  )}
+                  {result.catalogCategory && (
+                    <div className="text-[12px] text-ink-subtle truncate">
+                      {categorySlugToDisplayName(result.catalogCategory)}
+                    </div>
+                  )}
+                </div>
+              ))}
           </div>
         </div>
 
@@ -329,18 +355,18 @@ export function AnalyseResultPanel({
             {existingCoherenceId ? (
               <Link
                 href={`/promesses/${existingCoherenceId}`}
-                className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
+                className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 rounded-2xl bg-emerald-500 px-3 py-2.5 text-xs sm:text-[13px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
               >
-                <PromesseIcon className="h-3.5 w-3.5 shrink-0" />
+                <SparkleIcon className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate">Voir l&apos;analyse de la promesse</span>
               </Link>
             ) : (
               <button
                 type="button"
                 onClick={() => setPromesseOpen(true)}
-                className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
+                className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 rounded-2xl bg-emerald-500 px-3 py-2.5 text-xs sm:text-[13px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-600 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.55)]"
               >
-                <PromesseIcon className="h-3.5 w-3.5 shrink-0" />
+                <SparkleIcon className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate">Analyser la promesse</span>
               </button>
             )}
@@ -354,23 +380,9 @@ export function AnalyseResultPanel({
           </div>
         </div>
 
-        {/* Partager + Pastilles — en dehors de la carte commune */}
-        <div className="flex flex-1 items-center gap-2.5 rounded-full bg-white/85 px-3 py-1.5 ring-1 ring-black/[0.06] backdrop-blur-md transition-all hover:bg-white/95 hover:shadow-[0_6px_20px_-8px_rgba(15,23,42,0.15)]">
-            <button
-              type="button"
-              onClick={() => shareReport(originalText)}
-              aria-label="Partager cette analyse"
-              className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-ink transition hover:text-rose-700"
-            >
-              <ShareIcon className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">Partager</span>
-            </button>
-            <span aria-hidden className="lg:hidden h-4 w-px shrink-0 bg-black/10" />
-            <VerdictGauge
-              tone={cappedTone}
-              className="lg:hidden flex-1 justify-between"
-            />
-          </div>
+        {/* Qualité de la formule — note en étoiles (remplace les pastilles).
+            Partager vit en haut à droite du bloc, sur la ligne du titre. */}
+        <FormulaQualityCard tone={cappedTone} onShare={() => shareReport(originalText)} />
       </div>
       {!existingCoherenceId && (
         <PromesseFlowModal
@@ -384,62 +396,30 @@ export function AnalyseResultPanel({
         />
       )}
 
-      {/* Essentiel snapshot - the 3 rules-based cards (verdict + ce qui est
-          bien + à surveiller) that show instantly after an analysis. The full
-          AI-powered grid below is collapsed until the user explicitly asks
-          for it.
-          DESKTOP layout : the 3 cards sit on the left with a soft max-width
-          so they don't span the entire row, and the 5-pastille verdict gauge
-          is rendered IMMEDIATELY next to them as a vertical column. Both
-          flex items use `items-stretch` so the gauge container takes the
-          full height of the cards stack, and inside the gauge the pastilles
-          spread evenly (`justify-around` + `h-full`) — matching the cards'
-          vertical span as requested. */}
-      <div className="lg:flex lg:items-stretch lg:gap-8">
+      {/* Score de compatibilité (« Pour toi ») — PARITÉ MOBILE : rendu DIRECTEMENT
+          après la barre pastilles (l'ancienne carte « L'essentiel » est absorbée :
+          la ligne restrictions vit DANS cette carte, sous le score). MÊME appel IA
+          que les 3 blocs (1 crédit à la génération). Le clic ouvre le modal.
+          Verrous : /offre si 0 crédit ; « compléter le profil » si l'axe requis
+          n'est pas renseigné.
+          DESKTOP : la carte à gauche (max-w-[640px]) + la jauge verticale 5
+          pastilles à droite (items-stretch → même hauteur que la carte). */}
+      <div className="mt-4 lg:flex lg:items-stretch lg:gap-8">
         <div className="lg:flex-1 lg:min-w-0 lg:max-w-[640px]">
-          {/* `hideToggle` on desktop only: the toggle button is rendered
-              OUTSIDE this flex below, so the verdict gauge's `items-stretch`
-              matches the 3 cards' height — not the 3 cards + button. On
-              mobile (no flex, no gauge column), we render the toggle
-              inline via `EssentielToggleButton` further down. */}
-          <EssentielView
-            data={essentiel}
-            expanded={detailsExpanded}
-            onToggle={() => setDetailsExpanded((v) => !v)}
-            hideToggle
-            scoreTone={cappedTone}
+          <CompatibilityCard
+            analysisId={analysisId}
+            initialCompatibility={compatibility}
+            initialBlocks={personalBlocks}
+            initialBlocksKey={personalBlocksKey}
             restrictedCount={restrictedCount}
-            onShowFamilies={() => setFamiliesModalOpen(true)}
-          />
-        </div>
-        {/* Desktop verdict gauge — same chrome as the mobile toolbar pill
-            (rounded-full + white surface + ring + backdrop-blur) so the 5
-            pastilles read as a grouped control instead of floating loose
-            next to the cards. The active pastille's `ring-4` is allowed to
-            overflow the pill horizontally (px-1.5 keeps the side padding
-            small enough for the "pop" effect). Height = exactly the cards
-            stack — see `hideToggle` note above. */}
-        <div className="hidden lg:flex lg:shrink-0 lg:items-stretch">
-          <VerdictGauge
-            tone={cappedTone}
-            orientation="vertical"
-            className="h-full justify-around rounded-full bg-white/85 px-1.5 py-3 ring-1 ring-black/[0.06] backdrop-blur-md"
+            onShowRestrictedFamilies={() => setFamiliesModalOpen(true)}
           />
         </div>
       </div>
 
-      {/* 3 blocs IA personnalisés (objectifs / peau / à surveiller) — lazy,
-          1 crédit à la génération, verrouillés→/offre si 0 crédit. */}
-      <div className="mt-3 lg:max-w-[640px]">
-        <PersonalInsightsCards analysisId={analysisId} initialBlocks={personalBlocks} initialBlocksKey={personalBlocksKey} />
-      </div>
-
-      {/* Toggle button — rendered OUTSIDE the flex pair above so the gauge's
-          stretched height matches only the 3 cards (not cards + button).
-          `lg:max-w-[640px]` mirrors the cards column above so the button is
-          centred under the cards, not pushed off-centre by the gauge column
-          on the right. */}
-      <div className="mt-3 flex justify-center pt-2 lg:max-w-[640px]">
+      {/* CTA « Voir l'analyse complète » — barre pleine largeur (maquette),
+          alignée sur la colonne de la carte compat (lg:max-w-[640px]). */}
+      <div className="mt-6 lg:max-w-[640px]">
         <EssentielToggleButton
           expanded={detailsExpanded}
           onToggle={() => setDetailsExpanded((v) => !v)}
@@ -465,7 +445,7 @@ export function AnalyseResultPanel({
       {detailsExpanded && (
       <div
         ref={detailsRef}
-        className="mt-6 grid gap-4 grid-cols-1 [grid-template-areas:'score''warning''counts''synthesis''spectrum''observations''items'] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:[grid-template-areas:'left_middle_items']"
+        className="mt-6 grid gap-4 grid-cols-1 [grid-template-areas:'score''counts''synthesis''spectrum''observations''items'] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:[grid-template-areas:'left_middle_items']"
       >
         {/* Left column: on desktop, grouped as a flex column so Score + Counts
             + Spectrum stack tightly with no gap from row height mismatch. On
@@ -485,11 +465,9 @@ export function AnalyseResultPanel({
             />
           </Reveal>
 
-          {/* Restriction warning sits right under the score donut so the user
-              sees it without scrolling. Renders nothing when no match. */}
-          <Reveal delayMs={REVEAL_SCORE_MS + 200} className="[grid-area:warning]">
-            <RestrictionWarning items={result.items} />
-          </Reveal>
+          {/* Le rappel « N ingrédients dans tes restrictions » a été SUPPRIMÉ
+              ici (redondant : la carte compatibilité affiche déjà « Contient
+              N de tes restrictions » en tête de page, avec la modale détail). */}
 
           {/* 24% / 76% / 1% strip — moved ABOVE the spectrum so it reads
               right after the half-donut as the "verdict en chiffres". */}
@@ -583,8 +561,9 @@ export function AnalyseResultPanel({
       />
 
       {/* Petit espace pour décoller le bloc Outils du bouton « Voir l'analyse
-          complète » (et du carrousel d'alternatives quand il est présent). */}
-      <div className="mt-5">
+          complète » (et du carrousel d'alternatives quand il est présent).
+          id = ancre du bloc « Signaler une erreur » (bas de page). */}
+      <div className="mt-5" id="product-tools">
         <ToolsSection
           ean={ean ?? null}
           productLabel={productLabel ?? null}
@@ -604,7 +583,7 @@ export function AnalyseResultPanel({
       ) : null}
 
       {/* Modale : familles restreintes du produit */}
-      <FamiliesModalWeb open={familiesModalOpen} onClose={() => setFamiliesModalOpen(false)} families={restrictedFamilies} />
+      <FamiliesModalWeb open={familiesModalOpen} onClose={() => setFamiliesModalOpen(false)} families={restrictedFamilies} ingredients={restrictedIngredients} />
     </section>
   );
 }
@@ -720,6 +699,7 @@ function TitleBar({
   productType,
   catalogCategory,
   breadcrumb,
+  onLines,
 }: {
   title: string;
   category: ProductCategory | null;
@@ -729,6 +709,9 @@ function TitleBar({
    *  as "sous-catégorie · marque" below the product title. */
   catalogCategory?: string | null;
   breadcrumb: BreadcrumbItem[] | null;
+  /** Remonte le nombre de lignes réellement rendues par le titre (1-3) pour
+   *  piloter la disposition marque/sous-catégorie du parent. */
+  onLines?: (n: number) => void;
 }) {
   const subCategoryDisplay = catalogCategory
     ? categorySlugToDisplayName(catalogCategory)
@@ -736,6 +719,25 @@ function TitleBar({
   // Standard convention: last item is the current location (not clickable).
   const trail = breadcrumb ? breadcrumb.slice(0, -1) : [];
   const current = breadcrumb ? breadcrumb[breadcrumb.length - 1] : undefined;
+  // Mesure le nombre de lignes du titre (line-clamp-3) → 1, 2 ou 3. Recalcul
+  // au resize car la taille de police change au breakpoint sm.
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    const el = titleRef.current;
+    if (!el || !onLines) return;
+    const measure = () => {
+      const cs = window.getComputedStyle(el);
+      let lh = parseFloat(cs.lineHeight);
+      if (!Number.isFinite(lh) || lh <= 0) lh = parseFloat(cs.fontSize) * 1.25;
+      const n = Math.max(1, Math.min(3, Math.round(el.getBoundingClientRect().height / lh)));
+      onLines(n);
+    };
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [title, onLines]);
   return (
     <header className="flex flex-col gap-3">
       <div className="min-w-0">
@@ -760,7 +762,7 @@ function TitleBar({
             ) : null}
           </nav>
         ) : null}
-        <h1 className="mt-1 line-clamp-2 text-lg font-bold tracking-tight text-ink sm:text-2xl">
+        <h1 ref={titleRef} className="mt-1 line-clamp-3 text-lg font-bold tracking-tight text-ink sm:text-2xl">
           {title}
         </h1>
       </div>
@@ -1991,15 +1993,15 @@ async function shareReport(text: string) {
 // ============================================================
 // Familles Modal
 // ============================================================
-function FamiliesModalWeb({ open, onClose, families: restrictedFamilies }: { open: boolean; onClose: () => void; families: IngredientFamily[] }) {
-  if (!open || restrictedFamilies.length === 0) return null;
+function FamiliesModalWeb({ open, onClose, families: restrictedFamilies, ingredients = [] }: { open: boolean; onClose: () => void; families: IngredientFamily[]; ingredients?: string[] }) {
+  if (!open || (restrictedFamilies.length === 0 && ingredients.length === 0)) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity ${open ? "opacity-100" : "opacity-0 pointer-events-none"}`} style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}>
+    <div className={`fixed inset-0 z-[100] flex items-center justify-center transition-opacity ${open ? "opacity-100" : "opacity-0 pointer-events-none"}`} style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}>
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-xs mx-4 max-h-[70vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h3 className="text-base font-semibold text-gray-900">Familles restreintes</h3>
+          <h3 className="text-base font-semibold text-gray-900">Tes restrictions détectées</h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition"
@@ -2011,7 +2013,9 @@ function FamiliesModalWeb({ open, onClose, families: restrictedFamilies }: { ope
           </button>
         </div>
 
-        {/* Content */}
+        {/* Content — familles PUIS ingrédients restreints (le compte affiché
+            « Contient N de tes restrictions » = familles + ingrédients : la
+            liste doit donc montrer les N, pas seulement les familles). */}
         <div className="px-6 py-4 space-y-3">
           {restrictedFamilies.map((family, idx) => {
             const familyName = family?.name || family?.slug || String(family);
@@ -2024,6 +2028,14 @@ function FamiliesModalWeb({ open, onClose, families: restrictedFamilies }: { ope
               </div>
             );
           })}
+          {ingredients.map((name, idx) => (
+            <div key={`ing-${idx}`} className="flex items-center gap-3">
+              <svg className="w-5 h-5 text-rose-600 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2 15 8l6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z" />
+              </svg>
+              <span className="text-sm font-medium text-gray-900">{name}</span>
+            </div>
+          ))}
         </div>
 
         {/* Button */}
@@ -2055,10 +2067,11 @@ function DotIcon({ className }: { className?: string }) {
   return <span className={`block rounded-full ${className}`} aria-hidden />;
 }
 
-function PromesseIcon({ className }: { className?: string }) {
+/** Étincelle « ✦ » (maquette user) — 4 branches pleines, pour les CTA IA. */
+function SparkleIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
-      <path d="M12 2 15 8l6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z" />
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M12 2c.5 4.5 2.5 7.5 8 8-5.5 1.5-7.5 4.5-8 10-.5-5.5-2.5-8.5-8-10 5.5-.5 7.5-3.5 8-8z" />
     </svg>
   );
 }
@@ -2071,6 +2084,129 @@ function ShareIcon({ className }: { className?: string }) {
       <circle cx="18" cy="19" r="3" />
       <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
       <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+  );
+}
+
+// ─── Qualité de la formule (note en étoiles) ────────────────────────────────
+// Remplace les anciennes pastilles (cœur/feuille/œil/triangle/croix). Barème :
+//   5 étoiles vertes       = très douce   (very-safe)
+//   4 étoiles vertes douces= saine        (safe)
+//   3 étoiles jaunes       = à surveiller (caution)
+//   2 étoiles oranges      = moyenne      (warning)
+//   1 étoile rouge         = à examiner   (danger / high-risk)
+// Les étoiles se lisent de gauche (rempli) à droite (vides). Le bouton
+// Partager est en haut à droite, sur la ligne du titre.
+const STARS_BY_TONE: Record<VerdictTone, number> = {
+  "very-safe": 5,
+  safe: 4,
+  caution: 3,
+  warning: 2,
+  danger: 1,
+  "high-risk": 1,
+  unknown: 0,
+};
+
+// Palette 3D par tone (HEX inline, jamais de classes Tailwind : garantit le
+// rendu et aligne le web sur le mobile). Chaque étoile a trois teintes :
+//   light = reflet haut-gauche, face = couleur principale, dark = tranche
+//   d'extrusion (l'épaisseur 3D visible en bas) + fin du dégradé.
+type StarPalette = { face: string; dark: string; light: string };
+
+const STAR_PALETTE_BY_TONE: Record<VerdictTone, StarPalette> = {
+  "very-safe": { face: "#10B981", dark: "#047857", light: "#6EE7B7" }, // emerald 500/700/300
+  safe: { face: "#34D399", dark: "#059669", light: "#A7F3D0" }, // emerald 400/600/200 (atténué)
+  caution: { face: "#FBBF24", dark: "#D97706", light: "#FDE68A" }, // amber 400/600/200
+  warning: { face: "#F97316", dark: "#C2410C", light: "#FDBA74" }, // orange 500/700/300
+  danger: { face: "#F43F5E", dark: "#BE123C", light: "#FDA4AF" }, // rose 500/700/300
+  "high-risk": { face: "#F43F5E", dark: "#BE123C", light: "#FDA4AF" },
+  unknown: { face: "#E5E7EB", dark: "#C7CBD1", light: "#F5F6F8" },
+};
+
+const STAR_EMPTY_PALETTE: StarPalette = {
+  face: "#E5E7EB",
+  dark: "#C7CBD1",
+  light: "#F5F6F8",
+}; // gray
+
+function FormulaQualityCard({
+  tone,
+  onShare,
+}: {
+  tone: VerdictTone;
+  onShare: () => void;
+}) {
+  const filled = STARS_BY_TONE[tone];
+  const palette = STAR_PALETTE_BY_TONE[tone];
+  return (
+    <div className="card-white p-4">
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-[15px] font-semibold text-ink">Qualité de la formule</h3>
+        <button
+          type="button"
+          onClick={onShare}
+          aria-label="Partager cette analyse"
+          className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-ink transition hover:text-rose-700"
+        >
+          <ShareIcon className="h-3.5 w-3.5 shrink-0" />
+          <span>Partager</span>
+        </button>
+      </div>
+      <p className="mt-0.5 text-[13px] text-ink-subtle">
+        Évaluation générale de la formule
+      </p>
+      <div
+        role="meter"
+        aria-label="Qualité de la formule"
+        aria-valuemin={1}
+        aria-valuemax={5}
+        aria-valuenow={filled || undefined}
+        className="mt-3 flex items-center justify-between"
+      >
+        {[0, 1, 2, 3, 4].map((i) => (
+          <Star3DIcon
+            key={i}
+            gradientId={`qstar-${i}`}
+            className="h-14 w-14 sm:h-[72px] sm:w-[72px]"
+            palette={i < filled ? palette : STAR_EMPTY_PALETTE}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const STAR_PATH =
+  "M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 17.77l-5.8 3.05 1.11-6.46-4.7-4.58 6.49-.94L12 2.5z";
+
+/** Étoile « 3D inclinée » : légère rotation (-8°) + tranche d'extrusion sombre
+ *  décalée bas-droite + face avant en dégradé (reflet haut-gauche → teinte →
+ *  ombre bas-droite). Miroir exact du composant mobile Star3D. */
+function Star3DIcon({
+  gradientId,
+  className,
+  palette,
+}: {
+  /** Id unique du dégradé DANS la page (une carte par page → `qstar-i`). */
+  gradientId: string;
+  className?: string;
+  palette: StarPalette;
+}) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <defs>
+        <linearGradient id={gradientId} x1="20%" y1="0%" x2="65%" y2="100%">
+          <stop offset="0%" stopColor={palette.light} />
+          <stop offset="55%" stopColor={palette.face} />
+          <stop offset="100%" stopColor={palette.dark} />
+        </linearGradient>
+      </defs>
+      <g transform="rotate(-8, 12, 12)">
+        {/* Épaisseur (extrusion) : même étoile décalée bas-droite, teinte sombre. */}
+        <path d={STAR_PATH} transform="translate(0.5, 1.7)" fill={palette.dark} />
+        {/* Face avant en dégradé. */}
+        <path d={STAR_PATH} fill={`url(#${gradientId})`} />
+      </g>
     </svg>
   );
 }

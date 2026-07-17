@@ -11,29 +11,33 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { supabaseServer } from "@/lib/supabase";
+import { supabaseServer, supabaseService } from "@/lib/supabase";
 import { logError } from "@/lib/log";
-import { loadProfileForPrompt } from "@/lib/skin/promptFormat";
+import { loadProfileForPrompt, loadSkinProfile } from "@/lib/skin/promptFormat";
 import { loadRestrictionsContext } from "@/lib/restrictions/promptFormat";
 import { checkRestrictions } from "@/lib/restrictions/check";
+import { loadIngredientFamilies } from "@/lib/restrictions/families";
 import {
   generatePersonalBlocks,
   profileSignature,
+  type Compatibility,
   type PersonalBlocks,
 } from "@/lib/ai/personalInsights";
+import { detectForcedAgainst, relevanceVerdict } from "@/lib/ai/compatRelevance";
 import type { AnalyseItem, AnalyseResponse } from "@/lib/analyseTypes";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 25;
 
-type Body = { analysisId?: string };
+type Body = { analysisId?: string; compat?: boolean };
 
 type StoredResultJson = AnalyseResponse & {
   catalogCategory?: string | null;
   productType?: string | null;
   personalBlocks?: PersonalBlocks | null;
   personalBlocksKey?: string | null;
+  compatibility?: Compatibility | null;
 };
 
 export async function POST(req: NextRequest) {
@@ -66,16 +70,62 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Analyse invalide." }, { status: 400 });
   }
 
-  // Profil + restrictions → signature
-  const [profileBlock, restrictionsCtx] = await Promise.all([
+  // Profil + restrictions (+ profil brut pour le gating) → signature
+  const [rawProfileBlock, restrictionsCtx, skin] = await Promise.all([
     loadProfileForPrompt(user.id),
     loadRestrictionsContext(user.id),
+    loadSkinProfile(user.id),
   ]);
+  // Récap IA « sensibilités probables » (worker profile-restriction-inference) :
+  // injecté dans le bloc profil comme INDICES pour les contre-indications (-5),
+  // JAMAIS un malus restriction (-8). Inclus AVANT la signature → self-heal.
+  let profileBlock = rawProfileBlock;
+  // Slugs de FAMILLE des sensibilités déduites → SCORING : détectés dans le
+  // produit → -8 (comme une restriction cochée), dédoublonnés vs les cochées.
+  const inferredFamilySlugs: string[] = [];
+  if (rawProfileBlock) {
+    const { data: inferredRow } = await supabaseService()
+      .schema("cosme_check")
+      .from("profile_restriction_inference")
+      .select("items")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const inferredItems = Array.isArray(inferredRow?.items)
+      ? (inferredRow?.items as { label?: string; reason?: string; slug?: string | null }[]).filter(
+          (i) => typeof i?.label === "string" && i.label.trim(),
+        )
+      : [];
+    if (inferredItems.length > 0) {
+      const line = inferredItems
+        .slice(0, 8)
+        .map((i) => (i.reason ? `${i.label} (${i.reason})` : (i.label as string)))
+        .join(" ; ");
+      profileBlock = `${rawProfileBlock}\n- Sensibilités probables (déduites automatiquement du profil, NON confirmées par l'utilisateur) : ${line}`;
+      for (const it of inferredItems) {
+        const s = (it.slug ?? "").trim();
+        if (s && !inferredFamilySlugs.includes(s)) inferredFamilySlugs.push(s);
+      }
+    }
+  }
   const sig = profileSignature(profileBlock, restrictionsCtx.block);
+  // `||` (pas `??`) : une chaîne VIDE doit retomber sur le champ suivant.
+  const category = row.product_type || resultJson.catalogCategory || (row.category as string | null) || null;
 
   // Court-circuit GRATUIT : déjà généré pour ce profil ET version courante.
   if (resultJson.personalBlocks && resultJson.personalBlocksKey === sig) {
-    return NextResponse.json({ blocks: resultJson.personalBlocks });
+    return NextResponse.json({
+      blocks: resultJson.personalBlocks,
+      compatibility: resultJson.compatibility ?? null,
+    });
+  }
+
+  // Pré-check pertinence AVANT tout crédit / IA — activé seulement si le client
+  // le demande (compat:true) → rétro-compatibilité. Produit lié à un axe du
+  // profil non renseigné → on renvoie compléter la section, sans débit.
+  const wantCompat = body.compat === true;
+  const verdict = relevanceVerdict(category, skin);
+  if (wantCompat && verdict.kind === "profile_incomplete") {
+    return NextResponse.json({ profileIncomplete: true, missingSection: verdict.missingSection });
   }
 
   // CRÉDIT — GATE (LECTURE SEULE) : on refuse AVANT tout appel IA si 0 crédit,
@@ -114,6 +164,17 @@ export async function POST(req: NextRequest) {
     tags: it.tags ?? null,
   }));
   const matches = checkRestrictions(checkItems, restrictionsCtx.restrictions, restrictionsCtx.families);
+  // Familles DÉDUITES du profil présentes dans le produit (mêmes -8 que les
+  // restrictions cochées). loadRestrictionsContext ne charge le catalogue de
+  // familles que si l'utilisateur a des restrictions cochées → on le charge ici
+  // si besoin (cas « aucune restriction cochée mais sensibilités déduites »).
+  let familyCatalogue = restrictionsCtx.families;
+  if (inferredFamilySlugs.length > 0 && familyCatalogue.length === 0) {
+    familyCatalogue = await loadIngredientFamilies();
+  }
+  const inferredMatches = inferredFamilySlugs.length > 0
+    ? checkRestrictions(checkItems, { families: inferredFamilySlugs, ingredients: [] }, familyCatalogue)
+    : [];
   const reasonByPosition = new Map<number, string>();
   for (const m of matches) if (!reasonByPosition.has(m.position)) reasonByPosition.set(m.position, m.label);
 
@@ -128,7 +189,7 @@ export async function POST(req: NextRequest) {
   }));
 
   try {
-    const blocks = await generatePersonalBlocks({
+    const result = await generatePersonalBlocks({
       enriched,
       counts: {
         Vert: resultJson.counts.vert ?? 0,
@@ -140,16 +201,41 @@ export async function POST(req: NextRequest) {
       scoreLabel: (resultJson as unknown as { scoreLabel?: string }).scoreLabel ?? "",
       scoreTone: (resultJson as unknown as { scoreTone?: string | null }).scoreTone ?? null,
       productLabel: row.product_label ?? null,
-      category: row.product_type ?? resultJson.catalogCategory ?? (row.category as string | null) ?? null,
+      category,
       userId: user.id,
       profileBlock,
       restrictionsBlock: restrictionsCtx.block,
-      restrictionMatches: matches.map((m) => ({ inciName: m.inciName, label: m.label })),
+      restrictionMatches: matches.map((m) => ({
+        inciName: m.inciName,
+        label: m.label,
+        position: m.position,
+        kind: m.kind,
+        slug: m.slug,
+      })),
+      inferredRestrictionMatches: inferredMatches.map((m) => ({
+        inciName: m.inciName,
+        label: m.label,
+        position: m.position,
+        kind: m.kind,
+        slug: m.slug,
+      })),
+      // product_only = produit HORS PROFIL (axe "none" : dentifrice, déo…) OU
+      // profil/axe non renseigné (v29, demande user 16 juil 2026) : le score
+      // suit la QUALITÉ de la formule, mais l'IA liste quand même les bons
+      // actifs (utiles de manière globale) et les points à surveiller —
+      // affichés à 0 point dans le détail du calcul. Seul verdict "personal"
+      // (axe peau/cheveux rattaché ET renseigné) donne des bonus/malus réels.
+      productOnly: verdict.kind !== "personal",
+      // Filets déterministes : alcool asséchant, allergènes parfum, comédogènes,
+      // sulfates, allergie déclarée. Uniquement en mode personal : ces filets
+      // croisent le profil PEAU/CHEVEUX, hors sujet pour un produit hors profil.
+      forcedAgainst: verdict.kind === "personal" ? detectForcedAgainst(items, skin) : [],
     });
 
-    if (!blocks) {
+    if (!result) {
       return NextResponse.json({ error: "Génération indisponible pour le moment." }, { status: 503 });
     }
+    const { blocks, compatibility } = result;
 
     // DÉBIT APRÈS SUCCÈS : seule la PREMIÈRE génération réussie coûte 1 crédit.
     // (Une régénération d'un contenu déjà payé — alreadyHasBlocks — ne débite
@@ -173,7 +259,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const updatedJson = { ...resultJson, personalBlocks: blocks, personalBlocksKey: sig };
+    const updatedJson = { ...resultJson, personalBlocks: blocks, personalBlocksKey: sig, compatibility };
     const { error: updateError } = await sb
       .schema("cosme_check")
       .from("analyses")
@@ -181,7 +267,7 @@ export async function POST(req: NextRequest) {
       .eq("id", analysisId);
     if (updateError) logError("personal-insights.persist", updateError, { userId: user.id, analysisId });
 
-    return NextResponse.json({ blocks });
+    return NextResponse.json({ blocks, compatibility });
   } catch (err) {
     logError("personal-insights.generate", err, { userId: user.id, analysisId });
     return NextResponse.json({ error: "Génération indisponible pour le moment." }, { status: 500 });

@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { removeFromRoutine, setRoutineFrequency } from "@/app/routine/actions";
-import { IngredientBlob, type BlobCounts } from "@/components/blob/IngredientBlob";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 type Frequency = "daily" | "weekly" | "monthly";
@@ -15,17 +14,19 @@ const FREQUENCY_LABELS: Record<Frequency, string> = {
   monthly: "Mensuel",
 };
 
-export function RoutineProductRow({
+/**
+ * RoutineItemSettings — bloc d'édition d'un produit de routine (twin web de
+ * app/routine/item/[id].tsx mobile) : fréquence d'utilisation, voir l'analyse,
+ * retirer de la routine. Le hero produit (photo + nom + donut) est rendu par la
+ * page serveur ; ce composant client ne porte que les interactions.
+ */
+export function RoutineItemSettings({
   routineItemId,
   analysisId,
-  name,
-  counts,
   frequency,
 }: {
   routineItemId: string;
   analysisId: string;
-  name: string;
-  counts: BlobCounts | null;
   frequency: Frequency;
 }) {
   const [pending, startTransition] = useTransition();
@@ -44,50 +45,54 @@ export function RoutineProductRow({
   function confirmRemove() {
     startTransition(async () => {
       await removeFromRoutine(routineItemId);
+      router.push("/routine/produits");
       router.refresh();
     });
   }
 
   return (
-    <li className="flex items-center gap-3 py-3">
-      <div className="h-10 w-14 shrink-0">
-        <IngredientBlob
-          counts={counts ?? { vert: 0, jaune: 0, orange: 0, rouge: 0 }}
-          variant="sm"
-        />
+    <div className="mt-6 space-y-3">
+      {/* Fréquence d'utilisation */}
+      <div className="neu flex items-center justify-between gap-3 p-4">
+        <span className="text-[14px] font-semibold text-[#111111]">Fréquence d&apos;utilisation</span>
+        <FrequencyDropdown value={localFreq} disabled={pending} onChange={changeFreq} />
       </div>
-      <div className="min-w-0 flex-1">
-        <Link href={`/history/${analysisId}`} className="block font-semibold truncate hover:underline">
-          {name}
-        </Link>
-      </div>
-      <FrequencyDropdown
-        value={localFreq}
-        disabled={pending}
-        onChange={changeFreq}
-      />
+
+      {/* Voir l'analyse */}
+      <Link
+        href={`/history/${analysisId}`}
+        className="neu-shadow flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
+      >
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <path d="M14 2v6h6M9 13h6M9 17h6" />
+        </svg>
+        Voir l&apos;analyse
+      </Link>
+
+      {/* Retirer de ma routine */}
       <button
         type="button"
         onClick={() => setConfirmOpen(true)}
         disabled={pending}
-        aria-label="Retirer de la routine"
-        className="neu-sm-white h-9 w-9 text-rose-500 hover:text-rose-600 inline-flex items-center justify-center disabled:opacity-40"
+        className="flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition disabled:opacity-50"
       >
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden>
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
           <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
         </svg>
+        Retirer de ma routine
       </button>
 
       <ConfirmDialog
         open={confirmOpen}
         title="Retirer ce produit ?"
-        message={`Veux-tu vraiment retirer « ${name} » de ta routine ?`}
+        message="Ce produit sera retiré de ta routine."
         confirmLabel="Retirer"
         pending={pending}
         onConfirm={confirmRemove}
         onCancel={() => setConfirmOpen(false)}
       />
-    </li>
+    </div>
   );
 }
 
@@ -103,7 +108,6 @@ function FrequencyDropdown({
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  // Close on outside click + on Escape so the menu behaves like a real <select>.
   useEffect(() => {
     if (!open) return;
     const onPointer = (e: PointerEvent) => {
@@ -155,9 +159,7 @@ function FrequencyDropdown({
                   setOpen(false);
                 }}
                 className={`block w-full text-left px-3 py-1.5 text-[12px] font-medium transition ${
-                  selected
-                    ? "bg-[#F3F4F6] text-[#111111]"
-                    : "text-[#374151] hover:bg-[#F3F4F6]"
+                  selected ? "bg-[#F3F4F6] text-[#111111]" : "text-[#374151] hover:bg-[#F3F4F6]"
                 }`}
               >
                 {FREQUENCY_LABELS[opt]}

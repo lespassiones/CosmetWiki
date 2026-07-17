@@ -111,11 +111,11 @@ export function AddProductChoiceModal({
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
               <h2 className="text-[18px] font-semibold text-ink">
-                {step === "choice" ? "Ajouter un produit" : "Choisir une analyse"}
+                {step === "choice" ? "Ajouter à ma routine" : "Choisir une analyse"}
               </h2>
               <p className="text-[12px] text-[#6B7280] mt-0.5">
                 {step === "choice"
-                  ? "Ajoute un produit déjà scanné ou lance un nouveau scan."
+                  ? "Analyse un nouveau produit ou choisis-en un dans ton historique."
                   : "Sélectionne une analyse de ton historique."}
               </p>
             </div>
@@ -130,42 +130,54 @@ export function AddProductChoiceModal({
           </div>
 
           {step === "choice" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
-              <button
-                type="button"
-                onClick={() => setStep("pickExisting")}
-                disabled={eligibleAnalyses.length === 0}
-                className="text-left rounded-2xl ring-1 ring-[#E5E7EB] hover:ring-[#111111] bg-white p-4 transition group disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span aria-hidden className="text-lg">📋</span>
-                  <span className="text-[14px] font-semibold text-ink">
-                    Déjà scanné
-                  </span>
-                </div>
-                <p className="text-[12px] text-[#6B7280] leading-relaxed">
-                  {eligibleAnalyses.length === 0
-                    ? "Toutes tes analyses sont déjà dans la routine."
-                    : `Choisis parmi tes ${eligibleAnalyses.length} analyse${eligibleAnalyses.length > 1 ? "s" : ""} récente${eligibleAnalyses.length > 1 ? "s" : ""}, sans re-scanner.`}
-                </p>
-              </button>
+            <div className="flex flex-col gap-3 mt-2">
               <button
                 type="button"
                 onClick={() => {
                   onClose();
                   onPickNew();
                 }}
-                className="text-left rounded-2xl ring-1 ring-[#E5E7EB] hover:ring-[#111111] bg-white p-4 transition group"
+                className="flex items-center gap-3 text-left rounded-2xl ring-1 ring-[#E5E7EB] hover:ring-[#111111] bg-white p-4 transition group"
               >
-                <div className="flex items-center gap-2 mb-1">
-                  <span aria-hidden className="text-lg">📷</span>
-                  <span className="text-[14px] font-semibold text-ink">
-                    Nouveau produit
-                  </span>
+                <span
+                  aria-hidden
+                  className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-rose-50 text-xl"
+                >
+                  📷
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[15px] font-semibold text-ink">
+                    Analyser un nouveau produit
+                  </div>
+                  <p className="text-[12px] text-[#6B7280] leading-relaxed">
+                    Scanne ou colle une composition à analyser.
+                  </p>
                 </div>
-                <p className="text-[12px] text-[#6B7280] leading-relaxed">
-                  Scanne, colle ou cherche un produit qui n&apos;est pas encore dans ton historique.
-                </p>
+                <span aria-hidden className="text-[#9CA3AF]">›</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep("pickExisting")}
+                disabled={eligibleAnalyses.length === 0}
+                className="flex items-center gap-3 text-left rounded-2xl ring-1 ring-[#E5E7EB] hover:ring-[#111111] bg-white p-4 transition group disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span
+                  aria-hidden
+                  className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-violet-50 text-xl"
+                >
+                  🕐
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[15px] font-semibold text-ink">
+                    Choisir dans mon historique
+                  </div>
+                  <p className="text-[12px] text-[#6B7280] leading-relaxed">
+                    {eligibleAnalyses.length === 0
+                      ? "Toutes tes analyses sont déjà dans la routine."
+                      : "Ajoute une analyse déjà réalisée, sans la refaire."}
+                  </p>
+                </div>
+                <span aria-hidden className="text-[#9CA3AF]">›</span>
               </button>
             </div>
           )}

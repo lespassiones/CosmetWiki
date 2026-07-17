@@ -26,7 +26,19 @@ export type { PersonalBlocks };
 
 // DOIT rester synchro avec PERSONAL_PROMPT_VERSION (lib/ai/personalInsights.ts).
 // Détecte des blocs persistés périmés → refresh silencieux (gratuit, déjà payé).
-const PERSONAL_BLOCKS_VERSION = 10;
+// v12 (juil 2026) : + score de compatibilité + objectifs transmis à l'IA.
+// v21 : bonus tout actif utile (vert OU jaune), plus de malus « jaune sans lien ».
+// v22 : fix affichage « Plafond : 0 orange » (clamp 100% n'est pas un plafond).
+// v23 : fix score — plafond 100 AVANT restrictions (100% + restriction = 92).
+// v24 : détection profil->risque musclée (against 7 + balayage), plancher retiré.
+// v25 : filets déterministes étendus (allergènes/comédogènes/sulfates) + anti-contradiction.
+// v26 : tout produit personnalisé si profil rempli (product_only = profil vide).
+// v27 : sensibilités probables (inférence) comme indices against.
+// v28 : fix anti-double-comptage insensible aux accents (silicone -5 ET -8).
+// v29 : produit hors profil → score = qualité, lignes IA informatives (0 pt).
+// v30 : sensibilités déduites du profil = -8. v31 : hors profil → positif porté
+// par les 3 blocs IA (goals nomme les atouts), plus de liste d'actifs dans le calcul.
+const PERSONAL_BLOCKS_VERSION = 31;
 
 const TONE: Record<Tone, { bg: string; text: string }> = {
   vert: { bg: "bg-emerald-100", text: "text-emerald-600" },
@@ -122,7 +134,7 @@ export function PersonalInsightsCards({
     return (
       <div className="space-y-3">
         {BLOCKS.map(({ key }) => (
-          <article key={key} className="neu p-4">
+          <article key={key} className="card-white p-4">
             <div className="flex items-center gap-3">
               <span className="h-11 w-11 shrink-0 rounded-full bg-black/[0.06]" />
               <div className="min-w-0 flex-1">
@@ -143,7 +155,7 @@ export function PersonalInsightsCards({
         <div className="relative overflow-hidden rounded-3xl">
           <div className="space-y-3 blur-[5px] select-none" aria-hidden>
             {BLOCKS.map(({ key }) => (
-              <article key={key} className="neu p-4">
+              <article key={key} className="card-white p-4">
                 <div className="flex items-center gap-3">
                   <span className="h-11 w-11 shrink-0 rounded-full bg-emerald-100" />
                   <div className="min-w-0 flex-1">
@@ -194,13 +206,22 @@ export function PersonalInsightsCards({
     );
   }
 
+  return <PersonalBlocksList blocks={state.blocks} />;
+}
+
+/**
+ * Rendu PRÉSENTATIONNEL des 3 blocs (sans fetch). Réutilisé dans le modal
+ * « Ce qu'il faut retenir » ouvert depuis <CompatibilityCard/>.
+ * `hideSkin` : masque le bloc « à quoi sert ce produit » (score < 60).
+ */
+export function PersonalBlocksList({ blocks, hideSkin }: { blocks: PersonalBlocks; hideSkin?: boolean }) {
   return (
     <div className="space-y-3">
-      {BLOCKS.map(({ key, src }) => {
-        const b = state.blocks[key];
+      {BLOCKS.filter(({ key }) => !(hideSkin && key === "skin")).map(({ key, src }) => {
+        const b = blocks[key];
         const c = TONE[b.tone] ?? TONE.neutre;
         return (
-          <article key={key} className="neu p-4">
+          <article key={key} className="card-white p-4">
             <div className="flex items-start gap-3">
               <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${c.bg}`}>
                 <MaskIcon src={src} className={`h-7 w-7 ${c.text}`} />

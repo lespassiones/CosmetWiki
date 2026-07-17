@@ -24,7 +24,7 @@ export function AddProductButton({
   label = "+ Ajouter un produit",
   eligibleAnalyses,
 }: {
-  variant?: "primary" | "ghost";
+  variant?: "primary" | "ghost" | "success";
   className?: string;
   label?: string;
   /** Analyses the user has already saved but which aren't yet in the routine.
@@ -47,7 +47,9 @@ export function AddProductButton({
   const ButtonChrome =
     variant === "ghost"
       ? `inline-flex items-center justify-center gap-2 rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-[#F43F5E] hover:bg-rose-50 transition ${className}`
-      : `neu-shadow inline-flex items-center justify-center gap-2 rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-br from-[#1F2937] via-[#111111] to-[#0A0A0A] hover:brightness-110 transition ${className}`;
+      : variant === "success"
+        ? `neu-shadow inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 transition ${className}`
+        : `neu-shadow inline-flex items-center justify-center gap-2 rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-br from-[#1F2937] via-[#111111] to-[#0A0A0A] hover:brightness-110 transition ${className}`;
 
   return (
     <>

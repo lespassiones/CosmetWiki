@@ -484,18 +484,23 @@ export type EssentielData = {
 };
 
 /**
- * NEUTRALISÉ (juillet 2026) — le color cap n'est PLUS appliqué (parité mobile).
- * Le score est désormais issu du moteur PASTILLE qui intègre déjà le plafond PAR
- * POSITION (`lib/analysis/pastille.ts`). Re-plafonner ici (règle aveugle à la
- * position) sur-pénaliserait à tort un produit dont le rouge est en fin de liste
- * et divergerait du score du catalogue. Signature gardée (appelants inchangés) ;
- * renvoie le score tel quel. À retirer quand tous les appels auront été nettoyés.
+ * COLOR CAP — filet d'affichage par INVARIANTS de la pastille (réactivé 16 juil
+ * 2026 après l'incident « feuille verte avec 2 rouges » : 870 notes corrompues
+ * recalculées en base). L'ancien cap (≥1 rouge → 8,9), aveugle à la position,
+ * avait été neutralisé à raison ; ici on n'applique QUE les bornes que le moteur
+ * pastille ne peut JAMAIS dépasser, quelle que soit la position :
+ *   ≥1 rouge → ≤ 12,9 (caution max) ; ≥2 rouges ou ≥4 oranges → ≤ 8,9 (warning max).
+ * Un produit sain n'est jamais modifié ; seule une note corrompue est rabattue.
+ * Parité mobile : lib/analysis/scoreCap.ts (applyColorCap).
  */
 export function colorCapScore(
   score: number,
-  _counts: Pick<AnalyseResponse["counts"], "orange" | "rouge">,
+  counts: Pick<AnalyseResponse["counts"], "orange" | "rouge">,
 ): number {
-  return score;
+  let cap = Number.POSITIVE_INFINITY;
+  if ((counts.rouge ?? 0) >= 2 || (counts.orange ?? 0) >= 4) cap = 8.9;
+  else if ((counts.rouge ?? 0) >= 1) cap = 12.9;
+  return Math.min(score, cap);
 }
 
 export type EssentielOptions = {

@@ -141,11 +141,16 @@ export function OnboardingWizard({
   for (const c of initial.hairConcerns ?? []) if (HAIR_PROBLEM_CONCERNS.includes(c)) initHairProblems.add(c);
   const [hairProblemConcerns, setHairProblemConcerns] = useState<Set<HairConcern>>(initHairProblems);
   const [otherConcerns, setOtherConcerns] = useState(initial.otherConcerns ?? "");
+  const [otherHairConcerns, setOtherHairConcerns] = useState(initial.otherHairConcerns ?? "");
   // Conservé (sans UI dédiée, comme le mobile) pour ne pas écraser une valeur existante.
   const [allergies] = useState(initial.allergiesFreeform ?? "");
 
   const [goals, setGoals] = useState<Set<ProfileGoal>>(new Set(initial.goals ?? []));
   const [otherGoals, setOtherGoals] = useState(initial.otherGoals ?? "");
+  const [otherGoalsFace, setOtherGoalsFace] = useState(initial.otherGoalsFace ?? "");
+  const [otherGoalsBody, setOtherGoalsBody] = useState(initial.otherGoalsBody ?? "");
+  const [otherGoalsHair, setOtherGoalsHair] = useState(initial.otherGoalsHair ?? "");
+  const [otherGoalsRoutine, setOtherGoalsRoutine] = useState(initial.otherGoalsRoutine ?? "");
 
   const step = STEPS[index];
   const bloc = step.bloc;
@@ -174,10 +179,15 @@ export function OnboardingWizard({
         concerns.forEach((c) => fd.append("concerns", c));
         hairProblemConcerns.forEach((c) => fd.append("hair_problem_concerns", c));
         if (otherConcerns.trim()) fd.set("other_concerns", otherConcerns.trim());
+        if (otherHairConcerns.trim()) fd.set("other_hair_concerns", otherHairConcerns.trim());
         if (allergies.trim()) fd.set("allergies", allergies.trim());
       } else {
         goals.forEach((g) => fd.append("goals", g));
         if (otherGoals.trim()) fd.set("other_goals", otherGoals.trim());
+        if (otherGoalsFace.trim()) fd.set("other_goals_face", otherGoalsFace.trim());
+        if (otherGoalsBody.trim()) fd.set("other_goals_body", otherGoalsBody.trim());
+        if (otherGoalsHair.trim()) fd.set("other_goals_hair", otherGoalsHair.trim());
+        if (otherGoalsRoutine.trim()) fd.set("other_goals_routine", otherGoalsRoutine.trim());
       }
       return fd;
     },
@@ -191,9 +201,14 @@ export function OnboardingWizard({
       concerns,
       hairProblemConcerns,
       otherConcerns,
+      otherHairConcerns,
       allergies,
       goals,
       otherGoals,
+      otherGoalsFace,
+      otherGoalsBody,
+      otherGoalsHair,
+      otherGoalsRoutine,
     ],
   );
 
@@ -396,6 +411,9 @@ export function OnboardingWizard({
             options={HAIR_PROBLEM_CONCERNS.map((k) => ({ value: k as string, label: HAIR_CONCERN_LABEL[k] }))}
             values={hairProblemConcerns as Set<string>}
             onToggle={(k) => toggle(setHairProblemConcerns, hairProblemConcerns, k as HairConcern)}
+            otherPlaceholder="Décris ton souci cheveux"
+            otherValue={otherHairConcerns}
+            onOtherChange={setOtherHairConcerns}
           />
         )}
 
@@ -413,6 +431,9 @@ export function OnboardingWizard({
             options={goalOptions("Visage")}
             values={goals as Set<string>}
             onToggle={(k) => toggle(setGoals, goals, k as ProfileGoal)}
+            otherPlaceholder="Décris ton objectif visage"
+            otherValue={otherGoalsFace}
+            onOtherChange={setOtherGoalsFace}
           />
         )}
         {step.id === "goalsBody" && (
@@ -421,6 +442,9 @@ export function OnboardingWizard({
             options={goalOptions("Corps")}
             values={goals as Set<string>}
             onToggle={(k) => toggle(setGoals, goals, k as ProfileGoal)}
+            otherPlaceholder="Décris ton objectif corps"
+            otherValue={otherGoalsBody}
+            onOtherChange={setOtherGoalsBody}
           />
         )}
         {step.id === "goalsHair" && (
@@ -429,6 +453,9 @@ export function OnboardingWizard({
             options={goalOptions("Cheveux")}
             values={goals as Set<string>}
             onToggle={(k) => toggle(setGoals, goals, k as ProfileGoal)}
+            otherPlaceholder="Décris ton objectif cheveux"
+            otherValue={otherGoalsHair}
+            onOtherChange={setOtherGoalsHair}
           />
         )}
         {step.id === "goalsRoutine" && (
@@ -437,6 +464,9 @@ export function OnboardingWizard({
             options={goalOptions("Routine")}
             values={goals as Set<string>}
             onToggle={(k) => toggle(setGoals, goals, k as ProfileGoal)}
+            otherPlaceholder="Décris ton objectif routine"
+            otherValue={otherGoalsRoutine}
+            onOtherChange={setOtherGoalsRoutine}
           />
         )}
         {step.id === "otherGoal" && (
