@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState, useCallback } from 'react'
-import { createBrowserClient } from '@supabase/ssr'
+import { supabaseBrowser } from '@/lib/supabase'
 import type { Credits, CreditConfig, RenewalPeriod } from './types'
 
 // 60s : le débit de crédit est déjà reflété au moment de l'action ; ce polling
@@ -22,10 +22,10 @@ export function useCredits(): CreditConfig {
 
   const fetchCredits = useCallback(async () => {
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      // Client SINGLETON partagé (voir lib/supabase.ts) : une seule instance
+      // GoTrueClient -> la session authentifiée est présente, l'appel ne part
+      // plus en anon (fini les « permission denied for function get_credits »).
+      const supabase = supabaseBrowser()
 
       const { data, error: rpcError } = await supabase.rpc('cosme_check_get_credits')
 

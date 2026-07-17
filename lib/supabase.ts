@@ -38,9 +38,20 @@ export function supabaseService(): SupabaseClient {
   return _service;
 }
 
-/** Browser client - uses cookies for session, safe to import in client components. */
-export function supabaseBrowser() {
+/**
+ * Browser client - SINGLETON. Une seule instance GoTrueClient par contexte
+ * navigateur : sinon plusieurs clients se disputent le même token de session
+ * (warning « Multiple GoTrueClient instances ») et des appels partent en `anon`
+ * avant l'hydratation de la session -> `permission denied for function ...`
+ * (ex. cosme_check_get_credits, réservée à `authenticated`). Réutilisé partout,
+ * y compris par le hook useCredits. Reste un no-op côté serveur (jamais appelé).
+ */
+function newBrowserClient() {
   return createBrowserClient(url!, anonKey!);
+}
+let _browser: ReturnType<typeof newBrowserClient> | null = null;
+export function supabaseBrowser() {
+  return (_browser ??= newBrowserClient());
 }
 
 /** Server client - reads/writes the auth cookie via the Next 15 cookie API. */
