@@ -414,6 +414,16 @@ export function AnalyseResultPanel({
             initialBlocksKey={personalBlocksKey}
             restrictedCount={restrictedCount}
             onShowRestrictedFamilies={() => setFamiliesModalOpen(true)}
+            // Produit ouvert en vue catalogue (analysisId null) : on fournit de
+            // quoi l'enregistrer pour que « Réessayer » aboutisse à un vrai score.
+            ensurePayload={{
+              result,
+              productLabel,
+              brand,
+              productType,
+              inputText: originalText,
+              ean,
+            }}
           />
         </div>
       </div>

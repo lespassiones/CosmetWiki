@@ -20,6 +20,17 @@ import { useRouter } from "next/navigation";
 import { PersonalBlocksList } from "./PersonalInsightsCards";
 import type { PersonalBlocks } from "./personalInsightsState";
 import type { Compatibility } from "@/lib/ai/personalInsights";
+import type { AnalyseResponse } from "@/lib/analyseTypes";
+
+/** Données pour enregistrer un produit non persisté avant de calculer la compat. */
+export type EnsurePayload = {
+  result: AnalyseResponse;
+  productLabel: string | null;
+  brand: string | null;
+  productType: string | null;
+  inputText: string;
+  ean: string | null;
+};
 
 // Synchro avec PERSONAL_PROMPT_VERSION (lib/ai/personalInsights.ts).
 // v29 : produit hors profil → score = qualité, lignes IA informatives (0 pt).
@@ -168,6 +179,7 @@ export function CompatibilityCard({
   initialBlocksKey,
   restrictedCount = 0,
   onShowRestrictedFamilies,
+  ensurePayload,
 }: {
   analysisId: string | null;
   initialCompatibility?: Compatibility | null;
@@ -176,6 +188,13 @@ export function CompatibilityCard({
   /** Ligne restrictions (déterministe, toujours affichée sous le score). */
   restrictedCount?: number;
   onShowRestrictedFamilies?: () => void;
+  /**
+   * Données du produit à ENREGISTRER si `analysisId` est absent (produit ouvert
+   * en vue catalogue, non persisté). « Réessayer » enregistre d'abord via
+   * /api/analyses/ensure, puis calcule la compat sur l'id obtenu. Sans ce payload
+   * et sans analysisId, la carte reste en erreur (comportement historique).
+   */
+  ensurePayload?: EnsurePayload | null;
 }) {
   const router = useRouter();
   const hasInitial = Boolean(initialCompatibility && initialBlocks);
@@ -187,6 +206,9 @@ export function CompatibilityCard({
   const [modalOpen, setModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const fetchedRef = useRef(false);
+  // Id RÉSOLU : `analysisId` si présent, sinon celui obtenu en enregistrant le
+  // produit (vue catalogue non persistée) via /api/analyses/ensure.
+  const resolvedIdRef = useRef<string | null>(analysisId ?? null);
 
   // Portail : on ne rend le modal qu'après montage client (document dispo).
   useEffect(() => setMounted(true), []);
@@ -194,18 +216,56 @@ export function CompatibilityCard({
   const stale =
     hasInitial && (!initialBlocksKey || !initialBlocksKey.startsWith(`v${PERSONAL_BLOCKS_VERSION}:`));
 
+  /** Garantit un id d'analyse POSSÉDÉ : enregistre le produit si besoin. */
+  async function ensureAnalysisId(): Promise<string | null> {
+    if (resolvedIdRef.current) return resolvedIdRef.current;
+    if (analysisId) {
+      resolvedIdRef.current = analysisId;
+      return analysisId;
+    }
+    if (!ensurePayload) return null;
+    try {
+      const r = await fetch("/api/analyses/ensure", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ensurePayload),
+      });
+      if (!r.ok) return null;
+      const j = (await r.json()) as { analysisId?: string };
+      resolvedIdRef.current = j.analysisId ?? null;
+      return resolvedIdRef.current;
+    } catch {
+      return null;
+    }
+  }
+
   async function run(background = false) {
-    if (!analysisId) {
+    if (!background) setState({ status: "loading" });
+    // 1. Enregistre d'abord si le produit n'est pas encore une analyse à soi.
+    let id = await ensureAnalysisId();
+    if (!id) {
       if (!background) setState({ status: "error" });
       return;
     }
-    if (!background) setState({ status: "loading" });
     try {
-      const r = await fetch("/api/personal-insights", {
+      let r = await fetch("/api/personal-insights", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ analysisId, compat: true }),
+        body: JSON.stringify({ analysisId: id, compat: true }),
       });
+      // 404 = l'id ne pointe plus vers une analyse à soi (cache périmé) : on
+      // ré-enregistre UNE fois puis on retente, pour que « Réessayer » aboutisse.
+      if (r.status === 404 && ensurePayload) {
+        resolvedIdRef.current = null;
+        id = await ensureAnalysisId();
+        if (id) {
+          r = await fetch("/api/personal-insights", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ analysisId: id, compat: true }),
+          });
+        }
+      }
       if (!r.ok) {
         if (background) return;
         setState(r.status === 429 ? { status: "locked" } : { status: "error" });
