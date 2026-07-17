@@ -15,7 +15,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabaseBrowser } from "@/lib/supabase";
 import {
   type CoverageItem,
   type CoverageTone,
@@ -126,17 +125,19 @@ export function GoalsCoverageCard({ goalCount, productCount, goalsSig, initial }
     setErrored(false);
     setNoCredits(false);
     try {
-      const sb = supabaseBrowser();
-      const { data, error } = await sb.functions.invoke("goals-coverage", {
-        body: force ? { force: true } : {},
+      // Proxy Next serveur→edge (pas d'appel navigateur→edge : le preflight CORS
+      // échoue car l'apikey ne peut pas voyager sur un OPTIONS). Cf. app/api/goals-coverage.
+      const res = await fetch("/api/goals-coverage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(force ? { force: true } : {}),
       });
-      if (error) {
-        const status = (error as { context?: Response }).context?.status;
-        if (status === 429) setNoCredits(true);
+      if (!res.ok) {
+        if (res.status === 429) setNoCredits(true);
         else setErrored(true);
         return;
       }
-      const d = (data ?? {}) as InvokeResult;
+      const d = (await res.json()) as InvokeResult;
       if (d.state === "ok") {
         setRow({
           coverage: d.coverage ?? [],
