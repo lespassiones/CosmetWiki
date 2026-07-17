@@ -6,19 +6,31 @@ import Link from "next/link";
 
 export const metadata = { title: "Profil beauté · Cosme Check" };
 
-export default async function BeautyProfilePage() {
+export default async function BeautyProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
   const user = await getUser();
   if (!user) redirect("/auth/sign-in?next=/profile/beauty");
   const profile = await getProfile();
   const skin = readSkinProfile(profile?.preferences ?? null);
 
+  // « next » : on revient AU PRODUIT d'où l'on vient (carte compat) après avoir
+  // enregistré ; sinon retour au profil. Garde anti open-redirect : uniquement
+  // un chemin interne (« /… », pas « // »).
+  const sp = await searchParams;
+  const rawNext = typeof sp?.next === "string" ? sp.next : "";
+  const backHref =
+    rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/profile";
+
   return (
     <div className="mx-auto max-w-2xl px-5 lg:px-8 py-8 lg:py-12">
       <div className="flex items-center gap-3 mb-6">
         <Link
-          href="/profile"
+          href={backHref}
           className="flex h-9 w-9 items-center justify-center rounded-full text-[#6B7280] hover:bg-black/[0.05] transition"
-          aria-label="Retour au profil"
+          aria-label="Retour"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
             <path d="M19 12H5M12 5l-7 7 7 7" />
@@ -36,7 +48,7 @@ export default async function BeautyProfilePage() {
         onCancel={undefined}
         submitLabel="Enregistrer"
         showCancel={false}
-        redirectAfterSave="/profile"
+        redirectAfterSave={backHref}
       />
     </div>
   );

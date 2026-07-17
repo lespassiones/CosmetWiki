@@ -350,11 +350,7 @@ export function CompatibilityCard({
       ) : null}
 
       {state.status === "profileIncomplete" ? (
-        <button
-          type="button"
-          onClick={() => router.push(`/profile/beauty?section=${state.missingSection}`)}
-          className="flex w-full flex-col items-center py-3 text-center"
-        >
+        <div className="flex w-full flex-col items-center py-3 text-center">
           <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-violet-100 text-violet-600">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M19 8v6M22 11h-6" />
@@ -366,10 +362,35 @@ export function CompatibilityCard({
               ? "Renseigne tes cheveux pour voir ta compatibilité avec ce produit."
               : "Renseigne ta peau pour voir ta compatibilité avec ce produit."}
           </p>
-          <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#8B5CF6] px-5 py-2 text-[14px] font-semibold text-white">
-            Compléter maintenant
-          </span>
-        </button>
+          {/* « next » = on revient AU PRODUIT après enregistrement (pas /profile). */}
+          <button
+            type="button"
+            onClick={() =>
+              router.push(
+                `/profile/beauty?section=${state.missingSection}&next=${encodeURIComponent(
+                  typeof window !== "undefined" ? window.location.pathname : "/",
+                )}`,
+              )
+            }
+            className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#8B5CF6] px-5 py-2 text-[14px] font-semibold text-white"
+          >
+            Compléter mon profil
+          </button>
+          {/* Recharger : au retour de l'édition, relance l'analyse. Profil
+              complété → score ; sinon → même blocage. */}
+          <button
+            type="button"
+            onClick={() => run()}
+            className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#8B5CF6]"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden>
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+            </svg>
+            Recharger
+          </button>
+        </div>
       ) : null}
 
       {state.status === "locked" ? (
