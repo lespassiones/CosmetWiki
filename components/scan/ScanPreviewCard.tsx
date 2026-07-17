@@ -10,7 +10,7 @@
  * 100% instantané : toutes les données viennent d'une seule lecture catalogue
  * renvoyée par /api/product-by-barcode (champ `preview`).
  */
-import { VerdictGauge } from "@/components/analyse/VerdictGauge";
+import { QualityStarsRow } from "@/components/analyse/QualityStars";
 import { verdictToneFromScore, type VerdictTone } from "@/lib/essentiel/engine";
 import type { ScanPreview } from "@/lib/productSearch/types";
 
@@ -109,10 +109,14 @@ export function ScanPreviewCard({
         </button>
       </div>
 
-      {/* Pastilles (haut d'analyse) */}
-      <div className="mt-3">
-        <VerdictGauge tone={tone} />
-      </div>
+      {/* Étoiles « Qualité de la formule » (remplace les pastilles), pleine largeur. */}
+      <QualityStarsRow
+        tone={tone}
+        idPrefix="scanstar"
+        className="mt-3 flex items-center justify-between"
+        starClassName="h-12 w-12"
+        ariaLabel="Qualité de la formule (aperçu)"
+      />
 
       <div className="mt-3 flex items-center gap-2">
         <button
