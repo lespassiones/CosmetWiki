@@ -111,8 +111,17 @@ export async function POST(req: NextRequest) {
   // `||` (pas `??`) : une chaîne VIDE doit retomber sur le champ suivant.
   const category = row.product_type || resultJson.catalogCategory || (row.category as string | null) || null;
 
+  const wantCompat = body.compat === true;
+
   // Court-circuit GRATUIT : déjà généré pour ce profil ET version courante.
-  if (resultJson.personalBlocks && resultJson.personalBlocksKey === sig) {
+  // SELF-HEAL (18 juil 2026) : blocs présents mais compatibility ABSENTE (bug
+  // historique : l'upsert dédup au re-scan préservait les blocs mais effaçait la
+  // compat → carte sans score, pour toujours) → on ne court-circuite PAS : la
+  // régénération (GRATUITE, alreadyHasBlocks ⇒ aucun débit) re-persiste tout.
+  if (
+    resultJson.personalBlocks && resultJson.personalBlocksKey === sig &&
+    (!wantCompat || resultJson.compatibility)
+  ) {
     return NextResponse.json({
       blocks: resultJson.personalBlocks,
       compatibility: resultJson.compatibility ?? null,
@@ -122,7 +131,6 @@ export async function POST(req: NextRequest) {
   // Pré-check pertinence AVANT tout crédit / IA — activé seulement si le client
   // le demande (compat:true) → rétro-compatibilité. Produit lié à un axe du
   // profil non renseigné → on renvoie compléter la section, sans débit.
-  const wantCompat = body.compat === true;
   const verdict = relevanceVerdict(category, skin);
   if (wantCompat && verdict.kind === "profile_incomplete") {
     return NextResponse.json({ profileIncomplete: true, missingSection: verdict.missingSection });
