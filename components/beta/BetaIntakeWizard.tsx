@@ -253,37 +253,13 @@ export function BetaIntakeWizard({ source }: { source?: string }) {
             bêta testeur.
           </h1>
           <p className="mt-5 max-w-[27rem] text-[16px] leading-relaxed text-[#6B7280]">
-            <strong className="font-semibold text-[#111111]">Cosme Check</strong>, c&apos;est le scan
-            qui te dit si un produit cosmétique est vraiment{" "}
-            <strong className="font-semibold text-[#F43F5E]">fait pour toi</strong>. On décode chaque
-            formule à ta place&nbsp;:
+            Arrête de choisir tes cosmétiques au hasard. En un scan,{" "}
+            <strong className="font-semibold text-[#111111]">Cosme Check</strong> te dit si un
+            produit est vraiment{" "}
+            <strong className="font-semibold text-[#F43F5E]">fait pour toi</strong>&nbsp;: bon pour
+            ta peau, honnête sur ce qu&apos;il promet, et à la hauteur de tes envies. Tu achètes
+            enfin en confiance.
           </p>
-          <ul className="mt-4 max-w-[27rem] space-y-2.5">
-            {[
-              "On analyse chaque ingrédient (INCI) et on note la formule.",
-              "On vérifie les promesses marketing affichées sur le produit.",
-              "On calcule sa compatibilité avec ton profil beauté.",
-            ].map((line) => (
-              <li
-                key={line}
-                className="flex items-start gap-2.5 text-[15px] leading-snug text-[#374151]"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#F43F5E"
-                  strokeWidth={2.5}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="mt-0.5 h-4 w-4 shrink-0"
-                  aria-hidden
-                >
-                  <path d="m5 13 4 4L19 7" />
-                </svg>
-                {line}
-              </li>
-            ))}
-          </ul>
           <p className="mt-5 max-w-[27rem] text-[16px] leading-relaxed text-[#6B7280]">
             Teste l&apos;app en avant-première et aide-nous à la rendre meilleure. En échange de tes
             réponses, tu reçois <strong className="font-semibold text-[#111111]">50 crédits offerts</strong> pour

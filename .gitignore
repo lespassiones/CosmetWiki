@@ -54,4 +54,7 @@ supabase/.temp/
 # Originaux des captures bêta (non optimisés) : optimisés dans public/beta-captures/
 public/Beta/
 
+# QR codes générés localement (lien /beta, régénérables)
+qr-codes/
+
 .env*
