@@ -107,12 +107,28 @@ function isAkamaiBlock(server: string, body: string): boolean {
 
 async function fetchHtmlWithDiagnostics(url: string, timeoutMs = 10_000): Promise<FetchOutcome> {
   let r: Response;
+  let target = url;
   try {
-    r = await fetch(url, {
-      headers: BROWSER_HEADERS,
-      signal: AbortSignal.timeout(timeoutMs),
-      redirect: "follow",
-    });
+    // SSRF : redirections suivies manuellement et revalidées à chaque saut, pour
+    // qu'un 302 vers une IP interne (169.254.169.254, 127.x, IP privée…) soit
+    // refusé. Sans ça, seule l'URL initiale était validée.
+    for (let hop = 0; ; hop++) {
+      if (hop > 4) return { kind: "fetch_failed", reason: "too_many_redirects" };
+      const v = validateUserUrl(target);
+      if (!v.ok) return { kind: "fetch_failed", reason: "blocked_url" };
+      r = await fetch(v.url.toString(), {
+        headers: BROWSER_HEADERS,
+        signal: AbortSignal.timeout(timeoutMs),
+        redirect: "manual",
+      });
+      if (r.status >= 300 && r.status < 400) {
+        const loc = r.headers.get("location");
+        if (!loc) return { kind: "fetch_failed", reason: "redirect_no_location" };
+        target = new URL(loc, v.url).toString();
+        continue;
+      }
+      break;
+    }
   } catch (e) {
     return { kind: "fetch_failed", reason: e instanceof Error ? e.message : String(e) };
   }

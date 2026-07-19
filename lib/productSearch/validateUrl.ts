@@ -102,6 +102,17 @@ export function validateUserUrl(input: string): UrlValidationResult {
       return { ok: false, reason: "Adresse IP privée refusée." };
     }
   } else if (/^[\d.]+$/.test(host)) {
+    // N'accepter QUE la forme décimale-pointée a.b.c.d. Les formes entière
+    // (2130706433 = 127.0.0.1), octale (0177.0.0.1) ou à octets hors 0-255
+    // contournent les préfixes ci-dessous tout en résolvant vers des IP
+    // internes une fois passées à fetch().
+    const octets = host.split(".");
+    const validDotted =
+      octets.length === 4 &&
+      octets.every((o) => /^\d{1,3}$/.test(o) && !/^0\d/.test(o) && Number(o) <= 255);
+    if (!validDotted) {
+      return { ok: false, reason: "Adresse IP refusée." };
+    }
     if (BLOCKED_IPV4_PREFIXES.some((p) => host.startsWith(p))) {
       return { ok: false, reason: "Adresse IP privée refusée." };
     }

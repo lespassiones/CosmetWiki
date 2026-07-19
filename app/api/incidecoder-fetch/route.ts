@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchInciDecoderProduct } from "@/lib/productSearch/inciDecoder";
-import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { checkRateLimitShared, getClientIp } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,11 +13,11 @@ export const dynamic = "force-dynamic";
  */
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req.headers);
-  const rl = checkRateLimit(ip, 20, 60_000);
+  const rl = await checkRateLimitShared(`incidecoder:${ip}`, 20, 60);
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Trop de requêtes." },
-      { status: 429, headers: { "Retry-After": Math.ceil(rl.retryAfter / 1000).toString() } },
+      { status: 429, headers: { "Retry-After": Math.ceil(rl.retryAfterMs / 1000).toString() } },
     );
   }
 

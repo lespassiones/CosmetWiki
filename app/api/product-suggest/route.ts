@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { supabaseAnon, supabaseServer } from "@/lib/supabase";
-import { blacklistIp, checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { blacklistIp, checkRateLimitShared, getClientIp } from "@/lib/ratelimit";
 import { normalizeProductQuery } from "@/lib/ai/productNormalize";
 import type { OpenBeautyFactsCandidate } from "@/lib/productSearch/openBeautyFacts";
 
@@ -29,11 +29,11 @@ function dedupeKey(brand: string | null, name: string | null): string {
 
 export async function GET(req: NextRequest) {
   const ip = getClientIp(req.headers);
-  const rl = checkRateLimit(ip, 30, 60_000);
+  const rl = await checkRateLimitShared(`suggest:${ip}`, 30, 60);
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Trop de recherches récentes. Patiente une minute." },
-      { status: 429, headers: { "Retry-After": Math.ceil(rl.retryAfter / 1000).toString() } },
+      { status: 429, headers: { "Retry-After": Math.ceil(rl.retryAfterMs / 1000).toString() } },
     );
   }
 
@@ -92,7 +92,11 @@ async function fetchCachedCandidates(
   try {
     const cookieStore = await cookies();
     const sb = supabaseServer(cookieStore);
-    const like = `%${query.replace(/[%_]/g, "")}%`;
+    // Neutralise les métacaractères de la grammaire PostgREST .or()
+    // (% _ , . ( ) : *) pour éviter une injection de filtre (ex: query=x,brand.not.is.null).
+    const term = query.replace(/[%_,().:*]/g, "").trim();
+    if (term.length < 2) return [];
+    const like = `%${term}%`;
     const { data, error } = await sb
       .schema("cosme_check")
       .from("product_inci_cache")

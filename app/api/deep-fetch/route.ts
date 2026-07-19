@@ -18,20 +18,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchPageHtml } from "@/lib/productSearch/httpFetch";
 import { extractInciFromHtml } from "@/lib/productSearch/extractWithMistral";
-import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { checkRateLimitShared, getClientIp } from "@/lib/ratelimit";
+import { validateUserUrl } from "@/lib/productSearch/validateUrl";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-/** Sanity check only: must be a real http(s) URL. */
-function isWebUrl(url: string): boolean {
-  try {
-    const proto = new URL(url).protocol;
-    return proto === "https:" || proto === "http:";
-  } catch {
-    return false;
-  }
-}
 
 type Body = {
   url?: string;
@@ -45,13 +36,13 @@ export async function POST(req: NextRequest) {
   // 20 / min : un utilisateur qui clique plusieurs candidats successifs
   // (le scénario "le 1er ne marche pas, j'essaie le 2e") dépassait 6.
   // Chaque extraction = 1 fetch HTTP + 1 call GPT-4o-mini (~$0.001).
-  const rl = checkRateLimit(ip, 20, 60_000);
+  const rl = await checkRateLimitShared(`deepfetch:${ip}`, 20, 60);
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Trop de récupérations récentes. Patiente une minute." },
       {
         status: 429,
-        headers: { "Retry-After": Math.ceil(rl.retryAfter / 1000).toString() },
+        headers: { "Retry-After": Math.ceil(rl.retryAfterMs / 1000).toString() },
       },
     );
   }
@@ -63,13 +54,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Requête invalide." }, { status: 400 });
   }
 
-  const url = (body.url ?? "").trim();
-  if (!url || !isWebUrl(url)) {
-    return NextResponse.json(
-      { error: "URL invalide." },
-      { status: 400 },
-    );
+  // SSRF : valider l'URL (schéma http(s), pas d'IP privée/métadonnées/localhost)
+  // AVANT tout fetch. fetchPageHtml revalide aussi chaque redirection.
+  const v = validateUserUrl((body.url ?? "").trim());
+  if (!v.ok) {
+    return NextResponse.json({ error: v.reason }, { status: 400 });
   }
+  const url = v.url.toString();
 
   const html = await fetchPageHtml(url);
   if (!html) {

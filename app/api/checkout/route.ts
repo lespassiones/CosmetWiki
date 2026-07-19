@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { supabaseServer } from "@/lib/supabase";
+import { supabaseServer, supabaseService } from "@/lib/supabase";
 import { stripe, STRIPE_PRICES } from "@/lib/stripe";
 
 export async function POST(req: NextRequest) {
@@ -35,8 +35,11 @@ export async function POST(req: NextRequest) {
     });
     customerId = customer.id;
 
-    // Persist immediately so concurrent requests don't create duplicates
-    await sb
+    // Persist immediately so concurrent requests don't create duplicates.
+    // Écrit via le service role : la colonne stripe_customer_id n'est plus
+    // accessible en écriture au rôle authenticated (durcissement anti
+    // self-upgrade premium, cf. migration harden_user_profiles_writes).
+    await supabaseService()
       .schema("cosme_check")
       .from("user_profiles")
       .update({ stripe_customer_id: customerId })

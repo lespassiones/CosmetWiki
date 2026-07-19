@@ -18,6 +18,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { supabaseServer, supabaseService } from "./supabase";
+import { getTrustedIp } from "./clientIp";
 
 export type GateOptions = {
   /** Identifier for credits/logs - e.g. "promesse.identify". */
@@ -50,9 +51,9 @@ export type GateErr = {
 };
 
 function getClientIp(headers: Headers): string {
-  const xff = headers.get("x-forwarded-for");
-  if (xff) return xff.split(",")[0]!.trim();
-  return headers.get("x-real-ip") ?? "0.0.0.0";
+  // x-forwarded-for (leftmost) est spoofable sur Vercel → contournement total
+  // du rate-limit par rotation d'IP. On n'utilise que les en-têtes fiables.
+  return getTrustedIp(headers);
 }
 
 export async function apiGate(

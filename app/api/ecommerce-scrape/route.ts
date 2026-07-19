@@ -15,7 +15,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { scrapeEcommerceUrl, type EcommerceScrapeResult } from "@/lib/productSearch/scrapeEcommerceUrl";
-import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { checkRateLimitShared, getClientIp } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,13 +27,13 @@ export async function POST(req: NextRequest) {
   // 20/min — same as /api/deep-fetch. A user pasting a URL twice (preview
   // then confirm) only costs one fresh call thanks to the cache, so this
   // budget covers ~20 distinct products per minute, well above normal use.
-  const rl = checkRateLimit(ip, 20, 60_000);
+  const rl = await checkRateLimitShared(`scrape:${ip}`, 20, 60);
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Trop de récupérations récentes. Patiente une minute." },
       {
         status: 429,
-        headers: { "Retry-After": Math.ceil(rl.retryAfter / 1000).toString() },
+        headers: { "Retry-After": Math.ceil(rl.retryAfterMs / 1000).toString() },
       },
     );
   }

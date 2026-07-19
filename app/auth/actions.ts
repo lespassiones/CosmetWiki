@@ -245,6 +245,16 @@ export async function updatePassword(formData: FormData): Promise<AuthResult> {
   const { error } = await sb.auth.updateUser({ password });
   if (error) return { ok: false, error: error.message };
 
+  // Sécurité : un mot de passe est souvent réinitialisé PARCE QUE le compte est
+  // soupçonné compromis. On révoque toutes les AUTRES sessions/refresh-tokens
+  // pour qu'un token volé ne survive pas au reset (scope "others" conserve la
+  // session de recovery courante). Best-effort : un échec ne bloque pas le reset.
+  try {
+    await sb.auth.signOut({ scope: "others" });
+  } catch {
+    // ignore : le mot de passe est déjà changé, la révocation est un bonus
+  }
+
   return { ok: true };
 }
 
