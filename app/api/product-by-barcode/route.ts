@@ -150,7 +150,17 @@ export async function POST(req: NextRequest) {
   }
 
   // ─── 1. Notre catalogue par EAN — source unique de vérité. ──────────────
-  const local = await getCatalogByEan(barcode);
+  // ÉCHEC de requête (≠ produit inconnu) → 503 honnête : le client affiche
+  // « erreur / réessayer », JAMAIS le faux « pas dans notre base » (bug
+  // intermittent corrigé le 18 juil 2026, parité avec l'edge function mobile).
+  const lookup = await getCatalogByEan(barcode);
+  if (!lookup.ok) {
+    return NextResponse.json(
+      { error: "Recherche momentanément indisponible. Réessaie dans un instant." },
+      { status: 503 },
+    );
+  }
+  const local = lookup.row;
   if (local) {
     if (hasUsableInci(local.ingredients_text)) {
       return NextResponse.json({
