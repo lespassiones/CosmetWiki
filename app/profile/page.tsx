@@ -49,6 +49,18 @@ export default async function ProfilePage() {
         hasStripeCustomer={Boolean(extProfile?.stripe_customer_id)}
       />
 
+      {/* Crédits & fonctionnalités — détail du coût de chaque fonctionnalité */}
+      <Link href="/profile/credits" className={`${GLASS_CARD} p-5 flex items-center justify-between gap-4 hover:brightness-[0.97] transition block`}>
+        <div className="flex items-center gap-3">
+          <TagIcon className="h-6 w-6 text-rose-500 shrink-0" />
+          <div>
+            <p className="text-[15px] font-semibold text-ink leading-tight">Crédits &amp; fonctionnalités</p>
+            <p className="text-[12px] text-[#6B7280] mt-0.5">Ce que coûte chaque fonctionnalité</p>
+          </div>
+        </div>
+        <ChevronRightIcon className="h-4 w-4 text-[#9CA3AF] shrink-0" />
+      </Link>
+
       {/* Profil beauté — compact, lien vers /profile/beauty */}
       <Link href="/profile/beauty" className={`${GLASS_CARD} p-5 flex items-center justify-between gap-4 hover:brightness-[0.97] transition block`}>
         <div className="flex items-center gap-3">
@@ -161,6 +173,9 @@ function PencilIcon({ className }: { className?: string }) {
 }
 function ChevronRightIcon({ className }: { className?: string }) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden><path d="M9 18l6-6-6-6" /></svg>;
+}
+function TagIcon({ className }: { className?: string }) {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" /></svg>;
 }
 function DocIcon() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="8" y1="13" x2="16" y2="13" /><line x1="8" y1="17" x2="13" y2="17" /></svg>;

@@ -2113,7 +2113,7 @@ function FormulaQualityCard({
   return (
     <div className="card-white p-4">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-[15px] font-semibold text-ink">Qualité de la formule</h3>
+        <h3 className="text-[15px] font-semibold text-ink">Qualité de la composition</h3>
         <button
           type="button"
           onClick={onShare}
@@ -2124,9 +2124,6 @@ function FormulaQualityCard({
           <span>Partager</span>
         </button>
       </div>
-      <p className="mt-0.5 text-[13px] text-ink-subtle">
-        Évaluation générale de la formule
-      </p>
       <QualityStarsRow tone={tone} className="mt-3 flex items-center justify-between" />
     </div>
   );

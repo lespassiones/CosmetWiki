@@ -22,8 +22,6 @@ import {
   GOALS_COVERAGE_VERSION,
 } from "@/lib/routine/goalsCoverage";
 
-const EVAL_COST = 3;
-
 const SHORT_GOAL_LABEL: Record<string, string> = {
   peau_douce: "Peau douce",
   teint_uniforme: "Teint uniforme",
@@ -288,13 +286,10 @@ export function GoalsCoverageCard({ goalCount, productCount, goalsSig, initial }
         <button
           type="button"
           onClick={() => evaluate(false)}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-[#F43F5E] px-4 py-3 text-[13.5px] font-semibold text-white transition hover:bg-[#E11D48]"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-[#16A34A] px-4 py-3 text-[12px] font-semibold text-white transition hover:bg-[#15803D]"
         >
-          <SparkIcon className="h-4 w-4" />
+          <SparkIcon className="h-4 w-4 shrink-0" />
           Évaluer la couverture de mes objectifs
-          <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10.5px] font-semibold">
-            {EVAL_COST} crédits
-          </span>
         </button>
       </div>
     );
@@ -303,21 +298,35 @@ export function GoalsCoverageCard({ goalCount, productCount, goalsSig, initial }
 
 function GaugeRow({ item }: { item: CoverageItem }) {
   const color = TONE_HEX[item.tone] ?? TONE_HEX.rouge;
+  const [open, setOpen] = useState(false);
+  // Empilé : nom de l'objectif au-dessus (pleine largeur, jamais tronqué), barre
+  // de niveau + % EN DESSOUS. Tap → révèle le libellé complet.
   return (
-    <div className="flex items-center gap-2.5">
-      <span className="w-[108px] shrink-0 truncate text-[12.5px] font-medium text-[#1F2937]">
-        {shortLabel(item)}
+    <button
+      type="button"
+      onClick={() => setOpen((v) => !v)}
+      className="flex w-full flex-col gap-1.5 text-left"
+      aria-label={`${item.label} : ${item.percent}%`}
+    >
+      <span
+        className={`text-[13.5px] font-semibold leading-snug text-[#1F2937] ${
+          open ? "" : "truncate"
+        }`}
+      >
+        {open ? item.label : shortLabel(item)}
       </span>
-      <span className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-gray-200">
-        <span
-          className="absolute inset-y-0 left-0 rounded-full"
-          style={{ width: `${Math.max(2, item.percent)}%`, backgroundColor: color }}
-        />
+      <span className="flex items-center gap-2.5">
+        <span className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-gray-200">
+          <span
+            className="absolute inset-y-0 left-0 rounded-full"
+            style={{ width: `${Math.max(2, item.percent)}%`, backgroundColor: color }}
+          />
+        </span>
+        <span className="w-10 shrink-0 text-right text-[12.5px] font-semibold" style={{ color }}>
+          {item.percent}%
+        </span>
       </span>
-      <span className="w-10 shrink-0 text-right text-[12.5px] font-semibold" style={{ color }}>
-        {item.percent}%
-      </span>
-    </div>
+    </button>
   );
 }
 
