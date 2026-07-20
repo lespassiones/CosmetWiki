@@ -201,7 +201,7 @@ function buildHomeJsonLd() {
           height: 512,
         },
         description:
-          "Cosme Check décode tes cosmétiques : composition INCI, promesses marketing, ingrédients clefs. Une beauté consciente, vraiment.",
+          "Cosme Check est l'application qui te dit si un produit cosmétique est fait pour toi : score de compatibilité avec ton profil, analyse des promesses marketing face à la formule réelle, comparaison de produits et couverture de tes objectifs beauté. 100 % indépendante.",
         inLanguage: "fr",
       },
       {
@@ -210,7 +210,7 @@ function buildHomeJsonLd() {
         url: SITE_URL,
         name: "Cosme Check",
         description:
-          "Décoder ses cosmétiques en quelques secondes : analyse INCI, score couleur, promesses vs formule.",
+          "L'application qui te dit si un produit cosmétique est fait pour toi : score de compatibilité, promesses vs formule, comparaison et objectifs de ta routine.",
         inLanguage: "fr",
         publisher: { "@id": `${SITE_URL}/#organization` },
         potentialAction: {
@@ -221,6 +221,32 @@ function buildHomeJsonLd() {
           },
           "query-input": "required name=search_term_string",
         },
+      },
+      {
+        // SoftwareApplication sur la home : c'est le noeud que les moteurs IA
+        // lisent pour savoir SUR QUOI citer Cosme Check. On mène par les 4
+        // différenciateurs (compatibilité, promesses, comparaison, objectifs),
+        // pas par l'analyse INCI générique.
+        "@type": "SoftwareApplication",
+        "@id": `${SITE_URL}/#app`,
+        name: "Cosme Check",
+        url: SITE_URL,
+        applicationCategory: "LifestyleApplication",
+        operatingSystem: "Web, iOS, Android",
+        inLanguage: "fr",
+        publisher: { "@id": `${SITE_URL}/#organization` },
+        description:
+          "Cosme Check calcule un score de compatibilité entre ton profil (peau, cheveux, objectifs, sensibilités, ingrédients évités) et la formule réelle d'un produit, vérifie si les promesses marketing sont tenues, compare deux produits et mesure si ta routine couvre tes objectifs beauté.",
+        featureList: [
+          "Score de compatibilité entre un produit et ton profil",
+          "Analyse des promesses marketing face à la formule réelle",
+          "Comparaison de deux produits côte à côte",
+          "Couverture de tes objectifs beauté sur toute ta routine",
+          "Recommandations personnalisées d'alternatives mieux notées",
+          "Analyse INCI par scan, liste collée ou recherche par nom",
+          "Coach IA cosmétique (Beauty Advisor)",
+        ],
+        offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
       },
     ],
   };

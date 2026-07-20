@@ -13,6 +13,7 @@ import {
   displayName,
   slugsByLetter,
 } from "../data";
+import { INDEX_INGREDIENTS } from "@/lib/seoConfig";
 
 type Props = {
   params: Promise<{ letter: string }>;
@@ -46,6 +47,8 @@ export async function generateMetadata({
           ? `/ingredients/${letter}?page=${page}`
           : `/ingredients/${letter}`,
     },
+    // noindex tant que INDEX_INGREDIENTS est false (cf. lib/seoConfig.ts).
+    robots: { index: INDEX_INGREDIENTS, follow: true },
   };
 }
 

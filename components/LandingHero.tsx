@@ -56,26 +56,7 @@ export function LandingHero() {
         {/* Contenu mobile vertical, style OnSkin :
             titre → image (halo) → description → KPIs → badges → CTA */}
         <div className="relative z-10 flex flex-col items-center gap-6 px-5 pb-10 pt-28 text-center lg:hidden">
-          <h1 className="reveal-on-mount font-bold leading-[1.05] tracking-tight text-ink text-[34px] sm:text-[40px]">
-            <span className="text-[#111111]">Le scan qui te dit si ce produit est vraiment </span>
-            <span className="relative inline-block whitespace-nowrap">
-              <span className="text-[#F43F5E]">fait pour toi</span>
-              <svg
-                aria-hidden
-                viewBox="0 0 200 14"
-                preserveAspectRatio="none"
-                className="pointer-events-none absolute left-0 right-0 -bottom-1.5 h-2 text-rose-500"
-              >
-                <path
-                  d="M3,10 Q60,1 100,5 T197,10"
-                  stroke="currentColor"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-              </svg>
-            </span>
-          </h1>
+          <HeroHeadline className="reveal-on-mount text-ink text-[34px] sm:text-[40px]" />
 
           {/* Image avec halo radial + dégradé concave en bas */}
           <div className="relative mx-auto w-full max-w-[340px] reveal-on-mount reveal-delay-100">
@@ -112,8 +93,11 @@ export function LandingHero() {
           </div>
 
           <p className="reveal-on-mount reveal-delay-160 max-w-[32rem] text-[15px] leading-relaxed text-ink-muted">
-            On analyse chaque produit pour te dire s'il est vraiment adapté à
-            toi, et on vérifie ses promesses pour valider son efficacité.
+            Avis, promesses, packaging... et pourtant le doute reste. Cosme
+            Check analyse chaque produit{" "}
+            <SquiggleWord>selon ton profil</SquiggleWord> et vérifie ses
+            promesses sur des faits scientifiques, sans aucune influence
+            commerciale.
           </p>
 
           <div className="reveal-on-mount reveal-delay-220">
@@ -142,41 +126,97 @@ export function LandingHero() {
 }
 
 /**
- * Headline block - H1 with squiggle underline on "fait pour toi", subtitle, CTA.
+ * Highlight rose incliné (DA façon CinetPay) : un bloc arrondi, dégradé rose,
+ * texte blanc, légèrement tourné, posé derrière son contenu. Réutilisé pour
+ * l'accroche du titre (grand) et pour « selon ton profil » dans le sous-titre
+ * (petit). `textClassName` gère padding/taille ; `blockClassName` gère
+ * arrondi/ombre du bloc.
+ */
+function HighlightBlock({
+  children,
+  textClassName,
+  blockClassName = "rounded-2xl shadow-[0_14px_30px_-12px_rgba(225,29,72,0.55)]",
+}: {
+  children: string;
+  textClassName: string;
+  blockClassName?: string;
+}) {
+  return (
+    <span className="relative inline-block">
+      <span
+        aria-hidden
+        className={`absolute inset-0 -rotate-2 bg-gradient-to-br from-[#F43F5E] to-[#E11D48] ${blockClassName}`}
+      />
+      <span className={`relative inline-block whitespace-nowrap ${textClassName}`}>
+        {children}
+      </span>
+    </span>
+  );
+}
+
+/**
+ * Mot souligné d'un trait ondulé « fantaisiste » (SVG rose). Utilisé pour
+ * accentuer « selon ton profil » dans le sous-titre, sans l'alourdir d'un
+ * bloc plein.
+ */
+function SquiggleWord({ children }: { children: string }) {
+  return (
+    <span className="relative inline-block whitespace-nowrap font-semibold text-[#F43F5E]">
+      {children}
+      <svg
+        aria-hidden
+        viewBox="0 0 200 14"
+        preserveAspectRatio="none"
+        className="pointer-events-none absolute -bottom-1 left-0 right-0 h-1.5 text-[#F43F5E]"
+      >
+        <path
+          d="M3,10 Q60,1 100,5 T197,10"
+          stroke="currentColor"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+      </svg>
+    </span>
+  );
+}
+
+/**
+ * Titre héro partagé (desktop + mobile) : l'accroche « Arrête de douter »
+ * pose le PROBLÈME (le doute) sur un bloc rose incliné (DA façon highlight,
+ * remplace l'ancien soulignement ondulé). La promesse suit en dessous.
+ * `className` porte la taille de police et hérite de l'alignement du
+ * conteneur (gauche desktop, centré mobile).
+ */
+function HeroHeadline({ className = "" }: { className?: string }) {
+  return (
+    <h1 className={`font-bold leading-[1.12] tracking-tight ${className}`}>
+      <HighlightBlock textClassName="px-3 py-1 text-white">
+        Arrête de douter
+      </HighlightBlock>
+      <span className="mt-3 block text-[#111111]">
+        découvre si un produit est vraiment{" "}
+        <span className="whitespace-nowrap text-[#F43F5E]">fait pour toi</span>.
+      </span>
+    </h1>
+  );
+}
+
+/**
+ * Headline block - titre héro + sous-titre (problème → solution → indépendance) + CTA.
  * `mobile` prop centers everything and tightens the type sizes.
  */
 function Headline({ mobile = false }: { mobile?: boolean }) {
   const align = mobile ? "text-center" : "text-left";
   return (
     <div className={align}>
-      <h1
-        className={`font-bold leading-[1.05] tracking-tight text-ink ${
+      <HeroHeadline
+        className={`text-ink ${
           mobile
             ? "text-[28px] sm:text-[32px]"
             : "text-[clamp(30px,3.2vw,46px)]"
         }`}
-      >
-        <span className="text-[#111111]">Le scan qui te dit si ce produit est vraiment </span>
-        <span className="relative inline-block whitespace-nowrap">
-          <span className="text-[#F43F5E]">fait pour toi</span>
-          <svg
-            aria-hidden
-            viewBox="0 0 200 14"
-            preserveAspectRatio="none"
-            className={`pointer-events-none absolute left-0 right-0 text-rose-500 ${
-              mobile ? "-bottom-1.5 h-2" : "-bottom-2 h-2.5 lg:h-3"
-            }`}
-          >
-            <path
-              d="M3,10 Q60,1 100,5 T197,10"
-              stroke="currentColor"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              fill="none"
-            />
-          </svg>
-        </span>
-      </h1>
+      />
 
       <p
         className={`text-ink-muted leading-relaxed ${
@@ -185,8 +225,10 @@ function Headline({ mobile = false }: { mobile?: boolean }) {
             : "mt-6 text-[clamp(15px,1.25vw,19px)] max-w-[30rem]"
         }`}
       >
-        On analyse chaque produit pour te dire s'il est vraiment adapté à toi,
-        et on vérifie ses promesses pour valider son efficacité.
+        Avis, promesses, packaging... et pourtant le doute reste. Cosme Check
+        analyse chaque produit{" "}
+        <SquiggleWord>selon ton profil</SquiggleWord> et vérifie ses promesses
+        sur des faits scientifiques, sans aucune influence commerciale.
       </p>
 
       <Link

@@ -12,6 +12,7 @@ import { Reveal } from "@/components/Reveal";
 import { ExplainIngredient } from "@/components/ingredient/ExplainIngredient";
 import { BackToAnalyseButton } from "@/components/ingredient/BackToAnalyseButton";
 import { SITE_URL } from "@/lib/siteUrl";
+import { INDEX_INGREDIENTS } from "@/lib/seoConfig";
 import {
   supabaseAnon,
   type ColorRating,
@@ -153,7 +154,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${name} : danger, utilité et note (INCI)`,
     description,
     alternates: { canonical: path },
-    robots: { index: true, follow: true },
+    // Positionnement compatibilité, pas annuaire INCI : les fiches ingrédient
+    // sont noindex tant que INDEX_INGREDIENTS est false (cf. lib/seoConfig.ts).
+    // follow:true pour que le maillage interne reste suivi.
+    robots: { index: INDEX_INGREDIENTS, follow: true },
     openGraph: {
       title: `${name} · Cosme Check`,
       description,

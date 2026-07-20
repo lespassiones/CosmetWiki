@@ -12,6 +12,7 @@
 import { unstable_cache } from "next/cache";
 import { supabaseAnon } from "@/lib/supabase";
 import { SITE_URL } from "@/lib/siteUrl";
+import { INDEX_INGREDIENTS } from "@/lib/seoConfig";
 import { ARTICLES } from "@/app/blog/articles";
 
 /** Taille max d'un sitemap ingrédients. La spec autorise 50 000 URLs ;
@@ -67,7 +68,11 @@ export function staticRoutes(): StaticRoute[] {
     { path: "/", priority: 1.0, changeFrequency: "daily" },
     { path: "/fonctionnalites", priority: 0.9, changeFrequency: "monthly" },
     { path: "/comment-ca-marche", priority: 0.9, changeFrequency: "monthly" },
-    { path: "/ingredients", priority: 0.9, changeFrequency: "weekly" },
+    // Le hub /ingredients n'est listé que si on choisit d'indexer les
+    // ingrédients (cf. lib/seoConfig.ts). Positionnement = compatibilité.
+    ...(INDEX_INGREDIENTS
+      ? ([{ path: "/ingredients", priority: 0.9, changeFrequency: "weekly" }] as StaticRoute[])
+      : []),
     { path: "/produits", priority: 0.8, changeFrequency: "weekly" },
     { path: "/faq", priority: 0.8, changeFrequency: "monthly" },
     { path: "/blog", priority: 0.8, changeFrequency: "weekly" },

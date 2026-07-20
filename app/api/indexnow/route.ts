@@ -22,6 +22,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { submitToIndexNow } from "@/lib/indexnow";
 import { ingredientPageUrls, staticPageUrls } from "@/lib/sitemapData";
+import { INDEX_INGREDIENTS } from "@/lib/seoConfig";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -57,6 +58,9 @@ async function loadAllSitemapUrls(): Promise<string[]> {
   // Même source de vérité que les sitemaps (lib/sitemapData.ts). Si la RPC
   // des slugs échoue, on soumet au moins les pages statiques.
   const staticUrls = staticPageUrls();
+  // Les fiches ingrédient ne sont soumises à IndexNow que si on les indexe
+  // (cf. lib/seoConfig.ts). Positionnement = compatibilité, pas annuaire INCI.
+  if (!INDEX_INGREDIENTS) return staticUrls;
   try {
     const ingredientUrls = await ingredientPageUrls();
     return [...staticUrls, ...ingredientUrls];

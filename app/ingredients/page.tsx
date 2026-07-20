@@ -6,12 +6,16 @@ import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { SearchTrigger } from "@/components/SearchTrigger";
 import { MobileMenu } from "@/components/MobileMenu";
 import { LETTERS, OTHER_KEY, slugsByLetter } from "./data";
+import { INDEX_INGREDIENTS } from "@/lib/seoConfig";
 
 export const metadata: Metadata = {
   title: "Ingrédients cosmétiques INCI de A à Z : danger, note et utilité",
   description:
     "Index des 15 700+ ingrédients cosmétiques (INCI) analysés par Cosme Check : niveau de tolérance (vert, jaune, orange, rouge), fonctions, réglementation européenne. Cherchez un ingrédient par lettre.",
   alternates: { canonical: "/ingredients" },
+  // Hub ingrédient noindex : le site se positionne sur la compatibilité, pas
+  // sur l'annuaire INCI (cf. lib/seoConfig.ts).
+  robots: { index: INDEX_INGREDIENTS, follow: true },
 };
 
 export default async function IngredientsHubPage() {

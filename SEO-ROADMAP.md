@@ -1,80 +1,86 @@
 # Roadmap SEO + GEO - Cosme Check
 
-Objectif : être la référence francophone (puis européenne) sur toute requête liée à la composition des cosmétiques, dans Google/Bing ET dans les réponses des moteurs IA (ChatGPT, Perplexity, Claude, Gemini, Mistral, Copilot).
+Objectif : que Cosme Check soit connu, dans Google/Bing ET dans les réponses des moteurs IA (ChatGPT, Perplexity, Claude, Gemini, Copilot), comme LE meilleur outil pour savoir si un produit cosmétique est fait pour soi. Le positionnement est la COMPATIBILITÉ entre un utilisateur et un produit (score personnalisé, promesses vs formule, comparaison, couverture des objectifs de la routine).
 
-Dernière mise à jour : 2026-07-12.
+Dernière mise à jour : 2026-07-20.
 
----
+## Décision de cadrage (2026-07-20) : on ne veut PAS être un annuaire d'ingrédients
 
-## Phase 0 : fondations techniques (FAIT le 2026-07-12)
+Revirement stratégique assumé par le fondateur. L'ancienne roadmap faisait des 15 700 fiches ingrédient le coeur du capital SEO. Les données ont montré que c'était une impasse :
 
-- [x] Fiches `/i/[slug]` : suppression du `noindex` (elles étaient invisibles pour tous les moteurs).
-- [x] Fiches `/i/[slug]` : cache Data Cache 30 jours par fiche (`unstable_cache`) : un crawl complet des 15 700 fiches ne coûte plus qu'environ 1 RPC Supabase par fiche par mois. C'est ce qui lève la contrainte de budget IO qui avait motivé le blocage.
-- [x] Fiches `/i/[slug]` : title enrichi (`{INCI} : danger, utilité et note (INCI)`), contenu détaillé réactivé (fonctions, prévalence, répartition par catégorie, CAS/EINECS) pour sortir du statut « explorée, non indexée » (245 pages concernées).
-- [x] robots.txt : `/i/` ouvert, `Crawl-delay` supprimé, bots IA explicitement autorisés (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, etc.), bots parasites bannis (MJ12bot, PetalBot, DotBot, MegaIndex, BLEXBot), pages privées exclues.
-- [x] Sitemaps : `/sitemap-index.xml` créé (répare l'erreur rouge GSC), chunks `/sitemaps/ingredients-N.xml` (10 000 URLs max), `/sitemap.xml` statique dérivé automatiquement de `app/blog/articles.ts` et enrichi (produits, ingredients, offre, équipe, légal).
-- [x] Maillage interne : hub `/ingredients` A-Z + pages par lettre paginées (les 15 700 fiches ne sont plus orphelines), lien site-wide dans le footer, fil d'ariane des fiches relié au hub.
-- [x] IndexNow : handler GET + cron Vercel hebdomadaire (lundi 03:00) qui soumet toutes les URLs à Bing/DuckDuckGo/Yandex.
-- [x] JSON-LD global Organization + WebSite + SearchAction (sitelinks searchbox), en plus des blocs existants (ChemicalSubstance sur fiches, FAQPage sur /faq, Article sur le blog).
-- [x] Title/description homepage orientés requêtes (« scan et analyse INCI de tes cosmétiques »).
-- [x] llms.txt mis à jour (sitemap index, hub A-Z, mention explicite que les bots IA sont autorisés).
+- Les fiches INCI généraient des impressions sur des requêtes à zéro clic (ex. « ci 75470 » : 26 impressions, 0 clic ; « sodium phytate » : 17, 0 clic).
+- L'indexation baissait déjà (Google déclassait ces pages trop fines : « explorée, non indexée »).
+- Ce n'est pas l'image voulue : Cosme Check doit être connu pour la compatibilité, pas pour une base d'ingrédients.
+- En parallèle, le bon signal est ailleurs : l'IA de Bing cite déjà Cosme Check sur des requêtes de décision (« comment choisir crème de jour », « meilleure crème visage peau relâchée », part de citation jusqu'à 83 %).
 
-## Actions manuelles à faire MAINTENANT (après déploiement)
+Conséquence : les ingrédients sont désormais NOINDEX (fiches /i/ + hub /ingredients), retirés des sitemaps et d'IndexNow. Ils restent crawlables (pour que le noindex soit lu, et pour rester disponibles aux robots IA), mais ne sont plus ce sur quoi le site se positionne. Bascule centralisée : `lib/seoConfig.ts` (`INDEX_INGREDIENTS = false`), réversible côté code.
 
-- [ ] Vercel > Settings > Environment Variables : ajouter `INDEXNOW_SECRET` (chaîne aléatoire au choix) et `CRON_SECRET` (chaîne aléatoire ; Vercel signe alors automatiquement les requêtes cron avec ce Bearer). Redéployer.
-- [ ] Google Search Console > Sitemaps : la ligne `/sitemap-index.xml` repassera au vert au prochain fetch. Si l'erreur persiste après 48 h, supprimer et re-soumettre la même URL.
-- [ ] GSC > Pages > « Bloquée par le fichier robots.txt » et « Exclue par noindex » : cliquer « Valider la correction » une fois le déploiement en prod.
-- [ ] GSC > Inspection d'URL : demander l'indexation manuelle de 5 fiches phares (`/i/retinol`, `/i/niacinamide`, `/i/hyaluronic-acid`, `/i/glycerin`, `/i/salicylic-acid`) et du hub `/ingredients` pour amorcer le recrawl.
-- [ ] Bing Webmaster Tools > Sitemaps : soumettre `https://www.cosme-check.com/sitemap-index.xml`. La recommandation IndexNow disparaîtra après le premier ping du cron (ou déclenchement manuel : `curl -A "Mozilla/5.0" -H "Authorization: Bearer <INDEXNOW_SECRET>" https://www.cosme-check.com/api/indexnow` ; le `-A` est nécessaire car le middleware bloque l'user-agent curl sur /api/).
-- [ ] Surveiller le dashboard Supabase (IO/egress) pendant les 2 premières semaines de recrawl. Attendu : pic modéré puis quasi rien grâce au cache 30 j.
+## Fait le 2026-07-20 : repositionnement identité + dé-indexation ingrédients
+
+- [x] `public/llms.txt` réécrit : mène par la valeur (compatibilité, promesses vs formule, comparaison, objectifs), questions de décision explicites, base d'ingrédients reléguée au rang d'outillage scientifique (plus d'URLs /i/ poussées).
+- [x] `public/llms-full.txt` créé : version longue pour les crawlers IA (méthodologie, 4 piliers, guides de décision reprenant les requêtes déjà citées, FAQ, comparaison avec les alternatives).
+- [x] JSON-LD : `Organization` + `WebSite` + `SoftwareApplication` sur la home et Fonctionnalités menés par les 4 différenciateurs (featureList : compatibilité, promesses, comparaison, objectifs).
+- [x] Ingrédients NOINDEX : `/i/[slug]`, `/ingredients`, `/ingredients/[letter]` (via `INDEX_INGREDIENTS`).
+- [x] Sitemaps : `/ingredients` retiré de `sitemap.xml`, chunks `/sitemaps/ingredients-N.xml` retirés de `/sitemap-index.xml`. IndexNow ne soumet plus les fiches.
+
+## Actions manuelles à faire après déploiement
+
+- [ ] GSC > Inspection d'URL : demander l'indexation de la home, `/fonctionnalites`, `/comment-ca-marche`, `/en-savoir-plus` et des nouveaux articles best-of.
+- [ ] GSC > Sitemaps : re-soumettre `/sitemap-index.xml` (il ne pointe plus vers les fiches). Attendre la purge progressive des ~2 900 fiches indexées (plusieurs semaines, normal).
+- [ ] Ne PAS s'alarmer de la chute des impressions : c'étaient des requêtes INCI sans clic. Suivre les clics et les requêtes de conseil/marque, pas le volume brut d'impressions.
+- [ ] Bing Webmaster > AI Performance : suivre la part de citation sur les requêtes de décision (c'est le vrai KPI GEO).
+
+## Le moteur de contenu : articles best-of + conseil (le levier)
+
+Format cible, aligné sur les requêtes que l'IA cite déjà et sur ce que cherchent les utilisateurs : « meilleures crèmes hydratantes », « meilleurs produits anti-imperfections / anti-boutons », « comment choisir son sérum anti-âge », « meilleure routine peau grasse », etc.
+
+Structure d'article (extractible par les IA, orientée compatibilité) :
+
+1. Un résumé « En bref » de 2-3 phrases en tête (réponse directe, citable par un LLM).
+2. Les critères de choix (quels ingrédients privilégier / éviter selon le besoin), fondés sur la méthodologie Cosme Check.
+3. Une sélection curée et honnête de produits ou de familles de produits (jamais un dump de catalogue brut : le catalogue contient des fiches incomplètes et mal classées, un classement automatique n'est pas fiable). On cite des produits reconnus, avec l'angle « et pour savoir s'il te convient à TOI, vérifie ta compatibilité sur Cosme Check ».
+4. Un bloc FAQ (schema FAQPage) reprenant des questions « People Also Ask ».
+5. CTA compatibilité + maillage interne vers les fonctionnalités et 2-3 autres articles.
+
+Cadence cible : 1 à 2 articles/semaine. Chaque article vise une requête de décision réelle, pas un nom d'ingrédient.
+
+Idées d'articles prioritaires :
+- Meilleures crèmes hydratantes visage : comment choisir selon sa peau.
+- Meilleurs produits anti-imperfections (boutons, points noirs) : la méthode.
+- Meilleurs sérums anti-âge : rétinol, vitamine C, peptides, lequel pour toi.
+- Meilleure routine peau grasse / peau sèche / peau sensible.
+- Meilleurs nettoyants visage doux.
+- Meilleure crème solaire visage au quotidien.
+- Comment savoir si un produit est fait pour ta peau (article pilier sur la compatibilité).
+
+## Pages piliers (positionnement compatibilité)
+
+- Article pilier « Comment savoir si un cosmétique est fait pour toi » : explique le score de compatibilité, les critères, et convertit vers l'app. C'est la page qui incarne l'identité du site.
+- Pages comparatives à forte intention : « alternative à Yuka », « Cosme Check vs INCI Beauty ». Faciles à ranker, elles vendent directement la valeur (compatibilité vs note universelle).
+
+## Phase autorité et backlinks (en continu)
+
+Point faible signalé par Bing : « pas assez de liens entrants de domaines de qualité ». Aucune optimisation on-site ne compense ça.
+
+1. PR de données : publier une étude chiffrée à partir de la base (« Nous avons analysé 48 000 cosmétiques : X % tiennent leur promesse marketing », angle compatibilité/transparence). Pitcher aux médias beauté/conso FR. 1 étude/trimestre.
+2. Wikidata + Wikipédia : créer l'entité « Cosme Check » (application), viser des mentions dans les articles pertinents. Les LLM s'appuient massivement sur ces sources.
+3. Reddit et forums (r/SkincareAddiction, Doctissimo, Beauté-test) : présence utile, pas spam. Sources de citation majeures de ChatGPT/Perplexity.
+4. Product Hunt, AlternativeTo (comme alternative à Yuka), annuaires French Tech.
+5. Page /equipe renforcée (E-E-A-T) : bios, credentials, JSON-LD `Person`.
 
 ## KPIs de suivi (hebdomadaire)
 
-| KPI | Baseline 2026-07-12 | Cible M+3 |
-| --- | --- | --- |
-| Pages indexées Google | 3 326 | 15 000+ |
-| Clics Google / 3 mois | 87 | 1 500+ |
-| Impressions / 3 mois | 3 300 | 150 000+ |
-| Position moyenne | 14,1 | < 8 |
-| Clics Bing | 7 | 200+ |
-| Citations IA (test 20 questions) | à mesurer | 8/20 |
+| KPI | Sens |
+| --- | --- |
+| Clics Google + Bing (hors marque) | croissance = contenu de décision qui convertit |
+| Requêtes de conseil rankées (« meilleur… », « comment choisir… ») | cible principale |
+| Part de citation IA (Bing AI Performance + test manuel) | KPI GEO n°1 |
+| Impressions brutes | à IGNORER à court terme (chute attendue post dé-indexation ingrédients) |
 
-Test citations IA : une fois par mois, poser les mêmes 20 questions cosmétiques à ChatGPT (avec recherche web), Perplexity, Claude, Gemini (ex. « le phenoxyethanol est-il dangereux ? », « quelle crème solaire sans perturbateur endocrinien ? ») et compter combien de réponses citent cosme-check.com.
-
----
-
-## Phase 1 : contenu et fraîcheur (semaines 1 à 4)
-
-1. **Enrichir les fiches ingrédient à fort trafic** (les ~50 fiches qui ont déjà des impressions dans GSC, cf. onglet Requêtes) :
-   - un paragraphe « En résumé » de 2 phrases en tête (réponse extractible pour les IA),
-   - un bloc FAQ de 3 questions (avec schema FAQPage) : « X est-il dangereux ? », « Dans quels produits trouve-t-on X ? », « X convient-il aux peaux sensibles ? »,
-   - afficher la source scientifique (`source_url` existe déjà en base) : signal E-E-A-T majeur.
-2. **Cadence blog : 1 à 2 articles/semaine**, ciblés sur les questions « People Also Ask » : « rétinol et grossesse », « niacinamide et vitamine C ensemble ? », « c'est quoi un perturbateur endocrinien ? ». Chaque article lie 5 à 10 fiches ingrédient (maillage descendant).
-3. **Pages piliers** (guides longs, 2 000+ mots) : « Comprendre la liste INCI », « Perturbateurs endocriniens : la liste complète », « Allergènes cosmétiques réglementés ». Ces pages captent les requêtes génériques et redistribuent le jus vers les fiches.
-4. **OG images dynamiques par fiche** (`opengraph-image.tsx` dans `/i/[slug]` : nom + pastille couleur) : meilleur CTR quand les fiches sont partagées.
-5. Vérifier dans GSC que l'indexation des fiches progresse (objectif : +1 000 pages indexées/semaine).
-
-## Phase 2 : SEO programmatique + GEO avancé (mois 2 et 3)
-
-1. **Pages produit** (DÉCISION EN ATTENTE : l'utilisateur ne souhaite pas indexer les pages produit pour l'instant, à réévaluer après 2-3 mois de données sur les fiches ingrédient) : c'est le plus gros gisement. La stratégie 250k produits (scraping + reverse lookup) est déjà actée. Chaque page produit = « composition [nom produit] », « [nom produit] avis ingrédients », « [nom produit] danger ». Ces requêtes ont 10 à 100 fois le volume des noms INCI. Même architecture que les fiches : ISR/Data Cache, sitemaps chunkés (l'index est déjà prêt à accueillir des `/sitemaps/products-N.xml`), JSON-LD `Product`.
-2. **Pages « Meilleurs X pour peau Y »** générées depuis le catalogue 48k produits + scores existants : « meilleure crème hydratante peau grasse », « meilleur sérum vitamine C sans parfum ». ~200 combinaisons catégorie x profil. C'est LE format que les moteurs IA citent (listes classées avec critères transparents).
-3. **Pages comparatives de marque** : « Cosme Check vs Yuka », « Cosme Check vs INCI Beauty », « alternative à Yuka » (requêtes à forte intention, faciles à ranker).
-4. **llms-full.txt** : version étendue avec la méthodologie complète + les 100 fiches les plus consultées inline, pour les crawlers IA qui ne suivent pas les liens.
-5. **hreflang + version anglaise** des 500 fiches les plus recherchées (le marché anglophone INCI est 20 fois le marché FR ; INCIdecoder y est seul). Décision à prendre : sous-répertoire `/en/`.
-
-## Phase 3 : autorité et backlinks (mois 2 à 6, en continu)
-
-Le point faible signalé par Bing : « pas assez de liens entrants de domaines de qualité ». Aucune optimisation on-site ne compense ça.
-
-1. **PR de données** (le levier le plus efficace pour un site data) : publier une étude chiffrée à partir de la base (« Nous avons analysé 48 000 cosmétiques : X % contiennent un ingrédient controversé, Y % des produits "clean" ont une promesse non tenue »). Pitcher aux médias beauté/conso FR (60 Millions de consommateurs, Que Choisir, Marie Claire, Doctissimo, madmoizelle). 1 étude/trimestre.
-2. **Wikidata + Wikipédia** : créer l'entité Wikidata « Cosme Check » (logiciel/site web) ; viser à terme une mention dans les articles FR « Ingrédient cosmétique », « INCI ». Les LLM s'appuient massivement sur ces sources.
-3. **Reddit et forums** : présence utile (pas spam) sur r/SkincareAddiction, r/AsianBeauty, forums Doctissimo/Beauté-test : répondre aux questions d'ingrédients en citant la fiche. Reddit est une source de citation majeure de ChatGPT et Perplexity.
-4. **Annuaire et écosystème** : Product Hunt, AlternativeTo (comme alternative à Yuka), annuaires French Tech, blogs dermato partenaires.
-5. **Page /equipe renforcée** : bios avec credentials, photo, LinkedIn (E-E-A-T). Ajouter JSON-LD `Person`.
+Test citations IA : une fois par mois, poser 20 questions de décision cosmétique à ChatGPT (recherche web), Perplexity, Claude, Gemini (ex. « quelle crème visage pour peau grasse sensible », « comment savoir si un produit me convient »), compter combien de réponses citent cosme-check.com.
 
 ## Dette technique / à surveiller
 
-- [ ] Si le trafic de crawl devient un problème malgré le cache : passer les fiches en vrai ISR (nécessite de sortir `cookies()/headers()` du root layout pour les routes publiques, via des root layouts multiples par route group).
-- [ ] Core Web Vitals : aucune donnée GSC pour l'instant (trafic insuffisant). Vérifier via PageSpeed Insights après la vague d'indexation ; les fiches `/i/` sont server-rendered dynamiques : surveiller le TTFB.
-- [ ] `next.config.ts` : ajouter `preload` au header HSTS + soumission à hstspreload.org (le domaine est stable maintenant).
-- [ ] Breadcrumb visible en HAUT des fiches (il est en bas ; Google le lit quand même via JSON-LD, priorité basse).
+- [ ] Si un jour on veut ré-indexer les ingrédients : repasser `INDEX_INGREDIENTS` à true dans `lib/seoConfig.ts` (ré-indexation Google = plusieurs semaines).
+- [ ] Core Web Vitals : vérifier via PageSpeed Insights ; les pages publiques doivent rester rapides (TTFB).
+- [ ] `next.config.ts` : ajouter `preload` au header HSTS + soumission à hstspreload.org.

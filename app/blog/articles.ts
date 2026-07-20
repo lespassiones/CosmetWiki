@@ -36,6 +36,42 @@ export type Article = {
 
 export const ARTICLES: Article[] = [
   {
+    id: "meilleures-cremes-hydratantes-visage",
+    title:
+      "Meilleures crèmes hydratantes visage : la sélection par type de peau",
+    excerpt:
+      "Peau grasse, sèche, mixte, sensible ou mature : les crèmes hydratantes visage souvent recommandées, ce qui fait une bonne formule, et comment vérifier laquelle est vraiment faite pour toi.",
+    category: "Routines",
+    date: "20 juillet 2026",
+    published: "2026-07-20",
+    readingTime: "7 min",
+    image: "/image/blog/meilleures-cremes-hydratantes-visage/hero.webp",
+  },
+  {
+    id: "cosmetique-fait-pour-toi",
+    title:
+      "Comment savoir si un cosmétique est fait pour toi (la méthode)",
+    excerpt:
+      "Un produit n'est ni bon ni mauvais dans l'absolu : il est compatible, ou non, avec TA peau, tes objectifs et ce que tu veux éviter. La méthode pour le savoir, et l'erreur des notes universelles.",
+    category: "Routines",
+    date: "20 juillet 2026",
+    published: "2026-07-20",
+    readingTime: "6 min",
+    image: "/image/blog/cosmetique-fait-pour-toi/hero.webp",
+  },
+  {
+    id: "meilleurs-produits-anti-imperfections",
+    title:
+      "Meilleurs produits anti-imperfections : comment choisir (peau à boutons)",
+    excerpt:
+      "Boutons, points noirs, pores dilatés : les actifs qui marchent vraiment (BHA, niacinamide, zinc, acide azélaïque), les erreurs à éviter, et comment savoir si un produit est vraiment fait pour TA peau.",
+    category: "Routines",
+    date: "20 juillet 2026",
+    published: "2026-07-20",
+    readingTime: "6 min",
+    image: "/image/blog/anti-imperfections/hero.webp",
+  },
+  {
     id: "routine-peau-joueurs-foot",
     title: "Skincare des stars du foot : la routine de Ronaldo, Mbappé & co décryptée",
     excerpt:

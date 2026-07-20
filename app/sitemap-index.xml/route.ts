@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { SITE_URL } from "@/lib/siteUrl";
+import { INDEX_INGREDIENTS } from "@/lib/seoConfig";
 import {
   INGREDIENT_SITEMAP_CHUNK,
   loadIngredientSlugs,
@@ -22,19 +23,23 @@ export const dynamic = "force-dynamic";
  * soumission existante.
  */
 export async function GET() {
-  const slugs = await loadIngredientSlugs();
-  const chunkCount = Math.max(
-    1,
-    Math.ceil(slugs.length / INGREDIENT_SITEMAP_CHUNK),
-  );
+  // Les chunks /sitemaps/ingredients-N.xml ne sont listés que si on indexe les
+  // ingrédients (cf. lib/seoConfig.ts). Par défaut le site ne veut pas être
+  // référencé comme un annuaire INCI : seul /sitemap.xml (pages + articles) est
+  // soumis.
+  const ingredientLocs: string[] = [];
+  if (INDEX_INGREDIENTS) {
+    const slugs = await loadIngredientSlugs();
+    const chunkCount = Math.max(
+      1,
+      Math.ceil(slugs.length / INGREDIENT_SITEMAP_CHUNK),
+    );
+    for (let i = 0; i < chunkCount; i++) {
+      ingredientLocs.push(`${SITE_URL}/sitemaps/ingredients-${i}.xml`);
+    }
+  }
 
-  const locs = [
-    `${SITE_URL}/sitemap.xml`,
-    ...Array.from(
-      { length: chunkCount },
-      (_, i) => `${SITE_URL}/sitemaps/ingredients-${i}.xml`,
-    ),
-  ];
+  const locs = [`${SITE_URL}/sitemap.xml`, ...ingredientLocs];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

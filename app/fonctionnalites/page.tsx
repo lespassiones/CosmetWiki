@@ -382,7 +382,17 @@ function buildJsonLd() {
         operatingSystem: "Web, iOS, Android",
         url: SITE_URL,
         offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
-        featureList: NAV.map((it) => it.label).join(", "),
+        description:
+          "Cosme Check calcule un score de compatibilité entre ton profil et la formule réelle d'un produit, vérifie si les promesses marketing sont tenues, compare deux produits et mesure si ta routine couvre tes objectifs beauté.",
+        featureList: [
+          "Score de compatibilité entre un produit et ton profil",
+          "Analyse des promesses marketing face à la formule réelle",
+          "Comparaison de deux produits côte à côte",
+          "Couverture de tes objectifs beauté sur toute ta routine",
+          "Recommandations personnalisées d'alternatives mieux notées",
+          "Analyse INCI par scan, liste collée ou recherche par nom",
+          "Coach IA cosmétique (Beauty Advisor)",
+        ],
         inLanguage: "fr",
       },
       {
