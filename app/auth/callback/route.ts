@@ -5,8 +5,17 @@ import { resolveOnboardingDestination } from "@/lib/onboarding/resolve";
 import { BETA_COOKIE, grantBetaCredits } from "@/lib/beta-credits";
 
 function safeNext(value: string | null): string {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/";
-  return value;
+  // Chemin interne absolu uniquement. Rejette // et /\ (open redirect), le
+  // backslash (0x5c) et les caracteres de controle (< 0x20, 0x7f).
+  const raw = value ?? "";
+  if (!raw.startsWith("/")) return "/";
+  const c1 = raw.charCodeAt(1);
+  if (c1 === 0x2f || c1 === 0x5c) return "/";
+  for (let i = 0; i < raw.length; i++) {
+    const c = raw.charCodeAt(i);
+    if (c < 0x20 || c === 0x5c || c === 0x7f) return "/";
+  }
+  return raw;
 }
 
 export async function GET(request: Request) {

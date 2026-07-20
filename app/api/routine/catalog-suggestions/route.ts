@@ -28,6 +28,9 @@ export async function POST(req: NextRequest) {
 
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
+  // Décision d'auth sur getUser() (JWT vérifié), token via getSession() ensuite.
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Non connecté." }, { status: 401 });
   const {
     data: { session },
   } = await sb.auth.getSession();

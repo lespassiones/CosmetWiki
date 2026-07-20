@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseService } from "@/lib/supabase";
 import { SITE_URL } from "@/lib/siteUrl";
 import { addBetaContact, sendBetaInvitationEmail } from "@/lib/brevo";
+import { safeEqual } from "@/lib/safeEqual";
 
 /**
  * POST /api/beta/invite - envoie l'email d'invitation aux bêta testeurs en
@@ -24,7 +25,7 @@ const MAX_PER_CALL = 150;
 export async function POST(req: Request) {
   const secret = process.env.BETA_INVITE_SECRET;
   const provided = req.headers.get("x-beta-invite-secret");
-  if (!secret || provided !== secret) {
+  if (!secret || !provided || !safeEqual(provided, secret)) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 

@@ -234,7 +234,7 @@ function HomeJsonLdScript() {
       // Escape `<` and `>` so brand or description content with HTML-like
       // characters can't break out of the script tag.
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(jsonLd)
+        __html: JSON.stringify(jsonLd).replace(/</g, "\u003c").replace(/>/g, "\u003e")
           .replace(/</g, "\\u003c")
           .replace(/>/g, "\\u003e"),
       }}

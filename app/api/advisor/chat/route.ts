@@ -67,6 +67,12 @@ export async function POST(req: NextRequest) {
   // Auth : on récupère le token de session pour le relayer à l'edge function.
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
+  // Décision d'auth sur getUser() (JWT vérifié côté serveur), pas getSession()
+  // (qui fait confiance au cookie). getSession() ne sert qu'à relayer le token.
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) {
+    return new Response(JSON.stringify({ error: "Non connecté." }), { status: 401 });
+  }
   const { data: { session } } = await sb.auth.getSession();
   const token = session?.access_token;
   if (!token) {

@@ -80,7 +80,7 @@ export default function FaqPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd)
+          __html: JSON.stringify(jsonLd).replace(/</g, "\u003c").replace(/>/g, "\u003e")
             .replace(/</g, "\\u003c")
             .replace(/>/g, "\\u003e"),
         }}

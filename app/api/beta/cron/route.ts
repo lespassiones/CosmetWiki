@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseService } from "@/lib/supabase";
 import { sendBetaTemplateEmail } from "@/lib/brevo";
+import { safeEqual } from "@/lib/safeEqual";
 
 /**
  * GET /api/beta/cron - CRON quotidien du programme bêta (vercel.json).
@@ -53,7 +54,7 @@ function olderThan(iso: string | null, n: number, now: number): boolean {
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
   const auth = req.headers.get("authorization");
-  if (!secret || auth !== `Bearer ${secret}`) {
+  if (!secret || !auth || !safeEqual(auth, `Bearer ${secret}`)) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 

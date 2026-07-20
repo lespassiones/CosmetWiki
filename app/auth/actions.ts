@@ -1,6 +1,8 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { getTrustedIp } from "@/lib/clientIp";
+import { checkRateLimitShared } from "@/lib/ratelimit";
 import { phCapture } from "@/lib/posthogServer";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
@@ -28,7 +30,16 @@ function authOrigin(): string {
  */
 function safeNext(value: FormDataEntryValue | null): string {
   const raw = typeof value === "string" ? value : "";
-  if (!raw.startsWith("/") || raw.startsWith("//")) return "/";
+  // Doit rester un chemin interne absolu. Rejette les URL absolues (// et /\
+  // que les navigateurs normalisent en //host), le backslash (0x5c) et tout
+  // caractere de controle (< 0x20, 0x7f) exploitable pour le contournement.
+  if (!raw.startsWith("/")) return "/";
+  const c1 = raw.charCodeAt(1);
+  if (c1 === 0x2f || c1 === 0x5c) return "/";
+  for (let i = 0; i < raw.length; i++) {
+    const c = raw.charCodeAt(i);
+    if (c < 0x20 || c === 0x5c || c === 0x7f) return "/";
+  }
   return raw;
 }
 
@@ -54,6 +65,14 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
     return { ok: false, error: "Tu dois accepter les conditions d'utilisation pour créer ton compte." };
   }
 
+  // Rate-limit anti-abus (création massive de comptes / spam contacts Brevo) :
+  // 5 inscriptions / heure / IP fiable.
+  const signupIp = getTrustedIp(await headers());
+  const signupRl = await checkRateLimitShared(`signup:${signupIp}`, 5, 3600);
+  if (!signupRl.ok) {
+    return { ok: false, error: "Trop de créations de compte depuis ce réseau. Réessaie plus tard." };
+  }
+
   // Inscriptions gelées depuis l'admin (Paramètres → inscriptions). Le trigger
   // DB handle_new_user refuse aussi la création, mais on intercepte ici pour
   // renvoyer un message clair plutôt qu'une erreur Postgres brute.
@@ -73,7 +92,15 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
     options: { data: { first_name: firstName, signup_platform: "web" } },
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    // Anti-énumération : ne pas confirmer l'existence d'un compte
+    // ("User already registered"). On renvoie un message neutre.
+    return {
+      ok: false,
+      error:
+        "Impossible de créer le compte avec ces informations. Essaie de te connecter ou de réinitialiser ton mot de passe.",
+    };
+  }
 
   // Persiste le consentement dans preferences.consent (best-effort - le trigger
   // handle_new_user a déjà créé la ligne user_profiles dans la même transaction
@@ -146,6 +173,13 @@ export async function signIn(formData: FormData): Promise<AuthResult> {
   if (!email.includes("@")) return { ok: false, error: "Email invalide." };
   if (password.length < 1) return { ok: false, error: "Mot de passe requis." };
 
+  // Rate-limit anti brute-force : 8 tentatives / 15 min par (IP fiable, email).
+  const signinIp = getTrustedIp(await headers());
+  const signinRl = await checkRateLimitShared(`login:${signinIp}:${email}`, 8, 900);
+  if (!signinRl.ok) {
+    return { ok: false, error: "Trop de tentatives. Réessaie dans quelques minutes." };
+  }
+
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
 
@@ -209,6 +243,13 @@ export async function signOut(): Promise<void> {
 export async function requestPasswordReset(formData: FormData): Promise<AuthResult> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   if (!email.includes("@")) return { ok: false, error: "Email invalide." };
+
+  // Rate-limit anti-spam de mails de réinitialisation : 5 / 15 min par IP fiable.
+  const resetIp = getTrustedIp(await headers());
+  const resetRl = await checkRateLimitShared(`pwreset:${resetIp}`, 5, 900);
+  if (!resetRl.ok) {
+    return { ok: false, error: "Trop de demandes. Réessaie dans quelques minutes." };
+  }
 
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
