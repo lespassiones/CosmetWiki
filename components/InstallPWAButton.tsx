@@ -4,35 +4,26 @@ import { useEffect, useState } from "react";
 
 // Chrome's standard installability event. Fires once the PWA criteria are met
 // (manifest + service worker + 192/512 icons + HTTPS) AND the user hasn't
-// already installed/dismissed too recently. Captured globally so both the
-// header button and the burger-menu entry share the same prompt instance -
-// otherwise the second one would call prompt() on a used event and throw.
+// already installed/dismissed too recently.
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
-let cachedPrompt: BeforeInstallPromptEvent | null = null;
-let promptListenersAttached = false;
-const subscribers = new Set<() => void>();
-
-function notify() {
-  subscribers.forEach((fn) => fn());
+// The event is captured BEFORE hydration by the inline script emitted by
+// components/PWAInstallCapture.tsx (rendered in app/layout.tsx). Chrome fires
+// `beforeinstallprompt` during initial page load, well before this client
+// component mounts — so attaching the listener in a useEffect here would miss
+// it and we'd always fall back to the manual instructions. We just read the
+// global the capture script maintains.
+declare global {
+  interface Window {
+    __cwInstallPrompt?: BeforeInstallPromptEvent | null;
+    __cwInstalled?: boolean;
+  }
 }
 
-function ensureListeners() {
-  if (promptListenersAttached || typeof window === "undefined") return;
-  promptListenersAttached = true;
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    cachedPrompt = e as BeforeInstallPromptEvent;
-    notify();
-  });
-  window.addEventListener("appinstalled", () => {
-    cachedPrompt = null;
-    notify();
-  });
-}
+const INSTALL_CHANGE_EVENT = "cw:install-change";
 
 function isStandalone() {
   if (typeof window === "undefined") return false;
@@ -43,44 +34,38 @@ function isStandalone() {
 }
 
 function usePWAInstall() {
-  const [, force] = useState(0);
-  const [standalone, setStandalone] = useState(false);
+  const [canPromptNative, setCanPromptNative] = useState(false);
+  const [installed, setInstalled] = useState(false);
 
   useEffect(() => {
-    ensureListeners();
-    setStandalone(isStandalone());
-    const sub = () => force((n) => n + 1);
-    subscribers.add(sub);
-    const onInstalled = () => setStandalone(true);
-    window.addEventListener("appinstalled", onInstalled);
-    return () => {
-      subscribers.delete(sub);
-      window.removeEventListener("appinstalled", onInstalled);
+    const sync = () => {
+      setCanPromptNative(Boolean(window.__cwInstallPrompt));
+      setInstalled(isStandalone() || window.__cwInstalled === true);
     };
+    sync();
+    window.addEventListener(INSTALL_CHANGE_EVENT, sync);
+    return () => window.removeEventListener(INSTALL_CHANGE_EVENT, sync);
   }, []);
 
   const promptNative = async (): Promise<boolean> => {
-    if (!cachedPrompt) return false;
+    const evt = typeof window !== "undefined" ? window.__cwInstallPrompt : null;
+    if (!evt) return false;
     try {
-      await cachedPrompt.prompt();
-      await cachedPrompt.userChoice;
-      cachedPrompt = null;
-      notify();
+      await evt.prompt();
+      await evt.userChoice;
+      window.__cwInstallPrompt = null;
+      window.dispatchEvent(new Event(INSTALL_CHANGE_EVENT));
       return true;
     } catch {
       // Event was already used or browser blocked it - fall back to manual
       // instructions.
-      cachedPrompt = null;
-      notify();
+      window.__cwInstallPrompt = null;
+      window.dispatchEvent(new Event(INSTALL_CHANGE_EVENT));
       return false;
     }
   };
 
-  return {
-    installed: standalone,
-    canPromptNative: cachedPrompt !== null,
-    promptNative,
-  };
+  return { installed, canPromptNative, promptNative };
 }
 
 type Platform = "ios" | "android-chrome" | "desktop-chromium" | "firefox" | "other";
@@ -215,7 +200,7 @@ function InstallInstructionsDialog({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 px-4 pb-4 backdrop-blur-sm sm:items-center sm:pb-0"
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 px-4 pb-4 backdrop-blur-sm sm:items-center sm:pb-0"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}

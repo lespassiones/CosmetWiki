@@ -5,6 +5,7 @@ import { cookies, headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/next";
 import { SITE_URL } from "@/lib/siteUrl";
 import { PWARegister } from "@/components/PWARegister";
+import { PWAInstallCapture } from "@/components/PWAInstallCapture";
 import { PostHogInit } from "@/components/PostHogInit";
 import { SiteJsonLd } from "@/components/SiteJsonLd";
 import { RecoveryRedirect } from "./RecoveryRedirect";
@@ -178,6 +179,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     return (
       <html lang="fr" className={`light ${inter.variable}`} data-theme="light">
         <body className="min-h-screen antialiased">
+          <PWAInstallCapture />
           <SiteJsonLd />
           <link
             rel="preconnect"
@@ -247,6 +249,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="fr" className={`light ${inter.variable}`} data-theme="light">
       <body className="min-h-screen antialiased">
+        <PWAInstallCapture />
         <SiteJsonLd />
         <link
           rel="preconnect"
