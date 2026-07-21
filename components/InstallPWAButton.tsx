@@ -122,6 +122,49 @@ export function InstallPWAButton({ className = "" }: { className?: string }) {
   );
 }
 
+/**
+ * Bouton d'installation PLEINE LARGEUR (bannière du dashboard, au-dessus de
+ * « Astuce du jour »). Même logique que InstallPWAButton mais rendu comme un
+ * bloc large aligné sur la largeur des cartes.
+ *
+ * Visibilité : uniquement tant que l'app N'EST PAS installée (mode standalone).
+ * Dès qu'elle tourne en PWA (Android/desktop après install, ou iOS ouvert depuis
+ * l'écran d'accueil), `installed` passe à true et la bannière disparaît.
+ *
+ * Le gate `mounted` évite un flash de la bannière au chargement pour les
+ * utilisateurs qui ont DÉJÀ installé (l'état standalone n'est connu que côté
+ * client) : rien n'est rendu au SSR, puis la bannière apparaît si besoin.
+ */
+export function InstallPWABanner({ className = "" }: { className?: string }) {
+  const { installed, promptNative } = usePWAInstall();
+  const [showHelp, setShowHelp] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted || installed) return null;
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={async () => {
+          const ok = await promptNative();
+          if (!ok) setShowHelp(true);
+        }}
+        className={`flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-rose-400 to-pink-400 px-4 py-3.5 text-[15px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(251,113,133,0.55),inset_0_1px_0_0_rgba(255,255,255,0.30)] transition-all hover:from-rose-500 hover:to-pink-500 active:scale-[0.99] ${className}`}
+        aria-label="Installer l'application sur ton écran d'accueil"
+      >
+        <DownloadIcon />
+        Installer l&apos;app
+      </button>
+      {showHelp ? (
+        <InstallInstructionsDialog onClose={() => setShowHelp(false)} />
+      ) : null}
+    </>
+  );
+}
+
 export function InstallPWAMenuItem({
   onActivate,
 }: {

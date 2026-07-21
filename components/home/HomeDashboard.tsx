@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { InstallPWABanner } from "@/components/InstallPWAButton";
 import { IngredientBlob, type BlobCounts } from "../blob/IngredientBlob";
 import { TipCarousel } from "./TipCarousel";
 
@@ -118,6 +119,10 @@ export function HomeDashboard({
         </span>
         .
       </p>
+
+      {/* Bannière d'installation — visible tant que l'app n'est pas en PWA ;
+          disparaît d'elle-même une fois installée (mode standalone). */}
+      <InstallPWABanner className="mt-4" />
 
       <TipCarousel tips={data.tips} />
 

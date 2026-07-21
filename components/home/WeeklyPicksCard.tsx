@@ -24,6 +24,7 @@ import { isProfileStarted, readSkinProfile } from "@/lib/skin/profile";
 import { readUserRestrictions } from "@/lib/restrictions/types";
 import { buildExclusionSet } from "@/lib/alternatives/filter";
 import { colorCapScore, scoreColor } from "@/lib/essentiel/engine";
+import { safeProductImageUrl } from "@/lib/productImage";
 import { pickNeedsForUser } from "@/lib/weeklyPicks/needsMap";
 import {
   buildWeeklyPicksSeed,
@@ -163,7 +164,10 @@ export async function WeeklyPicksCard() {
           ean: p.ean,
           brand: p.brand,
           name: p.name,
-          imageUrl: p.imageUrl,
+          // Neutralise les placeholders scrappés (nophoto touslesprix…) et les
+          // hôtes hors CSP : la carte affiche alors son icône placeholder au
+          // lieu de déclencher une requête image bloquée + erreur console.
+          imageUrl: safeProductImageUrl(p.imageUrl),
           ingredientsText: p.ingredientsText as string,
           score: capped,
           label: scoreLabelFromScore(capped),
