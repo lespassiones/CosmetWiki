@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { GLASS_CARD } from "@/lib/ui/glass";
 import type { CoherenceResult, CoherenceVerdict } from "@/lib/coherence/types";
-import { VERDICT_TONE, verdictChipLabel } from "./tone";
+import { VERDICT_TONE, verdictChipLabel, promiseRingColor } from "./tone";
 
 /**
  * Hero summary card (refonte épurée, twin du mockup mobile).
@@ -81,7 +81,7 @@ export function VerdictGlobalCard({ metrics }: { metrics: CoherenceResult["metri
               cy="50"
               r={r}
               fill="none"
-              stroke="#10B981"
+              stroke={promiseRingColor(pct)}
               strokeWidth="9"
               strokeLinecap="round"
               strokeDasharray={c}

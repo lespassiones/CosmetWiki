@@ -6,6 +6,7 @@ import { supabaseServer } from "@/lib/supabase";
 import { computeMetrics } from "@/lib/coherence/engine";
 import { CoherenceItemActions } from "@/components/coherence/CoherenceItemActions";
 import type { CoherenceResult } from "@/lib/coherence/types";
+import { promiseRingColor } from "@/components/coherence/tone";
 
 export const metadata = { title: "Promesses · Cosme Check" };
 
@@ -28,13 +29,7 @@ function formatDate(iso: string): string {
   });
 }
 
-/** Ring colour by kept-% verdict (vert / jaune / orange / rouge). */
-function ringColor(pct: number): string {
-  if (pct >= 80) return "#16A34A";
-  if (pct >= 60) return "#FBBF24";
-  if (pct >= 35) return "#F97316";
-  return "#F43F5E";
-}
+// Couleur de l'anneau : source unique dans components/coherence/tone.ts (promiseRingColor).
 
 export default async function PromessesPage() {
   const user = await getUser();
@@ -103,7 +98,7 @@ export default async function PromessesPage() {
             // changed are still displayed with the current logic.
             const m = computeMetrics(r.result_json.promises);
             const supported = m.tenueCount + m.partielleCount;
-            const col = ringColor(m.tenuePct);
+            const col = promiseRingColor(m.tenuePct);
             const ringR = 28;
             const ringC = 2 * Math.PI * ringR;
             const ringOff = ringC * (1 - Math.min(100, Math.max(0, m.tenuePct)) / 100);

@@ -1,6 +1,19 @@
 import type { CoherenceVerdict } from "@/lib/coherence/types";
 
 /**
+ * Ring colour for the "promises kept" synthesis donut, by kept-%.
+ * SINGLE SOURCE shared by the hero (VerdictGlobalCard) and the /promesses list
+ * so the colour is IDENTICAL list <-> detail for a given product.
+ * Thresholds: >=80 green - >=60 amber - >=35 orange - <35 red.
+ */
+export function promiseRingColor(pct: number): string {
+  if (pct >= 80) return "#16A34A"; // green
+  if (pct >= 60) return "#FBBF24"; // amber
+  if (pct >= 35) return "#F97316"; // orange
+  return "#F43F5E"; // red
+}
+
+/**
  * Visual tone for each verdict - kept in one place so all coherence
  * components stay consistent. Aligned with the project's existing rating
  * palette (emerald / amber / orange / rose).
