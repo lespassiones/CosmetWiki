@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { phCapture } from "@/lib/posthogServer";
 import { supabaseAnon } from "@/lib/supabase";
-import { parseInciList, computeScore, scoreLabel, type ColorRating } from "@/lib/inciParser";
+import { parseInciList, computeScore, scoreLabel, reconcileScore, type ColorRating } from "@/lib/inciParser";
 import { hashInci } from "@/lib/cacheHash";
 import { apiGate } from "@/lib/apiGate";
 import { idempotencyKey, idempotencyLookup, idempotencyStore } from "@/lib/idempotency";
@@ -291,10 +291,23 @@ export async function POST(req: NextRequest) {
             cached_result.spectrum = { top5: pickSpec(5), top10: pickSpec(10) };
           }
         }
-        // Override with the catalog IB score (source of truth) when available.
+        // Override with the catalog IB score (source of truth) when available —
+        // SAUF s'il tombe dans une bande différente des couleurs live des items
+        // (on recalcule le live depuis les couleurs affichées) : dans ce cas on
+        // sert le live pour que la note = les couleurs. Garde : ≥50 % identifiés.
         if (catalogScore !== null) {
-          const lb = scoreLabel(catalogScore);
-          cached_result.score = catalogScore;
+          const its = cached_result.items ?? [];
+          const liveScore = computeScore(
+            its.map((it) => ({
+              color_rating: ((it as { colorRating?: ColorRating | null }).colorRating ?? null),
+              position: Number((it as { position?: number }).position ?? 0),
+            })),
+            its.length,
+          );
+          const c = cached_result.counts;
+          const chosen = reconcileScore(catalogScore, liveScore, c?.matched ?? 0, c?.total ?? its.length);
+          const lb = scoreLabel(chosen);
+          cached_result.score = chosen;
           cached_result.scoreLabel = lb.label;
           cached_result.scoreTone = lb.tone;
         } else if (typeof cached_result.score !== "number") {
@@ -632,11 +645,13 @@ export async function POST(req: NextRequest) {
   let { label: scoreLabelText, tone: scoreTone } = scoreLabel(score);
 
   // For known catalog products, replace the computed score with the proprietary
-  // catalog score fetched earlier. The computed score is only the fallback for
-  // new / internet-only products not yet in the catalog.
+  // catalog score fetched earlier — UNLESS it lands in a different quality band
+  // than the LIVE coloring of the same INCI (le scraper hors-ligne peut colorier
+  // autrement que le moteur live). Dans ce cas on garde le score live pour que
+  // la note corresponde aux couleurs affichées. Garde : ≥50 % identifiés.
   if (catalogScore !== null) {
-    score = catalogScore;
-    ({ label: scoreLabelText, tone: scoreTone } = scoreLabel(catalogScore));
+    score = reconcileScore(catalogScore, score, matched, enriched.length);
+    ({ label: scoreLabelText, tone: scoreTone } = scoreLabel(score));
   }
 
   // Tag aggregation : count + list of ingredients per tag

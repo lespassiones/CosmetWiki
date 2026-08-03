@@ -263,3 +263,29 @@ export function scoreLabel(score: number): { label: string; tone: "green" | "amb
   if (score >= 5) return { label: "Faible", tone: "orange" };
   return { label: "Faible", tone: "rose" };
 }
+
+/**
+ * Garde-fou de réconciliation score catalogue ↔ couleurs AFFICHÉES.
+ *
+ * Le score catalogue (scraper hors-ligne) peut avoir été calculé avec un
+ * coloriage différent du moteur live. Or l'app affiche les couleurs live
+ * (recalculées depuis l'INCI catalogue) → un orange visible peut coexister avec
+ * une note "Bien", ou une compo propre être notée "Moyen". On ne sert donc le
+ * score catalogue QUE s'il tombe dans la MÊME bande de qualité (tone) que le
+ * score live recalculé sur le même INCI ; sinon on sert le live (la note doit
+ * correspondre à ce que l'utilisateur voit). Garde : ≥50 % d'ingrédients
+ * identifiés. PARITÉ edge mobile (analyser/score.reconcileScore).
+ */
+export function reconcileScore(
+  catalogScore: number,
+  liveScore: number | null,
+  matched: number,
+  total: number,
+): number {
+  if (liveScore == null) return catalogScore;
+  const identRatio = total > 0 ? matched / total : 0;
+  if (identRatio < 0.5) return catalogScore;
+  return scoreLabel(catalogScore).tone === scoreLabel(liveScore).tone
+    ? catalogScore
+    : liveScore;
+}

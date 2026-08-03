@@ -36,7 +36,10 @@ import { supabaseService } from "@/lib/supabase";
 // promesses vérifiées, ingrédients réels cités) + filet déterministe anti-bruit
 // + lecture-pure versionnée (anti-cache-empoisonné). Même clé/format que le
 // mobile → cache cross-user PARTAGÉ entre web et app.
-const COHERENCE_ALGO_VERSION = "v10";
+// v11 = PARITÉ edge : passe LLM en gpt-4.1 + 2e passe CRITIQUE IA (anti-
+// invention, promesses mesurables, mapping honnête, dédup) + SUPPRESSION du
+// filet déterministe NOISE (c'est la critique IA qui reclasse le non-mesurable).
+const COHERENCE_ALGO_VERSION = "v11";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -227,17 +230,12 @@ export async function POST(req: NextRequest) {
       productType = analysis.productType;
 
       const bySlug = new Map(parent.items.map((it) => [it.slug, it] as const));
-      // Filet déterministe : phrases de TOLÉRANCE / PUBLIC / USAGE non vérifiables
-      // par un ingrédient → reclassées en « unverifiable » quel que soit le LLM.
-      const NOISE =
-        /(non\s+com[eé]dog|non\s+photosensibilis|non\s+gras|non\s+irritant|hypoallerg|test[eé].{0,18}dermatolog|recommand[eé]\s+pour|d[eé]conseill|facile\s+[aà]\s+appliquer|convient\s+[aà]\s+tous|sans\s+enfants|enfants?\s+de\s+\d|\d\s*ans\s+et\s+moins|toute\s+la\s+famille)/i;
-      const noiseUnver: UnverifiableClaim[] = [];
+      // Plus de filet déterministe NOISE : la 2e passe CRITIQUE IA
+      // (analyzeCoherence / reviewCoherencePass) reclasse elle-même le
+      // non-mesurable (périmètre, public, tolérance…) en "unverifiable". On ne
+      // rabote plus l'analyse avec une regex figée. PARITÉ edge.
       const built: CoherencePromise[] = [];
       for (const p of analysis.promises) {
-        if (NOISE.test(`${p.label} ${p.excerpt}`)) {
-          noiseUnver.push({ excerpt: p.excerpt.slice(0, 200), reason: "composition" });
-          continue;
-        }
         const foundActives = p.foundSlugs.flatMap((slug) => {
           const it = bySlug.get(slug);
           if (!it) return [];
@@ -285,7 +283,7 @@ export async function POST(req: NextRequest) {
         });
       }
       promises = built;
-      unverifiable = [...analysis.unverifiable, ...noiseUnver];
+      unverifiable = analysis.unverifiable;
       outOfScope = [];
     }
 

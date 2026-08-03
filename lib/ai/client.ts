@@ -12,6 +12,11 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY;
 
 export const AI_MODEL = "gpt-4o-mini";
+// Modèle dédié à l'analyse de cohérence "Promesses vs Formule" (2 passes :
+// extraction + critique). gpt-4o-mini n'est pas assez fiable sur l'anti-
+// invention et le mapping INCI ; gpt-4.1 suit les consignes bien mieux.
+// Basculer sur "gpt-4o" si l'account n'a pas accès à gpt-4.1. PARITÉ mobile.
+export const AI_MODEL_COHERENCE = "gpt-4.1";
 
 let _openai: OpenAI | null = null;
 export function openai(): OpenAI {
