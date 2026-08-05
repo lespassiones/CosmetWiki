@@ -15,17 +15,21 @@ export function RoutineProductCard({
   brand,
   counts,
   imageUrl,
+  href,
 }: {
   routineItemId: string;
   name: string;
   brand: string | null;
   counts: BlobCounts | null;
   imageUrl: string | null;
+  /** Destination du lien (défaut : réglages de l'item de routine). Les favoris
+   *  passent l'analyse directement (/history/[id]). */
+  href?: string;
 }) {
   const displayName = decodeHtml(name);
   return (
     <Link
-      href={`/routine/item/${routineItemId}`}
+      href={href ?? `/routine/item/${routineItemId}`}
       aria-label={`Ouvrir ${displayName}`}
       className="neu neu-hover flex items-stretch gap-4 p-3.5 transition"
     >

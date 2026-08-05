@@ -210,7 +210,7 @@ export function PromesseFlowModal({
       onClick={onClose}
     >
       <div
-        className="w-full lg:max-w-xl bg-white rounded-t-3xl lg:rounded-3xl shadow-xl pb-6 pt-3 lg:pt-6 max-h-[88vh] overflow-auto"
+        className="w-full lg:max-w-xl bg-white rounded-t-3xl lg:rounded-3xl shadow-xl pb-6 pt-3 lg:pt-6 max-h-[88vh] overflow-y-auto overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="lg:hidden mx-auto h-1 w-10 rounded-full bg-[#D1D5DB] mb-4" aria-hidden />

@@ -102,7 +102,7 @@ export function AddProductChoiceModal({
       onClick={onClose}
     >
       <div
-        className="w-full lg:max-w-lg bg-white rounded-t-3xl lg:rounded-3xl shadow-xl pb-6 pt-3 lg:pt-6 max-h-[88vh] overflow-auto"
+        className="w-full lg:max-w-lg bg-white rounded-t-3xl lg:rounded-3xl shadow-xl pb-6 pt-3 lg:pt-6 max-h-[88vh] overflow-y-auto overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="lg:hidden mx-auto h-1 w-10 rounded-full bg-[#D1D5DB] mb-4" aria-hidden />
@@ -200,7 +200,7 @@ export function AddProductChoiceModal({
                   Aucune analyse ne correspond à ta recherche.
                 </p>
               ) : (
-                <ul className="space-y-1.5 max-h-[420px] overflow-auto pr-1">
+                <ul className="space-y-1.5 max-h-[420px] overflow-y-auto overscroll-contain pr-1">
                   {filtered.map((a) => {
                     const label = decodeHtml(
                       a.product_label

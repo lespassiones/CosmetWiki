@@ -87,7 +87,13 @@ export function IngredientSpectrum({
 
   const effectiveTop5 = top5.map((r, i) => effectiveRatingAt(i + 1, r));
   const effectiveTop10 = top10.map((r, i) => effectiveRatingAt(i + 1, r));
-  const nonGreenInTop5 = effectiveTop5.filter((r) => r && r !== "Vert").length;
+  // Ne comptent comme « critiques » que l'orange et le rouge (le jaune et le
+  // vert sont exclus des chiffres).
+  const criticalInTop5 = effectiveTop5.filter(
+    (r) => r === "Orange" || r === "Rouge",
+  ).length;
+  const allGreenTop5 =
+    effectiveTop5.length > 0 && effectiveTop5.every((r) => r === "Vert");
 
   return (
     <section
@@ -145,17 +151,17 @@ export function IngredientSpectrum({
         })}
       </ul>
 
-      {nonGreenInTop5 > 0 ? (
+      {criticalInTop5 > 0 ? (
         <p className="mb-4 rounded-xl bg-rose-50/70 ring-1 ring-rose-100 px-3 py-2 text-[11px] leading-snug text-rose-700">
           <span className="font-semibold">Attention : </span>
-          {nonGreenInTop5} ingrédient{nonGreenInTop5 > 1 ? "s" : ""} non-vert
-          {nonGreenInTop5 > 1 ? "s" : ""} dans le top 5 - c&apos;est l&apos;essentiel de la formule.
+          Parmi les {effectiveTop5.length} ingrédients en quantité importante,{" "}
+          {criticalInTop5} {criticalInTop5 > 1 ? "sont critiques" : "est critique"}.
         </p>
-      ) : (
+      ) : allGreenTop5 ? (
         <p className="mb-4 text-[11px] text-[#9CA3AF]">
           Top 5 entièrement vert - la majorité de la formule est sans risque connu.
         </p>
-      )}
+      ) : null}
 
       <div className="mb-2 flex items-center gap-2">
         <h3 className="text-[13px] font-semibold">Spectre top 10</h3>
