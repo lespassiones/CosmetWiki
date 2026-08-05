@@ -323,7 +323,7 @@ export function CoherenceWizard({
                 Tu n&apos;as encore aucune analyse INCI sauvegardée. Colle la liste INCI ci-dessous pour comparer.
               </p>
             ) : (
-              <ul className="space-y-2 max-h-[420px] overflow-auto pr-1">
+              <ul className="space-y-2 max-h-[420px] overflow-y-auto overscroll-contain pr-1">
                 {options.map((o) => {
                   const isSel = selectedId === o.id;
                   const date = new Date(o.createdAt).toLocaleDateString("fr-FR", {

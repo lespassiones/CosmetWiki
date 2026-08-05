@@ -12,7 +12,7 @@ import { AddProductButton } from "@/components/routine/AddProductButton";
 import type { EligibleAnalysis } from "@/components/routine/AddProductChoiceModal";
 import { RoutineProductCard } from "@/components/routine/RoutineProductCard";
 
-export const metadata = { title: "Ma routine soin · Cosme Check" };
+export const metadata = { title: "Routine produit · Cosme Check" };
 export const dynamic = "force-dynamic";
 
 export default async function ProduitsPage() {
@@ -100,7 +100,8 @@ async function ProduitsContent() {
   const eligibleAnalyses = allAnalyses.filter((a) => !routineAnalysisIds.has(a.id));
 
   return (
-    <div className="neu-page mx-auto max-w-3xl px-5 lg:px-8 pt-4 pb-8 lg:py-12">
+    <>
+    <div className="neu-page mx-auto max-w-3xl px-5 lg:px-8 pt-4 pb-44 lg:pb-32">
       <header>
         <Link
           href="/routine"
@@ -108,7 +109,7 @@ async function ProduitsContent() {
         >
           <span aria-hidden>‹</span> Retour à ma routine
         </Link>
-        <h1 className="mt-3 text-2xl lg:text-3xl font-bold">Ma routine soin</h1>
+        <h1 className="mt-3 text-2xl lg:text-3xl font-bold">Routine produit</h1>
         <div className="mt-3 -mx-5 h-px bg-[#c5ccd6] lg:mx-0" />
       </header>
 
@@ -127,37 +128,56 @@ async function ProduitsContent() {
           </p>
         </div>
       ) : (
-        <>
-          <ul className="mt-4 space-y-3">
-            {usable.map((it) => {
-              const c = it.analyses!.result_json?.counts;
-              const counts: BlobCounts | null = c
-                ? { vert: c.vert, jaune: c.jaune, orange: c.orange, rouge: c.rouge }
-                : null;
-              return (
-                <li key={it.id}>
-                  <RoutineProductCard
-                    routineItemId={it.id}
-                    name={it.analyses!.product_label ?? it.analyses!.name ?? "Produit"}
-                    brand={it.analyses!.brand}
-                    counts={counts}
-                    imageUrl={it.analyses!.ean ? imageByEan.get(it.analyses!.ean) ?? null : null}
-                  />
-                </li>
-              );
-            })}
-          </ul>
-
-          {cfg.flag_suggestions && (
-            <Link
-              href="/routine/suggestions"
-              className="mt-6 neu-shadow flex items-center justify-center gap-2 rounded-full bg-[#F43F5E] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#E11D48]"
-            >
-              <span aria-hidden>✨</span> Proposer de meilleures alternatives
-            </Link>
-          )}
-        </>
+        <ul className="mt-4 space-y-3">
+          {usable.map((it) => {
+            const c = it.analyses!.result_json?.counts;
+            const counts: BlobCounts | null = c
+              ? { vert: c.vert, jaune: c.jaune, orange: c.orange, rouge: c.rouge }
+              : null;
+            return (
+              <li key={it.id}>
+                <RoutineProductCard
+                  routineItemId={it.id}
+                  name={it.analyses!.product_label ?? it.analyses!.name ?? "Produit"}
+                  brand={it.analyses!.brand}
+                  counts={counts}
+                  imageUrl={it.analyses!.ean ? imageByEan.get(it.analyses!.ean) ?? null : null}
+                />
+              </li>
+            );
+          })}
+        </ul>
       )}
     </div>
+
+    {/* Barre d'action FIXE : toujours visible, sans scroller. Positionnée
+        au-dessus de la nav mobile flottante (≈84px + safe-area) ; collée en bas
+        sur desktop. Bouton alternatives (vert) + lien souligné « Voir mes
+        favoris » juste en dessous. */}
+    {usable.length > 0 && (
+      <div className="fixed inset-x-0 z-40 lg:pl-60 bottom-[calc(env(safe-area-inset-bottom,0px)+84px)] lg:bottom-0">
+        <div className="mx-auto max-w-3xl px-5 lg:px-8">
+          <div className="border-t border-[#c5ccd6] bg-white/85 backdrop-blur-md pt-3 pb-3 lg:pb-4">
+            {cfg.flag_suggestions && (
+              <Link
+                href="/routine/suggestions"
+                className="neu-shadow flex items-center justify-center gap-2 rounded-full bg-[#16A34A] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#15803D]"
+              >
+                <span aria-hidden>✨</span> Proposer de meilleures alternatives
+              </Link>
+            )}
+            <div className="mt-2 text-center">
+              <Link
+                href="/routine/favoris"
+                className="text-[13px] font-semibold text-[#16A34A] underline underline-offset-2 hover:text-[#15803D]"
+              >
+                Voir mes favoris
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

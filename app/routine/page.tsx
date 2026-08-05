@@ -82,7 +82,7 @@ async function RoutineContent() {
 
   const cookieStore = await cookies();
   const sb = supabaseServer(cookieStore);
-  const [routineRes, profile] = await Promise.all([
+  const [routineRes, profile, favRes] = await Promise.all([
     sb
       .schema("cosme_check")
       .from("routine_items")
@@ -90,7 +90,14 @@ async function RoutineContent() {
       .order("added_at", { ascending: false })
       .limit(100),
     getProfile(),
+    sb
+      .schema("cosme_check")
+      .from("analyses")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("favori", true),
   ]);
+  const favoritesCount = favRes.count ?? 0;
 
   const restrictions = readUserRestrictions(profile?.preferences ?? null);
   const restrictionsCount = restrictions.families.length + restrictions.ingredients.length;
@@ -168,7 +175,7 @@ async function RoutineContent() {
         <div>
           <Link
             href="/routine/produits"
-            aria-label="Ouvrir ma routine soin"
+            aria-label="Ouvrir ma routine produit"
             className="neu neu-hover flex items-center gap-4 p-5 relative transition"
           >
             <span aria-hidden className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-rose-50">
@@ -179,7 +186,7 @@ async function RoutineContent() {
               </svg>
             </span>
             <div className="min-w-0 flex-1">
-              <div className="text-[15px] font-semibold text-[#111111]">Ma routine soin</div>
+              <div className="text-[15px] font-semibold text-[#111111]">Routine produit</div>
               {productsCount > 0 ? (
                 <div className="mt-0.5 text-[12px] text-[#6B7280]">
                   {productsCount} {productsCount > 1 ? "produits" : "produit"}
@@ -194,6 +201,37 @@ async function RoutineContent() {
           </Link>
           <p className="mt-1.5 px-1 text-[11px] italic text-[#9CA3AF]">
             Tous tes produits, reliés à ton exposition cumulée.
+          </p>
+        </div>
+
+        {/* Carte « Mes favoris » → liste des produits gardés en favori. */}
+        <div>
+          <Link
+            href="/routine/favoris"
+            aria-label="Ouvrir mes favoris"
+            className="neu neu-hover flex items-center gap-4 p-5 relative transition"
+          >
+            <span aria-hidden className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-rose-50">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#F43F5E" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6" aria-hidden>
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+              </svg>
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="text-[15px] font-semibold text-[#111111]">Mes favoris</div>
+              {favoritesCount > 0 ? (
+                <div className="mt-0.5 text-[12px] text-[#6B7280]">
+                  {favoritesCount} {favoritesCount > 1 ? "produits" : "produit"}
+                </div>
+              ) : (
+                <div className="mt-0.5 text-[12px] text-[#6B7280]">
+                  Mets des produits en favori pour les retrouver ici
+                </div>
+              )}
+            </div>
+            <span aria-hidden className="text-lg leading-none text-[#9CA3AF]">›</span>
+          </Link>
+          <p className="mt-1.5 px-1 text-[11px] italic text-[#9CA3AF]">
+            Tes produits gardés en favori (historique et alternatives).
           </p>
         </div>
 

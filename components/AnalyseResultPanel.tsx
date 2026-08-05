@@ -564,8 +564,8 @@ export function AnalyseResultPanel({
           bottom once expanded, since the `detailsExpanded` block sits between
           the toggle and this element. */}
       <AlternativesCarousel
-        ean={ean ?? null}
         category={result.catalogCategory ?? null}
+        productType={result.productType ?? null}
         brand={brand}
         productName={productLabel}
         seed={analysisId ?? null}

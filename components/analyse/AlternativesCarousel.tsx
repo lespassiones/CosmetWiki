@@ -52,8 +52,9 @@ const TONE: Record<string, { text: string; dot: string }> = {
 
 // ─── Fetch + filter hook ──────────────────────────────────────────────────────
 function useAlternatives(
-  ean: string | null,
   category: string | null,
+  productType: string | null,
+  productName: string | null,
   restrictions: UserRestrictions,
   allergiesFreeform: string | undefined,
   seed: string | null,
@@ -62,13 +63,15 @@ function useAlternatives(
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Clé de recherche : EAN prioritaire, sinon catégorie exacte (produit sans
-    // EAN). Sans EAN ni catégorie, rien à faire.
-    const queryParam = ean
-      ? `ean=${encodeURIComponent(ean)}`
-      : category
-        ? `category=${encodeURIComponent(category)}`
-        : null;
+    // On envoie les 3 signaux (catégorie catalogue, product_type, nom) ; la
+    // route les résout ROBUSTEMENT (slug spécifique → exact, sinon préfixe
+    // fonctionnel, sinon abstention) sans JAMAIS pivoter sur un bucket poubelle.
+    // Côté client on abstient aussi tôt si aucun signal n'est fourni.
+    const params = new URLSearchParams();
+    if (category) params.set("category", category);
+    if (productType) params.set("productType", productType);
+    if (productName) params.set("productName", productName);
+    const queryParam = params.toString();
     if (!queryParam) return;
     let cancelled = false;
 
@@ -126,7 +129,7 @@ function useAlternatives(
 
     load();
     return () => { cancelled = true; };
-  }, [ean, category, restrictions, allergiesFreeform, seed]);
+  }, [category, productType, productName, restrictions, allergiesFreeform, seed]);
 
   return { alternatives, loading };
 }
@@ -207,15 +210,16 @@ function AlternativesShimmer() {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export function AlternativesCarousel({
-  ean,
   category = null,
+  productType = null,
   brand,
   productName,
   seed = null,
 }: {
-  ean: string | null;
-  /** Catégorie catalogue exacte — repli quand le produit n'a pas d'EAN. */
+  /** Catégorie catalogue (slug) — utilisée SI spécifique (≥ 2 niveaux). */
   category?: string | null;
+  /** product_type de l'analyseur — repli fonctionnel si la catégorie est un bucket poubelle. */
+  productType?: string | null;
   brand: string | null;
   productName: string | null;
   /** Graine du mélange (ID d'analyse) → alternatives mélangées par tier. */
@@ -223,7 +227,14 @@ export function AlternativesCarousel({
 }) {
   const router = useRouter();
   const { restrictions, allergiesFreeform } = useRestrictions();
-  const { alternatives, loading } = useAlternatives(ean, category, restrictions, allergiesFreeform, seed);
+  const { alternatives, loading } = useAlternatives(
+    category,
+    productType,
+    productName,
+    restrictions,
+    allergiesFreeform,
+    seed,
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
 
   function handleSelect(alt: AlternativeRow) {
@@ -247,9 +258,10 @@ export function AlternativesCarousel({
     );
   }
 
-  // Nothing to show — hide the section entirely. On affiche dès qu'on a un EAN
-  // OU une catégorie catalogue (produit sans EAN), comme le mobile.
-  if (!ean && !category) return null;
+  // Nothing to show — hide the section entirely quand aucun signal exploitable
+  // (catégorie, product_type, nom) n'est disponible. La route décide ensuite si
+  // ces signaux se résolvent en une requête ou en abstention.
+  if (!category && !productType && !productName) return null;
   if (loading) return <AlternativesShimmer />;
   if (alternatives.length === 0) {
     return (

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAnon } from "@/lib/supabase";
 import { colorCapScore } from "@/lib/essentiel/engine";
 import { scoreLabel } from "@/lib/inciParser";
+import { resolveAlternativesQuery } from "@/lib/alternatives/categoryResolve";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,13 +21,25 @@ export type AlternativeRow = {
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
-  const ean = (url.searchParams.get("ean") ?? "").trim();
-  // Repli par catégorie quand le produit n'a pas d'EAN (produit internet /
-  // saisie manuelle) — miroir du mobile useAlternatives. Sans cela, le web
-  // n'affichait AUCUNE alternative dès que l'EAN manquait.
+  // `ean` n'est plus utilisé pour pivoter la requête (l'ancien
+  // `cosme_check_get_alternatives(p_ean)` retombait sur la catégorie propre —
+  // souvent un bucket poubelle — du produit, d'où les recos hors-sujet). Il
+  // reste accepté seulement pour la variété de la clé de requête côté client.
   const category = (url.searchParams.get("category") ?? "").trim();
-  if (!ean && !category) {
-    return NextResponse.json({ alternatives: [] }, { status: 400 });
+  const productType = (url.searchParams.get("productType") ?? "").trim();
+  const productName = (url.searchParams.get("productName") ?? "").trim();
+
+  // Résolution ROBUSTE : slug catalogue spécifique → match EXACT ; sinon
+  // product_type → préfixe ; sinon nom → préfixe ; sinon ABSTENTION. On ne
+  // pivote JAMAIS sur un bucket poubelle (« gel », « sunscreen », null…).
+  const query = resolveAlternativesQuery({
+    catalogCategory: category || null,
+    productType: productType || null,
+    productName: productName || null,
+  });
+  if (!query) {
+    // Aucun signal fiable → rien plutôt qu'une reco hors-sujet.
+    return NextResponse.json({ alternatives: [] });
   }
 
   const limit = Math.min(
@@ -38,19 +51,20 @@ export async function GET(req: NextRequest) {
     parseInt(url.searchParams.get("offset") ?? "0", 10) || 0,
   );
 
-  // EAN prioritaire (même catégorie via la ligne catalogue) ; sinon match exact
-  // de catégorie. Les deux RPC renvoient la même forme AlternativeRow.
-  const { data, error } = ean
-    ? await supabaseAnon().rpc("cosme_check_get_alternatives", {
-        p_ean: ean,
-        p_limit: limit,
-        p_offset: offset,
-      })
-    : await supabaseAnon().rpc("cosme_check_alternatives_by_category_exact", {
-        p_category: category,
-        p_limit: limit,
-        p_offset: offset,
-      });
+  // Slug spécifique → match EXACT (niveau feuille) ; préfixe fonctionnel →
+  // LIKE `l1/l2/%`. Les deux RPC renvoient la même forme AlternativeRow.
+  const { data, error } =
+    query.kind === "exact"
+      ? await supabaseAnon().rpc("cosme_check_alternatives_by_category_exact", {
+          p_category: query.value,
+          p_limit: limit,
+          p_offset: offset,
+        })
+      : await supabaseAnon().rpc("cosme_check_alternatives_by_category_prefix", {
+          p_prefix: query.value,
+          p_limit: limit,
+          p_offset: offset,
+        });
 
   if (error) {
     console.error("[alternatives] RPC error:", error.message);

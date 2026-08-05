@@ -411,8 +411,11 @@ function SkinTypeFieldset<T extends string>({
 }
 
 // Shared chrome for the dropdown trigger button (used by Single + Multi).
+// `items-*` is intentionally omitted here: Single aligns its label vertically
+// centered, Multi aligns to the top so the chevron stays put when the selected
+// chips wrap onto several lines.
 const DROPDOWN_TRIGGER =
-  "flex w-full items-center justify-between gap-2 rounded-xl bg-[#F9FAFB] ring-1 ring-[#E5E7EB] px-3.5 py-2.5 text-left text-[13px] text-ink hover:bg-white transition";
+  "flex w-full justify-between gap-2 rounded-xl bg-[#F9FAFB] ring-1 ring-[#E5E7EB] px-3.5 py-2.5 text-left text-[13px] text-ink hover:bg-white transition";
 const DROPDOWN_PANEL =
   "mt-2 rounded-xl bg-white ring-1 ring-[#E5E7EB] divide-y divide-[#F3F4F6] max-h-60 overflow-y-auto";
 
@@ -459,12 +462,14 @@ function SingleSelectDropdown<T extends string>({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open ? "true" : "false"}
         aria-label={ariaLabel}
-        className={DROPDOWN_TRIGGER}
+        className={`${DROPDOWN_TRIGGER} items-center`}
       >
-        <span className={`truncate ${!selected ? "text-[#9CA3AF]" : ""}`}>
+        <span className={`min-w-0 flex-1 truncate ${!selected ? "text-[#9CA3AF]" : ""}`}>
           {summary}
         </span>
-        <ChevronIcon open={open} />
+        <span className="shrink-0">
+          <ChevronIcon open={open} />
+        </span>
       </button>
       {open && (
         <ul className={DROPDOWN_PANEL}>
@@ -523,6 +528,8 @@ function MultiSelectDropdown<T extends string>({
   const summary =
     selectedLabels.length === 0 ? summaryWhenEmpty : selectedLabels.join(", ");
   const checkColor = accent === "sky" ? "accent-sky-500" : "accent-rose-500";
+  const chipColor =
+    accent === "sky" ? "bg-sky-50 text-sky-700" : "bg-rose-50 text-rose-700";
 
   return (
     <div className="relative">
@@ -530,19 +537,28 @@ function MultiSelectDropdown<T extends string>({
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open ? "true" : "false"}
-        className={DROPDOWN_TRIGGER}
+        className={`${DROPDOWN_TRIGGER} items-start`}
+        title={summary}
       >
-        {/* `min-w-0` is required so the flex child can actually shrink below
-            its intrinsic width — without it the `truncate` is a no-op and a
-            long summary ("Sécheresse, Pores dilatés, Excès de sébum…")
-            pushes the dropdown out of its parent card. */}
-        <span
-          className={`min-w-0 flex-1 truncate ${selectedLabels.length === 0 ? "text-[#9CA3AF]" : ""}`}
-          title={summary}
-        >
-          {summary}
-        </span>
-        <span className="shrink-0">
+        {/* Les choix sélectionnés s'affichent en puces qui passent à la ligne :
+            rien n'est tronqué ni « coupé » hors de la carte, même avec beaucoup
+            de sélections. (L'ancien `truncate` sur une seule ligne coupait le
+            résumé au bord de la carte, très visible sur iPhone.) */}
+        {selectedLabels.length === 0 ? (
+          <span className="min-w-0 flex-1 text-[#9CA3AF]">{summaryWhenEmpty}</span>
+        ) : (
+          <span className="min-w-0 flex-1 flex flex-wrap gap-1.5">
+            {selectedLabels.map((l) => (
+              <span
+                key={l}
+                className={`inline-block rounded-full px-2 py-0.5 text-[12px] font-medium ${chipColor}`}
+              >
+                {l}
+              </span>
+            ))}
+          </span>
+        )}
+        <span className="shrink-0 mt-px">
           <ChevronIcon open={open} />
         </span>
       </button>
