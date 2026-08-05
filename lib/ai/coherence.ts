@@ -1260,7 +1260,7 @@ async function runExtractionPass(
     return await callWithFallback<CoherenceAnalysis | null>({
       feature: "categorize",
       userId: userId ?? null,
-      timeoutMs: 30_000,
+      timeoutMs: 20_000,
       primary: async () => {
         if (!hasOpenAI()) throw new Error("openai disabled");
         const resp = await openai().chat.completions.create({
@@ -1356,11 +1356,11 @@ export async function analyzeCoherence(
   const empty: CoherenceAnalysis = { productType: "autre", promises: [], unverifiable: [] };
   if (!hasOpenAI() && !hasMistral()) return empty;
   const knownSlugs = new Set(items.map((it) => it.slug));
-
+  // PASSE UNIQUE gpt-4.1. La 2e passe critique a été RETIRÉE : elle doublait la
+  // latence (jusqu'à 25 s) → 504 sur la route /api/coherence (maxDuration 25s),
+  // et le compute Vercel/OpenAI x2. L'éval sur 20 produits a montré qu'elle ne
+  // changeait rien vs la passe 1. Toutes les règles sont dans le prompt de la
+  // passe 1. reviewCoherencePass/COHERENCE_REVIEW_SYSTEM restent définis, non appelés.
   const pass1 = await runExtractionPass(description, items, knownSlugs, userId);
-  if (!pass1) return empty;
-
-  if (!hasOpenAI()) return pass1; // critique OpenAI only
-  const reviewed = await reviewCoherencePass(description, items, pass1, knownSlugs, userId);
-  return reviewed ?? pass1;
+  return pass1 ?? empty;
 }
