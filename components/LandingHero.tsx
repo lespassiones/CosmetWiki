@@ -305,10 +305,12 @@ function AppleStoreBadge() {
 
 function GooglePlayBadge() {
   return (
-    <div
-      role="img"
-      aria-label="Bientôt sur Google Play"
-      className="flex h-[44px] w-[150px] items-center gap-2 rounded-lg bg-black px-3 text-white"
+    <a
+      href="https://play.google.com/store/apps/details?id=com.cosmecheck.app&hl=fr"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Télécharger sur Google Play"
+      className="flex h-[44px] w-[150px] items-center gap-2 rounded-lg bg-black px-3 text-white transition hover:brightness-110 active:scale-95"
     >
       <svg viewBox="0 0 60 64" aria-hidden className="h-7 w-7">
         <path d="M0 5.4v53.2c0 1.7 1.4 3 3 3l30-30L3 1.5C1.4 1.8 0 3.2 0 5.4z" fill="#4285F4" />
@@ -321,6 +323,6 @@ function GooglePlayBadge() {
         <span className="text-[9px] tracking-wide">Disponible sur</span>
         <span className="text-[15px] font-semibold tracking-tight">Google Play</span>
       </div>
-    </div>
+    </a>
   );
 }
