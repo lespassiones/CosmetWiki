@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { phCapture } from "@/lib/posthogServer";
 import { supabaseAnon } from "@/lib/supabase";
-import { parseInciList, computeScore, scoreLabel, reconcileScore, type ColorRating } from "@/lib/inciParser";
+import { parseInciList, computeScore, scoreLabel, reconcileScore, cacheMatchesInci, type ColorRating } from "@/lib/inciParser";
 import { hashInci } from "@/lib/cacheHash";
 import { apiGate } from "@/lib/apiGate";
 import { idempotencyKey, idempotencyLookup, idempotencyStore } from "@/lib/idempotency";
@@ -254,7 +254,30 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      if (precomputed) {
+      // GARDE-FOU DU CACHE EAN (21 août 2026, parité edge mobile). Deux
+      // conditions CUMULATIVES avant de servir une analyse pré-calculée :
+      //   - assez d'items (anti-troncature : un batch ETL a écrit des lignes à 1
+      //     item alors que l'INCI réel en compte bien plus) ;
+      //   - les BONS items (anti-cache-d'un-autre-produit : l'EAN du shampoing
+      //     Vagance servait l'analyse d'une eau micellaire, POLOXAMER 184 orange
+      //     en 4e position, parce que rien n'invalidait le cache quand l'INCI
+      //     catalogue changeait).
+      // Cache rejeté = on tombe dans le pipeline live, qui recalcule et réécrit
+      // la ligne → la table se répare d'elle-même. (Le cache par hash d'INCI plus
+      // bas est sûr par construction : sa clé EST le contenu.)
+      const freshTokens = parseInciList(effectiveText);
+      const precomputedItems =
+        precomputed && Array.isArray((precomputed as AnalyseResponse).items)
+          ? (precomputed as AnalyseResponse).items ?? []
+          : [];
+      const cacheTrustworthy =
+        (freshTokens.length < 5 || precomputedItems.length >= freshTokens.length * 0.5) &&
+        cacheMatchesInci(
+          precomputedItems as ReadonlyArray<{ input?: string }>,
+          freshTokens.map((t) => t.raw),
+        );
+
+      if (precomputed && cacheTrustworthy) {
         const cached_result = precomputed as AnalyseResponse;
         // Recompute thresholdContext from items (stored as null by ETL).
         cached_result.items = recomputeThresholdContext(cached_result.items ?? []);
