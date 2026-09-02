@@ -274,7 +274,7 @@ function KpiRow() {
   );
 }
 
-/** Badges App Store + Google Play (visuels, non cliquables pour l'instant). */
+/** Badges App Store + Google Play (liens vers les fiches des stores). */
 function StoreBadges({ align = "center" }: { align?: "center" | "left" }) {
   const justify = align === "left" ? "justify-start" : "justify-center";
   return (
@@ -287,10 +287,12 @@ function StoreBadges({ align = "center" }: { align?: "center" | "left" }) {
 
 function AppleStoreBadge() {
   return (
-    <div
-      role="img"
-      aria-label="Bientôt sur l'App Store"
-      className="flex h-[44px] w-[140px] items-center gap-2 rounded-lg bg-black px-3 text-white"
+    <a
+      href="https://apps.apple.com/us/app/cosme-check-scan-cosm%C3%A9tique/id6803527040"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Télécharger sur l'App Store"
+      className="flex h-[44px] w-[140px] items-center gap-2 rounded-lg bg-black px-3 text-white transition hover:brightness-110 active:scale-95"
     >
       <svg viewBox="0 0 24 24" aria-hidden className="h-7 w-7 fill-current">
         <path d="M17.05 12.04c-.02-2.3 1.88-3.4 1.96-3.45-1.07-1.56-2.74-1.78-3.33-1.8-1.42-.15-2.77.84-3.5.84-.73 0-1.84-.82-3.03-.79-1.56.02-3 .91-3.8 2.31-1.62 2.82-.41 6.97 1.17 9.25.77 1.12 1.69 2.37 2.89 2.33 1.16-.05 1.6-.75 3-.75s1.8.75 3.03.72c1.25-.02 2.04-1.14 2.8-2.27.88-1.3 1.25-2.56 1.27-2.62-.03-.02-2.44-.94-2.46-3.77zM14.84 5.27c.64-.78 1.07-1.86.95-2.93-.92.04-2.04.61-2.7 1.39-.6.69-1.12 1.8-.98 2.85 1.03.08 2.08-.52 2.73-1.31z" />
@@ -299,16 +301,18 @@ function AppleStoreBadge() {
         <span className="text-[9px] tracking-wide">Télécharger sur</span>
         <span className="text-[15px] font-semibold tracking-tight">App Store</span>
       </div>
-    </div>
+    </a>
   );
 }
 
 function GooglePlayBadge() {
   return (
-    <div
-      role="img"
-      aria-label="Bientôt sur Google Play"
-      className="flex h-[44px] w-[150px] items-center gap-2 rounded-lg bg-black px-3 text-white"
+    <a
+      href="https://play.google.com/store/apps/details?id=com.cosmecheck.app"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Télécharger sur Google Play"
+      className="flex h-[44px] w-[150px] items-center gap-2 rounded-lg bg-black px-3 text-white transition hover:brightness-110 active:scale-95"
     >
       <svg viewBox="0 0 60 64" aria-hidden className="h-7 w-7">
         <path d="M0 5.4v53.2c0 1.7 1.4 3 3 3l30-30L3 1.5C1.4 1.8 0 3.2 0 5.4z" fill="#4285F4" />
@@ -321,6 +325,6 @@ function GooglePlayBadge() {
         <span className="text-[9px] tracking-wide">Disponible sur</span>
         <span className="text-[15px] font-semibold tracking-tight">Google Play</span>
       </div>
-    </div>
+    </a>
   );
 }
