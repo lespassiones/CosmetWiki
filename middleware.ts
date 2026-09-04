@@ -24,6 +24,7 @@ const SKIP_AUTH_PREFIXES = [
   "/a/", // analyses partagées en lecture publique (jamais de session lue)
   "/maintenance",
   "/beta", // funnel bêta public (capture email + formulaire de retour)
+  "/dl", // lien intelligent du QR code imprimé : redirection pure, aucune session lue
 ];
 
 function isSkipAuthPath(pathname: string): boolean {
