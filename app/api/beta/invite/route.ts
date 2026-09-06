@@ -51,9 +51,9 @@ export async function POST(req: Request) {
     const email = t.email as string;
     const firstName = (t.first_name as string | null) ?? null;
     const token = t.token as string;
-    const accessUrl = `${SITE_URL}/auth/sign-up`;
+    const accessUrl = `${SITE_URL}/dl?c=beta`;
     const feedbackUrl = `${SITE_URL}/beta/retour?token=${token}`;
-    // Lien d'accès tracké : /beta/go note le clic puis redirige vers sign-up.
+    // Lien d'accès tracké : /beta/go note le clic puis redirige vers /dl.
     const goUrl = `${SITE_URL}/beta/go?token=${token}`;
 
     // Ajoute à la liste Brevo (avec BETA_URL + BETA_GO) puis envoie l'invitation.

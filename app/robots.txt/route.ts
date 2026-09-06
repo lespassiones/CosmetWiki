@@ -20,20 +20,27 @@ export const dynamic = "force-static";
  *     à ChatGPT / Claude / Perplexity (GEO).
  *   - Les aspirateurs SEO sans valeur (MJ12bot, PetalBot, DotBot, MegaIndex)
  *     sont bannis : ils consommaient du crawl sans jamais envoyer un visiteur.
- *   - Les pages privées (historique, routine, profil...) sont exclues :
- *     elles redirigent vers la sign-in et gaspillent le budget de crawl.
+ *   - Les anciennes routes de la web app connectée (historique, routine,
+ *     profil, comparaison, promesses, conseiller, offre, produits, auth) sont
+ *     exclues. Elles n'existent plus : la middleware les redirige en 308 vers
+ *     la page d'accueil. On les garde listées ici pour que les crawlers
+ *     cessent de les demander au lieu de suivre 40 redirections par passage.
  */
 
 const PRIVATE_PATHS = [
   "/api/",
-  "/history",
-  "/routine",
-  "/profile",
+  "/advisor",
+  "/analyse",
+  "/auth",
   "/compare",
-  "/onboarding",
-  "/auth/forgot-password",
-  "/auth/callback",
+  "/history",
   "/maintenance",
+  "/offre",
+  "/onboarding",
+  "/produits",
+  "/profile",
+  "/promesses",
+  "/routine",
 ];
 
 // Bots des moteurs de réponse IA + collecte pour entraînement LLM.

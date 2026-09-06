@@ -1,18 +1,20 @@
 /**
  * Crédits bêta - CÔTÉ SERVEUR UNIQUEMENT.
  *
- * Les 50 crédits non renouvelables sont accordés quand l'inscription vient du
- * LIEN bêta (cookie `cc_beta` posé par /beta/go), quel que soit l'email ou la
- * méthode (email/mot de passe ou Google). C'est le complément du trigger DB
- * qui, lui, matche par email (utile pour le mobile ou un même email).
+ * Les 50 crédits non renouvelables sont accordés par le trigger base de données,
+ * qui matche l'EMAIL de l'invitation à la création du compte, dans
+ * l'application. Cette fonction reste le point d'entrée manuel et idempotent
+ * pour créditer un compte depuis l'admin (testeur inscrit sous un autre email
+ * que celui invité, par exemple).
+ *
+ * Le cookie `cc_beta` et son constante ont été retirés avec l'inscription web :
+ * ils permettaient d'accorder le bonus à un compte créé SUR LE SITE. Plus
+ * d'inscription sur le site, plus de cookie à lire.
  *
  * Idempotent : un compte ne peut avoir qu'UN grant `grant_type='beta'`.
- * Fail-open : ne bloque jamais l'inscription.
+ * Fail-open : ne bloque jamais rien.
  */
 import { supabaseService } from "@/lib/supabase";
-
-/** Cookie marquant un navigateur venu d'un lien d'invitation bêta. */
-export const BETA_COOKIE = "cc_beta";
 
 /** Accorde 50 crédits non renouvelables (grant_type='beta') à un compte, une
  *  seule fois. Sûr à rappeler (idempotent). */

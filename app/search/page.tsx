@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { SearchBar } from "@/components/SearchBar";
 import { MobileMenu } from "@/components/MobileMenu";
+import { DownloadAppButton } from "@/components/download/DownloadAppButton";
 import { supabaseAnon, type SearchHit } from "@/lib/supabase";
 
 type SearchPageProps = {
@@ -63,7 +64,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             Comment ça marche
           </Link>
         </nav>
-        <MobileMenu />
+        <div className="flex items-center gap-2">
+          {/* Visible à partir de `sm` seulement : en dessous, c'est le tiroir
+              `MobileMenu` qui porte ce même bouton. */}
+          <DownloadAppButton
+            campaign="recherche"
+            className="hidden rounded-full bg-[#F43F5E] px-4 py-1.5 text-[13px] font-semibold text-white transition hover:bg-[#E11D48] sm:inline-flex"
+          >
+            Télécharger l&apos;app
+          </DownloadAppButton>
+          <MobileMenu />
+        </div>
       </header>
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16">

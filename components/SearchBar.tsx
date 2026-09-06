@@ -3,28 +3,29 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SearchHit } from "@/lib/supabase";
-import { ProcessingOverlay, randomProcessingTotal } from "./ProcessingOverlay";
+import { DownloadAppButton } from "@/components/download/DownloadAppButton";
 
+/**
+ * Recherche d'ingrédient du site public.
+ *
+ * Elle ne fait plus qu'une chose : trouver un ingrédient et mener à sa fiche
+ * `/i/[slug]` ou à la page `/search`. L'analyse d'une liste INCI collée a
+ * disparu avec la web app, ainsi que la prop `onAnalyseList` (utilisée par
+ * `HomeShell`) et le mode `alwaysAsList` de la modale « Coller INCI ».
+ *
+ * En revanche on continue de DÉTECTER une liste collée : sans ça, coller une
+ * composition entière renverrait « aucun ingrédient trouvé », une impasse. On
+ * affiche à la place un bouton qui mène au téléchargement de l'application,
+ * seul endroit où l'analyse existe désormais.
+ *
+ * `ProcessingOverlay` a aussi été retiré : c'était une animation d'attente
+ * artificielle de plusieurs secondes avant une simple navigation. Le clic mène
+ * maintenant directement à la fiche.
+ */
 type Props = {
   autoFocus?: boolean;
   placeholder?: string;
   size?: "lg" | "md";
-  /**
-   * Optional callback invoked when the user submits a multi-ingredient list.
-   * When provided, the SearchBar does NOT navigate away - the parent owns the
-   * processing overlay and the result rendering. This is what HomeShell uses
-   * to keep the analyse on the home page.
-   */
-  onAnalyseList?: (text: string) => void | Promise<void>;
-  /**
-   * Force "list mode" : tout texte saisi ou collé est traité comme une INCI
-   * et routé vers /api/analyser, sans passer par l'autocomplete d'ingrédient
-   * unique. Utilisé dans la modal "Coller INCI" où l'intention de l'utilisateur
-   * est sans ambiguïté — le backend gère ensuite n'importe quel format
-   * (commas, slashes, all-caps, OCR, sans séparateurs…) via parseInciWithAI
-   * et splitInciWithGpt.
-   */
-  alwaysAsList?: boolean;
 };
 
 const TEXTAREA_MIN_PX = 28;   // single-line height
@@ -34,8 +35,6 @@ export function SearchBar({
   autoFocus = false,
   placeholder = "Ex : Glycerin, Phenoxyethanol, 122-99-6…",
   size = "lg",
-  onAnalyseList,
-  alwaysAsList = false,
 }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchHit[]>([]);
@@ -44,10 +43,6 @@ export function SearchBar({
   const [loading, setLoading] = useState(false);
   const [hpField, setHpField] = useState("");
   const [focused, setFocused] = useState(false);
-  const [processing, setProcessing] = useState<{ active: boolean; budget: number }>({
-    active: false,
-    budget: 0,
-  });
   /**
    * Sticky "list mode" flag set whenever the user pastes content that's clearly
    * more than a single ingredient (≥ 3 words or > 30 chars). It bypasses the
@@ -96,7 +91,7 @@ export function SearchBar({
       setLoading(false);
       return;
     }
-    if (alwaysAsList || pastedAsList || looksLikeIngredientList(trimmed)) {
+    if (pastedAsList || looksLikeIngredientList(trimmed)) {
       setResults([]);
       setIsOpen(false);
       setLoading(false);
@@ -143,35 +138,14 @@ export function SearchBar({
     size === "lg" ? "text-[14px] sm:text-lg" : "text-[13px] sm:text-sm";
   const iconSize = size === "lg" ? "h-4 w-4 sm:h-5 sm:w-5" : "h-4 w-4";
 
-  function startProcessingThen(action: () => void) {
-    const budget = randomProcessingTotal();
-    setProcessing({ active: true, budget });
-    setIsOpen(false);
-    setTimeout(() => {
-      setProcessing({ active: false, budget: 0 });
-      action();
-    }, budget);
-  }
-
   function go(hit: SearchHit) {
-    startProcessingThen(() => router.push(`/i/${hit.slug}`));
+    setIsOpen(false);
+    router.push(`/i/${hit.slug}`);
   }
 
-  function submitList(trimmed: string) {
-    if (onAnalyseList) {
-      // Parent (HomeShell) owns the overlay + result rendering - clear
-      // the query and hand off.
-      void onAnalyseList(trimmed);
-      setQuery("");
-      setIsOpen(false);
-    } else {
-      // Outside the home shell : send the list to the home page, which owns
-      // the analyser flow. No local overlay - HomeShell will show its own
-      // once mounted, so we avoid playing the animation twice.
-      const blob = encodeURIComponent(trimmed.slice(0, 6000));
-      setIsOpen(false);
-      router.push(`/?inci=${blob}`);
-    }
+  function goToAllResults(trimmed: string) {
+    setIsOpen(false);
+    router.push(`/search?q=${encodeURIComponent(trimmed)}`);
   }
 
   function onPaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
@@ -192,16 +166,11 @@ export function SearchBar({
     if (e.key === "Enter" && !e.shiftKey && !e.altKey) {
       e.preventDefault();
       const trimmed = query.trim();
-      if (alwaysAsList || pastedAsList || looksLikeIngredientList(trimmed)) {
-        submitList(trimmed);
-        return;
-      }
+      // Liste collée : rien à chercher côté ingrédient unique. L'utilisateur
+      // doit passer par l'app, le bouton dédié est affiché sous le champ.
+      if (pastedAsList || looksLikeIngredientList(trimmed)) return;
       if (results[highlight]) go(results[highlight]);
-      else if (trimmed) {
-        startProcessingThen(() =>
-          router.push(`/search?q=${encodeURIComponent(trimmed)}`),
-        );
-      }
+      else if (trimmed) goToAllResults(trimmed);
       return;
     }
     if (e.key === "ArrowDown") {
@@ -218,21 +187,12 @@ export function SearchBar({
   }
 
   const hasResults = results.length > 0;
-  const isList = alwaysAsList || pastedAsList || looksLikeIngredientList(query);
+  const isList = pastedAsList || looksLikeIngredientList(query);
   const showDropdown =
     !isList && isOpen && (hasResults || (query.trim().length > 0 && !loading));
 
   return (
     <div className="relative w-full">
-      {processing.active ? (
-        <ProcessingOverlay
-          totalMs={processing.budget}
-          headline={
-            isList ? "On décode la composition…" : "On cherche dans la base…"
-          }
-        />
-      ) : null}
-
       {/* honeypot */}
       <input
         type="text"
@@ -309,32 +269,38 @@ export function SearchBar({
           )}
         </div>
 
+        {/* Liste INCI détectée : l'analyse se fait dans l'application. On le dit
+            explicitement plutôt que de laisser la recherche échouer. */}
         {isList && (
-          <div className="mt-2.5 flex items-center justify-end gap-2">
-            {query ? (
-              <button
-                type="button"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  setQuery("");
-                  inputRef.current?.focus();
-                }}
-                className="rounded-full px-3 py-1.5 text-[12px] font-medium text-ink-subtle transition hover:bg-black/[0.04] hover:text-ink"
+          <div className="mt-2.5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-[12.5px] leading-snug text-ink-muted">
+              On dirait une composition complète. Son analyse se fait dans
+              l&apos;application.
+            </p>
+            <div className="flex items-center justify-end gap-2">
+              {query ? (
+                <button
+                  type="button"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setQuery("");
+                    inputRef.current?.focus();
+                  }}
+                  className="rounded-full px-3 py-1.5 text-[12px] font-medium text-ink-subtle transition hover:bg-black/[0.04] hover:text-ink"
+                >
+                  Effacer
+                </button>
+              ) : null}
+              <DownloadAppButton
+                campaign="recherche_inci"
+                modalTitle="Colle ta liste INCI dans l'app"
+                modalSubtitle="L'analyse d'une composition complète, ingrédient par ingrédient, se fait dans l'application Cosme Check. Elle est gratuite."
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_4px_14px_-4px_rgba(16,185,129,0.6)] transition-all hover:bg-emerald-700 hover:shadow-[0_8px_22px_-6px_rgba(16,185,129,0.7)]"
+                withArrow
               >
-                Effacer
-              </button>
-            ) : null}
-            <button
-              type="button"
-              onMouseDown={(e) => {
-                e.preventDefault();
-                submitList(query.trim());
-              }}
-              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_4px_14px_-4px_rgba(16,185,129,0.6)] transition-all hover:bg-emerald-700 hover:shadow-[0_8px_22px_-6px_rgba(16,185,129,0.7)]"
-            >
-              Analyser
-              <span aria-hidden>→</span>
-            </button>
+                Analyser dans l&apos;app
+              </DownloadAppButton>
+            </div>
           </div>
         )}
       </div>
@@ -390,9 +356,7 @@ export function SearchBar({
                   type="button"
                   onMouseDown={(e) => {
                     e.preventDefault();
-                    startProcessingThen(() =>
-                      router.push(`/search?q=${encodeURIComponent(query.trim())}`),
-                    );
+                    goToAllResults(query.trim());
                   }}
                   className="flex w-full items-center justify-center gap-2 px-5 py-3.5 text-sm font-medium text-rose-700 hover:bg-rose-50/60"
                 >

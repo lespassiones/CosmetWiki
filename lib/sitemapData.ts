@@ -73,14 +73,16 @@ export function staticRoutes(): StaticRoute[] {
     ...(INDEX_INGREDIENTS
       ? ([{ path: "/ingredients", priority: 0.9, changeFrequency: "weekly" }] as StaticRoute[])
       : []),
-    { path: "/produits", priority: 0.8, changeFrequency: "weekly" },
     { path: "/faq", priority: 0.8, changeFrequency: "monthly" },
     { path: "/blog", priority: 0.8, changeFrequency: "weekly" },
     { path: "/en-savoir-plus", priority: 0.7, changeFrequency: "monthly" },
-    { path: "/offre", priority: 0.7, changeFrequency: "monthly" },
     { path: "/equipe", priority: 0.5, changeFrequency: "yearly" },
     { path: "/contact", priority: 0.5, changeFrequency: "yearly" },
-    { path: "/auth/sign-in", priority: 0.4, changeFrequency: "yearly" },
+    // Retirés du sitemap avec la web app : `/produits` (navigation catalogue),
+    // `/offre` (page Premium, remplacée par la section tarifs de la home) et
+    // `/auth/sign-in` (il n'y a plus de connexion sur le site). La middleware
+    // les redirige en 308 vers la page d'accueil : Google transfère le signal
+    // au lieu de tomber sur des 404.
     { path: "/cgu", priority: 0.3, changeFrequency: "yearly" },
     { path: "/confidentialite", priority: 0.3, changeFrequency: "yearly" },
     { path: "/mentions-legales", priority: 0.3, changeFrequency: "yearly" },

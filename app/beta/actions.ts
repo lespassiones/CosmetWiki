@@ -119,7 +119,7 @@ export async function joinBeta(input: {
       const sent = await sendBetaInvitationEmail({
         email,
         firstName: betaFirstName,
-        accessUrl: `${SITE_URL}/auth/sign-up`,
+        accessUrl: `${SITE_URL}/dl?c=beta`,
         feedbackUrl,
       });
       if (!sent.synced) {

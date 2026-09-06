@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
 import { FadeInSection } from "@/components/FadeInSection";
+import { DownloadAppButton } from "@/components/download/DownloadAppButton";
 
 type Value = {
   image: string;
@@ -95,15 +95,13 @@ function ValueCard({ value }: { value: Value }) {
         {value.subtitle}
       </p>
 
-      <Link
-        href="/auth/sign-in"
+      <DownloadAppButton
+        campaign="valeurs"
+        withArrow
         className="group mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[#F43F5E] to-[#E11D48] px-6 py-2.5 text-[14px] font-semibold text-white shadow-[0_10px_24px_-8px_rgba(244,63,94,0.5),inset_0_1px_0_rgba(255,255,255,0.30)] transition hover:brightness-110 active:scale-[0.98]"
       >
         Commencer gratuitement
-        <span aria-hidden className="transition group-hover:translate-x-0.5">
-          →
-        </span>
-      </Link>
+      </DownloadAppButton>
     </article>
   );
 }

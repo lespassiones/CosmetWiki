@@ -3,16 +3,17 @@
 import { useRouter } from "next/navigation";
 
 /**
- * Real "Retour" back button shown at the top of an ingredient detail page
- * when the user came from an analysis. Uses `router.back()` so it lands on
- * the EXACT analyse the user clicked from — be it `/analyse?inci=…`,
- * `/history/[id]`, or any other page — with the ingredients modal restored
- * (the analyse panel persists its UI flags in sessionStorage so a back-nav
- * re-opens the modal automatically).
+ * Bouton « Retour » en haut d'une fiche ingrédient.
  *
- * Falls back to the source URL passed via `?from=<url>` when there is no
- * history (e.g. the user opened the ingredient page via a shared link in a
- * new tab), and ultimately to `/` if neither is available.
+ * Il utilise `router.back()` pour ramener l'utilisateur exactement d'où il
+ * vient, la page de recherche ou l'index alphabétique la plupart du temps.
+ * Sans historique (fiche ouverte directement depuis un lien partagé dans un
+ * nouvel onglet), il retombe sur l'URL passée en `?from=<url>`, puis sur `/`.
+ *
+ * Note : ce bouton servait aussi à revenir sur une analyse en cours
+ * (`/analyse?inci=…`, `/history/[id]`) en restaurant la modale d'ingrédients.
+ * Ces pages ont été retirées avec la web app, donc `?from=` ne pointe plus
+ * jamais vers une analyse. Le comportement de repli, lui, reste correct.
  */
 export function BackToAnalyseButton({ fromUrl }: { fromUrl?: string | null }) {
   const router = useRouter();

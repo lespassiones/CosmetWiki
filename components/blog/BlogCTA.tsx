@@ -1,20 +1,29 @@
-import Link from "next/link";
+/**
+ * Encart de conversion en bas des articles du blog.
+ *
+ * Il ne renvoie plus vers une connexion : le site n'en a plus. Le bouton mène
+ * au téléchargement, avec la détection d'appareil habituelle (App Store sur
+ * iPhone, Google Play sur Android, modale sur ordinateur).
+ *
+ * `ctaHref` a disparu volontairement : un article ne doit plus pouvoir pointer
+ * un CTA vers une route arbitraire. `ctaLabel` reste réglable pour adapter le
+ * verbe au sujet de l'article.
+ */
+import { DownloadAppButton } from "@/components/download/DownloadAppButton";
 
 type BlogCTAProps = {
   eyebrow?: string;
   title?: string;
   description?: string;
   ctaLabel?: string;
-  ctaHref?: string;
   note?: string;
 };
 
 export function BlogCTA({
   eyebrow = "Analyse gratuite",
   title = "Vérifiez la composition de vos cosmétiques",
-  description = "Connectez-vous à Cosme Check pour obtenir la note ingrédient par ingrédient de vos produits, identifier les composants controversés et comparer avec des alternatives plus propres.",
-  ctaLabel = "Se connecter",
-  ctaHref = "/auth/sign-in",
+  description = "Téléchargez Cosme Check pour obtenir la note ingrédient par ingrédient de vos produits, identifier les composants controversés et comparer avec des alternatives plus propres.",
+  ctaLabel = "Télécharger l'app",
   note = "Gratuit · Sans engagement",
 }: BlogCTAProps) {
   return (
@@ -30,13 +39,13 @@ export function BlogCTA({
         {description}
       </p>
       <div className="mt-6 flex flex-wrap items-center gap-4">
-        <Link
-          href={ctaHref}
+        <DownloadAppButton
+          campaign="blog"
+          withArrow
           className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-[14px] font-semibold text-slate-900 transition hover:bg-slate-100"
         >
           {ctaLabel}
-          <span aria-hidden>→</span>
-        </Link>
+        </DownloadAppButton>
         {note ? (
           <span className="text-[13px] text-slate-400">{note}</span>
         ) : null}

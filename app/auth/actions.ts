@@ -1,273 +1,33 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
-import { getTrustedIp } from "@/lib/clientIp";
-import { checkRateLimitShared } from "@/lib/ratelimit";
-import { phCapture } from "@/lib/posthogServer";
-import { redirect } from "next/navigation";
-import { after } from "next/server";
+/**
+ * Actions d'authentification restantes du site : une seule.
+ *
+ * `signUp`, `signIn`, `signOut`, `requestPasswordReset` et `signInWithGoogle`
+ * ont été retirés avec la connexion web. On ne crée plus de compte et on ne se
+ * connecte plus sur cosme-check.com, tout se passe dans l'application mobile.
+ *
+ * `updatePassword` reste, et il est INDISPENSABLE : l'application mobile envoie
+ * ses emails de « mot de passe oublié » vers `https://cosme-check.com/auth/reset-password`
+ * (cf. `PASSWORD_RESET_WEB_URL` dans le dépôt mobile, `lib/auth/session.ts`).
+ * Le lien pose une session de récupération, la page lit le fragment d'URL via
+ * `RecoveryGate`, puis appelle cette action. Supprimer ce fichier ou cette
+ * fonction casserait la réinitialisation de mot de passe sur mobile.
+ *
+ * La demande d'envoi de l'email, elle, est faite par l'app via
+ * `supabase.auth.resetPasswordForEmail`, pas par le site : il n'y a donc plus
+ * de `requestPasswordReset` ici.
+ */
+
+import { cookies } from "next/headers";
 import { supabaseServer } from "@/lib/supabase";
-import { SITE_URL } from "@/lib/siteUrl";
-import { resolveOnboardingDestination } from "@/lib/onboarding/resolve";
-import { getAppConfig } from "@/lib/appConfig";
-import { buildConsent } from "@/lib/consent";
-import { syncBrevoContact } from "@/lib/brevo";
-import { grantBetaCredits, BETA_COOKIE } from "@/lib/beta-credits";
 
 export type AuthResult = { ok: true } | { ok: false; error: string };
 
-// SITE_URL is the canonical, env-driven origin (NEXT_PUBLIC_SITE_URL in prod,
-// VERCEL_PROJECT_PRODUCTION_URL / VERCEL_URL as fallbacks). Using a request
-// header here (x-forwarded-host) would let a forged Host send the OAuth /
-// password-reset redirect to an attacker-controlled domain → session theft.
-function authOrigin(): string {
-  return SITE_URL;
-}
-
 /**
- * Accept only same-origin, absolute-path redirect targets so a hostile `next`
- * value can't bounce a signed-in user to a third-party site.
- */
-function safeNext(value: FormDataEntryValue | null): string {
-  const raw = typeof value === "string" ? value : "";
-  // Doit rester un chemin interne absolu. Rejette les URL absolues (// et /\
-  // que les navigateurs normalisent en //host), le backslash (0x5c) et tout
-  // caractere de controle (< 0x20, 0x7f) exploitable pour le contournement.
-  if (!raw.startsWith("/")) return "/";
-  const c1 = raw.charCodeAt(1);
-  if (c1 === 0x2f || c1 === 0x5c) return "/";
-  for (let i = 0; i < raw.length; i++) {
-    const c = raw.charCodeAt(i);
-    if (c < 0x20 || c === 0x5c || c === 0x7f) return "/";
-  }
-  return raw;
-}
-
-export async function signUp(formData: FormData): Promise<AuthResult> {
-  const firstName = String(formData.get("first_name") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const password = String(formData.get("password") ?? "");
-  const next = safeNext(formData.get("next"));
-  // Cases à cocher : présentes dans le FormData uniquement si cochées. CGU =
-  // obligatoire ; marketing = opt-in newsletter (synchro Brevo).
-  const acceptCgu = Boolean(formData.get("accept_cgu"));
-  const marketing = Boolean(formData.get("accept_marketing"));
-
-  if (firstName.length < 1) return { ok: false, error: "Prénom requis." };
-  if (!email.includes("@")) return { ok: false, error: "Email invalide." };
-  if (password.length < 8) return { ok: false, error: "Mot de passe trop court (8 caractères minimum)." };
-  if (!/[a-z]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins une minuscule." };
-  if (!/[A-Z]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins une majuscule." };
-  if (!/[0-9]/.test(password)) return { ok: false, error: "Le mot de passe doit contenir au moins un chiffre." };
-  // Garde-fou serveur : le bouton est déjà désactivé côté client tant que la
-  // case CGU n'est pas cochée, mais on revalide ici.
-  if (!acceptCgu) {
-    return { ok: false, error: "Tu dois accepter les conditions d'utilisation pour créer ton compte." };
-  }
-
-  // Rate-limit anti-abus (création massive de comptes / spam contacts Brevo) :
-  // 5 inscriptions / heure / IP fiable.
-  const signupIp = getTrustedIp(await headers());
-  const signupRl = await checkRateLimitShared(`signup:${signupIp}`, 5, 3600);
-  if (!signupRl.ok) {
-    return { ok: false, error: "Trop de créations de compte depuis ce réseau. Réessaie plus tard." };
-  }
-
-  // Inscriptions gelées depuis l'admin (Paramètres → inscriptions). Le trigger
-  // DB handle_new_user refuse aussi la création, mais on intercepte ici pour
-  // renvoyer un message clair plutôt qu'une erreur Postgres brute.
-  const cfg = await getAppConfig();
-  if (!cfg.signups_open) {
-    return { ok: false, error: "Les inscriptions sont temporairement fermées. Réessaie plus tard." };
-  }
-
-  const cookieStore = await cookies();
-  const sb = supabaseServer(cookieStore);
-
-  const { error } = await sb.auth.signUp({
-    email,
-    password,
-    // `signup_platform` est copié dans user_profiles.signup_platform par le
-    // trigger handle_new_user → distingue les inscriptions web vs mobile.
-    options: { data: { first_name: firstName, signup_platform: "web" } },
-  });
-
-  if (error) {
-    // Anti-énumération : ne pas confirmer l'existence d'un compte
-    // ("User already registered"). On renvoie un message neutre.
-    return {
-      ok: false,
-      error:
-        "Impossible de créer le compte avec ces informations. Essaie de te connecter ou de réinitialiser ton mot de passe.",
-    };
-  }
-
-  // Persiste le consentement dans preferences.consent (best-effort - le trigger
-  // handle_new_user a déjà créé la ligne user_profiles dans la même transaction
-  // que l'insert auth.users, donc elle existe ici). Un échec ne bloque pas
-  // l'inscription : le modal de consentement de l'onboarding sert de filet.
-  const consent = buildConsent(marketing);
-  try {
-    const { data: { user } } = await sb.auth.getUser();
-    if (user) {
-      const { data: row } = await sb
-        .schema("cosme_check")
-        .from("user_profiles")
-        .select("preferences")
-        .eq("id", user.id)
-        .maybeSingle();
-      const prefs = (row?.preferences ?? {}) as Record<string, unknown>;
-      await sb
-        .schema("cosme_check")
-        .from("user_profiles")
-        .update({
-          preferences: { ...prefs, consent },
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
-
-      // Analytics : evenement produit (funnel PostHog), fire-and-forget.
-      phCapture("signup", user.id);
-
-      // Crédits bêta : inscription venue du lien bêta (cookie cc_beta) → 50
-      // crédits non renouvelables, quel que soit l'email utilisé.
-      if (cookieStore.get(BETA_COOKIE)) {
-        const uid = user.id;
-        after(() => grantBetaCredits(uid));
-        try {
-          cookieStore.set(BETA_COOKIE, "", { path: "/", maxAge: 0 });
-        } catch {
-          // cookies immuables selon le contexte : sans gravité (idempotent)
-        }
-      }
-    }
-  } catch (e) {
-    console.warn("[auth] signUp consent persist failed:", e);
-  }
-
-  // Synchro Brevo APRÈS la réponse (after) pour ne pas rallonger la latence de
-  // l'inscription. TOUT LE MONDE va dans « Tous les inscrits » ; les opt-in vont
-  // en plus dans « Newsletter » (géré par syncBrevoContact, fail-open).
-  after(() => syncBrevoContact({ email, firstName, marketing }));
-
-  // Send fresh signups through the 3-step onboarding wizard. The wizard
-  // forwards to `next` once the user finishes or dismisses. A returning user
-  // would never hit this branch (signUp creates a new account here).
-  const onboardingUrl =
-    next === "/"
-      ? "/onboarding"
-      : `/onboarding?next=${encodeURIComponent(next)}`;
-  redirect(onboardingUrl);
-}
-
-/** Timeout dur sur l'appel Auth pour ne pas tenir une Server Action 25 s
- *  quand Supabase Auth (pgbouncer / GoTrue) est indisponible. Renvoie un
- *  message distinct du vrai "mauvais mot de passe". */
-const SIGNIN_TIMEOUT_MS = 8000;
-
-export async function signIn(formData: FormData): Promise<AuthResult> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const password = String(formData.get("password") ?? "");
-  const next = safeNext(formData.get("next"));
-
-  if (!email.includes("@")) return { ok: false, error: "Email invalide." };
-  if (password.length < 1) return { ok: false, error: "Mot de passe requis." };
-
-  // Rate-limit anti brute-force : 8 tentatives / 15 min par (IP fiable, email).
-  const signinIp = getTrustedIp(await headers());
-  const signinRl = await checkRateLimitShared(`login:${signinIp}:${email}`, 8, 900);
-  if (!signinRl.ok) {
-    return { ok: false, error: "Trop de tentatives. Réessaie dans quelques minutes." };
-  }
-
-  const cookieStore = await cookies();
-  const sb = supabaseServer(cookieStore);
-
-  type SimplifiedError = { message: string; code?: string } | null;
-  const { error } = await Promise.race<{ error: SimplifiedError }>([
-    sb.auth.signInWithPassword({ email, password }) as Promise<{ error: SimplifiedError }>,
-    new Promise<{ error: SimplifiedError }>((resolve) =>
-      setTimeout(
-        () => resolve({ error: { message: "client_timeout", code: "timeout" } }),
-        SIGNIN_TIMEOUT_MS,
-      ),
-    ),
-  ]);
-
-  if (error) {
-    const msg = error.message?.toLowerCase() ?? "";
-    // Erreurs réseau / timeout : afficher un message distinct du vrai
-    // "mauvais mot de passe" pour ne pas désorienter l'utilisateur.
-    if (
-      msg.includes("client_timeout") ||
-      msg.includes("fetch") ||
-      msg.includes("network") ||
-      msg.includes("timeout") ||
-      msg.includes("upstream") ||
-      error.code === "timeout"
-    ) {
-      return {
-        ok: false,
-        error: "Service temporairement indisponible. Réessaye dans quelques secondes.",
-      };
-    }
-    if (msg.includes("not confirmed") || msg.includes("email_not_confirmed")) {
-      return { ok: false, error: "Email non confirmé. Vérifie ta boîte mail." };
-    }
-    return { ok: false, error: "Email ou mot de passe incorrect." };
-  }
-  // After a successful sign-in we route the user through /onboarding if they
-  // have never been shown the wizard AND their profile is still empty. This
-  // catches pre-existing accounts created before /onboarding existed: the
-  // FIRST login after the feature ships sends them there once. The resolver
-  // is fail-open (any error → just go to `next`).
-  const { data: { user } } = await sb.auth.getUser();
-  if (user) {
-    const dest = await resolveOnboardingDestination(sb, user.id, next);
-    redirect(dest);
-  }
-  redirect(next);
-}
-
-export async function signOut(): Promise<void> {
-  const cookieStore = await cookies();
-  const sb = supabaseServer(cookieStore);
-  await sb.auth.signOut();
-  redirect("/");
-}
-
-/**
- * Sends a password-reset email. Always returns `ok: true` to avoid leaking
- * whether the email exists in our user base (anti-enumeration).
- */
-export async function requestPasswordReset(formData: FormData): Promise<AuthResult> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  if (!email.includes("@")) return { ok: false, error: "Email invalide." };
-
-  // Rate-limit anti-spam de mails de réinitialisation : 5 / 15 min par IP fiable.
-  const resetIp = getTrustedIp(await headers());
-  const resetRl = await checkRateLimitShared(`pwreset:${resetIp}`, 5, 900);
-  if (!resetRl.ok) {
-    return { ok: false, error: "Trop de demandes. Réessaie dans quelques minutes." };
-  }
-
-  const cookieStore = await cookies();
-  const sb = supabaseServer(cookieStore);
-
-  const { error } = await sb.auth.resetPasswordForEmail(email, {
-    redirectTo: `${authOrigin()}/auth/callback?next=/auth/reset-password`,
-  });
-
-  if (error) {
-    console.warn("[auth] resetPasswordForEmail:", error.message);
-  }
-  return { ok: true };
-}
-
-/**
- * Updates the password of the currently signed-in user. Used by the
- * /auth/reset-password page, which requires a fresh recovery session set by
- * the email callback. Same complexity rules as signUp.
+ * Met à jour le mot de passe de l'utilisateur dont la session de récupération
+ * est active. Appelé par la page `/auth/reset-password`. Mêmes règles de
+ * complexité que celles appliquées côté application.
  */
 export async function updatePassword(formData: FormData): Promise<AuthResult> {
   const password = String(formData.get("password") ?? "");
@@ -281,15 +41,16 @@ export async function updatePassword(formData: FormData): Promise<AuthResult> {
   const sb = supabaseServer(cookieStore);
 
   const { data: userData } = await sb.auth.getUser();
-  if (!userData.user) return { ok: false, error: "Session expirée. Demandez un nouveau lien de réinitialisation." };
+  if (!userData.user) return { ok: false, error: "Session expirée. Demande un nouveau lien de réinitialisation depuis l'application." };
 
   const { error } = await sb.auth.updateUser({ password });
   if (error) return { ok: false, error: error.message };
 
   // Sécurité : un mot de passe est souvent réinitialisé PARCE QUE le compte est
-  // soupçonné compromis. On révoque toutes les AUTRES sessions/refresh-tokens
-  // pour qu'un token volé ne survive pas au reset (scope "others" conserve la
-  // session de recovery courante). Best-effort : un échec ne bloque pas le reset.
+  // soupçonné compromis. On révoque toutes les AUTRES sessions et refresh-tokens
+  // pour qu'un token volé ne survive pas au reset (le scope "others" conserve la
+  // session de récupération courante). Best-effort : un échec ne bloque pas le
+  // changement de mot de passe, qui est déjà appliqué.
   try {
     await sb.auth.signOut({ scope: "others" });
   } catch {
@@ -297,25 +58,4 @@ export async function updatePassword(formData: FormData): Promise<AuthResult> {
   }
 
   return { ok: true };
-}
-
-export async function signInWithGoogle(formData: FormData): Promise<void> {
-  const next = safeNext(formData.get("next"));
-  const cookieStore = await cookies();
-  const sb = supabaseServer(cookieStore);
-
-  const redirectTo = `${authOrigin()}/auth/callback?next=${encodeURIComponent(next)}`;
-
-  const { data, error } = await sb.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo,
-      queryParams: { access_type: "offline", prompt: "consent" },
-    },
-  });
-
-  if (error || !data?.url) {
-    redirect(`/auth/sign-in?error=oauth`);
-  }
-  redirect(data.url);
 }

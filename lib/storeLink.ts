@@ -45,9 +45,39 @@ export function playUrl(campaign = DEFAULT_CAMPAIGN): string {
  * Desktop et bots vont aussi sur le site, jamais sur un store.
  */
 export function storeUrlFor(userAgent: string, campaign = DEFAULT_CAMPAIGN): string {
-  const ua = userAgent ?? "";
-  if (/android/i.test(ua)) return playUrl(campaign);
-  if (/(iphone|ipad|ipod)/i.test(ua)) return appleUrl(campaign);
-  if (/macintosh/i.test(ua) && /mobile/i.test(ua)) return appleUrl(campaign);
+  const platform = detectPlatform(userAgent);
+  if (platform === "android") return playUrl(campaign);
+  if (platform === "ios") return appleUrl(campaign);
   return SITE_URL;
+}
+
+/** Plateforme déduite du User-Agent. `desktop` couvre aussi les bots. */
+export type Platform = "ios" | "android" | "desktop";
+
+/**
+ * Même logique de détection que `storeUrlFor`, mais elle rend la PLATEFORME au
+ * lieu d'une URL. Côté client on ne veut pas toujours rediriger : sur un poste
+ * fixe on préfère ouvrir la modale qui montre les deux badges. Un seul endroit
+ * porte les expressions régulières, donc `/dl` (serveur) et les boutons
+ * (navigateur) ne peuvent pas diverger.
+ */
+export function detectPlatform(userAgent: string | null | undefined): Platform {
+  const ua = userAgent ?? "";
+  if (/android/i.test(ua)) return "android";
+  if (/(iphone|ipad|ipod)/i.test(ua)) return "ios";
+  if (/macintosh/i.test(ua) && /mobile/i.test(ua)) return "ios";
+  return "desktop";
+}
+
+/**
+ * Destination store pour une plateforme déjà résolue, ou `null` sur poste fixe
+ * (aucun store à ouvrir : l'appelant affiche la modale à la place).
+ */
+export function storeUrlForPlatform(
+  platform: Platform,
+  campaign = DEFAULT_CAMPAIGN,
+): string | null {
+  if (platform === "android") return playUrl(campaign);
+  if (platform === "ios") return appleUrl(campaign);
+  return null;
 }

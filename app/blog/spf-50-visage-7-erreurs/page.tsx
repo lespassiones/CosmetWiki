@@ -517,7 +517,7 @@ export default function SpfArticlePage() {
 
               <BlogCTA
                 title="Vérifiez la composition de votre crème solaire"
-                description="Connectez-vous à Cosme Check pour obtenir la note ingrédient par ingrédient de votre SPF, identifier les filtres controversés et comparer avec des alternatives plus propres."
+                description="Téléchargez Cosme Check pour obtenir la note ingrédient par ingrédient de votre SPF, identifier les filtres controversés et comparer avec des alternatives plus propres."
               />
             </section>
 

@@ -1,6 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import { PublicHeader } from "@/components/PublicHeader";
+import { DownloadAppButton } from "@/components/download/DownloadAppButton";
+import { StoreBadges } from "@/components/download/StoreBadges";
 
 /**
  * Public landing hero - full-bleed image with the headline + CTA layered
@@ -33,7 +34,7 @@ export function LandingHero() {
               <KpiRow />
             </div>
             <div className="mt-6">
-              <StoreBadges align="left" />
+              <StoreBadges align="left" campaign="hero" />
             </div>
           </div>
           <div className="flex shrink-0 items-end reveal-on-mount reveal-delay-150">
@@ -105,18 +106,20 @@ export function LandingHero() {
           </div>
 
           <div className="reveal-on-mount reveal-delay-270">
-            <StoreBadges />
+            <StoreBadges campaign="hero" />
           </div>
 
-          <Link
-            href="/auth/sign-in"
+          {/* L'analyse se fait dans l'app : ce CTA ouvre le bon store sur
+              mobile, la modale avec les deux badges sur ordinateur. */}
+          <DownloadAppButton
+            campaign="hero"
+            withArrow
+            modalTitle="Analyse ton premier produit dans l'app"
+            modalSubtitle="Scan du code-barres, photo de la composition, lien produit ou liste INCI collée. Télécharge Cosme Check gratuitement pour lancer ta première analyse."
             className="group reveal-on-mount reveal-delay-320 mt-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[#F43F5E] to-[#E11D48] px-7 py-3 text-[15px] font-semibold text-white shadow-[0_12px_28px_-8px_rgba(244,63,94,0.55),inset_0_1px_0_rgba(255,255,255,0.30)] transition hover:brightness-110 active:scale-[0.98]"
           >
             Analyse ton premier produit
-            <span aria-hidden className="transition group-hover:translate-x-0.5">
-              →
-            </span>
-          </Link>
+          </DownloadAppButton>
         </div>
       </div>
 
@@ -231,8 +234,11 @@ function Headline({ mobile = false }: { mobile?: boolean }) {
         sur des faits scientifiques, sans aucune influence commerciale.
       </p>
 
-      <Link
-        href="/auth/sign-in"
+      <DownloadAppButton
+        campaign="hero"
+        withArrow
+        modalTitle="Analyse ton premier produit dans l'app"
+        modalSubtitle="Scan du code-barres, photo de la composition, lien produit ou liste INCI collée. Télécharge Cosme Check gratuitement pour lancer ta première analyse."
         className={`group inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[#F43F5E] to-[#E11D48] text-white font-semibold shadow-[0_12px_28px_-8px_rgba(244,63,94,0.55),inset_0_1px_0_rgba(255,255,255,0.30)] transition hover:brightness-110 active:scale-[0.98] ${
           mobile
             ? "mt-6 px-6 py-3 text-[14px]"
@@ -240,10 +246,7 @@ function Headline({ mobile = false }: { mobile?: boolean }) {
         }`}
       >
         Analyse ton premier produit
-        <span aria-hidden className="transition group-hover:translate-x-0.5">
-          →
-        </span>
-      </Link>
+      </DownloadAppButton>
     </div>
   );
 }
@@ -271,60 +274,5 @@ function KpiRow() {
         </div>
       ))}
     </div>
-  );
-}
-
-/** Badges App Store + Google Play (liens vers les fiches des stores). */
-function StoreBadges({ align = "center" }: { align?: "center" | "left" }) {
-  const justify = align === "left" ? "justify-start" : "justify-center";
-  return (
-    <div className={`flex flex-wrap items-center gap-3 ${justify}`}>
-      <AppleStoreBadge />
-      <GooglePlayBadge />
-    </div>
-  );
-}
-
-function AppleStoreBadge() {
-  return (
-    <a
-      href="https://apps.apple.com/us/app/cosme-check-scan-cosm%C3%A9tique/id6803527040"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Télécharger sur l'App Store"
-      className="flex h-[44px] w-[140px] items-center gap-2 rounded-lg bg-black px-3 text-white transition hover:brightness-110 active:scale-95"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden className="h-7 w-7 fill-current">
-        <path d="M17.05 12.04c-.02-2.3 1.88-3.4 1.96-3.45-1.07-1.56-2.74-1.78-3.33-1.8-1.42-.15-2.77.84-3.5.84-.73 0-1.84-.82-3.03-.79-1.56.02-3 .91-3.8 2.31-1.62 2.82-.41 6.97 1.17 9.25.77 1.12 1.69 2.37 2.89 2.33 1.16-.05 1.6-.75 3-.75s1.8.75 3.03.72c1.25-.02 2.04-1.14 2.8-2.27.88-1.3 1.25-2.56 1.27-2.62-.03-.02-2.44-.94-2.46-3.77zM14.84 5.27c.64-.78 1.07-1.86.95-2.93-.92.04-2.04.61-2.7 1.39-.6.69-1.12 1.8-.98 2.85 1.03.08 2.08-.52 2.73-1.31z" />
-      </svg>
-      <div className="flex flex-col text-left leading-none">
-        <span className="text-[9px] tracking-wide">Télécharger sur</span>
-        <span className="text-[15px] font-semibold tracking-tight">App Store</span>
-      </div>
-    </a>
-  );
-}
-
-function GooglePlayBadge() {
-  return (
-    <a
-      href="https://play.google.com/store/apps/details?id=com.cosmecheck.app"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Télécharger sur Google Play"
-      className="flex h-[44px] w-[150px] items-center gap-2 rounded-lg bg-black px-3 text-white transition hover:brightness-110 active:scale-95"
-    >
-      <svg viewBox="0 0 60 64" aria-hidden className="h-7 w-7">
-        <path d="M0 5.4v53.2c0 1.7 1.4 3 3 3l30-30L3 1.5C1.4 1.8 0 3.2 0 5.4z" fill="#4285F4" />
-        <path d="M48.6 22.4 39 17 33 23l9 9 6.6-5.4c2-1.5 2-4.7 0-6.2z" fill="#FBBC04" />
-        <path d="m3 1.5 39 30.5L51.5 41 3 62.6c-1.6-.3-3-1.7-3-3.4V5.4c0-1.7 1.4-3 3-3z" fill="transparent" />
-        <path d="M3 1.5c.4 0 .7.1 1.1.3L42 22 36 28 0 4.5C0 3 1.3 1.5 3 1.5z" fill="#34A853" />
-        <path d="m3 62.5 33-30 6 6L4.1 62.2c-.4.2-.7.3-1.1.3z" fill="#EA4335" />
-      </svg>
-      <div className="flex flex-col text-left leading-none">
-        <span className="text-[9px] tracking-wide">Disponible sur</span>
-        <span className="text-[15px] font-semibold tracking-tight">Google Play</span>
-      </div>
-    </a>
   );
 }

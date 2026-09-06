@@ -5,7 +5,11 @@
 //  - Stale-while-revalidate for static assets (so the home screen launch
 //    feels instant after the first visit) without going stale forever.
 
-const VERSION = "v2";
+// v3 : bump obligatoire après le retrait de la web app connectée. Sans lui, un
+// visiteur revenu garderait en cache runtime les anciennes pages /history,
+// /routine ou /profile, qui n'existent plus, et les verrait s'afficher hors
+// ligne. Changer VERSION invalide STATIC_CACHE et RUNTIME_CACHE d'un coup.
+const VERSION = "v3";
 const STATIC_CACHE = `cw-static-${VERSION}`;
 const RUNTIME_CACHE = `cw-runtime-${VERSION}`;
 const OFFLINE_URL = "/offline.html";

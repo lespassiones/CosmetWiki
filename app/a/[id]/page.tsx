@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { DownloadAppButton } from "@/components/download/DownloadAppButton";
+import { StoreBadges } from "@/components/download/StoreBadges";
 import type { Metadata } from "next";
 import { supabaseAnon, type ColorRating } from "@/lib/supabase";
 import { SITE_URL } from "@/lib/siteUrl";
@@ -222,7 +224,7 @@ export default async function PublicAnalysisPage({
       </div>
 
       {/* Teaser : l'analyse PERSONNALISÉE (3 blocs IA selon le profil) est
-          réservée aux comptes → pousse à créer un compte. */}
+          réservée aux comptes → pousse à télécharger l'app. */}
       <div className="mt-5 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/[0.06]">
         <div className="relative">
           {/* Aperçu flouté des 3 blocs perso */}
@@ -247,34 +249,43 @@ export default async function PublicAnalysisPage({
             </div>
             <p className="text-[15px] font-bold text-[#111111]">Ton analyse personnalisée</p>
             <p className="mt-1 max-w-sm text-[13px] text-ink-subtle">
-              Crée ton compte pour savoir si ce produit correspond à TES objectifs, ta peau
-              et tes restrictions.
+              Télécharge l&apos;app pour savoir si ce produit correspond à TES
+              objectifs, ta peau et tes restrictions.
             </p>
-            <Link
-              href="/"
+            <DownloadAppButton
+              campaign="partage_compat"
+              modalTitle="Ton analyse personnalisée est dans l'app"
+              modalSubtitle="Crée ton profil en quelques secondes et découvre si ce produit correspond à ta peau, tes objectifs et tes ingrédients évités."
               className="mt-3 inline-flex items-center justify-center rounded-full bg-[#111111] px-6 py-2.5 text-[14px] font-semibold text-white shadow-sm transition hover:brightness-110"
             >
-              Créer mon compte gratuit
-            </Link>
+              Télécharger l&apos;app
+            </DownloadAppButton>
           </div>
         </div>
       </div>
 
-      {/* CTA vers le web twin (fonctionnel) — l'app mobile arrive bientôt */}
+      {/* CTA principal de la page : c'est l'APPLICATION qui analyse. Cette page
+          est le point d'atterrissage des liens de partage envoyés depuis l'app,
+          donc le visiteur est presque toujours quelqu'un qui ne l'a pas encore.
+          On lui donne le bouton réactif ET les deux badges, pour qu'il puisse
+          aussi choisir son store lui-même. */}
       <div className="mt-5 rounded-3xl bg-gradient-to-br from-rose-50 to-white p-5 text-center ring-1 ring-rose-200/60 sm:p-7">
         <p className="text-[15px] font-semibold text-[#111111]">
           Analysez vos propres produits
         </p>
         <p className="mx-auto mt-1 max-w-sm text-[13px] text-ink-subtle">
-          Scannez ou collez une composition INCI et obtenez le même décryptage,
-          gratuitement.
+          Scannez un code-barres, photographiez une composition ou collez une
+          liste INCI, et obtenez le même décryptage, gratuitement.
         </p>
-        <Link
-          href="/"
+        <DownloadAppButton
+          campaign="partage_analyse"
+          modalTitle="Analyse tes produits avec Cosme Check"
+          modalSubtitle="Scan du code-barres, photo de la composition, lien produit ou liste INCI collée. L'application est gratuite."
           className="mt-4 inline-flex items-center justify-center rounded-full bg-[#F43F5E] px-6 py-2.5 text-[14px] font-semibold text-white shadow-sm transition hover:bg-[#E11D48]"
         >
-          Découvrir Cosme Check
-        </Link>
+          Télécharger l&apos;app
+        </DownloadAppButton>
+        <StoreBadges campaign="partage_analyse" size="compact" className="mt-4" />
       </div>
 
       <p className="mt-4 px-2 text-center text-[11px] leading-relaxed text-ink-subtle">

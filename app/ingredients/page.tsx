@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { SearchTrigger } from "@/components/SearchTrigger";
 import { MobileMenu } from "@/components/MobileMenu";
+import { DownloadAppButton } from "@/components/download/DownloadAppButton";
 import { LETTERS, OTHER_KEY, slugsByLetter } from "./data";
 import { INDEX_INGREDIENTS } from "@/lib/seoConfig";
 
@@ -36,6 +37,14 @@ export default async function IngredientsHubPage() {
           >
             Comment ça marche
           </Link>
+          {/* Visible à partir de `sm` seulement : en dessous, c'est le
+              tiroir `MobileMenu` qui porte ce même bouton. */}
+          <DownloadAppButton
+            campaign="index_ingredients"
+            className="hidden rounded-full bg-[#F43F5E] px-4 py-1.5 text-[13px] font-semibold text-white transition hover:bg-[#E11D48] sm:inline-flex"
+          >
+            Télécharger l&apos;app
+          </DownloadAppButton>
           <SearchTrigger />
           <MobileMenu />
         </div>

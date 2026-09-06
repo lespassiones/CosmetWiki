@@ -18,6 +18,7 @@
 import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
+import { DownloadAppButton } from "@/components/download/DownloadAppButton";
 
 type State = "checking" | "ready" | "expired";
 
@@ -56,23 +57,25 @@ export function RecoveryGate({ hasServerSession }: { hasServerSession: boolean }
     );
   }
 
+  // Lien expiré : on ne renvoie plus vers `/auth/forgot-password`, cette page a
+  // été retirée avec la connexion web. La demande d'un nouveau lien se fait
+  // dans l'application, écran de connexion, « Mot de passe oublié ».
   if (state === "expired") {
     return (
       <div className="space-y-4">
         <p className="text-center text-sm text-[#6B7280]">
-          Ce lien a expiré ou n&apos;est plus valide. Demande un nouveau lien.
+          Ce lien a expiré ou n&apos;est plus valide. Ouvre l&apos;application
+          Cosme Check, puis « Mot de passe oublié » sur l&apos;écran de
+          connexion, pour recevoir un nouveau lien.
         </p>
-        <a
-          href="/auth/forgot-password"
-          className="block w-full text-center rounded-xl bg-[#111111] text-white text-sm font-semibold py-3 hover:brightness-110 transition"
+        <DownloadAppButton
+          campaign="reset_expire"
+          modalTitle="Ouvre l'application Cosme Check"
+          modalSubtitle="La demande d'un nouveau lien de réinitialisation se fait depuis l'écran de connexion de l'application."
+          className="block w-full rounded-xl bg-[#111111] py-3 text-center text-sm font-semibold text-white transition hover:brightness-110"
         >
-          Demander un nouveau lien
-        </a>
-        <p className="text-center text-sm text-[#6B7280]">
-          <a href="/auth/sign-in" className="text-[#F43F5E] font-medium hover:underline">
-            Retour à la connexion
-          </a>
-        </p>
+          Ouvrir l&apos;application
+        </DownloadAppButton>
       </div>
     );
   }

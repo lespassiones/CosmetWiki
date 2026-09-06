@@ -1,24 +1,25 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { GLASS_CARD, GLASS_CARD_ROSE, GLASS_PILL } from "@/lib/ui/glass";
+import { GLASS_CARD, GLASS_PILL } from "@/lib/ui/glass";
 
 type Explanation = {
   text: string;
   cached: boolean;
-  // Always null on this endpoint (CDN-cached, can't be per-user).
-  personalLine?: string | null;
 };
 
-type Exposure = {
-  personalLine: string | null;
-};
-
+/**
+ * Explication IA d'un ingrédient, à la demande, sur sa fiche publique.
+ *
+ * L'encart rose « tu as cet ingrédient dans X produits » a été retiré : il
+ * venait de `/api/ingredient/[slug]/exposure`, une route par utilisateur qui
+ * lisait la routine et l'historique. Sans session sur le site, elle ne pouvait
+ * plus rien renvoyer, et l'appeler quand même déclenchait une requête inutile
+ * à chaque ouverture d'une fiche. Cette information vit maintenant dans
+ * l'application, qui connaît la routine de l'utilisateur.
+ */
 export function ExplainIngredient({ slug }: { slug: string }) {
   const [data, setData] = useState<Explanation | null>(null);
-  // Filled in parallel with `data`. Stays null for anonymous visitors or
-  // for users with no matching routine/history entries.
-  const [personalLine, setPersonalLine] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -26,32 +27,17 @@ export function ExplainIngredient({ slug }: { slug: string }) {
     setError(null);
     startTransition(async () => {
       try {
-        // Fire BOTH calls in parallel:
-        //   - /explain is CDN-cached at Vercel Edge (fast, public).
-        //   - /exposure is per-user, uncached, returns the personal callout.
-        // The page shows the explanation as soon as it arrives; the rose
-        // "🧴 Tu as cet ingrédient dans X produits…" callout pops in when
-        // /exposure resolves (~50 ms after /explain in steady state).
-        const [explainRes, exposureRes] = await Promise.all([
-          fetch(`/api/ingredient/${encodeURIComponent(slug)}/explain`),
-          fetch(`/api/ingredient/${encodeURIComponent(slug)}/exposure`).catch(() => null),
-        ]);
+        // `/explain` est mis en cache par le CDN Vercel Edge : public, rapide,
+        // partagé entre tous les visiteurs d'une même fiche.
+        const explainRes = await fetch(
+          `/api/ingredient/${encodeURIComponent(slug)}/explain`,
+        );
         if (!explainRes.ok) {
           const j = (await explainRes.json().catch(() => ({}))) as { error?: string };
           setError(j.error ?? "Erreur");
           return;
         }
-        const j = (await explainRes.json()) as Explanation;
-        setData(j);
-
-        if (exposureRes && exposureRes.ok) {
-          try {
-            const e = (await exposureRes.json()) as Exposure;
-            setPersonalLine(e.personalLine);
-          } catch {
-            // ignore - keep personalLine null
-          }
-        }
+        setData((await explainRes.json()) as Explanation);
       } catch {
         setError("Connexion indisponible.");
       }
@@ -74,12 +60,6 @@ export function ExplainIngredient({ slug }: { slug: string }) {
             <p key={i}>{l}</p>
           ))}
         </div>
-        {personalLine && (
-          <div className={`${GLASS_CARD_ROSE} mt-4 px-3 py-2.5 text-[13px] text-[#9F1239]`}>
-            <span aria-hidden className="mr-1.5">🧴</span>
-            {personalLine}
-          </div>
-        )}
       </section>
     );
   }

@@ -1,12 +1,19 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { updatePassword } from "@/app/auth/actions";
+import { DownloadAppButton } from "@/components/download/DownloadAppButton";
 import { PasswordRequirements, isPasswordValid } from "./PasswordRequirements";
 
+/**
+ * Formulaire de nouveau mot de passe, servi par `/auth/reset-password`.
+ *
+ * C'est le seul écran d'authentification qui subsiste sur le site : il reçoit
+ * le lien « mot de passe oublié » envoyé par l'APPLICATION MOBILE. Une fois le
+ * mot de passe changé, l'utilisateur retourne se connecter dans l'app, il n'y a
+ * plus de connexion web vers laquelle le renvoyer.
+ */
 export function ResetPasswordForm() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [showPwd, setShowPwd] = useState(false);
@@ -20,15 +27,18 @@ export function ResetPasswordForm() {
     return (
       <div className="space-y-4">
         <div className="rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3 text-sm text-emerald-800">
-          Ton mot de passe a bien été mis à jour. Tu peux maintenant te reconnecter.
+          Ton mot de passe a bien été mis à jour. Retourne dans
+          l&apos;application Cosme Check pour te connecter avec ce nouveau mot
+          de passe.
         </div>
-        <button
-          type="button"
-          onClick={() => router.push("/auth/sign-in")}
-          className="w-full rounded-xl bg-[#111111] text-white text-sm font-semibold py-3 hover:brightness-110 transition"
+        <DownloadAppButton
+          campaign="reset_succes"
+          modalTitle="Reconnecte-toi dans l'application"
+          modalSubtitle="Ton nouveau mot de passe est actif. Ouvre Cosme Check sur ton téléphone pour te connecter."
+          className="w-full rounded-xl bg-[#111111] py-3 text-sm font-semibold text-white transition hover:brightness-110"
         >
-          Aller à la connexion
-        </button>
+          Ouvrir l&apos;application
+        </DownloadAppButton>
       </div>
     );
   }

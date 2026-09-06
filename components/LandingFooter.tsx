@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { StoreBadges } from "@/components/download/StoreBadges";
 
 /**
  * Footer style Yuka pour la landing publique :
@@ -40,17 +41,14 @@ export function LandingFooter() {
             <p className="mt-3 max-w-[20rem] text-[13px] font-medium leading-relaxed text-[#111111]">
               Check tes cosmétiques, ingrédient par ingrédient.
             </p>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <AppleStoreBadge />
-              <GooglePlayBadge />
-            </div>
+            <StoreBadges align="left" campaign="footer" size="compact" className="mt-5" />
           </div>
 
           {/* Colonne 2 : Application */}
           <FooterColumn title="Application">
             <FooterLink href="/fonctionnalites">Fonctionnalités</FooterLink>
             <FooterLink href="/comment-ca-marche">Comment ça marche</FooterLink>
-            <FooterLink href="/offre">Nos offres</FooterLink>
+            <FooterLink href="/#tarifs">Tarifs</FooterLink>
           </FooterColumn>
 
           {/* Colonne 3 : Ressources */}
@@ -120,48 +118,5 @@ function FooterLink({
         {children}
       </Link>
     </li>
-  );
-}
-
-function AppleStoreBadge() {
-  return (
-    <a
-      href="https://apps.apple.com/us/app/cosme-check-scan-cosm%C3%A9tique/id6803527040"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Télécharger sur l'App Store"
-      className="flex h-[42px] w-[132px] items-center gap-2 rounded-lg bg-black px-3 text-white transition hover:brightness-110 active:scale-95"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden className="h-6 w-6 fill-current">
-        <path d="M17.05 12.04c-.02-2.3 1.88-3.4 1.96-3.45-1.07-1.56-2.74-1.78-3.33-1.8-1.42-.15-2.77.84-3.5.84-.73 0-1.84-.82-3.03-.79-1.56.02-3 .91-3.8 2.31-1.62 2.82-.41 6.97 1.17 9.25.77 1.12 1.69 2.37 2.89 2.33 1.16-.05 1.6-.75 3-.75s1.8.75 3.03.72c1.25-.02 2.04-1.14 2.8-2.27.88-1.3 1.25-2.56 1.27-2.62-.03-.02-2.44-.94-2.46-3.77zM14.84 5.27c.64-.78 1.07-1.86.95-2.93-.92.04-2.04.61-2.7 1.39-.6.69-1.12 1.8-.98 2.85 1.03.08 2.08-.52 2.73-1.31z" />
-      </svg>
-      <div className="flex flex-col text-left leading-none">
-        <span className="text-[8px] tracking-wide">Télécharger sur</span>
-        <span className="text-[14px] font-semibold tracking-tight">App Store</span>
-      </div>
-    </a>
-  );
-}
-
-function GooglePlayBadge() {
-  return (
-    <a
-      href="https://play.google.com/store/apps/details?id=com.cosmecheck.app"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Télécharger sur Google Play"
-      className="flex h-[42px] w-[140px] items-center gap-2 rounded-lg bg-black px-3 text-white transition hover:brightness-110 active:scale-95"
-    >
-      <svg viewBox="0 0 60 64" aria-hidden className="h-6 w-6">
-        <path d="M0 5.4v53.2c0 1.7 1.4 3 3 3l30-30L3 1.5C1.4 1.8 0 3.2 0 5.4z" fill="#4285F4" />
-        <path d="M48.6 22.4 39 17 33 23l9 9 6.6-5.4c2-1.5 2-4.7 0-6.2z" fill="#FBBC04" />
-        <path d="M3 1.5c.4 0 .7.1 1.1.3L42 22 36 28 0 4.5C0 3 1.3 1.5 3 1.5z" fill="#34A853" />
-        <path d="m3 62.5 33-30 6 6L4.1 62.2c-.4.2-.7.3-1.1.3z" fill="#EA4335" />
-      </svg>
-      <div className="flex flex-col text-left leading-none">
-        <span className="text-[8px] tracking-wide">Disponible sur</span>
-        <span className="text-[14px] font-semibold tracking-tight">Google Play</span>
-      </div>
-    </a>
   );
 }

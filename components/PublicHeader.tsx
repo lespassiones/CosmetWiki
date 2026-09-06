@@ -4,13 +4,29 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { DownloadAppButton } from "@/components/download/DownloadAppButton";
+
 const NAV_ITEMS = [
   { href: "/fonctionnalites", label: "Fonctionnalités" },
+  // Ancre vers la section tarifs de la page d'accueil : les prix doivent être
+  // atteignables depuis n'importe quelle page du site, pas seulement en
+  // scrollant la home.
+  { href: "/#tarifs", label: "Tarifs" },
   { href: "/en-savoir-plus", label: "En savoir plus" },
   { href: "/blog", label: "Blog" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
 ];
+
+/**
+ * Une ancre (`/#tarifs`) n'est jamais un chemin : la comparer au `pathname`
+ * marquerait la page d'accueil comme active sur cet onglet. On ne surligne donc
+ * que les vraies routes.
+ */
+function isActiveNav(pathname: string | null, href: string): boolean {
+  if (href.includes("#")) return false;
+  return Boolean(pathname?.startsWith(href));
+}
 
 export function PublicHeader() {
   const [open, setOpen] = useState(false);
@@ -66,7 +82,7 @@ export function PublicHeader() {
 
           <nav className="hidden items-center gap-1 lg:flex">
             {NAV_ITEMS.map((item) => {
-              const active = pathname?.startsWith(item.href);
+              const active = isActiveNav(pathname, item.href);
               return (
                 <Link
                   key={item.href}
@@ -84,12 +100,15 @@ export function PublicHeader() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link
-              href="/auth/sign-in"
+            {/* Il n'y a plus de connexion sur le site : ce bouton mène au
+                téléchargement. Sur iPhone il ouvre l'App Store, sur Android
+                Google Play, sur ordinateur la modale avec les deux badges. */}
+            <DownloadAppButton
+              campaign="header"
               className="hidden rounded-full bg-[#F43F5E] px-5 py-2 text-[14px] font-semibold text-white transition hover:bg-[#E11D48] sm:px-6 lg:inline-flex"
             >
-              Se connecter
-            </Link>
+              Télécharger l&apos;app
+            </DownloadAppButton>
 
             <button
               type="button"
@@ -144,7 +163,7 @@ export function PublicHeader() {
         {/* Liens de navigation */}
         <ul className="flex-1 overflow-y-auto px-4 py-4">
           {NAV_ITEMS.map((item) => {
-            const active = pathname?.startsWith(item.href);
+            const active = isActiveNav(pathname, item.href);
             return (
               <li key={item.href}>
                 <Link
@@ -165,12 +184,12 @@ export function PublicHeader() {
 
         {/* CTA bas du drawer */}
         <div className="border-t border-black/[0.06] px-5 py-5">
-          <Link
-            href="/auth/sign-in"
+          <DownloadAppButton
+            campaign="header_menu"
             className="flex w-full items-center justify-center rounded-full bg-[#F43F5E] py-3.5 text-[15px] font-semibold text-white shadow-[0_10px_24px_-8px_rgba(244,63,94,0.45)] transition hover:bg-[#E11D48]"
           >
-            Se connecter
-          </Link>
+            Télécharger l&apos;app
+          </DownloadAppButton>
         </div>
       </nav>
     </>

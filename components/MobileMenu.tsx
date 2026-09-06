@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { InstallPWAMenuItem } from "@/components/InstallPWAButton";
+import { DownloadAppButton } from "@/components/download/DownloadAppButton";
 
 const NAV_ITEMS = [
   { href: "/", label: "Accueil" },
   { href: "/comment-ca-marche", label: "Comment ça marche" },
+  { href: "/#tarifs", label: "Tarifs" },
 ];
 
 export function MobileMenu() {
@@ -90,8 +91,17 @@ export function MobileMenu() {
                   </li>
                 );
               })}
-              <li className="flex justify-center px-1.5 pt-3">
-                <InstallPWAMenuItem onActivate={() => setOpen(false)} />
+              {/* Remplace l'ancien « Installer l'app » (PWA) : il proposait
+                  d'ajouter le SITE à l'écran d'accueil, ce qui entre désormais
+                  en concurrence directe avec l'application des stores. */}
+              <li className="px-1.5 pt-3">
+                <DownloadAppButton
+                  campaign="menu_mobile"
+                  onClickExtra={() => setOpen(false)}
+                  className="flex w-full items-center justify-center rounded-2xl bg-[#F43F5E] py-3 text-[14px] font-semibold text-white transition hover:bg-[#E11D48]"
+                >
+                  Télécharger l&apos;app
+                </DownloadAppButton>
               </li>
             </ul>
           </nav>
