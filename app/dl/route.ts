@@ -17,12 +17,14 @@
  *    jamais entrer dans un cache partagé (sinon le premier scanneur décide pour
  *    tous les suivants).
  *
- * `?c=<slug>` propage un nom de campagne aux deux stores (ex. /dl?c=flyer_salon).
+ * `?c=<slug>` propage un nom de campagne aux deux stores (ex. /dl?c=flyer_salon)
+ * et `?m=<slug>` le média côté Play (ex. /dl?c=insta_bio&m=social). Sans `m` on
+ * reste sur `qr_code`, valeur des QR déjà imprimés.
  * La logique de résolution vit dans `lib/storeLink.ts` (testée).
  */
 import { NextResponse, type NextRequest } from "next/server";
 
-import { campaignSlug, storeUrlFor } from "@/lib/storeLink";
+import { campaignSlug, mediumSlug, storeUrlFor } from "@/lib/storeLink";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -30,7 +32,8 @@ export const dynamic = "force-dynamic";
 export function GET(req: NextRequest) {
   const ua = req.headers.get("user-agent") ?? "";
   const campaign = campaignSlug(req.nextUrl.searchParams.get("c"));
-  return NextResponse.redirect(storeUrlFor(ua, campaign), {
+  const medium = mediumSlug(req.nextUrl.searchParams.get("m"));
+  return NextResponse.redirect(storeUrlFor(ua, campaign, medium), {
     status: 302,
     headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" },
   });

@@ -36,6 +36,11 @@ import { DownloadAppModal } from "./DownloadAppModal";
 type OpenOptions = {
   /** Slug de campagne propagé au store, pour l'attribution. */
   campaign?: string;
+  /**
+   * Média côté Play. `web` par défaut : un clic sur un bouton du site n'est pas
+   * un QR scanné, alors que `/dl` sans paramètre, lui, vient d'un QR imprimé.
+   */
+  medium?: string;
   /** Titre de la modale, si le contexte d'appel mérite un message dédié. */
   title?: string;
   /** Sous-titre de la modale. */
@@ -89,7 +94,11 @@ export function DownloadAppProvider({ children }: { children: ReactNode }) {
   const goToApp = useCallback(
     (options?: OpenOptions) => {
       const platform = readPlatform();
-      const url = storeUrlForPlatform(platform, options?.campaign ?? "web");
+      const url = storeUrlForPlatform(
+        platform,
+        options?.campaign ?? "web",
+        options?.medium ?? "web",
+      );
       if (url) {
         // Même onglet : sur mobile c'est ce qui déclenche le passage à
         // l'application store native. Un `window.open` serait avalé par
@@ -137,10 +146,10 @@ export function useDownloadApp(): DownloadContextValue {
   if (ctx) return ctx;
   return {
     goToApp: () => {
-      if (typeof window !== "undefined") window.location.href = "/dl?c=web";
+      if (typeof window !== "undefined") window.location.href = "/dl?c=web&m=web";
     },
     openModal: () => {
-      if (typeof window !== "undefined") window.location.href = "/dl?c=web";
+      if (typeof window !== "undefined") window.location.href = "/dl?c=web&m=web";
     },
     closeModal: () => {},
     platform: null,

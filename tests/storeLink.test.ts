@@ -6,6 +6,8 @@ import {
   SITE_URL,
   campaignSlug,
   detectPlatform,
+  mediumSlug,
+  playUrl,
   storeUrlFor,
   storeUrlForPlatform,
 } from "@/lib/storeLink";
@@ -129,5 +131,49 @@ describe("storeUrlForPlatform", () => {
     expect(storeUrlForPlatform("android", "header")).toContain(
       encodeURIComponent("utm_source=header"),
     );
+  });
+});
+
+/**
+ * Le média part dans le `referrer` lu par l'Install Referrer API de Play. Sans
+ * lui, un clic depuis une bio Instagram remontait en `utm_medium=qr_code` dans
+ * Play Console. Le défaut reste `qr_code` : des QR pointant sur `/dl` sans
+ * paramètre sont déjà imprimés, on ne peut pas réécrire leur attribution.
+ */
+describe("mediumSlug", () => {
+  it("retombe sur qr_code quand le paramètre est absent ou hors format", () => {
+    for (const raw of [null, undefined, "", "a b", "x".repeat(33), "réseaux", "../etc"]) {
+      expect(mediumSlug(raw)).toBe("qr_code");
+    }
+  });
+
+  it("normalise en minuscules et accepte tirets et underscores", () => {
+    expect(mediumSlug("Social-Paid_2026")).toBe("social-paid_2026");
+  });
+});
+
+describe("média dans le referrer Play", () => {
+  it("garde qr_code par défaut, pour les QR déjà imprimés", () => {
+    expect(playUrl("flyer_salon")).toContain(encodeURIComponent("utm_medium=qr_code"));
+  });
+
+  it("propage le média demandé, dans les trois points d'entrée", () => {
+    const expected = encodeURIComponent(
+      "utm_source=insta_bio&utm_medium=social&utm_campaign=insta_bio",
+    );
+    expect(playUrl("insta_bio", "social")).toContain(expected);
+    expect(storeUrlFor(UA.androidChrome, "insta_bio", "social")).toContain(expected);
+    expect(storeUrlForPlatform("android", "insta_bio", "social")).toContain(expected);
+  });
+
+  it("n'ajoute rien à l'URL Apple, qui n'a pas de champ média", () => {
+    expect(storeUrlFor(UA.iphoneSafari, "insta_bio", "social")).toBe(
+      storeUrlFor(UA.iphoneSafari, "insta_bio"),
+    );
+  });
+
+  it("laisse desktop et bots sur le site, quel que soit le média", () => {
+    expect(storeUrlFor(UA.windowsChrome, "insta_bio", "social")).toBe(SITE_URL);
+    expect(storeUrlFor("Googlebot/2.1", "insta_bio", "social")).toBe(SITE_URL);
   });
 });

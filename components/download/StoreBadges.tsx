@@ -11,7 +11,7 @@
  * `size="compact"` reproduit exactement les dimensions qu'avait le pied de
  * page (42 px de haut) pour ne rien déplacer visuellement.
  */
-import { appleUrl, playUrl } from "@/lib/storeLink";
+import { DEFAULT_CAMPAIGN, appleUrl, playUrl } from "@/lib/storeLink";
 
 type Size = "default" | "compact";
 
@@ -19,6 +19,12 @@ type Props = {
   align?: "center" | "left";
   /** Slug de campagne propagé aux deux stores pour l'attribution. */
   campaign?: string;
+  /**
+   * Média côté Play. `web` par défaut, car un badge cliqué sur le site n'est
+   * pas un QR scanné : le défaut `qr_code` de `playUrl` ne vaut que pour les
+   * QR imprimés qui atteignent `/dl` sans paramètre.
+   */
+  medium?: string;
   size?: Size;
   className?: string;
 };
@@ -46,6 +52,7 @@ const SHELL =
 export function StoreBadges({
   align = "center",
   campaign,
+  medium = "web",
   size = "default",
   className = "",
 }: Props) {
@@ -53,7 +60,7 @@ export function StoreBadges({
   return (
     <div className={`flex flex-wrap items-center gap-3 ${justify} ${className}`}>
       <AppleStoreBadge campaign={campaign} size={size} />
-      <GooglePlayBadge campaign={campaign} size={size} />
+      <GooglePlayBadge campaign={campaign} medium={medium} size={size} />
     </div>
   );
 }
@@ -87,15 +94,17 @@ export function AppleStoreBadge({
 
 export function GooglePlayBadge({
   campaign,
+  medium = "web",
   size = "default",
 }: {
   campaign?: string;
+  medium?: string;
   size?: Size;
 }) {
   const m = METRICS[size];
   return (
     <a
-      href={campaign ? playUrl(campaign) : playUrl()}
+      href={playUrl(campaign ?? DEFAULT_CAMPAIGN, medium)}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Télécharger sur Google Play"
