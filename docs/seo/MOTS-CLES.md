@@ -8,12 +8,14 @@ Les sujets candidats, rangés par famille du mélange (`ROBOT.md`, section 2) et
 
 **Le mélange des douze articles publiés** : buzz et célébrités 3 (foot, LED, lip oils), ingrédients 3 (perturbateurs, déodorant, sérums), routines 4 (SPF, réparatrices, anti-imperfections, fait pour toi), comparatifs 2 (meilleures crèmes, K-beauty), Cosme Check pratique 0. En retard : **buzz et célébrités** (cible 3 sur 10, et c'est la famille qui va chercher le trafic) et **Cosme Check pratique**.
 
+**Publiés par le robot** : 2026-10-19 crème Nivea décryptée (`creme-nivea-composition`, buzz). Sur les dix derniers articles (de `creme-nivea-composition` à `lip-oils-huiles-levres`) : buzz 4, ingrédients 3, routines 2, comparatifs 1, pratique 0. Le buzz passe au-dessus de sa part : **pas de buzz demain**. Prochains à pousser : **Cosme Check pratique** (0 sur 1 : « analyser la composition d'un cosmétique », vue sans clic) et les **ingrédients** (INCI, lanoline).
+
 ## Priorités du premier mois
 
 | Ordre | Sujet | Famille | Pourquoi maintenant |
 |---|---|---|---|
 | 1 | Liste INCI : comment la lire en 30 secondes | ingrédients | « inci » 1 k à 10 k, concurrence faible ; pilier vers lequel tous les autres articles pointent |
-| 2 | La crème visage que Marion Cotillard dit préférer : ce qu'il y a dedans | buzz et célébrités | reprise par Grazia le 18/10/2026 ; vérifier l'interview d'origine, puis lire la composition dans la base |
+| ~~2~~ | ~~La crème visage que Marion Cotillard dit préférer~~ | buzz et célébrités | **écarté le 19/10/2026** : Grazia (18/10) écrit au conditionnel (« elle aurait révélé… dans un article pour Elle »), l'interview d'origine est introuvable, et la crème citée n'est plus vendue. Garde-fou célébrités : pas de source, pas d'article |
 | 3 | Meilleure crème hydratante visage (renforcer l'article existant) | comparatif | 231 affichages en 28 jours, position 68 : optimisation, pas un nouvel article |
 | 4 | Comment connaître son type de peau | routines | « type de peau » 100 à 1 k ; porte d'entrée de toutes les routines |
 | 5 | Cosmétique bio : est-ce vraiment mieux pour ta peau ? | ingrédients | « cosmetique bio » 1 k à 10 k |
@@ -24,14 +26,16 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 
 | Sujet | Requêtes | Volume |
 |---|---|---|
-| La crème préférée de Marion Cotillard, décryptée | crème marion cotillard, routine beauté marion cotillard | à mesurer (buzz du 18/10/2026) |
-| Rhode, la marque de Hailey Bieber : que valent ses formules ? | rhode hailey bieber, peptide lip treatment avis | à mesurer |
+| ~~La crème préférée de Marion Cotillard, décryptée~~ | crème marion cotillard | écarté le 19/10/2026 : source d'origine introuvable (voir les priorités) ; « marion cotillard crème » sans volume |
+| ~~La crème Nivea (boîte bleue) : sa composition lue~~ → `creme-nivea-composition`, 2026-10-19 | crème nivea, nivea creme, crème nivea visage | 10 k à 100 k, +900 % sur trois mois |
+| La Crème de la Mer face à sa composition (suite possible de l'article Nivea) | crème de la mer, crème de la mer avis | 1 k à 10 k ; comparatif honnête uniquement, jamais « arnaque » |
+| Rhode, la marque de Hailey Bieber : que valent ses formules ? | rhode hailey bieber, peptide lip treatment avis | 1 k à 10 k (« rhode hailey bieber », 5 zones, 19/10/2026) ; vérifier que les produits sont dans la base |
 | Fenty Skin (Rihanna) : la composition passée au crible | fenty skin avis, fenty skin composition | à mesurer |
 | Rare Beauty (Selena Gomez) : le blush liquide viral, côté ingrédients | rare beauty blush avis, rare beauty composition | à mesurer |
 | Les marques de stars vont-elles s'essouffler ? (Le Temps, 19/10/2026) | marque beauté célébrité | à mesurer |
 | Le produit TikTok du mois, décrypté (rubrique récurrente) | produit viral tiktok beauté, tiktok made me buy it | à mesurer chaque mois |
 | Les dupes : même composition, vraiment ? | dupe, dupe sephora, dupe crème | à mesurer |
-| ADN de saumon, facteurs de croissance : les tendances anti-âge bizarres | adn de saumon peau, pdrn | à mesurer |
+| ADN de saumon, facteurs de croissance : les tendances anti-âge bizarres | adn de saumon peau, pdrn | « pdrn » 10 k à 100 k (+900 % sur un an), « adn de saumon » 100 à 1 k ; rester sur les crèmes (sodium DNA), jamais sur les injections |
 | Le « botox naturel » des réseaux : ce que dit la science | botox naturel | à mesurer ; jamais de promesse |
 | La tendance maquillage qui remplace le blush (Doctissimo, 17/10/2026) | tendance maquillage 2026 | à mesurer |
 | Calendriers de l'Avent beauté : ce qu'il y a vraiment dedans | calendrier de l'avent beauté composition | saisonnier (novembre), à mesurer |
@@ -41,14 +45,15 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 
 | Sujet | Requêtes | Volume |
 |---|---|---|
-| **Lire une liste INCI** | inci, liste inci, comment lire une composition | 1 k à 10 k (« inci », France, toutes langues) |
+| **Lire une liste INCI** | inci, liste inci, comment lire une composition | 1 k à 10 k (« inci », 5 zones, 19/10/2026) ; « liste inci » 100 à 1 k |
+| Lanoline : d'où elle vient, à quoi elle sert, qui doit l'éviter | lanoline, lanolin alcohol | 10 k à 100 k (5 zones, 19/10/2026) ; vérifier l'intention (allaitement ?) avant d'écrire |
 | Niacinamide : à quoi ça sert vraiment | niacinamide, niacinamide bienfaits | à mesurer |
 | Rétinol : débuter sans irriter sa peau | rétinol, rétinol débutant | à mesurer |
 | Acide hyaluronique : hydratant ou effet de mode ? | acide hyaluronique visage | à mesurer |
 | Parabènes : faut-il encore les fuir ? (avec l'avis du SCCS) | parabènes danger, sans paraben | à mesurer ; sources officielles obligatoires |
 | Silicones dans les cosmétiques | silicone cosmétique, dimethicone | à mesurer |
 | « Sans », « clean », « naturel » : le bluff des étiquettes | cosmétique clean, sans paraben | à mesurer |
-| Cosmétique bio : vraiment mieux ? | cosmetique bio | 1 k à 10 k (France, toutes langues) |
+| Cosmétique bio : vraiment mieux ? | cosmetique bio | 1 k à 10 k (5 zones, 19/10/2026) |
 | Huiles essentielles dans les cosmétiques : précautions | huile essentielle cosmétique allergie | à mesurer |
 | Les allergènes à déclarer (limonene, linalool) | allergène cosmétique | 10 à 100 ; une section plutôt qu'un article |
 | Filtres solaires controversés : octocrylène, homosalate | octocrylène, filtre solaire danger | à mesurer ; sources officielles |
@@ -60,7 +65,7 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 
 | Sujet | Requêtes | Volume |
 |---|---|---|
-| Comment connaître son type de peau | type de peau, connaître son type de peau | 100 à 1 k |
+| Comment connaître son type de peau | type de peau, connaître son type de peau, test type de peau | « type de peau » 1 k à 10 k, les deux autres 100 à 1 k (5 zones, 19/10/2026) |
 | Routine skincare : l'ordre des produits | routine skincare, ordre des soins visage | 1 k à 10 k (« routine skincare ») |
 | Routine peau grasse | routine peau grasse | à mesurer |
 | Routine peau sèche en hiver | peau sèche hiver | à mesurer ; saisonnier (novembre à février) |

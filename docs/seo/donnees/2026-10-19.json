@@ -1,5 +1,5 @@
 {
-  "genere_le": "2026-10-19 17:23",
+  "genere_le": "2026-10-19 17:40",
   "site": "cosme-check.com",
   "periode": {
     "debut": "2026-09-21",
@@ -2280,10 +2280,10 @@
     "note": "comptes = lignes de user_profiles creees sur la periode (inscriptions, iOS et Android, comptes de l'equipe compris : aucune table ne les distingue). premium_actifs = tier premium maintenant. comptes_premium = parmi les comptes nes ce jour-la, ceux premium aujourd'hui. scans = scan_events du jour. analyses = produits analyses et gardes. produits_catalogue = produits actifs de la base.",
     "mesures_absentes": [],
     "totaux": {
-      "comptes": 147,
+      "comptes": 148,
       "premium_actifs": 3,
-      "nouveaux_7j": 8,
-      "nouveaux_30j": 15,
+      "nouveaux_7j": 9,
+      "nouveaux_30j": 16,
       "scans_7j": 68,
       "produits_catalogue": 478217,
       "comptes_periode": 11,

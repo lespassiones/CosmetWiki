@@ -92,6 +92,7 @@
 import type { Categorie } from "@/contenu/rubriques";
 
 import cosmetiqueFaitPourToi from "./articles/cosmetique-fait-pour-toi";
+import cremeNivea from "./articles/creme-nivea-composition";
 import cremeSolaireCoreenne from "./articles/creme-solaire-coreenne-k-beauty";
 import cremesHydratantesReparatrices from "./articles/cremes-hydratantes-reparatrices";
 import deodorantAluminium from "./articles/deodorant-sels-aluminium-verite";
@@ -282,6 +283,7 @@ export const ARTICLES: readonly Article[] = [
   antiImperfections,
   cosmetiqueFaitPourToi,
   meilleuresCremesHydratantes,
+  cremeNivea,
 ];
 
 controlerRegistre(ARTICLES);

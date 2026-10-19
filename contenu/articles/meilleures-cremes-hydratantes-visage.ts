@@ -6,17 +6,23 @@ import type { Article } from "@/contenu/articles";
  * « En bref » qui ouvrait la page devient le chapeau, et les quatre cartes
  * « type de peau » deviennent des `h3`. Le format de ce fichier est décrit en
  * tête de `contenu/articles.ts`.
+ *
+ * Retouché le 19/10/2026 par le robot éditorial : Google montrait la page sur
+ * « meilleure crème hydratante visage » (231 affichages en 28 jours, position
+ * 68). Titre de résultat et résumé recentrés sur cette requête exacte, une
+ * source scientifique, trois liens internes, « rétinol » expliqué, une
+ * question de FAQ. Expérience suivie dans `docs/seo/EXPERIENCES.md`.
  */
 const article: Article = {
   slug: "meilleures-cremes-hydratantes-visage",
-  titre: "Meilleures crèmes hydratantes visage : la sélection par type de peau",
-  titreSeo: "Meilleures crèmes hydratantes visage par peau",
+  titre: "Meilleure crème hydratante visage : laquelle choisir pour ta peau ?",
+  titreSeo: "Meilleure crème hydratante visage : laquelle ?",
   resume:
-    "Peau grasse, sèche, mixte, sensible ou mature : les crèmes hydratantes visage souvent recommandées, et comment savoir laquelle est faite pour toi.",
+    "Meilleure crème hydratante visage : il n'y en a pas une, il y a la tienne. Peau grasse, sèche, sensible ou mature : les formules à repérer avant d'acheter.",
   chapo:
     "Il n'existe pas *une* meilleure crème hydratante, mais la meilleure ==pour ta peau==. Vite dit : texture **fluide non comédogène** pour peau grasse, **riche aux céramides** pour peau sèche, **minimaliste sans parfum** pour peau sensible. Les références citées ici sont souvent recommandées, mais la seule façon de trancher reste de ++vérifier la compatibilité++ de la formule avec ton profil.",
   publieLe: "2026-07-20",
-  modifieLe: "2026-07-20",
+  modifieLe: "2026-10-19",
   minutes: 3,
   theme: "meilleure crème hydratante visage",
   motsCles: [
@@ -38,12 +44,16 @@ const article: Article = {
   },
   blocs: [
     { type: "h2", texte: "1. Ce qui fait une bonne crème hydratante" },
-    { type: "p", texte: "Une formule solide combine trois familles d'ingrédients :" },
+    {
+      type: "p",
+      texte:
+        "Une formule solide combine trois familles d'ingrédients. C'est le constat d'une [revue scientifique de 2017](https://pmc.ncbi.nlm.nih.gov/articles/PMC5849435/) sur les crèmes hydratantes : la plupart mélangent ces trois rôles.",
+    },
     {
       type: "liste",
       style: "coches",
       items: [
-        "**Humectants** (attirent l'eau) : glycérine, acide hyaluronique, urée, panthénol.",
+        "**Humectants** (attirent l'eau) : [glycérine](/i/glycerin), acide hyaluronique, urée, [panthénol](/i/panthenol).",
         "**Émollients** (lissent, assouplissent) : squalane, céramides, esters, beurres végétaux.",
         "**Occlusifs** (limitent la perte en eau) : cires, certaines huiles, silicones. Surtout utiles aux peaux sèches.",
       ],
@@ -64,7 +74,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Cherche glycérine + acide hyaluronique + niacinamide, texture fluide. Références souvent citées : La Roche-Posay Effaclar, CeraVe lotion hydratante, Bioderma Sébium. Évite les huiles lourdes et beurres occlusifs.",
+        "Cherche glycérine + acide hyaluronique + [niacinamide](/i/niacinamide), texture fluide. Références souvent citées : La Roche-Posay Effaclar, CeraVe lotion hydratante, Bioderma Sébium. Évite les huiles lourdes et beurres occlusifs. Les autres gestes pour cette peau sont dans notre [guide anti-imperfections](/blog/meilleurs-produits-anti-imperfections).",
     },
     { type: "h3", texte: "Peau sèche : riche, céramides + beurres" },
     {
@@ -82,7 +92,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Céramides + peptides + acide hyaluronique pour la fermeté et le confort. Si la peau tolère, un rétinol le soir, séparément. La protection solaire au quotidien reste le premier geste anti-âge.",
+        "Céramides + peptides + acide hyaluronique pour la fermeté et le confort. Si la peau tolère, un rétinol (un dérivé de la vitamine A, à introduire doucement) le soir, séparément. La protection solaire au quotidien reste le premier geste anti-âge : évite [les 7 erreurs qui gâchent ta crème solaire](/blog/spf-50-visage-7-erreurs).",
     },
     {
       type: "liste",
@@ -98,6 +108,11 @@ const article: Article = {
       type: "p",
       texte:
         "Peu. Sur une crème hydratante, **le prix ne fait pas la formule**. Des produits abordables (CeraVe, The Ordinary Natural Moisturizing Factors, Nivea, Embryolisse) tiennent tête à des crèmes de luxe sur les actifs qui comptent vraiment. Le marketing et le packaging expliquent souvent l'écart de prix, pas l'efficacité.",
+    },
+    {
+      type: "p",
+      texte:
+        "L'exemple parlant : [on a lu la composition de la boîte bleue Nivea](/blog/creme-nivea-composition), et 18 de ses 21 ingrédients se retrouvent dans une crème de luxe culte.",
     },
 
     { type: "h2", texte: "4. Laquelle est vraiment faite pour toi" },
@@ -140,6 +155,11 @@ const article: Article = {
       question: "Quelle crème hydratante pour peau grasse ?",
       reponse:
         "Une texture gel ou fluide non comédogène, à base de glycérine, d'acide hyaluronique et de niacinamide, sans huiles lourdes ni beurres occlusifs. Même une peau grasse a besoin d'être hydratée : la priver d'eau accentue le sébum.",
+    },
+    {
+      question: "Quelle est la meilleure crème hydratante pour peau mature ?",
+      reponse:
+        "Une crème riche qui associe des céramides, de l'acide hyaluronique et des peptides, pour le confort et le rebondi. Le soir, un rétinol peut s'ajouter, à petite dose et séparément, si ta peau le tolère. Le matin, la crème solaire reste le geste qui compte le plus pour une peau qui mûrit.",
     },
   ],
 };
