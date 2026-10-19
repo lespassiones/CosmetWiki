@@ -4,16 +4,20 @@ import Image from "next/image";
 import { PublicHeader } from "@/components/PublicHeader";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { BlogList } from "./BlogList";
-import { ARTICLES } from "./articles";
+import { ARTICLES_RECENTS } from "@/contenu/articles";
+import { fichesDe } from "@/lib/article";
 
 const TITLE = "Blog";
 const DESCRIPTION =
-  "Le journal Cosme Check : décoder les cosmétiques, un article à la fois. Ingrédients, marques, routines, réglementation.";
+  "Le journal Cosme Check : décoder les cosmétiques, un article à la fois. Ingrédients, routines, tendances, marques et réglementation.";
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  alternates: { canonical: "/blog" },
+  alternates: {
+    canonical: "/blog",
+    types: { "application/rss+xml": [{ url: "/blog/flux.xml", title: "Le Journal Cosme Check" }] },
+  },
   openGraph: {
     title: `${TITLE} · Cosme Check`,
     description: DESCRIPTION,
@@ -24,7 +28,7 @@ export const metadata: Metadata = {
 
 const STATS = [
   { value: "2026", label: "Édition" },
-  { value: `${ARTICLES.length}`, label: "Articles" },
+  { value: `${ARTICLES_RECENTS.length}`, label: "Articles" },
   { value: "Hebdo", label: "Mise à jour" },
 ];
 
@@ -82,7 +86,7 @@ export default function BlogPage() {
         </section>
 
         <div className="mx-auto mt-10 w-full max-w-6xl px-5 sm:px-8">
-          <BlogList articles={ARTICLES} />
+          <BlogList articles={fichesDe(ARTICLES_RECENTS)} />
         </div>
       </main>
 

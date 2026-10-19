@@ -2,25 +2,17 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { Article, Category } from "./articles";
+import type { FicheArticle } from "@/lib/article";
+import { CATEGORIES, STYLE_CATEGORIE, type Categorie } from "@/contenu/rubriques";
 
-// Re-export so existing imports `import { type Article } from "./BlogList"`
-// continue à fonctionner sans casser les call sites.
-export type { Article, Category };
-
-const CATEGORY_STYLES: Record<Category, string> = {
-  Ingrédients: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-  Marques: "bg-violet-50 text-violet-700 ring-violet-100",
-  Routines: "bg-rose-50 text-rose-700 ring-rose-100",
-  Réglementation: "bg-amber-50 text-amber-700 ring-amber-100",
-};
-
-const ALL_CATEGORIES: Category[] = [
-  "Ingrédients",
-  "Marques",
-  "Routines",
-  "Réglementation",
-];
+/**
+ * La liste filtrable du blog. Elle reçoit des fiches (`lib/article.fichesDe`),
+ * jamais les articles entiers : tout ce qu'un composant client reçoit voyage
+ * dans la page, et le texte complet de chaque article n'a rien à y faire.
+ */
+type Article = FicheArticle;
+type Category = Categorie;
+const CATEGORY_STYLES = STYLE_CATEGORIE;
 
 type Filter = "Tous" | Category;
 type SortOrder = "recent" | "oldest";
@@ -31,25 +23,23 @@ export function BlogList({ articles }: { articles: Article[] }) {
   const [sort, setSort] = useState<SortOrder>("recent");
 
   const counts = useMemo(() => {
-    const map: Record<Filter, number> = {
-      Tous: articles.length,
-      Ingrédients: 0,
-      Marques: 0,
-      Routines: 0,
-      Réglementation: 0,
-    };
-    for (const a of articles) map[a.category] += 1;
+    const map = { Tous: articles.length } as Record<Filter, number>;
+    for (const c of CATEGORIES) map[c] = 0;
+    for (const a of articles) map[a.categorie] += 1;
     return map;
   }, [articles]);
+  // Une rubrique sans article n'est pas proposée : un filtre qui mène à une
+  // liste vide est une impasse.
+  const ALL_CATEGORIES = CATEGORIES.filter((c) => counts[c] > 0);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const list = articles.filter((a) => {
-      if (filter !== "Tous" && a.category !== filter) return false;
+      if (filter !== "Tous" && a.categorie !== filter) return false;
       if (!q) return true;
       return (
-        a.title.toLowerCase().includes(q) ||
-        a.excerpt.toLowerCase().includes(q)
+        a.titre.toLowerCase().includes(q) ||
+        a.resume.toLowerCase().includes(q)
       );
     });
     // articles already ordered most-recent first in source
@@ -142,12 +132,12 @@ export function BlogList({ articles }: { articles: Article[] }) {
 
         {filtered.length === 0 ? (
           <div className="mt-6 rounded-2xl bg-white p-10 text-center text-[14px] text-ink-muted shadow-[0_4px_16px_-8px_rgba(17,17,17,0.06)] ring-1 ring-black/[0.04]">
-            Aucun article ne correspond à votre recherche.
+            Aucun article ne correspond à ta recherche.
           </div>
         ) : (
           <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {filtered.map((a) => (
-              <ArticleCard key={a.id} article={a} />
+              <ArticleCard key={a.slug} article={a} />
             ))}
           </div>
         )}
@@ -197,29 +187,29 @@ function CategoryRow({
 function ArticleCard({ article }: { article: Article }) {
   return (
     <Link
-      href={`/blog/${article.id}`}
+      href={`/blog/${article.slug}`}
       className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_4px_16px_-8px_rgba(17,17,17,0.06)] ring-1 ring-black/[0.04] transition hover:shadow-[0_8px_24px_-10px_rgba(17,17,17,0.12)] focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-black/[0.04]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={article.image}
+          src={article.imagePetite}
           alt=""
           className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
           loading="lazy"
         />
         <span
-          className={`absolute left-3 top-3 inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-semibold shadow-sm ring-1 ${CATEGORY_STYLES[article.category]}`}
+          className={`absolute left-3 top-3 inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-semibold shadow-sm ring-1 ${CATEGORY_STYLES[article.categorie]}`}
         >
-          {article.category}
+          {article.categorie}
         </span>
       </div>
       <div className="flex flex-1 flex-col gap-3 p-5">
         <h3 className="text-balance text-[16px] font-bold leading-snug tracking-tight text-ink">
-          {article.title}
+          {article.titre}
         </h3>
         <p className="line-clamp-2 text-[13.5px] leading-relaxed text-ink-muted">
-          {article.excerpt}
+          {article.resume}
         </p>
         <div className="mt-auto flex items-center justify-between pt-2 text-[12px] text-ink-subtle">
           <div className="flex items-center gap-3">
@@ -229,7 +219,7 @@ function ArticleCard({ article }: { article: Article }) {
             </span>
             <span className="inline-flex items-center gap-1">
               <ClockIcon className="h-3.5 w-3.5" />
-              {article.readingTime}
+              {article.minutes} min
             </span>
           </div>
           <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#F43F5E]">

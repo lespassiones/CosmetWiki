@@ -3,30 +3,31 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ARTICLES, type Article } from "@/app/blog/articles";
 import { FadeInSection } from "@/components/FadeInSection";
+import { STYLE_CATEGORIE } from "@/contenu/rubriques";
+import type { FicheArticle } from "@/lib/article";
 
-const SHOWN = ARTICLES.slice(0, 6);
-
-const CATEGORY_STYLES: Record<string, string> = {
-  Ingrédients: "bg-emerald-100 text-emerald-700",
-  Routines: "bg-rose-100 text-rose-600",
-  Marques: "bg-purple-100 text-purple-700",
-  Réglementation: "bg-sky-100 text-sky-700",
-};
+/**
+ * Les derniers articles du blog, en carrousel sur l'accueil.
+ *
+ * Il reçoit des fiches (`lib/article.fichesDe`) de la page, jamais le
+ * registre : ce composant est client, et importer `contenu/articles` ici
+ * aurait embarqué le texte complet de tous les articles dans le JavaScript de
+ * l'accueil.
+ */
+type Article = FicheArticle;
 
 function ArticleCard({ article }: { article: Article }) {
-  const catStyle =
-    CATEGORY_STYLES[article.category] ?? "bg-gray-100 text-gray-600";
+  const catStyle = STYLE_CATEGORIE[article.categorie] ?? "bg-gray-100 text-gray-600";
   return (
     <Link
-      href={`/blog/${article.id}`}
+      href={`/blog/${article.slug}`}
       className="group flex snap-start flex-col min-w-[calc(100%-1.5rem)] sm:min-w-[calc(50%-0.5rem)] lg:min-w-[calc(33.333%-0.75rem)] rounded-2xl border border-gray-100 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow"
     >
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-50">
         <Image
           src={article.image}
-          alt={article.title}
+          alt={article.alt}
           fill
           sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 90vw"
           className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
@@ -37,28 +38,29 @@ function ArticleCard({ article }: { article: Article }) {
         <span
           className={`inline-block self-start rounded-full px-3 py-0.5 text-[11px] font-semibold ${catStyle}`}
         >
-          {article.category}
+          {article.categorie}
         </span>
 
         <h3 className="mt-3 line-clamp-2 text-[15px] font-bold leading-snug text-ink transition-colors group-hover:text-[#F43F5E]">
-          {article.title}
+          {article.titre}
         </h3>
 
         <p className="mt-2 line-clamp-3 flex-1 text-[13px] leading-relaxed text-ink-muted">
-          {article.excerpt}
+          {article.resume}
         </p>
 
         <div className="mt-4 flex items-center gap-2 text-[12px] text-ink-muted/70">
           <span>{article.date}</span>
           <span aria-hidden>·</span>
-          <span>{article.readingTime} de lecture</span>
+          <span>{article.minutes} min de lecture</span>
         </div>
       </div>
     </Link>
   );
 }
 
-export function LandingArticles() {
+export function LandingArticles({ articles }: { articles: readonly Article[] }) {
+  const SHOWN = articles;
   const trackRef = useRef<HTMLDivElement>(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(true);
@@ -134,7 +136,7 @@ export function LandingArticles() {
             className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {SHOWN.map((article) => (
-              <ArticleCard key={article.id} article={article} />
+              <ArticleCard key={article.slug} article={article} />
             ))}
           </div>
 

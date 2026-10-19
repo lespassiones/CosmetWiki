@@ -8,7 +8,7 @@ export const revalidate = 86400;
 /**
  * Sitemap des pages STATIQUES uniquement (landing, blog, FAQ, légal...).
  * Les routes et leurs dates viennent de lib/sitemapData.ts : les articles
- * de blog sont dérivés de app/blog/articles.ts, ajouter un article là-bas
+ * de blog sont dérivés de contenu/articles.ts, ajouter un article là-bas
  * suffit.
  *
  * Les 15 700 fiches ingrédient /i/[slug] vivent dans des sitemaps dédiés

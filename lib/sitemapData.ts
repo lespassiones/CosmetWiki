@@ -13,7 +13,7 @@ import { unstable_cache } from "next/cache";
 import { supabaseAnon } from "@/lib/supabase";
 import { SITE_URL } from "@/lib/siteUrl";
 import { INDEX_INGREDIENTS } from "@/lib/seoConfig";
-import { ARTICLES } from "@/app/blog/articles";
+import { ARTICLES_RECENTS } from "@/contenu/articles";
 
 /** Taille max d'un sitemap ingrédients. La spec autorise 50 000 URLs ;
  *  10 000 garde des fichiers légers et scale jusqu'à 500k URLs via l'index. */
@@ -60,7 +60,7 @@ export type StaticRoute = {
 
 /**
  * Pages statiques du site. Les articles de blog sont dérivés de
- * `app/blog/articles.ts` : ajouter un article là-bas suffit, le sitemap
+ * `contenu/articles.ts` : ajouter un article là-bas suffit, le sitemap
  * suit automatiquement (fini les listes dupliquées qui divergent).
  */
 export function staticRoutes(): StaticRoute[] {
@@ -74,7 +74,8 @@ export function staticRoutes(): StaticRoute[] {
       ? ([{ path: "/ingredients", priority: 0.9, changeFrequency: "weekly" }] as StaticRoute[])
       : []),
     { path: "/faq", priority: 0.8, changeFrequency: "monthly" },
-    { path: "/blog", priority: 0.8, changeFrequency: "weekly" },
+    // Un article par jour : la liste change chaque jour, sa date est celle du dernier article retouché.
+    { path: "/blog", priority: 0.8, changeFrequency: "daily", lastModified: ARTICLES_RECENTS.map((x) => x.modifieLe).sort().at(-1) },
     { path: "/en-savoir-plus", priority: 0.7, changeFrequency: "monthly" },
     { path: "/equipe", priority: 0.5, changeFrequency: "yearly" },
     { path: "/contact", priority: 0.5, changeFrequency: "yearly" },
@@ -88,11 +89,11 @@ export function staticRoutes(): StaticRoute[] {
     { path: "/mentions-legales", priority: 0.3, changeFrequency: "yearly" },
   ];
 
-  const blog: StaticRoute[] = ARTICLES.map((a) => ({
-    path: `/blog/${a.id}`,
+  const blog: StaticRoute[] = ARTICLES_RECENTS.map((a) => ({
+    path: `/blog/${a.slug}`,
     priority: 0.7,
     changeFrequency: "monthly" as const,
-    lastModified: a.modified ?? a.published,
+    lastModified: a.modifieLe,
   }));
 
   return [...core, ...blog];

@@ -4,6 +4,8 @@ import { LandingSteps } from "@/components/LandingSteps";
 import { LandingValues } from "@/components/LandingValues";
 import { LandingPricing } from "@/components/LandingPricing";
 import { LandingArticles } from "@/components/LandingArticles";
+import { ARTICLES_RECENTS } from "@/contenu/articles";
+import { fichesDe } from "@/lib/article";
 import { DownloadAutoOpen } from "@/components/download/DownloadAutoOpen";
 import { SITE_URL } from "@/lib/siteUrl";
 
@@ -152,7 +154,7 @@ export default function Home() {
       <LandingSteps />
       <LandingValues />
       <LandingPricing />
-      <LandingArticles />
+      <LandingArticles articles={fichesDe(ARTICLES_RECENTS.slice(0, 6))} />
     </>
   );
 }
