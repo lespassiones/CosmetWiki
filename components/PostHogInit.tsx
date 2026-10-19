@@ -1,21 +1,24 @@
 "use client";
 
 /**
- * Initialise PostHog côté navigateur en mode SUIVI COMPLET (web uniquement) :
- *   - session replay (enregistrement des sessions, live),
- *   - autocapture des clics + heatmaps,
- *   - identité nominative (identify) des utilisateurs connectés,
- *   - persistance localStorage + cookie.
+ * Initialise PostHog côté navigateur, en deux modes selon le consentement.
  *
- * Les champs de saisie sont MASQUÉS dans les enregistrements
- * (session_recording.maskAllInputs) : on voit la navigation et les clics, mais
- * pas le contenu tapé (protège les données de peau/allergies). On voit aussi
- * bien les visiteurs ANONYMES que connectés (person_profiles: 'always').
+ * **Sans consentement (aujourd'hui, tout le monde : le site n'a pas de
+ * bandeau)** : mesure d'audience sans cookie (`cookieless_mode: 'always'`).
+ * Rien n'est écrit dans le navigateur, pas de session replay, pas de carte de
+ * chaleur, pas de profil, pas d'identité. C'est ce que promet la politique de
+ * confidentialité (section 9), et c'est ce qui fait tourner la mesure des
+ * articles du blog (`lib/mesure.ts`) sans rien demander au visiteur.
  *
- * ⚠️ RGPD : le session replay + les heatmaps ne sont PAS exemptés de
- * consentement (CNIL). Pour être conforme, ce composant doit être déclenché
- * APRÈS acceptation d'un bandeau cookies (à ajouter). En l'état, il capture dès
- * le chargement — décision produit assumée, à mettre derrière un consentement.
+ * **Avec consentement** (`enregistrerConsentementMesure('accepte')`, à
+ * brancher sur un futur bandeau) : le suivi complet d'avant le 19/10/2026,
+ * session replay avec saisies MASQUÉES, autocapture, cartes de chaleur,
+ * persistance localStorage + cookie, identité de l'utilisateur connecté.
+ *
+ * ⚠️ RGPD : le replay et les cartes de chaleur ne sont PAS exemptés de
+ * consentement (CNIL). Jusqu'au 19/10/2026 ils tournaient dès le chargement,
+ * en contradiction avec la politique publiée ; ils attendent désormais le
+ * consentement.
  *
  * Monté une fois dans app/layout.tsx. Ne rend rien.
  */
@@ -24,6 +27,7 @@ import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import posthog from "posthog-js";
 import { supabaseBrowser } from "@/lib/supabase";
+import { consentementMesure } from "@/lib/mesure";
 
 const KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY ?? "";
 const HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.com";
@@ -39,25 +43,50 @@ export function PostHogInit() {
     if (initialized || !KEY) return;
     initialized = true;
 
-    posthog.init(KEY, {
+    const complet = consentementMesure() === "accepte";
+
+    const commun = {
       api_host: HOST,
+      ui_host: "https://eu.posthog.com",
       // Pageview manuel (App Router ne recharge pas la page en navigation SPA).
       capture_pageview: false,
+      // La sortie de page porte la profondeur de défilement maximale : c'est
+      // elle qui dit au robot du blog où les lecteurs s'arrêtent.
       capture_pageleave: true,
-      // Suivi complet.
-      persistence: "localStorage+cookie",
       autocapture: true,
-      capture_heatmaps: true,
-      disable_session_recording: false,
-      session_recording: {
-        // Masque le CONTENU des champs de saisie dans les enregistrements
-        // (données de peau/allergies) — la navigation reste visible.
-        maskAllInputs: true,
-      },
-      // Capture aussi les visiteurs anonymes (pas seulement les connectés).
-      person_profiles: "always",
-    });
+    } as const;
+
+    posthog.init(
+      KEY,
+      complet
+        ? {
+            ...commun,
+            // Suivi complet, consenti.
+            persistence: "localStorage+cookie",
+            capture_heatmaps: true,
+            disable_session_recording: false,
+            session_recording: {
+              // Masque le CONTENU des champs de saisie dans les enregistrements
+              // (données de peau/allergies), la navigation reste visible.
+              maskAllInputs: true,
+            },
+            person_profiles: "always",
+          }
+        : {
+            ...commun,
+            // Sans consentement : aucun stockage dans le navigateur. Le projet
+            // PostHog doit avoir le « Cookieless server hash mode » actif.
+            cookieless_mode: "always",
+            capture_heatmaps: false,
+            disable_session_recording: true,
+            person_profiles: "identified_only",
+          },
+    );
     posthog.register({ platform: "web" });
+
+    // L'identité n'est envoyée qu'avec le consentement : sans lui, aucune
+    // visite n'est reliée à une personne.
+    if (!complet) return;
 
     // Identité : relie la session à l'utilisateur connecté (et met à jour au
     // login / logout) pour retrouver « qui » dans les enregistrements.
