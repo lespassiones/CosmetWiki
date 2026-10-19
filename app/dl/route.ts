@@ -20,11 +20,14 @@
  * `?c=<slug>` propage un nom de campagne aux deux stores (ex. /dl?c=flyer_salon)
  * et `?m=<slug>` le média côté Play (ex. /dl?c=insta_bio&m=social). Sans `m` on
  * reste sur `qr_code`, valeur des QR déjà imprimés.
+ * `?e=<emplacement>` dit d'où vient le clic dans un article du blog (`haut`,
+ * `milieu`, `colonne`, `fin`, `barre`) : il part dans `utm_content` côté Play.
+ * Les appels des articles mènent à `/dl?c=<slug>&m=blog&e=<emplacement>`.
  * La logique de résolution vit dans `lib/storeLink.ts` (testée).
  */
 import { NextResponse, type NextRequest } from "next/server";
 
-import { campaignSlug, mediumSlug, storeUrlFor } from "@/lib/storeLink";
+import { campaignSlug, contentSlug, mediumSlug, storeUrlFor } from "@/lib/storeLink";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -33,8 +36,11 @@ export function GET(req: NextRequest) {
   const ua = req.headers.get("user-agent") ?? "";
   const campaign = campaignSlug(req.nextUrl.searchParams.get("c"));
   const medium = mediumSlug(req.nextUrl.searchParams.get("m"));
-  return NextResponse.redirect(storeUrlFor(ua, campaign, medium), {
+  const content = contentSlug(req.nextUrl.searchParams.get("e"));
+  return NextResponse.redirect(storeUrlFor(ua, campaign, medium, content), {
     status: 302,
-    headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" },
+    // `Vary` en plus de `no-store` : la réponse dépend de l'appareil, aucun
+    // cache intermédiaire ne doit la resservir à un autre.
+    headers: { "Cache-Control": "no-store", Vary: "User-Agent", "X-Robots-Tag": "noindex" },
   });
 }

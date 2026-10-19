@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   ANDROID_PACKAGE,
+  APPLE_PROVIDER_TOKEN,
   APP_STORE_ID,
+  appleUrl,
+  contentSlug,
   SITE_URL,
   campaignSlug,
   detectPlatform,
@@ -63,7 +66,7 @@ describe("storeUrlFor", () => {
 
 describe("campaignSlug", () => {
   it("retombe sur qr quand le paramètre est absent ou hors format", () => {
-    for (const raw of [null, undefined, "", "a b", "trop_long".repeat(6), "évent", "../etc"]) {
+    for (const raw of [null, undefined, "", "a b", "trop_long".repeat(7), "évent", "../etc"]) {
       expect(campaignSlug(raw)).toBe("qr");
     }
   });
@@ -175,5 +178,41 @@ describe("média dans le referrer Play", () => {
   it("laisse desktop et bots sur le site, quel que soit le média", () => {
     expect(storeUrlFor(UA.windowsChrome, "insta_bio", "social")).toBe(SITE_URL);
     expect(storeUrlFor("Googlebot/2.1", "insta_bio", "social")).toBe(SITE_URL);
+  });
+});
+
+/**
+ * Les appels des articles du blog : `/dl?c=<slug>&m=blog&e=<emplacement>`.
+ * Un slug d'article va jusqu'à 60 caractères, Apple ne garde que 40
+ * caractères de `ct` et ne compte rien sans le jeton de fournisseur `pt`.
+ */
+describe("campagnes des articles", () => {
+  const slug = "perturbateurs-endocriniens-cosmetiques-2026";
+
+  it("accepte un slug d'article de 60 caractères comme campagne", () => {
+    expect(campaignSlug("a".repeat(60))).toBe("a".repeat(60));
+    expect(campaignSlug("a".repeat(61))).toBe("qr");
+    expect(campaignSlug(slug)).toBe(slug);
+  });
+
+  it("porte le jeton de fournisseur et tronque ct à 40 caractères chez Apple", () => {
+    const url = appleUrl(slug);
+    expect(url).toContain(`pt=${APPLE_PROVIDER_TOKEN}`);
+    expect(url).toContain(`ct=${slug.slice(0, 40)}&`);
+    expect(url).toContain("mt=8");
+  });
+
+  it("transmet l'emplacement en utm_content chez Google Play, et rien chez Apple", () => {
+    const attendu = encodeURIComponent(
+      `utm_source=${slug}&utm_medium=blog&utm_campaign=${slug}&utm_content=milieu`,
+    );
+    expect(storeUrlFor(UA.androidChrome, slug, "blog", "milieu")).toContain(attendu);
+    expect(storeUrlFor(UA.iphoneSafari, slug, "blog", "milieu")).toBe(appleUrl(slug));
+  });
+
+  it("ignore un emplacement hors format", () => {
+    expect(contentSlug("milieu")).toBe("milieu");
+    for (const raw of [null, "", "a b", "<script>", "x".repeat(33)]) expect(contentSlug(raw)).toBeNull();
+    expect(playUrl(slug, "blog", contentSlug("a&b"))).not.toContain("utm_content");
   });
 });

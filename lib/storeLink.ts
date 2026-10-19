@@ -11,6 +11,25 @@ export const SITE_URL = "https://www.cosme-check.com/";
 
 /** Slug borné : la valeur part telle quelle dans une URL externe. */
 const SLUG_RE = /^[a-z0-9_-]{1,32}$/i;
+/**
+ * Une campagne peut être plus longue qu'un média : les appels des articles du
+ * blog prennent le slug de l'article comme campagne (`/dl?c=<slug>`), et un
+ * slug d'article va jusqu'à 60 caractères (`contenu/articles.ts`).
+ */
+const CAMPAGNE_RE = /^[a-z0-9_-]{1,60}$/i;
+/**
+ * Apple ne garde que 40 caractères de `ct` : au-delà, la campagne est
+ * tronquée ici plutôt que refusée par l'App Store. Le slug complet reste lu
+ * par Google Play et par PostHog.
+ */
+const APPLE_CT_MAX = 40;
+/**
+ * Le jeton de fournisseur d'App Store Connect (`pt`). Sans lui, Apple ignore
+ * `ct` et ne compte aucune installation par campagne. Il est propre au compte
+ * développeur, pas à l'app : c'est celui de MemoryPilot et de RevealChat
+ * (même équipe, même émetteur de clé d'API, vérifié le 19/10/2026).
+ */
+export const APPLE_PROVIDER_TOKEN = "129333123";
 export const DEFAULT_CAMPAIGN = "qr";
 /**
  * Média par défaut. Reste `qr_code` : des QR pointant sur `/dl` sans paramètre
@@ -19,7 +38,16 @@ export const DEFAULT_CAMPAIGN = "qr";
 export const DEFAULT_MEDIUM = "qr_code";
 
 export function campaignSlug(raw: string | null | undefined): string {
-  return raw && SLUG_RE.test(raw) ? raw.toLowerCase() : DEFAULT_CAMPAIGN;
+  return raw && CAMPAGNE_RE.test(raw) ? raw.toLowerCase() : DEFAULT_CAMPAIGN;
+}
+
+/**
+ * L'emplacement de l'appel dans un article (`haut`, `milieu`, `colonne`,
+ * `fin`, `barre`), ou `null`. Il part dans `utm_content` côté Play ; Apple
+ * n'a pas de champ pour lui, PostHog le mesure (`cta_clic`).
+ */
+export function contentSlug(raw: string | null | undefined): string | null {
+  return raw && SLUG_RE.test(raw) ? raw.toLowerCase() : null;
 }
 
 /**
@@ -34,18 +62,24 @@ export function mediumSlug(raw: string | null | undefined): string {
 /**
  * Pas de code pays dans l'URL : Apple redirige lui-même vers la boutique du
  * compte. Un `/us/` en dur afficherait le store américain à tout le monde.
- * `ct` est le champ campagne des Apple Campaign Links ; sans `pt` (provider
- * token) il est ignoré, donc inoffensif, et prêt si on active App Analytics.
+ * `ct` est le champ campagne des Apple Campaign Links, compté dans App Store
+ * Connect grâce à `pt` (le jeton de fournisseur, voir `APPLE_PROVIDER_TOKEN`).
  * Apple n'a pas de champ « média », d'où l'absence de second paramètre ici.
  */
 export function appleUrl(campaign = DEFAULT_CAMPAIGN): string {
-  return `https://apps.apple.com/app/id${APP_STORE_ID}?ct=${encodeURIComponent(campaign)}`;
+  const ct = encodeURIComponent(campaign.slice(0, APPLE_CT_MAX));
+  return `https://apps.apple.com/app/id${APP_STORE_ID}?pt=${APPLE_PROVIDER_TOKEN}&ct=${ct}&mt=8`;
 }
 
 /** `referrer` est lu par l'Install Referrer API de Play : attribution native. */
-export function playUrl(campaign = DEFAULT_CAMPAIGN, medium = DEFAULT_MEDIUM): string {
+export function playUrl(
+  campaign = DEFAULT_CAMPAIGN,
+  medium = DEFAULT_MEDIUM,
+  content: string | null = null,
+): string {
   const referrer = encodeURIComponent(
-    `utm_source=${campaign}&utm_medium=${medium}&utm_campaign=${campaign}`,
+    `utm_source=${campaign}&utm_medium=${medium}&utm_campaign=${campaign}` +
+      (content ? `&utm_content=${content}` : ""),
   );
   return `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}&referrer=${referrer}`;
 }
@@ -63,9 +97,10 @@ export function storeUrlFor(
   userAgent: string,
   campaign = DEFAULT_CAMPAIGN,
   medium = DEFAULT_MEDIUM,
+  content: string | null = null,
 ): string {
   const platform = detectPlatform(userAgent);
-  if (platform === "android") return playUrl(campaign, medium);
+  if (platform === "android") return playUrl(campaign, medium, content);
   if (platform === "ios") return appleUrl(campaign);
   return SITE_URL;
 }
