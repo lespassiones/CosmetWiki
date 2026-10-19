@@ -97,6 +97,8 @@ export function PageArticle({ article, liste }: { article: Article; liste: reado
             sizes="100vw"
             priority
             className="object-cover"
+            // Le cadrage choisi par l'article (`couverture.position`), sinon le centre.
+            style={article.couverture.position ? { objectPosition: article.couverture.position } : undefined}
           />
           <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/75" />
 

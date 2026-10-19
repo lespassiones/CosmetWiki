@@ -144,6 +144,17 @@ export type Image = Credit & {
   alt: string;
   largeur: number;
   hauteur: number;
+  /**
+   * Le cadrage de la couverture dans le bandeau de l'article, facultatif :
+   * deux pourcentages, horizontal puis vertical (`"50% 40%"`), comme
+   * `object-position` en CSS. Le bandeau fait toute la largeur de l'écran et
+   * 420 à 520 px de haut : une image carrée ou en hauteur y est recadrée, et
+   * le centre (`"50% 50%"`, la valeur par défaut) peut couper le sujet.
+   * `"50% 30%"` remonte le cadre vers le haut de l'image, `"50% 70%"` le
+   * descend. Ignoré ailleurs (cartes, colonne « À lire ensuite »). À vérifier
+   * sur une capture, à 1440 px et à 390 px de large.
+   */
+  position?: string;
 };
 
 /** Le ton d'un encadré : la couleur de sa bordure et de son titre. */

@@ -37,6 +37,8 @@ const article: Article = {
     credit: "Berthold Werner, via Wikimedia Commons",
     licence: "CC BY-SA 4.0",
     source: "https://commons.wikimedia.org/wiki/File:Nivea_Creme_BW_2025-07-05_16-51-45_s.jpg",
+    // Image carrée dans un bandeau : centrée, le mot NIVEA était coupé en haut (capture du 19/10/2026).
+    position: "50% 28%",
   },
   blocs: [
     { type: "h2", texte: "Qu'est-ce qu'il y a dans la crème Nivea ?" },
