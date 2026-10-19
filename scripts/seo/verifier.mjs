@@ -166,8 +166,13 @@ const ENDOSSEMENT = new RegExp(
 /** Un prix ecrit en dur. Les prix vivent chez les magasins et changent selon le pays. */
 const PRIX = /\d+([.,]\d+)?\s?(€|euros?\b|EUR\b|\$|USD\b|dollars?\b|£)|(€|\$|£)\s?\d+([.,]\d+)?/i;
 
-/** Une note de produit sur 20 : elle doit venir de la base (champ `notes`). */
-const NOTE_SUR_20 = /\b(\d{1,2}(?:[.,]\d)?)\s?\/\s?20\b/g;
+/**
+ * Une note de produit sur 20 : elle doit venir de la base (champ `notes`).
+ * Deux decimales, comme la base les donne (« 11,32/20 »), et les deux formes
+ * qu'on ecrit : « 11,32/20 » et « 11,32 sur 20 ». Avec une seule decimale,
+ * « 11,32/20 » etait lu « 32/20 » (proposition du robot, 19/10/2026).
+ */
+const NOTE_SUR_20 = /(?<![\d.,])(\d{1,2}(?:[.,]\d{1,2})?)\s?(?:\/\s?|sur\s)20\b/g;
 
 /** Ce que l'outil photo laisse a ecrire, et qu'il ne faut jamais publier. */
 const A_ECRIRE = /<(À ÉCRIRE|A ECRIRE)>/i;
@@ -499,6 +504,9 @@ for (const { qui, nom, fichier, source, a } of articles) {
   /* ---- images : le credit est une obligation de licence ---- */
   const images = (a.blocs ?? []).filter((b) => b.type === 'image');
   if (!a.couverture?.src) signaler(qui, 'pas de couverture');
+  if (a.couverture?.position !== undefined && !/^\d{1,3}% \d{1,3}%$/.test(a.couverture.position)) {
+    signaler(qui, `couverture.position « ${a.couverture.position} » : deux pourcentages separes par une espace, par exemple « 50% 40% »`);
+  }
   for (const img of [a.couverture, ...images].filter(Boolean)) {
     const src = img.src;
     if (!IMAGE.test(src ?? '')) {
@@ -534,8 +542,22 @@ for (const { qui, nom, fichier, source, a } of articles) {
   const courant = textes
     .filter(([ou]) => (ou === 'chapo' || ou.startsWith('bloc') || ou.startsWith('faq')) && !/ (alt|credit)$/.test(ou))
     .map(([, t]) => t);
-  const mots = courant.map(brut).join(' ').split(/\s+/).filter(Boolean).length;
-  if (mots < MOTS_MIN || mots > MOTS_MAX) avertir(qui, `${mots} mots (${MOTS_MIN} a ${MOTS_MAX})`);
+  const compter = (liste) => liste.map(brut).join(' ').split(/\s+/).filter(Boolean).length;
+  const mots = compter(courant);
+  /*
+    Le plafond de longueur (REGLAGES.mots_par_article) ne vaut que pour le
+    corps redige : ni la FAQ (3 ou 4 reponses de 40 a 60 mots, exigees par la
+    doctrine) ni les cellules des tableaux (des noms d'ingredients et de
+    produits, qui se parcourent et ne se lisent pas). Les compter poussait le
+    robot a couper le texte pour faire de la place (19/10/2026). La duree de
+    lecture, elle, compte tout.
+  */
+  const corps = compter(
+    textes
+      .filter(([ou]) => (ou === 'chapo' || ou.startsWith('bloc')) && !/ (alt|credit)$/.test(ou) && !/\(tableau\)$/.test(ou))
+      .map(([, t]) => t),
+  );
+  if (corps < MOTS_MIN || corps > MOTS_MAX) avertir(qui, `${corps} mots dans le corps, hors FAQ et tableaux (${MOTS_MIN} a ${MOTS_MAX})`);
   const minutes = Math.max(1, Math.round(mots / 200));
   if (Math.abs((a.minutes ?? 0) - minutes) > 1) avertir(qui, `minutes: ${a.minutes}, le texte en demande environ ${minutes} (mots / 200)`);
 

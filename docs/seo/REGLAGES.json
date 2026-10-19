@@ -8,6 +8,7 @@
   "impressions_minimales_vue_sans_clic": 100,
   "position_vue_sans_clic": [5, 50],
   "mots_par_article": [600, 1200],
+  "mots_par_article_compte": "corps seulement : chapeau et blocs, hors FAQ et hors cellules de tableau (verifier.mjs, depuis le 19/10/2026). La duree de lecture compte tout.",
   "liens_internes_minimum": 3,
   "articles_lies": 3,
   "indexation_demandes_max_par_jour": 6,
