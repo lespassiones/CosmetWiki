@@ -1,6 +1,6 @@
 # Cosme Check : stratégie d'acquisition par le contenu et les magasins
 
-Écrit le 19/10/2026. Jumeau de `C:\Projet\Memory Pilot\STRATEGIE-SEO-MEMORYPILOT.md` et de `C:\Projet\Reveal Chat\STRATEGIE-SEO-3-MOIS.md` : même mécanique (un robot qui publie un article par jour, mesure tout et apprend), autre sujet, autre point de départ, **en français seulement**. Le robot relit la section « Les prévisions » chaque matin pour se situer (section « Prévision recalée » de son rapport).
+Écrit le 19/10/2026. Jumeau de `C:\Projet\Memory Pilot\STRATEGIE-SEO-MEMORYPILOT.md` et de `C:\Projet\Reveal Chat\STRATEGIE-SEO-3-MOIS.md` : même mécanique (un robot qui publie un article par jour, mesure tout et apprend), autre sujet, autre point de départ, **en français seulement**, pour tous les lieux francophones, pays limitrophes compris, jamais l'Afrique : la France outre-mer compris (Guadeloupe, Martinique, Guyane, La Réunion, Mayotte, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon…), la Belgique, la Suisse, le Luxembourg, Monaco, Andorre et le Canada francophone (Québec, Nouveau-Brunswick, Ontario francophone). Le robot relit la section « Les prévisions » chaque matin pour se situer (section « Prévision recalée » de son rapport).
 
 ---
 
@@ -46,13 +46,13 @@ Les cinq grappes du premier mois :
 4. Buzz et célébrités : la crème ou la marque dont on parle cette semaine, composition lue ;
 5. Cosmétique bio et étiquettes « clean » (« cosmetique bio » 1 k à 10 k).
 
-Volumes mesurés le 19/10/2026 en France seule, toutes langues : à remesurer sur les cinq zones en French (`VOLUMES.md`).
+Volumes mesurés le 19/10/2026 en France seule, toutes langues, puis sur cinq zones : à remesurer en French sur toutes les zones du Planificateur (France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, et les territoires d'outre-mer qu'il propose séparément ; `VOLUMES.md`).
 
 **Les garde-fous qui comptent le plus** : aucune allégation thérapeutique, aucun alarmisme non sourcé, aucune note de produit qui ne vienne pas de la base, et les célébrités traitées seulement sur ce qu'elles ont montré elles-mêmes. Le vérificateur les bloque.
 
 ## 4. Les prévisions
 
-Trois fourchettes (basse, médiane, haute). Hypothèses : un article par jour sans interruption, un domaine jeune face à des magazines beauté et des sites santé très installés, un public français seulement (dix à cent fois plus petit que l'anglais sur les mêmes sujets), un visiteur du blog sur cent qui installe, et un buzz qui prend de temps en temps (une star, un produit viral) et fait un pic.
+Trois fourchettes (basse, médiane, haute). Hypothèses : un article par jour sans interruption, un domaine jeune face à des magazines beauté et des sites santé très installés, un public francophone seulement, France, outre-mer, pays limitrophes et Canada (dix à cent fois plus petit que l'anglais sur les mêmes sujets), un visiteur du blog sur cent qui installe, et un buzz qui prend de temps en temps (une star, un produit viral) et fait un pic.
 
 ### Google (clics par mois vers le blog)
 
@@ -89,7 +89,7 @@ Trois comptes premium sur 147 aujourd'hui : l'échantillon est trop petit pour u
 | Une note de produit fausse publiée | Une note ne s'écrit qu'avec son relevé (code-barres, date), comparé à la base par le vérificateur |
 | Un comparatif qui dénigre une marque | Doctrine : ce que chaque produit fait bien est dit ; jamais de marque d'autrui dans un titre de façon trompeuse |
 | Lecteurs qui lisent sans installer | Mesure par emplacement d'appel ; le robot déplace et réécrit les appels qui ne convertissent pas |
-| Marché français seul, plus petit | Viser la traîne (ingrédients précis, produits nommés) et le buzz, où la concurrence française lit rarement la composition |
+| Marché francophone seul, plus petit | Viser la traîne (ingrédients précis, produits nommés) et le buzz, où la concurrence lit rarement la composition ; écrire pour toute la francophonie hors Afrique (Québec, Belgique, Suisse, outre-mer), pas seulement pour Paris |
 | Les fiches ingrédients en `noindex` alors que Bing les visite | Décision produit à reprendre par l'humain : le robot les lie, ne change pas `lib/seoConfig.ts` |
 | Les trois robots dans le même Chrome | Verrou `C:\Projet\.robot-chrome.lock`, une heure d'écart (6 h, 7 h, 8 h) |
 | Les illustrations des douze premiers articles | Origine déduite (générées par IA pour Cosme Check), pas prouvée : toute image d'origine incertaine se remplace par une photo libre (`seo:photo`) |

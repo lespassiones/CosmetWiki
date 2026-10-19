@@ -2,7 +2,7 @@
 
 Mémoire des volumes relevés dans le Planificateur de mots clés de Google Ads (compte « Test Civique France », sans dépense, donc en **fourchettes** mensuelles). Le robot y ajoute chaque mesure qu'il fait et la relit avant d'en refaire une : un volume ne bouge guère en quelques semaines. Un volume de plus de 60 jours se remesure.
 
-**Zones de mesure** (francophones à fort pouvoir d'achat, jamais l'Afrique) : France, Belgique, Suisse, Luxembourg, Canada, **langue French**. Le site est en français seulement : pas de mesure en anglais.
+**Zones de mesure** (tous les lieux francophones, pays limitrophes compris, jamais l'Afrique ; décision du 19/10/2026) : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, plus les territoires français d'outre-mer que le Planificateur propose comme zones séparées (à vérifier au premier passage : Nouvelle-Calédonie, Polynésie française, Réunion, Guadeloupe, Martinique, Guyane, Mayotte, Saint-Pierre-et-Miquelon), **langue French**. Note à chaque mesure la liste exacte des zones retenues. Le site est en français seulement : pas de mesure en anglais. Les mesures antérieures sur cinq zones (sans Monaco, Andorre ni l'outre-mer) restent valables comme ordre de grandeur.
 
 ⚠️ **Une partie du volume « peau » est médicale** (acné sévère, eczéma, psoriasis, rosacée). Cosme Check n'est pas un dispositif médical : on peut écrire sur les gestes et les compositions, et dire quand voir un dermatologue, jamais promettre de soigner. Voir `ROBOT.md`, section 5.
 

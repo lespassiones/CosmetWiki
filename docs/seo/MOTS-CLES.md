@@ -2,7 +2,7 @@
 
 Les sujets candidats, rangés par famille du mélange (`ROBOT.md`, section 2) et par volume mesuré (`VOLUMES.md`). Le robot y puise, raye ce qu'il publie (`~~sujet~~ → slug, date`) et ajoute ce qu'il découvre. Un sujet sans volume mesuré porte « à mesurer ».
 
-Écrite le 19/10/2026 à partir des requêtes déjà vues dans la Search Console et dans Bing Webmaster Tools, du premier relevé du Planificateur (France, toutes langues), de la première veille (Google Actualités, suggestions) et de ce que les magazines beauté traitent. Les volumes restent à mesurer sur les cinq zones en French.
+Écrite le 19/10/2026 à partir des requêtes déjà vues dans la Search Console et dans Bing Webmaster Tools, du premier relevé du Planificateur (France, toutes langues), de la première veille (Google Actualités, suggestions) et de ce que les magazines beauté traitent. Les volumes restent à mesurer en French sur toutes les zones francophones du Planificateur (France et outre-mer, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada ; jamais l'Afrique).
 
 **Déjà publiés** (avant le robot) : SPF 50 et ses 7 erreurs (`spf-50-visage-7-erreurs`), crèmes solaires coréennes (`creme-solaire-coreenne-k-beauty`), crèmes hydratantes et réparatrices (`cremes-hydratantes-reparatrices`), lip oils (`lip-oils-huiles-levres`), perturbateurs endocriniens (`perturbateurs-endocriniens-cosmetiques-2026`), masque LED (`masque-led-visage`), sérums (`serums-visage-guide`), routine des footballeurs (`routine-peau-joueurs-foot`), déodorant et aluminium (`deodorant-sels-aluminium-verite`), anti-imperfections (`meilleurs-produits-anti-imperfections`), savoir si un cosmétique est fait pour toi (`cosmetique-fait-pour-toi`), meilleures crèmes hydratantes visage (`meilleures-cremes-hydratantes-visage`).
 

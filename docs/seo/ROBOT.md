@@ -45,7 +45,13 @@ Quatre principes, dans cet ordre :
 
 Le site gagne quand les gens **adorent** venir lire. Les installations et les abonnements suivent.
 
-**Les publics visés** : la France, la Belgique, la Suisse, le Luxembourg et le Québec, **jamais l'Afrique** (même règle que RevealChat et MemoryPilot). Tes mesures de volume se font sur ces zones, et tes exemples, marques, enseignes (pharmacie, parapharmacie, Sephora, Monoprix), saisons et références parlent à ces lecteurs-là. Le public est majoritairement féminin, **mais tu ne présumes jamais le genre du lecteur** (section 4, « La voix »).
+**Les publics visés** : tous les lieux francophones, pays limitrophes compris, **jamais l'Afrique** (même règle que RevealChat et MemoryPilot, décision maintenue le 19/10/2026) :
+
+- **la France, outre-mer compris** : Guadeloupe, Martinique, Guyane, La Réunion, Mayotte, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon, Saint-Barthélemy, Saint-Martin, Wallis-et-Futuna. Ce sont des territoires français : ils sont dans le public, pas une exception ;
+- **la Belgique, la Suisse, le Luxembourg, Monaco, Andorre** ;
+- **le Canada francophone** : le Québec, le Nouveau-Brunswick, l'Ontario francophone.
+
+Tes mesures de volume se font sur ces zones, et tes exemples, marques, enseignes, saisons et références parlent à **tous** ces lecteurs, pas seulement à Paris : la pharmacie et la parapharmacie, mais aussi Jean Coutu, Familiprix ou Pharmaprix au Québec, Kruidvat en Belgique ; l'hiver sec de Montréal comme la chaleur humide de La Réunion ou des Antilles (une crème solaire ne s'y choisit pas pareil) ; les euros comme les dollars canadiens et les francs suisses, ce qui est une raison de plus pour ne jamais écrire de prix. Le public est majoritairement féminin, **mais tu ne présumes jamais le genre du lecteur** (section 4, « La voix »).
 
 **Le français facile.** Un ado de 15 ans doit tout comprendre : phrases courtes, mots simples, **chaque terme technique expliqué en une phrase la première fois** (INCI, comédogène, pH, SPF, BHA, perturbateur endocrinien). `seo:verifier` mesure la longueur des phrases et la lisibilité (seuils dans `REGLAGES.json`) et signale un terme jamais expliqué.
 
@@ -110,7 +116,7 @@ Sous le seuil de données de `REGLAGES.json`, tu **observes sans conclure**. Éc
 npm run seo:veille
 ```
 
-Tu obtiens : les tendances Google du jour (France, Belgique, Suisse, Canada), Google Actualités sur nos sujets (dont les routines et marques de stars), les nouvelles suggestions de recherche et les fils Reddit les plus populaires de la semaine (r/SkincareAddiction, r/BeautyGuruChatter, r/AsianBeauty, r/MakeupAddiction, r/beauty, r/30PlusSkinCare). La veille lit aussi l'anglais, parce que le buzz beauté y naît souvent : un sujet repéré là-bas s'écrit ici en français. Les requêtes vivent dans `docs/seo/veille-requetes.json` : enrichis-les librement (ajoute le nom d'une star dont on parle, une marque qui sort, un ingrédient qui monte). Complète avec tes outils de recherche web :
+Tu obtiens : les tendances Google du jour (France, Belgique, Suisse, Canada : Google Trends ne publie pas de flux du jour pour le Luxembourg, Monaco, Andorre ni l'outre-mer, vérifié le 19/10/2026), Google Actualités (dont une requête sur le Québec, une sur la Belgique, la Suisse et le Luxembourg, une sur l'outre-mer) sur nos sujets (dont les routines et marques de stars), les nouvelles suggestions de recherche et les fils Reddit les plus populaires de la semaine (r/SkincareAddiction, r/BeautyGuruChatter, r/AsianBeauty, r/MakeupAddiction, r/beauty, r/30PlusSkinCare). La veille lit aussi l'anglais, parce que le buzz beauté y naît souvent : un sujet repéré là-bas s'écrit ici en français. Les requêtes vivent dans `docs/seo/veille-requetes.json` : enrichis-les librement (ajoute le nom d'une star dont on parle, une marque qui sort, un ingrédient qui monte). Complète avec tes outils de recherche web :
 
 - **Ce qui a fait ses preuves.** Pour un sujet candidat, cherche-le sur Google. Ouvre les 3 à 5 premiers résultats et note leur angle, leur longueur, leur titre et ce qu'ils oublient. Ta page doit faire mieux sur un point précis : plus concret, plus court, la composition réellement lue, une réponse plus nette.
 - **Ce qui explose ailleurs.** Un produit en rupture parce qu'il est passé sur TikTok, une star qui montre sa routine en vidéo, une étude reprise par la presse, un rappel de l'ANSM. Une demande prouvée vaut mieux qu'une intuition.
@@ -125,8 +131,14 @@ Une suggestion Google prouve qu'une demande existe, pas qu'elle est grande. **Au
 1. Relis `VOLUMES.md`. Un volume mesuré il y a moins de 60 jours ne se remesure pas.
 2. Pour tes 5 à 8 meilleurs candidats, prépare une liste : la requête principale et 2 ou 3 variantes.
 3. Dans Chrome, ouvre `https://ads.google.com/aw/keywordplanner/home?ocid=7863475908&authuser=0`, puis « Obtenir le volume de recherche et les prévisions ». Colle la liste, séparée par des virgules, puis « Commencer ».
-4. Sur la page des résultats, clique sur la zone en haut à gauche. Retire ce qui y est, puis inclus les **cinq zones**, une par une : France, Belgique, Suisse, Luxembourg, Canada (pour le Québec) ; tape le pays, puis « Inclure » sur la ligne « pays ». **Jamais un pays d'Afrique.** Enregistre.
-   **La langue**, juste à droite de la zone (le bouton affiche « French », « English » ou « Toutes les langues ») : règle-la sur **French**. Ne te fie pas à une capture d'écran, elle expire souvent sur cette page alors que la liste s'ouvre bien. Trouve le bouton avec l'outil `find` (« language selector button next to location ») et clique **par sa référence** ; dans la liste qui s'ouvre, trouve l'option avec `find` (« French option in language list ») et clique par sa référence. Puis refais un `find` sur le même bouton : il doit afficher « French » avant que tu lises le tableau. Méthode éprouvée le 19/10/2026 chez MemoryPilot ; si elle échoue deux fois, mesure sur « toutes les langues » et dis-le dans le rapport.
+4. Sur la page des résultats, clique sur la zone en haut à gauche. Retire ce qui y est, puis inclus les zones **une par une** : **France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada** ; tape le pays, puis « Inclure » sur la ligne « pays ». Ajoute aussi les **territoires français d'outre-mer que le Planificateur propose comme zones séparées** (tape « Nouvelle-Calédonie », « Polynésie française », « Réunion », « Guadeloupe », « Martinique », « Guyane », « Mayotte », « Saint-Pierre-et-Miquelon » : inclus ceux qui sortent avec le type « pays » ou « territoire », ignore ceux qui n'existent pas). **Jamais un pays d'Afrique.** Enregistre, puis vérifie le libellé de la zone (« France et N autres ») et note dans `VOLUMES.md` la liste exacte retenue.
+   **La langue**, juste à droite de la zone (le bouton affiche « French », « English » ou « Toutes les langues ») : règle-la sur **French**. Ne te fie pas à une capture d'écran, elle expire souvent sur cette page alors que la liste s'ouvre bien. Trouve le bouton avec l'outil `find` (« language selector button next to location ») et clique **par sa référence** ; dans la liste qui s'ouvre, trouve l'option avec `find` (« French option in language list ») et clique par sa référence. Puis refais un `find` sur le même bouton : il doit afficher « French » avant que tu lises le tableau. Méthode éprouvée le 19/10/2026 chez MemoryPilot, **mais en échec le même jour ici** (le bouton ne s'ouvrait pas, deux essais). Si elle échoue, essaie ces replis, dans cet ordre, **sans les tenir pour éprouvés** tant qu'un rapport ne les a pas validés :
+   - **fermer ce qui recouvre la page** : une fenêtre « Turn off ad blockers » a été vue le 19/10/2026 ; ferme-la (bouton de fermeture trouvé par `find`), puis recommence le clic par référence ;
+   - **cliquer par coordonnées** : prends une capture, repère le bouton de langue à droite de la zone, clique au centre de ses coordonnées avec l'outil `computer`, puis reprends une capture pour voir si la liste est ouverte avant de cliquer sur « French » de la même façon ;
+   - **le clavier** : donne le focus au bouton (clic par référence), puis `Entrée` ou `Espace`, tape « French » et valide par `Entrée` ;
+   - **repartir de l'accueil du Planificateur** : sur l'écran de saisie des mots-clés, avant « Commencer », les réglages de langue et de zone sont parfois proposés directement ; règle-les là ;
+   - **le panneau des filtres** : un filtre « Langue » peut exister dans le panneau qui s'ouvre au-dessus du tableau.
+   Si rien ne marche, mesure sur « toutes les langues » et dis-le dans le rapport et dans `VOLUMES.md`, avec la méthode essayée et son résultat, pour que le passage suivant sache laquelle retenter.
 5. Lis le tableau avec `javascript_exec`. Chaque ligne `[role="row"]` donne « requête | volume | … ». Le tableau ne charge ses lignes qu'au défilement : fais défiler et accumule.
 6. Écris chaque mesure dans `VOLUMES.md`, avec la date, les zones et la langue.
 
@@ -201,7 +213,7 @@ Trois limites, même dans le titre : **aucune allégation thérapeutique**, **au
 
 **Le corps.**
 
-- 600 à 1 200 mots, sections courtes, une idée par section.
+- 600 à 1 200 mots **dans le corps** (chapeau et blocs), sections courtes, une idée par section. La FAQ et les cellules des tableaux ne comptent pas dans ce plafond (`REGLAGES.json > mots_par_article_compte`) : ne coupe jamais un paragraphe utile pour faire de la place à la FAQ. La durée de lecture (`minutes`), elle, compte tout.
 - Va droit à l'essentiel : la personne lit sur son téléphone, souvent le soir, parfois dans le rayon du magasin.
 - Donne des **gestes concrets**, applicables tout de suite : ce qu'il faut chercher dans la liste INCI, l'ordre des produits, la dose, le réflexe en magasin.
 - Utilise des listes (`coches` pour ce qu'il faut faire, `alertes` pour ce qu'il faut éviter), un tableau quand il aide, un encadré pour la phrase à retenir, une `fiche` pour un ingrédient décrypté.
@@ -245,6 +257,8 @@ npm run seo:photo -- --prendre <id> --slug <nom>
 
 Il écrit `public/image/blog/<nom>.webp` (1200 px) et `<nom>-s.webp` (700 px), et imprime le bloc `image` prêt à coller, crédit, licence et source compris. Écris un `alt` qui décrit l'image.
 
+**La couverture dans le bandeau.** L'en-tête de l'article affiche la couverture sur toute la largeur et 420 à 520 px de haut : une image carrée ou en hauteur y est recadrée au centre, et le sujet peut être coupé. Vérifie sur une capture (1440 px et 390 px de large) ; si le sujet est coupé, ajoute `position: "50% 30%"` à la `couverture` (horizontal puis vertical, comme `object-position` : un pourcentage vertical plus petit remonte le cadre). Exemple : l'article Nivea, `"50% 28%"`. Mieux encore, choisis une photo en paysage.
+
 **Ajouter un article.** Le format complet est documenté en tête de `contenu/articles.ts` : relis-le avant d'écrire. En bref :
 
 1. Choisis le slug : `[a-z0-9-]`, **40 caractères au plus** de préférence (Apple ne garde que 40 caractères de la campagne), 60 au maximum, sur la requête visée. Il **ne change jamais** une fois publié.
@@ -252,7 +266,7 @@ Il écrit `public/image/blog/<nom>.webp` (1200 px) et `<nom>-s.webp` (700 px), e
 3. Ajoute une ligne `import` et une entrée dans `ARTICLES`, dans `contenu/articles.ts`.
 4. Les blocs : `p`, `h2`, `h3`, `liste` (`puces`, `coches`, `alertes`, `numeros`), `citation`, `encadre` (avec un `ton`), `tableau`, `fiche` (un ingrédient : nom, INCI, niveau de preuve, effet, statut européen), `image`, et `cta` (`{ type: "cta", texte: "..." }`, au plus un). Le balisage dans les textes : `[libellé](cible)`, `**gras**`, `*italique*`, `==surligné==`, `++souligné++`.
 5. La FAQ : `faq: [{ question, reponse }]`, 3 ou 4 entrées. Elle part dans le balisage `FAQPage`.
-6. Une **note de produit** (« 14/20 ») ne s'écrit que si elle est déclarée dans `notes` avec le code-barres et la date du relevé, et `seo:verifier` la compare à la base. Pour la relever, lis-la dans Supabase en lecture seule : `cosme_check.catalog_export` (`code_barre`, `nom`, `note_affichee_sur_20`). Sans relevé, pas de note.
+6. Une **note de produit** (« 14/20 », « 11,32/20 » ou « 11,32 sur 20 », jusqu'à deux décimales comme la base) ne s'écrit que si elle est déclarée dans `notes` avec le code-barres et la date du relevé, et `seo:verifier` la compare à la base. Pour la relever, lis-la dans Supabase en lecture seule : `cosme_check.catalog_export` (`code_barre`, `nom`, `note_affichee_sur_20`). Sans relevé, pas de note.
 7. Au moins trois `h2` et une source externe par article.
 
 Les rubriques affichées (`categorie`) sont celles de `contenu/rubriques.ts` : Ingrédients, Routines, Tendances, Célébrités, Marques, Réglementation. Un article de la famille « buzz et célébrités » va dans « Célébrités » quand il parle d'une personne, dans « Tendances » sinon.
