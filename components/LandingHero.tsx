@@ -57,7 +57,7 @@ export function LandingHero() {
         {/* Contenu mobile vertical, style OnSkin :
             titre → image (halo) → description → KPIs → badges → CTA */}
         <div className="relative z-10 flex flex-col items-center gap-6 px-5 pb-10 pt-28 text-center lg:hidden">
-          <HeroHeadline className="reveal-on-mount text-ink text-[34px] sm:text-[40px]" />
+          <HeroHeadline doublon className="reveal-on-mount text-ink text-[34px] sm:text-[40px]" />
 
           {/* Image avec halo radial + dégradé concave en bas */}
           <div className="relative mx-auto w-full max-w-[340px] reveal-on-mount reveal-delay-100">
@@ -191,9 +191,21 @@ function SquiggleWord({ children }: { children: string }) {
  * `className` porte la taille de police et hérite de l'alignement du
  * conteneur (gauche desktop, centré mobile).
  */
-function HeroHeadline({ className = "" }: { className?: string }) {
+function HeroHeadline({
+  className = "",
+  doublon = false,
+}: {
+  className?: string;
+  /** Vrai pour la copie mobile : la page rend le titre deux fois (l'une est
+   *  masquée en CSS selon l'écran) et Google ne doit voir qu'un seul h1. */
+  doublon?: boolean;
+}) {
+  const Balise = doublon ? "div" : "h1";
   return (
-    <h1 className={`font-bold leading-[1.12] tracking-tight ${className}`}>
+    <Balise
+      {...(doublon ? { role: "heading", "aria-level": 1 } : {})}
+      className={`font-bold leading-[1.12] tracking-tight ${className}`}
+    >
       <HighlightBlock textClassName="px-3 py-1 text-white">
         Arrête de douter
       </HighlightBlock>
@@ -201,7 +213,7 @@ function HeroHeadline({ className = "" }: { className?: string }) {
         découvre si un produit est vraiment{" "}
         <span className="whitespace-nowrap text-[#F43F5E]">fait pour toi</span>.
       </span>
-    </h1>
+    </Balise>
   );
 }
 
