@@ -1,5 +1,5 @@
 {
-  "note": "Lu par scripts/seo/veille.mjs. tendances_geos : pays de Google Trends. requetes_* : Google News (72 h). graines_* : suggestions de Google. reddit : subreddits, top de la semaine. A enrichir librement. Celebrites : on repere le buzz, l'article ne reprend que ce que la personne a dit ou montre elle-meme, avec la source.",
+  "note": "Lu par scripts/seo/veille.mjs. tendances_geos : pays de Google Trends. requetes_* : Google News (72 h). graines_* : suggestions de Google. reddit : subreddits, top de la semaine. Zones : tous les lieux francophones, outre-mer compris, jamais l'Afrique ; Google Trends n'a de flux du jour que pour FR, BE, CH et CA (verifie le 19/10/2026), les autres zones passent par Google Actualites. A enrichir librement. Celebrites : on repere le buzz, l'article ne reprend que ce que la personne a dit ou montre elle-meme, avec la source.",
   "tendances_geos": [
     "FR",
     "BE",
@@ -20,7 +20,10 @@
     "K-beauty OR \"cosmétiques coréens\"",
     "\"60 Millions de consommateurs\" OR UFC-Que Choisir cosmétique",
     "Yuka OR INCI cosmétique application",
-    "dermatologue conseil peau"
+    "dermatologue conseil peau",
+    "cosmétique OR \"soins de la peau\" Québec OR Montréal",
+    "cosmétique OR \"soin visage\" Belgique OR Suisse OR Luxembourg",
+    "cosmétique OR \"crème solaire\" Réunion OR Antilles OR Guadeloupe OR Martinique OR \"Nouvelle-Calédonie\" OR Polynésie"
   ],
   "requetes_en": [
     "\"skincare routine\" celebrity OR star",

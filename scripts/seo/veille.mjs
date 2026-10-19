@@ -120,7 +120,12 @@ const REDDIT_MAX = 10;
 /** Valeurs de depart, ecrites quand le fichier ou l'un de ses champs manque. */
 const REQUETES_DEPART = {
   note: "Lu par scripts/seo/veille.mjs. tendances_geos : pays de Google Trends. requetes_* : Google News (72 h). graines_* : suggestions de Google. reddit : subreddits, top de la semaine. A enrichir librement. Celebrites : on repere le buzz, l'article ne reprend que ce que la personne a dit ou montre elle-meme, avec la source.",
-  // Zones francophones a fort pouvoir d'achat, jamais l'Afrique (doctrine, section 2).
+  /*
+    Tous les lieux francophones, outre-mer compris, jamais l'Afrique (doctrine,
+    section 2). Google Trends ne publie de flux du jour que pour ces quatre
+    pays : LU, MC, AD, RE, NC, PF et GP rendent un flux vide (verifie le
+    19/10/2026). Les autres zones passent par les requetes de Google Actualites.
+  */
   tendances_geos: ['FR', 'BE', 'CH', 'CA'],
   /*
     Les guillemets ne sont pas decoratifs : sans eux, « routine » ramene le
@@ -142,6 +147,9 @@ const REQUETES_DEPART = {
     '"60 Millions de consommateurs" OR UFC-Que Choisir cosmétique',
     'Yuka OR INCI cosmétique application',
     'dermatologue conseil peau',
+    'cosmétique OR "soins de la peau" Québec OR Montréal',
+    'cosmétique OR "soin visage" Belgique OR Suisse OR Luxembourg',
+    'cosmétique OR "crème solaire" Réunion OR Antilles OR Guadeloupe OR Martinique OR "Nouvelle-Calédonie" OR Polynésie',
   ],
   requetes_en: [
     '"skincare routine" celebrity OR star',
