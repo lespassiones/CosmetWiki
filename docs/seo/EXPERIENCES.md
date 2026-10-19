@@ -1,0 +1,10 @@
+# Expériences en cours
+
+Un changement = une hypothèse = une date de relecture. Le verdict s'écrit ici à l'échéance, puis la leçon part dans `LECONS.md` si elle s'est vérifiée deux fois.
+
+| Lancée le | Article | Changement | Hypothèse | Mesure | Valeur avant | À relire le | Verdict |
+|---|---|---|---|---|---|---|---|
+| 2026-10-19 | les 12 | Page article en trois colonnes, cinq appels à télécharger par article (haut, milieu, colonne, fin, barre), campagne transmise aux magasins (`/dl?c=<slug>&m=blog&e=<emplacement>`) | Le haut et la barre convertissent le mieux sur téléphone | `cta_clic` par `source`, installations par campagne (App Store Connect, console Play) | 0 clic mesuré (aucun appel suivi avant le 19/10) | 2026-11-02 | |
+| 2026-10-19 | les 12 | FAQ ajoutée aux 9 articles qui n'en avaient pas, déclarée en `FAQPage` | Des requêtes en question apparaissent dans la Search Console et les IA citent davantage le blog | impressions GSC sur des requêtes en « comment », « pourquoi », « est-ce que » ; visites venues des IA | 927 impressions sur 28 jours, 1 visite venue d'une IA | 2026-11-16 | |
+| 2026-10-19 | routine-peau-joueurs-foot | Titre réécrit : il promettait la routine de Ronaldo et Mbappé que le texte ne donne pas | Le taux de clic tient malgré la perte des noms (la page est à la position 7,5) | CTR et position GSC de la page | 49 impressions, position 7,5 (28 j au 18/10) | 2026-11-02 | |
+| 2026-10-19 | site entier | PostHog passe sans cookie pour les visiteurs sans consentement (plus de replay ni de carte de chaleur) | Le volume de pages vues mesuré ne baisse pas | `$pageview` par jour sur cosme-check.com | 255 vues sur 28 jours | 2026-11-02 | |

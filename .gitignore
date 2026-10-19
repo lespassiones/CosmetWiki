@@ -58,3 +58,7 @@ public/Beta/
 qr-codes/
 
 .env*
+
+# Robot editorial SEO : donnees brutes regenerables chaque matin (docs/seo/ROBOT.md)
+docs/seo/veille/*.json
+docs/seo/donnees/cache-asc.json

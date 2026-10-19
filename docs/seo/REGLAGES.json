@@ -1,0 +1,19 @@
+{
+  "_note": "Seuils du robot editorial de Cosme Check. Les changer ici, jamais dans ROBOT.md. Lus chaque matin par le robot et par scripts/seo/verifier.mjs.",
+  "articles_nouveaux_par_jour": 1,
+  "optimisations_par_jour": 1,
+  "jours_avant_reoptimisation": 7,
+  "jours_avant_verdict_experience": 7,
+  "vues_minimales_pour_conclure": 50,
+  "impressions_minimales_vue_sans_clic": 100,
+  "position_vue_sans_clic": [5, 50],
+  "mots_par_article": [600, 1200],
+  "liens_internes_minimum": 3,
+  "articles_lies": 3,
+  "indexation_demandes_max_par_jour": 6,
+  "titre_seo_max": 47,
+  "mots_par_phrase_moyenne_max": 20,
+  "phrase_longue_mots": 35,
+  "lisibilite_min": 60,
+  "langues": ["fr"]
+}

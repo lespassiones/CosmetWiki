@@ -1,0 +1,71 @@
+{
+  "note": "Lu par scripts/seo/veille.mjs. tendances_geos : pays de Google Trends. requetes_* : Google News (72 h). graines_* : suggestions de Google. reddit : subreddits, top de la semaine. A enrichir librement. Celebrites : on repere le buzz, l'article ne reprend que ce que la personne a dit ou montre elle-meme, avec la source.",
+  "tendances_geos": [
+    "FR",
+    "BE",
+    "CH",
+    "CA"
+  ],
+  "requetes_fr": [
+    "\"cosmétique\" OR \"cosmétiques\" étude ingrédient",
+    "\"perturbateurs endocriniens\" cosmétiques",
+    "ANSM cosmétique OR \"produit cosmétique\" rappel",
+    "\"crème solaire\" OR \"protection solaire\" étude OR test",
+    "\"routine beauté\" OR \"routine skincare\" star OR célébrité",
+    "\"marque de beauté\" OR \"marque de cosmétiques\" star OR chanteuse OR actrice",
+    "\"Rare Beauty\" OR \"Fenty Beauty\" OR \"Rhode\" OR \"Kylie Cosmetics\" OR \"Glossier\"",
+    "\"produit viral\" OR \"devenu viral\" beauté OR TikTok",
+    "tendance beauté TikTok",
+    "\"skincare\" tendance",
+    "K-beauty OR \"cosmétiques coréens\"",
+    "\"60 Millions de consommateurs\" OR UFC-Que Choisir cosmétique",
+    "Yuka OR INCI cosmétique application",
+    "dermatologue conseil peau"
+  ],
+  "requetes_en": [
+    "\"skincare routine\" celebrity OR star",
+    "\"beauty brand\" celebrity launch",
+    "\"Rare Beauty\" OR \"Fenty Beauty\" OR \"Rhode skin\" OR \"Kylie Cosmetics\"",
+    "\"viral\" skincare TikTok",
+    "\"beauty trend\" TikTok",
+    "sunscreen study OR recall",
+    "SCCS OR \"EU cosmetics regulation\" ingredient",
+    "\"K-beauty\" trend"
+  ],
+  "graines_fr": [
+    "routine beauté de",
+    "routine skincare",
+    "crème utilisée par",
+    "marque beauté de",
+    "produit viral tiktok",
+    "dupe",
+    "inci",
+    "comment lire une composition",
+    "ingrédient à éviter",
+    "perturbateur endocrinien",
+    "niacinamide",
+    "rétinol",
+    "acide hyaluronique",
+    "crème solaire visage",
+    "peau grasse",
+    "peau sensible",
+    "comédogène",
+    "yuka cosmétique"
+  ],
+  "graines_en": [
+    "skincare routine of",
+    "celebrity skincare routine",
+    "what moisturizer does",
+    "viral tiktok skincare",
+    "is it safe skincare",
+    "dupe for"
+  ],
+  "reddit": [
+    "SkincareAddiction",
+    "BeautyGuruChatter",
+    "AsianBeauty",
+    "MakeupAddiction",
+    "beauty",
+    "30PlusSkinCare"
+  ]
+}
