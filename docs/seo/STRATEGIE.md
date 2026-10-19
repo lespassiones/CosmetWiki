@@ -28,7 +28,7 @@
 | **Blog prêt pour un article par jour** | un fichier par article (`contenu/articles/`), registre documenté (`contenu/articles.ts`), page en trois colonnes (sommaire, article, « à lire ensuite »), cinq appels à télécharger, FAQ en données structurées, flux RSS (`/blog/flux.xml`), plan du site à jour. Les douze articles existants migrés sans changer d'adresse. |
 | **Campagnes jusqu'aux magasins** | chaque appel mène à `/dl?c=<slug>&m=blog&e=<emplacement>` : App Store avec `pt` et `ct` (compté dans App Store Connect), Google Play avec `referrer` (`utm_source`, `utm_medium=blog`, `utm_campaign`, `utm_content`). |
 | **Mesure** | PostHog (projet 221637, UE) **sans cookie** tant que le visiteur n'a pas consenti : vues par article, sections lues (`section_atteinte`), clics par emplacement (`cta_clic`), sources dont les IA. Le « Cookieless server hash mode » du projet est actif. |
-| **Le robot** | `/article-du-jour`, chaque matin à **6 h**, Opus 5.5 en effort xhigh, doctrine `docs/seo/ROBOT.md`. Verrou Chrome partagé avec RevealChat (7 h) et MemoryPilot (8 h). |
+| **Le robot** | `/article-du-jour`, chaque matin à **6 h**, Opus 5.5 en effort medium, doctrine `docs/seo/ROBOT.md`. Verrou Chrome partagé avec RevealChat (7 h) et MemoryPilot (8 h). |
 
 ## 3. La ligne éditoriale
 

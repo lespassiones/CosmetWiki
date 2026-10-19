@@ -69,5 +69,5 @@ $outils = @(
 
 # La consigne passe AVANT --allowedTools, qui avale tout ce qui le suit.
 # Windows PowerShell retire le `--` qui servirait a l'en separer : ne pas compter dessus.
-claude '/article-du-jour' --model claude-opus-5-5 --effort xhigh --permission-mode auto --chrome `
+claude '/article-du-jour' --model claude-opus-5-5 --effort medium --permission-mode auto --chrome `
   -n "Robot SEO Cosme Check $date" --allowedTools @outils

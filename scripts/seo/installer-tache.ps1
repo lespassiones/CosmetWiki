@@ -43,7 +43,7 @@ $principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" 
 
 Register-ScheduledTask -TaskName $nom -Action $action -Trigger $declencheur `
   -Settings $reglages -Principal $principal `
-  -Description 'Cosme Check, chaque matin a 6 h : Claude (Opus 5.5, xhigh) mesure, ecrit un article, en optimise un, publie et demande l''indexation. Doctrine : docs/seo/ROBOT.md.' `
+  -Description 'Cosme Check, chaque matin a 6 h : Claude (Opus 5.5, medium) mesure, ecrit un article, en optimise un, publie et demande l''indexation. Doctrine : docs/seo/ROBOT.md.' `
   -Force | Out-Null
 
 Get-ScheduledTask -TaskName $nom | Select-Object TaskName, State
