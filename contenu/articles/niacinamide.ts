@@ -39,6 +39,8 @@ const article: Article = {
     credit: "Auteur inconnu, via rawpixel",
     licence: "CC0",
     source: "https://www.rawpixel.com/image/11515770/dropper-bottle-blank-retro-label",
+    // Centrée, la pipette était coupée en haut du bandeau (capture du 20/10/2026).
+    position: "50% 30%",
   },
   blocs: [
     { type: "h2", texte: "Niacinamide : c'est quoi exactement ?" },
