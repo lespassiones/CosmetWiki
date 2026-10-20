@@ -335,7 +335,7 @@ Avec Chrome (outils `claude-in-chrome`), pour chaque **nouvelle** page :
 
 Si le quota du jour est atteint, ou si Chrome ne répond pas, note-le et continue. Ne retente pas en boucle. Tu ne cliques sur rien d'autre dans Search Console, et tu ne modifies aucun réglage.
 
-**Puis libère Chrome** pour les autres robots (Cosme Check à 6 h, RevealChat à 7 h, MemoryPilot à 8 h, qui partagent le même navigateur) :
+**Puis libère Chrome** pour les autres robots (Cosme Check à 6 h, RevealChat à 7 h, Test Civique à 7 h 30, MemoryPilot à 8 h, qui partagent le même navigateur) :
 
 ```
 npm run seo:liberer
@@ -381,4 +381,4 @@ Le premier dimanche de chaque mois, recale les prévisions de `STRATEGIE.md` sur
 | Le quota de modèle est épuisé en cours de route | Ce qui n'est pas vérifié et construit ne part pas. Le lendemain, tu reprends depuis le journal. |
 | Tu hésites entre deux sujets | Prends celui qui a la meilleure preuve de demande. Garde l'autre dans `MOTS-CLES.md`. |
 | Une star, un produit : tu ne trouves pas la source de ce qu'elle a dit ou montré | Tu ne l'écris pas. Tu prends un autre angle ou un autre sujet. |
-| Chrome semble piloté par une autre session | Le robot de Cosme Check passe à 6 h, celui de RevealChat à 7 h, celui de MemoryPilot à 8 h ; un verrou partagé les empêche de se croiser (`C:\Projet\.robot-chrome.lock`, `robot.ps1`). Si Chrome ne répond pas, note-le et continue sans les étapes Chrome. |
+| Chrome semble piloté par une autre session | Le robot de Cosme Check passe à 6 h, celui de RevealChat à 7 h, celui de Test Civique à 7 h 30, celui de MemoryPilot à 8 h ; un verrou partagé les empêche de se croiser (`C:\Projet\.robot-chrome.lock`, `robot.ps1`). Si Chrome ne répond pas, note-le et continue sans les étapes Chrome. |
