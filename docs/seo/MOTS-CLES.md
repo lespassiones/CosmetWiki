@@ -8,7 +8,9 @@ Les sujets candidats, rangés par famille du mélange (`ROBOT.md`, section 2) et
 
 **Le mélange des douze articles publiés** : buzz et célébrités 3 (foot, LED, lip oils), ingrédients 3 (perturbateurs, déodorant, sérums), routines 4 (SPF, réparatrices, anti-imperfections, fait pour toi), comparatifs 2 (meilleures crèmes, K-beauty), Cosme Check pratique 0. En retard : **buzz et célébrités** (cible 3 sur 10, et c'est la famille qui va chercher le trafic) et **Cosme Check pratique**.
 
-**Publiés par le robot** : 2026-10-19 crème Nivea décryptée (`creme-nivea-composition`, buzz). Sur les dix derniers articles (de `creme-nivea-composition` à `lip-oils-huiles-levres`) : buzz 4, ingrédients 3, routines 2, comparatifs 1, pratique 0. Le buzz passe au-dessus de sa part : **pas de buzz demain**. Prochains à pousser : **Cosme Check pratique** (0 sur 1 : « analyser la composition d'un cosmétique », vue sans clic) et les **ingrédients** (INCI, lanoline).
+**Publiés par le robot** : 2026-10-19 crème Nivea décryptée (`creme-nivea-composition`, buzz) ; 2026-10-20 niacinamide (`niacinamide`, ingrédients). Sur les dix derniers articles (de `creme-nivea-composition` à `lip-oils-huiles-levres`) : buzz 4, ingrédients 3, routines 2, comparatifs 1, pratique 0. Le buzz passe au-dessus de sa part : **pas de buzz demain**. Prochains à pousser : **Cosme Check pratique** (0 sur 1 : « analyser la composition d'un cosmétique », vue sans clic) et les **ingrédients** (INCI, lanoline).
+
+Au 20/10/2026, sur les dix derniers par date (de `niacinamide` à `perturbateurs-endocriniens-cosmetiques-2026`) : buzz 3, ingrédients 4, routines 2, comparatifs 1, pratique 0. Les ingrédients passent d'un cran au-dessus de leur part : **pas d'ingrédient demain**. Le reste tient, sauf **Cosme Check pratique, toujours à 0** : c'est la priorité de demain, sauf buzz de moins de 72 h repris partout.
 
 ## Priorités du premier mois
 
@@ -47,17 +49,17 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 |---|---|---|
 | **Lire une liste INCI** | inci, liste inci, comment lire une composition | 1 k à 10 k (« inci », 5 zones, 19/10/2026) ; « liste inci » 100 à 1 k |
 | Lanoline : d'où elle vient, à quoi elle sert, qui doit l'éviter | lanoline, lanolin alcohol | 10 k à 100 k (5 zones, 19/10/2026) ; vérifier l'intention (allaitement ?) avant d'écrire |
-| Niacinamide : à quoi ça sert vraiment | niacinamide, niacinamide bienfaits | à mesurer |
-| Rétinol : débuter sans irriter sa peau | rétinol, rétinol débutant | à mesurer |
-| Acide hyaluronique : hydratant ou effet de mode ? | acide hyaluronique visage | à mesurer |
-| Parabènes : faut-il encore les fuir ? (avec l'avis du SCCS) | parabènes danger, sans paraben | à mesurer ; sources officielles obligatoires |
-| Silicones dans les cosmétiques | silicone cosmétique, dimethicone | à mesurer |
+| ~~Niacinamide : à quoi ça sert vraiment~~ → `niacinamide`, 2026-10-20 | niacinamide, niacinamide bienfaits | 10 k à 100 k (10 zones, 20/10/2026) |
+| Rétinol : débuter sans irriter sa peau | rétinol, rétinol débutant, niacinamide et rétinol | « rétinol » 1 k à 10 k ; « niacinamide et rétinol » 100 à 1 k, +900 % (20/10/2026) ; « rétinol débutant » sans volume |
+| Acide hyaluronique : hydratant ou effet de mode ? | acide hyaluronique visage | « acide hyaluronique » 10 k à 100 k (20/10/2026), concurrence élevée |
+| Parabènes : faut-il encore les fuir ? (avec l'avis du SCCS) | parabènes danger, sans paraben | « parabène » 100 à 1 k (20/10/2026) ; sources officielles obligatoires |
+| Silicones dans les cosmétiques | silicone cosmétique, dimethicone | « silicone cosmétique » 10 à 100 (20/10/2026) : une section plutôt qu'un article |
 | « Sans », « clean », « naturel » : le bluff des étiquettes | cosmétique clean, sans paraben | à mesurer |
 | Cosmétique bio : vraiment mieux ? | cosmetique bio | 1 k à 10 k (5 zones, 19/10/2026) |
 | Huiles essentielles dans les cosmétiques : précautions | huile essentielle cosmétique allergie | à mesurer |
 | Les allergènes à déclarer (limonene, linalool) | allergène cosmétique | 10 à 100 ; une section plutôt qu'un article |
 | Filtres solaires controversés : octocrylène, homosalate | octocrylène, filtre solaire danger | à mesurer ; sources officielles |
-| Comédogène : ce que veut dire ce mot | comédogène, non comédogène | à mesurer |
+| Comédogène : ce que veut dire ce mot | comédogène, non comédogène | **1 k à 10 k, concurrence faible** (20/10/2026) : candidat fort |
 | Le pH de la peau et des nettoyants | ph peau, nettoyant ph neutre | à mesurer |
 | Les ingrédients de la traîne Bing (sodium olivamphoacetate, PEG-2 cocamide, 4-n-butylrésorcinol) | les noms INCI eux-mêmes | traîne déjà vue sur Bing : relier les fiches `/i/<slug>`, regrouper dans un article « ingrédients qu'on ne sait pas prononcer » |
 

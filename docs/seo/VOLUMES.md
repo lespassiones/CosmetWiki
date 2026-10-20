@@ -85,3 +85,41 @@ Mémoire des volumes relevés dans le Planificateur de mots clés de Google Ads 
 | huile minérale cosmétique | 10 à 100 | moyenne | |
 | lire composition cosmétique | aucun volume | | |
 | marion cotillard crème | aucun volume | | |
+
+## 2026-10-20 : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon, toutes les langues
+
+Zone affichée : « Andorre et 9 autres ». **Le Planificateur refuse plus de 10 zones** (« Votre plan ne peut pas contenir plus de 10 zones géographiques ») : Wallis-et-Futuna n'a pas pu être ajouté. La Réunion, la Guadeloupe et la Martinique ne sortent qu'en type « région » de la France : elles sont déjà comptées dans la France, ne pas les ajouter. Restent à tester un jour : Saint-Barthélemy, Saint-Martin, Wallis-et-Futuna (à la place d'une zone minuscule si besoin).
+
+⚠️ **La langue, enfin comprise** : sur l'onglet « Mots clés enregistrés » (là où mène « Obtenir le volume de recherche »), le bouton de langue est **désactivé** par Google Ads (`aria-disabled="true"`, classe `is-disabled`, vérifié par `javascript_exec`). Aucun clic ne l'ouvrira, ni par référence ni par coordonnées. Sur l'onglet « **Idées de mots clés** », il est actif et réglé sur **French**, mais la zone y est indépendante (France seule par défaut). Méthode pour la suite : mesurer les volumes sur 10 zones dans « Mots clés enregistrés » (toutes langues), puis recouper la traîne en French sur « Idées de mots clés ».
+
+| Requête | Volume mensuel | Variation 3 mois | Concurrence | Remarque |
+|---|---|---|---|---|
+| niacinamide | 10 k à 100 k | 0 % | élevée | **sujet du jour** |
+| acide hyaluronique | 10 k à 100 k | 0 % | élevée | gros volume, sites très installés |
+| lanoline | 10 k à 100 k | 0 % | élevée | confirme le 19/10 |
+| comédogène | 1 k à 10 k | 0 % | faible | concurrence faible : bon prochain sujet |
+| rétinol | 1 k à 10 k | 0 % | élevée | |
+| niacinamide et rétinol | 100 à 1 k | **+900 %** | élevée | |
+| niacinamide bienfaits | 100 à 1 k | 0 % | élevée | |
+| lanoline allaitement | 100 à 1 k | 0 % | élevée | l'intention « allaitement » existe mais pèse peu face à « lanoline » |
+| analyse composition cosmétique | 100 à 1 k | 0 % | faible | |
+| parabène | 100 à 1 k | 0 % | faible | |
+| cosmétique clean | 10 à 100 | 0 % | élevée | |
+| lanoline visage | 10 à 100 | 0 % | élevée | |
+| silicone cosmétique | 10 à 100 | 0 % | faible | |
+| niacinamide à quoi ça sert, rétinol débutant, comment lire une liste inci, lire une étiquette cosmétique, analyser un cosmétique | aucun volume | | | |
+
+## 2026-10-20 : France seule, French (« Idées de mots clés », mot de départ « niacinamide »)
+
+| Requête | Volume mensuel | Remarque |
+|---|---|---|
+| niacinamide, niacinamid | 10 k à 100 k | |
+| sérum niacinamide, serum niacinamid | 1 k à 10 k | |
+| niacinamide aroma zone, sérum niacinamide aroma zone | 1 k à 10 k | marque : jamais dans un titre de façon trompeuse |
+| la roche posay niacinamide (et variantes « pure niacinamide 10 ») | 100 à 1 k | |
+| vitamine b3 peau | 100 à 1 k | +900 % sur trois mois |
+| the ordinary zinc | 100 à 1 k | +900 % sur trois mois |
+| niacinamide bienfaits, niacinamide visage, niacinamide peau | 100 à 1 k | |
+| niacinamide et vitamine c, vitamine c et niacinamide | 100 à 1 k | |
+| niacinamide et rétinol, rétinol et niacinamide | 100 à 1 k | |
+| meilleur serum niacinamide, niacinamide 5 pourcent | 10 à 100 | |

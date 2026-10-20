@@ -10,14 +10,14 @@ import type { Article } from "@/contenu/articles";
 const article: Article = {
   slug: "lip-oils-huiles-levres",
   titre: "Lip oils : la vraie différence avec un gloss (et lesquels choisir)",
-  titreSeo: "Lip oil ou gloss : la vraie différence",
+  titreSeo: "Lip oil ou gloss ? Avis et INCI décryptés",
   resume:
-    "Les huiles à lèvres ont explosé sur les réseaux. Ce qui les distingue d'un gloss, comment lire leur INCI et les références qui tiennent leurs promesses.",
+    "Lip oil ou gloss ? Ce qui les sépare vraiment, les 3 ingrédients à chercher dans la liste, et les lip oils du moment passés à la loupe.",
   chapo:
     "Les **lip oils** sont devenus viraux sur TikTok, et ont propulsé Dior, Rhode et Clarins en tête des ventes lèvres. Promesse : la brillance d'un gloss avec le soin d'un baume. ++Vrai sur le papier++, mais à condition de bien choisir.",
   publieLe: "2026-05-14",
-  modifieLe: "2026-05-14",
-  minutes: 2,
+  modifieLe: "2026-10-20",
+  minutes: 4,
   theme: "lip oil",
   motsCles: [
     "huile à lèvres",
@@ -56,7 +56,7 @@ const article: Article = {
       items: [
         "**Nutrition immédiate :** les huiles végétales colmatent les micro-fissures des lèvres et limitent l'évaporation de l'eau.",
         "**Confort durable :** les versions sérieuses comprennent du beurre de karité, du squalane végétal ou de l'huile de jojoba.",
-        "**Effet plump léger :** certaines formules ajoutent de la *menthe poivrée* ou un dérivé de capsicum pour gonfler temporairement la lèvre. Joli sur Instagram, parfois irritant.",
+        "**Effet plump léger :** certaines formules ajoutent de la *menthe poivrée* ou un extrait de piment ([Capsicum Annuum Fruit Extract](/i/capsicum-annuum-fruit-extract)) pour gonfler temporairement la lèvre. Joli sur Instagram, parfois irritant.",
       ],
     },
     {
@@ -64,25 +64,30 @@ const article: Article = {
       ton: "rose",
       titre: "À retenir",
       texte:
-        "Le lip oil ==remplace souvent le baume== au quotidien, mais ne remplace pas un baume très occlusif type Cicaplast en cas de lèvres gercées profondes.",
+        "Le lip oil ==remplace souvent le baume== au quotidien. Mais sur des lèvres gercées profondes, rien ne vaut un baume très occlusif (qui forme un film épais pour garder l'eau), type Cicaplast. Pour ces lèvres-là, lis notre [guide des crèmes réparatrices](/blog/cremes-hydratantes-reparatrices).",
     },
 
-    { type: "h2", texte: "3. Que regarder dans l'INCI" },
+    { type: "h2", texte: "3. Liste INCI : que regarder ?" },
+    {
+      type: "p",
+      texte:
+        "La liste INCI, c'est la liste officielle des ingrédients au dos du produit, du plus dosé au moins dosé. Les trois premiers noms font l'essentiel de la formule : c'est là que tout se joue. Pour t'entraîner sur d'autres produits, suis notre méthode [« ce cosmétique est-il fait pour toi ? »](/blog/cosmetique-fait-pour-toi).",
+    },
     {
       type: "liste",
       style: "coches",
       items: [
-        "**Premiers ingrédients = vraies huiles :** *Helianthus annuus oil, Ricinus communis oil, Jojoba esters, Squalane, Butyrospermum parkii butter*.",
-        "**Pas que des esters :** certains lip oils ne contiennent que *Polybutene, Hydrogenated Polyisobutene* (huiles synthétiques imitatrices). Brillant, mais pas nourrissant.",
-        "**Vitamine E (*Tocopherol*) :** bon indicateur de qualité, antioxydant qui protège les huiles de l'oxydation.",
+        "**Premiers ingrédients = vraies huiles :** [Helianthus Annuus Seed Oil](/i/helianthus-annuus-seed-oil) (tournesol), [Ricinus Communis Seed Oil](/i/ricinus-communis-seed-oil) (ricin), [Simmondsia Chinensis Seed Oil](/i/simmondsia-chinensis-seed-oil) (jojoba), [Squalane](/i/squalane), [Butyrospermum Parkii Butter](/i/butyrospermum-parkii-butter) (karité).",
+        "**Pas que des esters :** certains lip oils ne contiennent que [Polybutene](/i/polybutene) et [Hydrogenated Polyisobutene](/i/hydrogenated-polyisobutene), des huiles synthétiques qui imitent les vraies. Brillant, mais pas nourrissant.",
+        "**Vitamine E ([Tocopherol](/i/tocopherol)) :** bon indicateur de qualité, antioxydant qui protège les huiles de l'oxydation.",
       ],
     },
     {
       type: "liste",
       style: "alertes",
       items: [
-        "**Parfums forts** et arômes (*cinnamon, peppermint oil*) : risque d'allergie ou de tiraillement.",
-        "**Colorants alimentaires douteux** (*CI 15850, CI 15985*) : préfère des pigments minéraux ou des nacres si tu veux une version teintée.",
+        "**Parfums forts** et arômes (cannelle, [huile de menthe poivrée](/i/mentha-piperita-oil)) : risque d'allergie ou de tiraillement.",
+        "**Colorants** ([CI 15850](/i/ci-15850), CI 15985) : ils sont autorisés en Europe, listés à l'annexe IV du [règlement (CE) 1223/2009](https://eur-lex.europa.eu/eli/reg/2009/1223/oj). Mais si tes lèvres réagissent facilement, une version transparente est plus sûre.",
       ],
     },
     {
@@ -104,13 +109,25 @@ const article: Article = {
         "**Clarins Lip Comfort Oil :** huile de noisette, de tournesol. Confortable, INCI cohérent avec la promesse.",
         "**Kosas LipFuel Hyaluronic :** huile + acide hyaluronique. Effet plus aqueux. Bonne option clean.",
         "**Rhode Peptide Lip Tint :** huile + peptides. Tendance, formule INCI très soignée.",
-        "**Bourjois Healthy Mix Lip Oil :** alternative accessible, INCI correct mais avec des huiles minérales (*Mineral oil*) en première position.",
+        "**Bourjois Healthy Mix Lip Oil :** alternative accessible, INCI correct, avec de l'huile minérale (*Paraffinum Liquidum*) en première position. Elle protège bien les lèvres, sans danger connu sur la peau : [on l'a décryptée dans la crème Nivea](/blog/creme-nivea-composition).",
       ],
     },
     {
       type: "cta",
       texte:
         "**Vérifie tes huiles à lèvres en 10 secondes.** Scanne ton lip oil avec Cosme Check : note ingrédient par ingrédient, alerte sur les parfums irritants et les huiles synthétiques.",
+    },
+
+    { type: "h2", texte: "Un lip oil protège-t-il du soleil ?" },
+    {
+      type: "p",
+      texte:
+        "Presque jamais. Les lèvres ont très peu de mélanine, le pigment qui protège un peu la peau du soleil : elles brûlent vite. Un lip oil n'a pas de filtre, sauf si un SPF (l'indice de protection solaire) est écrit sur le tube.",
+    },
+    {
+      type: "p",
+      texte:
+        "Au ski, à la plage, ou sous le soleil des Antilles et de La Réunion, choisis un stick à lèvres avec SPF, et garde ton lip oil pour le soir. Les mêmes réflexes que pour ton visage : [les 7 erreurs de la crème solaire](/blog/spf-50-visage-7-erreurs).",
     },
 
     { type: "h2", texte: "En résumé" },
