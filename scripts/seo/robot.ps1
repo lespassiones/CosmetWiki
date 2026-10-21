@@ -26,7 +26,7 @@ if (Test-Path (Join-Path $depot 'docs\seo\PAUSE')) {
 # Le PC reste eveille pendant toute la journee du robot (voir le jumeau RevealChat :
 # reveille par la tache, Windows le rendort au bout de deux minutes sans clavier).
 Add-Type -Namespace CosmeCheck -Name Veille -MemberDefinition '[DllImport("kernel32.dll")] public static extern uint SetThreadExecutionState(uint esFlags);'
-[void][CosmeCheck.Veille]::SetThreadExecutionState([uint32]'0x80000001') # ES_CONTINUOUS | ES_SYSTEM_REQUIRED
+[void][CosmeCheck.Veille]::SetThreadExecutionState([uint32]'0x80000003') # ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED : ecran allume, sinon Chrome fige son rendu
 
 # Le reseau d'abord, trois minutes au plus.
 $fin = (Get-Date).AddMinutes(3)
@@ -57,6 +57,14 @@ if (-not (Get-Process chrome -ErrorAction SilentlyContinue)) {
   Start-Sleep -Seconds 25
 }
 
+# Chrome au premier plan, fenetre agrandie : ecran eteint ou fenetre en arriere-plan,
+# Windows suspend le rendu de Chrome (captures qui expirent, champs qui ne prennent
+# aucune saisie dans Search Console et le Planificateur, constate les 20 et 21/10/2026).
+Add-Type -Namespace Robot -Name Fenetre -MemberDefinition '[DllImport("user32.dll")] public static extern bool ShowWindow(System.IntPtr h, int n); [DllImport("user32.dll")] public static extern bool SetForegroundWindow(System.IntPtr h);' -ErrorAction SilentlyContinue
+Get-Process chrome -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | ForEach-Object {
+  [void][Robot.Fenetre]::ShowWindow($_.MainWindowHandle, 3) # SW_MAXIMIZE
+  [void][Robot.Fenetre]::SetForegroundWindow($_.MainWindowHandle)
+}
 $date = Get-Date -Format 'yyyy-MM-dd'
 $outils = @(
   'Read', 'Edit', 'Write', 'Glob', 'Grep', 'WebSearch', 'WebFetch',
