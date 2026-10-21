@@ -123,3 +123,17 @@ Zone affichée : « Andorre et 9 autres ». **Le Planificateur refuse plus de 10
 | niacinamide et vitamine c, vitamine c et niacinamide | 100 à 1 k | |
 | niacinamide et rétinol, rétinol et niacinamide | 100 à 1 k | |
 | meilleur serum niacinamide, niacinamide 5 pourcent | 10 à 100 | |
+
+## 2026-10-21 : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon, toutes les langues
+
+Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (bouton désactivé sur « Mots clés enregistrés », voir le 20/10). Il y a deux boutons « Commencer » sur l'accueil : celui du bandeau « Votre compte est en veille » (paiement, ne jamais cliquer) et celui de la carte. Le clic par référence sur le second n'a rien lancé ; un `click()` en JavaScript sur le bouton dont le parent contient le `textarea` a marché.
+
+| Requête | Volume mensuel | Variation 3 mois | Concurrence | Remarque |
+|---|---|---|---|---|
+| calendrier de l'avent beauté | 10 k à 100 k | **+9 900 %** | élevée | saisonnier, pic de fin octobre à décembre : **sujet buzz prioritaire** dès que le mélange le permet |
+| comédogène | 1 k à 10 k | 0 % | faible | confirme le 20/10 |
+| yuka cosmétique | 100 à 1 k | 0 % | moyenne | confirme la mesure France seule du 19/10 |
+| analyse composition cosmétique en ligne | 10 à 100 | 0 % | faible | sujet du jour (avec « analyse composition cosmétique » 100 à 1 k et « analyse ingrédients cosmétiques » 100 à 1 k, mesurés les 19 et 20/10) |
+| application analyse cosmétique | 10 à 100 | 0 % | faible | |
+| application composition cosmétique | 10 à 100 | 0 % | faible | |
+| analyse cosmétique en ligne, analyser un produit cosmétique, comment lire la composition d'un cosmétique, scanner cosmétique | aucun volume | | | |

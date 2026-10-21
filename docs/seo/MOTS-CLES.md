@@ -12,6 +12,8 @@ Les sujets candidats, rangés par famille du mélange (`ROBOT.md`, section 2) et
 
 Au 20/10/2026, sur les dix derniers par date (de `niacinamide` à `perturbateurs-endocriniens-cosmetiques-2026`) : buzz 3, ingrédients 4, routines 2, comparatifs 1, pratique 0. Les ingrédients passent d'un cran au-dessus de leur part : **pas d'ingrédient demain**. Le reste tient, sauf **Cosme Check pratique, toujours à 0** : c'est la priorité de demain, sauf buzz de moins de 72 h repris partout.
 
+Au 21/10/2026, sur les dix derniers par date (de `analyse-composition-cosmetique` à `masque-led-visage`, `perturbateurs-endocriniens-cosmetiques-2026` sort) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain, la famille de l'article qui sort de la fenêtre décide ; si c'est un buzz, **calendriers de l'Avent beauté** (10 k à 100 k, +9 900 %), sinon comédogène (ingrédients) ou type de peau (routines).
+
 ## Priorités du premier mois
 
 | Ordre | Sujet | Famille | Pourquoi maintenant |
@@ -40,7 +42,7 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 | ADN de saumon, facteurs de croissance : les tendances anti-âge bizarres | adn de saumon peau, pdrn | « pdrn » 10 k à 100 k (+900 % sur un an), « adn de saumon » 100 à 1 k ; rester sur les crèmes (sodium DNA), jamais sur les injections |
 | Le « botox naturel » des réseaux : ce que dit la science | botox naturel | à mesurer ; jamais de promesse |
 | La tendance maquillage qui remplace le blush (Doctissimo, 17/10/2026) | tendance maquillage 2026 | à mesurer |
-| Calendriers de l'Avent beauté : ce qu'il y a vraiment dedans | calendrier de l'avent beauté composition | saisonnier (novembre), à mesurer |
+| **Calendriers de l'Avent beauté : ce qu'il y a vraiment dedans** | calendrier de l'avent beauté | **10 k à 100 k, +9 900 % sur trois mois** (10 zones, 21/10/2026) ; la fenêtre se ferme début décembre : à prendre au prochain jour « buzz » ; jamais de prix (les articles de presse en citent tous) |
 | Les routines des joueurs du Mondial 2026 (suite de l'article foot) | skincare footballeur | seulement ce que les joueurs ont montré ; à mesurer |
 
 ## 2. Ingrédients et compositions décryptés (3 sur 10)
@@ -93,6 +95,6 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 | Sujet | Requêtes | Volume |
 |---|---|---|
 | Scanner sa trousse de toilette en 5 minutes | scanner cosmétique, application cosmétique | 100 à 1 k (« application cosmétique ») |
-| Analyser la composition d'un cosmétique en ligne | analyse composition cosmétique, analyse ingrédients cosmétiques | vue sans clic : position 41 à 67 |
+| ~~Analyser la composition d'un cosmétique en ligne~~ → `analyse-composition-cosmetique`, 2026-10-21 | analyse composition cosmétique, analyse ingrédients cosmétiques | vue sans clic : position 41 à 67 ; 100 à 1 k |
 | Cosme Check, Yuka, INCI Beauty : ce que fait chacun | yuka cosmétique, inci beauty | 100 à 1 k et 10 k à 100 k ; comparatif honnête, jamais de dénigrement |
 | Vérifier une promesse marketing (« hydratation 24 h ») | promesse cosmétique vraie | à mesurer |

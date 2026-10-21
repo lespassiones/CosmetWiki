@@ -9,17 +9,18 @@ import type { Article } from "@/contenu/articles";
 const article: Article = {
   slug: "cosmetique-fait-pour-toi",
   titre: "Comment savoir si un cosmétique est fait pour toi (la méthode)",
-  titreSeo: "Savoir si un cosmétique est fait pour toi",
+  titreSeo: "Savoir si un cosmétique est bon pour ta peau",
   resume:
-    "Un produit n'est ni bon ni mauvais dans l'absolu : il est compatible ou non avec ta peau, tes objectifs et ce que tu évites. La méthode pour le savoir.",
+    "Comment savoir si un cosmétique est bon pour ta peau : les 3 questions à te poser, la liste INCI lue pour toi, et les pièges du « naturel ».",
   chapo:
     "Un cosmétique n'est pas « bon » ou « mauvais » dans l'absolu. Il est ==compatible ou non avec toi==. Trois choses décident : **ton profil** (peau, cheveux), **tes objectifs** (ce que tu veux améliorer) et **ce que tu veux éviter** (sensibilités, ingrédients bannis). La bonne question n'est jamais « quelle est sa note », c'est « ++est-il fait pour moi++ ».",
   publieLe: "2026-07-20",
-  modifieLe: "2026-07-20",
-  minutes: 3,
+  modifieLe: "2026-10-21",
+  minutes: 5,
   theme: "produit fait pour ma peau",
   motsCles: [
     "produit fait pour ma peau",
+    "comment savoir si un cosmétique est bon",
     "compatibilité produit cosmétique",
     "quel produit pour ma peau",
     "savoir si un produit me convient",
@@ -45,7 +46,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Une huile riche peut être parfaite pour une peau sèche et boucher les pores d'une peau grasse. Une crème notée « très bien » peut contenir un parfum qui fait réagir ta peau sensible. Un actif peut être idéal pour une peau mature et inutile pour une peau jeune. ==Le même produit, deux verdicts opposés selon la personne.==",
+        "Une huile riche peut être parfaite pour une peau sèche et boucher les pores d'une peau grasse. Une crème notée « très bien » peut contenir un parfum qui fait réagir ta peau sensible. Un actif peut être idéal pour une peau mature et inutile pour une peau jeune. C'est aussi pour ça qu'il n'existe pas de [meilleure crème hydratante](/blog/meilleures-cremes-hydratantes-visage) pour tout le monde. ==Le même produit, deux verdicts opposés selon la personne.==",
     },
     {
       type: "encadre",
@@ -70,24 +71,29 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Une fois ton profil clair, une liste INCI se lit différemment. Tu ne cherches plus « des mauvais ingrédients » en général, mais :",
+        "La liste INCI, c'est la liste officielle des ingrédients au dos du produit, rangée du plus dosé au moins dosé et obligatoire en Europe ([règlement (CE) 1223/2009, article 19](https://eur-lex.europa.eu/eli/reg/2009/1223/oj)). Une fois ton profil clair, elle se lit différemment. Tu ne cherches plus « des mauvais ingrédients » en général, mais :",
     },
     {
       type: "liste",
       style: "coches",
       items: [
-        "**Les actifs pertinents pour ton objectif** (ex. acide salicylique si tu cibles les imperfections, acide hyaluronique si tu cibles l'hydratation).",
-        "**Les irritants pour TA peau** (le parfum n'est un problème que s'il te fait réagir).",
-        "**La cohérence promesse / formule** : le produit tient-il ce que le marketing annonce, ou l'actif vedette est-il en fin de liste, à dose symbolique ?",
+        "**Les actifs pertinents pour ton objectif** (par exemple l'[acide salicylique](/i/salicylic-acid) si tu cibles les imperfections, l'[acide hyaluronique](/i/sodium-hyaluronate) si tu cibles l'hydratation).",
+        "**Les irritants pour TA peau** (le [parfum](/i/parfum) n'est un problème que s'il te fait réagir).",
+        "**La cohérence promesse / formule** : le produit tient-il ce que le marketing annonce, ou l'actif vedette est-il en fin de liste, à dose symbolique ? Exemple avec la [niacinamide](/blog/niacinamide), souvent écrite après la « ligne du 1 % ».",
       ],
     },
     {
       type: "liste",
       style: "alertes",
       items: [
-        "Ne te fie pas au packaging « naturel » ou « hypoallergénique » : ce sont des arguments, pas des garanties. ==La formule dit la vérité.==",
+        "Ne te fie pas au packaging « naturel » ou « hypoallergénique » : ce sont des arguments, pas des garanties. La loi demande seulement qu'ils soient honnêtes et prouvés ([règlement (UE) 655/2013](https://eur-lex.europa.eu/eli/reg/2013/655/oj)). ==La formule dit la vérité.==",
         "Un ingrédient « controversé » en fin de liste, à faible dose, ne pèse pas comme le même ingrédient en tête. Le contexte compte.",
       ],
+    },
+    {
+      type: "p",
+      texte:
+        "Pour la méthode pas à pas (les cinq premiers ingrédients, la « ligne du 1 % », le parfum et les allergènes), suis notre guide pour [analyser la composition d'un cosmétique en 5 étapes](/blog/analyse-composition-cosmetique). Et pour un exemple réel, lis le décryptage de la [crème Nivea](/blog/creme-nivea-composition).",
     },
 
     { type: "h2", texte: "4. Raisonner routine, pas produit isolé" },
@@ -133,6 +139,11 @@ const article: Article = {
     },
   ],
   faq: [
+    {
+      question: "Comment savoir si un cosmétique est bon ?",
+      reponse:
+        "Un cosmétique est bon s'il convient à ta peau, pas parce qu'il a une bonne note. Pose-toi trois questions : quel est mon type de peau, quel est mon objectif, qu'est-ce que je veux éviter. Puis lis la liste INCI au dos : l'actif promis doit être assez haut, sans ingrédient qui te fait réagir.",
+    },
     {
       question: "Un produit bien noté est-il forcément bon pour moi ?",
       reponse:
