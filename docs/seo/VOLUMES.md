@@ -137,3 +137,22 @@ Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (b
 | application analyse cosmétique | 10 à 100 | 0 % | faible | |
 | application composition cosmétique | 10 à 100 | 0 % | faible | |
 | analyse cosmétique en ligne, analyser un produit cosmétique, comment lire la composition d'un cosmétique, scanner cosmétique | aucun volume | | | |
+
+## 2026-10-22 : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon, toutes les langues
+
+Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (bouton désactivé sur « Mots clés enregistrés », méthode du 20/10). Le plan s'ouvre sur la **France seule** : il faut rouvrir la zone et ajouter les neuf autres à chaque passage (texte tapé dans le champ, puis `find` sur « Inclure » de la ligne « pays », clic par référence : marche du premier coup pour les dix). « Commencer » de la carte cliqué en JavaScript, comme le 21/10.
+
+| Requête | Volume mensuel | Variation 3 mois | Concurrence | Remarque |
+|---|---|---|---|---|
+| calendrier de l'avent maquillage | 10 k à 100 k | **+9 900 %** | élevée | sujet du jour (avec « calendrier de l'avent beauté », 21/10) |
+| calendrier de l'avent sephora | 10 k à 100 k | +900 % | élevée | marque : jamais dans un titre |
+| biodance | 10 k à 100 k | 0 % | élevée | masque coréen n°1 des ventes Amazon (Madame Figaro, 22/10) : buzz candidat |
+| volufiline | 10 k à 100 k | 0 % (+900 % sur un an) | élevée | ingrédient « remplaçant des injections » (Marie Claire UK, 22/10) : jamais de promesse |
+| nivea q10 | 1 k à 10 k | 0 % | élevée | suite possible de l'article Nivea (Grazia, 22/10) |
+| déodorant sans aluminium | 1 k à 10 k | 0 % | élevée | optimisation du jour |
+| calendrier avent cosmétique | 100 à 1 k | +900 % | élevée | |
+| calendrier de l'avent beauté 2026 | 100 à 1 k | +900 % | élevée | |
+| calendrier avent soin visage | 10 à 100 | 0 % | élevée | |
+| calendrier de l'avent beauté avis | 10 à 100 | | élevée | |
+| déodorant aluminium danger | 10 à 100 | 0 % | faible | |
+| pdrn crème | 10 à 100 | 0 % | élevée | |

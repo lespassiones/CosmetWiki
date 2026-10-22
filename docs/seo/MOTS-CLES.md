@@ -14,6 +14,8 @@ Au 20/10/2026, sur les dix derniers par date (de `niacinamide` à `perturbateurs
 
 Au 21/10/2026, sur les dix derniers par date (de `analyse-composition-cosmetique` à `masque-led-visage`, `perturbateurs-endocriniens-cosmetiques-2026` sort) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain, la famille de l'article qui sort de la fenêtre décide ; si c'est un buzz, **calendriers de l'Avent beauté** (10 k à 100 k, +9 900 %), sinon comédogène (ingrédients) ou type de peau (routines).
 
+Au 22/10/2026, sur les dix derniers par date (de `calendrier-avent-beaute` à `serums-visage-guide`, `masque-led-visage` sort) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort `serums-visage-guide` (ingrédients) ; le prochain article est donc un **ingrédient** : comédogène (1 k à 10 k, concurrence faible) ou volufiline (10 k à 100 k).
+
 ## Priorités du premier mois
 
 | Ordre | Sujet | Famille | Pourquoi maintenant |
@@ -42,7 +44,10 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 | ADN de saumon, facteurs de croissance : les tendances anti-âge bizarres | adn de saumon peau, pdrn | « pdrn » 10 k à 100 k (+900 % sur un an), « adn de saumon » 100 à 1 k ; rester sur les crèmes (sodium DNA), jamais sur les injections |
 | Le « botox naturel » des réseaux : ce que dit la science | botox naturel | à mesurer ; jamais de promesse |
 | La tendance maquillage qui remplace le blush (Doctissimo, 17/10/2026) | tendance maquillage 2026 | à mesurer |
-| **Calendriers de l'Avent beauté : ce qu'il y a vraiment dedans** | calendrier de l'avent beauté | **10 k à 100 k, +9 900 % sur trois mois** (10 zones, 21/10/2026) ; la fenêtre se ferme début décembre : à prendre au prochain jour « buzz » ; jamais de prix (les articles de presse en citent tous) |
+| ~~Calendriers de l'Avent beauté : ce qu'il y a vraiment dedans~~ → `calendrier-avent-beaute`, 2026-10-22 | calendrier de l'avent beauté, calendrier de l'avent maquillage | **10 k à 100 k, +9 900 % sur trois mois** (10 zones, 21/10/2026) ; la fenêtre se ferme début décembre : à prendre au prochain jour « buzz » ; jamais de prix (les articles de presse en citent tous) |
+| Biodance, le masque coréen n°1 des ventes : sa composition lue | biodance, masque biodance avis | **10 k à 100 k** (10 zones, 22/10/2026) ; Madame Figaro le 22/10 ; vérifier qu'il est dans la base |
+| Nivea Q10, la « petite sœur » de la boîte bleue (suite de l'article Nivea) | nivea q10 | 1 k à 10 k (22/10/2026) ; Grazia le 22/10 cite un pharmacien : citer l'article, ne rien promettre sur les rides |
+| La Volufiline, « l'ingrédient qui remplace les injections » ? | volufiline | 10 k à 100 k (22/10/2026), famille ingrédients ; jamais de promesse de volume, comparer à ce que disent les études |
 | Les routines des joueurs du Mondial 2026 (suite de l'article foot) | skincare footballeur | seulement ce que les joueurs ont montré ; à mesurer |
 
 ## 2. Ingrédients et compositions décryptés (3 sur 10)
