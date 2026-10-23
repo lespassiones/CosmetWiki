@@ -156,3 +156,19 @@ Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (b
 | calendrier de l'avent beauté avis | 10 à 100 | | élevée | |
 | déodorant aluminium danger | 10 à 100 | 0 % | faible | |
 | pdrn crème | 10 à 100 | 0 % | élevée | |
+
+## 2026-10-23 : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon, toutes les langues
+
+Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (bouton désactivé sur « Mots clés enregistrés », méthode du 20/10). Le plan s'ouvrait encore sur la France seule ; les neuf autres zones ajoutées du premier coup (texte tapé, `find` sur « Inclure » de la ligne « pays », clic par référence). Carte « Obtenir le volume de recherche » ouverte par un clic sur ses coordonnées, « Commencer » cliqué en JavaScript (bouton dont un parent contient le `textarea`).
+
+| Requête | Volume mensuel | Variation 3 mois | Concurrence | Remarque |
+|---|---|---|---|---|
+| comédogène | 1 k à 10 k | 0 % | faible | confirme les 20 et 21/10 : **sujet du jour** |
+| non comédogène | 100 à 1 k | 0 % | moyenne | |
+| crème non comédogène | 100 à 1 k | 0 % | élevée | |
+| huile non comédogène | 100 à 1 k | 0 % | élevée | |
+| maquillage non comédogène | 100 à 1 k | 0 % | élevée | |
+| rétinol pharmacie | 100 à 1 k | 0 % | élevée | suggestion « rétinol pharmacie sans ordonnance » vue le 23/10 |
+| ingrédients comédogènes | 10 à 100 | 0 % (-90 % sur un an) | faible | |
+| cmr cosmétique | 10 à 100 | 0 % | faible | vote Omnibus VI du 22/10 : le sujet est dans la presse, pas dans les recherches |
+| kylie jenner skincare | 10 à 100 | 0 % | élevée | |

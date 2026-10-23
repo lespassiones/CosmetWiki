@@ -93,6 +93,7 @@ import type { Categorie } from "@/contenu/rubriques";
 
 import analyseComposition from "./articles/analyse-composition-cosmetique";
 import calendrierAvent from "./articles/calendrier-avent-beaute";
+import comedogene from "./articles/comedogene";
 import cosmetiqueFaitPourToi from "./articles/cosmetique-fait-pour-toi";
 import cremeNivea from "./articles/creme-nivea-composition";
 import cremeSolaireCoreenne from "./articles/creme-solaire-coreenne-k-beauty";
@@ -301,6 +302,7 @@ export const ARTICLES: readonly Article[] = [
   niacinamide,
   analyseComposition,
   calendrierAvent,
+  comedogene,
 ];
 
 controlerRegistre(ARTICLES);

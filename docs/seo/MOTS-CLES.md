@@ -16,6 +16,8 @@ Au 21/10/2026, sur les dix derniers par date (de `analyse-composition-cosmetique
 
 Au 22/10/2026, sur les dix derniers par date (de `calendrier-avent-beaute` à `serums-visage-guide`, `masque-led-visage` sort) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort `serums-visage-guide` (ingrédients) ; le prochain article est donc un **ingrédient** : comédogène (1 k à 10 k, concurrence faible) ou volufiline (10 k à 100 k).
 
+Au 23/10/2026, sur les dix derniers par date (de `comedogene` à `routine-peau-joueurs-foot`, `serums-visage-guide` sort) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort `routine-peau-joueurs-foot` (buzz, le plus ancien des deux articles du 17/06 par date de retouche) : le prochain article est donc un **buzz**, Biodance (10 k à 100 k) en tête.
+
 ## Priorités du premier mois
 
 | Ordre | Sujet | Famille | Pourquoi maintenant |
@@ -57,7 +59,7 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 | **Lire une liste INCI** | inci, liste inci, comment lire une composition | 1 k à 10 k (« inci », 5 zones, 19/10/2026) ; « liste inci » 100 à 1 k |
 | Lanoline : d'où elle vient, à quoi elle sert, qui doit l'éviter | lanoline, lanolin alcohol | 10 k à 100 k (5 zones, 19/10/2026) ; vérifier l'intention (allaitement ?) avant d'écrire |
 | ~~Niacinamide : à quoi ça sert vraiment~~ → `niacinamide`, 2026-10-20 | niacinamide, niacinamide bienfaits | 10 k à 100 k (10 zones, 20/10/2026) |
-| Rétinol : débuter sans irriter sa peau | rétinol, rétinol débutant, niacinamide et rétinol | « rétinol » 1 k à 10 k ; « niacinamide et rétinol » 100 à 1 k, +900 % (20/10/2026) ; « rétinol débutant » sans volume |
+| Rétinol : débuter sans irriter sa peau, la limite européenne de 0,3 % | rétinol, rétinol pharmacie, niacinamide et rétinol | « rétinol » 1 k à 10 k ; « rétinol pharmacie » 100 à 1 k (23/10/2026) ; « niacinamide et rétinol » 100 à 1 k, +900 % (20/10/2026) ; nouvelles suggestions le 23/10 (« rétinol pharmacie sans ordonnance », « rétinol the ordinary 0 2 ») : **prochain ingrédient** |
 | Acide hyaluronique : hydratant ou effet de mode ? | acide hyaluronique visage | « acide hyaluronique » 10 k à 100 k (20/10/2026), concurrence élevée |
 | Parabènes : faut-il encore les fuir ? (avec l'avis du SCCS) | parabènes danger, sans paraben | « parabène » 100 à 1 k (20/10/2026) ; sources officielles obligatoires |
 | Silicones dans les cosmétiques | silicone cosmétique, dimethicone | « silicone cosmétique » 10 à 100 (20/10/2026) : une section plutôt qu'un article |
@@ -66,7 +68,8 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 | Huiles essentielles dans les cosmétiques : précautions | huile essentielle cosmétique allergie | à mesurer |
 | Les allergènes à déclarer (limonene, linalool) | allergène cosmétique | 10 à 100 ; une section plutôt qu'un article |
 | Filtres solaires controversés : octocrylène, homosalate | octocrylène, filtre solaire danger | à mesurer ; sources officielles |
-| Comédogène : ce que veut dire ce mot | comédogène, non comédogène | **1 k à 10 k, concurrence faible** (20/10/2026) : candidat fort |
+| ~~Comédogène : ce que veut dire ce mot~~ → `comedogene`, 2026-10-23 | comédogène, non comédogène, huile non comédogène, crème non comédogène | 1 k à 10 k, concurrence faible ; variantes « non comédogène » 100 à 1 k (23/10/2026) |
+| Omnibus VI : l'Europe laisse plus de temps aux substances CMR (vote du Parlement le 22/10/2026) | cmr cosmétique, substances cancérogènes cosmétiques | « cmr cosmétique » 10 à 100 (23/10/2026) ; actualité : attendre le texte officiel, sources UE obligatoires, aucun alarmisme |
 | Le pH de la peau et des nettoyants | ph peau, nettoyant ph neutre | à mesurer |
 | Les ingrédients de la traîne Bing (sodium olivamphoacetate, PEG-2 cocamide, 4-n-butylrésorcinol) | les noms INCI eux-mêmes | traîne déjà vue sur Bing : relier les fiches `/i/<slug>`, regrouper dans un article « ingrédients qu'on ne sait pas prononcer » |
 
