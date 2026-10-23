@@ -11,6 +11,7 @@ import { AppelTelecharger } from "./AppelTelecharger";
 import { BarreTelechargement, SommaireActif, SuiviLecture } from "./ArticleInteractif";
 import { CorpsArticle, Credit } from "./CorpsArticle";
 import { TexteRiche } from "./TexteRiche";
+import { VuesArticle } from "./VuesArticle";
 
 /**
  * Les textes des appels. Tutoiement, comme le reste du site ; aucun prix ici
@@ -137,6 +138,7 @@ export function PageArticle({ article, liste }: { article: Article; liste: reado
                 <ClockIcon className="h-4 w-4" />
                 {article.minutes} min de lecture
               </span>
+              <VuesArticle slug={article.slug} />
               <span
                 className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-white ring-1 ring-white/20 ${FOND_CATEGORIE[article.categorie]}`}
               >

@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FicheArticle } from "@/lib/article";
 import { CATEGORIES, STYLE_CATEGORIE, type Categorie } from "@/contenu/rubriques";
+import { IconeOeil } from "@/components/blog/VuesArticle";
+import { libelleVues, lireVues } from "@/lib/vuesArticles";
 
 /**
  * La liste filtrable du blog. Elle reçoit des fiches (`lib/article.fichesDe`),
@@ -21,6 +23,19 @@ export function BlogList({ articles }: { articles: Article[] }) {
   const [filter, setFilter] = useState<Filter>("Tous");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOrder>("recent");
+  // Les vues de toute la liste, en un seul appel. `null` tant qu'elles ne sont
+  // pas là, ou si la base ne répond pas : la carte ne montre alors rien.
+  const [vues, setVues] = useState<Map<string, number> | null>(null);
+
+  useEffect(() => {
+    let annule = false;
+    lireVues(articles.map((a) => a.slug)).then((v) => {
+      if (!annule) setVues(v);
+    });
+    return () => {
+      annule = true;
+    };
+  }, [articles]);
 
   const counts = useMemo(() => {
     const map = { Tous: articles.length } as Record<Filter, number>;
@@ -137,7 +152,7 @@ export function BlogList({ articles }: { articles: Article[] }) {
         ) : (
           <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {filtered.map((a) => (
-              <ArticleCard key={a.slug} article={a} />
+              <ArticleCard key={a.slug} article={a} vues={vues?.get(a.slug)} />
             ))}
           </div>
         )}
@@ -184,7 +199,7 @@ function CategoryRow({
   );
 }
 
-function ArticleCard({ article }: { article: Article }) {
+function ArticleCard({ article, vues }: { article: Article; vues?: number }) {
   return (
     <Link
       href={`/blog/${article.slug}`}
@@ -212,7 +227,7 @@ function ArticleCard({ article }: { article: Article }) {
           {article.resume}
         </p>
         <div className="mt-auto flex items-center justify-between pt-2 text-[12px] text-ink-subtle">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span className="inline-flex items-center gap-1">
               <CalendarIcon className="h-3.5 w-3.5" />
               {article.date}
@@ -221,6 +236,12 @@ function ArticleCard({ article }: { article: Article }) {
               <ClockIcon className="h-3.5 w-3.5" />
               {article.minutes} min
             </span>
+            {vues !== undefined && (
+              <span className="inline-flex items-center gap-1">
+                <IconeOeil className="h-3.5 w-3.5" />
+                {libelleVues(vues)}
+              </span>
+            )}
           </div>
           <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#F43F5E]">
             Lire <span aria-hidden>→</span>

@@ -88,5 +88,5 @@ export const LEGAL = {
     },
   ],
 
-  lastUpdated: "10 juillet 2026",
+  lastUpdated: "23 octobre 2026",
 } as const;

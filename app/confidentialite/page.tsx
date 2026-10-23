@@ -225,6 +225,15 @@ export default function ConfidentialitePage() {
         la mesure d&apos;audience exemptée de consentement&nbsp;: aucune bannière
         de consentement n&apos;est requise dans cette configuration.
       </p>
+      <p>
+        Chaque article du blog affiche son nombre de vues. Ce compteur
+        n&apos;enregistre qu&apos;un total par article&nbsp;: ni adresse IP, ni
+        identifiant, ni rien qui permette de te reconnaître. Pour ne compter
+        ta lecture qu&apos;une fois, le site note le nom de l&apos;article dans
+        le stockage de session (sessionStorage) de ton navigateur, effacé à la
+        fermeture de l&apos;onglet et jamais envoyé à nos serveurs. Aucun
+        cookie n&apos;est utilisé.
+      </p>
 
       <h2>10. Mineurs</h2>
       <p>
