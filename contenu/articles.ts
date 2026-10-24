@@ -100,6 +100,7 @@ import cremeSolaireCoreenne from "./articles/creme-solaire-coreenne-k-beauty";
 import cremesHydratantesReparatrices from "./articles/cremes-hydratantes-reparatrices";
 import deodorantAluminium from "./articles/deodorant-sels-aluminium-verite";
 import lipOils from "./articles/lip-oils-huiles-levres";
+import masqueBiodance from "./articles/masque-biodance";
 import masqueLed from "./articles/masque-led-visage";
 import meilleuresCremesHydratantes from "./articles/meilleures-cremes-hydratantes-visage";
 import antiImperfections from "./articles/meilleurs-produits-anti-imperfections";
@@ -303,6 +304,7 @@ export const ARTICLES: readonly Article[] = [
   analyseComposition,
   calendrierAvent,
   comedogene,
+  masqueBiodance,
 ];
 
 controlerRegistre(ARTICLES);

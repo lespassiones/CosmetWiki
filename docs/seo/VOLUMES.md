@@ -172,3 +172,20 @@ Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (b
 | ingrédients comédogènes | 10 à 100 | 0 % (-90 % sur un an) | faible | |
 | cmr cosmétique | 10 à 100 | 0 % | faible | vote Omnibus VI du 22/10 : le sujet est dans la presse, pas dans les recherches |
 | kylie jenner skincare | 10 à 100 | 0 % | élevée | |
+
+## 2026-10-24 : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon, toutes les langues
+
+Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (bouton désactivé sur « Mots clés enregistrés », méthode du 20/10). Le plan s'ouvrait sur la France seule ; les neuf autres zones ajoutées du premier coup, troisième jour de suite (texte tapé, `find` sur « Inclure » de la ligne « pays », clic par référence, regroupés dans un `browser_batch`). Carte « Obtenir le volume de recherche » ouverte par un clic sur ses coordonnées, liste collée et « Commencer » cliqué en JavaScript.
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| masque biodance | 10 k à 100 k | 0 % | **+900 %** | élevée | **sujet du jour** |
+| biodance | 10 k à 100 k | 0 % | 0 % | élevée | confirme le 22/10 |
+| biodance avis | 100 à 1 k | 0 % | 0 % | élevée | |
+| biodance collagen | 100 à 1 k | 0 % | 0 % | élevée | |
+| masque coréen collagène | 100 à 1 k | -90 % | -99 % | élevée | la demande va au nom de la marque, plus au générique |
+| nivea q10 | 1 k à 10 k | 0 % | 0 % | élevée | confirme le 22/10 |
+| crème hydratante réparatrice | 100 à 1 k | -90 % | 0 % | élevée | optimisation du jour |
+| crème réparatrice visage | 100 à 1 k | 0 % | 0 % | élevée | optimisation du jour |
+| hydrater ou nourrir la peau | 10 à 100 | | | | |
+| rétinol ou rétinal | 10 à 100 | 0 % | 0 % | élevée | suggestion neuve du 24/10, petite |

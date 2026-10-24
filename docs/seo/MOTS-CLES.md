@@ -18,6 +18,8 @@ Au 22/10/2026, sur les dix derniers par date (de `calendrier-avent-beaute` à `s
 
 Au 23/10/2026, sur les dix derniers par date (de `comedogene` à `routine-peau-joueurs-foot`, `serums-visage-guide` sort) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort `routine-peau-joueurs-foot` (buzz, le plus ancien des deux articles du 17/06 par date de retouche) : le prochain article est donc un **buzz**, Biodance (10 k à 100 k) en tête.
 
+Au 24/10/2026, sur les dix derniers par date (de `masque-biodance` à `deodorant-sels-aluminium-verite`, `routine-peau-joueurs-foot` sort) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort `deodorant-sels-aluminium-verite` (ingrédients) : le prochain article est donc un **ingrédient**, rétinol en tête (1 k à 10 k, suggestions neuves « rétinol ou rétinal », « rétinol pharmacie sans ordonnance »). Nouvelles pistes vues le 24/10 : le produit Lidl noté 100/100 sur Yuka (Top Santé, 23/10 ; composition à lire, comparatif honnête), « routine skincare yepoda », les couleurs des masques Biodance (« masque biodance bleu, jaune, vert, rose » en suggestions : à n'écrire qu'avec la correspondance officielle de la marque).
+
 ## Priorités du premier mois
 
 | Ordre | Sujet | Famille | Pourquoi maintenant |
@@ -47,7 +49,7 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 | Le « botox naturel » des réseaux : ce que dit la science | botox naturel | à mesurer ; jamais de promesse |
 | La tendance maquillage qui remplace le blush (Doctissimo, 17/10/2026) | tendance maquillage 2026 | à mesurer |
 | ~~Calendriers de l'Avent beauté : ce qu'il y a vraiment dedans~~ → `calendrier-avent-beaute`, 2026-10-22 | calendrier de l'avent beauté, calendrier de l'avent maquillage | **10 k à 100 k, +9 900 % sur trois mois** (10 zones, 21/10/2026) ; la fenêtre se ferme début décembre : à prendre au prochain jour « buzz » ; jamais de prix (les articles de presse en citent tous) |
-| Biodance, le masque coréen n°1 des ventes : sa composition lue | biodance, masque biodance avis | **10 k à 100 k** (10 zones, 22/10/2026) ; Madame Figaro le 22/10 ; vérifier qu'il est dans la base |
+| ~~Biodance, le masque coréen n°1 des ventes : sa composition lue~~ → `masque-biodance`, 2026-10-24 | biodance, masque biodance, biodance avis | **10 k à 100 k** (10 zones, 22 et 24/10/2026), « masque biodance » +900 % sur un an ; 37 produits Biodance dans la base |
 | Nivea Q10, la « petite sœur » de la boîte bleue (suite de l'article Nivea) | nivea q10 | 1 k à 10 k (22/10/2026) ; Grazia le 22/10 cite un pharmacien : citer l'article, ne rien promettre sur les rides |
 | La Volufiline, « l'ingrédient qui remplace les injections » ? | volufiline | 10 k à 100 k (22/10/2026), famille ingrédients ; jamais de promesse de volume, comparer à ce que disent les études |
 | Les routines des joueurs du Mondial 2026 (suite de l'article foot) | skincare footballeur | seulement ce que les joueurs ont montré ; à mesurer |
