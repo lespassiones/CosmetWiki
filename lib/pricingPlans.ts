@@ -57,20 +57,22 @@ export type PricingPlan = {
 };
 
 /**
- * 49,99 €/an et 7,99 €/mois : ce sont les prix servis par le paywall de l'app.
- * Ils doivent rester alignés, sinon le site annonce un tarif que le store ne
- * facture pas.
+ * 59,99 €/an et 9,99 €/mois : ce sont les prix facturés par l'App Store en
+ * France (table `storePrices.generated.ts` de l'app, fiche App Store). Google
+ * Play facture le mensuel 9,49 € : le site affiche le prix le plus haut pour ne
+ * jamais annoncer moins que ce que le store facture. Ils doivent rester
+ * alignés, sinon le site annonce un tarif que le store ne facture pas.
  */
 export const PRICING_PLANS: readonly PricingPlan[] = [
   {
     id: "cosmecheck_premium_yearly",
     period: "yearly",
     name: "Annuel",
-    priceLabel: "49,99 €",
-    priceCents: 4999,
+    priceLabel: "59,99 €",
+    priceCents: 5999,
     currency: "EUR",
-    subLabel: "soit 4,17 €/mois",
-    badge: "Économise 48 %",
+    subLabel: "soit 5,00 €/mois",
+    badge: "Économise 50 %",
     featured: true,
     stripePriceEnv: "STRIPE_PRICE_PREMIUM_YEARLY",
     checkoutPath: null,
@@ -79,8 +81,8 @@ export const PRICING_PLANS: readonly PricingPlan[] = [
     id: "cosmecheck_premium_monthly",
     period: "monthly",
     name: "Mensuel",
-    priceLabel: "7,99 €",
-    priceCents: 799,
+    priceLabel: "9,99 €",
+    priceCents: 999,
     currency: "EUR",
     subLabel: "par mois",
     badge: null,
@@ -97,7 +99,7 @@ export const PREMIUM_BENEFITS: readonly string[] = [
   "Suggestions et conseils adaptés à ta peau",
   "Analyse des promesses produit selon ton profil",
   "Amélioration de ta routine, sur-mesure",
-  "100 crédits par mois pour trouver les produits faits pour toi",
+  "50 crédits par jour pour trouver les produits faits pour toi",
 ] as const;
 
 /** Ce que le plan gratuit couvre, pour que la comparaison soit honnête. */

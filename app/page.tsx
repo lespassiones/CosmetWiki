@@ -110,13 +110,13 @@ function buildHomeJsonLd() {
           {
             "@type": "Offer",
             name: "Premium mensuel",
-            price: "7.99",
+            price: "9.99",
             priceCurrency: "EUR",
           },
           {
             "@type": "Offer",
             name: "Premium annuel",
-            price: "49.99",
+            price: "59.99",
             priceCurrency: "EUR",
           },
         ],
