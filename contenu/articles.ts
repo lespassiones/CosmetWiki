@@ -92,6 +92,7 @@
 import type { Categorie } from "@/contenu/rubriques";
 
 import analyseComposition from "./articles/analyse-composition-cosmetique";
+import bakuchiol from "./articles/bakuchiol";
 import calendrierAvent from "./articles/calendrier-avent-beaute";
 import comedogene from "./articles/comedogene";
 import cosmetiqueFaitPourToi from "./articles/cosmetique-fait-pour-toi";
@@ -305,6 +306,7 @@ export const ARTICLES: readonly Article[] = [
   calendrierAvent,
   comedogene,
   masqueBiodance,
+  bakuchiol,
 ];
 
 controlerRegistre(ARTICLES);

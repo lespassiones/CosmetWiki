@@ -20,6 +20,8 @@ Au 23/10/2026, sur les dix derniers par date (de `comedogene` à `routine-peau-j
 
 Au 24/10/2026, sur les dix derniers par date (de `masque-biodance` à `deodorant-sels-aluminium-verite`, `routine-peau-joueurs-foot` sort) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort `deodorant-sels-aluminium-verite` (ingrédients) : le prochain article est donc un **ingrédient**, rétinol en tête (1 k à 10 k, suggestions neuves « rétinol ou rétinal », « rétinol pharmacie sans ordonnance »). Nouvelles pistes vues le 24/10 : le produit Lidl noté 100/100 sur Yuka (Top Santé, 23/10 ; composition à lire, comparatif honnête), « routine skincare yepoda », les couleurs des masques Biodance (« masque biodance bleu, jaune, vert, rose » en suggestions : à n'écrire qu'avec la correspondance officielle de la marque).
 
+Au 25/10/2026, sur les dix derniers par date (de `bakuchiol` à `meilleurs-produits-anti-imperfections`, `deodorant-sels-aluminium-verite` sort) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort `meilleurs-produits-anti-imperfections` ou `meilleures-cremes-hydratantes-visage` (publiés le même jour, 20/07) : routines ou comparatif. Si c'est une **routine** : peau sèche en hiver et changement d'heure (une dermatologue citée par aufeminin le 24/10 conseille de passer à une crème plus riche, glycérine ou céramides ; « glycérine » 10 k à 100 k, « céramides » 100 à 1 k). Nouvelle grappe mesurée le 25/10 pour la prochaine place « pratique » : **cosmétiques et grossesse** (cinq variantes à 100 à 1 k chacune). Le GEO de Bing désigne aussi « crème hydratante non comédogène » (113 citations Copilot) : à renforcer dans `comedogene` ou `meilleures-cremes-hydratantes-visage`.
+
 ## Priorités du premier mois
 
 | Ordre | Sujet | Famille | Pourquoi maintenant |
@@ -61,12 +63,13 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 | **Lire une liste INCI** | inci, liste inci, comment lire une composition | 1 k à 10 k (« inci », 5 zones, 19/10/2026) ; « liste inci » 100 à 1 k |
 | Lanoline : d'où elle vient, à quoi elle sert, qui doit l'éviter | lanoline, lanolin alcohol | 10 k à 100 k (5 zones, 19/10/2026) ; vérifier l'intention (allaitement ?) avant d'écrire |
 | ~~Niacinamide : à quoi ça sert vraiment~~ → `niacinamide`, 2026-10-20 | niacinamide, niacinamide bienfaits | 10 k à 100 k (10 zones, 20/10/2026) |
-| Rétinol : débuter sans irriter sa peau, la limite européenne de 0,3 % | rétinol, rétinol pharmacie, niacinamide et rétinol | « rétinol » 1 k à 10 k ; « rétinol pharmacie » 100 à 1 k (23/10/2026) ; « niacinamide et rétinol » 100 à 1 k, +900 % (20/10/2026) ; nouvelles suggestions le 23/10 (« rétinol pharmacie sans ordonnance », « rétinol the ordinary 0 2 ») : **prochain ingrédient** |
+| Rétinol : débuter sans irriter sa peau (le bakuchiol, son « alternative », est traité le 25/10 : lier les deux), la limite européenne de 0,3 % | rétinol, rétinol pharmacie, niacinamide et rétinol | « rétinol » 1 k à 10 k ; « rétinol pharmacie » 100 à 1 k (23/10/2026) ; « niacinamide et rétinol » 100 à 1 k, +900 % (20/10/2026) ; nouvelles suggestions le 23/10 (« rétinol pharmacie sans ordonnance », « rétinol the ordinary 0 2 ») : **prochain ingrédient** |
 | Acide hyaluronique : hydratant ou effet de mode ? | acide hyaluronique visage | « acide hyaluronique » 10 k à 100 k (20/10/2026), concurrence élevée |
 | Parabènes : faut-il encore les fuir ? (avec l'avis du SCCS) | parabènes danger, sans paraben | « parabène » 100 à 1 k (20/10/2026) ; sources officielles obligatoires |
 | Silicones dans les cosmétiques | silicone cosmétique, dimethicone | « silicone cosmétique » 10 à 100 (20/10/2026) : une section plutôt qu'un article |
 | « Sans », « clean », « naturel » : le bluff des étiquettes | cosmétique clean, sans paraben | à mesurer |
 | Cosmétique bio : vraiment mieux ? | cosmetique bio | 1 k à 10 k (5 zones, 19/10/2026) |
+| ~~Bakuchiol, le « rétinol végétal »~~ → `bakuchiol`, 2026-10-25 | bakuchiol, bakuchiol avis, bakuchiol ou rétinol | 10 k à 100 k, +900 % sur trois mois (25/10/2026) |
 | Huiles essentielles dans les cosmétiques : précautions | huile essentielle cosmétique allergie | à mesurer |
 | Les allergènes à déclarer (limonene, linalool) | allergène cosmétique | 10 à 100 ; une section plutôt qu'un article |
 | Filtres solaires controversés : octocrylène, homosalate | octocrylène, filtre solaire danger | à mesurer ; sources officielles |
@@ -88,7 +91,7 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 | Routine homme en 3 gestes | routine visage homme | à mesurer |
 | Démaquillage : huile, eau micellaire ou baume | eau micellaire ou huile démaquillante | à mesurer |
 | Le double nettoyage | double nettoyage visage | à mesurer |
-| Cosmétiques et grossesse : les ingrédients à repérer | cosmétique grossesse ingrédients à éviter | à mesurer ; « parles-en à ton médecin » |
+| Cosmétiques et grossesse : les ingrédients à repérer | cosmétique grossesse, cosmétique femme enceinte, produits de beauté femme enceinte | 100 à 1 k chacune, cinq variantes (25/10/2026) ; famille « pratique » plutôt que routines (scanner sa trousse pendant la grossesse) ; « parles-en à ton médecin » |
 
 ## 4. Comparatifs honnêtes et produits du moment (1 sur 10)
 
@@ -104,7 +107,7 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 
 | Sujet | Requêtes | Volume |
 |---|---|---|
-| Scanner sa trousse de toilette en 5 minutes | scanner cosmétique, application cosmétique | 100 à 1 k (« application cosmétique ») |
+| Scanner sa trousse de toilette en 5 minutes | scanner cosmétique, application cosmétique, scan produit de beauté | 100 à 1 k (« application cosmétique » ; « scan produit de beauté » +900 % sur trois mois, 25/10/2026) |
 | ~~Analyser la composition d'un cosmétique en ligne~~ → `analyse-composition-cosmetique`, 2026-10-21 | analyse composition cosmétique, analyse ingrédients cosmétiques | vue sans clic : position 41 à 67 ; 100 à 1 k |
 | Cosme Check, Yuka, INCI Beauty : ce que fait chacun | yuka cosmétique, inci beauty | 100 à 1 k et 10 k à 100 k ; comparatif honnête, jamais de dénigrement |
 | Vérifier une promesse marketing (« hydratation 24 h ») | promesse cosmétique vraie | à mesurer |

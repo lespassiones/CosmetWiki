@@ -189,3 +189,38 @@ Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (b
 | crème réparatrice visage | 100 à 1 k | 0 % | 0 % | élevée | optimisation du jour |
 | hydrater ou nourrir la peau | 10 à 100 | | | | |
 | rétinol ou rétinal | 10 à 100 | 0 % | 0 % | élevée | suggestion neuve du 24/10, petite |
+
+## 2026-10-25 : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon, toutes les langues
+
+Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (bouton désactivé sur « Mots clés enregistrés », méthode du 20/10). Le plan s'ouvrait sur la France seule. Les neuf autres zones ajoutées **en un seul `browser_batch`** : texte tapé dans le champ, puis une fonction JavaScript qui clique « Inclure » sur la première ligne dont le texte commence par le nom et contient « pays » (`window.__inc(nom)`) ; neuf sur neuf du premier coup, sans `find`. Carte « Obtenir le volume de recherche » ouverte par un clic sur ses coordonnées, « Commencer » cliqué en JavaScript.
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| bakuchiol | 10 k à 100 k | **+900 %** | 0 % | élevée | **sujet du jour** |
+| glycérine | 10 k à 100 k | 0 % | 0 % | élevée | intention mêlée (DIY, pharmacie) ; piste « changer de crème au changement d'heure » (aufeminin, 24/10) |
+| rétinol visage | 100 à 1 k | 0 % | 0 % | élevée | |
+| sérum rétinol | 100 à 1 k | 0 % | 0 % | élevée | |
+| crème rétinol | 100 à 1 k | 0 % | 0 % | élevée | |
+| rétinal | 100 à 1 k | 0 % | 0 % | élevée | |
+| rétinol et soleil | 100 à 1 k | 0 % | 0 % | faible | |
+| céramides | 100 à 1 k | 0 % | 0 % | moyenne | |
+| rétinol effets secondaires | 10 à 100 | 0 % | 0 % | faible | |
+| rétinol grossesse | 10 à 100 | 0 % | 0 % | faible | |
+| crème céramides | 10 à 100 | 0 % | -90 % | élevée | |
+| rétinol quand l'appliquer | aucun volume | | | | |
+
+## 2026-10-25 : France seule, French (« Idées de mots clés », dimanche, famille Cosme Check pratique)
+
+Neuf mots de départ : application cosmétique, scanner produit cosmétique, yuka cosmétique, inci beauty, ingrédients à éviter cosmétiques, composition crème, cosmétique grossesse, produit cosmétique dangereux, liste ingrédients cosmétiques. ⚠️ Le Planificateur refuse un **dixième** mot tapé avec une virgule finale (« caractères non valides ») et grise « Obtenir des résultats » : retirer la puce fautive, puis cliquer.
+
+| Requête | Volume mensuel | Variation 3 mois | Remarque |
+|---|---|---|---|
+| inci beauty | 10 k à 100 k | -90 % | concurrent, comparatif honnête seulement |
+| scan produit de beauté | 100 à 1 k | **+900 %** | intention app |
+| application cosmétique, app produits cosmétiques, appli produit de beaute, application produit beaute, application composition produit cosmétique | 100 à 1 k | 0 % à -90 % | intention app, cinq variantes |
+| scanner produit cosmétique | 100 à 1 k | -90 % | |
+| yuka cosmétique | 100 à 1 k | 0 % | confirme |
+| inci beauty avis, inci beauty application, inci beauty ou yuka | 100 à 1 k | | |
+| **cosmétique grossesse, cosmétique femme enceinte, cosmétiques femme enceinte, produits de beauté femme enceinte, cosmétique pour femme enceinte** | 100 à 1 k chacune | 0 % | **grappe à prendre** : un article « Cosme Check pratique » (exemple de la doctrine), renvoi au médecin ou au pharmacien |
+| produits cosmétiques dangereux liste | 100 à 1 k | -90 % | |
+| composition crème, produit cosmétique dangereux, liste ingrédients cosmétiques, cosmétique femme enceinte que choisir | 10 à 100 | | |
