@@ -12,6 +12,13 @@ import type { Article } from "@/contenu/articles";
  * 68). Titre de résultat et résumé recentrés sur cette requête exacte, une
  * source scientifique, trois liens internes, « rétinol » expliqué, une
  * question de FAQ. Expérience suivie dans `docs/seo/EXPERIENCES.md`.
+ *
+ * Retouché le 26/10/2026 (GEO) : deuxième page la plus citée par Copilot
+ * (254 citations sur trois mois, Bing), d'abord sur « crème hydratante non
+ * comédogène » (113 citations, 1 k à 10 k recherches par mois). Section
+ * « non comédogène » sourcée (règlement 655/2013) et reliée à `comedogene`,
+ * `h2` en questions, termes expliqués, affirmation sans source sur le sébum
+ * retirée, liens vers `peau-seche-visage` et `analyse-composition-cosmetique`.
  */
 const article: Article = {
   slug: "meilleures-cremes-hydratantes-visage",
@@ -20,10 +27,10 @@ const article: Article = {
   resume:
     "Meilleure crème hydratante visage : il n'y en a pas une, il y a la tienne. Peau grasse, sèche, sensible ou mature : les formules à repérer avant d'acheter.",
   chapo:
-    "Il n'existe pas *une* meilleure crème hydratante, mais la meilleure ==pour ta peau==. Vite dit : texture **fluide non comédogène** pour peau grasse, **riche aux céramides** pour peau sèche, **minimaliste sans parfum** pour peau sensible. Les références citées ici sont souvent recommandées, mais la seule façon de trancher reste de ++vérifier la compatibilité++ de la formule avec ton profil.",
+    "Il n'existe pas *une* meilleure crème hydratante, mais la meilleure ==pour ta peau==. Vite dit : texture **fluide non comédogène** (qui ne favorise pas les points noirs) pour peau grasse, **riche aux céramides** pour peau sèche, **minimaliste sans parfum** pour peau sensible. Les références citées ici sont souvent recommandées, mais la seule façon de trancher reste de ++vérifier la compatibilité++ de la formule avec ton profil.",
   publieLe: "2026-07-20",
-  modifieLe: "2026-10-19",
-  minutes: 3,
+  modifieLe: "2026-10-26",
+  minutes: 5,
   theme: "meilleure crème hydratante visage",
   motsCles: [
     "meilleure crème hydratante visage",
@@ -43,7 +50,7 @@ const article: Article = {
     licence: "illustration générée par IA pour Cosme Check",
   },
   blocs: [
-    { type: "h2", texte: "1. Ce qui fait une bonne crème hydratante" },
+    { type: "h2", texte: "Qu'est-ce qui fait une bonne crème hydratante ?" },
     {
       type: "p",
       texte:
@@ -53,9 +60,9 @@ const article: Article = {
       type: "liste",
       style: "coches",
       items: [
-        "**Humectants** (attirent l'eau) : [glycérine](/i/glycerin), acide hyaluronique, urée, [panthénol](/i/panthenol).",
-        "**Émollients** (lissent, assouplissent) : squalane, céramides, esters, beurres végétaux.",
-        "**Occlusifs** (limitent la perte en eau) : cires, certaines huiles, silicones. Surtout utiles aux peaux sèches.",
+        "**Humectants** (ils attirent l'eau dans la peau) : [glycérine](/i/glycerin), acide hyaluronique, urée, [panthénol](/i/panthenol).",
+        "**Émollients** (ils lissent et assouplissent) : squalane, céramides, esters, beurres végétaux.",
+        "**Occlusifs** (ils posent un film qui limite la perte d'eau) : cires, certaines huiles, silicones. Surtout utiles aux peaux sèches.",
       ],
     },
     {
@@ -64,7 +71,7 @@ const article: Article = {
         "Pour le détail (hydratation vs nutrition, quel actif pour quoi), vois le guide complet : [Crèmes hydratantes et réparatrices, le guide pour choisir](/blog/cremes-hydratantes-reparatrices).",
     },
 
-    { type: "h2", texte: "2. La sélection par type de peau" },
+    { type: "h2", texte: "Quelle crème hydratante pour quel type de peau ?" },
     {
       type: "p",
       texte:
@@ -76,17 +83,32 @@ const article: Article = {
       texte:
         "Cherche glycérine + acide hyaluronique + [niacinamide](/i/niacinamide), texture fluide. Références souvent citées : La Roche-Posay Effaclar, CeraVe lotion hydratante, Bioderma Sébium. Évite les huiles lourdes et beurres occlusifs. Les autres gestes pour cette peau sont dans notre [guide anti-imperfections](/blog/meilleurs-produits-anti-imperfections).",
     },
+    { type: "h3", texte: "Et la mention « non comédogène », elle vaut quoi ?" },
+    {
+      type: "p",
+      texte:
+        "Une crème **non comédogène**, c'est une crème dont la marque affirme qu'elle ne favorise pas les points noirs et les boutons. En Europe, toute promesse écrite sur un cosmétique doit pouvoir être prouvée ([règlement (UE) 655/2013](https://eur-lex.europa.eu/eli/reg/2013/655/oj)). Mais aucun test commun n'est imposé : chaque marque choisit sa méthode.",
+    },
+    {
+      type: "liste",
+      style: "coches",
+      items: [
+        "Cherche plutôt « testé sur peaux grasses » ou « sur peaux à tendance acnéique » : c'est plus précis.",
+        "Regarde le haut de la liste INCI (la liste des ingrédients au dos) : une texture gel ou fluide, avec glycérine et eau en tête, reste légère.",
+        "Les listes d'ingrédients « à fuir » viennent de vieux tests sur des oreilles de lapin : [ce que veut vraiment dire « comédogène »](/blog/comedogene).",
+      ],
+    },
     { type: "h3", texte: "Peau sèche : riche, céramides + beurres" },
     {
       type: "p",
       texte:
-        "Céramides, squalane, beurre de karité, glycérine. Références : CeraVe crème hydratante (pot), La Roche-Posay Toleriane Sensible, Avène Hydrance riche, Embryolisse Lait-Crème Concentré.",
+        "Céramides, squalane, beurre de karité, glycérine. Références : CeraVe crème hydratante (pot), La Roche-Posay Toleriane Sensible, Avène Hydrance riche, Embryolisse Lait-Crème Concentré. En hiver, une fine couche de vaseline le soir sur les zones qui tirent aide aussi : c'est le [slugging, et nos gestes pour la peau sèche du visage](/blog/peau-seche-visage).",
     },
     { type: "h3", texte: "Peau sensible / réactive : minimaliste, sans parfum" },
     {
       type: "p",
       texte:
-        "Panthénol, céramides, niacinamide ; sans parfum, sans huiles essentielles, sans alcool dénaturé. Références : La Roche-Posay Cicaplast Baume B5, Avène Tolérance Control, Bioderma Hydrabio. ==Plus court = mieux toléré.==",
+        "Panthénol, céramides (les gras qui collent les cellules de la peau entre elles), niacinamide ; sans parfum, sans huiles essentielles, sans alcool dénaturé. Références : La Roche-Posay Cicaplast Baume B5, Avène Tolérance Control, Bioderma Hydrabio. ==Plus court = mieux toléré.==",
     },
     { type: "h3", texte: "Peau mature : riche + actifs ciblés" },
     {
@@ -103,7 +125,7 @@ const article: Article = {
       ],
     },
 
-    { type: "h2", texte: "3. Prix : est-ce que ça change quelque chose ?" },
+    { type: "h2", texte: "Une crème hydratante chère est-elle meilleure ?" },
     {
       type: "p",
       texte:
@@ -115,11 +137,11 @@ const article: Article = {
         "L'exemple parlant : [on a lu la composition de la boîte bleue Nivea](/blog/creme-nivea-composition), et 18 de ses 21 ingrédients se retrouvent dans une crème de luxe culte.",
     },
 
-    { type: "h2", texte: "4. Laquelle est vraiment faite pour toi" },
+    { type: "h2", texte: "Comment savoir si une crème est faite pour toi ?" },
     {
       type: "p",
       texte:
-        "Une liste de « meilleures crèmes » reste générale. Ta peau, elle, est précise. Avant d'acheter, la vraie question est : ++cette crème est-elle compatible avec MON profil++ (type de peau, objectifs, ingrédients que j'évite) ? C'est l'approche détaillée dans notre article pilier : [comment savoir si un cosmétique est fait pour toi](/blog/cosmetique-fait-pour-toi).",
+        "Une liste de « meilleures crèmes » reste générale. Ta peau, elle, est précise. Avant d'acheter, la vraie question est : ++cette crème est-elle compatible avec MON profil++ (type de peau, objectifs, ingrédients que j'évite) ? C'est l'approche détaillée dans notre article pilier : [comment savoir si un cosmétique est fait pour toi](/blog/cosmetique-fait-pour-toi). Pour lire une liste toi-même, suis [notre méthode en cinq étapes](/blog/analyse-composition-cosmetique).",
     },
     {
       type: "cta",
@@ -127,7 +149,7 @@ const article: Article = {
         "**Vérifie si une crème est faite pour toi.** Scanne une crème ou colle sa liste INCI : Cosme Check calcule ton score de compatibilité, analyse la formule derrière les promesses et signale les ingrédients à éviter selon ton profil.",
     },
 
-    { type: "h2", texte: "En résumé" },
+    { type: "h2", texte: "Que retenir avant d'acheter ?" },
     {
       type: "liste",
       style: "coches",
@@ -154,12 +176,17 @@ const article: Article = {
     {
       question: "Quelle crème hydratante pour peau grasse ?",
       reponse:
-        "Une texture gel ou fluide non comédogène, à base de glycérine, d'acide hyaluronique et de niacinamide, sans huiles lourdes ni beurres occlusifs. Même une peau grasse a besoin d'être hydratée : la priver d'eau accentue le sébum.",
+        "Une texture gel ou fluide, à base de glycérine, d'acide hyaluronique et de niacinamide, sans huiles lourdes ni beurres occlusifs. Même une peau grasse peut manquer d'eau : la sauter laisse souvent la peau tirer après le nettoyage, et ne fait pas briller moins.",
     },
     {
       question: "Quelle est la meilleure crème hydratante pour peau mature ?",
       reponse:
         "Une crème riche qui associe des céramides, de l'acide hyaluronique et des peptides, pour le confort et le rebondi. Le soir, un rétinol peut s'ajouter, à petite dose et séparément, si ta peau le tolère. Le matin, la crème solaire reste le geste qui compte le plus pour une peau qui mûrit.",
+    },
+    {
+      question: "Quelle crème hydratante non comédogène choisir ?",
+      reponse:
+        "Une crème gel ou fluide, avec de l'eau et de la glycérine en tête de liste, sans beurres ni huiles lourdes. La mention « non comédogène » n'a pas de test officiel commun : préfère « testé sur peaux grasses » ou « sur peaux à tendance acnéique ». Et teste-la deux semaines avant de juger.",
     },
   ],
 };

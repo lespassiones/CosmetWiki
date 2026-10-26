@@ -224,3 +224,22 @@ Neuf mots de départ : application cosmétique, scanner produit cosmétique, yuk
 | **cosmétique grossesse, cosmétique femme enceinte, cosmétiques femme enceinte, produits de beauté femme enceinte, cosmétique pour femme enceinte** | 100 à 1 k chacune | 0 % | **grappe à prendre** : un article « Cosme Check pratique » (exemple de la doctrine), renvoi au médecin ou au pharmacien |
 | produits cosmétiques dangereux liste | 100 à 1 k | -90 % | |
 | composition crème, produit cosmétique dangereux, liste ingrédients cosmétiques, cosmétique femme enceinte que choisir | 10 à 100 | | |
+
+## 2026-10-26 : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon, toutes les langues
+
+Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (pas retentée : le bouton est désactivé sur « Mots clés enregistrés », comme le 20 et le 25/10). Même méthode que le 25/10 : carte « Obtenir le volume de recherche » ouverte par un clic sur ses coordonnées, douze mots collés, « Commencer », puis les neuf zones ajoutées en un seul `browser_batch` avec `window.__inc(nom)` (texte tapé, puis clic JavaScript sur « Inclure » de la première ligne « pays ») : neuf sur neuf du premier coup.
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| peau sèche visage | 1 k à 10 k | 0 % | 0 % | élevée | **sujet du jour** (`peau-seche-visage`) |
+| crème peau sèche visage | 1 k à 10 k | 0 % | -90 % | élevée | sujet du jour |
+| peau déshydratée | 1 k à 10 k | -90 % | -90 % | élevée | section « sèche ou déshydratée » |
+| slugging | 1 k à 10 k | 0 % | 0 % | faible | buzz : National Geographic, 26/10 ; suggestions « slugging vaseline », « slugging nivea » |
+| crème hydratante non comédogène | 1 k à 10 k | 0 % | 0 % | élevée | **optimisation du jour** (`meilleures-cremes-hydratantes-visage`), 113 citations Copilot |
+| meilleur hydratant visage | 100 à 1 k | 0 % | 0 % | élevée | vue sans clic : 45 affichages en position 72 |
+| peau sèche hiver | 100 à 1 k | 0 % | -90 % | faible | |
+| routine peau sèche | 100 à 1 k | 0 % | -90 % | élevée | |
+| slugging vaseline | 100 à 1 k | 0 % | -90 % | faible | |
+| peau qui tire | 10 à 100 | 0 % | 0 % | faible | |
+| slugging visage | 10 à 100 | 0 % | 0 % | moyenne | |
+| routine skincare hiver | aucun volume | | | | |

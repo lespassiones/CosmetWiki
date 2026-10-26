@@ -13,3 +13,7 @@ Ces règles viennent de Vaultaire (Starter Story, octobre 2026 : 40 700 téléch
 - **Mesurer le volume avant d'écrire.** Le premier article du robot RevealChat visait 10 à 100 recherches par mois : une suggestion Google prouve une demande, pas sa taille.
 - **Un titre sage ne se clique pas.** Le premier passage RevealChat a perdu un point sur un titre trop prudent : écrire cinq titres et garder le plus fort.
 - **Le tutoiement glisse vers un genre.** Le premier passage MemoryPilot a laissé « tu es paresseux » dans sa première phrase : relire chaque « tu es ».
+
+## Appris ici (vérifié au moins deux fois)
+
+- **Les phrases longues se cherchent avec une copie du découpage de `seo:verifier`, jamais à l'œil.** Le 23/10 et le 26/10, un script de vingt lignes (blocs aplatis, balisage retiré, découpe sur `.!?`) a trouvé en une seconde la phrase fautive, que la relecture n'avait pas vue (deux fois une phrase qui portait une référence d'étude entre parenthèses). Le script vit dans le bloc-notes de session ; le recréer depuis `lisibilite()` de `scripts/seo/verifier.mjs`.

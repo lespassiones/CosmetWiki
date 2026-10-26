@@ -106,6 +106,7 @@ import masqueLed from "./articles/masque-led-visage";
 import meilleuresCremesHydratantes from "./articles/meilleures-cremes-hydratantes-visage";
 import antiImperfections from "./articles/meilleurs-produits-anti-imperfections";
 import niacinamide from "./articles/niacinamide";
+import peauSecheVisage from "./articles/peau-seche-visage";
 import perturbateursEndocriniens from "./articles/perturbateurs-endocriniens-cosmetiques-2026";
 import routineFoot from "./articles/routine-peau-joueurs-foot";
 import serums from "./articles/serums-visage-guide";
@@ -307,6 +308,7 @@ export const ARTICLES: readonly Article[] = [
   comedogene,
   masqueBiodance,
   bakuchiol,
+  peauSecheVisage,
 ];
 
 controlerRegistre(ARTICLES);

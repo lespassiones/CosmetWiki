@@ -22,6 +22,8 @@ Au 24/10/2026, sur les dix derniers par date (de `masque-biodance` à `deodorant
 
 Au 25/10/2026, sur les dix derniers par date (de `bakuchiol` à `meilleurs-produits-anti-imperfections`, `deodorant-sels-aluminium-verite` sort) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort `meilleurs-produits-anti-imperfections` ou `meilleures-cremes-hydratantes-visage` (publiés le même jour, 20/07) : routines ou comparatif. Si c'est une **routine** : peau sèche en hiver et changement d'heure (une dermatologue citée par aufeminin le 24/10 conseille de passer à une crème plus riche, glycérine ou céramides ; « glycérine » 10 k à 100 k, « céramides » 100 à 1 k). Nouvelle grappe mesurée le 25/10 pour la prochaine place « pratique » : **cosmétiques et grossesse** (cinq variantes à 100 à 1 k chacune). Le GEO de Bing désigne aussi « crème hydratante non comédogène » (113 citations Copilot) : à renforcer dans `comedogene` ou `meilleures-cremes-hydratantes-visage`.
 
+Au 26/10/2026, sur les dix derniers par date (de `peau-seche-visage` à `meilleures-cremes-hydratantes-visage`, `meilleurs-produits-anti-imperfections` sort comme annoncé hier) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort le dernier des deux articles du 20/07 encore dans la fenêtre : `cosmetique-fait-pour-toi` (routines) ou `meilleures-cremes-hydratantes-visage` (comparatif, retouchée aujourd'hui), selon le tri. Routine : **l'ordre des produits d'une routine skincare** (« routine skincare » 1 k à 10 k) ou **connaître son type de peau** (1 k à 10 k). Comparatif : **Cosme Check, Yuka, INCI Beauty** ou le produit Lidl noté 100/100 sur Yuka. Vu le 26/10 : Jennifer Aniston parle de sa crème teintée hydratante préférée (Grazia, 26/10) ; à garder pour un jour buzz, seulement si elle nomme le produit elle-même.
+
 ## Priorités du premier mois
 
 | Ordre | Sujet | Famille | Pourquoi maintenant |
@@ -85,7 +87,7 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 | Comment connaître son type de peau | type de peau, connaître son type de peau, test type de peau | « type de peau » 1 k à 10 k, les deux autres 100 à 1 k (5 zones, 19/10/2026) |
 | Routine skincare : l'ordre des produits | routine skincare, ordre des soins visage | 1 k à 10 k (« routine skincare ») |
 | Routine peau grasse | routine peau grasse | à mesurer |
-| Routine peau sèche en hiver | peau sèche hiver | à mesurer ; saisonnier (novembre à février) |
+| ~~Routine peau sèche en hiver~~ → `peau-seche-visage`, 2026-10-26 (avec le slugging) | peau sèche visage, crème peau sèche visage, peau déshydratée, slugging | 1 k à 10 k chacune (26/10/2026) ; « peau sèche hiver » 100 à 1 k |
 | Routine peau sensible : les ingrédients à éviter | peau sensible routine | à mesurer |
 | Routine skincare ado (13 à 17 ans) | routine skincare ado | à mesurer ; ton adapté, aucun complexe |
 | Routine homme en 3 gestes | routine visage homme | à mesurer |
