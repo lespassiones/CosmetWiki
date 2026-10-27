@@ -11,13 +11,13 @@ import type { Article } from "@/contenu/articles";
 const article: Article = {
   slug: "creme-nivea-composition",
   titre: "Crème Nivea : on a lu les 21 ingrédients de la boîte bleue (tu vas la regarder autrement)",
-  titreSeo: "Crème Nivea : la composition de la boîte bleue",
+  titreSeo: "Crème Nivea composition : ses 21 ingrédients",
   resume:
-    "Crème Nivea : on a lu les 21 ingrédients de la boîte bleue. Ce qu'ils font, ce qu'ils ne font pas (soleil, rides) et la note que lui donne Cosme Check.",
+    "Composition de la crème Nivea : ses 21 ingrédients lus un par un, ses 7 allergènes, et sa note face à la Crème de la Mer (11,32 sur 20 contre 7,60).",
   chapo:
     "La crème Nivea, c'est surtout **de l'eau, de l'huile minérale et des cires** : un mélange simple qui hydrate en posant un film sur la peau. Elle ne protège pas du soleil et ne lisse pas les rides. On a lu ses 21 ingrédients, et ++la fin réserve une surprise++.",
   publieLe: "2026-10-19",
-  modifieLe: "2026-10-19",
+  modifieLe: "2026-10-27",
   minutes: 6,
   theme: "crème nivea",
   motsCles: [

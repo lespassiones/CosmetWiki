@@ -24,6 +24,8 @@ Au 25/10/2026, sur les dix derniers par date (de `bakuchiol` à `meilleurs-produ
 
 Au 26/10/2026, sur les dix derniers par date (de `peau-seche-visage` à `meilleures-cremes-hydratantes-visage`, `meilleurs-produits-anti-imperfections` sort comme annoncé hier) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort le dernier des deux articles du 20/07 encore dans la fenêtre : `cosmetique-fait-pour-toi` (routines) ou `meilleures-cremes-hydratantes-visage` (comparatif, retouchée aujourd'hui), selon le tri. Routine : **l'ordre des produits d'une routine skincare** (« routine skincare » 1 k à 10 k) ou **connaître son type de peau** (1 k à 10 k). Comparatif : **Cosme Check, Yuka, INCI Beauty** ou le produit Lidl noté 100/100 sur Yuka. Vu le 26/10 : Jennifer Aniston parle de sa crème teintée hydratante préférée (Grazia, 26/10) ; à garder pour un jour buzz, seulement si elle nomme le produit elle-même.
 
+Au 27/10/2026, sur les dix derniers par date (de `routine-skincare` à `meilleures-cremes-hydratantes-visage`, `cosmetique-fait-pour-toi` sort, retouché le 21/10 contre le 26/10 pour son voisin du 20/07) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort `meilleures-cremes-hydratantes-visage` (comparatif), le dernier des articles d'avant le robot : le prochain article est donc un **comparatif honnête**, par exemple Cosme Check, Yuka et INCI Beauty (100 à 1 k et 10 k à 100 k) ou le produit Lidl noté sur Yuka (NextPlz, 26/10 : « 13 produits notés excellents »). Vu le 27/10 : Kelly Ripa parle d'une crème L'Oréal (Grazia, 26/10, à vérifier à la source si un jour buzz) ; en Australie, refonte des tests de crèmes solaires après un scandale de SPF (TGA, 27/10) : piste pour un article solaire au printemps.
+
 ## Priorités du premier mois
 
 | Ordre | Sujet | Famille | Pourquoi maintenant |
@@ -84,8 +86,8 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 
 | Sujet | Requêtes | Volume |
 |---|---|---|
-| Comment connaître son type de peau | type de peau, connaître son type de peau, test type de peau | « type de peau » 1 k à 10 k, les deux autres 100 à 1 k (5 zones, 19/10/2026) |
-| Routine skincare : l'ordre des produits | routine skincare, ordre des soins visage | 1 k à 10 k (« routine skincare ») |
+| Comment connaître son type de peau | type de peau, connaître son type de peau, test type de peau, peau mixte, peau normale, peau sensible | « type de peau » 1 k à 10 k, concurrence faible (10 zones, 27/10/2026) ; les autres 100 à 1 k ; « routine peau mixte » +900 % : **prochaine routine** ; jamais de diagnostic posé sur le lecteur |
+| ~~Routine skincare : l'ordre des produits~~ → `routine-skincare`, 2026-10-27 (avec les routines virales, EADV 2026) | routine skincare, ordre des soins visage | 1 k à 10 k (« routine skincare », 27/10/2026) ; variantes « ordre » 10 à 100 |
 | Routine peau grasse | routine peau grasse | à mesurer |
 | ~~Routine peau sèche en hiver~~ → `peau-seche-visage`, 2026-10-26 (avec le slugging) | peau sèche visage, crème peau sèche visage, peau déshydratée, slugging | 1 k à 10 k chacune (26/10/2026) ; « peau sèche hiver » 100 à 1 k |
 | Routine peau sensible : les ingrédients à éviter | peau sensible routine | à mesurer |

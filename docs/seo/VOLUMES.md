@@ -243,3 +243,24 @@ Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (p
 | peau qui tire | 10 à 100 | 0 % | 0 % | faible | |
 | slugging visage | 10 à 100 | 0 % | 0 % | moyenne | |
 | routine skincare hiver | aucun volume | | | | |
+
+## 2026-10-27 : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon, toutes les langues
+
+Zone affichée : « Andorre et 9 autres » (deux plans, dix zones chacun). Langue : « Toutes les langues » (bouton désactivé sur « Mots clés enregistrés », méthode du 20/10, pas retentée). Méthode du 26/10 reprise telle quelle : carte ouverte par coordonnées, liste collée en JavaScript, « Commencer » cliqué (il ne s'active qu'après l'événement `input`), puis les neuf zones en un seul `browser_batch` avec `window.__inc(nom)` (redéfinie à chaque plan : la page la perd en changeant d'adresse) ; neuf sur neuf, deux fois.
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| skincare | 10 k à 100 k | 0 % | 0 % | élevée | trop large pour un article |
+| routine skincare | 1 k à 10 k | 0 % | 0 % | élevée | **sujet du jour** (`routine-skincare`) ; confirme le 19/10 |
+| peau grasse | 1 k à 10 k | 0 % | 0 % | élevée | candidat routine |
+| type de peau | 1 k à 10 k | 0 % | -90 % | faible | confirme le 19/10 ; candidat routine suivant |
+| routine visage | 100 à 1 k | 0 % | 0 % | élevée | |
+| routine peau mixte | 100 à 1 k | **+900 %** | 0 % | élevée | |
+| connaitre son type de peau, test type de peau | 100 à 1 k | 0 % | 0 % | moyenne | grappe « type de peau » |
+| peau mixte, peau normale, peau sensible | 100 à 1 k | 0 % à -90 % | | moyenne à faible | grappe « type de peau » |
+| ordre routine skincare, ordre des soins visage, ordre application soin visage | 10 à 100 | 0 % | 0 % | moyenne à élevée | sections du sujet du jour |
+| routine skincare matin, routine skincare soir, routine skincare ado | 10 à 100 | 0 % | 0 % | élevée | |
+| crème solaire avant ou après crème hydratante | 10 à 100 | 0 % | 0 % | moyenne | FAQ du sujet du jour |
+| crème nivea composition | 10 à 100 | -90 % | 0 % | faible | page optimisée du jour |
+| quel est mon type de peau, routine skincare peau grasse | 10 à 100 | | | | |
+| ordre sérum crème, routine skincare débutant, routine skincare tiktok | aucun volume | | | | |

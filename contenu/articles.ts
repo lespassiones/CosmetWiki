@@ -109,6 +109,7 @@ import niacinamide from "./articles/niacinamide";
 import peauSecheVisage from "./articles/peau-seche-visage";
 import perturbateursEndocriniens from "./articles/perturbateurs-endocriniens-cosmetiques-2026";
 import routineFoot from "./articles/routine-peau-joueurs-foot";
+import routineSkincare from "./articles/routine-skincare";
 import serums from "./articles/serums-visage-guide";
 import spf50 from "./articles/spf-50-visage-7-erreurs";
 
@@ -309,6 +310,7 @@ export const ARTICLES: readonly Article[] = [
   masqueBiodance,
   bakuchiol,
   peauSecheVisage,
+  routineSkincare,
 ];
 
 controlerRegistre(ARTICLES);
