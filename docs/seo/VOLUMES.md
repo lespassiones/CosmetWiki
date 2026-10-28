@@ -264,3 +264,25 @@ Zone affichée : « Andorre et 9 autres » (deux plans, dix zones chacun). Langu
 | crème nivea composition | 10 à 100 | -90 % | 0 % | faible | page optimisée du jour |
 | quel est mon type de peau, routine skincare peau grasse | 10 à 100 | | | | |
 | ordre sérum crème, routine skincare débutant, routine skincare tiktok | aucun volume | | | | |
+
+## 2026-10-28 : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon, toutes les langues
+
+Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (pas retentée : bouton désactivé sur « Mots clés enregistrés », comme depuis le 20/10). Méthode du 27/10 reprise sans accroc : carte ouverte par coordonnées, liste collée en JavaScript (`value` puis événement `input`), bouton `material-button.submit-button` cliqué en JavaScript (⚠️ ne pas prendre le premier « Commencer » de la page : c'est celui du bandeau de paiement), puis les neuf zones avec `window.__inc(nom)`, neuf sur neuf.
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| cerave | 100 k à 1 M | -90 % | -90 % | élevée | marque, trop large |
+| cerave crème hydratante | 10 k à 100 k | 0 % | **+900 %** | élevée | **sujet du jour** (`cerave-creme-hydratante`) |
+| crème cerave | 1 k à 10 k | 0 % | 0 % | élevée | sujet du jour |
+| cerave lait hydratant | 1 k à 10 k | 0 % | 0 % | élevée | section du sujet du jour |
+| cerave nettoyant | 1 k à 10 k | 0 % | 0 % | élevée | suite possible (nettoyants CeraVe) |
+| cerave avis, cerave peau grasse | 100 à 1 k | 0 % | 0 % | moyenne à élevée | FAQ du sujet du jour |
+| cerave ou la roche posay, crème cerave avis | 10 à 100 | | | | |
+| rhode | 100 k à 1 M | 0 % | 0 % | élevée | marque de Hailey Bieber, arrivée en France fin septembre (Madame Figaro, 27/10) : **prochain buzz** |
+| rhode france, rhode hailey bieber | 1 k à 10 k | 0 % | 0 % | moyenne à élevée | prochain buzz |
+| rhode avis | 10 à 100 | +900 % | +900 % | faible | |
+| cien lidl | 1 k à 10 k | 0 % | 0 % | moyenne | piste comparatif (Lidl et Yuka, presse du 26 au 28/10) |
+| crème lidl | 100 à 1 k | 0 % | 0 % | faible | |
+| lidl yuka | 10 à 100 | 0 % | 0 % | faible | le buzz presse ne se cherche pas |
+| yuka cosmétique | 100 à 1 k | 0 % | 0 % | moyenne | confirme le 25/10 |
+| yuka ou inci beauty | 10 à 100 | | | faible | |

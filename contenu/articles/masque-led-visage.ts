@@ -6,26 +6,32 @@ import type { Article } from "@/contenu/articles";
  * au tutoiement, comme le reste du site, et l'article change de rubrique
  * (« Routines » devient « Tendances »). Le format de ce fichier est décrit en
  * tête de `contenu/articles.ts`.
+ *
+ * Retouché le 28/10/2026 par le robot éditorial : chiffres sans source
+ * retirés (nombre de LED, irradiance minimale, comparaison au peroxyde de
+ * benzoyle, liste de marques), trois sources (Wunsch et Matuschka 2014,
+ * revue Cochrane 2016, rappel Neutrogena 2019), `h2` en questions, liens
+ * vers quatre articles et deux fiches.
  */
 const article: Article = {
   slug: "masque-led-visage",
   titre: "Masque LED visage : effet réel ou simple tendance TikTok ?",
   titreSeo: "Masque LED visage : effet réel ou tendance ?",
   resume:
-    "Boom des masques LED en 2026 : ce que disent vraiment les études, à quoi sert chaque couleur de lumière, et les précautions à connaître avant d'investir.",
+    "Masque LED visage : ce que disent vraiment les études sur la lumière rouge et bleue, combien de séances il faut, et les précautions pour tes yeux.",
   chapo:
-    "Les masques LED ont explosé sur TikTok et chez les marques de skincare premium. Derrière l'effet « ovni » sur le visage, il y a une vraie technologie médicale (la **photobiomodulation**), aujourd'hui rendue accessible à la maison. Mais ++tous les masques ne se valent pas++, et le marketing va souvent plus vite que les études.",
+    "Un masque LED peut améliorer un peu l'aspect de la peau, à condition de s'en servir longtemps et souvent : l'essai le plus cité a demandé **30 séances en 15 semaines**. Pour les boutons, les preuves restent faibles. Voici ce que disent vraiment les études, et les deux précautions que la pub oublie : ++tes yeux et tes crèmes++.",
   publieLe: "2026-05-17",
-  modifieLe: "2026-05-17",
-  minutes: 3,
+  modifieLe: "2026-10-28",
+  minutes: 5,
   theme: "masque LED visage",
   motsCles: [
     "masque LED",
+    "masque LED visage avis",
     "LED rouge peau",
-    "LED bleue acné",
+    "LED bleue boutons",
     "luminothérapie visage",
     "photobiomodulation",
-    "masque LED avis",
   ],
   categorie: "Tendances",
   couverture: {
@@ -37,30 +43,29 @@ const article: Article = {
     licence: "illustration générée par IA pour Cosme Check",
   },
   blocs: [
-    { type: "h2", texte: "1. Le principe : la photobiomodulation" },
+    { type: "h2", texte: "Comment marche un masque LED ?" },
     {
       type: "p",
       texte:
-        "Des LED émettent une lumière à **longueur d'onde précise**. Chaque longueur pénètre la peau à une profondeur différente et déclenche une réaction biologique : stimulation des mitochondries, production de collagène, réduction de l'inflammation.",
+        "Il éclaire ta peau avec une lumière d'une seule couleur, sans UV. On parle de **photobiomodulation** : l'idée que certaines couleurs de lumière réveillent l'activité des cellules de la peau. Chaque couleur a sa longueur d'onde, mesurée en nanomètres (nm) : le rouge tourne autour de 630 nm, le bleu autour de 415 nm.",
     },
     {
-      type: "encadre",
-      ton: "indigo",
-      titre: "À retenir",
+      type: "p",
       texte:
-        "La technique est utilisée en dermatologie hospitalière ==depuis les années 2000==. Les versions maison sont moins puissantes mais reposent sur le même principe.",
+        "Ce n'est pas un cosmétique : un masque LED est un appareil électrique. Il ne suit donc pas les règles des crèmes ([règlement (CE) 1223/2009](https://eur-lex.europa.eu/eli/reg/2009/1223/oj)), et ++rien ne garantit que sa lumière est assez forte pour faire quelque chose++.",
     },
 
-    { type: "h2", texte: "2. Que fait chaque couleur" },
+    { type: "h2", texte: "Que fait chaque couleur de LED ?" },
     {
       type: "tableau",
-      entetes: ["Couleur", "Longueur d'onde", "Effet ciblé"],
+      entetes: ["Couleur", "Longueur d'onde", "Ce qui a été testé", "Niveau de preuve"],
       lignes: [
-        ["**Rouge**", "630-660 nm", "Anti-âge, collagène, fermeté"],
-        ["**Bleue**", "415-465 nm", "Acné, bactérie *P. acnes*"],
-        ["**Infrarouge**", "830-940 nm", "Cicatrisation, douleurs profondes"],
-        ["**Verte**", "520-560 nm", "Taches pigmentaires (preuve faible)"],
+        ["Rouge.", "Environ 610 à 660 nm.", "Le teint, le grain de peau, les ridules.", "Quelques essais encourageants."],
+        ["Infrarouge proche.", "Environ 830 à 850 nm.", "Associé au rouge, les mêmes effets.", "Quelques essais."],
+        ["Bleu.", "Environ 415 nm.", "Les boutons.", "Faible."],
+        ["Vert, jaune.", "Environ 520 à 590 nm.", "Les taches, l'éclat.", "Très faible."],
       ],
+      legende: "Les masques vendus affichent souvent sept couleurs : seuls le rouge et l'infrarouge ont des essais un peu solides.",
     },
     {
       type: "image",
@@ -72,81 +77,90 @@ const article: Article = {
       licence: "illustration générée par IA pour Cosme Check",
     },
 
-    { type: "h2", texte: "3. Bénéfices documentés" },
+    { type: "h2", texte: "Le masque LED rouge, ça marche vraiment ?" },
     {
-      type: "liste",
-      style: "coches",
-      items: [
-        "**LED rouge :** études cliniques montrent une augmentation visible du collagène et une réduction des rides fines après ==8 à 12 semaines== à raison de 3 à 5 séances de 10 minutes par semaine.",
-        "**LED bleue :** efficacité prouvée contre l'acné inflammatoire légère à modérée. Souvent comparable à une crème topique à base de peroxyde de benzoyle.",
-        "**LED infrarouge :** accélère la cicatrisation, utilisée en clinique post-laser ou post-microneedling.",
-        "Aucune douleur, aucune éviction sociale, pas de photosensibilisation.",
-      ],
+      type: "p",
+      texte:
+        "Un peu, avec de la patience. L'essai le plus cité a suivi 136 volontaires. Ceux qui ont reçu de la lumière rouge, seule ou avec de l'infrarouge, pendant 30 séances avaient un teint et un grain de peau jugés meilleurs ([Wunsch et Matuschka, *Photomedicine and Laser Surgery*, 2014](https://pmc.ncbi.nlm.nih.gov/articles/PMC3926176/)).",
+    },
+    {
+      type: "p",
+      texte:
+        "L'échographie montrait aussi un collagène plus dense. Le collagène, c'est la protéine qui fait la fermeté de la peau. Deux limites : l'essai utilisait un appareil de cabine, plus puissant qu'un masque maison, et les changements restent modestes. ==Une séance de temps en temps ne donne rien== : c'est la régularité sur des mois qui compte.",
     },
 
-    { type: "h2", texte: "4. Limites et précautions" },
+    { type: "h2", texte: "Et la lumière bleue contre les boutons ?" },
     {
-      type: "liste",
-      style: "alertes",
-      items: [
-        "**Régularité essentielle :** 3-5 séances par semaine pendant 2 à 3 mois minimum. Un masque utilisé « de temps en temps » ne donne rien.",
-        "**Qualité variable :** beaucoup de masques low cost ont une puissance trop faible (irradiance) pour produire un effet biologique réel. Cherche la mention de la longueur d'onde précise et de la densité de LED.",
-        "**Contre-indications :** épilepsie photosensible, certains traitements photosensibilisants (rétinoïdes oraux, tétracyclines), grossesse (par prudence). Demande un avis médical en cas de doute.",
-        "**Protection oculaire :** porte les lunettes fournies. Ne regarde jamais les LED directement.",
-      ],
+      type: "p",
+      texte:
+        "Les preuves sont faibles. Une grande revue de 71 études conclut qu'on manque de données solides, et la plupart des essais étaient petits et financés par les fabricants ([revue Cochrane, 2016](https://www.cochrane.org/CD007917/SKIN_use-light-therapy-acne)). Si tes boutons font mal ou laissent des marques, parles-en à un dermatologue plutôt que d'acheter un masque.",
     },
-
-    { type: "h2", texte: "5. Comment choisir son masque" },
     {
-      type: "liste",
-      style: "coches",
-      items: [
-        "**Marquage CE médical** (CE 0123 ou équivalent), pas seulement CE jouet.",
-        "Longueur d'onde précise indiquée : ==633 nm ou 660 nm== pour le rouge, 415 nm pour le bleu.",
-        "**Densité de LED :** au moins 150 LED pour un visage complet.",
-        "**Irradiance** (intensité) annoncée par le fabricant. En-dessous de 20 mW/cm², l'effet est probablement négligeable.",
-        "Marques de référence : *CurrentBody, Dr. Dennis Gross, Omnilux, Foreo*.",
-      ],
+      type: "p",
+      texte:
+        "Au quotidien, les gestes simples comptent plus : une [routine en quatre étapes](/blog/routine-skincare), et des crèmes qui ne bouchent pas les pores (lis ce que veut dire [« comédogène »](/blog/comedogene)).",
     },
     {
       type: "cta",
       texte:
-        "**Vérifie ta routine soin.** Cosme Check analyse tes crèmes et sérums pour qu'ils accompagnent au mieux ta routine LED, sans interaction avec des actifs photosensibilisants.",
+        "**Ta routine, elle contient quoi ?** Scanne tes crèmes avec Cosme Check : tu vois en dix secondes si l'une d'elles contient du rétinol ou un acide exfoliant.",
     },
 
-    { type: "h2", texte: "En résumé" },
+    { type: "h2", texte: "Quelles précautions avant de s'en servir ?" },
+    {
+      type: "liste",
+      style: "alertes",
+      items: [
+        "**Tes yeux d'abord.** En 2019, Neutrogena a retiré son masque LED de la vente, après une alerte australienne sur un risque pour la rétine chez certaines personnes ([Association of Optometrists, 2019](https://www.aop.org.uk/ot/news/2019/07/22/eye-injury-risk-prompts-recall-of-neutrogena-light-therapy-acne-mask)). Garde les yeux fermés et porte les lunettes fournies.",
+        "**Une vue fragile ou une maladie des yeux** : demande l'avis d'un ophtalmologiste avant de commencer.",
+        "**Un médicament qui rend sensible à la lumière** : demande à ton médecin ou à ton pharmacien.",
+        "**Grossesse ou épilepsie** : demande d'abord un avis médical.",
+        "**Ça chauffe, ça pique, ça rougit** : arrête, et parles-en à un professionnel.",
+      ],
+    },
+    {
+      type: "p",
+      texte:
+        "Et tes crèmes ? Le [rétinol](/i/retinol) et les acides exfoliants comme l'[acide glycolique](/i/glycolic-acid) rendent la peau plus réactive. Le soir d'une séance, garde une routine douce. Pour une option plus douce que le rétinol, lis notre article sur le [bakuchiol](/blog/bakuchiol).",
+    },
+
+    { type: "h2", texte: "Comment choisir un masque LED ?" },
     {
       type: "liste",
       style: "coches",
       items: [
-        "Technologie médicale réelle, pas de la magie TikTok.",
-        "**Rouge** = anti-âge, **bleue** = acné, **infrarouge** = cicatrisation.",
-        "Régularité > fréquence d'achat : 3-5 séances / semaine pendant ==8-12 semaines==.",
-        "Choisir un masque **certifié CE médical**, avec longueur d'onde et irradiance précisées.",
-        "Compatible avec une routine skincare normale ; éviter sur peau sous traitement photosensibilisant.",
+        "La longueur d'onde écrite en nanomètres pour chaque couleur, et pas seulement « lumière rouge ».",
+        "La puissance de la lumière (l'irradiance, en mW/cm²) annoncée par le fabricant. Sans ce chiffre, impossible de comparer avec les études.",
+        "Une étude publiée sur l'appareil lui-même, ou au moins sur ses réglages.",
+        "Une notice qui parle des yeux et des contre-indications. Son absence est un mauvais signe.",
       ],
+    },
+    {
+      type: "p",
+      texte:
+        "Le geste à retenir : ++un masque LED ne remplace pas la crème solaire++. Les UV abîment le collagène toute l'année. Éviter les [7 erreurs qui divisent ton SPF](/blog/spf-50-visage-7-erreurs) protège mieux ta peau que n'importe quelle lumière rouge.",
     },
   ],
   faq: [
     {
       question: "Est-ce que le masque LED visage fonctionne vraiment ?",
       reponse:
-        "La technique, la photobiomodulation, est utilisée en dermatologie hospitalière depuis les années 2000. Les masques maison sont moins puissants mais reposent sur le même principe. Des études cliniques montrent une réduction des rides fines avec la LED rouge, après 8 à 12 semaines d'usage régulier.",
+        "Un peu, et seulement avec de la régularité. Un essai sur 136 volontaires a vu le teint et le grain de peau s'améliorer après 30 séances de lumière rouge, avec un appareil de cabine. Les masques maison sont souvent moins puissants, et contre les boutons les preuves restent faibles.",
     },
     {
       question: "Combien de séances de masque LED par semaine ?",
       reponse:
-        "Compte 3 à 5 séances de 10 minutes par semaine, pendant 2 à 3 mois au minimum. C'est la régularité qui fait le résultat : un masque utilisé de temps en temps ne donne rien. Les effets de la LED rouge sur les rides fines se voient après 8 à 12 semaines.",
+        "L'essai le plus cité faisait deux séances par semaine, pendant 15 semaines. Les fabricants conseillent souvent des séances courtes plus fréquentes : suis la notice de ton appareil. Ce qui compte, c'est de tenir plusieurs mois. Un masque utilisé de temps en temps ne donne rien de visible.",
     },
     {
       question: "Quelle couleur de LED pour quel problème de peau ?",
       reponse:
-        "Le rouge (630 à 660 nm) vise l'anti-âge, le collagène et la fermeté. Le bleu (415 à 465 nm) vise l'acné et la bactérie *P. acnes*. L'infrarouge (830 à 940 nm) vise la cicatrisation. Le vert (520 à 560 nm) vise les taches pigmentaires, avec des preuves faibles.",
+        "Le rouge, seul ou avec l'infrarouge, a les essais les plus solides, sur le teint, le grain de peau et les ridules. Le bleu est vendu contre les boutons, mais une revue Cochrane de 2016 juge les preuves faibles. Le vert et le jaune n'ont presque pas d'études sérieuses.",
     },
     {
-      question: "Comment choisir un masque LED ?",
+      question: "Le masque LED est-il dangereux pour les yeux ?",
       reponse:
-        "Vérifie le marquage CE médical, pas seulement CE jouet. La longueur d'onde doit être indiquée (633 ou 660 nm pour le rouge, 415 nm pour le bleu). Vise au moins 150 LED pour un visage complet, et une irradiance annoncée d'au moins 20 mW/cm², sinon l'effet est probablement négligeable.",
+        "Il peut l'être pour certaines personnes. En 2019, Neutrogena a retiré un masque LED de la vente à cause d'un risque pour la rétine chez des personnes ayant certaines maladies des yeux. Garde les yeux fermés, porte les lunettes fournies, et demande conseil à un ophtalmologiste si ta vue est fragile.",
     },
   ],
 };

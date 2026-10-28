@@ -1,0 +1,7503 @@
+{
+  "genere_le": "2026-10-28 05:01",
+  "site": "cosme-check.com",
+  "periode": {
+    "debut": "2026-09-30",
+    "fin": "2026-10-27",
+    "jours": 28,
+    "fuseau": "Europe/Paris"
+  },
+  "posthog": {
+    "etat": "mesure",
+    "message": null,
+    "mesure_depuis": "2026-09-30",
+    "note": "Hotes cosme-check.com, www.cosme-check.com seulement. vues = 28 jours, vues_7j = depuis 2026-10-21, vues_1j = 2026-10-27. visiteurs_jour = uniques par jour additionnes. defilement en % de la page, duree en secondes, medianes. clics_magasin = cta_clic de destination magasin (App Store ou Play Store) ; destination modale = fenetre du QR code, comptee dans clics_cta seulement. clics_par_emplacement = source <slug>-<emplacement> sans le slug. lecture.sections = total de sections annonce, lecture.rangs[].visites = visites ayant vu la section de cet index (a partir de 1).",
+    "hotes_vus": {
+      "(sans hote)": 3229,
+      "www.cosme-check.com": 688,
+      "cosmet-wiki.vercel.app": 2
+    },
+    "evenements_site": {
+      "$pageview": 353,
+      "$autocapture": 188,
+      "$pageleave": 73,
+      "section_atteinte": 69,
+      "$set": 3,
+      "$identify": 1,
+      "$rageclick": 1
+    },
+    "totaux": {
+      "vues": 353,
+      "vues_7j": 151,
+      "vues_1j": 16,
+      "vues_blog": 62,
+      "visiteurs_jour": 301,
+      "clics_cta": 0,
+      "clics_magasin": 0,
+      "taux_cta": 0,
+      "pages_vues": 54,
+      "clics_articles_par_emplacement": {},
+      "clics_magasin_articles_par_emplacement": {}
+    },
+    "sources_site": {
+      "direct": 269,
+      "moteur": 55,
+      "interne": 16,
+      "reseau": 9,
+      "autre": 3,
+      "ia": 1
+    },
+    "referents_site": {
+      "$direct": 269,
+      "www.google.com": 26,
+      "www.cosme-check.com": 16,
+      "www.bing.com": 10,
+      "www.ecosia.org": 7,
+      "www.google.fr": 5,
+      "www.facebook.com": 4,
+      "duckduckgo.com": 3,
+      "ohhi.canva.link": 2,
+      "www.youtube.com": 2,
+      "m.facebook.com": 2,
+      "fr.search.yahoo.com": 2,
+      "mokka.corp.google.com": 1,
+      "com.linkedin.android": 1,
+      "www.tiktok.com": 1,
+      "chatgpt.com": 1,
+      "chfr.search.yahoo.com": 1
+    },
+    "utm_source_site": {
+      "chatgpt.com": 9
+    },
+    "ia": {
+      "total": 1,
+      "par_moteur": {
+        "chatgpt.com": 1
+      },
+      "pages": []
+    },
+    "pages": [
+      {
+        "chemin": "/",
+        "langue": "fr",
+        "article": null,
+        "vues": 106,
+        "vues_7j": 56,
+        "vues_1j": 3,
+        "visiteurs_jour": 90,
+        "defilement_median_pct": 0,
+        "duree_mediane_s": 7,
+        "sorties_mesurees": 58,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 65,
+          "www.google.com": 16,
+          "www.cosme-check.com": 3,
+          "www.facebook.com": 3,
+          "www.bing.com": 3,
+          "ohhi.canva.link": 2,
+          "duckduckgo.com": 2,
+          "www.google.fr": 2,
+          "www.youtube.com": 2,
+          "m.facebook.com": 2
+        },
+        "sources": {
+          "direct": 65,
+          "moteur": 26,
+          "reseau": 8,
+          "interne": 3,
+          "autre": 3,
+          "ia": 1
+        },
+        "utm_source": {
+          "chatgpt.com": 8
+        },
+        "lecture": null
+      },
+      {
+        "chemin": "/privacy",
+        "langue": "fr",
+        "article": null,
+        "vues": 69,
+        "vues_7j": 14,
+        "vues_1j": 3,
+        "visiteurs_jour": 68,
+        "defilement_median_pct": null,
+        "duree_mediane_s": null,
+        "sorties_mesurees": 0,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 69
+        },
+        "sources": {
+          "direct": 69
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/suppression-compte",
+        "langue": "fr",
+        "article": null,
+        "vues": 38,
+        "vues_7j": 7,
+        "vues_1j": 2,
+        "visiteurs_jour": 35,
+        "defilement_median_pct": null,
+        "duree_mediane_s": null,
+        "sorties_mesurees": 0,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 38
+        },
+        "sources": {
+          "direct": 38
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/blog",
+        "langue": "fr",
+        "article": null,
+        "vues": 22,
+        "vues_7j": 16,
+        "vues_1j": 0,
+        "visiteurs_jour": 11,
+        "defilement_median_pct": 43,
+        "duree_mediane_s": 4,
+        "sorties_mesurees": 20,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 18,
+          "www.cosme-check.com": 2,
+          "www.google.com": 1,
+          "www.bing.com": 1
+        },
+        "sources": {
+          "direct": 18,
+          "interne": 2,
+          "moteur": 2
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/glyceryl-caprylate",
+        "langue": "fr",
+        "article": null,
+        "vues": 9,
+        "vues_7j": 5,
+        "vues_1j": 0,
+        "visiteurs_jour": 6,
+        "defilement_median_pct": null,
+        "duree_mediane_s": null,
+        "sorties_mesurees": 0,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 9
+        },
+        "sources": {
+          "direct": 9
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/faq",
+        "langue": "fr",
+        "article": null,
+        "vues": 6,
+        "vues_7j": 2,
+        "vues_1j": 0,
+        "visiteurs_jour": 5,
+        "defilement_median_pct": 51,
+        "duree_mediane_s": 12,
+        "sorties_mesurees": 4,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 4,
+          "www.cosme-check.com": 2
+        },
+        "sources": {
+          "direct": 4,
+          "interne": 2
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/en-savoir-plus",
+        "langue": "fr",
+        "article": null,
+        "vues": 6,
+        "vues_7j": 6,
+        "vues_1j": 0,
+        "visiteurs_jour": 4,
+        "defilement_median_pct": 92,
+        "duree_mediane_s": 6,
+        "sorties_mesurees": 6,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "www.cosme-check.com": 2,
+          "www.google.com": 2,
+          "www.bing.com": 1,
+          "$direct": 1
+        },
+        "sources": {
+          "moteur": 3,
+          "interne": 2,
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/blog/niacinamide",
+        "langue": "fr",
+        "article": "niacinamide",
+        "vues": 6,
+        "vues_7j": 3,
+        "vues_1j": 0,
+        "visiteurs_jour": 3,
+        "defilement_median_pct": 0,
+        "duree_mediane_s": 9,
+        "sorties_mesurees": 4,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 6
+        },
+        "sources": {
+          "direct": 6
+        },
+        "utm_source": {},
+        "lecture": {
+          "slug": "niacinamide",
+          "sections": 7,
+          "sections_vues": 7,
+          "rangs": [
+            {
+              "index": 1,
+              "section": "niacinamide-c-est-quoi-exactement",
+              "visites": 1,
+              "part_des_vues": 0.167,
+              "part_du_premier": 1
+            },
+            {
+              "index": 2,
+              "section": "a-quoi-sert-la-niacinamide-preuves-a-l-appui",
+              "visites": 1,
+              "part_des_vues": 0.167,
+              "part_du_premier": 1
+            },
+            {
+              "index": 3,
+              "section": "5-10-20-faut-il-viser-le-plus-fort-dosage",
+              "visites": 1,
+              "part_des_vues": 0.167,
+              "part_du_premier": 1
+            },
+            {
+              "index": 4,
+              "section": "niacinamide-et-retinol-peut-on-les-melanger-et-la-vitamine-c",
+              "visites": 1,
+              "part_des_vues": 0.167,
+              "part_du_premier": 1
+            },
+            {
+              "index": 5,
+              "section": "quand-et-comment-l-utiliser-dans-ta-routine",
+              "visites": 1,
+              "part_des_vues": 0.167,
+              "part_du_premier": 1
+            },
+            {
+              "index": 6,
+              "section": "liste-inci-comment-reperer-la-niacinamide",
+              "visites": 1,
+              "part_des_vues": 0.167,
+              "part_du_premier": 1
+            },
+            {
+              "index": 7,
+              "section": "questions-frequentes",
+              "visites": 1,
+              "part_des_vues": 0.167,
+              "part_du_premier": 1
+            }
+          ]
+        }
+      },
+      {
+        "chemin": "/blog/creme-nivea-composition",
+        "langue": "fr",
+        "article": "creme-nivea-composition",
+        "vues": 6,
+        "vues_7j": 3,
+        "vues_1j": 0,
+        "visiteurs_jour": 6,
+        "defilement_median_pct": 0,
+        "duree_mediane_s": 8,
+        "sorties_mesurees": 3,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 3,
+          "chfr.search.yahoo.com": 1,
+          "www.google.com": 1,
+          "www.cosme-check.com": 1
+        },
+        "sources": {
+          "direct": 3,
+          "moteur": 2,
+          "interne": 1
+        },
+        "utm_source": {},
+        "lecture": {
+          "slug": "creme-nivea-composition",
+          "sections": 7,
+          "sections_vues": 6,
+          "rangs": [
+            {
+              "index": 1,
+              "section": "qu-est-ce-qu-il-y-a-dans-la-creme-nivea",
+              "visites": 2,
+              "part_des_vues": 0.333,
+              "part_du_premier": 1
+            },
+            {
+              "index": 2,
+              "section": "l-huile-minerale-de-la-creme-nivea-est-elle-dangereuse",
+              "visites": 2,
+              "part_des_vues": 0.333,
+              "part_du_premier": 1
+            },
+            {
+              "index": 3,
+              "section": "quels-allergenes-cache-le-parfum-de-la-creme-nivea",
+              "visites": 1,
+              "part_des_vues": 0.167,
+              "part_du_premier": 0.5
+            },
+            {
+              "index": 4,
+              "section": "la-creme-nivea-est-elle-bonne-pour-le-visage",
+              "visites": 1,
+              "part_des_vues": 0.167,
+              "part_du_premier": 0.5
+            },
+            {
+              "index": 5,
+              "section": "protege-t-elle-du-soleil-lisse-t-elle-les-rides",
+              "visites": 1,
+              "part_des_vues": 0.167,
+              "part_du_premier": 0.5
+            },
+            {
+              "index": 6,
+              "section": "une-creme-de-luxe-a-t-elle-vraiment-une-autre-base",
+              "visites": 1,
+              "part_des_vues": 0.167,
+              "part_du_premier": 0.5
+            }
+          ]
+        }
+      },
+      {
+        "chemin": "/fonctionnalites",
+        "langue": "fr",
+        "article": null,
+        "vues": 5,
+        "vues_7j": 4,
+        "vues_1j": 0,
+        "visiteurs_jour": 4,
+        "defilement_median_pct": 53,
+        "duree_mediane_s": 9,
+        "sorties_mesurees": 4,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 3,
+          "www.cosme-check.com": 1,
+          "www.bing.com": 1
+        },
+        "sources": {
+          "direct": 3,
+          "interne": 1,
+          "moteur": 1
+        },
+        "utm_source": {
+          "chatgpt.com": 1
+        },
+        "lecture": null
+      },
+      {
+        "chemin": "/ingredients",
+        "langue": "fr",
+        "article": null,
+        "vues": 5,
+        "vues_7j": 1,
+        "vues_1j": 0,
+        "visiteurs_jour": 5,
+        "defilement_median_pct": 0,
+        "duree_mediane_s": 14,
+        "sorties_mesurees": 5,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 4,
+          "www.google.com": 1
+        },
+        "sources": {
+          "direct": 4,
+          "moteur": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/blog/masque-led-visage",
+        "langue": "fr",
+        "article": "masque-led-visage",
+        "vues": 5,
+        "vues_7j": 5,
+        "vues_1j": 4,
+        "visiteurs_jour": 2,
+        "defilement_median_pct": null,
+        "duree_mediane_s": null,
+        "sorties_mesurees": 0,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 3,
+          "www.ecosia.org": 2
+        },
+        "sources": {
+          "direct": 3,
+          "moteur": 2
+        },
+        "utm_source": {},
+        "lecture": {
+          "slug": "masque-led-visage",
+          "sections": 7,
+          "sections_vues": 7,
+          "rangs": [
+            {
+              "index": 1,
+              "section": "1-le-principe-la-photobiomodulation",
+              "visites": 1,
+              "part_des_vues": 0.2,
+              "part_du_premier": 1
+            },
+            {
+              "index": 2,
+              "section": "2-que-fait-chaque-couleur",
+              "visites": 1,
+              "part_des_vues": 0.2,
+              "part_du_premier": 1
+            },
+            {
+              "index": 3,
+              "section": "3-benefices-documentes",
+              "visites": 1,
+              "part_des_vues": 0.2,
+              "part_du_premier": 1
+            },
+            {
+              "index": 4,
+              "section": "4-limites-et-precautions",
+              "visites": 1,
+              "part_des_vues": 0.2,
+              "part_du_premier": 1
+            },
+            {
+              "index": 5,
+              "section": "5-comment-choisir-son-masque",
+              "visites": 1,
+              "part_des_vues": 0.2,
+              "part_du_premier": 1
+            },
+            {
+              "index": 6,
+              "section": "en-resume",
+              "visites": 1,
+              "part_des_vues": 0.2,
+              "part_du_premier": 1
+            },
+            {
+              "index": 7,
+              "section": "questions-frequentes",
+              "visites": 1,
+              "part_des_vues": 0.2,
+              "part_du_premier": 1
+            }
+          ]
+        }
+      },
+      {
+        "chemin": "/blog/analyse-composition-cosmetique",
+        "langue": "fr",
+        "article": "analyse-composition-cosmetique",
+        "vues": 5,
+        "vues_7j": 5,
+        "vues_1j": 0,
+        "visiteurs_jour": 3,
+        "defilement_median_pct": 98,
+        "duree_mediane_s": 21,
+        "sorties_mesurees": 5,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 3,
+          "www.google.fr": 2
+        },
+        "sources": {
+          "direct": 3,
+          "moteur": 2
+        },
+        "utm_source": {},
+        "lecture": {
+          "slug": "analyse-composition-cosmetique",
+          "sections": 8,
+          "sections_vues": 8,
+          "rangs": [
+            {
+              "index": 1,
+              "section": "etape-1-ou-trouver-la-vraie-composition",
+              "visites": 3,
+              "part_des_vues": 0.6,
+              "part_du_premier": 1
+            },
+            {
+              "index": 2,
+              "section": "etape-2-pourquoi-les-cinq-premiers-ingredients-comptent-le-plus",
+              "visites": 3,
+              "part_des_vues": 0.6,
+              "part_du_premier": 1
+            },
+            {
+              "index": 3,
+              "section": "etape-3-comment-trouver-la-ligne-du-1",
+              "visites": 3,
+              "part_des_vues": 0.6,
+              "part_du_premier": 1
+            },
+            {
+              "index": 4,
+              "section": "etape-4-parfum-et-allergenes-que-chercher",
+              "visites": 3,
+              "part_des_vues": 0.6,
+              "part_du_premier": 1
+            },
+            {
+              "index": 5,
+              "section": "etape-5-la-promesse-colle-t-elle-a-la-formule",
+              "visites": 3,
+              "part_des_vues": 0.6,
+              "part_du_premier": 1
+            },
+            {
+              "index": 6,
+              "section": "et-une-application-pour-analyser-la-composition",
+              "visites": 3,
+              "part_des_vues": 0.6,
+              "part_du_premier": 1
+            },
+            {
+              "index": 7,
+              "section": "le-geste-bonus-le-petit-pot-ouvert",
+              "visites": 3,
+              "part_des_vues": 0.6,
+              "part_du_premier": 1
+            },
+            {
+              "index": 8,
+              "section": "questions-frequentes",
+              "visites": 3,
+              "part_des_vues": 0.6,
+              "part_du_premier": 1
+            }
+          ]
+        }
+      },
+      {
+        "chemin": "/contact",
+        "langue": "fr",
+        "article": null,
+        "vues": 4,
+        "vues_7j": 2,
+        "vues_1j": 0,
+        "visiteurs_jour": 3,
+        "defilement_median_pct": 51,
+        "duree_mediane_s": 9,
+        "sorties_mesurees": 3,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 2,
+          "www.cosme-check.com": 1,
+          "www.bing.com": 1
+        },
+        "sources": {
+          "direct": 2,
+          "interne": 1,
+          "moteur": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/equipe",
+        "langue": "fr",
+        "article": null,
+        "vues": 4,
+        "vues_7j": 4,
+        "vues_1j": 0,
+        "visiteurs_jour": 3,
+        "defilement_median_pct": 36,
+        "duree_mediane_s": 141,
+        "sorties_mesurees": 3,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "www.cosme-check.com": 4
+        },
+        "sources": {
+          "interne": 4
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/blog/deodorant-sels-aluminium-verite",
+        "langue": "fr",
+        "article": "deodorant-sels-aluminium-verite",
+        "vues": 4,
+        "vues_7j": 2,
+        "vues_1j": 0,
+        "visiteurs_jour": 4,
+        "defilement_median_pct": 91,
+        "duree_mediane_s": 40,
+        "sorties_mesurees": 2,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "www.bing.com": 2,
+          "duckduckgo.com": 1,
+          "$direct": 1
+        },
+        "sources": {
+          "moteur": 3,
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": {
+          "slug": "deodorant-sels-aluminium-verite",
+          "sections": 6,
+          "sections_vues": 5,
+          "rangs": [
+            {
+              "index": 1,
+              "section": "1-deodorant-anti-transpirant",
+              "visites": 1,
+              "part_des_vues": 0.25,
+              "part_du_premier": 1
+            },
+            {
+              "index": 2,
+              "section": "2-sels-d-aluminium-ce-que-dit-et-ne-dit-pas-la-science",
+              "visites": 1,
+              "part_des_vues": 0.25,
+              "part_du_premier": 1
+            },
+            {
+              "index": 3,
+              "section": "3-les-alternatives-sans-aluminium-et-leurs-limites",
+              "visites": 1,
+              "part_des_vues": 0.25,
+              "part_du_premier": 1
+            },
+            {
+              "index": 4,
+              "section": "4-lire-l-inci-de-ton-deo-en-10-secondes",
+              "visites": 1,
+              "part_des_vues": 0.25,
+              "part_du_premier": 1
+            },
+            {
+              "index": 5,
+              "section": "en-resume",
+              "visites": 1,
+              "part_des_vues": 0.25,
+              "part_du_premier": 1
+            }
+          ]
+        }
+      },
+      {
+        "chemin": "/blog/comedogene",
+        "langue": "fr",
+        "article": "comedogene",
+        "vues": 3,
+        "vues_7j": 3,
+        "vues_1j": 2,
+        "visiteurs_jour": 3,
+        "defilement_median_pct": 11,
+        "duree_mediane_s": 2,
+        "sorties_mesurees": 3,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "www.bing.com": 1,
+          "www.ecosia.org": 1,
+          "$direct": 1
+        },
+        "sources": {
+          "moteur": 2,
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": {
+          "slug": "comedogene",
+          "sections": 7,
+          "sections_vues": 1,
+          "rangs": [
+            {
+              "index": 1,
+              "section": "que-veut-dire-comedogene",
+              "visites": 2,
+              "part_des_vues": 0.667,
+              "part_du_premier": 1
+            }
+          ]
+        }
+      },
+      {
+        "chemin": "/search",
+        "langue": "fr",
+        "article": null,
+        "vues": 3,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 2,
+        "defilement_median_pct": 89,
+        "duree_mediane_s": 9,
+        "sorties_mesurees": 3,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 3
+        },
+        "sources": {
+          "direct": 3
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/blog/calendrier-avent-beaute",
+        "langue": "fr",
+        "article": "calendrier-avent-beaute",
+        "vues": 3,
+        "vues_7j": 3,
+        "vues_1j": 0,
+        "visiteurs_jour": 2,
+        "defilement_median_pct": 43,
+        "duree_mediane_s": 2,
+        "sorties_mesurees": 3,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 3
+        },
+        "sources": {
+          "direct": 3
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/beta",
+        "langue": "fr",
+        "article": null,
+        "vues": 3,
+        "vues_7j": 1,
+        "vues_1j": 0,
+        "visiteurs_jour": 3,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 29,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 2,
+          "www.facebook.com": 1
+        },
+        "sources": {
+          "direct": 2,
+          "reseau": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/cgu",
+        "langue": "fr",
+        "article": null,
+        "vues": 2,
+        "vues_7j": 1,
+        "vues_1j": 0,
+        "visiteurs_jour": 2,
+        "defilement_median_pct": null,
+        "duree_mediane_s": null,
+        "sorties_mesurees": 0,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 2
+        },
+        "sources": {
+          "direct": 2
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/ethylhexylglycerin",
+        "langue": "fr",
+        "article": null,
+        "vues": 2,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 2,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 53,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 2
+        },
+        "sources": {
+          "direct": 2
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/blog/routine-peau-joueurs-foot",
+        "langue": "fr",
+        "article": "routine-peau-joueurs-foot",
+        "vues": 2,
+        "vues_7j": 1,
+        "vues_1j": 1,
+        "visiteurs_jour": 2,
+        "defilement_median_pct": 62,
+        "duree_mediane_s": 221,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "www.google.com": 1,
+          "$direct": 1
+        },
+        "sources": {
+          "moteur": 1,
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": {
+          "slug": "routine-peau-joueurs-foot",
+          "sections": 6,
+          "sections_vues": 6,
+          "rangs": [
+            {
+              "index": 1,
+              "section": "1-pourquoi-les-joueurs-soignent-vraiment-leur-peau",
+              "visites": 1,
+              "part_des_vues": 0.5,
+              "part_du_premier": 1
+            },
+            {
+              "index": 2,
+              "section": "2-ce-qu-ils-utilisent-vraiment-sans-le-marketing",
+              "visites": 1,
+              "part_des_vues": 0.5,
+              "part_du_premier": 1
+            },
+            {
+              "index": 3,
+              "section": "3-la-routine-niveau-pro-en-3-minutes-par-jour",
+              "visites": 1,
+              "part_des_vues": 0.5,
+              "part_du_premier": 1
+            },
+            {
+              "index": 4,
+              "section": "4-les-ingredients-qui-comptent-vraiment",
+              "visites": 1,
+              "part_des_vues": 0.5,
+              "part_du_premier": 1
+            },
+            {
+              "index": 5,
+              "section": "en-resume",
+              "visites": 1,
+              "part_des_vues": 0.5,
+              "part_du_premier": 1
+            },
+            {
+              "index": 6,
+              "section": "questions-frequentes",
+              "visites": 1,
+              "part_des_vues": 0.5,
+              "part_du_premier": 1
+            }
+          ]
+        }
+      },
+      {
+        "chemin": "/i/phenylpropanol",
+        "langue": "fr",
+        "article": null,
+        "vues": 2,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 94,
+        "duree_mediane_s": 506,
+        "sorties_mesurees": 2,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 2
+        },
+        "sources": {
+          "direct": 2
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/prunus-amygdalus-dulcis-oil",
+        "langue": "fr",
+        "article": null,
+        "vues": 2,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 2,
+        "defilement_median_pct": null,
+        "duree_mediane_s": null,
+        "sorties_mesurees": 0,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "www.ecosia.org": 2
+        },
+        "sources": {
+          "moteur": 2
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/didecyldimonium-chloride",
+        "langue": "fr",
+        "article": null,
+        "vues": 2,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 105,
+        "sorties_mesurees": 2,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 2
+        },
+        "sources": {
+          "direct": 2
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/blog/meilleurs-produits-anti-imperfections",
+        "langue": "fr",
+        "article": "meilleurs-produits-anti-imperfections",
+        "vues": 2,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 2,
+        "defilement_median_pct": 50,
+        "duree_mediane_s": 319,
+        "sorties_mesurees": 2,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 2
+        },
+        "sources": {
+          "direct": 2
+        },
+        "utm_source": {},
+        "lecture": {
+          "slug": "meilleurs-produits-anti-imperfections",
+          "sections": 7,
+          "sections_vues": 7,
+          "rangs": [
+            {
+              "index": 1,
+              "section": "1-d-ou-viennent-les-imperfections",
+              "visites": 1,
+              "part_des_vues": 0.5,
+              "part_du_premier": 1
+            },
+            {
+              "index": 2,
+              "section": "2-les-actifs-qui-marchent-vraiment",
+              "visites": 1,
+              "part_des_vues": 0.5,
+              "part_du_premier": 1
+            },
+            {
+              "index": 3,
+              "section": "3-ce-qu-il-vaut-mieux-eviter",
+              "visites": 1,
+              "part_des_vues": 0.5,
+              "part_du_premier": 1
+            },
+            {
+              "index": 4,
+              "section": "4-selon-ta-situation",
+              "visites": 1,
+              "part_des_vues": 0.5,
+              "part_du_premier": 1
+            },
+            {
+              "index": 5,
+              "section": "5-le-meilleur-produit-c-est-celui-fait-pour-toi",
+              "visites": 1,
+              "part_des_vues": 0.5,
+              "part_du_premier": 1
+            },
+            {
+              "index": 6,
+              "section": "en-resume",
+              "visites": 1,
+              "part_des_vues": 0.5,
+              "part_du_premier": 1
+            },
+            {
+              "index": 7,
+              "section": "questions-frequentes",
+              "visites": 1,
+              "part_des_vues": 0.5,
+              "part_du_premier": 1
+            }
+          ]
+        }
+      },
+      {
+        "chemin": "/blog/cosmetique-fait-pour-toi",
+        "langue": "fr",
+        "article": "cosmetique-fait-pour-toi",
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": null,
+        "duree_mediane_s": null,
+        "sorties_mesurees": 0,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "fr.search.yahoo.com": 1
+        },
+        "sources": {
+          "moteur": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/tricalcium-phosphate",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": null,
+        "duree_mediane_s": null,
+        "sorties_mesurees": 0,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/sodium-benzoate",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 186,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/sorbic-acid",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 146,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/caprylyl-glycol",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 86,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/potassium-sorbate",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 314,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/methylpropanediol",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 63,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/propanediol",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 327,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/triethylamine",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 1,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 41,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "www.google.com": 1
+        },
+        "sources": {
+          "moteur": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/methyl-rosinate",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": null,
+        "duree_mediane_s": null,
+        "sorties_mesurees": 0,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "www.google.com": 1
+        },
+        "sources": {
+          "moteur": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/hydrogenated-palm-oil",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 1,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": null,
+        "duree_mediane_s": null,
+        "sorties_mesurees": 0,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/1-2-hexanediol",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 632,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/phenethyl-alcohol",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 177,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/blog/routine-skincare",
+        "langue": "fr",
+        "article": "routine-skincare",
+        "vues": 1,
+        "vues_7j": 1,
+        "vues_1j": 1,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 0,
+        "duree_mediane_s": 10,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/ethyl-acetate",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 1,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": null,
+        "duree_mediane_s": null,
+        "sorties_mesurees": 0,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/zinc-acetate",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 34,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/blog/lip-oils-huiles-levres",
+        "langue": "fr",
+        "article": "lip-oils-huiles-levres",
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 67,
+        "duree_mediane_s": 177,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "www.ecosia.org": 1
+        },
+        "sources": {
+          "moteur": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/a/b9fef83a-f394-4293-8786-1c45f2d03b2f",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": null,
+        "duree_mediane_s": null,
+        "sorties_mesurees": 0,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/blog/bakuchiol",
+        "langue": "fr",
+        "article": "bakuchiol",
+        "vues": 1,
+        "vues_7j": 1,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 33,
+        "duree_mediane_s": 15,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": {
+          "slug": "bakuchiol",
+          "sections": 7,
+          "sections_vues": 3,
+          "rangs": [
+            {
+              "index": 1,
+              "section": "c-est-quoi-le-bakuchiol",
+              "visites": 1,
+              "part_des_vues": 1,
+              "part_du_premier": 1
+            },
+            {
+              "index": 2,
+              "section": "le-bakuchiol-est-il-aussi-efficace-que-le-retinol",
+              "visites": 1,
+              "part_des_vues": 1,
+              "part_du_premier": 1
+            },
+            {
+              "index": 3,
+              "section": "pour-qui-le-bakuchiol-est-il-interessant",
+              "visites": 1,
+              "part_des_vues": 1,
+              "part_du_premier": 1
+            }
+          ]
+        }
+      },
+      {
+        "chemin": "/i/chlorphenesin",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 265,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/phenoxyethanol",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 89,
+        "duree_mediane_s": 414,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/calluna-vulgaris-extract",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 0,
+        "duree_mediane_s": 56,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "www.google.com": 1
+        },
+        "sources": {
+          "moteur": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/p-phenylenediamine",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 1,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": null,
+        "duree_mediane_s": null,
+        "sorties_mesurees": 0,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/ingredients/c",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 3,
+        "duree_mediane_s": 200,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/polyglyceryl-3-sorbityl-linseedate",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 0,
+        "duree_mediane_s": 4,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "www.google.com": 1
+        },
+        "sources": {
+          "moteur": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/i/benzoic-acid",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 0,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 39,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "$direct": 1
+        },
+        "sources": {
+          "direct": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      },
+      {
+        "chemin": "/mentions-legales",
+        "langue": "fr",
+        "article": null,
+        "vues": 1,
+        "vues_7j": 1,
+        "vues_1j": 0,
+        "visiteurs_jour": 1,
+        "defilement_median_pct": 100,
+        "duree_mediane_s": 31,
+        "sorties_mesurees": 1,
+        "clics_cta": 0,
+        "clics_cta_7j": 0,
+        "clics_magasin": 0,
+        "taux_cta": 0,
+        "taux_magasin": 0,
+        "clics_par_source": {},
+        "clics_par_emplacement": {},
+        "clics_par_destination": {},
+        "referents": {
+          "www.google.fr": 1
+        },
+        "sources": {
+          "moteur": 1
+        },
+        "utm_source": {},
+        "lecture": null
+      }
+    ],
+    "serie": [
+      {
+        "jour": "2026-09-30",
+        "vues": 6,
+        "vues_blog": 0,
+        "visiteurs": 6,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-01",
+        "vues": 8,
+        "vues_blog": 0,
+        "visiteurs": 8,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-02",
+        "vues": 2,
+        "vues_blog": 0,
+        "visiteurs": 2,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-03",
+        "vues": 4,
+        "vues_blog": 0,
+        "visiteurs": 4,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-04",
+        "vues": 2,
+        "vues_blog": 0,
+        "visiteurs": 2,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-05",
+        "vues": 6,
+        "vues_blog": 1,
+        "visiteurs": 6,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-06",
+        "vues": 28,
+        "vues_blog": 0,
+        "visiteurs": 8,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-07",
+        "vues": 9,
+        "vues_blog": 0,
+        "visiteurs": 7,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-08",
+        "vues": 4,
+        "vues_blog": 1,
+        "visiteurs": 4,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-09",
+        "vues": 13,
+        "vues_blog": 0,
+        "visiteurs": 13,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-10",
+        "vues": 7,
+        "vues_blog": 0,
+        "visiteurs": 7,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-11",
+        "vues": 6,
+        "vues_blog": 0,
+        "visiteurs": 6,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-12",
+        "vues": 14,
+        "vues_blog": 3,
+        "visiteurs": 14,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-13",
+        "vues": 8,
+        "vues_blog": 1,
+        "visiteurs": 8,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-14",
+        "vues": 6,
+        "vues_blog": 0,
+        "visiteurs": 6,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-15",
+        "vues": 3,
+        "vues_blog": 0,
+        "visiteurs": 3,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-16",
+        "vues": 18,
+        "vues_blog": 0,
+        "visiteurs": 16,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-17",
+        "vues": 6,
+        "vues_blog": 0,
+        "visiteurs": 6,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-18",
+        "vues": 4,
+        "vues_blog": 0,
+        "visiteurs": 4,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-19",
+        "vues": 33,
+        "vues_blog": 7,
+        "visiteurs": 29,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-20",
+        "vues": 15,
+        "vues_blog": 6,
+        "visiteurs": 11,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-21",
+        "vues": 14,
+        "vues_blog": 7,
+        "visiteurs": 7,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-22",
+        "vues": 18,
+        "vues_blog": 4,
+        "visiteurs": 12,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-23",
+        "vues": 41,
+        "vues_blog": 16,
+        "visiteurs": 12,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-24",
+        "vues": 38,
+        "vues_blog": 2,
+        "visiteurs": 16,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-25",
+        "vues": 8,
+        "vues_blog": 5,
+        "visiteurs": 4,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-26",
+        "vues": 16,
+        "vues_blog": 1,
+        "visiteurs": 14,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      },
+      {
+        "jour": "2026-10-27",
+        "vues": 16,
+        "vues_blog": 8,
+        "visiteurs": 11,
+        "clics_cta": 0,
+        "clics_magasin": 0
+      }
+    ],
+    "app": {
+      "note": "Evenements de l'app mobile dans le meme projet PostHog : installations_app = Application Installed, inscriptions_app = signup, onboardings_app = onboarding_completed, premium_app = premium_started, scans_app = scan_completed. iOS et Android confondus. 0 = aucun evenement ce jour-la.",
+      "totaux": {
+        "installations_app": 148,
+        "inscriptions_app": 24,
+        "onboardings_app": 88,
+        "premium_app": 0,
+        "scans_app": 337
+      },
+      "totaux_7j": {
+        "installations_app": 84,
+        "inscriptions_app": 12,
+        "onboardings_app": 43,
+        "premium_app": 0,
+        "scans_app": 169
+      },
+      "serie": [
+        {
+          "jour": "2026-09-30",
+          "installations_app": 1,
+          "inscriptions_app": 0,
+          "onboardings_app": 0,
+          "premium_app": 0,
+          "scans_app": 11
+        },
+        {
+          "jour": "2026-10-01",
+          "installations_app": 1,
+          "inscriptions_app": 0,
+          "onboardings_app": 0,
+          "premium_app": 0,
+          "scans_app": 2
+        },
+        {
+          "jour": "2026-10-02",
+          "installations_app": 2,
+          "inscriptions_app": 3,
+          "onboardings_app": 3,
+          "premium_app": 0,
+          "scans_app": 12
+        },
+        {
+          "jour": "2026-10-03",
+          "installations_app": 4,
+          "inscriptions_app": 4,
+          "onboardings_app": 6,
+          "premium_app": 0,
+          "scans_app": 4
+        },
+        {
+          "jour": "2026-10-04",
+          "installations_app": 1,
+          "inscriptions_app": 0,
+          "onboardings_app": 1,
+          "premium_app": 0,
+          "scans_app": 5
+        },
+        {
+          "jour": "2026-10-05",
+          "installations_app": 4,
+          "inscriptions_app": 1,
+          "onboardings_app": 3,
+          "premium_app": 0,
+          "scans_app": 14
+        },
+        {
+          "jour": "2026-10-06",
+          "installations_app": 2,
+          "inscriptions_app": 0,
+          "onboardings_app": 3,
+          "premium_app": 0,
+          "scans_app": 17
+        },
+        {
+          "jour": "2026-10-07",
+          "installations_app": 3,
+          "inscriptions_app": 0,
+          "onboardings_app": 0,
+          "premium_app": 0,
+          "scans_app": 27
+        },
+        {
+          "jour": "2026-10-08",
+          "installations_app": 4,
+          "inscriptions_app": 0,
+          "onboardings_app": 0,
+          "premium_app": 0,
+          "scans_app": 1
+        },
+        {
+          "jour": "2026-10-09",
+          "installations_app": 1,
+          "inscriptions_app": 0,
+          "onboardings_app": 3,
+          "premium_app": 0,
+          "scans_app": 7
+        },
+        {
+          "jour": "2026-10-10",
+          "installations_app": 0,
+          "inscriptions_app": 0,
+          "onboardings_app": 0,
+          "premium_app": 0,
+          "scans_app": 1
+        },
+        {
+          "jour": "2026-10-11",
+          "installations_app": 0,
+          "inscriptions_app": 1,
+          "onboardings_app": 1,
+          "premium_app": 0,
+          "scans_app": 10
+        },
+        {
+          "jour": "2026-10-12",
+          "installations_app": 3,
+          "inscriptions_app": 0,
+          "onboardings_app": 1,
+          "premium_app": 0,
+          "scans_app": 9
+        },
+        {
+          "jour": "2026-10-13",
+          "installations_app": 2,
+          "inscriptions_app": 0,
+          "onboardings_app": 3,
+          "premium_app": 0,
+          "scans_app": 8
+        },
+        {
+          "jour": "2026-10-14",
+          "installations_app": 1,
+          "inscriptions_app": 1,
+          "onboardings_app": 5,
+          "premium_app": 0,
+          "scans_app": 9
+        },
+        {
+          "jour": "2026-10-15",
+          "installations_app": 0,
+          "inscriptions_app": 0,
+          "onboardings_app": 0,
+          "premium_app": 0,
+          "scans_app": 4
+        },
+        {
+          "jour": "2026-10-16",
+          "installations_app": 0,
+          "inscriptions_app": 0,
+          "onboardings_app": 0,
+          "premium_app": 0,
+          "scans_app": 0
+        },
+        {
+          "jour": "2026-10-17",
+          "installations_app": 3,
+          "inscriptions_app": 0,
+          "onboardings_app": 0,
+          "premium_app": 0,
+          "scans_app": 0
+        },
+        {
+          "jour": "2026-10-18",
+          "installations_app": 2,
+          "inscriptions_app": 0,
+          "onboardings_app": 0,
+          "premium_app": 0,
+          "scans_app": 8
+        },
+        {
+          "jour": "2026-10-19",
+          "installations_app": 14,
+          "inscriptions_app": 0,
+          "onboardings_app": 8,
+          "premium_app": 0,
+          "scans_app": 8
+        },
+        {
+          "jour": "2026-10-20",
+          "installations_app": 16,
+          "inscriptions_app": 2,
+          "onboardings_app": 8,
+          "premium_app": 0,
+          "scans_app": 11
+        },
+        {
+          "jour": "2026-10-21",
+          "installations_app": 8,
+          "inscriptions_app": 1,
+          "onboardings_app": 3,
+          "premium_app": 0,
+          "scans_app": 17
+        },
+        {
+          "jour": "2026-10-22",
+          "installations_app": 3,
+          "inscriptions_app": 0,
+          "onboardings_app": 1,
+          "premium_app": 0,
+          "scans_app": 22
+        },
+        {
+          "jour": "2026-10-23",
+          "installations_app": 11,
+          "inscriptions_app": 2,
+          "onboardings_app": 5,
+          "premium_app": 0,
+          "scans_app": 9
+        },
+        {
+          "jour": "2026-10-24",
+          "installations_app": 31,
+          "inscriptions_app": 2,
+          "onboardings_app": 7,
+          "premium_app": 0,
+          "scans_app": 6
+        },
+        {
+          "jour": "2026-10-25",
+          "installations_app": 9,
+          "inscriptions_app": 1,
+          "onboardings_app": 5,
+          "premium_app": 0,
+          "scans_app": 22
+        },
+        {
+          "jour": "2026-10-26",
+          "installations_app": 15,
+          "inscriptions_app": 4,
+          "onboardings_app": 12,
+          "premium_app": 0,
+          "scans_app": 48
+        },
+        {
+          "jour": "2026-10-27",
+          "installations_app": 7,
+          "inscriptions_app": 2,
+          "onboardings_app": 10,
+          "premium_app": 0,
+          "scans_app": 45
+        }
+      ]
+    }
+  },
+  "app_store": {
+    "note": "Jours decoupes par Apple (heure du Pacifique), pas a minuit Paris. premiers = types 1/1F/1T/F1 (installations neuves iOS). achats = types IA*/FI*. abonnements : nouveaux = Subscription New avec prix, sans_prix = essai ou offre a 0, renouvellements = Renewal, remboursements = unites negatives. recettes = Developer Proceeds x unites, par devise, sans conversion. Filtre sur l'app Cosme Check seule (le compte vendeur en porte d'autres).",
+    "app": {
+      "id": "6803527040",
+      "skus": [
+        "cosmecheck-ios"
+      ]
+    },
+    "jours_lus": 27,
+    "jours_non_publies": [
+      "2026-10-27"
+    ],
+    "jours_en_echec": [],
+    "totaux": {
+      "premiers": 43,
+      "premiers_7j": 32,
+      "dernier_jour_lu": {
+        "jour": "2026-10-26",
+        "premiers": 12
+      },
+      "re_telechargements": 2,
+      "mises_a_jour": 53,
+      "achats": 0,
+      "abonnements": {
+        "nouveaux": 0,
+        "renouvellements": 0,
+        "sans_prix": 0,
+        "remboursements": 0
+      },
+      "abonnements_par_periode": {},
+      "recettes_par_devise": {}
+    },
+    "top_pays": {
+      "FR": 22,
+      "CM": 7,
+      "BE": 3,
+      "DE": 2,
+      "CI": 2,
+      "SN": 1,
+      "AE": 1,
+      "GB": 1,
+      "CY": 1,
+      "CD": 1
+    },
+    "achats_par_produit": {},
+    "serie": [
+      {
+        "jour": "2026-09-30",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 9,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-01",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 1,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-02",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-03",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-04",
+        "premiers": 1,
+        "re_telechargements": 1,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {
+          "FR": 1
+        }
+      },
+      {
+        "jour": "2026-10-05",
+        "premiers": 1,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {
+          "DE": 1
+        }
+      },
+      {
+        "jour": "2026-10-06",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-07",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-08",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-09",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-10",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-11",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-12",
+        "premiers": 1,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {
+          "FR": 1
+        }
+      },
+      {
+        "jour": "2026-10-13",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-14",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-15",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-16",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-17",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-18",
+        "premiers": 0,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {}
+      },
+      {
+        "jour": "2026-10-19",
+        "premiers": 2,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {
+          "FR": 1,
+          "SN": 1
+        }
+      },
+      {
+        "jour": "2026-10-20",
+        "premiers": 6,
+        "re_telechargements": 0,
+        "mises_a_jour": 3,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {
+          "AE": 1,
+          "DE": 1,
+          "GB": 1,
+          "CY": 1,
+          "FR": 1
+        }
+      },
+      {
+        "jour": "2026-10-21",
+        "premiers": 5,
+        "re_telechargements": 0,
+        "mises_a_jour": 12,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {
+          "CM": 4,
+          "CI": 1
+        }
+      },
+      {
+        "jour": "2026-10-22",
+        "premiers": 2,
+        "re_telechargements": 0,
+        "mises_a_jour": 0,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {
+          "FR": 1,
+          "CM": 1
+        }
+      },
+      {
+        "jour": "2026-10-23",
+        "premiers": 4,
+        "re_telechargements": 0,
+        "mises_a_jour": 1,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {
+          "FR": 2,
+          "CD": 1,
+          "BE": 1
+        }
+      },
+      {
+        "jour": "2026-10-24",
+        "premiers": 5,
+        "re_telechargements": 0,
+        "mises_a_jour": 3,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {
+          "FR": 1,
+          "CM": 1,
+          "MA": 1,
+          "BE": 1,
+          "CI": 1
+        }
+      },
+      {
+        "jour": "2026-10-25",
+        "premiers": 4,
+        "re_telechargements": 1,
+        "mises_a_jour": 23,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {
+          "FR": 4
+        }
+      },
+      {
+        "jour": "2026-10-26",
+        "premiers": 12,
+        "re_telechargements": 0,
+        "mises_a_jour": 1,
+        "achats": 0,
+        "abonnements_nouveaux": 0,
+        "recettes": {},
+        "pays": {
+          "FR": 10,
+          "CG": 1,
+          "BE": 1
+        }
+      },
+      {
+        "jour": "2026-10-27",
+        "statut": "non_publie",
+        "premiers": null,
+        "re_telechargements": null,
+        "mises_a_jour": null,
+        "achats": null,
+        "abonnements_nouveaux": null,
+        "recettes": null,
+        "pays": null
+      }
+    ]
+  },
+  "supabase": {
+    "note": "comptes = lignes de user_profiles creees sur la periode (inscriptions, iOS et Android, comptes de l'equipe compris : aucune table ne les distingue). premium_actifs = tier premium maintenant. comptes_premium = parmi les comptes nes ce jour-la, ceux premium aujourd'hui. scans = scan_events du jour. analyses = produits analyses et gardes. produits_catalogue = produits actifs de la base.",
+    "mesures_absentes": [],
+    "totaux": {
+      "comptes": 185,
+      "premium_actifs": 3,
+      "nouveaux_7j": 33,
+      "nouveaux_30j": 49,
+      "scans_7j": 188,
+      "produits_catalogue": 478274,
+      "comptes_periode": 49,
+      "comptes_premium_periode": 0,
+      "scans_periode": 278,
+      "analyses_periode": 186
+    },
+    "serie": [
+      {
+        "jour": "2026-09-30",
+        "comptes": 0,
+        "comptes_premium": 0,
+        "scans": 11,
+        "analyses": 7
+      },
+      {
+        "jour": "2026-10-01",
+        "comptes": 0,
+        "comptes_premium": 0,
+        "scans": 0,
+        "analyses": 0
+      },
+      {
+        "jour": "2026-10-02",
+        "comptes": 0,
+        "comptes_premium": 0,
+        "scans": 1,
+        "analyses": 5
+      },
+      {
+        "jour": "2026-10-03",
+        "comptes": 2,
+        "comptes_premium": 0,
+        "scans": 1,
+        "analyses": 4
+      },
+      {
+        "jour": "2026-10-04",
+        "comptes": 1,
+        "comptes_premium": 0,
+        "scans": 0,
+        "analyses": 3
+      },
+      {
+        "jour": "2026-10-05",
+        "comptes": 0,
+        "comptes_premium": 0,
+        "scans": 3,
+        "analyses": 2
+      },
+      {
+        "jour": "2026-10-06",
+        "comptes": 0,
+        "comptes_premium": 0,
+        "scans": 0,
+        "analyses": 3
+      },
+      {
+        "jour": "2026-10-07",
+        "comptes": 0,
+        "comptes_premium": 0,
+        "scans": 1,
+        "analyses": 7
+      },
+      {
+        "jour": "2026-10-08",
+        "comptes": 0,
+        "comptes_premium": 0,
+        "scans": 2,
+        "analyses": 0
+      },
+      {
+        "jour": "2026-10-09",
+        "comptes": 0,
+        "comptes_premium": 0,
+        "scans": 0,
+        "analyses": 1
+      },
+      {
+        "jour": "2026-10-10",
+        "comptes": 0,
+        "comptes_premium": 0,
+        "scans": 0,
+        "analyses": 3
+      },
+      {
+        "jour": "2026-10-11",
+        "comptes": 0,
+        "comptes_premium": 0,
+        "scans": 0,
+        "analyses": 0
+      },
+      {
+        "jour": "2026-10-12",
+        "comptes": 1,
+        "comptes_premium": 0,
+        "scans": 2,
+        "analyses": 1
+      },
+      {
+        "jour": "2026-10-13",
+        "comptes": 1,
+        "comptes_premium": 0,
+        "scans": 0,
+        "analyses": 8
+      },
+      {
+        "jour": "2026-10-14",
+        "comptes": 2,
+        "comptes_premium": 0,
+        "scans": 0,
+        "analyses": 6
+      },
+      {
+        "jour": "2026-10-15",
+        "comptes": 0,
+        "comptes_premium": 0,
+        "scans": 15,
+        "analyses": 3
+      },
+      {
+        "jour": "2026-10-16",
+        "comptes": 0,
+        "comptes_premium": 0,
+        "scans": 0,
+        "analyses": 0
+      },
+      {
+        "jour": "2026-10-17",
+        "comptes": 0,
+        "comptes_premium": 0,
+        "scans": 0,
+        "analyses": 0
+      },
+      {
+        "jour": "2026-10-18",
+        "comptes": 1,
+        "comptes_premium": 0,
+        "scans": 49,
+        "analyses": 1
+      },
+      {
+        "jour": "2026-10-19",
+        "comptes": 4,
+        "comptes_premium": 0,
+        "scans": 2,
+        "analyses": 4
+      },
+      {
+        "jour": "2026-10-20",
+        "comptes": 4,
+        "comptes_premium": 0,
+        "scans": 3,
+        "analyses": 5
+      },
+      {
+        "jour": "2026-10-21",
+        "comptes": 3,
+        "comptes_premium": 0,
+        "scans": 1,
+        "analyses": 8
+      },
+      {
+        "jour": "2026-10-22",
+        "comptes": 2,
+        "comptes_premium": 0,
+        "scans": 18,
+        "analyses": 6
+      },
+      {
+        "jour": "2026-10-23",
+        "comptes": 3,
+        "comptes_premium": 0,
+        "scans": 0,
+        "analyses": 1
+      },
+      {
+        "jour": "2026-10-24",
+        "comptes": 6,
+        "comptes_premium": 0,
+        "scans": 0,
+        "analyses": 5
+      },
+      {
+        "jour": "2026-10-25",
+        "comptes": 2,
+        "comptes_premium": 0,
+        "scans": 0,
+        "analyses": 21
+      },
+      {
+        "jour": "2026-10-26",
+        "comptes": 11,
+        "comptes_premium": 0,
+        "scans": 110,
+        "analyses": 49
+      },
+      {
+        "jour": "2026-10-27",
+        "comptes": 6,
+        "comptes_premium": 0,
+        "scans": 59,
+        "analyses": 33
+      }
+    ]
+  },
+  "gsc": {
+    "propriete": "https://www.cosme-check.com/",
+    "note": "Jours de Google (heure du Pacifique), donnees fraiches incluses donc provisoires sur les 2 a 3 derniers jours. vues_sans_clic : impressions >= 10, ctr <= 0.02, position 5 a 50.",
+    "totaux": {
+      "clics": 27,
+      "impressions": 1146
+    },
+    "pages": [
+      {
+        "page": "/",
+        "clics": 19,
+        "impressions": 374,
+        "ctr": 0.0508,
+        "position": 22.9
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "clics": 0,
+        "impressions": 216,
+        "ctr": 0,
+        "position": 71.3
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "clics": 1,
+        "impressions": 89,
+        "ctr": 0.0112,
+        "position": 16.8
+      },
+      {
+        "page": "/blog/creme-nivea-composition",
+        "clics": 1,
+        "impressions": 89,
+        "ctr": 0.0112,
+        "position": 8
+      },
+      {
+        "page": "/blog/routine-peau-joueurs-foot",
+        "clics": 1,
+        "impressions": 55,
+        "ctr": 0.0182,
+        "position": 5.9
+      },
+      {
+        "page": "/blog/cosmetique-fait-pour-toi",
+        "clics": 0,
+        "impressions": 42,
+        "ctr": 0,
+        "position": 14.2
+      },
+      {
+        "page": "/fonctionnalites",
+        "clics": 0,
+        "impressions": 42,
+        "ctr": 0,
+        "position": 8.5
+      },
+      {
+        "page": "/blog/lip-oils-huiles-levres",
+        "clics": 0,
+        "impressions": 38,
+        "ctr": 0,
+        "position": 7.2
+      },
+      {
+        "page": "/blog/deodorant-sels-aluminium-verite",
+        "clics": 0,
+        "impressions": 32,
+        "ctr": 0,
+        "position": 56.6
+      },
+      {
+        "page": "/comment-ca-marche",
+        "clics": 0,
+        "impressions": 32,
+        "ctr": 0,
+        "position": 3
+      },
+      {
+        "page": "/blog/calendrier-avent-beaute",
+        "clics": 0,
+        "impressions": 22,
+        "ctr": 0,
+        "position": 11.2
+      },
+      {
+        "page": "/en-savoir-plus",
+        "clics": 0,
+        "impressions": 18,
+        "ctr": 0,
+        "position": 4.7
+      },
+      {
+        "page": "/faq",
+        "clics": 0,
+        "impressions": 18,
+        "ctr": 0,
+        "position": 2.3
+      },
+      {
+        "page": "/blog",
+        "clics": 0,
+        "impressions": 15,
+        "ctr": 0,
+        "position": 2.2
+      },
+      {
+        "page": "/i/glyceryl-acrylate-acrylic-acid-copolymer",
+        "clics": 0,
+        "impressions": 15,
+        "ctr": 0,
+        "position": 15
+      },
+      {
+        "page": "/blog/cremes-hydratantes-reparatrices",
+        "clics": 0,
+        "impressions": 13,
+        "ctr": 0,
+        "position": 5
+      },
+      {
+        "page": "/blog/meilleurs-produits-anti-imperfections",
+        "clics": 0,
+        "impressions": 13,
+        "ctr": 0,
+        "position": 23.5
+      },
+      {
+        "page": "/blog/niacinamide",
+        "clics": 0,
+        "impressions": 8,
+        "ctr": 0,
+        "position": 16.5
+      },
+      {
+        "page": "/i/isocamphenyl-cyclohexanol-mixed-isomers",
+        "clics": 0,
+        "impressions": 8,
+        "ctr": 0,
+        "position": 4.5
+      },
+      {
+        "page": "/i/diospyros-mespiliformis-leaf-extract",
+        "clics": 0,
+        "impressions": 6,
+        "ctr": 0,
+        "position": 11.5
+      },
+      {
+        "page": "/i/polyurethane-35",
+        "clics": 0,
+        "impressions": 6,
+        "ctr": 0,
+        "position": 7.8
+      },
+      {
+        "page": "/i/hydrogenated-olive-oil-cetyl-esters",
+        "clics": 0,
+        "impressions": 5,
+        "ctr": 0,
+        "position": 12.2
+      },
+      {
+        "page": "/i/sodium-sunflowerseedate",
+        "clics": 0,
+        "impressions": 5,
+        "ctr": 0,
+        "position": 7.8
+      },
+      {
+        "page": "/i/avena-sativa-leaf-stalk-extract",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 16
+      },
+      {
+        "page": "/i/benzyl-alcohol",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/pentanone",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "page": "/i/snail-extract",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 7.8
+      },
+      {
+        "page": "/privacy",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 5.5
+      },
+      {
+        "page": "/i/triethylamine",
+        "clics": 1,
+        "impressions": 3,
+        "ctr": 0.3333,
+        "position": 3
+      },
+      {
+        "page": "/blog/perturbateurs-endocriniens-cosmetiques-2026",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 7.3
+      },
+      {
+        "page": "/i/ascorbyl-stearate",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/i/benzophenone-3",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "page": "/i/bis-hema-polycaprolactone-diol-ipdi-copolymer",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 4
+      },
+      {
+        "page": "/i/butoxyethyl-acetate",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 4.3
+      },
+      {
+        "page": "/i/diacetin",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 5
+      },
+      {
+        "page": "/i/fucus-vesiculosus-thalle-extract",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 5.3
+      },
+      {
+        "page": "/i/isomalt",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 9.7
+      },
+      {
+        "page": "/i/polyglyceryl-3-stearate-sebacate-crosspolymer",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 7.3
+      },
+      {
+        "page": "/i/polyquaternium-71",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/sorbitol",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 8.3
+      },
+      {
+        "page": "/i/sucrose",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 9.7
+      },
+      {
+        "page": "/i/triethoxycaprylylsilane",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 7.7
+      },
+      {
+        "page": "/i/ethylhexyl-acetate",
+        "clics": 1,
+        "impressions": 2,
+        "ctr": 0.5,
+        "position": 11.5
+      },
+      {
+        "page": "/i/methyl-rosinate",
+        "clics": 1,
+        "impressions": 2,
+        "ctr": 0.5,
+        "position": 5
+      },
+      {
+        "page": "/i/polyglyceryl-3-sorbityl-linseedate",
+        "clics": 1,
+        "impressions": 2,
+        "ctr": 0.5,
+        "position": 3
+      },
+      {
+        "page": "/blog/comedogene",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 9.5
+      },
+      {
+        "page": "/i/calcium-salicylate",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/i/chrysanthemum-indicum-flower-extract",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 9.5
+      },
+      {
+        "page": "/i/citrus-aurantium-dulcis-flower-extract",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 5.5
+      },
+      {
+        "page": "/i/dicetyl-phosphate",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "page": "/i/hydrolyzed-serum-protein",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/i/montmorillonite",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 14.5
+      },
+      {
+        "page": "/i/oleth-20",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 12
+      },
+      {
+        "page": "/i/polyglycerin-10",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/quaternium-45",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "page": "/i/rhyolite-powder",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "page": "/i/sunfloweroyl-methylglucamide",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "page": "/i/trametes-versicolor-extract",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/i/calluna-vulgaris-extract",
+        "clics": 1,
+        "impressions": 1,
+        "ctr": 1,
+        "position": 11
+      },
+      {
+        "page": "/blog/peau-seche-visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 1
+      },
+      {
+        "page": "/i/angelica-polymorpha-sinensis-root-extract",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 27
+      },
+      {
+        "page": "/i/apo-lactoferrin",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 4
+      },
+      {
+        "page": "/i/aquaphilus-dolomiae-ferment-filtrate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 13
+      },
+      {
+        "page": "/i/bacopa-monnieri-leaf-extract",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/i/basic-brown-16",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/i/betula-pendula-twig-oil",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 18
+      },
+      {
+        "page": "/i/bis-vinyl-dimethicone-dimethicone-copolymer",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "page": "/i/boron-nitride",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "page": "/i/brassica-alcohol",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 5
+      },
+      {
+        "page": "/i/brucine-sulfate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/i/c11-13-isoparaffin",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/c13-c15-alkane",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 40
+      },
+      {
+        "page": "/i/caragana-sinica-root-extract",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "page": "/i/carthamus-tinctorius-flower-extract",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/i/carvacrol",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "page": "/i/centella-asiatica-flower-extract",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 46
+      },
+      {
+        "page": "/i/cetearyl-alcohol",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/chamomilla-recutita-extract",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/ci-15510",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "page": "/i/ci-74100",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "page": "/i/cis-3-hexenyl-butyrate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/citral",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 4
+      },
+      {
+        "page": "/i/citronellol",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/citrus-aurantium-peel-extract",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "page": "/i/citrus-limon-leaf-peel-stem-oil-a2",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 26
+      },
+      {
+        "page": "/i/clay",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/i/cocamide-mipa",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "page": "/i/coconut-acid",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "page": "/i/cuscuta-japonica-seed-extract",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "page": "/i/dicapryl-dicaprylyl-dimonium-chloride",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "page": "/i/dimethyl-stearamine",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "page": "/i/disodium-oleamido-mipa-sulfosuccinate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/i/ethylparaben",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "page": "/i/faex",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/gardenia-jasminoides-meristem-cell-culture",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "page": "/i/geraniol",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 97
+      },
+      {
+        "page": "/i/glyceryl-cocoate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 28
+      },
+      {
+        "page": "/i/glycidoxypropyl-polysilsesquioxane",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 5
+      },
+      {
+        "page": "/i/guaiacol",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/hdi-trimethylol-hexyllactone-crosspolymer",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/i/hibiscus-sabdariffa-seed-oil",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "page": "/i/isobutyl-acetate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 5
+      },
+      {
+        "page": "/i/isoeugenyl-acetate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 5
+      },
+      {
+        "page": "/i/isopropyl-palmitate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/maslinic-acid",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 4
+      },
+      {
+        "page": "/i/methyl-diisopropyl-propionamide",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "page": "/i/n-adamantanoyl-dopamine-a2",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/i/nonadecane",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 5
+      },
+      {
+        "page": "/i/ozonized-olive-oil",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "page": "/i/pandanus-odoratissimus-seed-extract",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 16
+      },
+      {
+        "page": "/i/piroctone-olamine",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/plantago-major-leaf-extract",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "page": "/i/polyether-1",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "page": "/i/polyglyceryl-2-isostearate-dimer-dilinoleate-copolymer",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 18
+      },
+      {
+        "page": "/i/polysorbate-21",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 5
+      },
+      {
+        "page": "/i/potassium-castorate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 5
+      },
+      {
+        "page": "/i/propolis-extract",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/sodium-apricot-kernelate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 5
+      },
+      {
+        "page": "/i/sodium-cocoyl-hydrolyzed-silk",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 4
+      },
+      {
+        "page": "/i/sodium-ethylhexyl-sulfate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "page": "/i/sodium-myristate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/sodium-sunflowerseedamphoacetate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "page": "/i/solum-diatomeae",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "page": "/i/squalene",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/sweet-almond-oil-peg-8-esters",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/teprenone",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 1
+      },
+      {
+        "page": "/i/tetradecyloctadecanoic-acid",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "page": "/i/tributyl-citrate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 17
+      },
+      {
+        "page": "/i/tridecyl-stearate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 15
+      },
+      {
+        "page": "/i/trimethylsiloxysilylcarbamoyl-pullulan",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "page": "/i/tris-tetramethylhydroxypiperidinol-citrate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 15
+      },
+      {
+        "page": "/i/triticum-vulgare-bran-extract",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/i/zinc-hydroxyapatite",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 15
+      }
+    ],
+    "requetes": [
+      {
+        "requete": "analyse ingrédients cosmétiques",
+        "clics": 0,
+        "impressions": 55,
+        "ctr": 0,
+        "position": 48.2
+      },
+      {
+        "requete": "cosmetic check",
+        "clics": 1,
+        "impressions": 46,
+        "ctr": 0.0217,
+        "position": 8.6
+      },
+      {
+        "requete": "meilleur hydratant visage",
+        "clics": 0,
+        "impressions": 45,
+        "ctr": 0,
+        "position": 72
+      },
+      {
+        "requete": "check cosmetics",
+        "clics": 0,
+        "impressions": 32,
+        "ctr": 0,
+        "position": 7.5
+      },
+      {
+        "requete": "analyse cosmétique",
+        "clics": 0,
+        "impressions": 26,
+        "ctr": 0,
+        "position": 35.1
+      },
+      {
+        "requete": "analyse composition",
+        "clics": 0,
+        "impressions": 25,
+        "ctr": 0,
+        "position": 21.4
+      },
+      {
+        "requete": "check cosmétiques",
+        "clics": 1,
+        "impressions": 14,
+        "ctr": 0.0714,
+        "position": 7.2
+      },
+      {
+        "requete": "beauty decoder",
+        "clics": 0,
+        "impressions": 12,
+        "ctr": 0,
+        "position": 34.2
+      },
+      {
+        "requete": "analyse produits cosmétiques",
+        "clics": 0,
+        "impressions": 11,
+        "ctr": 0,
+        "position": 40.4
+      },
+      {
+        "requete": "meilleure crème hydratante visage",
+        "clics": 0,
+        "impressions": 11,
+        "ctr": 0,
+        "position": 85.9
+      },
+      {
+        "requete": "analyse composition cosmétique en ligne",
+        "clics": 0,
+        "impressions": 10,
+        "ctr": 0,
+        "position": 41.5
+      },
+      {
+        "requete": "meilleure crème hydratant visage",
+        "clics": 0,
+        "impressions": 10,
+        "ctr": 0,
+        "position": 72.1
+      },
+      {
+        "requete": "checkcosmetics",
+        "clics": 0,
+        "impressions": 8,
+        "ctr": 0,
+        "position": 8.3
+      },
+      {
+        "requete": "creme hydratante visage bonne composition",
+        "clics": 0,
+        "impressions": 8,
+        "ctr": 0,
+        "position": 85.5
+      },
+      {
+        "requete": "meilleur crème hydratant visage",
+        "clics": 0,
+        "impressions": 8,
+        "ctr": 0,
+        "position": 82.8
+      },
+      {
+        "requete": "meilleure crème nourrissante visage",
+        "clics": 0,
+        "impressions": 8,
+        "ctr": 0,
+        "position": 83.6
+      },
+      {
+        "requete": "creme hydratante bonne composition",
+        "clics": 0,
+        "impressions": 7,
+        "ctr": 0,
+        "position": 78.6
+      },
+      {
+        "requete": "déodorant aluminium",
+        "clics": 0,
+        "impressions": 7,
+        "ctr": 0,
+        "position": 59
+      },
+      {
+        "requete": "meilleure creme hydratante visage",
+        "clics": 0,
+        "impressions": 7,
+        "ctr": 0,
+        "position": 81
+      },
+      {
+        "requete": "meilleure crème hydratant visage que choisir",
+        "clics": 0,
+        "impressions": 7,
+        "ctr": 0,
+        "position": 95.7
+      },
+      {
+        "requete": "composition produit",
+        "clics": 0,
+        "impressions": 6,
+        "ctr": 0,
+        "position": 52
+      },
+      {
+        "requete": "meilleur creme hydratante visage",
+        "clics": 0,
+        "impressions": 6,
+        "ctr": 0,
+        "position": 76.7
+      },
+      {
+        "requete": "meilleure creme hydratante",
+        "clics": 0,
+        "impressions": 6,
+        "ctr": 0,
+        "position": 80.8
+      },
+      {
+        "requete": "meilleure creme pour le visage",
+        "clics": 0,
+        "impressions": 6,
+        "ctr": 0,
+        "position": 63.8
+      },
+      {
+        "requete": "check cosmetic",
+        "clics": 0,
+        "impressions": 5,
+        "ctr": 0,
+        "position": 9.4
+      },
+      {
+        "requete": "les meilleurs crèmes pour le visage",
+        "clics": 0,
+        "impressions": 5,
+        "ctr": 0,
+        "position": 63.2
+      },
+      {
+        "requete": "check cosme",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 14.3
+      },
+      {
+        "requete": "cosmeticcheck",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "requete": "deodorants aluminium",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 64.3
+      },
+      {
+        "requete": "meilleur creme hydratant pour visage",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 61.8
+      },
+      {
+        "requete": "meilleur crème pour le visage",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 65.8
+      },
+      {
+        "requete": "meilleures crème hydratante visage",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 86
+      },
+      {
+        "requete": "analyse composition cosmétique",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 20.3
+      },
+      {
+        "requete": "check produit cosmétique",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "requete": "composition cosmétique",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 46.3
+      },
+      {
+        "requete": "déodorant sel d aluminium",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 55
+      },
+      {
+        "requete": "glyceryl acrylate",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 5.3
+      },
+      {
+        "requete": "meilleur creme hydratant visage",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 64.3
+      },
+      {
+        "requete": "meilleure creme hydratant visage que choisir",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 84.3
+      },
+      {
+        "requete": "meilleure crème visage",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 68
+      },
+      {
+        "requete": "quelle crème visage choisir",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 81.7
+      },
+      {
+        "requete": "sel d aluminium danger",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 71.3
+      },
+      {
+        "requete": "analyse ingredient cosmetique",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 63.5
+      },
+      {
+        "requete": "analyse produit cosmétique",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 68
+      },
+      {
+        "requete": "check composition",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "requete": "composition analyse",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 15
+      },
+      {
+        "requete": "crème hydratante que choisir",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 68
+      },
+      {
+        "requete": "faire analyser la composition d'un produit",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 15.5
+      },
+      {
+        "requete": "ingredients nivea creme",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 7.5
+      },
+      {
+        "requete": "le meilleur hydratant visage",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 72.5
+      },
+      {
+        "requete": "makeup ingredients analysis",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 88
+      },
+      {
+        "requete": "meilleur creme pour visage",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 61
+      },
+      {
+        "requete": "meilleur creme visage",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 71
+      },
+      {
+        "requete": "meilleur crème hydratant visage peau sèche et sensible",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 71.5
+      },
+      {
+        "requete": "meilleur crème hydratante visage femme",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 80
+      },
+      {
+        "requete": "meilleur produit acide salicylique point noir",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 46
+      },
+      {
+        "requete": "meilleure creme hydratante pour le visage",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 55
+      },
+      {
+        "requete": "meilleure creme visage",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 66.5
+      },
+      {
+        "requete": "meilleurs crème visage",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 61
+      },
+      {
+        "requete": "nivea creme composition",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 8.5
+      },
+      {
+        "requete": "nivea ingredients",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 8.5
+      },
+      {
+        "requete": "polyurethane-35",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "requete": "quelle est la meilleure crème hydratante",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 73.5
+      },
+      {
+        "requete": "quels types de contenus trouve-t-on sur beauté test en dehors des tests produits ?",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 8.5
+      },
+      {
+        "requete": "sels d aluminium",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 76
+      },
+      {
+        "requete": "test creme hydratante",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 60
+      },
+      {
+        "requete": "verifier ingredients cosmetiques",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 29.5
+      },
+      {
+        "requete": "vérifier composition cosmétique",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 77.5
+      },
+      {
+        "requete": "acrylate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 54
+      },
+      {
+        "requete": "acrylate danger",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 50
+      },
+      {
+        "requete": "aluminium dans deodorant",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 56
+      },
+      {
+        "requete": "analyse composition en ligne",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 40
+      },
+      {
+        "requete": "analyse composition produit",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 46
+      },
+      {
+        "requete": "analyse des ingrédients",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 32
+      },
+      {
+        "requete": "analyse produit",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 34
+      },
+      {
+        "requete": "analyser la composition",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "requete": "analyser la composition d'un produit",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 17
+      },
+      {
+        "requete": "anti imperfection",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 67
+      },
+      {
+        "requete": "app check cosmetic",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 19
+      },
+      {
+        "requete": "checkcosme",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 1
+      },
+      {
+        "requete": "comedogene",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "requete": "comparatif creme hydratant visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 69
+      },
+      {
+        "requete": "comparatif crème hydratante visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 94
+      },
+      {
+        "requete": "comparez les marques suivantes en matière de services de diagnostic et d’accompagnement beauté : la roche-posay, estée lauder, clarins, lancôme, chanel, dior. donnez à chaque marque citée une note de 1 à 5 et expliquez chaque note en une ou deux phrases.",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 74
+      },
+      {
+        "requete": "composition creme nivea",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "requete": "composition de la creme nivea",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 24
+      },
+      {
+        "requete": "composition de la crème nivea",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "requete": "composition nivea",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "requete": "comédogène",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "requete": "cosmetics check",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "requete": "cosmé",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "requete": "creme nivea composition",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "requete": "creme nivea ingredients",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 1
+      },
+      {
+        "requete": "creme visage que choisir",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 81
+      },
+      {
+        "requete": "crème hydratante pour le visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 67
+      },
+      {
+        "requete": "crème nivea bleu composition",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 5
+      },
+      {
+        "requete": "deo aluminium",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 59
+      },
+      {
+        "requete": "examen formule cosmétique",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 89
+      },
+      {
+        "requete": "geraniol contre indications",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 97
+      },
+      {
+        "requete": "glyceryl acrylate acrylic acid copolymer",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "requete": "makeup check",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 27
+      },
+      {
+        "requete": "meilleur anti point noir",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 83
+      },
+      {
+        "requete": "meilleur creme hydratant visage femme",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 65
+      },
+      {
+        "requete": "meilleur creme hydratante",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 66
+      },
+      {
+        "requete": "meilleur creme visage femme",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 73
+      },
+      {
+        "requete": "meilleur creme.hydratante visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 88
+      },
+      {
+        "requete": "meilleur soin hydratant visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 64
+      },
+      {
+        "requete": "meilleure creme hydratant visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 60
+      },
+      {
+        "requete": "meilleure crème hydratante",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 60
+      },
+      {
+        "requete": "meilleure crème pour le visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 63
+      },
+      {
+        "requete": "meilleures cremes visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 85
+      },
+      {
+        "requete": "meilleurs hydratant visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 59
+      },
+      {
+        "requete": "niacinamide c'est quoi",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 97
+      },
+      {
+        "requete": "nivea composition",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "requete": "nivea creme ingredients",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "requete": "que choisir creme hydratante",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 70
+      },
+      {
+        "requete": "quel est la meilleur creme pour le visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 66
+      },
+      {
+        "requete": "quelle est la meilleure crème hydratante visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 94
+      },
+      {
+        "requete": "quelle est la meilleure crème pour le visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 66
+      },
+      {
+        "requete": "ronaldo skin care",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "requete": "ronaldo skin care routine",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "requete": "sel aluminium",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 72
+      },
+      {
+        "requete": "sel aluminium déodorant",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 72
+      },
+      {
+        "requete": "sel d aluminium",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 89
+      },
+      {
+        "requete": "sels d'aluminium",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 58
+      },
+      {
+        "requete": "sels d'aluminium danger",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 90
+      },
+      {
+        "requete": "sephora beauté",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 91
+      },
+      {
+        "requete": "site composition produit cosmétique",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 61
+      },
+      {
+        "requete": "test produit cosmétique",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 64
+      }
+    ],
+    "pages_requetes": [
+      {
+        "page": "/",
+        "requete": "cosmetic check",
+        "clics": 1,
+        "impressions": 46,
+        "ctr": 0.0217,
+        "position": 8.6
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur hydratant visage",
+        "clics": 0,
+        "impressions": 45,
+        "ctr": 0,
+        "position": 72
+      },
+      {
+        "page": "/",
+        "requete": "analyse ingrédients cosmétiques",
+        "clics": 0,
+        "impressions": 43,
+        "ctr": 0,
+        "position": 68.3
+      },
+      {
+        "page": "/",
+        "requete": "check cosmetics",
+        "clics": 0,
+        "impressions": 32,
+        "ctr": 0,
+        "position": 7.5
+      },
+      {
+        "page": "/",
+        "requete": "analyse cosmétique",
+        "clics": 0,
+        "impressions": 22,
+        "ctr": 0,
+        "position": 43.7
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "requete": "analyse ingrédients cosmétiques",
+        "clics": 0,
+        "impressions": 22,
+        "ctr": 0,
+        "position": 19
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "requete": "analyse composition",
+        "clics": 0,
+        "impressions": 15,
+        "ctr": 0,
+        "position": 12.6
+      },
+      {
+        "page": "/",
+        "requete": "check cosmétiques",
+        "clics": 1,
+        "impressions": 14,
+        "ctr": 0.0714,
+        "position": 7.2
+      },
+      {
+        "page": "/",
+        "requete": "beauty decoder",
+        "clics": 0,
+        "impressions": 12,
+        "ctr": 0,
+        "position": 34.2
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleure crème hydratante visage",
+        "clics": 0,
+        "impressions": 11,
+        "ctr": 0,
+        "position": 85.9
+      },
+      {
+        "page": "/",
+        "requete": "analyse composition",
+        "clics": 0,
+        "impressions": 10,
+        "ctr": 0,
+        "position": 34.6
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleure crème hydratant visage",
+        "clics": 0,
+        "impressions": 10,
+        "ctr": 0,
+        "position": 72.1
+      },
+      {
+        "page": "/",
+        "requete": "analyse composition cosmétique en ligne",
+        "clics": 0,
+        "impressions": 9,
+        "ctr": 0,
+        "position": 40.6
+      },
+      {
+        "page": "/",
+        "requete": "analyse produits cosmétiques",
+        "clics": 0,
+        "impressions": 9,
+        "ctr": 0,
+        "position": 70.4
+      },
+      {
+        "page": "/",
+        "requete": "checkcosmetics",
+        "clics": 0,
+        "impressions": 8,
+        "ctr": 0,
+        "position": 8.3
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "requete": "analyse cosmétique",
+        "clics": 0,
+        "impressions": 8,
+        "ctr": 0,
+        "position": 22.5
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "creme hydratante visage bonne composition",
+        "clics": 0,
+        "impressions": 8,
+        "ctr": 0,
+        "position": 85.5
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur crème hydratant visage",
+        "clics": 0,
+        "impressions": 8,
+        "ctr": 0,
+        "position": 82.8
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleure crème nourrissante visage",
+        "clics": 0,
+        "impressions": 8,
+        "ctr": 0,
+        "position": 83.6
+      },
+      {
+        "page": "/blog/deodorant-sels-aluminium-verite",
+        "requete": "déodorant aluminium",
+        "clics": 0,
+        "impressions": 7,
+        "ctr": 0,
+        "position": 59
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "creme hydratante bonne composition",
+        "clics": 0,
+        "impressions": 7,
+        "ctr": 0,
+        "position": 78.6
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleure creme hydratante visage",
+        "clics": 0,
+        "impressions": 7,
+        "ctr": 0,
+        "position": 81
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleure crème hydratant visage que choisir",
+        "clics": 0,
+        "impressions": 7,
+        "ctr": 0,
+        "position": 95.7
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "requete": "analyse produits cosmétiques",
+        "clics": 0,
+        "impressions": 6,
+        "ctr": 0,
+        "position": 23.8
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur creme hydratante visage",
+        "clics": 0,
+        "impressions": 6,
+        "ctr": 0,
+        "position": 76.7
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleure creme hydratante",
+        "clics": 0,
+        "impressions": 6,
+        "ctr": 0,
+        "position": 80.8
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleure creme pour le visage",
+        "clics": 0,
+        "impressions": 6,
+        "ctr": 0,
+        "position": 63.8
+      },
+      {
+        "page": "/",
+        "requete": "check cosmetic",
+        "clics": 0,
+        "impressions": 5,
+        "ctr": 0,
+        "position": 9.4
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "les meilleurs crèmes pour le visage",
+        "clics": 0,
+        "impressions": 5,
+        "ctr": 0,
+        "position": 63.2
+      },
+      {
+        "page": "/",
+        "requete": "cosmeticcheck",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/blog/deodorant-sels-aluminium-verite",
+        "requete": "deodorants aluminium",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 64.3
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur creme hydratant pour visage",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 61.8
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur crème pour le visage",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 65.8
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleures crème hydratante visage",
+        "clics": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 86
+      },
+      {
+        "page": "/",
+        "requete": "check cosme",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 5.7
+      },
+      {
+        "page": "/",
+        "requete": "check produit cosmétique",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "page": "/",
+        "requete": "composition produit",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 80.3
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "requete": "composition cosmétique",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 46.3
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "requete": "composition produit",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 23.7
+      },
+      {
+        "page": "/blog/deodorant-sels-aluminium-verite",
+        "requete": "déodorant sel d aluminium",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 55
+      },
+      {
+        "page": "/blog/deodorant-sels-aluminium-verite",
+        "requete": "sel d aluminium danger",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 71.3
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur creme hydratant visage",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 64.3
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleure creme hydratant visage que choisir",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 84.3
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleure crème visage",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 68
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "quelle crème visage choisir",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 81.7
+      },
+      {
+        "page": "/i/glyceryl-acrylate-acrylic-acid-copolymer",
+        "requete": "glyceryl acrylate",
+        "clics": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 5.3
+      },
+      {
+        "page": "/",
+        "requete": "analyse ingredient cosmetique",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 63.5
+      },
+      {
+        "page": "/",
+        "requete": "analyse produit cosmétique",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 68
+      },
+      {
+        "page": "/",
+        "requete": "check composition",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "page": "/",
+        "requete": "makeup ingredients analysis",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 88
+      },
+      {
+        "page": "/",
+        "requete": "verifier ingredients cosmetiques",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 29.5
+      },
+      {
+        "page": "/",
+        "requete": "vérifier composition cosmétique",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 81
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "requete": "analyse composition cosmétique",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 8.5
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "requete": "faire analyser la composition d'un produit",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 15.5
+      },
+      {
+        "page": "/blog/creme-nivea-composition",
+        "requete": "ingredients nivea creme",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 7.5
+      },
+      {
+        "page": "/blog/creme-nivea-composition",
+        "requete": "nivea creme composition",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 8.5
+      },
+      {
+        "page": "/blog/creme-nivea-composition",
+        "requete": "nivea ingredients",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 8.5
+      },
+      {
+        "page": "/blog/deodorant-sels-aluminium-verite",
+        "requete": "sels d aluminium",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 76
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "crème hydratante que choisir",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 68
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "le meilleur hydratant visage",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 72.5
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur creme pour visage",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 61
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur creme visage",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 71
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur crème hydratant visage peau sèche et sensible",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 71.5
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur crème hydratante visage femme",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 80
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleure creme hydratante pour le visage",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 55
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleure creme visage",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 66.5
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleurs crème visage",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 61
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "quelle est la meilleure crème hydratante",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 73.5
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "test creme hydratante",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 60
+      },
+      {
+        "page": "/blog/meilleurs-produits-anti-imperfections",
+        "requete": "meilleur produit acide salicylique point noir",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 46
+      },
+      {
+        "page": "/fonctionnalites",
+        "requete": "quels types de contenus trouve-t-on sur beauté test en dehors des tests produits ?",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 8.5
+      },
+      {
+        "page": "/i/polyurethane-35",
+        "requete": "polyurethane-35",
+        "clics": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "page": "/",
+        "requete": "analyse composition cosmétique",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 44
+      },
+      {
+        "page": "/",
+        "requete": "analyse composition produit",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 46
+      },
+      {
+        "page": "/",
+        "requete": "app check cosmetic",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 19
+      },
+      {
+        "page": "/",
+        "requete": "checkcosme",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 1
+      },
+      {
+        "page": "/",
+        "requete": "composition analyse",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "page": "/",
+        "requete": "composition cosmétique",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 88
+      },
+      {
+        "page": "/",
+        "requete": "cosmetics check",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "page": "/",
+        "requete": "cosmé",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "page": "/",
+        "requete": "makeup check",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 27
+      },
+      {
+        "page": "/",
+        "requete": "site composition produit cosmétique",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 61
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "requete": "analyse des ingrédients",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 32
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "requete": "analyser la composition",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "requete": "analyser la composition d'un produit",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 17
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "requete": "composition analyse",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 19
+      },
+      {
+        "page": "/blog/calendrier-avent-beaute",
+        "requete": "sephora beauté",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 91
+      },
+      {
+        "page": "/blog/comedogene",
+        "requete": "comedogene",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "page": "/blog/comedogene",
+        "requete": "comédogène",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/blog/cosmetique-fait-pour-toi",
+        "requete": "analyse cosmétique",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 74
+      },
+      {
+        "page": "/blog/cosmetique-fait-pour-toi",
+        "requete": "examen formule cosmétique",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 89
+      },
+      {
+        "page": "/blog/cosmetique-fait-pour-toi",
+        "requete": "test produit cosmétique",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 64
+      },
+      {
+        "page": "/blog/cosmetique-fait-pour-toi",
+        "requete": "vérifier composition cosmétique",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 84
+      },
+      {
+        "page": "/blog/creme-nivea-composition",
+        "requete": "composition creme nivea",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "page": "/blog/creme-nivea-composition",
+        "requete": "composition de la creme nivea",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 24
+      },
+      {
+        "page": "/blog/creme-nivea-composition",
+        "requete": "composition de la crème nivea",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "page": "/blog/creme-nivea-composition",
+        "requete": "composition nivea",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "page": "/blog/creme-nivea-composition",
+        "requete": "creme nivea composition",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "page": "/blog/creme-nivea-composition",
+        "requete": "creme nivea ingredients",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 1
+      },
+      {
+        "page": "/blog/creme-nivea-composition",
+        "requete": "crème nivea bleu composition",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 5
+      },
+      {
+        "page": "/blog/creme-nivea-composition",
+        "requete": "nivea composition",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "page": "/blog/creme-nivea-composition",
+        "requete": "nivea creme ingredients",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "page": "/blog/deodorant-sels-aluminium-verite",
+        "requete": "aluminium dans deodorant",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 56
+      },
+      {
+        "page": "/blog/deodorant-sels-aluminium-verite",
+        "requete": "deo aluminium",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 59
+      },
+      {
+        "page": "/blog/deodorant-sels-aluminium-verite",
+        "requete": "sel aluminium",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 72
+      },
+      {
+        "page": "/blog/deodorant-sels-aluminium-verite",
+        "requete": "sel aluminium déodorant",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 72
+      },
+      {
+        "page": "/blog/deodorant-sels-aluminium-verite",
+        "requete": "sel d aluminium",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 89
+      },
+      {
+        "page": "/blog/deodorant-sels-aluminium-verite",
+        "requete": "sels d'aluminium",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 58
+      },
+      {
+        "page": "/blog/deodorant-sels-aluminium-verite",
+        "requete": "sels d'aluminium danger",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 90
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "comparatif creme hydratant visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 69
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "comparatif crème hydratante visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 94
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "creme visage que choisir",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 81
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "crème hydratante pour le visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 67
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur creme hydratant visage femme",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 65
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur creme hydratante",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 66
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur creme visage femme",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 73
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur creme.hydratante visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 88
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleur soin hydratant visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 64
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleure creme hydratant visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 60
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleure crème hydratante",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 60
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleure crème pour le visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 63
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleures cremes visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 85
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "meilleurs hydratant visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 59
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "que choisir creme hydratante",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 70
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "quel est la meilleur creme pour le visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 66
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "quelle est la meilleure crème hydratante visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 94
+      },
+      {
+        "page": "/blog/meilleures-cremes-hydratantes-visage",
+        "requete": "quelle est la meilleure crème pour le visage",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 66
+      },
+      {
+        "page": "/blog/meilleurs-produits-anti-imperfections",
+        "requete": "anti imperfection",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 67
+      },
+      {
+        "page": "/blog/meilleurs-produits-anti-imperfections",
+        "requete": "meilleur anti point noir",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 83
+      },
+      {
+        "page": "/blog/niacinamide",
+        "requete": "niacinamide c'est quoi",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 97
+      },
+      {
+        "page": "/blog/routine-peau-joueurs-foot",
+        "requete": "ronaldo skin care",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "page": "/blog/routine-peau-joueurs-foot",
+        "requete": "ronaldo skin care routine",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "page": "/comment-ca-marche",
+        "requete": "check cosme",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "page": "/en-savoir-plus",
+        "requete": "check cosme",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 40
+      },
+      {
+        "page": "/fonctionnalites",
+        "requete": "analyse composition cosmétique en ligne",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 50
+      },
+      {
+        "page": "/fonctionnalites",
+        "requete": "analyse composition en ligne",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 40
+      },
+      {
+        "page": "/fonctionnalites",
+        "requete": "analyse produit",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 34
+      },
+      {
+        "page": "/fonctionnalites",
+        "requete": "comparez les marques suivantes en matière de services de diagnostic et d’accompagnement beauté : la roche-posay, estée lauder, clarins, lancôme, chanel, dior. donnez à chaque marque citée une note de 1 à 5 et expliquez chaque note en une ou deux phrases.",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 74
+      },
+      {
+        "page": "/i/geraniol",
+        "requete": "geraniol contre indications",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 97
+      },
+      {
+        "page": "/i/glyceryl-acrylate-acrylic-acid-copolymer",
+        "requete": "acrylate",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 54
+      },
+      {
+        "page": "/i/glyceryl-acrylate-acrylic-acid-copolymer",
+        "requete": "acrylate danger",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 50
+      },
+      {
+        "page": "/i/glyceryl-acrylate-acrylic-acid-copolymer",
+        "requete": "glyceryl acrylate acrylic acid copolymer",
+        "clics": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      }
+    ],
+    "vues_sans_clic": [
+      {
+        "page": "/",
+        "requete": "check cosmetics",
+        "clics": 0,
+        "impressions": 32,
+        "ctr": 0,
+        "position": 7.5
+      },
+      {
+        "page": "/",
+        "requete": "analyse cosmétique",
+        "clics": 0,
+        "impressions": 22,
+        "ctr": 0,
+        "position": 43.7
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "requete": "analyse ingrédients cosmétiques",
+        "clics": 0,
+        "impressions": 22,
+        "ctr": 0,
+        "position": 19
+      },
+      {
+        "page": "/blog/analyse-composition-cosmetique",
+        "requete": "analyse composition",
+        "clics": 0,
+        "impressions": 15,
+        "ctr": 0,
+        "position": 12.6
+      },
+      {
+        "page": "/",
+        "requete": "beauty decoder",
+        "clics": 0,
+        "impressions": 12,
+        "ctr": 0,
+        "position": 34.2
+      },
+      {
+        "page": "/",
+        "requete": "analyse composition",
+        "clics": 0,
+        "impressions": 10,
+        "ctr": 0,
+        "position": 34.6
+      }
+    ],
+    "serie": [
+      {
+        "jour": "2026-09-30",
+        "clics": 0,
+        "impressions": 19,
+        "ctr": 0,
+        "position": 11.8
+      },
+      {
+        "jour": "2026-10-01",
+        "clics": 0,
+        "impressions": 26,
+        "ctr": 0,
+        "position": 21.2
+      },
+      {
+        "jour": "2026-10-02",
+        "clics": 0,
+        "impressions": 42,
+        "ctr": 0,
+        "position": 26.8
+      },
+      {
+        "jour": "2026-10-03",
+        "clics": 2,
+        "impressions": 41,
+        "ctr": 0.0488,
+        "position": 37.1
+      },
+      {
+        "jour": "2026-10-04",
+        "clics": 1,
+        "impressions": 56,
+        "ctr": 0.0179,
+        "position": 34
+      },
+      {
+        "jour": "2026-10-05",
+        "clics": 0,
+        "impressions": 48,
+        "ctr": 0,
+        "position": 30.7
+      },
+      {
+        "jour": "2026-10-06",
+        "clics": 0,
+        "impressions": 34,
+        "ctr": 0,
+        "position": 28.2
+      },
+      {
+        "jour": "2026-10-07",
+        "clics": 1,
+        "impressions": 40,
+        "ctr": 0.025,
+        "position": 29.6
+      },
+      {
+        "jour": "2026-10-08",
+        "clics": 1,
+        "impressions": 44,
+        "ctr": 0.0227,
+        "position": 22.5
+      },
+      {
+        "jour": "2026-10-09",
+        "clics": 1,
+        "impressions": 40,
+        "ctr": 0.025,
+        "position": 25.1
+      },
+      {
+        "jour": "2026-10-10",
+        "clics": 0,
+        "impressions": 31,
+        "ctr": 0,
+        "position": 25.5
+      },
+      {
+        "jour": "2026-10-11",
+        "clics": 0,
+        "impressions": 24,
+        "ctr": 0,
+        "position": 23.4
+      },
+      {
+        "jour": "2026-10-12",
+        "clics": 0,
+        "impressions": 42,
+        "ctr": 0,
+        "position": 24.2
+      },
+      {
+        "jour": "2026-10-13",
+        "clics": 1,
+        "impressions": 38,
+        "ctr": 0.0263,
+        "position": 33.1
+      },
+      {
+        "jour": "2026-10-14",
+        "clics": 0,
+        "impressions": 28,
+        "ctr": 0,
+        "position": 40.4
+      },
+      {
+        "jour": "2026-10-15",
+        "clics": 0,
+        "impressions": 41,
+        "ctr": 0,
+        "position": 39.6
+      },
+      {
+        "jour": "2026-10-16",
+        "clics": 1,
+        "impressions": 56,
+        "ctr": 0.0179,
+        "position": 42.6
+      },
+      {
+        "jour": "2026-10-17",
+        "clics": 0,
+        "impressions": 23,
+        "ctr": 0,
+        "position": 37.3
+      },
+      {
+        "jour": "2026-10-18",
+        "clics": 0,
+        "impressions": 34,
+        "ctr": 0,
+        "position": 37.2
+      },
+      {
+        "jour": "2026-10-19",
+        "clics": 2,
+        "impressions": 35,
+        "ctr": 0.0571,
+        "position": 23.9
+      },
+      {
+        "jour": "2026-10-20",
+        "clics": 3,
+        "impressions": 26,
+        "ctr": 0.1154,
+        "position": 25.2
+      },
+      {
+        "jour": "2026-10-21",
+        "clics": 1,
+        "impressions": 42,
+        "ctr": 0.0238,
+        "position": 24.4
+      },
+      {
+        "jour": "2026-10-22",
+        "clics": 2,
+        "impressions": 64,
+        "ctr": 0.0313,
+        "position": 22.3
+      },
+      {
+        "jour": "2026-10-23",
+        "clics": 1,
+        "impressions": 56,
+        "ctr": 0.0179,
+        "position": 13
+      },
+      {
+        "jour": "2026-10-24",
+        "clics": 2,
+        "impressions": 48,
+        "ctr": 0.0417,
+        "position": 16.9
+      },
+      {
+        "jour": "2026-10-25",
+        "clics": 1,
+        "impressions": 50,
+        "ctr": 0.02,
+        "position": 18.7
+      },
+      {
+        "jour": "2026-10-26",
+        "clics": 4,
+        "impressions": 65,
+        "ctr": 0.0615,
+        "position": 20.3
+      },
+      {
+        "jour": "2026-10-27",
+        "clics": 3,
+        "impressions": 53,
+        "ctr": 0.0566,
+        "position": 15
+      }
+    ]
+  },
+  "articles": {
+    "note": "Catalogue lu dans contenu/articles/ (francais seulement). vues_28j = fenetre de 28 jours. gsc = null tant que Search Console est indisponible ou sans impression.",
+    "nombre": 21,
+    "liste": [
+      {
+        "cle": "analyse-composition-cosmetique",
+        "slug_fr": "analyse-composition-cosmetique",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 5,
+        "vues_28j": 5,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/analyse-composition-cosmetique",
+          "vues_1j": 0,
+          "vues_7j": 5,
+          "vues_28j": 5,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": 0,
+          "defilement_median_pct": 98,
+          "sections_vues": 8,
+          "source_1": "direct",
+          "gsc": {
+            "clics": 1,
+            "impressions": 89,
+            "ctr": 0.0112,
+            "position": 16.8
+          }
+        },
+        "en": null
+      },
+      {
+        "cle": "masque-led-visage",
+        "slug_fr": "masque-led-visage",
+        "slug_en": null,
+        "vues_1j": 4,
+        "vues_7j": 5,
+        "vues_28j": 5,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/masque-led-visage",
+          "vues_1j": 4,
+          "vues_7j": 5,
+          "vues_28j": 5,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": 0,
+          "defilement_median_pct": null,
+          "sections_vues": 7,
+          "source_1": "direct",
+          "gsc": null
+        },
+        "en": null
+      },
+      {
+        "cle": "creme-nivea-composition",
+        "slug_fr": "creme-nivea-composition",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 3,
+        "vues_28j": 6,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/creme-nivea-composition",
+          "vues_1j": 0,
+          "vues_7j": 3,
+          "vues_28j": 6,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": 0,
+          "defilement_median_pct": 0,
+          "sections_vues": 6,
+          "source_1": "direct",
+          "gsc": {
+            "clics": 1,
+            "impressions": 89,
+            "ctr": 0.0112,
+            "position": 8
+          }
+        },
+        "en": null
+      },
+      {
+        "cle": "niacinamide",
+        "slug_fr": "niacinamide",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 3,
+        "vues_28j": 6,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/niacinamide",
+          "vues_1j": 0,
+          "vues_7j": 3,
+          "vues_28j": 6,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": 0,
+          "defilement_median_pct": 0,
+          "sections_vues": 7,
+          "source_1": "direct",
+          "gsc": {
+            "clics": 0,
+            "impressions": 8,
+            "ctr": 0,
+            "position": 16.5
+          }
+        },
+        "en": null
+      },
+      {
+        "cle": "calendrier-avent-beaute",
+        "slug_fr": "calendrier-avent-beaute",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 3,
+        "vues_28j": 3,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/calendrier-avent-beaute",
+          "vues_1j": 0,
+          "vues_7j": 3,
+          "vues_28j": 3,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": 0,
+          "defilement_median_pct": 43,
+          "sections_vues": null,
+          "source_1": "direct",
+          "gsc": {
+            "clics": 0,
+            "impressions": 22,
+            "ctr": 0,
+            "position": 11.2
+          }
+        },
+        "en": null
+      },
+      {
+        "cle": "comedogene",
+        "slug_fr": "comedogene",
+        "slug_en": null,
+        "vues_1j": 2,
+        "vues_7j": 3,
+        "vues_28j": 3,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/comedogene",
+          "vues_1j": 2,
+          "vues_7j": 3,
+          "vues_28j": 3,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": 0,
+          "defilement_median_pct": 11,
+          "sections_vues": 1,
+          "source_1": "moteur",
+          "gsc": {
+            "clics": 0,
+            "impressions": 2,
+            "ctr": 0,
+            "position": 9.5
+          }
+        },
+        "en": null
+      },
+      {
+        "cle": "deodorant-sels-aluminium-verite",
+        "slug_fr": "deodorant-sels-aluminium-verite",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 2,
+        "vues_28j": 4,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/deodorant-sels-aluminium-verite",
+          "vues_1j": 0,
+          "vues_7j": 2,
+          "vues_28j": 4,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": 0,
+          "defilement_median_pct": 91,
+          "sections_vues": 5,
+          "source_1": "moteur",
+          "gsc": {
+            "clics": 0,
+            "impressions": 32,
+            "ctr": 0,
+            "position": 56.6
+          }
+        },
+        "en": null
+      },
+      {
+        "cle": "routine-peau-joueurs-foot",
+        "slug_fr": "routine-peau-joueurs-foot",
+        "slug_en": null,
+        "vues_1j": 1,
+        "vues_7j": 1,
+        "vues_28j": 2,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/routine-peau-joueurs-foot",
+          "vues_1j": 1,
+          "vues_7j": 1,
+          "vues_28j": 2,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": 0,
+          "defilement_median_pct": 62,
+          "sections_vues": 6,
+          "source_1": "moteur",
+          "gsc": {
+            "clics": 1,
+            "impressions": 55,
+            "ctr": 0.0182,
+            "position": 5.9
+          }
+        },
+        "en": null
+      },
+      {
+        "cle": "bakuchiol",
+        "slug_fr": "bakuchiol",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 1,
+        "vues_28j": 1,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/bakuchiol",
+          "vues_1j": 0,
+          "vues_7j": 1,
+          "vues_28j": 1,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": 0,
+          "defilement_median_pct": 33,
+          "sections_vues": 3,
+          "source_1": "direct",
+          "gsc": null
+        },
+        "en": null
+      },
+      {
+        "cle": "routine-skincare",
+        "slug_fr": "routine-skincare",
+        "slug_en": null,
+        "vues_1j": 1,
+        "vues_7j": 1,
+        "vues_28j": 1,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/routine-skincare",
+          "vues_1j": 1,
+          "vues_7j": 1,
+          "vues_28j": 1,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": 0,
+          "defilement_median_pct": 0,
+          "sections_vues": null,
+          "source_1": "direct",
+          "gsc": null
+        },
+        "en": null
+      },
+      {
+        "cle": "meilleurs-produits-anti-imperfections",
+        "slug_fr": "meilleurs-produits-anti-imperfections",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 0,
+        "vues_28j": 2,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/meilleurs-produits-anti-imperfections",
+          "vues_1j": 0,
+          "vues_7j": 0,
+          "vues_28j": 2,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": 0,
+          "defilement_median_pct": 50,
+          "sections_vues": 7,
+          "source_1": "direct",
+          "gsc": {
+            "clics": 0,
+            "impressions": 13,
+            "ctr": 0,
+            "position": 23.5
+          }
+        },
+        "en": null
+      },
+      {
+        "cle": "cosmetique-fait-pour-toi",
+        "slug_fr": "cosmetique-fait-pour-toi",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 0,
+        "vues_28j": 1,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/cosmetique-fait-pour-toi",
+          "vues_1j": 0,
+          "vues_7j": 0,
+          "vues_28j": 1,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": 0,
+          "defilement_median_pct": null,
+          "sections_vues": null,
+          "source_1": "moteur",
+          "gsc": {
+            "clics": 0,
+            "impressions": 42,
+            "ctr": 0,
+            "position": 14.2
+          }
+        },
+        "en": null
+      },
+      {
+        "cle": "lip-oils-huiles-levres",
+        "slug_fr": "lip-oils-huiles-levres",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 0,
+        "vues_28j": 1,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/lip-oils-huiles-levres",
+          "vues_1j": 0,
+          "vues_7j": 0,
+          "vues_28j": 1,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": 0,
+          "defilement_median_pct": 67,
+          "sections_vues": null,
+          "source_1": "moteur",
+          "gsc": {
+            "clics": 0,
+            "impressions": 38,
+            "ctr": 0,
+            "position": 7.2
+          }
+        },
+        "en": null
+      },
+      {
+        "cle": "creme-solaire-coreenne-k-beauty",
+        "slug_fr": "creme-solaire-coreenne-k-beauty",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 0,
+        "vues_28j": 0,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/creme-solaire-coreenne-k-beauty",
+          "vues_1j": 0,
+          "vues_7j": 0,
+          "vues_28j": 0,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": null,
+          "defilement_median_pct": null,
+          "sections_vues": null,
+          "source_1": null,
+          "gsc": null
+        },
+        "en": null
+      },
+      {
+        "cle": "cremes-hydratantes-reparatrices",
+        "slug_fr": "cremes-hydratantes-reparatrices",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 0,
+        "vues_28j": 0,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/cremes-hydratantes-reparatrices",
+          "vues_1j": 0,
+          "vues_7j": 0,
+          "vues_28j": 0,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": null,
+          "defilement_median_pct": null,
+          "sections_vues": null,
+          "source_1": null,
+          "gsc": {
+            "clics": 0,
+            "impressions": 13,
+            "ctr": 0,
+            "position": 5
+          }
+        },
+        "en": null
+      },
+      {
+        "cle": "masque-biodance",
+        "slug_fr": "masque-biodance",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 0,
+        "vues_28j": 0,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/masque-biodance",
+          "vues_1j": 0,
+          "vues_7j": 0,
+          "vues_28j": 0,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": null,
+          "defilement_median_pct": null,
+          "sections_vues": null,
+          "source_1": null,
+          "gsc": null
+        },
+        "en": null
+      },
+      {
+        "cle": "meilleures-cremes-hydratantes-visage",
+        "slug_fr": "meilleures-cremes-hydratantes-visage",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 0,
+        "vues_28j": 0,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/meilleures-cremes-hydratantes-visage",
+          "vues_1j": 0,
+          "vues_7j": 0,
+          "vues_28j": 0,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": null,
+          "defilement_median_pct": null,
+          "sections_vues": null,
+          "source_1": null,
+          "gsc": {
+            "clics": 0,
+            "impressions": 216,
+            "ctr": 0,
+            "position": 71.3
+          }
+        },
+        "en": null
+      },
+      {
+        "cle": "peau-seche-visage",
+        "slug_fr": "peau-seche-visage",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 0,
+        "vues_28j": 0,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/peau-seche-visage",
+          "vues_1j": 0,
+          "vues_7j": 0,
+          "vues_28j": 0,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": null,
+          "defilement_median_pct": null,
+          "sections_vues": null,
+          "source_1": null,
+          "gsc": {
+            "clics": 0,
+            "impressions": 1,
+            "ctr": 0,
+            "position": 1
+          }
+        },
+        "en": null
+      },
+      {
+        "cle": "perturbateurs-endocriniens-cosmetiques-2026",
+        "slug_fr": "perturbateurs-endocriniens-cosmetiques-2026",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 0,
+        "vues_28j": 0,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/perturbateurs-endocriniens-cosmetiques-2026",
+          "vues_1j": 0,
+          "vues_7j": 0,
+          "vues_28j": 0,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": null,
+          "defilement_median_pct": null,
+          "sections_vues": null,
+          "source_1": null,
+          "gsc": {
+            "clics": 0,
+            "impressions": 3,
+            "ctr": 0,
+            "position": 7.3
+          }
+        },
+        "en": null
+      },
+      {
+        "cle": "serums-visage-guide",
+        "slug_fr": "serums-visage-guide",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 0,
+        "vues_28j": 0,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/serums-visage-guide",
+          "vues_1j": 0,
+          "vues_7j": 0,
+          "vues_28j": 0,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": null,
+          "defilement_median_pct": null,
+          "sections_vues": null,
+          "source_1": null,
+          "gsc": null
+        },
+        "en": null
+      },
+      {
+        "cle": "spf-50-visage-7-erreurs",
+        "slug_fr": "spf-50-visage-7-erreurs",
+        "slug_en": null,
+        "vues_1j": 0,
+        "vues_7j": 0,
+        "vues_28j": 0,
+        "clics_magasin": 0,
+        "fr": {
+          "chemin": "/blog/spf-50-visage-7-erreurs",
+          "vues_1j": 0,
+          "vues_7j": 0,
+          "vues_28j": 0,
+          "clics_cta": 0,
+          "clics_magasin": 0,
+          "taux_magasin": null,
+          "defilement_median_pct": null,
+          "sections_vues": null,
+          "source_1": null,
+          "gsc": null
+        },
+        "en": null
+      }
+    ]
+  },
+  "correlations": {
+    "note": "Pearson entre x au jour J et y au jour J + decalage. r = null si moins de 3 points ou une serie constante. installations_app = Application Installed (PostHog, iOS et Android). premium = premium_started de l'app. Aucune conclusion ici.",
+    "regle": "assez_de_donnees exige au moins 14 jours ayant au moins un clic CTA (magasin ou QR code)",
+    "jours_alignes": 27,
+    "jours_avec_clic": 0,
+    "clics_cta_total": 0,
+    "clics_magasin_total": 0,
+    "assez_de_donnees": false,
+    "jours": [
+      {
+        "jour": "2026-09-30",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 1,
+        "comptes": 0,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-01",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 1,
+        "comptes": 0,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-02",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 2,
+        "comptes": 0,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-03",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 4,
+        "comptes": 2,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-04",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 1,
+        "installations_app": 1,
+        "comptes": 1,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-05",
+        "vues_blog": 1,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 1,
+        "installations_app": 4,
+        "comptes": 0,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-06",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 2,
+        "comptes": 0,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-07",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 3,
+        "comptes": 0,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-08",
+        "vues_blog": 1,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 4,
+        "comptes": 0,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-09",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 1,
+        "comptes": 0,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-10",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 0,
+        "comptes": 0,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-11",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 0,
+        "comptes": 0,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-12",
+        "vues_blog": 3,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 1,
+        "installations_app": 3,
+        "comptes": 1,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-13",
+        "vues_blog": 1,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 2,
+        "comptes": 1,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-14",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 1,
+        "comptes": 2,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-15",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 0,
+        "comptes": 0,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-16",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 0,
+        "comptes": 0,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-17",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 3,
+        "comptes": 0,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-18",
+        "vues_blog": 0,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 0,
+        "installations_app": 2,
+        "comptes": 1,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-19",
+        "vues_blog": 7,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 2,
+        "installations_app": 14,
+        "comptes": 4,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-20",
+        "vues_blog": 6,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 6,
+        "installations_app": 16,
+        "comptes": 4,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-21",
+        "vues_blog": 7,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 5,
+        "installations_app": 8,
+        "comptes": 3,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-22",
+        "vues_blog": 4,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 2,
+        "installations_app": 3,
+        "comptes": 2,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-23",
+        "vues_blog": 16,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 4,
+        "installations_app": 11,
+        "comptes": 3,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-24",
+        "vues_blog": 2,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 5,
+        "installations_app": 31,
+        "comptes": 6,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-25",
+        "vues_blog": 5,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 4,
+        "installations_app": 9,
+        "comptes": 2,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-26",
+        "vues_blog": 1,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": 12,
+        "installations_app": 15,
+        "comptes": 11,
+        "premium": 0
+      },
+      {
+        "jour": "2026-10-27",
+        "vues_blog": 8,
+        "clics_cta": 0,
+        "clics_magasin": 0,
+        "installations_ios": null,
+        "installations_app": 7,
+        "comptes": 6,
+        "premium": 0
+      }
+    ],
+    "paires": [
+      {
+        "x": "vues_blog",
+        "y": "installations_ios",
+        "resultats": [
+          {
+            "decalage_jours": 0,
+            "r": 0.444,
+            "n": 27
+          },
+          {
+            "decalage_jours": 1,
+            "r": 0.621,
+            "n": 26
+          },
+          {
+            "decalage_jours": 2,
+            "r": 0.392,
+            "n": 25
+          },
+          {
+            "decalage_jours": 3,
+            "r": 0.781,
+            "n": 24
+          }
+        ]
+      },
+      {
+        "x": "vues_blog",
+        "y": "installations_app",
+        "resultats": [
+          {
+            "decalage_jours": 0,
+            "r": 0.444,
+            "n": 28
+          },
+          {
+            "decalage_jours": 1,
+            "r": 0.822,
+            "n": 27
+          },
+          {
+            "decalage_jours": 2,
+            "r": 0.297,
+            "n": 26
+          },
+          {
+            "decalage_jours": 3,
+            "r": 0.506,
+            "n": 25
+          }
+        ]
+      },
+      {
+        "x": "vues_blog",
+        "y": "nouveaux_comptes",
+        "resultats": [
+          {
+            "decalage_jours": 0,
+            "r": 0.409,
+            "n": 28
+          },
+          {
+            "decalage_jours": 1,
+            "r": 0.575,
+            "n": 27
+          },
+          {
+            "decalage_jours": 2,
+            "r": 0.283,
+            "n": 26
+          },
+          {
+            "decalage_jours": 3,
+            "r": 0.75,
+            "n": 25
+          }
+        ]
+      },
+      {
+        "x": "vues_blog",
+        "y": "nouveaux_premium",
+        "resultats": [
+          {
+            "decalage_jours": 0,
+            "r": null,
+            "n": 28
+          },
+          {
+            "decalage_jours": 1,
+            "r": null,
+            "n": 27
+          },
+          {
+            "decalage_jours": 2,
+            "r": null,
+            "n": 26
+          },
+          {
+            "decalage_jours": 3,
+            "r": null,
+            "n": 25
+          }
+        ]
+      },
+      {
+        "x": "clics_cta",
+        "y": "installations_ios",
+        "resultats": [
+          {
+            "decalage_jours": 0,
+            "r": null,
+            "n": 27
+          },
+          {
+            "decalage_jours": 1,
+            "r": null,
+            "n": 26
+          },
+          {
+            "decalage_jours": 2,
+            "r": null,
+            "n": 25
+          },
+          {
+            "decalage_jours": 3,
+            "r": null,
+            "n": 24
+          }
+        ]
+      },
+      {
+        "x": "clics_cta",
+        "y": "installations_app",
+        "resultats": [
+          {
+            "decalage_jours": 0,
+            "r": null,
+            "n": 28
+          },
+          {
+            "decalage_jours": 1,
+            "r": null,
+            "n": 27
+          },
+          {
+            "decalage_jours": 2,
+            "r": null,
+            "n": 26
+          },
+          {
+            "decalage_jours": 3,
+            "r": null,
+            "n": 25
+          }
+        ]
+      },
+      {
+        "x": "clics_cta",
+        "y": "nouveaux_comptes",
+        "resultats": [
+          {
+            "decalage_jours": 0,
+            "r": null,
+            "n": 28
+          },
+          {
+            "decalage_jours": 1,
+            "r": null,
+            "n": 27
+          },
+          {
+            "decalage_jours": 2,
+            "r": null,
+            "n": 26
+          },
+          {
+            "decalage_jours": 3,
+            "r": null,
+            "n": 25
+          }
+        ]
+      },
+      {
+        "x": "clics_cta",
+        "y": "nouveaux_premium",
+        "resultats": [
+          {
+            "decalage_jours": 0,
+            "r": null,
+            "n": 28
+          },
+          {
+            "decalage_jours": 1,
+            "r": null,
+            "n": 27
+          },
+          {
+            "decalage_jours": 2,
+            "r": null,
+            "n": 26
+          },
+          {
+            "decalage_jours": 3,
+            "r": null,
+            "n": 25
+          }
+        ]
+      },
+      {
+        "x": "clics_magasin",
+        "y": "installations_ios",
+        "resultats": [
+          {
+            "decalage_jours": 0,
+            "r": null,
+            "n": 27
+          },
+          {
+            "decalage_jours": 1,
+            "r": null,
+            "n": 26
+          },
+          {
+            "decalage_jours": 2,
+            "r": null,
+            "n": 25
+          },
+          {
+            "decalage_jours": 3,
+            "r": null,
+            "n": 24
+          }
+        ]
+      },
+      {
+        "x": "clics_magasin",
+        "y": "installations_app",
+        "resultats": [
+          {
+            "decalage_jours": 0,
+            "r": null,
+            "n": 28
+          },
+          {
+            "decalage_jours": 1,
+            "r": null,
+            "n": 27
+          },
+          {
+            "decalage_jours": 2,
+            "r": null,
+            "n": 26
+          },
+          {
+            "decalage_jours": 3,
+            "r": null,
+            "n": 25
+          }
+        ]
+      },
+      {
+        "x": "clics_magasin",
+        "y": "nouveaux_comptes",
+        "resultats": [
+          {
+            "decalage_jours": 0,
+            "r": null,
+            "n": 28
+          },
+          {
+            "decalage_jours": 1,
+            "r": null,
+            "n": 27
+          },
+          {
+            "decalage_jours": 2,
+            "r": null,
+            "n": 26
+          },
+          {
+            "decalage_jours": 3,
+            "r": null,
+            "n": 25
+          }
+        ]
+      },
+      {
+        "x": "clics_magasin",
+        "y": "nouveaux_premium",
+        "resultats": [
+          {
+            "decalage_jours": 0,
+            "r": null,
+            "n": 28
+          },
+          {
+            "decalage_jours": 1,
+            "r": null,
+            "n": 27
+          },
+          {
+            "decalage_jours": 2,
+            "r": null,
+            "n": 26
+          },
+          {
+            "decalage_jours": 3,
+            "r": null,
+            "n": 25
+          }
+        ]
+      }
+    ]
+  },
+  "erreurs": []
+}

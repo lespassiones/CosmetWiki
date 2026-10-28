@@ -26,6 +26,8 @@ Au 26/10/2026, sur les dix derniers par date (de `peau-seche-visage` à `meilleu
 
 Au 27/10/2026, sur les dix derniers par date (de `routine-skincare` à `meilleures-cremes-hydratantes-visage`, `cosmetique-fait-pour-toi` sort, retouché le 21/10 contre le 26/10 pour son voisin du 20/07) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort `meilleures-cremes-hydratantes-visage` (comparatif), le dernier des articles d'avant le robot : le prochain article est donc un **comparatif honnête**, par exemple Cosme Check, Yuka et INCI Beauty (100 à 1 k et 10 k à 100 k) ou le produit Lidl noté sur Yuka (NextPlz, 26/10 : « 13 produits notés excellents »). Vu le 27/10 : Kelly Ripa parle d'une crème L'Oréal (Grazia, 26/10, à vérifier à la source si un jour buzz) ; en Australie, refonte des tests de crèmes solaires après un scandale de SPF (TGA, 27/10) : piste pour un article solaire au printemps.
 
+Au 28/10/2026, sur les dix derniers par date (de `cerave-creme-hydratante` à `creme-nivea-composition`, `meilleures-cremes-hydratantes-visage` sort) : buzz 3, ingrédients 3, routines 2, comparatifs 1, pratique 1. **Le mélange est juste, et la fenêtre ne contient plus que des articles du robot.** Demain sort `creme-nivea-composition` (buzz, 19/10) : le prochain article est donc un **buzz**, **Rhode, la marque de Hailey Bieber** en tête (« rhode » 100 k à 1 M, « rhode france » et « rhode hailey bieber » 1 k à 10 k ; arrivée en France fin septembre, deux articles de Madame Figaro le 27/10 ; vérifier que les produits sont dans la base, et ne parler que de ce que la marque et la star ont dit elles-mêmes). Pistes vues le 28/10 : le « sérum au sperme de saumon » (PDRN, Grazia 27/10 ; « pdrn » 10 k à 100 k), la tendance TikTok « ferritin face » (Journal de Montréal, PureWow : sujet santé, à écarter), le plan national perturbateurs endocriniens 2026-2030 publié (Actu-Environnement, 27/10 : sources officielles à lire avant tout article), les sérums aux peptides (Ohmymag).
+
 ## Priorités du premier mois
 
 | Ordre | Sujet | Famille | Pourquoi maintenant |
@@ -102,6 +104,9 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 | Sujet | Requêtes | Volume |
 |---|---|---|
 | Meilleure crème hydratante visage (renforcer l'existant) | meilleure crème hydratante visage | vue sans clic : 231 affichages, position 68 |
+| ~~Crème CeraVe : laquelle choisir, formules comparées~~ → `cerave-creme-hydratante`, 2026-10-28 | cerave crème hydratante, crème cerave, cerave baume hydratant | 10 k à 100 k (+900 % sur un an) et 1 k à 10 k (28/10/2026) |
+| Nettoyants CeraVe : gel moussant ou crème lavante | cerave nettoyant | 1 k à 10 k (28/10/2026) |
+| Cien (Lidl) face aux marques de pharmacie, compositions lues | cien lidl, crème lidl | 1 k à 10 k et 100 à 1 k (28/10/2026) ; jamais de prix |
 | Crème visage par type de peau | crème visage | 1 k à 10 k |
 | Meilleure crème solaire visage 2027 | meilleure crème solaire visage | à mesurer ; saisonnier (avril à juillet) |
 | Eau micellaire : comparatif par composition | meilleure eau micellaire | à mesurer |
