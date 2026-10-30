@@ -12,13 +12,13 @@ import type { Article } from "@/contenu/articles";
 const article: Article = {
   slug: "analyse-composition-cosmetique",
   titre: "Arrête de lire le devant du pot : 5 étapes pour analyser la composition d'un cosmétique",
-  titreSeo: "Analyse composition cosmétique en 5 étapes",
+  titreSeo: "Analyse ingrédients cosmétiques en 5 étapes",
   resume:
-    "Analyser la composition d'un cosmétique sans être chimiste : 5 étapes pour lire la liste INCI, repérer le parfum, les allergènes et le vrai dosage des actifs.",
+    "Analyse des ingrédients d'un cosmétique en 5 étapes, sans être chimiste : lire la liste INCI, repérer parfum et allergènes, voir le vrai dosage des actifs.",
   chapo:
     "Pour analyser la composition d'un cosmétique, retourne le produit : la vérité est dans la **liste INCI**, au dos, pas dans les promesses du devant. Cinq étapes suffisent, et ++la plus utile tient en un seul mot à repérer++.",
   publieLe: "2026-10-21",
-  modifieLe: "2026-10-21",
+  modifieLe: "2026-10-30",
   minutes: 6,
   theme: "analyse composition cosmétique",
   motsCles: [

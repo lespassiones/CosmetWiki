@@ -107,6 +107,7 @@ import masqueLed from "./articles/masque-led-visage";
 import meilleuresCremesHydratantes from "./articles/meilleures-cremes-hydratantes-visage";
 import antiImperfections from "./articles/meilleurs-produits-anti-imperfections";
 import niacinamide from "./articles/niacinamide";
+import pdrn from "./articles/pdrn";
 import peauSecheVisage from "./articles/peau-seche-visage";
 import perturbateursEndocriniens from "./articles/perturbateurs-endocriniens-cosmetiques-2026";
 import routineFoot from "./articles/routine-peau-joueurs-foot";
@@ -313,6 +314,7 @@ export const ARTICLES: readonly Article[] = [
   peauSecheVisage,
   routineSkincare,
   ceraveCremeHydratante,
+  pdrn,
 ];
 
 controlerRegistre(ARTICLES);

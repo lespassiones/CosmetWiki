@@ -47,13 +47,13 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 | ~~La crème préférée de Marion Cotillard, décryptée~~ | crème marion cotillard | écarté le 19/10/2026 : source d'origine introuvable (voir les priorités) ; « marion cotillard crème » sans volume |
 | ~~La crème Nivea (boîte bleue) : sa composition lue~~ → `creme-nivea-composition`, 2026-10-19 | crème nivea, nivea creme, crème nivea visage | 10 k à 100 k, +900 % sur trois mois |
 | La Crème de la Mer face à sa composition (suite possible de l'article Nivea) | crème de la mer, crème de la mer avis | 1 k à 10 k ; comparatif honnête uniquement, jamais « arnaque » |
-| Rhode, la marque de Hailey Bieber : que valent ses formules ? | rhode hailey bieber, peptide lip treatment avis | 1 k à 10 k (« rhode hailey bieber », 5 zones, 19/10/2026) ; vérifier que les produits sont dans la base |
+| Rhode, la marque de Hailey Bieber : que valent ses formules ? | rhode blush, rhode glazing milk, rhode skin, peptide lip treatment | « rhode blush » et « rhode glazing milk » 10 k à 100 k (+900 % sur un an), « rhode skin » 1 k à 10 k (30/10/2026) ; **aucun produit Rhode dans la base au 30/10/2026** : sans note possible, l'article lirait les listes du site de la marque ; à reprendre si le catalogue les ajoute |
 | Fenty Skin (Rihanna) : la composition passée au crible | fenty skin avis, fenty skin composition | à mesurer |
 | Rare Beauty (Selena Gomez) : le blush liquide viral, côté ingrédients | rare beauty blush avis, rare beauty composition | à mesurer |
 | Les marques de stars vont-elles s'essouffler ? (Le Temps, 19/10/2026) | marque beauté célébrité | à mesurer |
 | Le produit TikTok du mois, décrypté (rubrique récurrente) | produit viral tiktok beauté, tiktok made me buy it | à mesurer chaque mois |
 | Les dupes : même composition, vraiment ? | dupe, dupe sephora, dupe crème | à mesurer |
-| ADN de saumon, facteurs de croissance : les tendances anti-âge bizarres | adn de saumon peau, pdrn | « pdrn » 10 k à 100 k (+900 % sur un an), « adn de saumon » 100 à 1 k ; rester sur les crèmes (sodium DNA), jamais sur les injections |
+| ~~ADN de saumon (PDRN) : ce que fait la crème~~ → `pdrn`, 2026-10-30 | pdrn, pdrn skincare, sperme de saumon, sodium dna | « pdrn » 10 k à 100 k (+900 % sur un an), « pdrn skincare » 1 k à 10 k (30/10/2026) ; resté sur les crèmes, jamais sur les injections |
 | Le « botox naturel » des réseaux : ce que dit la science | botox naturel | à mesurer ; jamais de promesse |
 | La tendance maquillage qui remplace le blush (Doctissimo, 17/10/2026) | tendance maquillage 2026 | à mesurer |
 | ~~Calendriers de l'Avent beauté : ce qu'il y a vraiment dedans~~ → `calendrier-avent-beaute`, 2026-10-22 | calendrier de l'avent beauté, calendrier de l'avent maquillage | **10 k à 100 k, +9 900 % sur trois mois** (10 zones, 21/10/2026) ; la fenêtre se ferme début décembre : à prendre au prochain jour « buzz » ; jamais de prix (les articles de presse en citent tous) |
@@ -120,3 +120,5 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 | ~~Analyser la composition d'un cosmétique en ligne~~ → `analyse-composition-cosmetique`, 2026-10-21 | analyse composition cosmétique, analyse ingrédients cosmétiques | vue sans clic : position 41 à 67 ; 100 à 1 k |
 | Cosme Check, Yuka, INCI Beauty : ce que fait chacun | yuka cosmétique, inci beauty | 100 à 1 k et 10 k à 100 k ; comparatif honnête, jamais de dénigrement |
 | Vérifier une promesse marketing (« hydratation 24 h ») | promesse cosmétique vraie | à mesurer |
+
+Au 30/10/2026, sur les dix derniers par date (de `pdrn` à `niacinamide`, `creme-nivea-composition` sort ; pas de passage le 29/10) : buzz 3 (calendrier, Biodance, PDRN), ingrédients 3 (niacinamide, comédogène, bakuchiol), routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort `niacinamide` (ingrédients) : le prochain article est donc un **ingrédient**, rétinol en tête (1 k à 10 k, suggestions « rétinol ou rétinal », « rétinol pharmacie sans ordonnance ») ou lanoline (10 k à 100 k). Rhode reste le plus gros buzz, mais ses produits ne sont pas dans la base.

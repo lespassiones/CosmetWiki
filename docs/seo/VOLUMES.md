@@ -286,3 +286,19 @@ Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (p
 | lidl yuka | 10 à 100 | 0 % | 0 % | faible | le buzz presse ne se cherche pas |
 | yuka cosmétique | 100 à 1 k | 0 % | 0 % | moyenne | confirme le 25/10 |
 | yuka ou inci beauty | 10 à 100 | | | faible | |
+
+## 2026-10-30 : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon, toutes les langues
+
+Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (pas retentée : bouton désactivé sur « Mots clés enregistrés », comme depuis le 20/10). Le plan s'ouvre sur « France » seule : `window.__inc(nom)` réécrite ce matin (champ « zone géographique » rempli en JavaScript, événement `input`, puis clic sur le premier « Inclure » dont la ligne commence par le nom suivi de « pays » ou « territoire ») ; neuf sur neuf. Réunion, Guadeloupe, Martinique, Guyane et Mayotte ne sortent pas en « pays » ou « territoire », comme les jours précédents.
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| pdrn | 10 k à 100 k | 0 % | **+900 %** | élevée | **sujet du jour** (`pdrn`) |
+| pdrn skincare | 1 k à 10 k | 0 % | +900 % | élevée | sujet du jour |
+| sperme de saumon | 100 à 1 k | 0 % | -90 % | faible | sujet du jour (le buzz people de l'été retombe) |
+| sodium dna | 100 à 1 k | 0 % | 0 % | faible | nom INCI, sujet du jour |
+| crème pdrn, pdrn crème, sérum pdrn | 10 à 100 | 0 à +900 % | 0 à +900 % | élevée | les gens tapent « pdrn » seul |
+| adn de saumon crème | pas de donnée | | | | |
+| rhode blush, rhode glazing milk | 10 k à 100 k | 0 % | +900 % | élevée | Rhode : produits pas dans la base au 30/10 |
+| rhode skin | 1 k à 10 k | 0 % | 0 % | élevée | |
+| peptide lip treatment | 100 à 1 k | 0 % | 0 % | moyenne | |
