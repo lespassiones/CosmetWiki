@@ -20,7 +20,7 @@ const article: Article = {
   chapo:
     "Un calendrier de l'Avent beauté, ce n'est pas un produit : c'est **jusqu'à 24 compositions différentes**, souvent sans leur liste d'ingrédients sous les yeux. Avant d'ouvrir la première case, quatre réflexes évitent la mauvaise surprise de décembre, et ++le dernier change la façon d'ouvrir les cases++.",
   publieLe: "2026-10-22",
-  modifieLe: "2026-10-22",
+  modifieLe: "2026-10-31",
   minutes: 7,
   theme: "calendrier de l'avent beauté",
   motsCles: [
@@ -122,6 +122,11 @@ const article: Article = {
       type: "p",
       texte:
         "Le piège, c'est d'ouvrir le rétinol le 3 décembre et l'exfoliant le 4, puis de tout mettre le même soir. Ces deux-là ensemble peuvent irriter. La règle simple : un sérum neuf, quelques soirs seuls, puis le suivant. La [niacinamide](/blog/niacinamide), elle, se mélange sans souci avec presque tout.",
+    },
+    {
+      type: "p",
+      texte:
+        "Depuis novembre 2025, une miniature au rétinol porte « Contient de la vitamine A » sur sa boîte, et ne dépasse pas 0,3 % dans un soin visage ([règlement (UE) 2024/996](https://eur-lex.europa.eu/eli/reg/2024/996/oj)). Commence-la à deux soirs par semaine ([notre guide du rétinol](/blog/retinol)).",
     },
     {
       type: "liste",

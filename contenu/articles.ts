@@ -109,6 +109,7 @@ import antiImperfections from "./articles/meilleurs-produits-anti-imperfections"
 import niacinamide from "./articles/niacinamide";
 import pdrn from "./articles/pdrn";
 import peauSecheVisage from "./articles/peau-seche-visage";
+import retinol from "./articles/retinol";
 import perturbateursEndocriniens from "./articles/perturbateurs-endocriniens-cosmetiques-2026";
 import routineFoot from "./articles/routine-peau-joueurs-foot";
 import routineSkincare from "./articles/routine-skincare";
@@ -315,6 +316,7 @@ export const ARTICLES: readonly Article[] = [
   routineSkincare,
   ceraveCremeHydratante,
   pdrn,
+  retinol,
 ];
 
 controlerRegistre(ARTICLES);
