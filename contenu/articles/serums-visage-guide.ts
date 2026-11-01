@@ -5,6 +5,12 @@ import type { Article } from "@/contenu/articles";
  * (page écrite à la main), sans changer l'adresse ni la date. Le texte passe
  * au tutoiement, comme le reste du site. Le format de ce fichier est décrit
  * en tête de `contenu/articles.ts`.
+ *
+ * Mis au niveau le 01/11/2026 par le robot éditorial : quatrième page la plus
+ * citée par Copilot (150 citations sur trois mois, Bing, « choisir sérum
+ * visage sans tester », « choisir sérum anti-âge conseils »). Chiffres sans
+ * source retirés, quatre études en lien, `h2` en questions, section « sans le
+ * tester », liens internes. Titre de résultat inchangé.
  */
 const article: Article = {
   slug: "serums-visage-guide",
@@ -15,8 +21,8 @@ const article: Article = {
   chapo:
     "Trois actifs dominent les rayons sérums : la **vitamine C**, l'**acide hyaluronique** et les **peptides**. Ils ne font ++pas la même chose++ et ne se mettent pas tous au même moment. Voici comment choisir et les combiner sans fausser leurs effets.",
   publieLe: "2026-05-18",
-  modifieLe: "2026-05-18",
-  minutes: 4,
+  modifieLe: "2026-11-01",
+  minutes: 6,
   theme: "sérum visage",
   motsCles: [
     "sérum vitamine C",
@@ -36,50 +42,51 @@ const article: Article = {
     licence: "illustration générée par IA pour Cosme Check",
   },
   blocs: [
-    { type: "h2", texte: "1. Pourquoi un sérum ?" },
+    { type: "h2", texte: "C'est quoi, un sérum visage ?" },
     {
       type: "p",
       texte:
-        "Un sérum est une **formule très concentrée en actifs** (souvent 3 à 10 fois plus qu'une crème), à la texture fluide qui pénètre vite. Il vient ==avant la crème== pour cibler un besoin précis : éclat, hydratation, rides...",
+        "Un sérum, c'est un soin fluide, souvent en flacon pipette, construit autour d'un ou deux actifs. Il se met ==avant la crème==, sur une peau propre, pour viser un besoin précis : l'éclat, l'hydratation ou les premières rides. La crème, elle, vient par-dessus pour nourrir et garder l'eau dans la peau.",
     },
     {
       type: "encadre",
       ton: "emeraude",
       titre: "Le bon réflexe",
       texte:
-        "Un seul sérum bien choisi vaut mieux que trois mal combinés. On identifie son besoin n°1, puis on choisit l'actif adapté.",
+        "Un seul sérum bien choisi vaut mieux que trois mal combinés. Choisis ton besoin numéro un, puis l'actif qui y répond.",
     },
 
-    { type: "h2", texte: "2. Vitamine C : pour l'éclat et les taches" },
+    { type: "h2", texte: "La vitamine C, à quoi ça sert ?" },
     {
       type: "p",
       texte:
-        "L'antioxydant le plus étudié en cosmétique. Il neutralise les radicaux libres causés par les UV et la pollution, et inhibe la production de mélanine responsable des taches.",
+        "La vitamine C, c'est un antioxydant : elle aide la peau à se défendre contre les dégâts du soleil et de la pollution, et elle freine la fabrication des taches brunes. C'est l'un des actifs les plus étudiés en cosmétique ([Telang, *Indian Dermatology Online Journal*, 2013](https://doi.org/10.4103/2229-5178.110593)).",
     },
     {
       type: "liste",
       style: "coches",
       items: [
-        "**Pour qui :** teint terne, taches pigmentaires, prévention anti-âge.",
-        "**Quand :** ==le matin==, sous le SPF (effet synergique avec la protection UV).",
-        "**Concentration efficace :** 10 à 20 % d'*L-ascorbic acid*, ou des dérivés stables (*Ascorbyl Glucoside, MAP, THD-ascorbate*) si peau sensible.",
-        "**Conservation :** garder loin de la lumière, jeter si la formule vire au jaune-orange foncé.",
+        "**Pour qui :** teint terne, petites taches, envie de prévenir.",
+        "**Quand :** ==le matin==, sous la crème solaire. Les deux se complètent.",
+        "**Dans la liste INCI** (la liste officielle des ingrédients, au dos) : [Ascorbic Acid](/i/ascorbic-acid), la forme pure, ou des formes plus stables et plus douces comme l'[Ascorbyl Glucoside](/i/ascorbyl-glucoside).",
+        "**Le bon dosage :** pour la forme pure, une étude sur la peau a trouvé le meilleur passage jusqu'à 20 %, avec un produit très acide ; au-delà, pas de gain ([Pinnell et al., *Dermatologic Surgery*, 2001](https://doi.org/10.1046/j.1524-4725.2001.00264.x)).",
+        "**Conservation :** à l'abri de la lumière. Si le sérum vire au jaune orangé foncé, la vitamine C s'est abîmée.",
       ],
     },
 
-    { type: "h2", texte: "3. Acide hyaluronique : pour l'hydratation" },
+    { type: "h2", texte: "L'acide hyaluronique, est-ce qu'il hydrate vraiment ?" },
     {
       type: "p",
       texte:
-        "Naturellement présent dans la peau, l'acide hyaluronique retient ==jusqu'à 1 000 fois son poids en eau==. Il regonfle la peau visiblement en quelques semaines.",
+        "Oui. L'acide hyaluronique, c'est une molécule que la peau fabrique elle-même pour retenir l'eau. Il y en a de moins en moins avec l'âge ([Papakonstantinou et al., *Dermato-Endocrinology*, 2012](https://doi.org/10.4161/derm.21923)). En sérum, il agit surtout en surface : il attire l'eau et donne une peau plus souple et plus rebondie, tant qu'on en met.",
     },
     {
       type: "liste",
       style: "coches",
       items: [
-        "**Pour qui :** toutes les peaux, surtout déshydratées, tiraillements, ridules de déshydratation.",
-        "**Quand :** matin et / ou soir, sur peau légèrement humide pour booster l'hydratation.",
-        "**À chercher dans l'INCI :** *Sodium Hyaluronate* (la forme la mieux absorbée), ou des combinaisons de petites et grandes molécules.",
+        "**Pour qui :** toutes les peaux, surtout celles qui tiraillent.",
+        "**Quand :** matin ou soir, sur une peau encore un peu humide.",
+        "**Dans la liste INCI :** [Sodium Hyaluronate](/i/sodium-hyaluronate), la forme la plus courante.",
       ],
     },
     {
@@ -87,23 +94,23 @@ const article: Article = {
       ton: "emeraude",
       titre: "Astuce",
       texte:
-        "Si tu vis dans un climat très sec, scelle ton sérum à l'acide hyaluronique avec une crème grasse par-dessus. Sinon, il peut puiser l'eau **de la peau elle-même**.",
+        "Dans un air très sec (le chauffage en hiver, le froid de Montréal), mets toujours une crème par-dessus ton acide hyaluronique. Elle garde l'eau qu'il a attirée. Si ta peau tiraille déjà, lis aussi [notre article sur la peau sèche](/blog/peau-seche-visage).",
     },
 
-    { type: "h2", texte: "4. Peptides : pour l'anti-âge" },
+    { type: "h2", texte: "Les peptides, pour qui ?" },
     {
       type: "p",
       texte:
-        "Les peptides sont de **petits fragments de protéines** qui envoient à la peau un signal de réparation : produire plus de collagène, raffermir, lisser. C'est l'alternative douce au rétinol.",
+        "Les peptides, ce sont de petits morceaux de protéines. Certains envoient à la peau le signal de fabriquer plus de collagène, la protéine qui la rend ferme. Les études existent, mais elles sont souvent petites et faites par les fabricants : l'effet est réel mais modeste ([Gorouhi et Maibach, *International Journal of Cosmetic Science*, 2009](https://doi.org/10.1111/j.1468-2494.2009.00490.x)).",
     },
     {
       type: "liste",
       style: "coches",
       items: [
-        "**Pour qui :** premières rides, perte de fermeté, peaux qui ne tolèrent pas le rétinol.",
-        "**Quand :** ==le soir==, après nettoyage. Compatible avec presque tout.",
-        "**Mots-clés INCI :** *Palmitoyl Tripeptide-1, Acetyl Hexapeptide-8 (Argireline), Copper Tripeptide-1, Matrixyl 3000*.",
-        "**Patience :** 6 à 12 semaines pour voir un effet visible, contre 2 à 4 pour la vitamine C.",
+        "**Pour qui :** premières rides, peaux qui ne supportent pas le [rétinol](/blog/retinol) (la vitamine A des crèmes anti-âge, mieux prouvée mais plus irritante).",
+        "**Quand :** le soir, après le nettoyage. Ils s'entendent avec presque tout.",
+        "**Dans la liste INCI :** [Palmitoyl Tripeptide-1](/i/palmitoyl-tripeptide-1), [Acetyl Hexapeptide-8](/i/acetyl-hexapeptide-8) (vendu sous le nom Argireline), Copper Tripeptide-1.",
+        "**Patience :** comme pour tout anti-âge, compte plusieurs semaines avant de juger.",
       ],
     },
     {
@@ -116,42 +123,67 @@ const article: Article = {
       licence: "illustration générée par IA pour Cosme Check",
     },
 
-    { type: "h2", texte: "5. Comment les combiner sans se planter" },
-    { type: "p", texte: "La règle simple, validée par la majorité des dermatologues :" },
+    { type: "h2", texte: "Comment choisir un sérum sans le tester ?" },
+    {
+      type: "p",
+      texte:
+        "Retourne le flacon. Les ingrédients sont écrits du plus dosé au moins dosé. Trois choses à regarder en dix secondes :",
+    },
+    {
+      type: "liste",
+      style: "numeros",
+      items: [
+        "L'actif promis sur le devant est-il dans la première moitié de la liste ? S'il arrive après le parfum, il est sans doute très peu dosé.",
+        "Y a-t-il du [parfum](/i/parfum) (*Parfum* ou *Fragrance*) ? Dans notre base, ==59,9 % des 15 903 sérums visage en contiennent== (relevé du 27/10/2026). Pour une peau qui réagit, c'est souvent la première chose à éviter.",
+        "Combien d'actifs forts à la fois ? Un sérum qui mélange vitamine C, rétinol et acide exfoliant (un acide qui décolle les cellules mortes) pique plus qu'il n'aide.",
+      ],
+    },
+    {
+      type: "p",
+      texte:
+        "Pour aller plus loin, notre [méthode d'analyse de composition](/blog/analyse-composition-cosmetique) détaille les cinq étapes. Et les sérums à la mode passent au même crible : le [PDRN](/blog/pdrn) ou le [bakuchiol](/blog/bakuchiol).",
+    },
+    {
+      type: "cta",
+      texte:
+        "**Ton sérum tient-il ses promesses ?** Scanne-le avec Cosme Check : tu vois la place de l'actif dans la liste, le parfum et la couleur de chaque ingrédient.",
+    },
+
+    { type: "h2", texte: "Comment combiner ses sérums sans se planter ?" },
+    {
+      type: "p",
+      texte:
+        "La règle simple : la vitamine C le matin, les actifs plus forts le soir, l'acide hyaluronique quand tu veux. L'ordre complet de la routine est dans notre article [routine skincare](/blog/routine-skincare).",
+    },
     {
       type: "tableau",
       entetes: ["Moment", "Sérum", "Pourquoi"],
       lignes: [
-        ["**Matin**", "Vitamine C", "Antioxydant qui prépare aux UV"],
-        ["**Matin ou soir**", "Acide hyaluronique", "Hydratation compatible avec tout"],
-        ["**Soir**", "Peptides", "Réparation pendant le sommeil"],
+        ["**Matin.**", "Vitamine C.", "Elle aide la peau face au soleil, sous la crème solaire."],
+        ["**Matin ou soir.**", "Acide hyaluronique.", "Il s'entend avec tout."],
+        ["**Soir.**", "Peptides ou rétinol.", "Loin de la lumière, qui abîme le rétinol."],
       ],
     },
     {
       type: "liste",
       style: "alertes",
       items: [
-        "**Vitamine C + niacinamide :** compatible en formules modernes, mais éviter de superposer deux sérums forts. Choisis l'un, pas les deux.",
-        "**Vitamine C + rétinol :** jamais en même temps. Vitamine C le matin, rétinol le soir.",
-        "**Peptides + acides exfoliants (AHA, BHA) :** les acides peuvent dégrader certains peptides. Alterne les soirs.",
+        "**Vitamine C et [niacinamide](/blog/niacinamide)** (la vitamine B3) : elles s'entendent dans les formules actuelles, mais deux sérums forts l'un sur l'autre, c'est souvent un de trop.",
+        "**Vitamine C et rétinol :** pas en même temps. La vitamine C le matin, le rétinol le soir.",
+        "**Peptides et acides exfoliants** (AHA comme l'acide glycolique, BHA comme l'acide salicylique) : alterne les soirs, les acides peuvent abîmer certains peptides.",
       ],
     },
-    {
-      type: "cta",
-      texte:
-        "**Analyse la composition de ton sérum.** Cosme Check te donne la note ingrédient par ingrédient de ton sérum, signale les actifs efficaces et les ingrédients à surveiller.",
-    },
 
-    { type: "h2", texte: "En résumé" },
+    { type: "h2", texte: "Lequel choisir, en résumé ?" },
     {
       type: "liste",
       style: "coches",
       items: [
-        "**Vitamine C** = éclat et taches. ==Le matin==, sous SPF.",
-        "**Acide hyaluronique** = hydratation. Matin ou soir, sur peau humide.",
-        "**Peptides** = anti-âge doux. ==Le soir==, après nettoyage.",
-        "Un seul sérum bien choisi > trois mal combinés.",
-        "Patience : 4 à 12 semaines pour un résultat visible.",
+        "**Teint terne ou taches :** vitamine C, le matin, sous la crème solaire.",
+        "**Peau qui tiraille :** acide hyaluronique, sur peau humide, avec une crème par-dessus.",
+        "**Premières rides, peau sensible :** peptides, le soir.",
+        "**Un seul sérum** bien choisi vaut mieux que trois mal combinés.",
+        "Le meilleur geste pour la fin : ==un sérum sans parfum, appliqué tous les jours pendant deux mois, bat n'importe quel sérum miracle oublié dans un tiroir.==",
       ],
     },
   ],
@@ -159,22 +191,22 @@ const article: Article = {
     {
       question: "Quand mettre un sérum à la vitamine C ?",
       reponse:
-        "Le matin, sous ta protection solaire : la vitamine C est un antioxydant qui neutralise les radicaux libres causés par les UV et la pollution. Vise 10 à 20 % de *L-ascorbic acid*, ou un dérivé stable si ta peau est sensible. Jette le flacon si la formule vire au jaune-orange foncé.",
+        "Le matin, sur une peau propre, avant ta crème et ta protection solaire. La vitamine C est un antioxydant : elle aide la peau à se défendre contre les dégâts du soleil et de la pollution. Garde le flacon à l'abri de la lumière, et remplace-le s'il vire au jaune orangé foncé.",
     },
     {
       question: "Comment appliquer un sérum à l'acide hyaluronique ?",
       reponse:
-        "Le matin, le soir ou les deux, sur une peau légèrement humide pour booster l'hydratation. Cherche *Sodium Hyaluronate* dans la liste INCI. Si tu vis dans un climat très sec, scelle-le avec une crème grasse par-dessus : sinon, il peut puiser l'eau de la peau elle-même.",
+        "Le matin, le soir ou les deux, sur une peau encore un peu humide, puis une crème par-dessus. Cherche *Sodium Hyaluronate* dans la liste INCI. Dans un air très sec, la crème est indispensable : elle garde dans la peau l'eau que l'acide hyaluronique a attirée.",
     },
     {
       question: "Peut-on mélanger vitamine C et rétinol ?",
       reponse:
-        "Jamais en même temps : vitamine C le matin, rétinol le soir. Avec la niacinamide, c'est compatible en formules modernes, mais évite de superposer deux sérums forts et choisis l'un des deux. Et alterne les soirs entre peptides et acides exfoliants (AHA, BHA), qui peuvent dégrader certains peptides.",
+        "Pas en même temps : la vitamine C le matin, le rétinol le soir. Avec la niacinamide, la vitamine C s'entend bien dans les formules actuelles, mais évite d'empiler deux sérums forts. Et alterne les soirs entre peptides et acides exfoliants (AHA, BHA), qui peuvent abîmer certains peptides.",
     },
     {
-      question: "Combien de temps pour voir l'effet d'un sérum ?",
+      question: "Comment choisir un sérum anti-âge ?",
       reponse:
-        "Compte 2 à 4 semaines pour la vitamine C, et 6 à 12 semaines pour les peptides. L'acide hyaluronique regonfle la peau visiblement en quelques semaines. Dans tous les cas, la patience compte, et un seul sérum bien choisi vaut mieux que trois mal combinés.",
+        "Choisis un seul actif selon ta peau : le rétinol est le mieux prouvé mais irrite au début, les peptides sont plus doux et plus modestes. Vérifie que l'actif est dans la première moitié de la liste INCI et qu'il n'y a pas de parfum. Puis donne-lui plusieurs semaines, avec une crème solaire chaque matin.",
     },
   ],
 };

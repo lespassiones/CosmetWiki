@@ -302,3 +302,17 @@ Zone affichée : « Andorre et 9 autres ». Langue : « Toutes les langues » (p
 | rhode blush, rhode glazing milk | 10 k à 100 k | 0 % | +900 % | élevée | Rhode : produits pas dans la base au 30/10 |
 | rhode skin | 1 k à 10 k | 0 % | 0 % | élevée | |
 | peptide lip treatment | 100 à 1 k | 0 % | 0 % | moyenne | |
+
+## 2026-11-01 : France seule, French (« Trouver de nouveaux mots clés », dimanche)
+
+Famille la moins fournie : **comparatifs**. Neuf mots de départ : dupe crème, meilleure eau micellaire, meilleure crème solaire visage, crème de la mer avis, cien lidl, déodorant sans aluminium efficace, cerave nettoyant, meilleur sérum vitamine c, crème visage pharmacie. Zone et langue proposées d'office par l'écran de départ (« French (par défaut) · France ») : pas retouchées, la découverte sert à repérer des idées, pas à départager deux sujets. 1 384 idées ; 95 lues (les plus pertinentes). Rien de remesuré pour le sujet du jour (grossesse, mesuré le 25/10).
+
+| Requête | Volume mensuel | Variation 3 mois | Concurrence | Remarque |
+|---|---|---|---|---|
+| cerave gel moussant | **10 k à 100 k** | -90 % | élevée | **piste comparatif** : les nettoyants CeraVe, suite de `cerave-creme-hydratante` |
+| cerave nettoyant, cerave nettoyant visage, cerave gel nettoyant, nettoyant cerave, gel moussant cerave, cerave gel moussant anti imperfection(s), cerave anti rugosités | 1 k à 10 k chacune | 0 à -90 % | élevée | même grappe : une page les prend toutes |
+| crème cien avis dermatologue | 1 k à 10 k | 0 % | **faible** | piste Lidl (presse Yuka des 26/10 et 31/10) |
+| meilleure crème solaire visage, meilleures crèmes solaires visage, meilleure creme solaire | 1 k à 10 k | -90 à -99 % | élevée | saisonnier : à écrire en avril |
+| meilleure eau micellaire, meilleur sérum vitamine c, crème visage pharmacie, cerave peau grasse, cerave acide salicylique, savon cerave | 100 à 1 k | 0 % | élevée | « meilleur sérum vitamine c » renforce `serums-visage-guide` |
+| cien lidl | 100 à 1 k | 0 % | faible | (1 k à 10 k le 28/10 sur dix zones) |
+| meilleure crème solaire visage anti âge / teintée / anti tache, selon les dermatologues | 100 à 1 k | -90 % | élevée | saisonnier |

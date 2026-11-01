@@ -54,14 +54,20 @@ Volumes mesurés le 19/10/2026 en France seule, toutes langues, puis sur cinq zo
 
 Trois fourchettes (basse, médiane, haute). Hypothèses : un article par jour sans interruption, un domaine jeune face à des magazines beauté et des sites santé très installés, un public francophone seulement, France, outre-mer, pays limitrophes et Canada (dix à cent fois plus petit que l'anglais sur les mêmes sujets), un visiteur du blog sur cent qui installe, et un buzz qui prend de temps en temps (une star, un produit viral) et fait un pic.
 
+### Recalage du 01/11/2026 (premier dimanche du mois, treize jours après le départ)
+
+Mesuré sur 28 jours au 31/10 : **33 clics Google pour tout le site, dont 4 vers le blog** ; 1 417 affichages ; huit articles entre les positions 5 et 17, mais aucun encore cliqué plus d'une fois. **198 installations** (PostHog, iOS et Android), soit plus que la fourchette haute à un mois (120) : l'app s'installe sans le blog, sur une base plus haute que prévu (une partie hors des zones visées, Cameroun et Côte d'Ivoire dans les rapports Apple). **0 clic sur un appel à télécharger** depuis le 19/10. 1 nouveau premium (29/10), 4 actifs. Bing : 29 clics et 1 400 citations Copilot sur trois mois.
+
+Ce que ça change : Google est **plus lent** que prévu sur le blog (les pages sont vues, pas cliquées), l'app **plus forte** que prévu sans lui. Les fourchettes Google descendent ; celles des installations montent sur les « autres sources » ; la part du blog reste une hypothèse tant qu'aucun appel n'est cliqué. Les tableaux ci-dessous sont les fourchettes recalées ; celles du 19/10 sont gardées entre parenthèses pour mesurer l'écart.
+
 ### Google (clics par mois vers le blog)
 
 | Horizon | Basse | Médiane | Haute |
 |---|---|---|---|
-| 1 mois | 20 | 80 | 250 |
-| 3 mois | 250 | 1 000 | 4 000 |
-| 6 mois | 1 200 | 5 000 | 18 000 |
-| 12 mois | 5 000 | 18 000 | 60 000 |
+| 1 mois | 5 (20) | 15 (80) | 40 (250) |
+| 3 mois | 80 (250) | 400 (1 000) | 1 500 (4 000) |
+| 6 mois | 500 (1 200) | 2 500 (5 000) | 9 000 (18 000) |
+| 12 mois | 3 000 (5 000) | 12 000 (18 000) | 40 000 (60 000) |
 
 Point de départ : 15 clics sur 28 jours, presque tous sur la page d'accueil.
 
@@ -69,10 +75,10 @@ Point de départ : 15 clics sur 28 jours, presque tous sur la page d'accueil.
 
 | Horizon | Venues du blog (médiane) | Autres sources (médiane) | Total (basse · médiane · haute) |
 |---|---|---|---|
-| 1 mois | 1 | 85 | 70 · 86 · 120 |
-| 3 mois | 10 | 95 | 80 · 105 · 180 |
-| 6 mois | 50 | 110 | 110 · 160 · 350 |
-| 12 mois | 180 | 130 | 180 · 310 · 800 |
+| 1 mois | 1 | 190 (85) | 150 · 190 · 250 (70 · 86 · 120) |
+| 3 mois | 5 (10) | 200 (95) | 160 · 205 · 320 (80 · 105 · 180) |
+| 6 mois | 30 (50) | 220 (110) | 180 · 250 · 500 (110 · 160 · 350) |
+| 12 mois | 120 (180) | 250 (130) | 240 · 370 · 900 (180 · 310 · 800) |
 
 Point de départ : 82 installations sur 28 jours (PostHog, `Application Installed`), dont 5 premiers téléchargements iOS dans les rapports d'Apple : l'essentiel vient d'Android. Le blog ne prend le relais qu'à partir du quatrième mois ; avant, ce qui compte est que chaque page publiée tienne ses promesses et que la mesure par emplacement dise où placer les appels.
 

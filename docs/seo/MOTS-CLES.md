@@ -97,7 +97,7 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 | Routine homme en 3 gestes | routine visage homme | à mesurer |
 | Démaquillage : huile, eau micellaire ou baume | eau micellaire ou huile démaquillante | à mesurer |
 | Le double nettoyage | double nettoyage visage | à mesurer |
-| Cosmétiques et grossesse : les ingrédients à repérer | cosmétique grossesse, cosmétique femme enceinte, produits de beauté femme enceinte | 100 à 1 k chacune, cinq variantes (25/10/2026) ; famille « pratique » plutôt que routines (scanner sa trousse pendant la grossesse) ; « parles-en à ton médecin » |
+| ~~Cosmétiques et grossesse : les ingrédients à repérer~~ → `cosmetiques-grossesse`, 2026-11-01 (famille pratique) | cosmétique grossesse, cosmétique femme enceinte, produits de beauté femme enceinte | 100 à 1 k chacune, cinq variantes (25/10/2026) |
 
 ## 4. Comparatifs honnêtes et produits du moment (1 sur 10)
 
@@ -105,8 +105,8 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 |---|---|---|
 | Meilleure crème hydratante visage (renforcer l'existant) | meilleure crème hydratante visage | vue sans clic : 231 affichages, position 68 |
 | ~~Crème CeraVe : laquelle choisir, formules comparées~~ → `cerave-creme-hydratante`, 2026-10-28 | cerave crème hydratante, crème cerave, cerave baume hydratant | 10 k à 100 k (+900 % sur un an) et 1 k à 10 k (28/10/2026) |
-| Nettoyants CeraVe : gel moussant ou crème lavante | cerave nettoyant | 1 k à 10 k (28/10/2026) |
-| Cien (Lidl) face aux marques de pharmacie, compositions lues | cien lidl, crème lidl | 1 k à 10 k et 100 à 1 k (28/10/2026) ; jamais de prix |
+| Nettoyants CeraVe : gel moussant ou crème lavante | cerave gel moussant, cerave nettoyant, cerave gel moussant anti imperfection | **« cerave gel moussant » 10 k à 100 k**, sept variantes à 1 k à 10 k (France, 01/11/2026) : **prochain comparatif** |
+| Cien (Lidl) face aux marques de pharmacie, compositions lues | cien lidl, crème lidl, crème cien avis dermatologue | 1 k à 10 k et 100 à 1 k (28/10/2026) ; « crème cien avis dermatologue » 1 k à 10 k, concurrence faible (01/11/2026) ; jamais de prix |
 | Crème visage par type de peau | crème visage | 1 k à 10 k |
 | Meilleure crème solaire visage 2027 | meilleure crème solaire visage | à mesurer ; saisonnier (avril à juillet) |
 | Eau micellaire : comparatif par composition | meilleure eau micellaire | à mesurer |
@@ -124,3 +124,5 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 Au 30/10/2026, sur les dix derniers par date (de `pdrn` à `niacinamide`, `creme-nivea-composition` sort ; pas de passage le 29/10) : buzz 3 (calendrier, Biodance, PDRN), ingrédients 3 (niacinamide, comédogène, bakuchiol), routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort `niacinamide` (ingrédients) : le prochain article est donc un **ingrédient**, rétinol en tête (1 k à 10 k, suggestions « rétinol ou rétinal », « rétinol pharmacie sans ordonnance ») ou lanoline (10 k à 100 k). Rhode reste le plus gros buzz, mais ses produits ne sont pas dans la base.
 
 Au 31/10/2026, sur les dix derniers par date (de `retinol` à `analyse-composition-cosmetique`, `niacinamide` sort) : buzz 3 (calendrier, Biodance, PDRN), ingrédients 3 (comédogène, bakuchiol, rétinol), routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort `analyse-composition-cosmetique` (pratique) : le prochain article est donc un **Cosme Check pratique**, « cosmétiques et grossesse : les ingrédients à repérer » en tête (cinq variantes à 100 à 1 k ; le rétinol et la mention « vitamine A » y ont leur place, toujours avec « parles-en à ton médecin »), sinon « scanner sa trousse de toilette ». Vu le 31/10 : Jennifer Lawrence lance une marque de soins capillaires (Cosmopolitan, Yahoo, 30 et 31/10 : à mesurer, et seulement ce qu'elle dit elle-même) ; un soin Medicube anti-points noirs viral (Le Parisien, 31/10) ; « messy girl » contre « clean girl » (Le Parisien) ; Sephora ouvre dans le Brabant wallon en janvier 2027.
+
+Au 01/11/2026, sur les dix derniers par date (de `cosmetiques-grossesse` à `calendrier-avent-beaute`, `analyse-composition-cosmetique` sort) : buzz 3 (calendrier, Biodance, PDRN), ingrédients 3 (comédogène, bakuchiol, rétinol), routines 2, comparatifs 1, pratique 1. **Le mélange est juste.** Demain sort `calendrier-avent-beaute` (buzz, 22/10) : le prochain article est donc un **buzz**. Pistes : Jennifer Lawrence et sa marque de beauté (ELLE, 31/10 : vérifier ce qu'elle dit elle-même et si les produits sont en base), le soin Medicube anti-points noirs « viral » (Le Parisien, 31/10 ; Medicube est dans la base), les soins Lidl notés sur Yuka (Top Santé, MCE TV, 31/10 ; « crème cien avis dermatologue » 1 k à 10 k : plutôt comparatif). Vu le 01/11 : « acide hyaluronique gélules danger » (suggestion neuve, sujet de complément alimentaire : à écarter), Australie et le scandale des tests SPF (à garder pour le printemps).

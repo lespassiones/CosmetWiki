@@ -21,7 +21,7 @@ const article: Article = {
   chapo:
     "Le PDRN, c'est de l'ADN tiré de la laitance de saumon, et dans une crème il agit surtout comme un hydratant. Ses effets « régénérants » ont été étudiés en injection, pas en crème. On a lu les 612 produits qui en contiennent dans notre base : ++dans 9 cas sur 10, la niacinamide est plus dosée que lui++.",
   publieLe: "2026-10-30",
-  modifieLe: "2026-10-30",
+  modifieLe: "2026-11-01",
   minutes: 7,
   theme: "pdrn",
   motsCles: [
@@ -133,7 +133,7 @@ const article: Article = {
       type: "tableau",
       entetes: ["Produit", "Place du PDRN", "Note Cosme Check"],
       lignes: [
-        ["Medicube, PDRN Pink Cica Soothing Toner (lotion tonique).", "8e sur 35.", "16,73 sur 20."],
+        ["Medicube, PDRN Pink Cica Soothing Toner (lotion tonique).", "8e sur 35.", "16,68 sur 20."],
         ["Anua, PDRN Glow Moisture Serum.", "18e sur 34.", "12,55 sur 20."],
         ["VT Cosmetics, PDRN Reedle Shot 100.", "41e sur 53.", "12,44 sur 20."],
         ["Anua, PDRN Hyaluronic Acid 100 Moisturising Cream.", "7e sur 48.", "8,26 sur 20."],
@@ -142,7 +142,7 @@ const article: Article = {
         ["Medicube, PDRN Pink Hyaluronic Moisturizing Cream.", "29e sur 58.", "4,08 sur 20."],
       ],
       legende:
-        "Listes et notes relevées dans la base Cosme Check le 30/10/2026. [Comment l'app note un produit](/comment-ca-marche).",
+        "Listes et notes relevées dans la base Cosme Check le 30/10/2026 (note Medicube mise à jour le 01/11/2026). [Comment l'app note un produit](/comment-ca-marche).",
     },
     {
       type: "p",
@@ -190,7 +190,7 @@ const article: Article = {
     {
       question: "PDRN Medicube ou Anua : lequel choisir ?",
       reponse:
-        "Ça dépend du produit, pas de la marque. Dans la base Cosme Check, la lotion tonique PDRN Pink Cica de Medicube a 16,73 sur 20 et le sérum Glow d'Anua 12,55 sur 20. Leurs crèmes PDRN les plus connues tournent autour de 8 sur 20, à cause de polymères de synthèse. Scanne celui que tu vises.",
+        "Ça dépend du produit, pas de la marque. Dans la base Cosme Check, la lotion tonique PDRN Pink Cica de Medicube a 16,68 sur 20 et le sérum Glow d'Anua 12,55 sur 20. Leurs crèmes PDRN les plus connues tournent autour de 8 sur 20, à cause de polymères de synthèse. Scanne celui que tu vises.",
     },
     {
       question: "Le PDRN convient-il aux peaux sensibles ?",
@@ -207,8 +207,8 @@ const article: Article = {
     {
       produit: "Medicube, PDRN Pink Cica Soothing Toner",
       ean: "8800289474897",
-      note: 16.73,
-      releveeLe: "2026-10-30",
+      note: 16.68,
+      releveeLe: "2026-11-01",
     },
     {
       produit: "Anua, PDRN Glow Moisture Serum",
