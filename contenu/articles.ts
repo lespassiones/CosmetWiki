@@ -105,6 +105,7 @@ import deodorantAluminium from "./articles/deodorant-sels-aluminium-verite";
 import lipOils from "./articles/lip-oils-huiles-levres";
 import masqueBiodance from "./articles/masque-biodance";
 import masqueLed from "./articles/masque-led-visage";
+import medicubeZeroPorePad from "./articles/medicube-zero-pore-pad";
 import meilleuresCremesHydratantes from "./articles/meilleures-cremes-hydratantes-visage";
 import antiImperfections from "./articles/meilleurs-produits-anti-imperfections";
 import niacinamide from "./articles/niacinamide";
@@ -319,6 +320,7 @@ export const ARTICLES: readonly Article[] = [
   pdrn,
   retinol,
   cosmetiquesGrossesse,
+  medicubeZeroPorePad,
 ];
 
 controlerRegistre(ARTICLES);

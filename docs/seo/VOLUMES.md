@@ -316,3 +316,19 @@ Famille la moins fournie : **comparatifs**. Neuf mots de départ : dupe crème, 
 | meilleure eau micellaire, meilleur sérum vitamine c, crème visage pharmacie, cerave peau grasse, cerave acide salicylique, savon cerave | 100 à 1 k | 0 % | élevée | « meilleur sérum vitamine c » renforce `serums-visage-guide` |
 | cien lidl | 100 à 1 k | 0 % | faible | (1 k à 10 k le 28/10 sur dix zones) |
 | meilleure crème solaire visage anti âge / teintée / anti tache, selon les dermatologues | 100 à 1 k | -90 % | élevée | saisonnier |
+
+## 2026-11-02 : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon, toutes les langues
+
+Zone affichée : « Andorre et 9 autres » (dix zones, le plafond du Planificateur : « Votre plan ne peut pas contenir plus de 10 zones géographiques » ; Réunion, Guadeloupe, Martinique, Guyane et Mayotte n'ont donc pas été tentées). Langue : « Toutes les langues » (pas retentée : bouton désactivé sur « Mots clés enregistrés », comme depuis le 20/10). Carte ouverte par coordonnées, liste collée en JavaScript, `material-button.submit-button` cliqué en JavaScript. ⚠️ `window.__inc` doit viser le champ par `offsetParent !== null` et sans `aria-label` (le champ n'a plus de `placeholder` lisible) ; la boucle sur les quatorze zones a fait geler l'onglet 45 s au-delà de la dixième, mais les dix premières étaient prises : enregistrer par la référence du bouton « Enregistrer » (`find`).
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| medicube | 100 k à 1 M | 0 % | **+900 %** | élevée | marque, trop large |
+| medicube zero pore pad | **10 k à 100 k** | 0 % | **+900 %** | élevée | **sujet du jour** (`medicube-zero-pore-pad`) |
+| medicube avis | 1 k à 10 k | 0 % | +900 % | élevée | sujet du jour |
+| rare beauty blush | 10 k à 100 k | 0 % | 0 % | élevée | maquillage de star (Selena Gomez) ; composition peu parlante |
+| produits lidl | 1 k à 10 k | 0 % | 0 % | faible | piste Lidl et Yuka (comparatif) |
+| crème cien, cien crème de jour | 100 à 1 k | 0 % | +900 % (crème cien) | élevée | piste Lidl : 1 418 produits Cien en base |
+| crème cien avis | 100 à 1 k | +900 % | 0 % | faible | piste Lidl |
+| shampooing cien | 100 à 1 k | 0 % | 0 % | moyenne | piste Lidl (shampooings Cien : médiane 7,54) |
+| cien avis, cien visage | 10 à 100 | | | | |

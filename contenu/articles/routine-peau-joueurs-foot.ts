@@ -19,8 +19,8 @@ const article: Article = {
   chapo:
     "Pendant la **Coupe du monde**, leurs visages passent en gros plan des centaines de fois par match. Et beaucoup l'ont compris : une peau nette, c'est aussi une image de marque. Mais derrière les routines impressionnantes des stars, ++l'essentiel tient en 3 gestes++ accessibles à tout le monde, pas besoin d'un contrat à 200 millions.",
   publieLe: "2026-06-17",
-  modifieLe: "2026-06-17",
-  minutes: 4,
+  modifieLe: "2026-11-02",
+  minutes: 5,
   theme: "routine peau footballeur",
   motsCles: [
     "soin visage homme",
@@ -40,14 +40,19 @@ const article: Article = {
     licence: "illustration générée par IA pour Cosme Check",
   },
   blocs: [
-    { type: "h2", texte: "1. Pourquoi les joueurs soignent (vraiment) leur peau" },
+    { type: "h2", texte: "Pourquoi les footballeurs soignent leur peau ?" },
+    {
+      type: "p",
+      texte:
+        "Parce que leur peau encaisse beaucoup, et que leur visage passe en gros plan. Soleil, sueur, douches répétées, avion : tout ce qui abîme une peau, un joueur le vit chaque semaine. Bonne nouvelle, la tienne vit la même chose à plus petite dose, à la salle de sport, au stade ou en vacances.",
+    },
     {
       type: "liste",
       style: "coches",
       items: [
-        "**Le soleil et la sueur :** entraînements en plein air, transpiration permanente, douches répétées… la barrière cutanée prend cher. Sans protection, ça donne teint terne, déshydratation et imperfections.",
-        "**Les voyages incessants :** avion, décalage horaire, air sec des hôtels. La peau se déshydrate vite, exactement comme pour n'importe quel grand voyageur.",
-        "**L'exposition médiatique :** caméras 4K, sponsoring beauté, réseaux sociaux. Plusieurs stars ont lancé ou prêté leur image à des marques de soin : ==David Beckham avec House 99== en est l'exemple le plus connu ([annonce de L'Oréal, 2018](https://www.loreal.com/en/news/brands/david-beckham-partners-with-loreal-and-launches-house-99/)).",
+        "**Le soleil et la sueur :** entraînements en plein air, transpiration, douches répétées. La barrière de la peau, ce film de gras et de cellules qui retient l'eau, s'use plus vite. Résultat : teint terne, tiraillements, parfois des boutons.",
+        "**Les voyages :** l'air de l'avion et des hôtels est sec. La peau perd son eau, comme chez n'importe quel grand voyageur.",
+        "**L'image :** caméras, sponsors, réseaux sociaux. Certaines stars ont même leur marque de soins : ==David Beckham a lancé House 99== avec L'Oréal ([annonce de L'Oréal, 2018](https://www.loreal.com/en/news/brands/david-beckham-partners-with-loreal-and-launches-house-99/)).",
       ],
     },
     {
@@ -55,31 +60,31 @@ const article: Article = {
       ton: "rose",
       titre: "Le vrai parallèle",
       texte:
-        "Ce que vit la peau d'un joueur (soleil + sueur + fatigue) est exactement ce que vit la tienne en été, à la salle de sport ou en festival. La routine est ==transposable à 100 %==.",
+        "Soleil, sueur, fatigue : c'est ce que vit ta peau en été, après le sport ou en festival. La routine des pros se copie ==telle quelle==.",
     },
 
-    { type: "h2", texte: "2. Ce qu'ils utilisent vraiment (sans le marketing)" },
+    { type: "h2", texte: "Qu'est-ce qu'une routine de sportif contient vraiment ?" },
     {
       type: "p",
       texte:
-        "Au-delà des marques de stars, les routines partagées par les dermatologues du sport et les préparateurs reviennent toujours aux mêmes familles de produits :",
+        "Trois produits, pas dix. Les routines qui marchent tournent autour des mêmes familles, et chacune a un rôle simple.",
     },
     {
       type: "liste",
       style: "coches",
       items: [
-        "**Un nettoyant doux** matin et soir pour éliminer sueur et sébum sans décaper.",
-        "**Une crème hydratante légère**, souvent un gel ou une émulsion non grasse, adaptée aux peaux qui transpirent.",
-        "**Une protection solaire SPF 50** systématique : c'est ++le geste anti-âge n°1++, et le plus négligé chez les hommes.",
-        "**Parfois un actif ciblé :** vitamine C le matin (éclat), rétinol ou acide le soir (texture, marques).",
+        "**Un nettoyant doux**, matin et soir, pour enlever la sueur et le sébum (le gras naturel de la peau) sans la décaper.",
+        "**Une crème hydratante légère**, en gel ou en émulsion non grasse, qui ne colle pas sur une peau qui transpire.",
+        "**Une crème solaire SPF 50** chaque matin. Le SPF, c'est l'indice de protection contre les coups de soleil. Une étude australienne l'a mesuré : ceux qui en mettaient chaque jour avaient ++24 % de signes de vieillissement en moins++ après quatre ans et demi ([Hughes et al., *Annals of Internal Medicine*, 2013](https://pubmed.ncbi.nlm.nih.gov/23732711/)).",
+        "**Parfois un actif**, c'est-à-dire l'ingrédient qui fait le travail promis : de la vitamine C le matin, du [rétinol](/blog/retinol) ou un acide le soir, jamais les deux le même soir.",
       ],
     },
     {
       type: "liste",
       style: "alertes",
       items: [
-        "Méfie-toi des routines **« 10 étapes »** postées sur les réseaux : spectaculaires, mais souvent du contenu sponsorisé. Plus de produits ≠ meilleure peau.",
-        "Les **parfums forts** dans les soins masculins (after-shave, gels « fraîcheur ») irritent les peaux déjà agressées par la sueur.",
+        "Méfie-toi des routines en **10 étapes** sur les réseaux : spectaculaires, mais souvent sponsorisées. Plus de produits ne veut pas dire une meilleure peau.",
+        "Les **parfums forts** des soins « pour hommes » (après-rasage, gels « fraîcheur ») irritent une peau déjà fatiguée par la sueur.",
       ],
     },
     {
@@ -92,14 +97,19 @@ const article: Article = {
       licence: "illustration générée par IA pour Cosme Check",
     },
 
-    { type: "h2", texte: "3. La routine « niveau pro » en 3 minutes par jour" },
+    { type: "h2", texte: "Quelle routine copier en 3 minutes par jour ?" },
+    {
+      type: "p",
+      texte:
+        "Celle-ci, qui tient en trois moments. L'ordre suit la règle de toute [routine skincare](/blog/routine-skincare) : du plus léger au plus épais, et la crème solaire en dernier le matin.",
+    },
     {
       type: "tableau",
       entetes: ["Moment", "Geste", "Pourquoi"],
       lignes: [
-        ["**Matin**", "Nettoyant + hydratant + SPF 50", "Protège du soleil et de la pollution toute la journée"],
-        ["**Après sport**", "Rinçage à l'eau + hydratant léger", "Évite boutons et tiraillements liés à la sueur"],
-        ["**Soir**", "Nettoyant + (1 soir / 2) actif", "Régénération nocturne, texture et marques"],
+        ["**Matin.**", "Nettoyant, hydratant, SPF 50.", "Protège du soleil toute la journée."],
+        ["**Après le sport.**", "Rinçage à l'eau, hydratant léger.", "Enlève la sueur et évite les tiraillements."],
+        ["**Soir.**", "Nettoyant, et un soir sur deux un actif.", "Travaille la texture et les marques."],
       ],
     },
     {
@@ -107,43 +117,44 @@ const article: Article = {
       ton: "rose",
       titre: "Astuce terrain",
       texte:
-        "Tu transpires beaucoup ? Garde un ==SPF en stick== ou une brume dans ton sac pour réappliquer à la mi-temps, exactement ce que font les staffs médicaux pour les joueurs sur le banc.",
+        "Tu transpires beaucoup ? Garde un ==SPF en stick== dans ton sac et remets-en à la pause. La crème solaire part avec la sueur et le frottement de la serviette. Les [7 erreurs qui divisent ton SPF](/blog/spf-50-visage-7-erreurs) disent combien en mettre.",
     },
 
-    { type: "h2", texte: "4. Les ingrédients qui comptent vraiment" },
+    { type: "h2", texte: "Quels ingrédients chercher dans un soin pour sportif ?" },
     {
       type: "liste",
       style: "coches",
       items: [
-        "**Niacinamide :** régule le sébum et apaise, parfait pour les peaux qui transpirent.",
-        "**Acide hyaluronique :** réhydrate sans graisser, idéal après l'effort et les voyages.",
-        "**Filtres solaires modernes** (*Tinosorb, Uvinul*) : large spectre, texture légère, pas d'effet blanc.",
-        "**Vitamine C (*Ascorbic acid*) :** coup d'éclat anti-teint terne, antioxydant.",
+        "**[Niacinamide](/i/niacinamide) :** c'est la vitamine B3, qui aide la peau à garder son eau et à rester nette. Notre [guide de la niacinamide](/blog/niacinamide) détaille ce qu'elle fait vraiment.",
+        "**Acide hyaluronique ([Sodium Hyaluronate](/i/sodium-hyaluronate)) :** il retient l'eau sans graisser, pratique après l'effort et l'avion.",
+        "**Filtres solaires récents**, comme le [Tinosorb S](/i/bis-ethylhexyloxyphenol-methoxyphenyl-triazine) : ils couvrent les UVA et les UVB, sans laisser de traces blanches.",
+        "**Vitamine C ([Ascorbic Acid](/i/ascorbic-acid)) :** un antioxydant qui redonne de l'éclat à un teint terne.",
       ],
     },
     {
       type: "liste",
       style: "alertes",
       items: [
-        "**Alcool dénaturé (*Alcohol denat.*) en tête de liste :** dessèche, fréquent dans les soins « pour hommes ».",
-        "**Parfum (*Parfum / Fragrance*) très présent :** première cause d'allergie cosmétique.",
+        "**Alcool dénaturé ([Alcohol Denat.](/i/alcohol-denat-)) en tête de liste :** il dessèche, et on le croise souvent dans les soins « pour hommes ».",
+        "**[Parfum](/i/parfum) très présent :** c'est l'une des causes les plus fréquentes d'allergie aux cosmétiques, selon le comité d'experts de la Commission européenne ([SCCS, 2012](https://ec.europa.eu/health/scientific_committees/consumer_safety/docs/sccs_o_102.pdf)).",
+        "**Crème trop riche sur une peau à boutons :** vérifie ce que veut dire [« comédogène »](/blog/comedogene) avant de choisir.",
       ],
     },
     {
       type: "cta",
       texte:
-        "**Scanne le soin que tu utilises déjà.** Avant d'acheter la crème « du joueur préféré », vérifie sa vraie composition avec Cosme Check : note ingrédient par ingrédient, alerte sur l'alcool et les parfums, et alternatives plus propres.",
+        "**Scanne le soin que tu utilises déjà.** Avant d'acheter la crème « du joueur préféré », vérifie sa composition avec Cosme Check : la couleur de chaque ingrédient, l'alcool et le parfum repérés en dix secondes.",
     },
 
-    { type: "h2", texte: "En résumé" },
+    { type: "h2", texte: "Ce qu'il faut retenir" },
     {
       type: "liste",
       style: "coches",
       items: [
-        "La peau nette des stars du foot tient à ==3 gestes==, pas à 10 produits hors de prix.",
-        "**Nettoyant doux + hydratant léger + SPF 50** : la base qui marche pour 90 % des hommes.",
-        "Soleil et sueur abîment ta peau exactement comme la leur : la protection solaire est non négociable.",
-        "Méfie-toi du marketing « star » : c'est l'INCI qui compte, pas le nom sur le flacon.",
+        "La peau nette des pros tient à ==3 gestes==, pas à 10 produits.",
+        "**Nettoyant doux, hydratant léger, SPF 50** : la base, quel que soit ton sport.",
+        "En hiver, quand le froid s'ajoute à la sueur, passe à une crème un peu plus riche : notre guide de la [peau sèche](/blog/peau-seche-visage) explique comment.",
+        "Méfie-toi du marketing « star » : c'est la liste INCI qui compte, pas le nom sur le flacon. La liste INCI, c'est la liste officielle des ingrédients, du plus dosé au moins dosé.",
       ],
     },
   ],
@@ -161,12 +172,12 @@ const article: Article = {
     {
       question: "Quels ingrédients éviter dans un soin pour homme ?",
       reponse:
-        "Méfie-toi de l'alcool dénaturé (*Alcohol denat.*) en tête de liste : il dessèche, et il revient souvent dans les soins « pour hommes ». Surveille aussi le parfum (*Parfum* ou *Fragrance*) très présent, première cause d'allergie cosmétique, surtout sur une peau déjà agressée par la sueur.",
+        "Méfie-toi de l'alcool dénaturé (*Alcohol denat.*) en tête de liste : il dessèche, et il revient souvent dans les soins « pour hommes ». Surveille aussi le parfum (*Parfum* ou *Fragrance*) très présent : c'est l'une des causes les plus fréquentes d'allergie aux cosmétiques, surtout sur une peau déjà agressée par la sueur.",
     },
     {
       question: "Faut-il mettre de la crème solaire quand on fait du sport ?",
       reponse:
-        "Oui. Un SPF 50 chaque matin est le geste anti-âge numéro un, et le plus négligé chez les hommes. Si tu transpires beaucoup, garde un SPF en stick ou une brume dans ton sac pour en remettre pendant la pause, comme les joueurs à la mi-temps.",
+        "Oui. Un SPF 50 chaque matin protège des coups de soleil et du vieillissement : dans une étude australienne de 2013, ceux qui en mettaient tous les jours avaient 24 % de signes de vieillissement en moins. Si tu transpires beaucoup, garde un SPF en stick dans ton sac et remets-en pendant la pause.",
     },
   ],
 };
