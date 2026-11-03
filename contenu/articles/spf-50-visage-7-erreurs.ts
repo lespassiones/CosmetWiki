@@ -5,6 +5,14 @@ import type { Article } from "@/contenu/articles";
  * (page écrite à la main), sans changer l'adresse ni la date. Le texte passe
  * au tutoiement, comme le reste du site. Le format de ce fichier est décrit
  * en tête de `contenu/articles.ts`.
+ *
+ * Retouché le 03/11/2026 par le robot éditorial : l'article le plus lié du
+ * blog (seize articles pointent vers lui) n'avait aucun lien sortant ni
+ * source pour ses chiffres. Retirés faute de source : « 80 % des gens »,
+ * « comme un SPF 7 », « SPF 4-5 », « 80 % des signes du vieillissement »,
+ * et deux produits présentés comme « ressortant bien à l'analyse » sans note
+ * relevée. Ajoutés : Faurschou et Wulf 2007, FDA, Downs 2021, règlement
+ * (UE) 2022/1176, Hughes 2013, `h2` en questions, liens internes.
  */
 const article: Article = {
   slug: "spf-50-visage-7-erreurs",
@@ -13,10 +21,10 @@ const article: Article = {
   resume:
     "Quantité, réapplication, filtres, hiver, parfum : les 7 erreurs qui font d'un SPF 50 visage une protection au rabais, et la bonne méthode.",
   chapo:
-    "**80 % des gens appliquent leur crème solaire de la mauvaise façon**, et le SPF devient presque inutile. Une seule erreur (dose, moment, filtre) peut transformer un SPF 50 en SPF 7. Voici les 7 plus fréquentes, et la bonne méthode pour vraiment protéger ton visage.",
+    "Un SPF 50 ne protège comme promis que si tu en mets assez, et que tu en remets. Le SPF, c'est l'indice de protection contre les coups de soleil, mesuré en laboratoire avec une dose que presque personne n'applique. Voici les 7 erreurs les plus fréquentes, et la bonne méthode pour vraiment protéger ton visage.",
   publieLe: "2026-04-15",
-  modifieLe: "2026-04-15",
-  minutes: 5,
+  modifieLe: "2026-11-03",
+  minutes: 6,
   theme: "crème solaire visage SPF 50",
   motsCles: [
     "crème solaire visage",
@@ -36,65 +44,73 @@ const article: Article = {
     licence: "illustration générée par IA pour Cosme Check",
   },
   blocs: [
-    { type: "h2", texte: "Erreur 1 : mettre trop peu de produit" },
+    { type: "h2", texte: "Erreur 1 : combien de crème solaire faut-il mettre ?" },
     {
       type: "p",
       texte:
-        "Le SPF est calculé en labo avec ==2 mg de crème par cm² de peau==. Soit, pour un visage adulte, **deux longueurs de doigt** (index + majeur) ou une **demi-cuillère à café**. La plupart des gens en mettent 2 à 3 fois moins.",
+        "Le SPF est mesuré en laboratoire avec ==2 mg de crème par cm² de peau==. Pour un visage adulte, ça fait **deux longueurs de doigt** (index et majeur), soit environ une demi-cuillère à café. La plupart des gens en mettent beaucoup moins.",
+    },
+    {
+      type: "p",
+      texte:
+        "Le problème, c'est que la protection ne baisse pas au même rythme que la dose. Dans une étude sur des volontaires, appliquer 0,5 ou 1 mg par cm² a fait chuter le SPF bien plus que de moitié ([Faurschou et Wulf, *British Journal of Dermatology*, 2007](https://doi.org/10.1111/j.1365-2133.2006.07684.x)). Une demi-dose ne donne donc pas une demi-protection, mais bien moins.",
     },
     {
       type: "liste",
       style: "coches",
       items: [
-        "À moitié dose, le SPF protège ==comme un SPF 7== (pas 25 : la relation n'est pas linéaire).",
-        "Mesure ta dose sur les doigts, étale en deux temps (visage, puis cou + oreilles + racine des cheveux).",
-        "Texture gel ou fluide si la quantité gêne (ex. *Heliocare 360 Water Gel*).",
+        "Mesure ta dose sur deux doigts, puis étale en deux temps : le visage d'abord, puis le cou, les oreilles et la racine des cheveux.",
+        "Si la quantité te gêne, choisis une texture fluide ou gel : elle s'étale mieux et se sent moins.",
       ],
     },
 
-    { type: "h2", texte: "Erreur 2 : ne pas remettre en cours de journée" },
+    { type: "h2", texte: "Erreur 2 : faut-il remettre de la crème solaire dans la journée ?" },
     {
       type: "p",
       texte:
-        "Le SPF se dégrade : oxydation UV, transpiration, frottements. Après ==2 heures d'exposition==, sa protection effective chute fortement, même pour les formules tenaces.",
+        "Oui. La sueur, l'eau, les frottements et les mains sur le visage emportent le produit. L'agence américaine du médicament conseille d'en remettre ==au moins toutes les deux heures== quand on est dehors, et plus souvent après la baignade ou une forte transpiration ([FDA, « Sun Protection »](https://www.fda.gov/consumers/consumer-updates/tips-stay-safe-sun-sunscreen-sunglasses)).",
     },
     {
       type: "encadre",
       ton: "rose",
       titre: "La solution",
       texte:
-        "Utilise un format **poudre, brume ou stick** (par exemple *Isdin Mineral Brush SPF 50*) qui se réapplique par-dessus le maquillage en quelques secondes. Une fois à 13 h pour une journée de bureau, deux fois en extérieur.",
+        "Un format **poudre, brume ou stick** se remet par-dessus le maquillage en quelques secondes. Une fois en milieu de journée au bureau, toutes les deux heures dehors.",
     },
 
-    { type: "h2", texte: "Erreur 3 : choisir un SPF aux filtres problématiques" },
-    { type: "p", texte: "Tous les SPF 50 ne se valent pas. Les filtres à surveiller :" },
+    { type: "h2", texte: "Erreur 3 : quels filtres solaires surveiller ?" },
+    {
+      type: "p",
+      texte:
+        "Tous les SPF 50 ne se valent pas. Un filtre, c'est l'ingrédient qui arrête les UV. Sur la liste INCI (la liste officielle des ingrédients, du plus dosé au moins dosé), trois noms font débat :",
+    },
     {
       type: "liste",
       style: "alertes",
       items: [
-        "**Oxybenzone (Benzophenone-3)** : suspecté perturbateur endocrinien (le comité scientifique européen n'a pas pu trancher dans son [avis de 2021](https://health.ec.europa.eu/publications/benzophenone-3_en), et l'Europe en a limité la dose), interdit à Hawaï pour son impact sur les coraux.",
-        "**Octocrylène** : peut se dégrader en benzophénone (cancérogène possible) avec le temps.",
-        "**Homosalate, Octinoxate** : pénètrent la peau, sous surveillance européenne.",
+        "**[Benzophenone-3](/i/benzophenone-3)** (oxybenzone) : suspecté d'agir comme perturbateur endocrinien, c'est-à-dire de dérégler les hormones. Le comité scientifique européen n'a pas pu trancher dans son [avis de 2021](https://health.ec.europa.eu/publications/benzophenone-3_en), et l'Europe a réduit sa dose maximale ([règlement (UE) 2022/1176](https://eur-lex.europa.eu/eli/reg/2022/1176/oj)).",
+        "**[Octocrylene](/i/octocrylene)** : il peut se dégrader lentement en benzophénone dans le flacon, surtout dans un produit qui vieillit ([Downs et al., *Chemical Research in Toxicology*, 2021](https://doi.org/10.1021/acs.chemrestox.0c00461)). L'Europe le juge sûr, mais l'a limité à 10 % dans le même règlement de 2022.",
+        "**[Homosalate](/i/homosalate)** : sa dose maximale a été réduite à 7,34 % dans un soin visage par ce règlement de 2022.",
       ],
     },
     {
       type: "p",
       texte:
-        "À l'inverse, les filtres modernes (**Tinosorb S, Mexoryl 400, Uvinul A Plus**) sont stables, sûrs et efficaces. Le bon angle n'est pas « chimique ou minéral » mais « ++quels filtres précis++ ».",
+        "Le bon réflexe n'est donc pas « chimique ou minéral », mais « ++quels filtres précis, et à quelle place dans la liste++ ». Notre article sur [les perturbateurs endocriniens](/blog/perturbateurs-endocriniens-cosmetiques-2026) détaille le statut européen de chacun.",
     },
 
-    { type: "h2", texte: "Erreur 4 : croire que le maquillage SPF suffit" },
+    { type: "h2", texte: "Erreur 4 : le maquillage avec SPF suffit-il ?" },
     {
       type: "p",
       texte:
-        "Un fond de teint affiché SPF 30 ne protège que si on en met ==une demi-cuillère à café sur le visage==. Personne ne fait ça. En usage réel, la protection effective tombe à **SPF 4-5**.",
+        "Rarement. Un fond de teint « SPF 30 » ne protège comme annoncé que si on en met ==autant qu'une crème solaire==, soit une demi-cuillère à café. Personne ne se maquille avec une telle couche. Avec la dose habituelle, et vu l'erreur 1, la protection réelle est bien plus faible que le chiffre.",
     },
     {
       type: "encadre",
       ton: "rose",
       titre: "La solution",
       texte:
-        "Le maquillage SPF est un **bonus**, pas la couche principale. La routine reste : sérum → crème → SPF 50 dédié → maquillage par-dessus.",
+        "Le maquillage avec SPF est un **bonus**, pas la couche principale. L'ordre reste : sérum, crème, crème solaire, puis maquillage par-dessus. Notre [routine skincare](/blog/routine-skincare) le détaille étape par étape.",
     },
     {
       type: "image",
@@ -106,48 +122,57 @@ const article: Article = {
       licence: "illustration générée par IA pour Cosme Check",
     },
 
-    { type: "h2", texte: "Erreur 5 : ne pas mettre de SPF en hiver" },
+    { type: "h2", texte: "Erreur 5 : faut-il mettre de la crème solaire en hiver ?" },
     {
       type: "p",
       texte:
-        "Les **UVA traversent les nuages et les vitres** toute l'année. Ce sont eux qui causent ==80 % des signes visibles du vieillissement== (taches, perte de fermeté, rides), pas l'âge en lui-même.",
+        "Oui. Les UVA, les rayons qui vieillissent la peau, traversent les nuages et les vitres toute l'année. Un essai australien a suivi 903 adultes pendant quatre ans ([Hughes et al., *Annals of Internal Medicine*, 2013](https://pubmed.ncbi.nlm.nih.gov/23732711/)). Ceux qui mettaient une crème solaire chaque jour avaient ==24 % de signes de vieillissement en moins== que ceux qui en mettaient à leur guise.",
+    },
+    {
+      type: "p",
+      texte:
+        "C'est encore plus vrai si tu utilises un actif qui rend la peau plus sensible au soleil, comme le [rétinol](/blog/retinol) ou un acide exfoliant. Et sur la neige ou en altitude, le soleil d'hiver tape fort, des Alpes aux pistes du Québec.",
     },
     {
       type: "encadre",
       ton: "rose",
       titre: "La solution",
       texte:
-        "SPF 30-50 quotidien, ++365 jours par an++. En hiver, une texture hydratante ou une crème teintée fait double emploi sans alourdir.",
+        "Un SPF 30 à 50 chaque matin, ++toute l'année++. En hiver, une crème solaire hydratante ou teintée fait double emploi. Si ta peau tiraille avec le froid, lis [nos gestes pour la peau sèche](/blog/peau-seche-visage).",
     },
 
-    { type: "h2", texte: "Erreur 6 : choisir au parfum, pas à la composition" },
+    { type: "h2", texte: "Erreur 6 : pourquoi éviter le parfum dans une crème solaire visage ?" },
     {
       type: "p",
       texte:
-        "Le parfum est l'un des premiers facteurs d'irritation et d'allergie cutanée. Certains composants parfumants sont aussi **photosensibilisants** : ils provoquent des taches ou des rougeurs sous UV, précisément là où tu voulais te protéger.",
+        "Le [parfum](/i/parfum) est l'une des premières causes d'allergie aux cosmétiques. Certains de ses composants peuvent aussi réagir à la lumière et marquer la peau, précisément là où tu voulais la protéger.",
     },
     {
       type: "encadre",
       ton: "rose",
       titre: "La solution",
       texte:
-        "Privilégie une formule **sans parfum** sur le visage (mention « fragrance-free » ou absence de « Parfum/Fragrance » dans l'INCI). Garde les parfums solaires pour le corps.",
+        "Sur le visage, choisis une formule **sans parfum** : vérifie l'absence de « Parfum » ou « Fragrance » dans la liste INCI. Garde les crèmes parfumées pour le corps, si tu y tiens.",
     },
 
-    { type: "h2", texte: "Erreur 7 : confondre SPF minéral et chimique" },
-    { type: "p", texte: "Le sujet le plus mal expliqué de la cosmétique solaire. Petit récap visuel :" },
+    { type: "h2", texte: "Erreur 7 : crème solaire minérale ou chimique, laquelle choisir ?" },
+    {
+      type: "p",
+      texte:
+        "Aucune n'est meilleure par nature. Les filtres minéraux (oxyde de zinc, dioxyde de titane) réfléchissent et absorbent les UV ; les filtres chimiques les absorbent. Petit récapitulatif.",
+    },
     {
       type: "tableau",
-      entetes: ["Type", "Mécanisme", "Avantage", "Limite"],
+      entetes: ["Type", "Comment il agit", "Avantage", "Limite"],
       lignes: [
-        ["**Minéral**", "Réfléchit les UV", "Bien toléré, grossesse / enfant", "Fini blanc, texture pâteuse"],
-        ["**Chimique**", "Absorbe les UV", "Texture invisible et fluide", "Selon la molécule choisie (cf. erreur 3)"],
+        ["**Minéral**.", "Il fait écran aux UV.", "Bien toléré par les peaux réactives.", "Fini souvent blanc, texture plus épaisse."],
+        ["**Chimique**.", "Il absorbe les UV.", "Texture invisible et fluide.", "Dépend du filtre choisi (voir l'erreur 3)."],
       ],
     },
     {
       type: "p",
       texte:
-        "Ni l'un ni l'autre n'est meilleur par nature. **Un Tinosorb moderne est aussi sûr** qu'un minéral classique. Ce qui compte : la liste INCI et la stabilité de la formule.",
+        "Les filtres récents comme le Tinosorb S (*Bis-Ethylhexyloxyphenol Methoxyphenyl Triazine*) sont stables et autorisés en Europe. Ce qui compte : la liste INCI, la stabilité de la formule, et surtout la dose que tu mets. Les crèmes solaires d'Asie ont d'autres filtres : notre article sur [les crèmes solaires coréennes](/blog/creme-solaire-coreenne-k-beauty) les compare.",
     },
     {
       type: "image",
@@ -159,27 +184,27 @@ const article: Article = {
       licence: "illustration générée par IA pour Cosme Check",
     },
 
-    { type: "h2", texte: "Analyser sa crème solaire avec Cosme Check" },
-    { type: "p", texte: "Lis la composition, pas l'allégation. En 10 secondes :" },
+    { type: "h2", texte: "Comment vérifier sa crème solaire avec Cosme Check ?" },
+    { type: "p", texte: "Lis la composition, pas la promesse. En dix secondes :" },
     {
       type: "liste",
       style: "numeros",
       items: [
         "**Scanne** le code-barres du tube.",
-        "Note couleur ==vert / jaune / orange / rouge== ingrédient par ingrédient.",
-        "Alerte directe sur les filtres controversés (benzophénone, octocrylène, oxybenzone...).",
-        "Comparaison avec d'autres SPF 50 plus propres.",
+        "Regarde la couleur de chaque ingrédient : ==vert, jaune, orange ou rouge==.",
+        "Repère les filtres discutés (benzophénone, octocrylène, homosalate) et leur place dans la liste.",
+        "Compare avec d'autres crèmes solaires du même rayon.",
       ],
     },
     {
       type: "p",
       texte:
-        "Deux références qui ressortent bien à l'analyse : **Heliocare 360** (Tinosorb + Mexoryl, sans parfum) et **Isdin Mineral Brush SPF 50** (poudre pour la retouche).",
+        "Notre méthode d'[analyse de composition](/blog/analyse-composition-cosmetique) t'apprend à lire le reste de la liste, ligne par ligne.",
     },
     {
       type: "cta",
       texte:
-        "**Vérifie la composition de ta crème solaire.** Télécharge Cosme Check pour obtenir la note ingrédient par ingrédient de ton SPF, repérer les filtres controversés et comparer avec des alternatives plus propres.",
+        "**Vérifie la composition de ta crème solaire.** Télécharge Cosme Check pour voir la note de ton SPF ingrédient par ingrédient et repérer les filtres discutés.",
     },
 
     { type: "h2", texte: "En résumé" },
@@ -187,39 +212,39 @@ const article: Article = {
       type: "liste",
       style: "coches",
       items: [
-        "**La bonne dose** : deux doigts / demi-cuillère à café.",
-        "**Réappliqué** au moins une fois en journée.",
-        "**Formule propre** : sans filtres controversés, sans parfum sur le visage.",
-        "**Toute l'année**, pas qu'en été ou à la plage.",
-        "**Filtres précis** > catégorie minéral / chimique.",
+        "**La bonne dose** : deux doigts, soit une demi-cuillère à café.",
+        "**Remise** toutes les deux heures dehors, une fois en journée au bureau.",
+        "**Des filtres que tu connais**, et pas de parfum sur le visage.",
+        "**Toute l'année**, pas seulement l'été ou à la plage.",
+        "**Les filtres précis** comptent plus que « minéral ou chimique ».",
       ],
     },
     {
       type: "p",
       texte:
-        "La meilleure crème solaire est celle dont tu mets la bonne quantité, tous les jours, et que tu sais lire.",
+        "La meilleure crème solaire est celle dont tu mets la bonne quantité, tous les jours, et que tu sais lire. Et si ta peau sèche la tiraille, une crème hydratante dessous, à la glycérine ou à l'[acide hyaluronique](/blog/acide-hyaluronique) (deux ingrédients qui retiennent l'eau), la rend plus agréable à porter.",
     },
   ],
   faq: [
     {
       question: "Quelle quantité de crème solaire mettre sur le visage ?",
       reponse:
-        "Compte deux longueurs de doigt (index et majeur), soit environ une demi-cuillère à café pour le visage. C'est la dose utilisée en labo pour mesurer le SPF (2 mg par cm²). Avec moitié moins, la protection réelle chute bien plus que de moitié.",
+        "Compte deux longueurs de doigt (index et majeur), soit environ une demi-cuillère à café pour le visage. C'est la dose utilisée en laboratoire pour mesurer le SPF (2 mg par cm²). Avec moitié moins, la protection réelle chute bien plus que de moitié, comme l'a montré une étude de 2007.",
     },
     {
       question: "Faut-il mettre de la crème solaire en hiver ?",
       reponse:
-        "Oui. Les UVA traversent les nuages et les vitres toute l'année, et ce sont eux qui marquent la peau (taches, rides, perte de fermeté). Un SPF 30 à 50 chaque matin suffit en hiver, dans une texture hydratante ou teintée.",
+        "Oui. Les UVA traversent les nuages et les vitres toute l'année, et ce sont eux qui marquent la peau (taches, rides, perte de fermeté). Un SPF 30 à 50 chaque matin suffit en hiver, dans une texture hydratante ou teintée. Sur la neige ou en altitude, remets-en souvent.",
     },
     {
       question: "Le fond de teint SPF suffit-il à protéger la peau ?",
       reponse:
-        "Non. Pour atteindre le SPF affiché, il faudrait en mettre une demi-cuillère à café sur le visage, ce que personne ne fait. En usage réel, la protection tombe autour de SPF 4 ou 5. Garde un vrai SPF 50 sous le maquillage.",
+        "Non. Pour atteindre le SPF affiché, il faudrait en mettre une demi-cuillère à café sur le visage, ce que personne ne fait. Avec la dose habituelle, la protection réelle est bien plus faible que le chiffre de l'étiquette. Garde une vraie crème solaire sous le maquillage.",
     },
     {
       question: "Crème solaire minérale ou chimique : laquelle choisir ?",
       reponse:
-        "Aucune n'est meilleure par nature. Le minéral réfléchit les UV et convient aux peaux sensibles, mais laisse souvent un fini blanc. Le chimique absorbe les UV avec une texture invisible. Ce qui compte, ce sont les filtres précis de la liste INCI.",
+        "Aucune n'est meilleure par nature. Le minéral convient souvent aux peaux réactives, mais laisse fréquemment un fini blanc. Le chimique offre une texture invisible. Ce qui compte, ce sont les filtres précis de la liste INCI, la stabilité de la formule et la quantité que tu appliques.",
     },
   ],
 };

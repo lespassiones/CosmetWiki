@@ -91,6 +91,7 @@
  */
 import type { Categorie } from "@/contenu/rubriques";
 
+import acideHyaluronique from "./articles/acide-hyaluronique";
 import analyseComposition from "./articles/analyse-composition-cosmetique";
 import bakuchiol from "./articles/bakuchiol";
 import ceraveCremeHydratante from "./articles/cerave-creme-hydratante";
@@ -309,6 +310,7 @@ export const ARTICLES: readonly Article[] = [
   meilleuresCremesHydratantes,
   cremeNivea,
   niacinamide,
+  acideHyaluronique,
   analyseComposition,
   calendrierAvent,
   comedogene,

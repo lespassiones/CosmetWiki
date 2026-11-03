@@ -332,3 +332,24 @@ Zone affichée : « Andorre et 9 autres » (dix zones, le plafond du Planificate
 | crème cien avis | 100 à 1 k | +900 % | 0 % | faible | piste Lidl |
 | shampooing cien | 100 à 1 k | 0 % | 0 % | moyenne | piste Lidl (shampooings Cien : médiane 7,54) |
 | cien avis, cien visage | 10 à 100 | | | | |
+
+## 2026-11-03 : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon, toutes les langues
+
+Zone affichée : « Andorre et 9 autres » (dix zones, le plafond du Planificateur). Langue : « Toutes les langues » (bouton désactivé sur « Mots clés enregistrés », pas retenté). Liste collée en JavaScript dans le `textarea` visible, puis clic en JavaScript sur le « Commencer » du parent du `textarea` (jamais celui du bandeau « compte en veille »). Zone ouverte par un clic sur « France » ; `window.__inc` (champ visible sans `aria-label`, puis « Inclure » de la ligne « pays » ou « territoire ») a pris les neuf zones du premier coup, **sans gel de l'onglet** cette fois (neuf appels, pas quatorze) ; « Enregistrer » cliqué par sa référence (`find`).
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| acide hyaluronique | **10 k à 100 k** | 0 % | 0 % | élevée | **sujet du jour** (`acide-hyaluronique`), confirme le 20/10 |
+| acide hyaluronique visage | 1 k à 10 k | 0 % | 0 % | élevée | sujet du jour |
+| sérum acide hyaluronique | 1 k à 10 k | 0 % | 0 % | élevée | sujet du jour |
+| crème acide hyaluronique | 1 k à 10 k | 0 % | 0 % | élevée | sujet du jour |
+| acide hyaluronique bienfaits | 1 k à 10 k | 0 % | 0 % | élevée | sujet du jour |
+| sodium hyaluronate | 1 k à 10 k | 0 % | 0 % | **faible** | nom INCI, sujet du jour |
+| acide hyaluronique peau | 100 à 1 k | 0 % | 0 % | élevée | |
+| acide hyaluronique ou niacinamide | 10 à 100 | 0 % | 0 % | élevée | une ligne de FAQ, pas un article |
+| glycérine | **10 k à 100 k** | 0 % | 0 % | élevée | piste ingrédient (confirme le 25/10) ; citée dans l'article du jour |
+| glycérine visage | 100 à 1 k | 0 % | 0 % | élevée | |
+| lanoline | 10 k à 100 k | 0 % | 0 % | élevée | confirme le 20/10 ; intention à vérifier (allaitement) |
+| liste inci | 100 à 1 k | 0 % | 0 % | faible | confirme le 19/10 |
+
+Suggestions Google du jour (« acide hyaluronique … ») : « injection », « genou », « gélules danger », « cheveux » (hors sujet ou médical : écartés) ; « visage matin ou soir », « visage danger », « est ce du botox », « est ce naturel » (repris mot pour mot en FAQ).
