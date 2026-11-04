@@ -353,3 +353,25 @@ Zone affichée : « Andorre et 9 autres » (dix zones, le plafond du Planificate
 | liste inci | 100 à 1 k | 0 % | 0 % | faible | confirme le 19/10 |
 
 Suggestions Google du jour (« acide hyaluronique … ») : « injection », « genou », « gélules danger », « cheveux » (hors sujet ou médical : écartés) ; « visage matin ou soir », « visage danger », « est ce du botox », « est ce naturel » (repris mot pour mot en FAQ).
+
+## 2026-11-04 : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon, toutes les langues
+
+Zone affichée : « Andorre et 9 autres » (dix zones). Réunion, Guadeloupe et Martinique ne sortent pas comme zones séparées (aucune ligne « pays » ou « territoire »). Liste collée dans le `textarea` du panneau « Obtenir le volume », « Commencer » cliqué par sa référence (`find`). Zones ajoutées par `window.__inc` (le champ de saisie, puis le lien « Inclure » de la ligne `div.entry` dont `.name` et `.type` correspondent), « Enregistrer » par sa référence : les neuf zones prises du premier coup. Langue : « Toutes les langues » ; un clic par référence sur le bouton n'ouvre aucune liste (même résultat que le 03/11), pas d'autre repli tenté. Une première lecture en **France seule** donnait « peptide de cuivre » 100 à 1 k et « ghk cu » 1 k à 10 k : l'essentiel de « ghk cu » vient donc du Canada (anglais compris).
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| peptide de cuivre | **1 k à 10 k** | **+900 %** | **+900 %** | élevée | **sujet du jour** (`peptide-de-cuivre`) ; buzz Harper's Bazaar (03/11, Spate : +91,8 % sur un an) |
+| ghk cu | 10 k à 100 k | 0 % | 0 % | élevée | sujet du jour ; tiré par le Canada et par l'injection (suggestions « ghk-cu injection ») |
+| copper peptide | 1 k à 10 k | 0 % | 0 % | faible | sujet du jour (anglais) |
+| sérum peptide de cuivre, sérum peptides | 10 à 100 | 0 % | 0 % | élevée | |
+| rare beauty blush | 10 k à 100 k | 0 % | 0 % | élevée | confirme le 02/11 ; maquillage |
+| cien lidl | 1 k à 10 k | 0 % | 0 % | moyenne | confirme le 28/10 ; piste comparatif |
+| crème cien | 100 à 1 k | 0 % | +900 % | élevée | |
+| cerave que choisir | 100 à 1 k | 0 % | 0 % | faible | **vue sans clic chez nous** (`cerave-creme-hydratante`) : optimisation du jour |
+| cerave spf 50 | 1 k à 10 k | 0 % | +900 % | élevée | Test-Achats la mesure autour de SPF 20 (08/10/2026) : optimisation du jour |
+| crème solaire cerave | 1 k à 10 k | -90 % | 0 % | élevée | saisonnier |
+| dexeryl | 10 k à 100 k | 0 % | 0 % | élevée | Daniela Lumbroso (Marie France, 04/11) ; la crème Dexeryl est un médicament : écarté |
+| jelly mist | 100 à 1 k | 0 % | +900 % | élevée | K-beauty (elle.ch, 04/11) |
+| skincare dinner | 10 à 100 | 0 % | 0 % | faible | tendance TikTok (Journal de Montréal, 04/11) : pas de demande ici |
+
+Suggestions Google du jour : « peptide de cuivre aroma zone », « the ordinary », « nooance », « cheveux », « bienfaits », « peau » ; « peptides de cuivre ou retinol », « et vitamine c », « avis » (deux reprises mot pour mot en FAQ) ; « ghk-cu injection », « injection france », « injection dosage » (injection : hors cosmétique, seulement une mise en garde).

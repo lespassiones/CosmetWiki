@@ -16,11 +16,11 @@ const article: Article = {
   titre: "Crème CeraVe : laquelle choisir ? On a lu 8 formules, et les « Intensif » perdent 4 points",
   titreSeo: "CeraVe crème hydratante : laquelle choisir ?",
   resume:
-    "Baume, lait, gel-crème, SPF, Intensif : on a lu les listes INCI de 8 crèmes hydratantes CeraVe. Ce que fait chacune, et sa note Cosme Check.",
+    "8 crèmes CeraVe lues et notées, et ce que disent les tests de Que Choisir et Test-Achats : la SPF 50 mesurée autour de SPF 20 en 2026.",
   chapo:
     "La meilleure crème CeraVe dépend de ta peau. Mais les formules les plus simples sont les mieux notées : le **Gel-crème Oil Control**, la **Crème hydratante visage** et le **Lait Hydratant**, de 12,12 à 12,34 sur 20. Les versions « Intensif » et celles avec SPF tombent sous 8. On a lu les huit listes pour te dire pourquoi, et ++quand le moins bien noté reste le bon choix++.",
   publieLe: "2026-10-28",
-  modifieLe: "2026-10-28",
+  modifieLe: "2026-11-04",
   minutes: 7,
   theme: "cerave crème hydratante",
   motsCles: [
@@ -95,19 +95,19 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "L'idée de CeraVe vient d'une étude ancienne. Chez l'animal, la barrière de la peau se répare mieux quand on lui apporte ++les trois familles de graisses ensemble++, et moins bien avec une seule ([Man et al., *Journal of Investigative Dermatology*, 1996](https://doi.org/10.1111/1523-1747.ep12340135)). C'est pour ça que tu trouves céramides et cholestérol dans la même liste.",
+        "L'idée vient d'une étude ancienne. Chez l'animal, la barrière de la peau se répare mieux avec ++les trois familles de graisses ensemble++ qu'avec une seule ([Man et al., *Journal of Investigative Dermatology*, 1996](https://doi.org/10.1111/1523-1747.ep12340135)).",
     },
     {
       type: "p",
       texte:
-        "Une précision utile : les céramides arrivent après la 6e place. En Europe, un ingrédient dosé à moins de 1 % peut s'écrire dans n'importe quel ordre ([règlement (CE) 1223/2009, article 19](https://eur-lex.europa.eu/eli/reg/2009/1223/oj)). Et tout ce qui suit le [phénoxyéthanol](/i/phenoxyethanol), un conservateur plafonné à 1 % par ce même règlement, est forcément en dessous. Les céramides et le cholestérol se trouvent juste avant lui : ce sont des renforts. ++Le gros du travail, c'est la glycérine++, en 2e place.",
+        "Une précision : les céramides arrivent juste avant le [phénoxyéthanol](/i/phenoxyethanol), un conservateur plafonné à 1 % ([règlement (CE) 1223/2009](https://eur-lex.europa.eu/eli/reg/2009/1223/oj)). Elles sont donc peu dosées : ce sont des renforts. ++Le gros du travail, c'est la glycérine++, en 2e place.",
     },
 
     { type: "h2", texte: "Pourquoi les versions « Intensif » ont une moins bonne note ?" },
     {
       type: "p",
       texte:
-        "Parce que leur liste est presque deux fois plus longue. Le Lait Hydratant Intensif passe de 25 à 45 ingrédients. Il gagne de bonnes choses : du beurre de karité en 3e place, des petits humectants que la peau contient déjà (sodium PCA, acides aminés comme la glycine). Un humectant, c'est un ingrédient qui attire l'eau et la garde dans la peau.",
+        "Parce que leur liste est presque deux fois plus longue. Le Lait Hydratant Intensif passe de 25 à 45 ingrédients. Il gagne du beurre de karité et des humectants, des ingrédients qui attirent l'eau et la gardent dans la peau.",
     },
     {
       type: "p",
@@ -120,16 +120,21 @@ const article: Article = {
         "Résultat : 4 points de moins. ++Ça ne veut pas dire qu'ils hydratent moins++. Pour une peau du corps très sèche en plein hiver, à Montréal comme à Lausanne, leur texture riche peut être la bonne. La note lit la formule, pas le confort.",
     },
 
-    { type: "h2", texte: "Et les crèmes CeraVe avec SPF, il faut les éviter ?" },
+    { type: "h2", texte: "Et les crèmes CeraVe avec SPF, elles protègent vraiment ?" },
     {
       type: "p",
       texte:
-        "Non. Leurs points perdus viennent surtout des filtres solaires. La SPF 50 contient quatre filtres organiques, dont l'[avobenzone](/i/butyl-methoxydibenzoylmethane) (nom INCI : Butyl Methoxydibenzoylmethane), classés orange par la base. Tous sont autorisés en Europe, à des doses plafonnées par l'annexe VI du règlement 1223/2009.",
+        "Pas toujours autant que promis. En octobre 2026, Test-Achats a mesuré la Crème hydratante visage SPF 50 en laboratoire. ==Sa protection correspond plutôt à un SPF 20==, et le test la déconseille ([Test-Achats, 08/10/2026](https://www.test-achats.be/sante/sante-au-quotidien/creme-de-jour/news/test-cremes-hydratantes-de-jour-spf)). Un autre lot peut faire mieux, mais ++une crème de jour ne remplace pas une crème solaire++ au soleil.",
     },
     {
       type: "p",
       texte:
-        "Le SPF, c'est l'indice de protection contre les coups de soleil. Une crème de jour avec SPF que tu mets vraiment vaut mieux qu'une crème mieux notée sans protection. Attention quand même : on en met souvent trop peu pour atteindre l'indice annoncé. Les [7 erreurs qui divisent ton SPF](/blog/spf-50-visage-7-erreurs) expliquent la bonne dose.",
+        "Côté note Cosme Check, leurs points perdus viennent surtout des filtres solaires. La SPF 50 contient quatre filtres organiques, dont l'[avobenzone](/i/butyl-methoxydibenzoylmethane) (nom INCI : Butyl Methoxydibenzoylmethane), classés orange par la base. Tous sont autorisés en Europe, à des doses plafonnées par l'annexe VI du règlement 1223/2009.",
+    },
+    {
+      type: "p",
+      texte:
+        "Le SPF, c'est l'indice de protection contre les coups de soleil. On en met souvent trop peu pour l'atteindre : les [7 erreurs qui divisent ton SPF](/blog/spf-50-visage-7-erreurs) donnent la bonne dose.",
     },
     {
       type: "cta",
@@ -161,6 +166,27 @@ const article: Article = {
         "Ne superpose pas deux crèmes CeraVe le même matin : une seule suffit, puis la crème solaire. L'[ordre de la routine](/blog/routine-skincare) tient en quatre gestes.",
         "Rougeurs, brûlures ou plaques qui ne partent pas : arrête et demande conseil à ton pharmacien ou à un dermatologue.",
       ],
+    },
+
+    { type: "h2", texte: "Que disent les tests de Que Choisir et de Test-Achats ?" },
+    {
+      type: "p",
+      texte:
+        "Les deux associations ont testé des CeraVe, mais leurs notes complètes sont réservées aux abonnés. Voici ce qu'on peut lire librement.",
+    },
+    {
+      type: "liste",
+      style: "puces",
+      items: [
+        "**Que Choisir** a testé le Lait Hydratant parmi 16 laits pour le corps, en mars 2025. Sa note n'est pas publique ([Que Choisir, 2025](https://www.quechoisir.org/comparatif-laits-corporels-n613/cerave-lait-hydratant-p277956/)).",
+        "**Test-Achats** place la Lotion hydratante visage 5e sur 13 pour l'avis des testeuses. C'est la seule crème du test qui imprime sa liste INCI sur le tube.",
+        "Le même test juge la mention « non comédogène » sans fondement clinique. Voir [ce que veut dire « comédogène »](/blog/comedogene).",
+      ],
+    },
+    {
+      type: "p",
+      texte:
+        "La note Cosme Check, elle, est gratuite et lit la liste de ton pot : un regard différent, qui complète ces tests.",
     },
 
     { type: "h2", texte: "CeraVe, c'est une bonne marque ?" },
@@ -197,9 +223,9 @@ const article: Article = {
         "Oui, la marque le vend pour le visage et le corps. Il contient de la vaseline, qui couvre la peau et garde son eau : c'est utile pour une peau sèche qui tire, surtout le soir en hiver. Sur une peau grasse ou à boutons, préfère le Gel-crème Oil Control, plus léger.",
     },
     {
-      question: "CeraVe est une marque de quel pays ?",
+      question: "Que dit Que Choisir de CeraVe ?",
       reponse:
-        "CeraVe est une marque américaine, créée aux États-Unis au milieu des années 2000. Le groupe français L'Oréal l'a rachetée en 2017 et la range avec La Roche-Posay et Vichy. En Europe, elle se vend surtout en pharmacie et en parapharmacie, et au Québec dans les grandes chaînes de pharmacies.",
+        "Que Choisir a testé le Lait Hydratant CeraVe parmi 16 laits pour le corps en mars 2025, mais sa note est réservée aux abonnés. En Belgique, Test-Achats a mesuré en octobre 2026 la crème visage SPF 50 autour d'un SPF 20 et l'a déconseillée. Les notes Cosme Check des huit crèmes, elles, sont dans cet article.",
     },
   ],
   notes: [

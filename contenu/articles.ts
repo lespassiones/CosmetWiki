@@ -111,6 +111,7 @@ import meilleuresCremesHydratantes from "./articles/meilleures-cremes-hydratante
 import antiImperfections from "./articles/meilleurs-produits-anti-imperfections";
 import niacinamide from "./articles/niacinamide";
 import pdrn from "./articles/pdrn";
+import peptideDeCuivre from "./articles/peptide-de-cuivre";
 import peauSecheVisage from "./articles/peau-seche-visage";
 import retinol from "./articles/retinol";
 import perturbateursEndocriniens from "./articles/perturbateurs-endocriniens-cosmetiques-2026";
@@ -323,6 +324,7 @@ export const ARTICLES: readonly Article[] = [
   retinol,
   cosmetiquesGrossesse,
   medicubeZeroPorePad,
+  peptideDeCuivre,
 ];
 
 controlerRegistre(ARTICLES);
