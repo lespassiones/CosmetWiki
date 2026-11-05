@@ -5,6 +5,13 @@ import type { Article } from "@/contenu/articles";
  * (page écrite à la main), sans changer l'adresse ni la date. Le texte passe
  * au tutoiement, comme le reste du site. Le format de ce fichier est décrit
  * en tête de `contenu/articles.ts`.
+ *
+ * Mis au niveau le 05/11/2026 par le robot éditorial : chiffres et avis sans
+ * source retirés (« 6 à 12 mois », « 3 à 5 ans », « protection souvent
+ * meilleure », « top des ventes »), une erreur corrigée (l'octocrylène présenté
+ * comme un filtre américain), sources (règlements 1223/2009 et 2022/1176,
+ * FDA), six notes de la base, `h2` en questions, liens internes.
+ * `titre` et `titreSeo` inchangés pour isoler l'effet.
  */
 const article: Article = {
   slug: "creme-solaire-coreenne-k-beauty",
@@ -13,10 +20,10 @@ const article: Article = {
   resume:
     "Beauty of Joseon, Round Lab, Anua, COSRX : les SPF coréens explosent en France. Avantages, filtres face à l'Europe et précautions avant d'acheter.",
   chapo:
-    "Les SPF coréens dominent aujourd'hui le top des ventes sur Yesstyle, Olive Young, et de plus en plus en parapharmacie française. **Beauty of Joseon Relief Sun** est devenu un phénomène TikTok. Mais pourquoi sont-ils si différents de nos SPF européens, et ++peut-on les acheter sans risque++ ?",
+    "Les crèmes solaires coréennes plaisent pour leur texture : légères, sans film blanc, faciles à porter sous le maquillage. Beaucoup utilisent les mêmes filtres récents que l'Europe. Mais ++« coréen » ne garantit rien++ : dans notre base, les notes des solaires coréens vont de 1,16 à 16,32 sur 20.",
   publieLe: "2026-05-11",
-  modifieLe: "2026-05-11",
-  minutes: 3,
+  modifieLe: "2026-11-05",
+  minutes: 5,
   theme: "crème solaire coréenne",
   motsCles: [
     "K-Beauty SPF",
@@ -36,129 +43,125 @@ const article: Article = {
     licence: "illustration générée par IA pour Cosme Check",
   },
   blocs: [
-    { type: "h2", texte: "1. Pourquoi le boom en 2026 ?" },
-    {
-      type: "liste",
-      style: "coches",
-      items: [
-        "**Texture :** les SPF coréens sont traditionnellement ==légers, non gras, sans fini blanc==. La culture skincare asiatique impose des produits agréables à porter au quotidien.",
-        "**Innovation rapide :** nouvelles formules tous les 6-12 mois, là où une marque européenne peut mettre 3-5 ans à renouveler une gamme.",
-        "**Prix :** souvent moins chers qu'un SPF européen, pour une protection souvent meilleure.",
-        "**Effet « glass skin » :** beaucoup de SPF coréens jouent un rôle d'hybride entre soin hydratant et écran solaire.",
-      ],
-    },
-
-    { type: "h2", texte: "2. EU vs Corée : la différence des filtres" },
+    { type: "h2", texte: "Pourquoi les crèmes solaires coréennes sont-elles si populaires ?" },
     {
       type: "p",
       texte:
-        "La Corée autorise des **filtres UV modernes** (Tinosorb, Uvinul, Mexoryl) que la FDA américaine n'a toujours pas approuvés, et qui sont aussi autorisés en Europe. C'est pour ça que les SPF coréens et européens partagent les mêmes molécules de pointe.",
+        "D'abord pour la sensation. En Corée, la crème solaire se met tous les jours, comme une crème hydratante : les marques soignent donc la texture. On trouve des fluides, des gels, des sticks, souvent sans le film blanc des vieux écrans. Beaucoup ajoutent des actifs de soin, comme la [niacinamide](/blog/niacinamide) (la vitamine B3) ou la centella.",
     },
     {
-      type: "tableau",
-      entetes: ["Marché", "Filtres modernes", "Approche"],
-      lignes: [
-        ["**Corée**", "Tinosorb, Uvinul, Mexoryl, Iscotrizinol", "Texture + innovation rapide"],
-        [
-          "**Europe**",
-          "Mêmes filtres ([Annexe VI](https://single-market-economy.ec.europa.eu/sectors/cosmetics/legislation_en))",
-          "Cycles de validation plus longs",
-        ],
-        ["**États-Unis**", "Anciens uniquement (Avobenzone...)", "Filtres modernes *non approuvés*"],
-      ],
+      type: "p",
+      texte:
+        "Le SPF, c'est l'indice de protection contre les UVB, les rayons qui donnent les coups de soleil. Les solaires coréens affichent aussi un indice **PA**, de PA+ à PA++++, pour les UVA, les rayons qui vieillissent la peau en profondeur. Plus il y a de « + », plus la protection UVA est forte.",
+    },
+
+    { type: "h2", texte: "Les filtres coréens sont-ils autorisés en Europe ?" },
+    {
+      type: "p",
+      texte:
+        "Un filtre, c'est l'ingrédient qui arrête les UV. L'Europe tient une liste fermée des filtres permis, à l'annexe VI du [règlement (CE) 1223/2009](https://eur-lex.europa.eu/eli/reg/2009/1223/oj). Beaucoup de solaires coréens récents utilisent des filtres de cette liste, comme le [Tinosorb S](/i/bis-ethylhexyloxyphenol-methoxyphenyl-triazine) ou l'[Uvinul A Plus](/i/diethylamino-hydroxybenzoyl-hexyl-benzoate), qui protègent bien des UVA.",
+    },
+    {
+      type: "p",
+      texte:
+        "Aux États-Unis, la crème solaire est un médicament en vente libre, et la liste des filtres permis par la [FDA](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun) est plus courte que la liste européenne. C'est pour ça que certaines marques vendent une « version US » avec d'autres filtres. ==Avant d'acheter en ligne, compare la liste INCI== (la liste officielle des ingrédients, du plus dosé au moins dosé) avec celle du produit que tu vises.",
     },
     {
       type: "encadre",
       ton: "violet",
       titre: "À retenir",
       texte:
-        "Un SPF coréen importé en France est donc ==cohérent avec la réglementation EU== sur les filtres. C'est la grosse différence avec un SPF américain qui peut contenir uniquement des filtres anciens (oxybenzone, octocrylène).",
+        "Un produit vendu dans un magasin de l'Union européenne doit respecter la liste européenne. Un produit commandé sur un site étranger, pas forcément : c'est à toi de lire sa liste.",
     },
 
-    { type: "h2", texte: "3. Texture et innovation" },
+    { type: "h2", texte: "Quelle crème solaire coréenne choisir ?" },
     {
       type: "p",
-      texte: "La force des SPF coréens, c'est l'ergonomie. Tu trouveras :",
+      texte:
+        "Le pays ne dit rien : ce sont les filtres qui comptent. Six solaires coréens connus, relevés dans notre base, avec ce qui pèse le plus sur leur note.",
     },
     {
-      type: "liste",
-      style: "coches",
-      items: [
-        "Des **essences** hybrides (entre lotion et sérum) avec SPF intégré, idéales pour les peaux mixtes.",
-        "Des **fluids invisibles** qui se posent sous le maquillage sans pilling.",
-        "Des **sticks** ultra-pratiques pour la réapplication en journée par-dessus le maquillage.",
-        "Des ajouts d'actifs cosmétiques : *niacinamide, panthénol, centella asiatica, propolis*, qui apportent un vrai bénéfice soin en plus du SPF.",
+      type: "tableau",
+      entetes: ["Produit", "Ce qui pèse sur la note", "Note Cosme Check"],
+      lignes: [
+        ["Round Lab, Baby Mild Sun Cushion.", "filtres minéraux ([oxyde de zinc](/i/zinc-oxide), [dioxyde de titane](/i/titanium-dioxide)).", "16,32 sur 20."],
+        ["Beauty of Joseon, Relief Sun Riz + Probiotiques SPF 50+.", "filtres récents, sans parfum.", "8 sur 20."],
+        ["Anua, Silky Moisture Sun Cream SPF 50.", "filtres récents, sans parfum.", "7,97 sur 20."],
+        ["Round Lab, Birch Juice Moisturizing Sunscreen SPF 50+.", "filtres récents, sans parfum.", "7,9 sur 20."],
+        ["Innisfree, Daily UV Defense Sunscreen SPF 36.", "[homosalate](/i/homosalate) et parfum.", "3,59 sur 20."],
+        ["COSRX, Aloe Soothing Sun Cream SPF 50+.", "[octinoxate](/i/ethylhexyl-methoxycinnamate), parfum et alcool.", "1,16 sur 20."],
       ],
+      legende: "Listes et notes relevées dans la base Cosme Check le 05/11/2026.",
     },
     {
-      type: "image",
-      src: "/image/blog/k-beauty/image1.webp",
-      alt: "Femme appliquant une crème solaire coréenne légère, illustration de la K-Beauty et de sa texture invisible",
-      largeur: 1915,
-      hauteur: 821,
-      credit: "Cosme Check",
-      licence: "illustration générée par IA pour Cosme Check",
-    },
-
-    { type: "h2", texte: "4. Les marques à connaître (disponibles en France)" },
-    {
-      type: "liste",
-      style: "coches",
-      items: [
-        "**Beauty of Joseon Relief Sun Rice + Probiotics** (SPF 50+ PA++++) : la star TikTok. Texture chimique transparente, riz fermenté, INCI court. ==Excellent rapport qualité-prix==.",
-        "**Round Lab Birch Juice Moisturizing Sunscreen** (SPF 50+ PA++++) : sève de bouleau, très hydratant, idéal peaux sèches ou matures.",
-        "**Anua Heartleaf Silky Moisture Sun Cream** (SPF 50+ PA++++) : centella et heartleaf, apaisant, recommandé pour peaux sensibles ou sujettes à l'acné.",
-        "**COSRX Aloe Soothing Sun Cream** (SPF 50+ PA+++) : aloe vera, classique abordable.",
-        "**Innisfree Daily UV Defense Invisible Serum** (SPF 36 PA+++) : fini invisible parfait sous maquillage.",
-      ],
-    },
-
-    { type: "h2", texte: "5. Précautions avant d'acheter" },
-    {
-      type: "liste",
-      style: "alertes",
-      items: [
-        "**Vérifier la version :** certaines marques vendent des *« US versions »* avec filtres différents (et souvent moins bons). Préfère la version ==« Korean / Global »==.",
-        "**Date de péremption :** sur certains sites tiers (Yesstyle, Stylevana), vérifie la date PAO (Period After Opening). Les filtres UV s'oxydent avec le temps.",
-        "**Notation PA / SPF :** *SPF 50+ PA++++* est le maximum réglementaire en Corée. Au-dessous, c'est moins protecteur sur les UVA.",
-        "**Parfums :** certains SPF coréens utilisent des parfums prononcés. Vérifie l'INCI si tu as la peau sensible.",
-      ],
+      type: "p",
+      texte:
+        "Le cushion minéral de Round Lab est le seul en vert. Les trois stars de TikTok se tiennent autour de 8, loin devant les formules à l'homosalate ou à l'octinoxate, des filtres plus anciens. L'Europe a d'ailleurs réduit la dose permise d'homosalate dans les soins visage à 7,34 % ([règlement (UE) 2022/1176](https://eur-lex.europa.eu/eli/reg/2022/1176/oj)).",
     },
     {
       type: "cta",
       texte:
-        "**Vérifie ton SPF coréen avant achat.** Cosme Check analyse l'INCI des SPF coréens et internationaux selon la réglementation européenne, signale les filtres modernes et alerte sur les molécules à surveiller.",
+        "**Ta crème solaire coréenne est-elle dans le bon camp ?** Scanne-la avec Cosme Check : tu vois ses filtres, leur couleur et sa note en dix secondes.",
     },
 
-    { type: "h2", texte: "En résumé" },
+    { type: "h2", texte: "Que vérifier avant d'acheter une crème solaire coréenne ?" },
+    {
+      type: "liste",
+      style: "alertes",
+      items: [
+        "**La version.** Une même marque peut vendre des formules différentes selon le pays : compare la liste du produit reçu avec celle de la fiche.",
+        "**La date.** Sur les sites qui expédient depuis l'Asie, regarde la date de péremption et le petit pot ouvert (la durée d'utilisation après ouverture). Une crème solaire trop vieille protège moins bien.",
+        "**Le parfum.** Certains solaires en contiennent beaucoup : à éviter si ta peau réagit vite.",
+        "**La quantité.** Le SPF affiché est mesuré avec une couche épaisse. Une noisette ne suffit pas : relis [les 7 erreurs du SPF](/blog/spf-50-visage-7-erreurs).",
+      ],
+    },
+    {
+      type: "p",
+      texte:
+        "Sous la chaleur humide de La Réunion ou des Antilles, une texture fluide se supporte mieux, mais elle s'en va vite avec la sueur : remets-en toutes les deux heures dehors. En hiver, à Québec comme à Lille, un fluide léger se glisse facilement sous la crème de jour, dans l'ordre de notre [routine skincare](/blog/routine-skincare).",
+    },
+
+    { type: "h2", texte: "Coréen, européen ou minéral : que retenir ?" },
     {
       type: "liste",
       style: "coches",
       items: [
-        "SPF coréens = **textures supérieures** et filtres modernes ==compatibles EU==.",
-        "Très différents des SPF américains (filtres anciens uniquement aux USA).",
-        "Stars du moment : **Beauty of Joseon, Round Lab, Anua, COSRX**.",
-        "Vérifier la **version « Korean / Global »** et la date PAO sur les sites tiers.",
-        "Toujours scanner l'INCI avant achat (parfums, alcool, filtres précis).",
+        "Les solaires coréens sont appréciés pour leur texture, pas parce qu'ils seraient plus sûrs.",
+        "Beaucoup utilisent les mêmes filtres récents que l'Europe ; d'autres gardent des filtres plus anciens.",
+        "Lis les filtres plutôt que le pays : notre guide des [perturbateurs endocriniens](/blog/perturbateurs-endocriniens-cosmetiques-2026) donne le statut européen de chacun.",
+        "Si ta peau réagit fort à une crème solaire, demande conseil à ton pharmacien ou à un dermatologue.",
       ],
+    },
+    {
+      type: "p",
+      texte:
+        "Le meilleur pour la fin : dans notre tableau, la note la plus haute ne revient pas à une star de TikTok, mais à un cushion pour bébé aux filtres minéraux. ++La crème solaire la plus virale n'est pas forcément la mieux composée.++ Et la mieux composée ne sert à rien si tu n'en mets pas assez.",
     },
   ],
   faq: [
     {
       question: "Pourquoi les crèmes solaires coréennes sont-elles si populaires ?",
       reponse:
-        "Pour leur texture d'abord : légère, non grasse, sans fini blanc, agréable à porter tous les jours. Les marques coréennes renouvellent aussi leurs formules tous les 6 à 12 mois, et beaucoup de leurs SPF jouent les hybrides entre soin hydratant et écran solaire, pour un effet « glass skin ».",
+        "Pour leur texture d'abord : légère, non grasse, sans fini blanc, agréable à porter tous les jours. Beaucoup jouent aussi les hybrides entre soin hydratant et crème solaire, avec des actifs comme la niacinamide. Leur note dépend de leurs filtres : dans notre base, elle va de 1,16 à 16,32 sur 20.",
     },
     {
       question: "Les crèmes solaires coréennes sont-elles autorisées en Europe ?",
       reponse:
-        "Leurs filtres modernes (Tinosorb, Uvinul, Mexoryl) sont aussi autorisés en Europe, à l'annexe VI du règlement cosmétique. Un SPF coréen importé est donc cohérent avec la réglementation européenne sur les filtres, contrairement à un SPF américain qui peut ne contenir que des filtres anciens comme l'oxybenzone ou l'octocrylène.",
+        "Beaucoup utilisent des filtres de la liste européenne, comme le Tinosorb S ou l'Uvinul A Plus (annexe VI du règlement cosmétique). Un produit vendu en magasin dans l'Union européenne doit respecter cette liste. Commandé sur un site étranger, il peut contenir d'autres filtres : compare sa liste INCI avant d'acheter.",
     },
     {
       question: "Que veut dire PA++++ sur une crème solaire coréenne ?",
       reponse:
         "La notation PA mesure la protection contre les UVA. SPF 50+ PA++++ est le maximum réglementaire en Corée : en dessous, la crème protège moins bien des UVA. Avant d'acheter, vérifie aussi que tu prends la version « Korean / Global » et non une « US version » aux filtres différents.",
     },
+  ],
+  notes: [
+    { produit: "Round Lab, Baby Mild Sun Cushion (16 g)", ean: "8809962541031", note: 16.32, releveeLe: "2026-11-05" },
+    { produit: "Beauty of Joseon, Relief Sun Riz + Probiotiques SPF 50+ PA++++", ean: "8809968132387", note: 8, releveeLe: "2026-11-05" },
+    { produit: "Anua, Silky Moisture Sun Cream SPF 50 (50 ml)", ean: "8809640737275", note: 7.97, releveeLe: "2026-11-05" },
+    { produit: "Round Lab, Birch Juice Moisturizing Sunscreen SPF 50+ PA++++ (50 ml)", ean: "8809782551418", note: 7.9, releveeLe: "2026-11-05" },
+    { produit: "Innisfree, Daily UV Defense Sunscreen SPF 36 (50 ml)", ean: "8809843685984", note: 3.59, releveeLe: "2026-11-05" },
+    { produit: "COSRX, Aloe Soothing Sun Cream SPF 50+", ean: "8809416470191", note: 1.16, releveeLe: "2026-11-05" },
   ],
 };
 

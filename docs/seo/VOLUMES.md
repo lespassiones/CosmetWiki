@@ -375,3 +375,22 @@ Zone affichée : « Andorre et 9 autres » (dix zones). Réunion, Guadeloupe et 
 | skincare dinner | 10 à 100 | 0 % | 0 % | faible | tendance TikTok (Journal de Montréal, 04/11) : pas de demande ici |
 
 Suggestions Google du jour : « peptide de cuivre aroma zone », « the ordinary », « nooance », « cheveux », « bienfaits », « peau » ; « peptides de cuivre ou retinol », « et vitamine c », « avis » (deux reprises mot pour mot en FAQ) ; « ghk-cu injection », « injection france », « injection dosage » (injection : hors cosmétique, seulement une mise en garde).
+
+## 2026-11-05 : France seule, toutes les langues
+
+⚠️ Mesure **réduite** : la page « Mots clés enregistrés » s'est ouverte sur « France » et « Toutes les langues ». Ni le bouton de zone ni celui de langue ne s'ouvrent (clic par référence, puis clic par coordonnées : aucune liste, troisième jour pour la langue). Le repli « régler la langue sur l'écran de saisie avant Commencer » **n'existe pas** : le panneau « Obtenir le volume » n'a que le champ, l'import de fichier et « Commencer » (vérifié par `find`). À retenter : le panneau des filtres, puis le clavier.
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| glycérine végétale | 1 k à 10 k | 0 % | 0 % | élevée | **sujet du jour** (`glycerine`) ; intention DIY et pharmacie |
+| glycerin | 1 k à 10 k | 0 % | 0 % | moyenne | sujet du jour (nom INCI) |
+| glycérine peau | 100 à 1 k | 0 % | 0 % | élevée | sujet du jour |
+| glycérine danger | 100 à 1 k | 0 % | 0 % | faible | sujet du jour (section et FAQ) |
+| glycérine cheveux | 100 à 1 k | 0 % | 0 % | élevée | |
+| crème urée | 1 k à 10 k | 0 % | 0 % | élevée | piste ingrédient (urée) |
+| crème à l'urée | 1 k à 10 k | 0 % | +900 % | élevée | piste ingrédient (urée) |
+| urée peau | 100 à 1 k | -90 % | -90 % | élevée | |
+| urée visage | 10 à 100 | 0 % | 0 % | élevée | |
+| liste ingrédients cosmétiques | 10 à 100 | 0 % | 0 % | faible | |
+
+Suggestions Google du jour : « glycérine danger », « pharmacie », « végétale leclerc » ; « glycérine visage avis », « bienfait », « recette » ; « glycérine peau grasse », « peau éclaircissante », « peau noire » ; « la glycérine est elle bonne pour la peau », « toxique », « comédogène » (trois reprises en FAQ, plus « éclaircit-elle la peau »).
