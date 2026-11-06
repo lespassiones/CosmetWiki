@@ -94,13 +94,12 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 |---|---|---|
 | Comment connaître son type de peau | type de peau, connaître son type de peau, test type de peau, peau mixte, peau normale, peau sensible | « type de peau » 1 k à 10 k, concurrence faible (10 zones, 27/10/2026) ; les autres 100 à 1 k ; « routine peau mixte » +900 % : **prochaine routine** ; jamais de diagnostic posé sur le lecteur |
 | ~~Routine skincare : l'ordre des produits~~ → `routine-skincare`, 2026-10-27 (avec les routines virales, EADV 2026) | routine skincare, ordre des soins visage | 1 k à 10 k (« routine skincare », 27/10/2026) ; variantes « ordre » 10 à 100 |
-| Routine peau grasse | routine peau grasse | à mesurer |
 | ~~Routine peau sèche en hiver~~ → `peau-seche-visage`, 2026-10-26 (avec le slugging) | peau sèche visage, crème peau sèche visage, peau déshydratée, slugging | 1 k à 10 k chacune (26/10/2026) ; « peau sèche hiver » 100 à 1 k |
 | Routine peau sensible : les ingrédients à éviter | peau sensible routine | à mesurer |
 | Routine skincare ado (13 à 17 ans) | routine skincare ado | à mesurer ; ton adapté, aucun complexe |
-| Routine homme en 3 gestes | routine visage homme | à mesurer |
-| Démaquillage : huile, eau micellaire ou baume | eau micellaire ou huile démaquillante | à mesurer |
-| Le double nettoyage | double nettoyage visage | à mesurer |
+| ~~Démaquillage : huile, eau micellaire ou baume~~ → `eau-micellaire-ou-huile-demaquillante`, 2026-11-06 (avec le double nettoyage) | eau micellaire, huile démaquillante, double nettoyage visage | 10 k à 100 k, 10 k à 100 k, 1 k à 10 k (06/11/2026, dix zones) |
+| Routine visage homme en 3 gestes | soin visage homme, routine visage homme | « soin visage homme » 1 k à 10 k, « routine visage homme » 100 à 1 k (06/11/2026) |
+| Routine peau mixte / peau grasse | routine peau mixte, peau grasse visage, routine peau grasse | 100 à 1 k, **+900 %** sur trois mois (06/11/2026) : **prochaine routine** |
 | ~~Cosmétiques et grossesse : les ingrédients à repérer~~ → `cosmetiques-grossesse`, 2026-11-01 (famille pratique) | cosmétique grossesse, cosmétique femme enceinte, produits de beauté femme enceinte | 100 à 1 k chacune, cinq variantes (25/10/2026) |
 
 ## 4. Comparatifs honnêtes et produits du moment (1 sur 10)

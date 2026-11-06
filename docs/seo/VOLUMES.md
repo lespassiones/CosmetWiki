@@ -394,3 +394,22 @@ Suggestions Google du jour : « peptide de cuivre aroma zone », « the ordinary
 | liste ingrédients cosmétiques | 10 à 100 | 0 % | 0 % | faible | |
 
 Suggestions Google du jour : « glycérine danger », « pharmacie », « végétale leclerc » ; « glycérine visage avis », « bienfait », « recette » ; « glycérine peau grasse », « peau éclaircissante », « peau noire » ; « la glycérine est elle bonne pour la peau », « toxique », « comédogène » (trois reprises en FAQ, plus « éclaircit-elle la peau »).
+
+## 2026-11-06 : dix zones, toutes les langues
+
+Zones retenues (« Andorre et 9 autres ») : **France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon**. Le plan est plafonné à **10 zones** (message « Votre plan ne peut pas contenir plus de 10 zones géographiques » au onzième ajout, Wallis-et-Futuna). La Réunion sort comme « région » (déjà comprise dans la France) : non ajoutée. **Le sélecteur de zone s'ouvre de nouveau** (clic par coordonnées sur « France », puis saisie du pays et « Inclure » sur la ligne « pays », dix fois). **La langue ne s'ouvre toujours pas** (clic par coordonnées, puis `Entrée` sur le bouton focalisé : aucune liste, quatrième jour) : mesure sur « toutes les langues ».
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| eau micellaire | **10 k à 100 k** | 0 % | 0 % | élevée | **sujet du jour** (`eau-micellaire-ou-huile-demaquillante`) |
+| huile démaquillante | **10 k à 100 k** | 0 % | 0 % | élevée | sujet du jour |
+| double nettoyage visage | 1 k à 10 k | 0 % | -90 % | élevée | sujet du jour (section) |
+| soin visage homme | 1 k à 10 k | 0 % | 0 % | élevée | piste routine homme |
+| double nettoyage | 100 à 1 k | 0 % | 0 % | élevée | |
+| routine peau grasse, routine peau sensible, routine visage homme | 100 à 1 k | 0 % à -90 % | 0 % | élevée | |
+| routine peau mixte, peau grasse visage | 100 à 1 k | **+900 %** | 0 % | élevée | piste routine suivante |
+| peau mixte, connaitre son type de peau, test type de peau | 100 à 1 k | 0 % | 0 à -90 % | moyenne | grappe « type de peau » |
+| peau sensible visage | 100 à 1 k | 0 % | 0 % | élevée | |
+| quel est mon type de peau, routine skincare ado | 10 à 100 | 0 % | 0 à -90 % | moyenne à élevée | |
+
+Suggestions Google du jour : « eau micellaire faut il rincer » ; « est ce que l'eau micellaire se rince », « enlève la crème solaire », « assèche la peau », « se périme » ; « eau micellaire danger » ; « huile démaquillante ou eau micellaire », « huile démaquillante ou baume » (trois reprises en FAQ, plus le baume) ; « double nettoyage avis dermatologue ».

@@ -10,13 +10,13 @@ import type { Article } from "@/contenu/articles";
 const article: Article = {
   slug: "lip-oils-huiles-levres",
   titre: "Lip oils : la vraie différence avec un gloss (et lesquels choisir)",
-  titreSeo: "Lip oil ou gloss ? Avis et INCI décryptés",
+  titreSeo: "Lip oil : avis et notes de 5 huiles à lèvres",
   resume:
-    "Lip oil ou gloss ? Ce qui les sépare vraiment, les 3 ingrédients à chercher dans la liste, et les lip oils du moment passés à la loupe.",
+    "Lip oil ou gloss ? Le Dior Lip Glow Oil classique commence par deux huiles synthétiques : 5 lip oils notés, et les 3 ingrédients à chercher.",
   chapo:
-    "Les **lip oils** sont devenus viraux sur TikTok, et ont propulsé Dior, Rhode et Clarins en tête des ventes lèvres. Promesse : la brillance d'un gloss avec le soin d'un baume. ++Vrai sur le papier++, mais à condition de bien choisir.",
+    "Les **lip oils** sont devenus viraux sur TikTok, et ont rendu célèbre le Lip Glow Oil de Dior. Promesse : la brillance d'un gloss avec le soin d'un baume. ++Vrai sur le papier++, mais à condition de bien choisir.",
   publieLe: "2026-05-14",
-  modifieLe: "2026-10-20",
+  modifieLe: "2026-11-06",
   minutes: 4,
   theme: "lip oil",
   motsCles: [
@@ -42,10 +42,10 @@ const article: Article = {
       type: "tableau",
       entetes: ["Critère", "Gloss", "Lip oil"],
       lignes: [
-        ["**Base**", "Polymères + silicones", "Huiles végétales (jojoba, ricin...)"],
-        ["**Texture**", "Collante, épaisse", "Fluide, légère, non collante"],
-        ["**Effet**", "Brillance pure", "Brillance + nutrition"],
-        ["**Tenue**", "2-3 h", "1-2 h (à réappliquer)"],
+        ["**Base.**", "Polymères et silicones.", "Huiles (jojoba, ricin) ou huiles synthétiques."],
+        ["**Texture.**", "Collante, épaisse.", "Fluide, légère, non collante."],
+        ["**Effet.**", "Brillance pure.", "Brillance et confort."],
+        ["**Tenue.**", "Plus longue.", "Courte, on réapplique."],
       ],
     },
 
@@ -100,17 +100,28 @@ const article: Article = {
       licence: "illustration générée par IA pour Cosme Check",
     },
 
-    { type: "h2", texte: "4. Les marques du moment (et notre lecture INCI)" },
+    { type: "h2", texte: "4. Que valent les lip oils du moment ?" },
     {
-      type: "liste",
-      style: "coches",
-      items: [
-        "**Dior Addict Lip Glow Oil :** base d'huile de cerise + ricin. INCI propre, parfum présent. ==La référence luxe.==",
-        "**Clarins Lip Comfort Oil :** huile de noisette, de tournesol. Confortable, INCI cohérent avec la promesse.",
-        "**Kosas LipFuel Hyaluronic :** huile + acide hyaluronique. Effet plus aqueux. Bonne option clean.",
-        "**Rhode Peptide Lip Tint :** huile + peptides. Tendance, formule INCI très soignée.",
-        "**Bourjois Healthy Mix Lip Oil :** alternative accessible, INCI correct, avec de l'huile minérale (*Paraffinum Liquidum*) en première position. Elle protège bien les lèvres, sans danger connu sur la peau : [on l'a décryptée dans la crème Nivea](/blog/creme-nivea-composition).",
+      type: "p",
+      texte:
+        "On a lu leurs listes dans notre base, le 06/11/2026. Surprise : le plus célèbre ne suit pas la règle des trois premiers ingrédients. Le *Dior Addict Lip Glow Oil* classique commence par deux huiles synthétiques, [Hydrogenated Polyisobutene](/i/hydrogenated-polyisobutene) et [Polybutene](/i/polybutene). Son huile de cerise (*Prunus Avium Seed Oil*) n'arrive qu'en ==12e place sur 25==, après le parfum.",
+    },
+    {
+      type: "tableau",
+      entetes: ["Lip oil", "Les premiers ingrédients", "Note Cosme Check"],
+      lignes: [
+        ["Take Care, Lip Glow Oil Parfum Fraise.", "huile de colza, huile de ricin.", "16,19 sur 20."],
+        ["Dior, Addict Lip Glow Oil 081 Latte, finition Glaze.", "ester végétal, huile de colza.", "16,11 sur 20."],
+        ["Clarins, Lip Comfort Oil 01.", "polymère, huile de jojoba, huile de rose musquée.", "11,79 sur 20."],
+        ["Charlotte Tilbury, Unreal Lips Healthy Glow Nectar Oil Cherry Glaze.", "Polybutene, Hydrogenated Polydecene.", "11,63 sur 20."],
+        ["Dior, Addict Lip Glow Oil 001 Pink.", "Hydrogenated Polyisobutene, Polybutene.", "7,73 sur 20."],
       ],
+      legende: "Listes et notes relevées dans la base Cosme Check le 06/11/2026.",
+    },
+    {
+      type: "p",
+      texte:
+        "Chez Dior, la note double selon la teinte. Les nouvelles finitions Glaze et Sparkly mettent l'huile de colza en troisième place et montent autour de 16. Le Pink classique, avec du menthol et de l'huile de menthe poivrée, reste à 7,73. Et la mieux notée du tableau est la plus simple : 11 ingrédients, deux vraies huiles en tête. ++Le prix ne dit rien de la liste.++",
     },
     {
       type: "cta",
@@ -138,7 +149,7 @@ const article: Article = {
         "**Gloss** = brillance pure. **Lip oil** = brillance + nutrition.",
         "Cherche ==une vraie huile végétale== dans les 3 premiers ingrédients de l'INCI.",
         "Évite les arômes forts (menthe, cannelle) si tu as les lèvres sensibles.",
-        "Tenue 1-2 h : c'est normal, on réapplique. Pas un défaut produit.",
+        "Il tient moins qu'un gloss : c'est normal, on réapplique. Pas un défaut produit.",
       ],
     },
   ],
@@ -146,7 +157,7 @@ const article: Article = {
     {
       question: "Quelle est la différence entre un lip oil et un gloss ?",
       reponse:
-        "Le gloss repose sur des polymères et des silicones : texture collante et épaisse, brillance pure, tenue de 2 à 3 heures. Le lip oil repose sur des huiles végétales comme le jojoba ou le ricin : texture fluide et non collante, brillance plus nutrition, mais tenue de 1 à 2 heures seulement.",
+        "Le gloss repose sur des polymères et des silicones : texture collante et épaisse, brillance pure, tenue plus longue. Le lip oil repose sur des huiles, végétales comme le jojoba ou le ricin, ou synthétiques : texture fluide et non collante, brillance plus confort, mais il faut le remettre plus souvent.",
     },
     {
       question: "Un lip oil peut-il remplacer un baume à lèvres ?",
@@ -161,8 +172,15 @@ const article: Article = {
     {
       question: "Pourquoi mon lip oil ne tient-il pas longtemps ?",
       reponse:
-        "C'est normal : un lip oil tient en général 1 à 2 heures, contre 2 à 3 heures pour un gloss. Sa texture est fluide, légère et non collante, et la brillance vient d'huiles végétales qui nourrissent la lèvre. Ce n'est pas un défaut du produit : on le réapplique simplement dans la journée.",
+        "C'est normal : un lip oil tient moins longtemps qu'un gloss, parce qu'il est moins collant. Sa texture est fluide, légère et non collante, et la brillance vient d'huiles végétales qui nourrissent la lèvre. Ce n'est pas un défaut du produit : on le réapplique simplement dans la journée.",
     },
+  ],
+  notes: [
+    { produit: "Take Care, Huile à Lèvres Lip Glow Oil Parfum Fraise (7,5 ml)", ean: "3661075357764", note: 16.19, releveeLe: "2026-11-06" },
+    { produit: "Dior, Addict Lip Glow Oil 081 Latte, finition Glaze", ean: "3348901792165", note: 16.11, releveeLe: "2026-11-06" },
+    { produit: "Clarins, Lip Comfort Oil 01 (7 ml)", ean: "3666057037429", note: 11.79, releveeLe: "2026-11-06" },
+    { produit: "Charlotte Tilbury, Unreal Lips Healthy Glow Nectar Oil Cherry Glaze (14 ml)", ean: "5056446653800", note: 11.63, releveeLe: "2026-11-06" },
+    { produit: "Dior, Addict Lip Glow Oil 001 Pink (6 ml)", ean: "3348901795319", note: 7.73, releveeLe: "2026-11-06" },
   ],
 };
 

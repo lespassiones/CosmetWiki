@@ -103,6 +103,7 @@ import cremeNivea from "./articles/creme-nivea-composition";
 import cremeSolaireCoreenne from "./articles/creme-solaire-coreenne-k-beauty";
 import cremesHydratantesReparatrices from "./articles/cremes-hydratantes-reparatrices";
 import deodorantAluminium from "./articles/deodorant-sels-aluminium-verite";
+import eauMicellaire from "./articles/eau-micellaire-ou-huile-demaquillante";
 import glycerine from "./articles/glycerine";
 import lipOils from "./articles/lip-oils-huiles-levres";
 import masqueBiodance from "./articles/masque-biodance";
@@ -326,6 +327,7 @@ export const ARTICLES: readonly Article[] = [
   cosmetiquesGrossesse,
   medicubeZeroPorePad,
   peptideDeCuivre,
+  eauMicellaire,
   glycerine,
 ];
 
