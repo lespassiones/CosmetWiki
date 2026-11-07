@@ -9,13 +9,13 @@ import type { Article } from "@/contenu/articles";
 const article: Article = {
   slug: "cosmetique-fait-pour-toi",
   titre: "Comment savoir si un cosmétique est fait pour toi (la méthode)",
-  titreSeo: "Savoir si un cosmétique est bon pour ta peau",
+  titreSeo: "Savoir si un cosmétique est bon : 3 questions",
   resume:
-    "Comment savoir si un cosmétique est bon pour ta peau : les 3 questions à te poser, la liste INCI lue pour toi, et les pièges du « naturel ».",
+    "Un cosmétique bien noté peut mal convenir à ta peau. 3 questions pour savoir s'il est bon pour toi, et la liste INCI lue pour toi.",
   chapo:
     "Un cosmétique n'est pas « bon » ou « mauvais » dans l'absolu. Il est ==compatible ou non avec toi==. Trois choses décident : **ton profil** (peau, cheveux), **tes objectifs** (ce que tu veux améliorer) et **ce que tu veux éviter** (sensibilités, ingrédients bannis). La bonne question n'est jamais « quelle est sa note », c'est « ++est-il fait pour moi++ ».",
   publieLe: "2026-07-20",
-  modifieLe: "2026-10-21",
+  modifieLe: "2026-11-07",
   minutes: 5,
   theme: "produit fait pour ma peau",
   motsCles: [
@@ -61,7 +61,7 @@ const article: Article = {
       type: "liste",
       style: "coches",
       items: [
-        "**Quel est mon profil ?** Type de peau (grasse, sèche, mixte, sensible, mature) et de cheveux. C'est le socle : il décide des textures et des actifs qui te conviennent.",
+        "**Quel est mon profil ?** Type de peau (grasse, sèche, mixte, sensible, mature) et de cheveux. C'est le socle : il décide des textures et des actifs qui te conviennent. Si tu hésites, fais le [test du mouchoir pour connaître ton type de peau](/blog/type-de-peau).",
         "**Quels sont mes objectifs ?** Hydrater, atténuer les imperfections, unifier le teint, anti-âge, apaiser les rougeurs... Un produit n'est pertinent que s'il sert ==ton== objectif.",
         "**Qu'est-ce que je veux éviter ?** Allergènes connus, ingrédients que tu ne tolères pas, familles que tu bannis (parfum, certains conservateurs...). Un produit qui contient l'un d'eux est disqualifié, quelle que soit sa note.",
       ],
@@ -78,7 +78,7 @@ const article: Article = {
       style: "coches",
       items: [
         "**Les actifs pertinents pour ton objectif** (par exemple l'[acide salicylique](/i/salicylic-acid) si tu cibles les imperfections, l'[acide hyaluronique](/i/sodium-hyaluronate) si tu cibles l'hydratation).",
-        "**Les irritants pour TA peau** (le [parfum](/i/parfum) n'est un problème que s'il te fait réagir).",
+        "**Les irritants pour TA peau** (le [parfum](/i/parfum) n'est un problème que s'il te fait réagir). Méfie-toi des étiquettes : dans notre base, 62,7 % des produits « peau sensible » contiennent du parfum (relevé du 07/11/2026).",
         "**La cohérence promesse / formule** : le produit tient-il ce que le marketing annonce, ou l'actif vedette est-il en fin de liste, à dose symbolique ? Exemple avec la [niacinamide](/blog/niacinamide), souvent écrite après la « ligne du 1 % ».",
       ],
     },
