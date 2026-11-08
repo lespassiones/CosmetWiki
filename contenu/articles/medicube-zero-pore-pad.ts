@@ -21,7 +21,7 @@ const article: Article = {
   chapo:
     "Les Medicube Zero Pore Pad sont des disques imbibés de deux acides qui exfolient : l'acide lactique et l'acide salicylique. Ce duo peut aider contre les points noirs, à condition de ne pas en abuser. Mais leur liste cache aussi ==sept huiles essentielles==. Et selon le code-barres de ton pot, la même liste d'ingrédients obtient ++12,16 ou 16,16 sur 20++ dans Cosme Check.",
   publieLe: "2026-11-02",
-  modifieLe: "2026-11-02",
+  modifieLe: "2026-11-08",
   minutes: 7,
   theme: "medicube zero pore pad",
   motsCles: [
@@ -102,7 +102,7 @@ const article: Article = {
       entetes: ["Disques", "Code-barres", "Place des 2 ingrédients orange", "Note Cosme Check"],
       lignes: [
         ["Zero Pore Pad 2.0, version 2025 (70 disques).", "8800256114665.", "8e et 10e.", "12,16 sur 20."],
-        ["Zero Pore Pad 2.0 (70 disques), liste proche.", "8800289479915.", "10e et 20e.", "12,21 sur 20."],
+        ["Zero Pore Pad 2.0 (70 disques), liste proche.", "8800289479915.", "10e et 20e.", "12,15 sur 20."],
         ["Zero Pore Pad 2.0, compresses purifiantes.", "8809517412908.", "40e et 43e.", "16,11 sur 20."],
         ["Disques Zero Pore 2.0.", "8809517418870.", "40e et 43e.", "16,16 sur 20."],
         ["Zero Pore Pad Mild (sans acide salicylique).", "8809517414315.", "5e et 38e.", "12,30 sur 20."],
@@ -231,8 +231,8 @@ const article: Article = {
     {
       produit: "Medicube, Zero Pore Pad 2.0 (70 disques)",
       ean: "8800289479915",
-      note: 12.21,
-      releveeLe: "2026-11-02",
+      note: 12.15,
+      releveeLe: "2026-11-08",
     },
     {
       produit: "Medicube, Zero Pore Pad 2.0, compresses purifiantes",

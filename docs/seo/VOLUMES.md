@@ -413,3 +413,7 @@ Zones retenues (« Andorre et 9 autres ») : **France, Belgique, Suisse, Luxembo
 | quel est mon type de peau, routine skincare ado | 10 à 100 | 0 % | 0 à -90 % | moyenne à élevée | |
 
 Suggestions Google du jour : « eau micellaire faut il rincer » ; « est ce que l'eau micellaire se rince », « enlève la crème solaire », « assèche la peau », « se périme » ; « eau micellaire danger » ; « huile démaquillante ou eau micellaire », « huile démaquillante ou baume » (trois reprises en FAQ, plus le baume) ; « double nettoyage avis dermatologue ».
+
+## 08/11/2026 : pas de mesure
+
+Chrome injoignable (« Browser extension is not connected », un essai au début des étapes Chrome). Le sujet du jour (« cerave gel moussant » et sa grappe) avait été mesuré le 01/11, moins de 60 jours : pas de nouvelle mesure nécessaire. « Trouver de nouveaux mots clés » du dimanche **non fait** : à faire dimanche 15/11, famille la moins fournie. À mesurer au prochain passage : « cerave gel moussant ou la roche posay effaclar », « dupe adopt femme », « sans conservateur ».

@@ -95,6 +95,7 @@ import acideHyaluronique from "./articles/acide-hyaluronique";
 import analyseComposition from "./articles/analyse-composition-cosmetique";
 import bakuchiol from "./articles/bakuchiol";
 import ceraveCremeHydratante from "./articles/cerave-creme-hydratante";
+import ceraveGelMoussant from "./articles/cerave-gel-moussant";
 import calendrierAvent from "./articles/calendrier-avent-beaute";
 import comedogene from "./articles/comedogene";
 import cosmetiqueFaitPourToi from "./articles/cosmetique-fait-pour-toi";
@@ -324,6 +325,7 @@ export const ARTICLES: readonly Article[] = [
   peauSecheVisage,
   routineSkincare,
   ceraveCremeHydratante,
+  ceraveGelMoussant,
   pdrn,
   retinol,
   cosmetiquesGrossesse,

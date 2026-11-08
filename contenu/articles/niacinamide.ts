@@ -16,9 +16,9 @@ const article: Article = {
   resume:
     "La niacinamide (vitamine B3) : ce que les études prouvent sur le sébum, les taches et les ridules, le bon dosage, et avec quoi la mélanger sans risque.",
   chapo:
-    "La niacinamide, c'est la **vitamine B3** : un actif doux qui aide à limiter la brillance, atténuer les taches brunes et renforcer la peau. Les études l'ont testée entre 2 et 5 %, sur 4 à 12 semaines. ++Le sérum le plus dosé n'est donc pas forcément le meilleur++.",
+    "La niacinamide, c'est la **vitamine B3** : un actif doux qui aide à limiter la brillance, atténuer les taches brunes et renforcer la peau. Elle ne fait pas ressortir les boutons et ne craint pas le soleil. Mais ++le sérum le plus dosé n'est pas forcément le meilleur++ : les études l'ont testée entre 2 et 5 %.",
   publieLe: "2026-10-20",
-  modifieLe: "2026-10-20",
+  modifieLe: "2026-11-08",
   minutes: 6,
   theme: "niacinamide",
   motsCles: [
@@ -52,7 +52,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Elle est partout. Dans notre base, ==29 138 produits== la contiennent (relevé du 20/10/2026) : sérums, crèmes, gels nettoyants, et même des dentifrices. Dans Cosme Check, elle est classée **verte**, sans risque connu.",
+        "Elle est partout. Dans notre base, ==29 138 produits== la contiennent (relevé du 20/10/2026) : sérums, crèmes, gels nettoyants, et même des dentifrices. Dans Cosme Check, elle est classée **verte**, sans risque connu. Dans un nettoyant comme le [Gel Moussant CeraVe](/blog/cerave-gel-moussant), elle part au rinçage : c'est dans un soin qui reste sur la peau qu'elle a le temps d'agir.",
     },
     {
       type: "fiche",
@@ -158,7 +158,28 @@ const article: Article = {
         "**Ton sérum contient-il vraiment de la niacinamide, et à quelle place ?** Scanne-le avec Cosme Check : tu vois toute sa liste, ingrédient par ingrédient.",
     },
 
-    { type: "h2", texte: "Quand et comment l'utiliser dans ta routine ?" },
+    { type: "h2", texte: "La niacinamide fait-elle ressortir les boutons ?" },
+    {
+      type: "p",
+      texte:
+        "Non, elle ne provoque pas de « purge ». La purge, c'est une poussée de petits boutons au début d'un actif qui accélère le renouvellement de la peau, comme le [rétinol](/blog/retinol) ou les acides exfoliants. La niacinamide n'exfolie pas, et la revue de Boo (2021) la décrit comme bien tolérée.",
+    },
+    {
+      type: "p",
+      texte:
+        "Des boutons après un nouveau sérum ? Regarde le reste de la liste : une huile riche ou un parfum sont plus souvent en cause. Notre article sur les ingrédients [comédogènes](/blog/comedogene) explique lesquels peuvent boucher les pores. Et un sérum à 10 % peut piquer une peau qui réagit vite : ++ce n'est pas une purge, c'est une irritation++.",
+    },
+    {
+      type: "liste",
+      style: "coches",
+      items: [
+        "Ajoute un seul nouveau produit à la fois, et attends deux semaines avant le suivant.",
+        "Commence un soir sur deux, puis tous les soirs si ta peau ne tiraille pas.",
+        "Choisis une formule adaptée à [ton type de peau](/blog/type-de-peau) : gel léger si elle brille, crème si elle tire.",
+      ],
+    },
+
+    { type: "h2", texte: "Niacinamide et soleil : quand l'utiliser dans ta routine ?" },
     {
       type: "p",
       texte:
