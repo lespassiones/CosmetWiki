@@ -417,3 +417,24 @@ Suggestions Google du jour : « eau micellaire faut il rincer » ; « est ce que
 ## 08/11/2026 : pas de mesure
 
 Chrome injoignable (« Browser extension is not connected », un essai au début des étapes Chrome). Le sujet du jour (« cerave gel moussant » et sa grappe) avait été mesuré le 01/11, moins de 60 jours : pas de nouvelle mesure nécessaire. « Trouver de nouveaux mots clés » du dimanche **non fait** : à faire dimanche 15/11, famille la moins fournie. À mesurer au prochain passage : « cerave gel moussant ou la roche posay effaclar », « dupe adopt femme », « sans conservateur ».
+
+
+## 2026-11-09 : dix zones, toutes les langues
+
+Zones (« Andorre et 9 autres ») : France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon. Langue : « Toutes les langues » (clic par référence sur le bouton : aucune liste, comme les jours précédents). Liste tapée dans le champ du panneau « Obtenir le volume », « Commencer » par sa référence ; zones ajoutées par `__inc` en JavaScript, du premier coup. Chrome répondait ce matin.
+
+| Requête | Volume mensuel | 3 mois | 1 an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| rhode lip tint | 1 k à 10 k | 0 % | 0 % | élevée | **sujet du jour** (`rhode-hailey-bieber-composition`) |
+| rhode peptide lip treatment | 1 k à 10 k | 0 % | 0 % | faible | sujet du jour |
+| rhode sephora | 1 k à 10 k | +900 % | 0 % | élevée | sujet du jour |
+| rhode glazing fluid | 100 à 1 k | -90 % | -90 % | élevée | sujet du jour |
+| rhode barrier restore cream | 100 à 1 k | 0 % | 0 % | élevée | |
+| rhode composition | 0 à 10 | 0 % | 0 % | | les gens tapent « rhode avis composition » en suggestion |
+| ferritin face | 1 k à 10 k | **+9 900 %** | + ∞ | faible | tendance santé (fer, prise de sang) : sujet médical, écarté |
+| bloom skin | 100 à 1 k | 0 % | 0 % | faible | piste tendance (NBC, 07/11 : « glass skin is out ») |
+| crème solaire danger | 100 à 1 k | -90 % | 0 % | faible | hors saison en France ; franceinfo 07/11 |
+| crème solaire cancer | 100 à 1 k | -90 % | +900 % | moyenne | |
+| cosmétique sans conservateur, crème sans conservateur | 10 à 100 | | | | trop petit pour un article ; une section |
+| fenty skin avis | 10 à 100 | 0 % | 0 % | élevée | |
+| peptide lèvres | aucun | | | | |

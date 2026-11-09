@@ -117,6 +117,7 @@ import pdrn from "./articles/pdrn";
 import peptideDeCuivre from "./articles/peptide-de-cuivre";
 import peauSecheVisage from "./articles/peau-seche-visage";
 import retinol from "./articles/retinol";
+import rhodeHaileyBieber from "./articles/rhode-hailey-bieber-composition";
 import perturbateursEndocriniens from "./articles/perturbateurs-endocriniens-cosmetiques-2026";
 import routineFoot from "./articles/routine-peau-joueurs-foot";
 import routineSkincare from "./articles/routine-skincare";
@@ -328,6 +329,7 @@ export const ARTICLES: readonly Article[] = [
   ceraveGelMoussant,
   pdrn,
   retinol,
+  rhodeHaileyBieber,
   cosmetiquesGrossesse,
   medicubeZeroPorePad,
   peptideDeCuivre,

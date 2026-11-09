@@ -14,13 +14,13 @@ import type { Article } from "@/contenu/articles";
 const article: Article = {
   slug: "calendrier-avent-beaute",
   titre: "Calendrier de l'Avent beauté : 24 cases, 24 compositions (et tu n'en lis aucune)",
-  titreSeo: "Calendrier de l'Avent beauté : ce qu'il cache",
+  titreSeo: "Calendrier de l'Avent beauté 2026 : le piège",
   resume:
-    "Calendrier de l'Avent beauté : où lire les ingrédients des miniatures, le parfum qui s'accumule, les actifs à ne pas mélanger et le bon geste à l'ouverture.",
+    "24 cases, 24 listes d'ingrédients que tu ne lis pas : le piège du calendrier de l'Avent beauté 2026, le parfum qui s'accumule et le bon geste à l'ouverture.",
   chapo:
     "Un calendrier de l'Avent beauté, ce n'est pas un produit : c'est **jusqu'à 24 compositions différentes**, souvent sans leur liste d'ingrédients sous les yeux. Avant d'ouvrir la première case, quatre réflexes évitent la mauvaise surprise de décembre, et ++le dernier change la façon d'ouvrir les cases++.",
   publieLe: "2026-10-22",
-  modifieLe: "2026-10-31",
+  modifieLe: "2026-11-09",
   minutes: 7,
   theme: "calendrier de l'avent beauté",
   motsCles: [
