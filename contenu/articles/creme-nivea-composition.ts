@@ -17,7 +17,7 @@ const article: Article = {
   chapo:
     "La crème Nivea, c'est surtout **de l'eau, de l'huile minérale et des cires** : un mélange simple qui hydrate en posant un film sur la peau. Elle ne protège pas du soleil et ne lisse pas les rides. On a lu ses 21 ingrédients, et ++la fin réserve une surprise++.",
   publieLe: "2026-10-19",
-  modifieLe: "2026-10-27",
+  modifieLe: "2026-11-10",
   minutes: 6,
   theme: "crème nivea",
   motsCles: [
@@ -46,6 +46,38 @@ const article: Article = {
       type: "p",
       texte:
         "La crème Nivea contient 21 ingrédients, et les quatre premiers font presque tout le travail : de l'eau, une huile minérale et deux cires. On le lit dans sa liste INCI : c'est la liste officielle des ingrédients, du plus dosé au moins dosé. Celle de [la fiche Nivea](https://www.nivea.fr/produits/creme-multi-usage-hydratante-eucerit-34140908013290040.html) est identique à celle de notre base.",
+    },
+    {
+      type: "p",
+      texte:
+        "Voici la composition complète de la crème Nivea, dans l'ordre exact de la boîte (relevée le 10/11/2026).",
+    },
+    {
+      type: "liste",
+      style: "numeros",
+      items: [
+        "Aqua (eau).",
+        "Paraffinum Liquidum (huile minérale).",
+        "Cera Microcristallina (cire minérale).",
+        "Glycerin (glycérine, un hydratant).",
+        "Lanolin Alcohol (l'Eucerit, tiré de la lanoline).",
+        "Paraffin (cire minérale).",
+        "Panthenol (provitamine B5).",
+        "Magnesium Sulfate (un sel minéral).",
+        "Decyl Oleate (un corps gras léger).",
+        "Octyldodecanol (un corps gras léger).",
+        "Aluminum Stearates (un épaississant).",
+        "Citric Acid (règle l'acidité).",
+        "Magnesium Stearate (un épaississant).",
+        "Limonene (allergène du parfum).",
+        "Geraniol (allergène du parfum).",
+        "Hydroxycitronellal (allergène du parfum).",
+        "Linalool (allergène du parfum).",
+        "Citronellol (allergène du parfum).",
+        "Benzyl Benzoate (allergène du parfum).",
+        "Cinnamyl Alcohol (allergène du parfum).",
+        "Parfum.",
+      ],
     },
     {
       type: "p",

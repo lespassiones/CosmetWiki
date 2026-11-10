@@ -101,6 +101,7 @@ import comedogene from "./articles/comedogene";
 import cosmetiqueFaitPourToi from "./articles/cosmetique-fait-pour-toi";
 import cosmetiquesGrossesse from "./articles/cosmetiques-grossesse";
 import cremeNivea from "./articles/creme-nivea-composition";
+import cremeUree from "./articles/creme-uree";
 import cremeSolaireCoreenne from "./articles/creme-solaire-coreenne-k-beauty";
 import cremesHydratantesReparatrices from "./articles/cremes-hydratantes-reparatrices";
 import deodorantAluminium from "./articles/deodorant-sels-aluminium-verite";
@@ -335,6 +336,7 @@ export const ARTICLES: readonly Article[] = [
   peptideDeCuivre,
   eauMicellaire,
   glycerine,
+  cremeUree,
 ];
 
 controlerRegistre(ARTICLES);

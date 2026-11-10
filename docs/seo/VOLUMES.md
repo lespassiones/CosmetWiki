@@ -438,3 +438,7 @@ Zones (« Andorre et 9 autres ») : France, Belgique, Suisse, Luxembourg, Monaco
 | cosmétique sans conservateur, crème sans conservateur | 10 à 100 | | | | trop petit pour un article ; une section |
 | fenty skin avis | 10 à 100 | 0 % | 0 % | élevée | |
 | peptide lèvres | aucun | | | | |
+
+## 10/11/2026 : pas de mesure
+
+Chrome injoignable : les outils `claude-in-chrome` n'étaient pas chargeables dans la session (aucun outil trouvé, deuxième fois après le 08/11). Le sujet du jour (« crème urée », « crème à l'urée » 1 k à 10 k) avait été mesuré le 05/11, en France seule et toutes langues : moins de 60 jours, mais sur une seule zone. À remesurer sur dix zones au prochain passage, avec « crème urée 30 », « crème urée visage », « crème urée pieds », « imidazolidinyl urea », « libère du formaldéhyde ».
