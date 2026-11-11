@@ -442,3 +442,34 @@ Zones (« Andorre et 9 autres ») : France, Belgique, Suisse, Luxembourg, Monaco
 ## 10/11/2026 : pas de mesure
 
 Chrome injoignable : les outils `claude-in-chrome` n'étaient pas chargeables dans la session (aucun outil trouvé, deuxième fois après le 08/11). Le sujet du jour (« crème urée », « crème à l'urée » 1 k à 10 k) avait été mesuré le 05/11, en France seule et toutes langues : moins de 60 jours, mais sur une seule zone. À remesurer sur dix zones au prochain passage, avec « crème urée 30 », « crème urée visage », « crème urée pieds », « imidazolidinyl urea », « libère du formaldéhyde ».
+
+## 11/11/2026 : sujets « Cosme Check pratique »
+
+Deux relevés dans le Planificateur (« Obtenir le volume de recherche et les prévisions »), période oct. 2025 à sept. 2026, réseau Google.
+
+**Premier relevé, France seule, toutes langues** (le panneau de zone n'avait pas encore été ouvert) :
+
+| Requête | Volume mensuel | 3 mois | Sur un an | Concurrence | Note |
+|---|---|---|---|---|---|
+| crème périmée | 100 à 1 k | 0 % | 0 % | faible | |
+| application cosmétique | 100 à 1 k | 0 % | 0 % | faible | confirme le 19/10 |
+| scanner produit cosmétique | 100 à 1 k | -40 % | -40 % | faible | |
+| date de péremption cosmétique | 10 à 100 | 0 % | +900 % | faible | |
+| formaldéhyde cosmétique | 10 à 100 | 0 % | 0 % | faible | trop petit : une section (déjà dans `creme-uree`) |
+| pao cosmétique | 10 à 100 | 0 % | 0 % | faible | |
+| libère du formaldéhyde, symbole pot ouvert, cosmétique périmé danger | aucun volume | | | | |
+
+**Second relevé, neuf zones** : Andorre, Belgique, Canada, France, Luxembourg, Monaco, Nouvelle-Calédonie, Polynésie française, Suisse (libellé « Andorre et 8 autres »), **toutes langues**. « Réunion » ne sort qu'avec le type « région » (comprise dans la France) : non ajoutée. Langue non réglée sur French : pas essayé aujourd'hui, la zone d'abord.
+
+| Requête | Volume mensuel | 3 mois | Sur un an | Concurrence | Note |
+|---|---|---|---|---|---|
+| application yuka | 1 k à 10 k | 0 % | 0 % | faible | navigationnel (l'app concurrente) : pas un sujet, une piste comparatif |
+| crème périmée | 100 à 1 k | 0 % | 0 % | faible | **sujet du jour** |
+| crème solaire périmée | 100 à 1 k | -90 % | 0 % | faible | saisonnier (hors saison en novembre) |
+| péremption crème solaire | 100 à 1 k | 0 % | 0 % | faible | |
+| scanner produit cosmétique | 100 à 1 k | -90 % | -90 % | faible | |
+| yuka cosmétique | 100 à 1 k | 0 % | 0 % | moyenne | confirme le 25/10 |
+| maquillage périmé, mascara périmé | 10 à 100 | 0 % | 0 % | faible | une section |
+| durée de vie cosmétique ouvert | aucun volume | | | | |
+
+Suggestions Google du jour : « crème périmée pas ouverte », « creme périmée danger », « crème périmée visage », « creme perimee depuis 1 mois / 2 ans » ; « crème solaire périmée non ouverte », « … dangereux », « … cancer », « … où jeter » ; « date de péremption cosmétique non ouvert », « date de péremption maquillage », « application date de péremption cosmétique » ; « mascara périmé danger ».

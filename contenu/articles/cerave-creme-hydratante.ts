@@ -20,7 +20,7 @@ const article: Article = {
   chapo:
     "La meilleure crème CeraVe dépend de ta peau. Mais les formules les plus simples sont les mieux notées : le **Gel-crème Oil Control**, la **Crème hydratante visage** et le **Lait Hydratant**, de 12,12 à 12,34 sur 20. Les versions « Intensif » et celles avec SPF tombent sous 8. On a lu les huit listes pour te dire pourquoi, et ++quand le moins bien noté reste le bon choix++.",
   publieLe: "2026-10-28",
-  modifieLe: "2026-11-04",
+  modifieLe: "2026-11-11",
   minutes: 7,
   theme: "cerave crème hydratante",
   motsCles: [
@@ -70,6 +70,13 @@ const article: Article = {
       type: "p",
       texte:
         "La règle saute aux yeux : ==plus la liste s'allonge, plus la note baisse==. Les quatre premières tiennent en 24 à 28 ingrédients. Les quatre dernières en comptent de 36 à 45, et chaque ajout amène son lot d'orange.",
+    },
+
+    { type: "h2", texte: "Quelle crème hydratante CeraVe pour une peau grasse ?" },
+    {
+      type: "p",
+      texte:
+        "Le **Gel-crème Hydratant Oil Control**, le seul de la gamme pensé pour les peaux mixtes à grasses. Sa liste le montre : la [niacinamide](/i/niacinamide) passe en 2e place, juste après l'eau, et il n'y a ni vaseline ni beurre. De l'[amidon de maïs](/i/zea-mays-starch) et de la [silice](/i/silica) absorbent le surplus de sébum, l'huile naturelle de la peau. Seul bémol : l'[Isopropyl Myristate](/i/isopropyl-myristate), en 6e place, figure sur les vieilles listes [« comédogènes »](/blog/comedogene). Si des boutons apparaissent dans les jours qui suivent, c'est le premier suspect.",
     },
 
     { type: "h2", texte: "Qu'est-ce qu'il y a dans une crème CeraVe ?" },
@@ -154,7 +161,6 @@ const article: Article = {
       items: [
         "Peau sèche qui tire en hiver : le Baume, en fine couche le soir. Le [guide de la peau sèche](/blog/peau-seche-visage) explique comment l'ajouter à ta routine.",
         "Peau normale à sèche, le jour : la Crème Hydratante Visage, plus légère, avec la niacinamide.",
-        "Peau qui brille vite : le Gel-crème Oil Control, la mieux notée des huit, sans vaseline.",
         "Corps : le Lait Hydratant fait le même travail que le Baume, en plus fluide.",
       ],
     },
@@ -162,7 +168,6 @@ const article: Article = {
       type: "liste",
       style: "alertes",
       items: [
-        "Peau à boutons : évite le Baume sur le visage, un occlusif épais ne va pas à toutes les peaux. Lis ce que veut dire [« comédogène »](/blog/comedogene).",
         "Ne superpose pas deux crèmes CeraVe le même matin : une seule suffit, puis la crème solaire. L'[ordre de la routine](/blog/routine-skincare) tient en quatre gestes.",
         "Rougeurs, brûlures ou plaques qui ne partent pas : arrête et demande conseil à ton pharmacien ou à un dermatologue.",
       ],
@@ -180,13 +185,7 @@ const article: Article = {
       items: [
         "**Que Choisir** a testé le Lait Hydratant parmi 16 laits pour le corps, en mars 2025. Sa note n'est pas publique ([Que Choisir, 2025](https://www.quechoisir.org/comparatif-laits-corporels-n613/cerave-lait-hydratant-p277956/)).",
         "**Test-Achats** place la Lotion hydratante visage 5e sur 13 pour l'avis des testeuses. C'est la seule crème du test qui imprime sa liste INCI sur le tube.",
-        "Le même test juge la mention « non comédogène » sans fondement clinique. Voir [ce que veut dire « comédogène »](/blog/comedogene).",
       ],
-    },
-    {
-      type: "p",
-      texte:
-        "La note Cosme Check, elle, est gratuite et lit la liste de ton pot : un regard différent, qui complète ces tests.",
     },
 
     { type: "h2", texte: "CeraVe, c'est une bonne marque ?" },
@@ -203,7 +202,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le geste à garder pour la fin : ++devant le rayon, lis le mot « Intensif » comme un signal++. Il annonce une liste plus longue, pas une formule meilleure. Si ta peau n'est pas très sèche, la version de base fait le travail avec moins d'ingrédients. Pour aller plus loin, compare avec [les meilleures crèmes hydratantes visage](/blog/meilleures-cremes-hydratantes-visage) ou les [crèmes réparatrices](/blog/cremes-hydratantes-reparatrices).",
+        "Le geste à garder pour la fin : ++devant le rayon, lis le mot « Intensif » comme un signal++. Il annonce une liste plus longue, pas une formule meilleure. Pour aller plus loin, compare avec [les meilleures crèmes hydratantes visage](/blog/meilleures-cremes-hydratantes-visage) ou les [crèmes réparatrices](/blog/cremes-hydratantes-reparatrices).",
     },
   ],
   faq: [
