@@ -20,7 +20,7 @@ const article: Article = {
   chapo:
     "Un produit **comédogène**, c'est un produit qui peut boucher les pores et faire apparaître des points noirs ou des points blancs. Le mot est partout sur les crèmes. Mais les listes d'ingrédients « à fuir » viennent de vieux tests faits sur des oreilles de lapin, et ++la mention « non comédogène » ne garantit rien pour ta peau à toi++.",
   publieLe: "2026-10-23",
-  modifieLe: "2026-10-23",
+  modifieLe: "2026-11-12",
   minutes: 6,
   theme: "comédogène",
   motsCles: [
@@ -30,6 +30,8 @@ const article: Article = {
     "crème non comédogène",
     "huile non comédogène",
     "maquillage non comédogène",
+    "comédon",
+    "produits comédogènes",
   ],
   categorie: "Ingrédients",
   couverture: {
@@ -61,6 +63,18 @@ const article: Article = {
         "Comédogène ne veut pas dire toxique, ni mauvais. Ça veut dire : ==peut boucher les pores chez certaines peaux, à une certaine dose==.",
     },
 
+    { type: "h2", texte: "Comédon : définition, et pourquoi le point noir est noir ?" },
+    {
+      type: "p",
+      texte:
+        "Un comédon, c'est un pore bouché par un mélange de sébum et de cellules mortes. Il en existe trois sortes : le microcomédon, trop petit pour se voir ; le comédon fermé, ou point blanc ; le comédon ouvert, ou point noir ([DermNet](https://dermnetnz.org/topics/comedonal-acne)).",
+    },
+    {
+      type: "p",
+      texte:
+        "Le point noir n'est pas de la saleté. Sa couleur vient de la mélanine, le pigment de la peau, présente dans le bouchon ouvert à l'air. ++Frotter plus fort ne le fera donc pas partir++, et ça irrite. Un exfoliant doux (un soin qui décolle les cellules mortes) comme l'acide salicylique, décrit dans notre article sur les [disques Medicube](/blog/medicube-zero-pore-pad), l'entretient mieux que les doigts.",
+    },
+
     { type: "h2", texte: "D'où vient l'échelle de comédogénicité de 0 à 5 ?" },
     {
       type: "p",
@@ -77,7 +91,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Parce que la dose et la formule changent tout. Une huile testée pure n'a rien à voir avec la même huile à 2 % dans un gel léger. En 2006, deux chercheurs ont repris la question ([Draelos et DiNardo, *Journal of the American Academy of Dermatology*, 2006](https://doi.org/10.1016/j.jaad.2005.11.1058)). Leur conclusion : un produit fini qui contient un ingrédient réputé comédogène n'est **pas forcément** comédogène. Il faut tester le produit entier, sur de vraies personnes.",
+        "Parce que la dose et la formule changent tout. Une huile testée pure n'a rien à voir avec la même huile à 2 % dans un gel léger. En 2006, deux chercheurs ont repris la question ([Draelos et DiNardo, *Journal of the American Academy of Dermatology*, 2006](https://doi.org/10.1016/j.jaad.2005.11.1058)). Leur conclusion : un produit fini qui contient un ingrédient réputé comédogène n'est **pas forcément** comédogène. Il faut tester le produit entier, sur de vraies personnes. Il n'existe donc aucune liste officielle de « produits comédogènes ».",
     },
     {
       type: "p",
@@ -142,6 +156,7 @@ const article: Article = {
         "Ne bannis pas toutes les huiles. L'huile de [jojoba](/i/simmondsia-chinensis-seed-oil) ou le [squalane](/i/squalane) sont notés très bas sur ces échelles.",
         "Ne confonds pas « occlusif » et « comédogène ». Occlusif veut dire qui forme un film pour garder l'eau dans la peau : la [vaseline](/i/petrolatum) l'est beaucoup, mais elle est notée très bas.",
         "Ne décape pas ta peau pour compenser. Un nettoyant trop fort assèche, et ne débouche rien.",
+        "Méfie-toi des tendances « tout gras ». Le [suif de bœuf de TikTok](/blog/suif-de-boeuf) est épais et occlusif, et aucune étude ne dit s'il bouche les pores ou non.",
       ],
     },
     {
@@ -179,9 +194,9 @@ const article: Article = {
         "Aucune huile n'est sans risque pour toutes les peaux, mais certaines sont notées très bas sur les échelles : l'huile de jojoba, le squalane, l'huile de pépins de raisin ou l'huile de chanvre, par exemple. Teste-les une à la fois, quelques semaines, et observe ta peau.",
     },
     {
-      question: "La vaseline est-elle comédogène ?",
+      question: "Comédon c'est quoi ?",
       reponse:
-        "Sur les échelles classiques, la vaseline (Petrolatum) est notée très bas. Elle est très occlusive : elle forme un film qui garde l'eau dans la peau, ce qui n'est pas la même chose que boucher un pore. Sur une peau très grasse, une couche épaisse sur tout le visage reste toutefois lourde.",
+        "Un comédon, c'est un pore bouché par du sébum et des cellules mortes. Fermé, il forme un point blanc sous la peau. Ouvert, il devient un point noir : sa couleur vient du pigment de la peau, pas de la saleté. Un exfoliant doux l'entretient mieux que les doigts, qui irritent et marquent.",
     },
   ],
 };

@@ -124,6 +124,7 @@ import perturbateursEndocriniens from "./articles/perturbateurs-endocriniens-cos
 import routineFoot from "./articles/routine-peau-joueurs-foot";
 import routineSkincare from "./articles/routine-skincare";
 import serums from "./articles/serums-visage-guide";
+import suifDeBoeuf from "./articles/suif-de-boeuf";
 import spf50 from "./articles/spf-50-visage-7-erreurs";
 import typeDePeau from "./articles/type-de-peau";
 
@@ -339,6 +340,7 @@ export const ARTICLES: readonly Article[] = [
   glycerine,
   cremeUree,
   cremePerimee,
+  suifDeBoeuf,
 ];
 
 controlerRegistre(ARTICLES);

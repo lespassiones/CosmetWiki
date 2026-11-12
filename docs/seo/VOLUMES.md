@@ -473,3 +473,37 @@ Deux relevés dans le Planificateur (« Obtenir le volume de recherche et les pr
 | durée de vie cosmétique ouvert | aucun volume | | | | |
 
 Suggestions Google du jour : « crème périmée pas ouverte », « creme périmée danger », « crème périmée visage », « creme perimee depuis 1 mois / 2 ans » ; « crème solaire périmée non ouverte », « … dangereux », « … cancer », « … où jeter » ; « date de péremption cosmétique non ouvert », « date de péremption maquillage », « application date de péremption cosmétique » ; « mascara périmé danger ».
+
+## 2026-11-12
+
+**Premier relevé, France seule, toutes langues** (zone par défaut du plan).
+
+| Requête | Volume mensuel | 3 mois | Sur un an | Concurrence | Note |
+|---|---|---|---|---|---|
+| beef tallow | 1 k à 10 k | 0 % | 0 % | élevée | |
+| crème suif de boeuf | 100 à 1 k | +900 % | +900 % | élevée | |
+| suif de boeuf visage | 100 à 1 k | 0 % | 0 % | élevée | |
+| celimax | 10 k à 100 k | 0 % | +900 % | élevée | 52 produits en base, pas le Retinal Shot |
+| celimax retinal shot | 100 à 1 k | 0 % | 0 % | élevée | absent de la base |
+| typology | 100 k à 1 M | +900 % | 0 % | élevée | navigationnel ; pic à expliquer (Black Friday, calendrier ?) |
+| sérum cils typology | 100 à 1 k | 0 % | 0 % | élevée | absent de la base (gels sourcils seulement) |
+| comédon, comédons | 1 k à 10 k | 0 % | 0 % | faible | |
+| produits comédogènes | 100 à 1 k | 0 % | 0 % | faible | |
+| suif de boeuf peau | 10 à 100 | 0 % | 0 % | élevée | |
+| calendrier avent fenty | 10 à 100 | 0 % | 0 % | élevée | |
+
+**Second relevé, cinq zones** : France, Belgique, Suisse, Canada, Luxembourg (libellé « Belgique et 4 autres »), **toutes langues**. Monaco, Andorre et l'outre-mer non ajoutés (temps). **La langue ne se règle pas : le bouton « Toutes les langues » est désactivé** (`find` le renvoie avec l'attribut `disabled`), ce qui explique les échecs depuis le 19/10 ; inutile de retenter la méthode `find` sur ce compte.
+
+| Requête | Volume mensuel | 3 mois | Sur un an | Concurrence | Note |
+|---|---|---|---|---|---|
+| beef tallow | 10 k à 100 k | 0 % | 0 % | élevée | gonflé par le Canada anglophone |
+| comédon | 10 k à 100 k | -90 % | -90 % | faible | **optimisation du jour** (`comedogene`) |
+| celimax | 10 k à 100 k | 0 % | 0 % | élevée | |
+| celimax retinal shot | 1 k à 10 k | 0 % | 0 % | élevée | |
+| typology | 100 k à 1 M | +900 % | 0 % | élevée | |
+| comédons | 1 k à 10 k | 0 % | 0 % | faible | |
+| crème suif de boeuf, suif de boeuf visage | 100 à 1 k | 0 % | 0 % | élevée | **sujet du jour** |
+| produits comédogènes, sérum cils typology | 100 à 1 k | 0 % | 0 % | | |
+| suif de boeuf peau, calendrier avent fenty | 10 à 100 | | | | |
+
+Suggestions Google du jour : « suif de bœuf visage avis / bio / homme / halal / bienfaits », « graisse de bœuf visage » ; « creme suif de boeuf bio / halal / et miel / pharmacie / quebec » ; « suif de boeuf peau grasse », « suif de boeuf bon pour la peau » ; « suif de boeuf c'est quoi ».
