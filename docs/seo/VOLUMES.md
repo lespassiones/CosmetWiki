@@ -507,3 +507,22 @@ Suggestions Google du jour : « crème périmée pas ouverte », « creme périm
 | suif de boeuf peau, calendrier avent fenty | 10 à 100 | | | | |
 
 Suggestions Google du jour : « suif de bœuf visage avis / bio / homme / halal / bienfaits », « graisse de bœuf visage » ; « creme suif de boeuf bio / halal / et miel / pharmacie / quebec » ; « suif de boeuf peau grasse », « suif de boeuf bon pour la peau » ; « suif de boeuf c'est quoi ».
+
+## 2026-11-13 : dix zones, toutes les langues
+
+Zones retenues (« Andorre et 9 autres ») : **France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon**. Méthode : « Obtenir le volume » cliqué par coordonnées sur l'accueil, liste tapée dans le champ (clic par référence puis saisie), « Commencer » par référence ; zone ouverte par un clic sur « France », neuf zones ajoutées d'un seul appel `javascript_exec` (`window.__inc` : champ visible sans `aria-label`, ligne `div.entry` dont `.name` correspond et `.type` vaut « pays » ou « territoire », lien « Inclure »), « Enregistrer » par référence. Langue : « Toutes les langues » (bouton désactivé, non retenté).
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| acide salicylique | **10 k à 100 k** | 0 % | 0 % | élevée | **sujet du jour** (`acide-salicylique`) |
+| acide glycolique | 10 k à 100 k | 0 % | 0 % | élevée | piste ingrédient suivante |
+| centella asiatica | 10 k à 100 k | 0 % | 0 % | élevée | piste ingrédient ; intention mêlée (compléments alimentaires) |
+| sérum vitamine c | 10 k à 100 k | 0 % | -90 % | élevée | renforce `serums-visage-guide` ; en baisse sur un an |
+| vitamine c visage | 1 k à 10 k | 0 % | 0 % | élevée | |
+| acide azélaïque | 1 k à 10 k | 0 % | 0 % | élevée | |
+| panthénol | 1 k à 10 k | 0 % | 0 % | élevée | |
+| squalane | 1 k à 10 k | 0 % | 0 % | élevée | |
+| parabène | 100 à 1 k | 0 % | 0 % | faible | confirme le 20/10 |
+| céramides | 100 à 1 k | 0 % | 0 % | moyenne | confirme le 29/10 |
+
+Suggestions Google du jour (« acide salicylique … ») : « aroma zone », « verrue » (médical, écarté), « pharmacie », « the ordinary », « visage », « peau », « point noir », « 2 » ; « visage danger », « danger cancer », « danger yeux » ; « enceinte », « allaitement » ; « et niacinamide », « et acide azelaique », « et vitamine c », « et retinol » (trois reprises en FAQ).

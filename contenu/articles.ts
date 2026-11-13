@@ -92,6 +92,7 @@
 import type { Categorie } from "@/contenu/rubriques";
 
 import acideHyaluronique from "./articles/acide-hyaluronique";
+import acideSalicylique from "./articles/acide-salicylique";
 import analyseComposition from "./articles/analyse-composition-cosmetique";
 import bakuchiol from "./articles/bakuchiol";
 import ceraveCremeHydratante from "./articles/cerave-creme-hydratante";
@@ -341,6 +342,7 @@ export const ARTICLES: readonly Article[] = [
   cremeUree,
   cremePerimee,
   suifDeBoeuf,
+  acideSalicylique,
 ];
 
 controlerRegistre(ARTICLES);

@@ -18,8 +18,8 @@ const article: Article = {
   chapo:
     "Pour analyser la composition d'un cosmétique, retourne le produit : la vérité est dans la **liste INCI**, au dos, pas dans les promesses du devant. Cinq étapes suffisent, et ++la plus utile tient en un seul mot à repérer++.",
   publieLe: "2026-10-21",
-  modifieLe: "2026-10-30",
-  minutes: 6,
+  modifieLe: "2026-11-13",
+  minutes: 8,
   theme: "analyse composition cosmétique",
   motsCles: [
     "analyse composition cosmétique en ligne",
@@ -138,6 +138,30 @@ const article: Article = {
         ["Phenoxyethanol", "Un conservateur, 1 % au plus : ce qui suit est encore moins dosé."],
         ["CI 77891", "Un colorant ou un pigment (ici, le blanc du dioxyde de titane)."],
         ["(nano)", "Un ingrédient en particules très fines, signalé par la loi."],
+      ],
+    },
+
+    { type: "h2", texte: "Faire analyser la composition d'un produit en laboratoire : utile ou pas ?" },
+    {
+      type: "p",
+      texte:
+        "Pour un particulier, presque jamais. Un laboratoire ne lit pas l'étiquette : il mesure ce qu'il y a vraiment dans le pot, par exemple la dose d'un conservateur ou d'un actif. C'est un contrôle, fait par les marques puis par l'État.",
+    },
+    {
+      type: "p",
+      texte:
+        "En France, la DGCCRF, le service des fraudes, fait analyser des produits prélevés en magasin par son laboratoire, le SCL ([DGCCRF, enquête cosmétiques](https://www.economie.gouv.fr/dgccrf/laction-de-la-dgccrf/les-enquetes/cosmetiques-quand-des-produits-reserves-aux-professionnels)). Ce contrôle donne du poids à la liste INCI.",
+    },
+    {
+      type: "p",
+      texte:
+        "La liste ne donne pas les doses, mais la ligne du 1 % de l'étape 3 suffit souvent. Sur 775 produits qui affichent l'[acide salicylique](/blog/acide-salicylique) dans leur nom, un sur quatre seulement le place dans les cinq premiers.",
+    },
+    {
+      type: "liste",
+      style: "coches",
+      items: [
+        "Un produit t'a fait réagir : garde le pot, parles-en à ton pharmacien, et déclare l'effet sur le [portail officiel de signalement](https://signalement.social-sante.gouv.fr).",
       ],
     },
 
