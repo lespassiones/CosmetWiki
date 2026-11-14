@@ -20,7 +20,7 @@ const article: Article = {
   chapo:
     "L'ordre d'une routine skincare tient en trois gestes : nettoyer, mettre le soin qui agit, puis hydrater, avec la crème solaire en dernier le matin. Le reste, c'est souvent de l'empilement. En 2026, des dermatologues ont suivi 94 personnes dont la peau avait mal réagi à des produits vus sur les réseaux : ++près de deux sur trois mettaient plus de trois actifs à la fois++.",
   publieLe: "2026-10-27",
-  modifieLe: "2026-10-27",
+  modifieLe: "2026-11-14",
   minutes: 7,
   theme: "routine skincare",
   motsCles: [
@@ -172,7 +172,30 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Ensuite, on ajuste selon la peau. Une peau qui tire en hiver a besoin d'une crème plus riche : voir [peau sèche du visage](/blog/peau-seche-visage). Une peau qui brille cherche des textures légères qui ne bouchent pas les pores : voir [ce que veut dire comédogène](/blog/comedogene).",
+        "Une routine courte a un autre avantage : les flacons se vident avant d'avoir le temps de tourner. C'est tout l'esprit du [project pan](/blog/project-pan), la tendance qui consiste à finir ses produits avant d'en racheter.",
+    },
+
+    { type: "h2", texte: "Quelle routine skincare selon ton type de peau ?" },
+    {
+      type: "p",
+      texte:
+        "La même base pour tout le monde, puis un seul réglage : la texture de la crème. C'est le type de peau qui la choisit, pas la mode du moment. Si tu ne sais pas où te placer, fais d'abord le test du mouchoir de notre guide pour [connaître ton type de peau](/blog/type-de-peau).",
+    },
+    {
+      type: "tableau",
+      entetes: ["Type de peau", "Le matin", "Le soir", "Le piège"],
+      lignes: [
+        ["Sèche, qui tire.", "Nettoyant doux ou eau, crème riche, crème solaire.", "Nettoyant doux, crème riche, un baume sur les zones qui tirent.", "Les nettoyants qui moussent fort et l'eau trop chaude."],
+        ["Grasse, qui brille.", "Gel nettoyant doux, gel-crème léger, crème solaire fluide.", "Nettoyant doux, gel-crème, un actif comme l'acide salicylique un soir sur deux.", "Décaper la peau : elle ne brille pas moins pour autant."],
+        ["Mixte.", "Nettoyant doux, crème légère, crème solaire.", "Nettoyant doux, crème légère, un peu plus riche sur les joues si besoin.", "Traiter tout le visage comme la zone T (front, nez, menton)."],
+        ["Sensible, qui réagit.", "Eau ou nettoyant très doux, crème sans parfum, crème solaire.", "Nettoyant doux, crème sans parfum, rien d'autre au début.", "Les huiles essentielles et les nouveautés en série."],
+      ],
+      legende: "Une base, pas une ordonnance : si ta peau réagit malgré tout, demande conseil à un pharmacien ou à un dermatologue.",
+    },
+    {
+      type: "p",
+      texte:
+        "Pour aller plus loin, lis notre guide de la [peau sèche du visage](/blog/peau-seche-visage) en hiver. Les textures qui ne bouchent pas les pores sont dans [ce que veut dire comédogène](/blog/comedogene). Et l'actif des peaux grasses décrypté dans [notre article sur l'acide salicylique](/blog/acide-salicylique).",
     },
     {
       type: "p",

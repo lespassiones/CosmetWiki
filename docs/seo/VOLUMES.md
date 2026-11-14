@@ -526,3 +526,18 @@ Zones retenues (« Andorre et 9 autres ») : **France, Belgique, Suisse, Luxembo
 | céramides | 100 à 1 k | 0 % | 0 % | moyenne | confirme le 29/10 |
 
 Suggestions Google du jour (« acide salicylique … ») : « aroma zone », « verrue » (médical, écarté), « pharmacie », « the ordinary », « visage », « peau », « point noir », « 2 » ; « visage danger », « danger cancer », « danger yeux » ; « enceinte », « allaitement » ; « et niacinamide », « et acide azelaique », « et vitamine c », « et retinol » (trois reprises en FAQ).
+
+## 2026-11-14 : dix zones, toutes les langues (première liste) ; France seule (variantes)
+
+Zones retenues (« Andorre et 9 autres ») : **France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon**. Méthode : « Obtenir le volume » cliqué par référence (`find`), liste tapée dans le champ, « Commencer » **du champ** par référence (jamais celui du bandeau « compte en veille ») ; zone ouverte par un clic par référence sur « France » (le panneau « Lieu » s'ouvre sans que `find` voie son champ), puis pour chaque pays : triple clic sur le combobox, saisie, `find` « Inclure sur la ligne <pays> pays », clic par référence ; « Enregistrer » par référence. Neuf allers-retours, environ trois minutes. Langue : « Toutes les langues » (bouton désactivé). La seconde liste, lancée depuis l'accueil, est repartie sur **France seule** : ses chiffres sont un plancher.
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| project pan | **1 k à 10 k** | **+900 %** | **+900 %** | faible | **sujet du jour** (`project-pan`) |
+| crème anti rides | 1 k à 10 k | 0 % | 0 % | élevée | |
+| nivea q10 avis | 100 à 1 k | +900 % | 0 % | élevée | piste buzz suivante (avec « nivea q10 », 1 k à 10 k en France seule, confirme le 22/10) |
+| coenzyme q10 peau, crème q10, crème de la mer avis | 10 à 100 | 0 % | 0 % | élevée | |
+| skincare enfant, sephora kids, cosmétique enfant, maquillage enfant | pas de donnée | | | | les « Sephora kids » sont dans l'actualité (TVA Nouvelles, 12/11) mais le Planificateur ne renvoie rien |
+| déconsommation (France seule) | 100 à 1 k | 0 % | 0 % | faible | |
+| project pan tiktok, underconsumption core, no buy 2026, low buy (France seule) | 10 à 100 | 0 % | 0 % | faible | |
+| project pan c'est quoi, project pan maquillage, finir ses produits de beauté (France seule) | pas de donnée | | | | |

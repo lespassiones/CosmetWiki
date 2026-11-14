@@ -119,6 +119,7 @@ import niacinamide from "./articles/niacinamide";
 import pdrn from "./articles/pdrn";
 import peptideDeCuivre from "./articles/peptide-de-cuivre";
 import peauSecheVisage from "./articles/peau-seche-visage";
+import projectPan from "./articles/project-pan";
 import retinol from "./articles/retinol";
 import rhodeHaileyBieber from "./articles/rhode-hailey-bieber-composition";
 import perturbateursEndocriniens from "./articles/perturbateurs-endocriniens-cosmetiques-2026";
@@ -342,6 +343,7 @@ export const ARTICLES: readonly Article[] = [
   cremeUree,
   cremePerimee,
   suifDeBoeuf,
+  projectPan,
   acideSalicylique,
 ];
 
