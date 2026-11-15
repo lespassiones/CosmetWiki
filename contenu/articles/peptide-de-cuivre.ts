@@ -84,7 +84,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Sur l'étiquette, cherche son nom INCI : [Copper Tripeptide-1](/i/copper-tripeptide-1). La liste INCI, c'est la liste officielle des ingrédients, écrite du plus dosé au moins dosé. Dans notre base, 818 des 828 produits au cuivre utilisent cette forme-là.",
+        "Sur l'étiquette, cherche son nom INCI : Copper Tripeptide-1. La liste INCI, c'est la liste officielle des ingrédients, écrite du plus dosé au moins dosé. Dans notre base, 818 des 828 produits au cuivre utilisent cette forme-là.",
     },
 
     { type: "h2", texte: "Est-ce qu'il entre vraiment dans la peau ?" },
@@ -128,8 +128,8 @@ const article: Article = {
       items: [
         "**Il est dans la seconde moitié de la liste 71 fois sur 100.** Il n'arrive dans les cinq premiers que dans 2,4 % des produits.",
         "**Il est rarement seul.** 8 produits sur 10 contiennent d'autres peptides, et la moitié en ajoute au moins quatre. Certains en alignent plus de cinquante.",
-        "**La [glycérine](/i/glycerin) passe avant lui dans 88 % des cas.** C'est l'hydratant de base, celui qui fait déjà le gros du travail dans [les sérums à l'acide hyaluronique](/blog/acide-hyaluronique).",
-        "**43 % contiennent du [parfum](/i/parfum).** C'est moins que la moyenne des soins, mais ça reste un produit parfumé sur deux pour les peaux sensibles.",
+        "**La glycérine passe avant lui dans 88 % des cas.** C'est l'hydratant de base, celui qui fait déjà le gros du travail dans [les sérums à l'acide hyaluronique](/blog/acide-hyaluronique).",
+        "**43 % contiennent du parfum.** C'est moins que la moyenne des soins, mais ça reste un produit parfumé sur deux pour les peaux sensibles.",
       ],
     },
     {
@@ -160,7 +160,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "La note lit toute la formule, pas seulement l'actif. Le sérum Medicube perd ses points à cause de son parfum et d'un ingrédient classé rouge. Le sérum The Ordinary, lui, n'a ni parfum ni ingrédient rouge, et place le cuivre juste après la [glycérine](/i/glycerin).",
+        "La note lit toute la formule, pas seulement l'actif. Le sérum Medicube perd ses points à cause de son parfum et d'un ingrédient classé rouge. Le sérum The Ordinary, lui, n'a ni parfum ni ingrédient rouge, et place le cuivre juste après la glycérine.",
     },
     {
       type: "cta",

@@ -68,12 +68,12 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Surtout des huiles de synthèse, du beurre de karité et des cires : c'est un baume brillant classique, bien construit. On lit ici la version sans parfum (*Unscented*), avec ses 27 ingrédients. La liste démarre par le [Hydrogenated Polyisobutene](/i/hydrogenated-polyisobutene), une huile de synthèse qui donne l'effet glacé, puis le Diisostearyl Malate, qui adoucit, et le [beurre de karité](/i/butyrospermum-parkii-butter) en 3e place.",
+        "Surtout des huiles de synthèse, du beurre de karité et des cires : c'est un baume brillant classique, bien construit. On lit ici la version sans parfum (*Unscented*), avec ses 27 ingrédients. La liste démarre par le Hydrogenated Polyisobutene, une huile de synthèse qui donne l'effet glacé, puis le Diisostearyl Malate, qui adoucit, et le beurre de karité en 3e place.",
     },
     {
       type: "p",
       texte:
-        "Ces corps gras sont des **occlusifs** : ils posent un film qui empêche l'eau de s'évaporer ([Purnamawati et al., *Clinical Medicine & Research*, 2017](https://pmc.ncbi.nlm.nih.gov/articles/PMC5849435/)). C'est ce film qui rend les lèvres plus douces, tout de suite. Et le fameux peptide ? Le [Palmitoyl Tripeptide-1](/i/palmitoyl-tripeptide-1) n'arrive qu'en 17e place, juste après deux formes de vitamine E et une de vitamine C.",
+        "Ces corps gras sont des **occlusifs** : ils posent un film qui empêche l'eau de s'évaporer ([Purnamawati et al., *Clinical Medicine & Research*, 2017](https://pmc.ncbi.nlm.nih.gov/articles/PMC5849435/)). C'est ce film qui rend les lèvres plus douces, tout de suite. Et le fameux peptide ? Le Palmitoyl Tripeptide-1 n'arrive qu'en 17e place, juste après deux formes de vitamine E et une de vitamine C.",
     },
     {
       type: "fiche",
@@ -109,36 +109,36 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Oui, et ce sont les trois céramides les plus connus du rayon. Les céramides sont des graisses que ta peau fabrique pour retenir son eau. La Glazing Milk contient le [Ceramide NP](/i/ceramide-np), le [Ceramide AP](/i/ceramide-ap) et le [Ceramide EOP](/i/ceramide-eop), en 12e, 13e et 14e places sur 40 ingrédients. C'est le trio qu'on trouve aussi dans [les crèmes CeraVe](/blog/cerave-creme-hydratante).",
+        "Oui, et ce sont les trois céramides les plus connus du rayon. Les céramides sont des graisses que ta peau fabrique pour retenir son eau. La Glazing Milk contient le Ceramide NP, le Ceramide AP et le Ceramide EOP, en 12e, 13e et 14e places sur 40 ingrédients. C'est le trio qu'on trouve aussi dans [les crèmes CeraVe](/blog/cerave-creme-hydratante).",
     },
     {
       type: "p",
       texte:
-        "Ce trio n'a rien d'exclusif : il figure dans ==2 328 produits de notre base==. La Lotion Faciale Hydratante CeraVe, par exemple, le contient et obtient 12,17 sur 20. La Glazing Milk ajoute quatre formes d'[acide hyaluronique](/blog/acide-hyaluronique), de la [glycérine](/blog/glycerine) en 4e place et un [émollient léger](/i/c12-15-alkyl-benzoate), un corps gras qui adoucit. Sa formule a du sens pour une peau qui tire.",
+        "Ce trio n'a rien d'exclusif : il figure dans ==2 328 produits de notre base==. La Lotion Faciale Hydratante CeraVe, par exemple, le contient et obtient 12,17 sur 20. La Glazing Milk ajoute quatre formes d'[acide hyaluronique](/blog/acide-hyaluronique), de la [glycérine](/blog/glycerine) en 4e place et un émollient léger, un corps gras qui adoucit. Sa formule a du sens pour une peau qui tire.",
     },
 
     { type: "h2", texte: "Peptide Glazing Fluid : que fait ce sérum ?" },
     {
       type: "p",
       texte:
-        "C'est d'abord un sérum hydratant à la niacinamide, et sa liste de 22 ingrédients est courte. On y lit de l'eau, deux ingrédients qui retiennent l'eau, de l'[huile de marula](/i/sclerocarya-birrea-seed-oil), puis la [niacinamide](/blog/niacinamide) en 5e place. Cette vitamine B3 est l'actif le mieux placé du flacon.",
+        "C'est d'abord un sérum hydratant à la niacinamide, et sa liste de 22 ingrédients est courte. On y lit de l'eau, deux ingrédients qui retiennent l'eau, de l'huile de marula, puis la [niacinamide](/blog/niacinamide) en 5e place. Cette vitamine B3 est l'actif le mieux placé du flacon.",
     },
     {
       type: "p",
       texte:
-        "Le peptide, l'[Acetyl Hexapeptide-8](/i/acetyl-hexapeptide-8), arrive en 9e place. On le connaît sous le nom d'Argireline. Dans une petite étude citée par une revue scientifique, une crème à ==10 %== a réduit les rides autour des yeux de 30 %, chez 10 femmes, en 30 jours ([Schagen, *Cosmetics*, 2017](https://www.mdpi.com/2079-9284/4/2/16)). Les marques qui affichent ce dosage existent : la solution Argireline 10 % de The Ordinary obtient 11,84 sur 20 dans notre base. Rhode, elle, ne donne pas le sien sur sa liste.",
+        "Le peptide, l'Acetyl Hexapeptide-8, arrive en 9e place. On le connaît sous le nom d'Argireline. Dans une petite étude citée par une revue scientifique, une crème à ==10 %== a réduit les rides autour des yeux de 30 %, chez 10 femmes, en 30 jours ([Schagen, *Cosmetics*, 2017](https://www.mdpi.com/2079-9284/4/2/16)). Les marques qui affichent ce dosage existent : la solution Argireline 10 % de The Ordinary obtient 11,84 sur 20 dans notre base. Rhode, elle, ne donne pas le sien sur sa liste.",
     },
 
     { type: "h2", texte: "Barrier Restore Cream : la crème la plus complète ?" },
     {
       type: "p",
       texte:
-        "C'est la liste la plus fournie en peptides, avec quatre d'entre eux, en 10e à 13e places sur 35 ingrédients. La crème repose sur une base simple : eau, glycérine, triglycérides, karité, alcool gras. La niacinamide arrive en 7e place et le [squalane](/i/squalane), un corps gras très léger, en 8e.",
+        "C'est la liste la plus fournie en peptides, avec quatre d'entre eux, en 10e à 13e places sur 35 ingrédients. La crème repose sur une base simple : eau, glycérine, triglycérides, karité, alcool gras. La niacinamide arrive en 7e place et le squalane, un corps gras très léger, en 8e.",
     },
     {
       type: "p",
       texte:
-        "Côté conservateurs, le [phénoxyéthanol](/i/phenoxyethanol) arrive juste derrière les peptides. C'est un conservateur classique, autorisé jusqu'à 1 % en Europe. On le retrouve dans les trois soins du visage lus ici. Aucun des quatre produits ne contient de parfum dans la liste relevée. Attention : d'autres versions du baume ont leur propre liste, donc lis celle de ta teinte.",
+        "Côté conservateurs, le phénoxyéthanol arrive juste derrière les peptides. C'est un conservateur classique, autorisé jusqu'à 1 % en Europe. On le retrouve dans les trois soins du visage lus ici. Aucun des quatre produits ne contient de parfum dans la liste relevée. Attention : d'autres versions du baume ont leur propre liste, donc lis celle de ta teinte.",
     },
     {
       type: "cta",

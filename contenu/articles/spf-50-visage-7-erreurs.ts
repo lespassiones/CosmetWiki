@@ -88,9 +88,9 @@ const article: Article = {
       type: "liste",
       style: "alertes",
       items: [
-        "**[Benzophenone-3](/i/benzophenone-3)** (oxybenzone) : suspecté d'agir comme perturbateur endocrinien, c'est-à-dire de dérégler les hormones. Le comité scientifique européen n'a pas pu trancher dans son [avis de 2021](https://health.ec.europa.eu/publications/benzophenone-3_en), et l'Europe a réduit sa dose maximale ([règlement (UE) 2022/1176](https://eur-lex.europa.eu/eli/reg/2022/1176/oj)).",
-        "**[Octocrylene](/i/octocrylene)** : il peut se dégrader lentement en benzophénone dans le flacon, surtout dans un produit qui vieillit ([Downs et al., *Chemical Research in Toxicology*, 2021](https://doi.org/10.1021/acs.chemrestox.0c00461)). L'Europe le juge sûr, mais l'a limité à 10 % dans le même règlement de 2022.",
-        "**[Homosalate](/i/homosalate)** : sa dose maximale a été réduite à 7,34 % dans un soin visage par ce règlement de 2022.",
+        "**Benzophenone-3** (oxybenzone) : suspecté d'agir comme perturbateur endocrinien, c'est-à-dire de dérégler les hormones. Le comité scientifique européen n'a pas pu trancher dans son [avis de 2021](https://health.ec.europa.eu/publications/benzophenone-3_en), et l'Europe a réduit sa dose maximale ([règlement (UE) 2022/1176](https://eur-lex.europa.eu/eli/reg/2022/1176/oj)).",
+        "**Octocrylene** : il peut se dégrader lentement en benzophénone dans le flacon, surtout dans un produit qui vieillit ([Downs et al., *Chemical Research in Toxicology*, 2021](https://doi.org/10.1021/acs.chemrestox.0c00461)). L'Europe le juge sûr, mais l'a limité à 10 % dans le même règlement de 2022.",
+        "**Homosalate** : sa dose maximale a été réduite à 7,34 % dans un soin visage par ce règlement de 2022.",
       ],
     },
     {
@@ -145,7 +145,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le [parfum](/i/parfum) est l'une des premières causes d'allergie aux cosmétiques. Certains de ses composants peuvent aussi réagir à la lumière et marquer la peau, précisément là où tu voulais la protéger.",
+        "Le parfum est l'une des premières causes d'allergie aux cosmétiques. Certains de ses composants peuvent aussi réagir à la lumière et marquer la peau, précisément là où tu voulais la protéger.",
     },
     {
       type: "encadre",

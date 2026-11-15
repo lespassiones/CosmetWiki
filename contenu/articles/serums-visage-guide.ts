@@ -68,7 +68,7 @@ const article: Article = {
       items: [
         "**Pour qui :** teint terne, petites taches, envie de prévenir.",
         "**Quand :** ==le matin==, sous la crème solaire. Les deux se complètent.",
-        "**Dans la liste INCI** (la liste officielle des ingrédients, au dos) : [Ascorbic Acid](/i/ascorbic-acid), la forme pure, ou des formes plus stables et plus douces comme l'[Ascorbyl Glucoside](/i/ascorbyl-glucoside).",
+        "**Dans la liste INCI** (la liste officielle des ingrédients, au dos) : Ascorbic Acid, la forme pure, ou des formes plus stables et plus douces comme l'Ascorbyl Glucoside.",
         "**Le bon dosage :** pour la forme pure, une étude sur la peau a trouvé le meilleur passage jusqu'à 20 %, avec un produit très acide ; au-delà, pas de gain ([Pinnell et al., *Dermatologic Surgery*, 2001](https://doi.org/10.1046/j.1524-4725.2001.00264.x)).",
         "**Conservation :** à l'abri de la lumière. Si le sérum vire au jaune orangé foncé, la vitamine C s'est abîmée.",
       ],
@@ -86,7 +86,7 @@ const article: Article = {
       items: [
         "**Pour qui :** toutes les peaux, surtout celles qui tiraillent.",
         "**Quand :** matin ou soir, sur une peau encore un peu humide.",
-        "**Dans la liste INCI :** [Sodium Hyaluronate](/i/sodium-hyaluronate), la forme la plus courante.",
+        "**Dans la liste INCI :** Sodium Hyaluronate, la forme la plus courante.",
       ],
     },
     {
@@ -109,7 +109,7 @@ const article: Article = {
       items: [
         "**Pour qui :** premières rides, peaux qui ne supportent pas le [rétinol](/blog/retinol) (la vitamine A des crèmes anti-âge, mieux prouvée mais plus irritante).",
         "**Quand :** le soir, après le nettoyage. Ils s'entendent avec presque tout.",
-        "**Dans la liste INCI :** [Palmitoyl Tripeptide-1](/i/palmitoyl-tripeptide-1), [Acetyl Hexapeptide-8](/i/acetyl-hexapeptide-8) (vendu sous le nom Argireline), Copper Tripeptide-1.",
+        "**Dans la liste INCI :** Palmitoyl Tripeptide-1, Acetyl Hexapeptide-8 (vendu sous le nom Argireline), Copper Tripeptide-1.",
         "**Patience :** comme pour tout anti-âge, compte plusieurs semaines avant de juger.",
       ],
     },
@@ -134,7 +134,7 @@ const article: Article = {
       style: "numeros",
       items: [
         "L'actif promis sur le devant est-il dans la première moitié de la liste ? S'il arrive après le parfum, il est sans doute très peu dosé.",
-        "Y a-t-il du [parfum](/i/parfum) (*Parfum* ou *Fragrance*) ? Dans notre base, ==59,9 % des 15 903 sérums visage en contiennent== (relevé du 27/10/2026). Pour une peau qui réagit, c'est souvent la première chose à éviter.",
+        "Y a-t-il du parfum (*Parfum* ou *Fragrance*) ? Dans notre base, ==59,9 % des 15 903 sérums visage en contiennent== (relevé du 27/10/2026). Pour une peau qui réagit, c'est souvent la première chose à éviter.",
         "Combien d'actifs forts à la fois ? Un sérum qui mélange vitamine C, rétinol et acide exfoliant (un acide qui décolle les cellules mortes) pique plus qu'il n'aide.",
       ],
     },

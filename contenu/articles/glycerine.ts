@@ -51,7 +51,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "La glycérine, c'est un petit alcool sucré, sans couleur ni odeur, un peu sirupeux. Ta peau en fabrique elle-même, et on la tire des huiles végétales ou des graisses. Sur la liste INCI (la liste officielle des ingrédients, écrite du plus dosé au moins dosé), elle s'appelle **[Glycerin](/i/glycerin)**.",
+        "La glycérine, c'est un petit alcool sucré, sans couleur ni odeur, un peu sirupeux. Ta peau en fabrique elle-même, et on la tire des huiles végétales ou des graisses. Sur la liste INCI (la liste officielle des ingrédients, écrite du plus dosé au moins dosé), elle s'appelle **Glycerin**.",
     },
     {
       type: "p",
@@ -149,7 +149,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "La crème mains Neutrogena tient en 13 ingrédients, dont la glycérine juste après l'eau : sa note est haute malgré le parfum. La crème CeraVe avec SPF perd des points à cause de ses filtres, pas de sa glycérine. La Nivea Soft contient de l'[alcool dénaturé](/i/alcohol-denat) en quatrième place, qui peut dessécher les peaux fragiles. Pour lire une liste en entier, suis notre [méthode en 5 étapes](/blog/analyse-composition-cosmetique).",
+        "La crème mains Neutrogena tient en 13 ingrédients, dont la glycérine juste après l'eau : sa note est haute malgré le parfum. La crème CeraVe avec SPF perd des points à cause de ses filtres, pas de sa glycérine. La Nivea Soft contient de l'alcool dénaturé en quatrième place, qui peut dessécher les peaux fragiles. Pour lire une liste en entier, suis notre [méthode en 5 étapes](/blog/analyse-composition-cosmetique).",
     },
 
     { type: "h2", texte: "La glycérine végétale pure sur le visage, bonne idée ?" },
@@ -161,7 +161,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Mais un humectant seul ne suffit pas. Il a besoin d'un **occlusif** par-dessus, un ingrédient qui forme un film et empêche l'eau de s'évaporer, comme la [vaseline](/i/petrolatum) ou les beurres ([Purnamawati et al., *Clinical Medicine & Research*, 2017](https://pmc.ncbi.nlm.nih.gov/articles/PMC5849435/)). Une crème du commerce fait les deux à la fois. Et la glycérine n'est pas **comédogène**, c'est-à-dire qu'elle ne bouche pas les pores : notre article sur [le mot comédogène](/blog/comedogene) explique d'où viennent ces listes. Dans l'air sec d'un hiver à Montréal ou d'un appartement chauffé, c'est ce duo qui compte : relis [nos gestes pour la peau sèche](/blog/peau-seche-visage).",
+        "Mais un humectant seul ne suffit pas. Il a besoin d'un **occlusif** par-dessus, un ingrédient qui forme un film et empêche l'eau de s'évaporer, comme la vaseline ou les beurres ([Purnamawati et al., *Clinical Medicine & Research*, 2017](https://pmc.ncbi.nlm.nih.gov/articles/PMC5849435/)). Une crème du commerce fait les deux à la fois. Et la glycérine n'est pas **comédogène**, c'est-à-dire qu'elle ne bouche pas les pores : notre article sur [le mot comédogène](/blog/comedogene) explique d'où viennent ces listes. Dans l'air sec d'un hiver à Montréal ou d'un appartement chauffé, c'est ce duo qui compte : relis [nos gestes pour la peau sèche](/blog/peau-seche-visage).",
     },
     {
       type: "liste",
@@ -191,14 +191,14 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Si une crème à la glycérine te fait rougir, regarde d'abord le [parfum](/i/parfum) et les actifs de sa liste. La glycérine est très rarement la coupable.",
+        "Si une crème à la glycérine te fait rougir, regarde d'abord le parfum et les actifs de sa liste. La glycérine est très rarement la coupable.",
     },
 
     { type: "h2", texte: "Pourquoi les marques n'en parlent-elles presque jamais ?" },
     {
       type: "p",
       texte:
-        "Parce qu'elle coûte peu et ne fait pas rêver. On vend l'acide hyaluronique, les [céramides](/i/ceramide-np) (des graisses qui soudent les cellules de surface), la [niacinamide](/blog/niacinamide) (la vitamine B3). Dans notre base, la glycérine passait avant l'acide hyaluronique dans ==73 % des produits « hyaluroniques »==. Et une crème sans aucun actif à la mode, mais avec la glycérine en deuxième ligne et sans parfum, hydrate déjà très bien.",
+        "Parce qu'elle coûte peu et ne fait pas rêver. On vend l'acide hyaluronique, les céramides (des graisses qui soudent les cellules de surface), la [niacinamide](/blog/niacinamide) (la vitamine B3). Dans notre base, la glycérine passait avant l'acide hyaluronique dans ==73 % des produits « hyaluroniques »==. Et une crème sans aucun actif à la mode, mais avec la glycérine en deuxième ligne et sans parfum, hydrate déjà très bien.",
     },
     {
       type: "p",

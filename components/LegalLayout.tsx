@@ -3,9 +3,8 @@ import { Logo } from "@/components/Logo";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
 import { MobileMenu } from "@/components/MobileMenu";
 import { LEGAL } from "@/lib/legal";
-import { hasAuthCookie } from "@/lib/authCookie";
 
-export async function LegalLayout({
+export function LegalLayout({
   title,
   current,
   children,
@@ -22,33 +21,28 @@ export async function LegalLayout({
     { href: "/mentions-legales", label: "Mentions légales", key: "mentions-legales" },
   ];
 
-  // Quand l'utilisateur est connecté, l'AppShell (dashboard) enveloppe déjà ces
-  // pages avec sa sidebar + son burger menu. On masque alors le header public
-  // (logo + MobileMenu) pour ne PAS afficher un second burger : ces pages
-  // légales « restent dans le dashboard ». Un visiteur anonyme, lui, n'a aucun
-  // chrome d'AppShell → il garde ce header comme seule navigation.
-  const signedIn = await hasAuthCookie();
+  // Plus de lecture du cookie de session (15 nov 2026) : il n'y a plus de
+  // connexion sur le site, et cette lecture rendait les 5 pages légales
+  // dynamiques (une fonction par visite). Elles sont désormais statiques.
 
   return (
     <div className="relative isolate flex min-h-screen flex-col bg-bg">
       <BackgroundGlow />
 
-      {!signedIn && (
-        <header className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-6">
-          <Logo size="md" />
-          <nav className="hidden items-center gap-1 text-sm text-ink-muted sm:flex">
-            <Link
-              href="/comment-ca-marche"
-              className="rounded-full px-3 py-1.5 transition-colors hover:text-ink"
-            >
-              Comment ça marche
-            </Link>
-          </nav>
-          <MobileMenu />
-        </header>
-      )}
+      <header className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-6">
+        <Logo size="md" />
+        <nav className="hidden items-center gap-1 text-sm text-ink-muted sm:flex">
+          <Link
+            href="/comment-ca-marche"
+            className="rounded-full px-3 py-1.5 transition-colors hover:text-ink"
+          >
+            Comment ça marche
+          </Link>
+        </nav>
+        <MobileMenu />
+      </header>
 
-      <main className={`mx-auto w-full max-w-3xl flex-1 px-6 pb-16${signedIn ? " pt-10 lg:pt-16" : ""}`}>
+      <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16">
         <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-ink">
           {title}
         </h1>

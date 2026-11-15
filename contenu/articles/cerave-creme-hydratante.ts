@@ -76,19 +76,19 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le **Gel-crème Hydratant Oil Control**, le seul de la gamme pensé pour les peaux mixtes à grasses. Sa liste le montre : la [niacinamide](/i/niacinamide) passe en 2e place, juste après l'eau, et il n'y a ni vaseline ni beurre. De l'[amidon de maïs](/i/zea-mays-starch) et de la [silice](/i/silica) absorbent le surplus de sébum, l'huile naturelle de la peau. Seul bémol : l'[Isopropyl Myristate](/i/isopropyl-myristate), en 6e place, figure sur les vieilles listes [« comédogènes »](/blog/comedogene). Si des boutons apparaissent dans les jours qui suivent, c'est le premier suspect.",
+        "Le **Gel-crème Hydratant Oil Control**, le seul de la gamme pensé pour les peaux mixtes à grasses. Sa liste le montre : la niacinamide passe en 2e place, juste après l'eau, et il n'y a ni vaseline ni beurre. De l'amidon de maïs et de la silice absorbent le surplus de sébum, l'huile naturelle de la peau. Seul bémol : l'Isopropyl Myristate, en 6e place, figure sur les vieilles listes [« comédogènes »](/blog/comedogene). Si des boutons apparaissent dans les jours qui suivent, c'est le premier suspect.",
     },
 
     { type: "h2", texte: "Qu'est-ce qu'il y a dans une crème CeraVe ?" },
     {
       type: "p",
       texte:
-        "De l'eau, de la [glycérine](/i/glycerin) et des céramides. La liste INCI, c'est la liste officielle des ingrédients, écrite du plus dosé au moins dosé. Dans la Crème Hydratante Visage, on lit d'abord l'eau, la glycérine et une huile légère. Puis vient la [niacinamide](/blog/niacinamide) en 4e place : c'est la vitamine B3, qui aide la peau à garder son eau.",
+        "De l'eau, de la glycérine et des céramides. La liste INCI, c'est la liste officielle des ingrédients, écrite du plus dosé au moins dosé. Dans la Crème Hydratante Visage, on lit d'abord l'eau, la glycérine et une huile légère. Puis vient la [niacinamide](/blog/niacinamide) en 4e place : c'est la vitamine B3, qui aide la peau à garder son eau.",
     },
     {
       type: "p",
       texte:
-        "Viennent ensuite les trois céramides : [Ceramide NP](/i/ceramide-np), [Ceramide AP](/i/ceramide-ap) et [Ceramide EOP](/i/ceramide-eop). Les céramides sont des graisses que ta peau fabrique elle-même. Avec le [cholestérol](/i/cholesterol) et des acides gras, elles forment le « ciment » entre les cellules de surface, qui retient l'eau.",
+        "Viennent ensuite les trois céramides : Ceramide NP, Ceramide AP et Ceramide EOP. Les céramides sont des graisses que ta peau fabrique elle-même. Avec le cholestérol et des acides gras, elles forment le « ciment » entre les cellules de surface, qui retient l'eau.",
     },
     {
       type: "fiche",
@@ -107,7 +107,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Une précision : les céramides arrivent juste avant le [phénoxyéthanol](/i/phenoxyethanol), un conservateur plafonné à 1 % ([règlement (CE) 1223/2009](https://eur-lex.europa.eu/eli/reg/2009/1223/oj)). Elles sont donc peu dosées : ce sont des renforts. ++Le gros du travail, c'est la glycérine++, en 2e place.",
+        "Une précision : les céramides arrivent juste avant le phénoxyéthanol, un conservateur plafonné à 1 % ([règlement (CE) 1223/2009](https://eur-lex.europa.eu/eli/reg/2009/1223/oj)). Elles sont donc peu dosées : ce sont des renforts. ++Le gros du travail, c'est la glycérine++, en 2e place.",
     },
 
     { type: "h2", texte: "Pourquoi les versions « Intensif » ont une moins bonne note ?" },
@@ -119,7 +119,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Mais il gagne aussi des émulsifiants de la famille des PEG, comme le [PEG-100 Stearate](/i/peg-100-stearate). Un émulsifiant mélange l'eau et l'huile. Les PEG sont fabriqués par un procédé polluant appelé éthoxylation, et la base les classe orange pour ça. S'y ajoutent des polymères de synthèse et un dérivé de l'urée, l'[Hydroxyethyl Urea](/i/hydroxyethyl-urea), lui aussi orange.",
+        "Mais il gagne aussi des émulsifiants de la famille des PEG, comme le PEG-100 Stearate. Un émulsifiant mélange l'eau et l'huile. Les PEG sont fabriqués par un procédé polluant appelé éthoxylation, et la base les classe orange pour ça. S'y ajoutent des polymères de synthèse et un dérivé de l'urée, l'Hydroxyethyl Urea, lui aussi orange.",
     },
     {
       type: "p",
@@ -136,7 +136,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Côté note Cosme Check, leurs points perdus viennent surtout des filtres solaires. La SPF 50 contient quatre filtres organiques, dont l'[avobenzone](/i/butyl-methoxydibenzoylmethane) (nom INCI : Butyl Methoxydibenzoylmethane), classés orange par la base. Tous sont autorisés en Europe, à des doses plafonnées par l'annexe VI du règlement 1223/2009.",
+        "Côté note Cosme Check, leurs points perdus viennent surtout des filtres solaires. La SPF 50 contient quatre filtres organiques, dont l'avobenzone (nom INCI : Butyl Methoxydibenzoylmethane), classés orange par la base. Tous sont autorisés en Europe, à des doses plafonnées par l'annexe VI du règlement 1223/2009.",
     },
     {
       type: "p",
@@ -153,7 +153,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Oui, la marque le vend pour le visage et le corps. Mais le Baume Hydratant contient de la vaseline ([Petrolatum](/i/petrolatum)) en 7e place. C'est un occlusif : il couvre la peau et l'empêche de perdre son eau. Une revue scientifique en fait l'un des plus efficaces ([Purnamawati et al., 2017](https://pmc.ncbi.nlm.nih.gov/articles/PMC5849435/)).",
+        "Oui, la marque le vend pour le visage et le corps. Mais le Baume Hydratant contient de la vaseline (Petrolatum) en 7e place. C'est un occlusif : il couvre la peau et l'empêche de perdre son eau. Une revue scientifique en fait l'un des plus efficaces ([Purnamawati et al., 2017](https://pmc.ncbi.nlm.nih.gov/articles/PMC5849435/)).",
     },
     {
       type: "liste",

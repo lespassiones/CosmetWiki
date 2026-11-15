@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/siteUrl";
 import { staticRoutes } from "@/lib/sitemapData";
 
-// Cache the sitemap : Next will revalidate at most once per day.
-export const revalidate = 86400;
+// Statique : généré au build. Il ne dépend que de contenu/articles.ts, qui ne
+// change qu'à un déploiement. Plus de régénération (et donc de fonction) par jour.
 
 /**
  * Sitemap des pages STATIQUES uniquement (landing, blog, FAQ, légal...).
@@ -11,9 +11,8 @@ export const revalidate = 86400;
  * de blog sont dérivés de contenu/articles.ts, ajouter un article là-bas
  * suffit.
  *
- * Les 15 700 fiches ingrédient /i/[slug] vivent dans des sitemaps dédiés
- * (/sitemaps/ingredients-N.xml), agrégés avec celui-ci par
- * /sitemap-index.xml : c'est ce fichier index qu'on soumet à Google et Bing.
+ * /sitemap-index.xml (soumis à Google et Bing) ne pointe plus que sur ce
+ * fichier : les fiches ingrédient /i/[slug] ont été retirées le 15 nov 2026.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

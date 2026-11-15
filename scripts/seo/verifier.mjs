@@ -495,8 +495,9 @@ for (const { qui, nom, fichier, source, a } of articles) {
       if (ancre && !ancresDe.get(chemin)?.has(ancre)) signaler(qui, `ancre inconnue dans ${chemin} : #${ancre}`);
       continue;
     }
-    // Les fiches ingredient existent par milliers, en base : leur format suffit ici.
-    if (/^\/i\/[a-z0-9-]+$/.test(chemin)) continue;
+    // Plus d'exception pour les fiches ingredient /i/<slug> : elles ont ete
+    // retirees le 15 nov 2026 (site = vitrine + blog, entierement statique).
+    // Un lien vers /i/... tombe donc dans « page inconnue » ci-dessous.
     const page = chemin.replace(/\/$/, '') || '/';
     if (!PAGES_CONNUES.has(page)) signaler(qui, `lien interne vers une page inconnue : ${cible}`);
   }

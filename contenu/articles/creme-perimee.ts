@@ -74,7 +74,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Rarement, mais elle n'est plus fiable. Une crème contient des **conservateurs**, des ingrédients qui empêchent les microbes de pousser dans le pot, comme le [phénoxyéthanol](/i/phenoxyethanol). Avec le temps, l'air et les doigts, ils s'épuisent. Les actifs fragiles perdent aussi de leur force, et la texture peut se séparer.",
+        "Rarement, mais elle n'est plus fiable. Une crème contient des **conservateurs**, des ingrédients qui empêchent les microbes de pousser dans le pot, comme le phénoxyéthanol. Avec le temps, l'air et les doigts, ils s'épuisent. Les actifs fragiles perdent aussi de leur force, et la texture peut se séparer.",
     },
     {
       type: "liste",
@@ -123,7 +123,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le [Butylphenyl Methylpropional](/i/butylphenyl-methylpropional) et le [Zinc Pyrithione](/i/zinc-pyrithione) ont été classés **reprotoxiques** de catégorie 1B, c'est-à-dire présumés nuire à la fertilité d'après des études chez l'animal. Ils sont passés dans l'annexe II, la liste des substances interdites ([règlement (UE) 2021/1902](https://eur-lex.europa.eu/eli/reg/2021/1902/oj)). Le [Hydroxyisohexyl 3-Cyclohexene Carboxaldehyde](/i/hydroxyisohexyl-3-cyclohexene-carboxaldehyde) est un **allergène**, une substance qui déclenche des allergies chez les personnes sensibles. Il donnait trop d'eczémas de contact, des plaques qui grattent là où le produit touche la peau. Il a quitté les nouveaux produits en 2019, puis les rayons en 2021 ([règlement (UE) 2017/1410](https://eur-lex.europa.eu/eli/reg/2017/1410/oj)).",
+        "Le Butylphenyl Methylpropional et le Zinc Pyrithione ont été classés **reprotoxiques** de catégorie 1B, c'est-à-dire présumés nuire à la fertilité d'après des études chez l'animal. Ils sont passés dans l'annexe II, la liste des substances interdites ([règlement (UE) 2021/1902](https://eur-lex.europa.eu/eli/reg/2021/1902/oj)). Le Hydroxyisohexyl 3-Cyclohexene Carboxaldehyde est un **allergène**, une substance qui déclenche des allergies chez les personnes sensibles. Il donnait trop d'eczémas de contact, des plaques qui grattent là où le produit touche la peau. Il a quitté les nouveaux produits en 2019, puis les rayons en 2021 ([règlement (UE) 2017/1410](https://eur-lex.europa.eu/eli/reg/2017/1410/oj)).",
     },
     {
       type: "fiche",
@@ -138,7 +138,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Pas de panique : ces produits ont été reformulés, et un flacon de 2021 ne devient pas un poison du jour au lendemain. Mais le signe est utile. ++Si la liste d'un flacon acheté en Europe porte l'un de ces trois noms, il a été fabriqué avant 2022++ : il a donc plus de trois ans et demi. Au Québec, d'autres règles s'appliquent, et seule la liste fait foi. Le parfum est le seul souci des deux premiers, et il en reste beaucoup d'autres : [ce qu'il cache dans une liste](/i/parfum). Dans notre base, 1 092 de ces fiches sont des produits d'hygiène, dont 429 déodorants, et 2 913 des produits pour les cheveux.",
+        "Pas de panique : ces produits ont été reformulés, et un flacon de 2021 ne devient pas un poison du jour au lendemain. Mais le signe est utile. ++Si la liste d'un flacon acheté en Europe porte l'un de ces trois noms, il a été fabriqué avant 2022++ : il a donc plus de trois ans et demi. Au Québec, d'autres règles s'appliquent, et seule la liste fait foi. Le parfum est le seul souci des deux premiers, et il en reste beaucoup d'autres : ce qu'il cache dans une liste. Dans notre base, 1 092 de ces fiches sont des produits d'hygiène, dont 429 déodorants, et 2 913 des produits pour les cheveux.",
     },
     {
       type: "cta",

@@ -121,7 +121,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Et tes crèmes ? Le [rétinol](/i/retinol) et les acides exfoliants comme l'[acide glycolique](/i/glycolic-acid) rendent la peau plus réactive. Le soir d'une séance, garde une routine douce. Pour une option plus douce que le rétinol, lis notre article sur le [bakuchiol](/blog/bakuchiol).",
+        "Et tes crèmes ? Le rétinol et les acides exfoliants comme l'acide glycolique rendent la peau plus réactive. Le soir d'une séance, garde une routine douce. Pour une option plus douce que le rétinol, lis notre article sur le [bakuchiol](/blog/bakuchiol).",
     },
 
     { type: "h2", texte: "Comment choisir un masque LED ?" },

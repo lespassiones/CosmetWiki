@@ -61,8 +61,9 @@
  * - Le texte **tutoie**, sans présumer le genre du lecteur, et se lit
  *   facilement à 15 ans : phrases courtes, chaque terme technique expliqué la
  *   première fois.
- * - Quand un ingrédient précis est cité, le lien vers sa fiche (`/i/<slug>`)
- *   aide le lecteur : ces fiches attirent déjà de la recherche.
+ * - Pas de lien vers une fiche ingrédient (`/i/<slug>`) : les fiches ont été
+ *   retirées le 15 nov 2026, le site est une vitrine plus ce blog. Pour aller
+ *   plus loin, le lecteur est renvoyé vers l'application.
  *
  * # Le balisage du texte
  *

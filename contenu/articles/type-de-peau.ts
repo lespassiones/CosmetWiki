@@ -150,7 +150,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le paradoxe est en rayon. Dans notre base, ==2 596 produits== disent s'adresser aux peaux sensibles, et ++62,7 % contiennent du [parfum](/i/parfum)++. Pour les seuls soins du visage, c'est encore 54,2 %. Or le parfum est l'une des causes les plus fréquentes d'allergie aux cosmétiques, selon le comité d'experts de la Commission européenne ([SCCS, 2012](https://ec.europa.eu/health/scientific_committees/consumer_safety/docs/sccs_o_102.pdf)). Une peau qui picote a tout intérêt à le fuir, ou à le garder tout en bas de la liste INCI, la liste officielle des ingrédients au dos du produit.",
+        "Le paradoxe est en rayon. Dans notre base, ==2 596 produits== disent s'adresser aux peaux sensibles, et ++62,7 % contiennent du parfum++. Pour les seuls soins du visage, c'est encore 54,2 %. Or le parfum est l'une des causes les plus fréquentes d'allergie aux cosmétiques, selon le comité d'experts de la Commission européenne ([SCCS, 2012](https://ec.europa.eu/health/scientific_committees/consumer_safety/docs/sccs_o_102.pdf)). Une peau qui picote a tout intérêt à le fuir, ou à le garder tout en bas de la liste INCI, la liste officielle des ingrédients au dos du produit.",
     },
     {
       type: "cta",
@@ -169,11 +169,11 @@ const article: Article = {
       entetes: ["Produit", "Ce que dit sa liste", "Note Cosme Check"],
       lignes: [
         ["Eucerin, Aquaporin Active Soin Hydratant peaux normales et mixtes.", "Glycérine en 2e place, sans parfum, avec de l'alcool en 3e.", "15,93 sur 20."],
-        ["CeraVe, Gel-crème Hydratant Oil Control peaux mixtes à grasses.", "[Niacinamide](/i/niacinamide) en 2e place, trois [céramides](/i/ceramide-np) (les gras qui collent les cellules de la peau), sans parfum.", "12,34 sur 20."],
+        ["CeraVe, Gel-crème Hydratant Oil Control peaux mixtes à grasses.", "Niacinamide en 2e place, trois céramides (les gras qui collent les cellules de la peau), sans parfum.", "12,34 sur 20."],
         ["Eucerin, Soin apaisant anti-rougeurs peaux hypersensibles.", "Glycérine, karité, panthénol, sans parfum.", "12,29 sur 20."],
         ["Bioderma, Sébium Gel Moussant peaux mixtes à grasses.", "Deux tensioactifs, du zinc, du parfum en dernier.", "7,44 sur 20."],
         ["La Roche-Posay, Hydreane Riche peaux sensibles.", "Glycérine, vaseline, karité, et du parfum en dernier.", "7,36 sur 20."],
-        ["La Roche-Posay, Effaclar Gel Moussant peaux grasses et sensibles.", "[Sodium Laureth Sulfate](/i/sodium-laureth-sulfate), [Zinc PCA](/i/zinc-pca), et du parfum.", "7,09 sur 20."],
+        ["La Roche-Posay, Effaclar Gel Moussant peaux grasses et sensibles.", "Sodium Laureth Sulfate, Zinc PCA, et du parfum.", "7,09 sur 20."],
         ["Mixa, Soin Hydratant Apaisant peaux sensibles et réactives.", "Avoine, vaseline, un silicone cyclique et du parfum.", "3,01 sur 20."],
         ["Nivea, Matifiant crème de jour FPS 15 peau mixte et grasse.", "Alcool en 4e place, octocrylène, un paraben, parfum.", "1,28 sur 20."],
       ],
@@ -182,7 +182,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le soin « matifiant » de Nivea perd ses points sur deux ingrédients. L'[octocrylène](/i/octocrylene), un filtre solaire dont l'Europe a limité la dose ([règlement (UE) 2022/1176](https://eur-lex.europa.eu/eli/reg/2022/1176/oj), 2022), et le [methylparaben](/i/methylparaben), un conservateur. Le soin Mixa contient du [cyclohexasiloxane](/i/cyclohexasiloxane). L'Europe limitera ce silicone à 0,1 % dans les soins sans rinçage à partir de juin 2027 ([règlement (UE) 2024/1328](https://eur-lex.europa.eu/eli/reg/2024/1328/oj)). À l'inverse, les deux soins Eucerin sans parfum passent au-dessus de 12.",
+        "Le soin « matifiant » de Nivea perd ses points sur deux ingrédients. L'octocrylène, un filtre solaire dont l'Europe a limité la dose ([règlement (UE) 2022/1176](https://eur-lex.europa.eu/eli/reg/2022/1176/oj), 2022), et le methylparaben, un conservateur. Le soin Mixa contient du cyclohexasiloxane. L'Europe limitera ce silicone à 0,1 % dans les soins sans rinçage à partir de juin 2027 ([règlement (UE) 2024/1328](https://eur-lex.europa.eu/eli/reg/2024/1328/oj)). À l'inverse, les deux soins Eucerin sans parfum passent au-dessus de 12.",
     },
 
     { type: "h2", texte: "Type de peau ou phototype : quelle différence ?" },
@@ -207,10 +207,10 @@ const article: Article = {
       type: "tableau",
       entetes: ["Type", "Texture à préférer", "À chercher dans la liste", "À limiter"],
       lignes: [
-        ["Sèche.", "Crème riche, baume.", "[Glycérine](/i/glycerin), céramides, vaseline le soir.", "Parfum, nettoyants qui moussent fort."],
+        ["Sèche.", "Crème riche, baume.", "Glycérine, céramides, vaseline le soir.", "Parfum, nettoyants qui moussent fort."],
         ["Normale.", "Crème légère.", "Glycérine.", "Les actifs en trop."],
         ["Mixte.", "Gel-crème.", "Niacinamide, glycérine.", "Alcool en tête de liste sur les joues."],
-        ["Grasse.", "Gel, fluide.", "Niacinamide, [acide salicylique](/i/salicylic-acid) (un BHA, exfoliant qui entre dans les pores).", "Huiles lourdes si tu as des boutons."],
+        ["Grasse.", "Gel, fluide.", "Niacinamide, acide salicylique (un BHA, exfoliant qui entre dans les pores).", "Huiles lourdes si tu as des boutons."],
       ],
       legende: "Des repères généraux, à ajuster selon ce que ta peau supporte.",
     },

@@ -63,12 +63,12 @@ const article: Article = {
       type: "liste",
       style: "coches",
       items: [
-        "**[Acide salicylique](/i/salicylic-acid) (BHA)** : un acide qui se mélange au gras, donc il entre dans le pore et le débouche. La référence contre les ==points noirs et les petits points blancs==.",
+        "**Acide salicylique (BHA)** : un acide qui se mélange au gras, donc il entre dans le pore et le débouche. La référence contre les ==points noirs et les petits points blancs==.",
         "**Peroxyde de benzoyle** : il agit sur la bactérie et vise les ==boutons rouges inflammatoires==. Efficace mais desséchant. En France, c'est un médicament vendu en pharmacie, pas un cosmétique : demande conseil à ton pharmacien.",
         "**[Niacinamide](/blog/niacinamide)** (vitamine B3) : limite le sébum, affine l'aspect des pores, calme les rougeurs. Très bien tolérée, elle se glisse dans presque toutes les routines.",
-        "**Zinc ([Zinc PCA](/i/zinc-pca))** : il aide à limiter le gras et apaise. On le trouve souvent avec la niacinamide.",
-        "**[Acide azélaïque](/i/azelaic-acid)** : le couteau suisse. Il agit sur les imperfections, les rougeurs et les marques laissées par les boutons, tout en restant ==doux pour les peaux sensibles==.",
-        "**Rétinoïdes** ([Retinol](/i/retinol), rétinaldéhyde) : des dérivés de la vitamine A qui accélèrent le renouvellement de la peau et débouchent les pores sur le long terme. À introduire peu à peu, le soir. À éviter pendant la grossesse.",
+        "**Zinc (Zinc PCA)** : il aide à limiter le gras et apaise. On le trouve souvent avec la niacinamide.",
+        "**Acide azélaïque** : le couteau suisse. Il agit sur les imperfections, les rougeurs et les marques laissées par les boutons, tout en restant ==doux pour les peaux sensibles==.",
+        "**Rétinoïdes** (Retinol, rétinaldéhyde) : des dérivés de la vitamine A qui accélèrent le renouvellement de la peau et débouchent les pores sur le long terme. À introduire peu à peu, le soir. À éviter pendant la grossesse.",
       ],
     },
 
@@ -78,7 +78,7 @@ const article: Article = {
       style: "alertes",
       items: [
         "**Trop nettoyer.** Décaper la peau matin et soir avec des produits agressifs l'assèche et l'irrite, sans rien déboucher.",
-        "**Les ingrédients réputés comédogènes en tête de liste**, comme l'[huile de coco](/i/cocos-nucifera-oil) dans une crème de jour sur peau grasse. Comédogène veut dire qui peut boucher les pores : notre article sur [ce que veut dire comédogène](/blog/comedogene) explique pourquoi la dose compte plus que le nom.",
+        "**Les ingrédients réputés comédogènes en tête de liste**, comme l'huile de coco dans une crème de jour sur peau grasse. Comédogène veut dire qui peut boucher les pores : notre article sur [ce que veut dire comédogène](/blog/comedogene) explique pourquoi la dose compte plus que le nom.",
         "**Empiler tous les actifs d'un coup.** BHA + peroxyde de benzoyle + rétinoïde + AHA le même soir, c'est la recette de l'irritation. On y va un actif à la fois.",
         "**Le parfum et les huiles essentielles** sur une peau réactive : ce ne sont pas des anti-boutons, et ils peuvent déclencher des réactions.",
       ],

@@ -51,7 +51,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le rétinol, c'est une forme de vitamine A. Sur la liste INCI (la liste officielle des ingrédients, écrite du plus dosé au moins dosé), il s'écrit simplement **[Retinol](/i/retinol)**. Une fois dans la peau, il se transforme en deux étapes : d'abord en rétinal, puis en acide rétinoïque. C'est cette dernière forme qui agit sur les cellules.",
+        "Le rétinol, c'est une forme de vitamine A. Sur la liste INCI (la liste officielle des ingrédients, écrite du plus dosé au moins dosé), il s'écrit simplement **Retinol**. Une fois dans la peau, il se transforme en deux étapes : d'abord en rétinal, puis en acide rétinoïque. C'est cette dernière forme qui agit sur les cellules.",
     },
     {
       type: "p",
@@ -119,9 +119,9 @@ const article: Article = {
       lignes: [
         ["Produits où le rétinol est dans la seconde moitié de la liste.", "698, soit 50,5 %."],
         ["Produits où il est dans les cinq premiers ingrédients.", "72, soit 5,2 %."],
-        ["Produits qui contiennent du [parfum](/i/parfum).", "801, soit 58 %."],
+        ["Produits qui contiennent du parfum.", "801, soit 58 %."],
         ["Produits qui l'associent à un acide exfoliant (AHA).", "192, soit 13,9 %."],
-        ["Produits qui l'associent à la [niacinamide](/i/niacinamide).", "397, soit 28,7 %."],
+        ["Produits qui l'associent à la niacinamide.", "397, soit 28,7 %."],
       ],
       legende: "Base Cosme Check, produits actifs, relevé du 31/10/2026.",
     },
@@ -160,7 +160,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Les deux dernières lignes ne sont pas des erreurs. Ce sont des crèmes de jour au rétinol avec un filtre solaire, et certains de leurs filtres, comme l'[octocrylène](/i/octocrylene) ou l'[homosalate](/i/homosalate), sont classés rouge dans l'app. Sur les 95 produits au rétinol de la base qui contiennent un filtre solaire chimique, la note médiane tombe à 6,8. Pour lire ces listes toi-même, suis notre [méthode d'analyse de composition](/blog/analyse-composition-cosmetique).",
+        "Les deux dernières lignes ne sont pas des erreurs. Ce sont des crèmes de jour au rétinol avec un filtre solaire, et certains de leurs filtres, comme l'octocrylène ou l'homosalate, sont classés rouge dans l'app. Sur les 95 produits au rétinol de la base qui contiennent un filtre solaire chimique, la note médiane tombe à 6,8. Pour lire ces listes toi-même, suis notre [méthode d'analyse de composition](/blog/analyse-composition-cosmetique).",
     },
 
     { type: "h2", texte: "Comment débuter le rétinol sans irriter sa peau ?" },
@@ -179,7 +179,7 @@ const article: Article = {
       type: "liste",
       style: "alertes",
       items: [
-        "Ne le mets pas le même soir qu'un acide exfoliant (AHA comme l'[acide glycolique](/i/glycolic-acid), ou BHA comme l'[acide salicylique](/i/salicylic-acid)). Un soir l'un, un soir l'autre. Notre [routine skincare](/blog/routine-skincare) donne l'ordre complet.",
+        "Ne le mets pas le même soir qu'un acide exfoliant (AHA comme l'acide glycolique, ou BHA comme l'acide salicylique). Un soir l'un, un soir l'autre. Notre [routine skincare](/blog/routine-skincare) donne l'ordre complet.",
         "Rougeurs qui brûlent, plaques qui démangent, peau qui pèle encore après un mois : arrête et demande conseil à ton pharmacien ou à un dermatologue.",
         "Enceinte, en train d'allaiter ou en projet de grossesse : la vitamine A en excès est liée à un risque de malformations du bébé. Parles-en à ton médecin, à ta sage-femme ou à ton pharmacien avant d'utiliser un rétinol.",
       ],

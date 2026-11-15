@@ -47,7 +47,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "La [niacinamide](/i/niacinamide), c'est une forme de la vitamine B3. On la trouve aussi sous le nom de nicotinamide. Rien à voir avec la nicotine, et malgré son surnom d'« acide niacinamide », ce n'est pas un acide : elle n'exfolie pas la peau.",
+        "La niacinamide, c'est une forme de la vitamine B3. On la trouve aussi sous le nom de nicotinamide. Rien à voir avec la nicotine, et malgré son surnom d'« acide niacinamide », ce n'est pas un acide : elle n'exfolie pas la peau.",
     },
     {
       type: "p",
@@ -120,7 +120,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Les sérums stars du rayon affichent pourtant 10 %, parfois avec du [zinc](/i/zinc-pca). Ce n'est pas un danger, mais plus de dose ne veut pas dire plus d'effet. Et une peau qui réagit vite supporte souvent mieux une crème à 4 ou 5 %.",
+        "Les sérums stars du rayon affichent pourtant 10 %, parfois avec du zinc. Ce n'est pas un danger, mais plus de dose ne veut pas dire plus d'effet. Et une peau qui réagit vite supporte souvent mieux une crème à 4 ou 5 %.",
     },
     {
       type: "liste",
@@ -135,21 +135,21 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Oui pour le rétinol. Le [rétinol](/i/retinol) est un dérivé de la vitamine A, connu pour lisser la peau mais aussi pour l'irriter au début. La niacinamide, douce, fait un bon duo avec lui : plusieurs soins testés en étude associent les deux (revue de Boo, 2021).",
+        "Oui pour le rétinol. Le rétinol est un dérivé de la vitamine A, connu pour lisser la peau mais aussi pour l'irriter au début. La niacinamide, douce, fait un bon duo avec lui : plusieurs soins testés en étude associent les deux (revue de Boo, 2021).",
     },
     {
       type: "p",
       texte:
-        "Pour la [vitamine C](/i/ascorbic-acid), on lit souvent qu'elles « s'annulent ». La revue de 2021 cite au contraire un essai où niacinamide et dérivé de vitamine C marchaient ensemble contre les taches. Si ta peau picote, le geste simple : vitamine C le matin, niacinamide le soir.",
+        "Pour la vitamine C, on lit souvent qu'elles « s'annulent ». La revue de 2021 cite au contraire un essai où niacinamide et dérivé de vitamine C marchaient ensemble contre les taches. Si ta peau picote, le geste simple : vitamine C le matin, niacinamide le soir.",
     },
     {
       type: "tableau",
       entetes: ["Avec…", "Ça va ?", "Le geste"],
       lignes: [
-        ["[Rétinol](/i/retinol)", "Oui", "Niacinamide d'abord, rétinol ensuite, le soir."],
-        ["[Vitamine C](/i/ascorbic-acid)", "Oui", "Si ça picote : vitamine C le matin, niacinamide le soir."],
-        ["[Acide salicylique](/i/salicylic-acid)", "Oui", "Pas les deux en même temps si ta peau tiraille."],
-        ["[Acide hyaluronique](/i/sodium-hyaluronate)", "Oui", "Duo très doux, matin et soir."],
+        ["Rétinol", "Oui", "Niacinamide d'abord, rétinol ensuite, le soir."],
+        ["Vitamine C", "Oui", "Si ça picote : vitamine C le matin, niacinamide le soir."],
+        ["Acide salicylique", "Oui", "Pas les deux en même temps si ta peau tiraille."],
+        ["Acide hyaluronique", "Oui", "Duo très doux, matin et soir."],
       ],
     },
     {

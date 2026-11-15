@@ -90,19 +90,19 @@ const article: Article = {
       lignes: [
         ["Aqua", "De l'eau, la base de la crème.", "vert"],
         [
-          "[Paraffinum Liquidum](/i/paraffinum-liquidum), [Paraffin](/i/paraffin), [Cera Microcristallina](/i/cera-microcristallina)",
+          "Paraffinum Liquidum, Paraffin, Cera Microcristallina",
           "Une huile et des cires minérales qui posent un film sur la peau.",
           "orange",
         ],
-        ["[Glycerin](/i/glycerin), [Panthenol](/i/panthenol)", "Elles attirent l'eau et la gardent.", "vert"],
-        ["[Lanolin Alcohol](/i/lanolin-alcohol) (Eucerit)", "Il lie l'eau et le gras.", "vert"],
-        ["[Decyl Oleate](/i/decyl-oleate), [Octyldodecanol](/i/octyldodecanol)", "Des corps gras légers, pour étaler facilement.", "vert"],
+        ["Glycerin, Panthenol", "Elles attirent l'eau et la gardent.", "vert"],
+        ["Lanolin Alcohol (Eucerit)", "Il lie l'eau et le gras.", "vert"],
+        ["Decyl Oleate, Octyldodecanol", "Des corps gras légers, pour étaler facilement.", "vert"],
         [
-          "[Magnesium Sulfate](/i/magnesium-sulfate), [Aluminum Stearates](/i/aluminum-stearates), Magnesium Stearate, Citric Acid",
+          "Magnesium Sulfate, Aluminum Stearates, Magnesium Stearate, Citric Acid",
           "Ils tiennent la texture et règlent l'acidité.",
           "jaune (acide citrique : vert)",
         ],
-        ["[Parfum](/i/parfum) et 7 allergènes", "L'odeur Nivea.", "jaune"],
+        ["Parfum et 7 allergènes", "L'odeur Nivea.", "jaune"],
       ],
       legende:
         "Couleurs relevées dans la base Cosme Check le 19/10/2026. [Comment l'app classe les ingrédients](/comment-ca-marche).",

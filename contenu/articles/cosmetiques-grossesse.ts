@@ -82,9 +82,9 @@ const article: Article = {
       type: "liste",
       style: "alertes",
       items: [
-        "[Retinol](/i/retinol), le plus connu ([notre guide du rétinol](/blog/retinol)).",
-        "[Retinyl Palmitate](/i/retinyl-palmitate) et Retinyl Acetate, des formes plus douces mais de la vitamine A quand même.",
-        "Retinal, et [Hydroxypinacolone Retinoate](/i/hydroxypinacolone-retinoate), vendu comme « rétinoïde nouvelle génération » (un dérivé de la vitamine A).",
+        "Retinol, le plus connu ([notre guide du rétinol](/blog/retinol)).",
+        "Retinyl Palmitate et Retinyl Acetate, des formes plus douces mais de la vitamine A quand même.",
+        "Retinal, et Hydroxypinacolone Retinoate, vendu comme « rétinoïde nouvelle génération » (un dérivé de la vitamine A).",
       ],
     },
     {
@@ -97,7 +97,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Elles sont déconseillées. L'Anses (l'agence française de sécurité sanitaire) écrit noir sur blanc que les huiles essentielles sont déconseillées aux femmes enceintes et aux enfants. Avant de s'en servir, elle conseille de demander l'avis d'un professionnel de santé ([Anses, 2024](https://www.anses.fr/fr/article/huiles-essentielles-risques-precautions)). Certaines contiennent des molécules qui agissent sur le système nerveux, comme le [camphre](/i/camphor).",
+        "Elles sont déconseillées. L'Anses (l'agence française de sécurité sanitaire) écrit noir sur blanc que les huiles essentielles sont déconseillées aux femmes enceintes et aux enfants. Avant de s'en servir, elle conseille de demander l'avis d'un professionnel de santé ([Anses, 2024](https://www.anses.fr/fr/article/huiles-essentielles-risques-precautions)). Certaines contiennent des molécules qui agissent sur le système nerveux, comme le camphre.",
     },
     {
       type: "p",
@@ -109,7 +109,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "L'[acide salicylique](/i/salicylic-acid), c'est le BHA, l'exfoliant des produits contre les boutons et les points noirs. En Europe, il est classé comme substance suspectée d'être toxique pour la reproduction. Il reste autorisé dans les cosmétiques, à 2 % au plus dans la plupart des produits. Le SCCS (le comité d'experts qui conseille la Commission européenne) l'a jugé sûr à ces doses en 2018 ([règlement (UE) 2019/1966](https://eur-lex.europa.eu/eli/reg/2019/1966/oj)).",
+        "L'acide salicylique, c'est le BHA, l'exfoliant des produits contre les boutons et les points noirs. En Europe, il est classé comme substance suspectée d'être toxique pour la reproduction. Il reste autorisé dans les cosmétiques, à 2 % au plus dans la plupart des produits. Le SCCS (le comité d'experts qui conseille la Commission européenne) l'a jugé sûr à ces doses en 2018 ([règlement (UE) 2019/1966](https://eur-lex.europa.eu/eli/reg/2019/1966/oj)).",
     },
     {
       type: "p",
@@ -132,11 +132,11 @@ const article: Article = {
       type: "tableau",
       entetes: ["Ce qu'on a compté", "Résultat"],
       lignes: [
-        ["Produits avec du [parfum](/i/parfum).", "199, soit 54 %."],
+        ["Produits avec du parfum.", "199, soit 54 %."],
         ["Produits avec au moins une huile essentielle repérable.", "51, soit 14 %."],
         ["Produits avec du parfum ou une huile essentielle.", "226, soit 61 %."],
         ["Soins anti-vergetures parfumés.", "152 sur 226, soit 67 %."],
-        ["Produits avec un allergène à déclarer (comme le [linalool](/i/linalool) ou le [limonene](/i/limonene)).", "101, soit 27 %."],
+        ["Produits avec un allergène à déclarer (comme le linalool ou le limonene).", "101, soit 27 %."],
         ["Produits avec de la vitamine A (rétinol ou dérivé).", "9, soit 2,4 %."],
       ],
       legende: "Base Cosme Check, produits actifs, relevé du 01/11/2026.",
@@ -170,7 +170,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "La ligne qui surprend, c'est l'huile Bio-Oil classique, la plus connue du rayon. Sa liste place le [Retinyl Palmitate](/i/retinyl-palmitate), une forme de vitamine A, en 5e position. Rien n'interdit de l'utiliser, mais c'est exactement la question à poser à ta sage-femme. La même marque vend une version « Naturelle », sans vitamine A ni parfum, notée 16,53.",
+        "La ligne qui surprend, c'est l'huile Bio-Oil classique, la plus connue du rayon. Sa liste place le Retinyl Palmitate, une forme de vitamine A, en 5e position. Rien n'interdit de l'utiliser, mais c'est exactement la question à poser à ta sage-femme. La même marque vend une version « Naturelle », sans vitamine A ni parfum, notée 16,53.",
     },
 
     { type: "h2", texte: "Comment faire le tri dans sa trousse en 10 minutes ?" },

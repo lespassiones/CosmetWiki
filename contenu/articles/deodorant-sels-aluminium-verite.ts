@@ -104,9 +104,9 @@ const article: Article = {
       type: "liste",
       style: "coches",
       items: [
-        "**Bicarbonate de soude** ([Sodium Bicarbonate](/i/sodium-bicarbonate)) : efficace contre l'odeur, mais son ++pH élevé++ irrite souvent la peau des aisselles. Le pH mesure l'acidité : la peau est un peu acide, le bicarbonate ne l'est pas du tout.",
-        "**Pierre d'alun** : souvent vendue « naturelle », alors qu'elle contient elle-même de l'aluminium ([Potassium Alum](/i/potassium-alum)). Un vrai paradoxe.",
-        "**Oxyde ou ricinoléate de zinc** ([Zinc Ricinoleate](/i/zinc-ricinoleate)) : il neutralise les odeurs en douceur, une bonne option pour les peaux sensibles.",
+        "**Bicarbonate de soude** (Sodium Bicarbonate) : efficace contre l'odeur, mais son ++pH élevé++ irrite souvent la peau des aisselles. Le pH mesure l'acidité : la peau est un peu acide, le bicarbonate ne l'est pas du tout.",
+        "**Pierre d'alun** : souvent vendue « naturelle », alors qu'elle contient elle-même de l'aluminium (Potassium Alum). Un vrai paradoxe.",
+        "**Oxyde ou ricinoléate de zinc** (Zinc Ricinoleate) : il neutralise les odeurs en douceur, une bonne option pour les peaux sensibles.",
         "**Amidons et huiles végétales** : ils absorbent l'humidité sans bloquer la sueur. C'est confortable, mais la tenue est plus courte en pleine chaleur.",
         "**Acide glycolique sous les bras** : l'astuce des réseaux sociaux consiste à passer un tonique exfoliant à la place du déo. L'idée est qu'une peau plus acide gênerait les bactéries de l'odeur. Les fabricants restent prudents : dans notre base, 865 déodorants sur 18 065 contiennent un acide de fruit, presque tous de l'acide lactique, et 8 seulement de l'acide glycolique. Jamais sur une peau qui vient d'être rasée. On a lu [4 700 produits à l'acide glycolique](/blog/acide-glycolique) pour voir ce qu'il fait vraiment.",
       ],
@@ -129,7 +129,7 @@ const article: Article = {
       type: "liste",
       style: "numeros",
       items: [
-        "Cherche un anti-odeur doux dans la liste : *Zinc Ricinoleate* ou [Triethyl Citrate](/i/triethyl-citrate), qui freine les bactéries.",
+        "Cherche un anti-odeur doux dans la liste : *Zinc Ricinoleate* ou Triethyl Citrate, qui freine les bactéries.",
         "Évite le bicarbonate en tête de liste si ta peau tiraille ou rougit vite.",
         "Mets-le sur une peau propre et sèche, le matin, et reprends-en à midi les jours de grosse chaleur.",
         "Laisse deux semaines à ta peau quand tu quittes un anti-transpirant : la sueur revient d'un coup, puis ça se calme souvent.",
@@ -146,7 +146,7 @@ const article: Article = {
       type: "liste",
       style: "coches",
       items: [
-        "**Sels d'aluminium** : [Aluminum Chlorohydrate](/i/aluminum-chlorohydrate), *Aluminum Zirconium…* Tu tiens un anti-transpirant, qui réduit la sueur.",
+        "**Sels d'aluminium** : Aluminum Chlorohydrate, *Aluminum Zirconium…* Tu tiens un anti-transpirant, qui réduit la sueur.",
         "**Actifs anti-odeur doux** : *Zinc Ricinoleate*, *Triethyl Citrate*. Ils sont en général bien tolérés.",
       ],
     },
@@ -156,7 +156,7 @@ const article: Article = {
       items: [
         "**Sodium Bicarbonate** en tête de liste : à éviter si ta peau réagit facilement.",
         "**Alcohol Denat.** en première position : il pique sur une peau rasée et dessèche.",
-        "**Parfum** abondant avec des allergènes comme [Limonene](/i/limonene) ou [Linalool](/i/linalool) : une cause fréquente de rougeurs sous les bras. Une réaction qui dure mérite l'avis d'un dermatologue.",
+        "**Parfum** abondant avec des allergènes comme Limonene ou Linalool : une cause fréquente de rougeurs sous les bras. Une réaction qui dure mérite l'avis d'un dermatologue.",
       ],
     },
     {

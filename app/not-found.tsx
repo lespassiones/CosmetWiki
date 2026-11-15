@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { Logo } from "@/components/Logo";
 import { Footer } from "@/components/Footer";
 import { BackgroundGlow } from "@/components/BackgroundGlow";
-import { SearchBar } from "@/components/SearchBar";
 
 export const metadata: Metadata = {
   title: "Page introuvable",
@@ -25,17 +24,16 @@ export default function NotFound() {
           Erreur 404
         </p>
         <h1 className="mt-2 text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
-          Cet ingrédient n&apos;est pas dans notre index.
+          Cette page n&apos;existe pas.
         </h1>
-        <div className="mt-10 w-full">
-          <SearchBar autoFocus size="lg" />
+        <div className="mt-8 flex flex-col items-center gap-3 text-sm font-medium sm:flex-row sm:gap-6">
+          <Link href="/" className="text-rose-700 hover:text-rose-900">
+            ← Retour à l&apos;accueil
+          </Link>
+          <Link href="/blog" className="text-rose-700 hover:text-rose-900">
+            Lire le blog
+          </Link>
         </div>
-        <Link
-          href="/"
-          className="mt-8 text-sm font-medium text-rose-700 hover:text-rose-900"
-        >
-          ← Retour à l&apos;accueil
-        </Link>
       </main>
 
       <Footer />

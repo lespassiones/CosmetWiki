@@ -68,12 +68,12 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Surtout de l'eau et deux acides. La liste INCI, c'est la liste officielle des ingrédients, écrite du plus dosé au moins dosé. Dans la version 2025, on lit d'abord l'eau, un solvant et un ingrédient qui règle l'acidité. Puis vient l'[acide lactique](/i/lactic-acid) en 4e place, et l'alcool en 5e.",
+        "Surtout de l'eau et deux acides. La liste INCI, c'est la liste officielle des ingrédients, écrite du plus dosé au moins dosé. Dans la version 2025, on lit d'abord l'eau, un solvant et un ingrédient qui règle l'acidité. Puis vient l'acide lactique en 4e place, et l'alcool en 5e.",
     },
     {
       type: "p",
       texte:
-        "L'acide lactique est un AHA, un acide qui décolle les cellules mortes à la surface de la peau. L'[acide salicylique](/i/salicylic-acid) est un BHA : il fait le même travail, mais il se dissout dans le gras. Selon la fiche d'un pharmacien en ligne, un disque contient 4,5 % d'acide lactique et 0,45 % d'acide salicylique ([Redcare Pharmacie](https://www.redcare-pharmacie.fr/beaute/F00599456/medicube-zero-pore-pad.htm)).",
+        "L'acide lactique est un AHA, un acide qui décolle les cellules mortes à la surface de la peau. L'acide salicylique est un BHA : il fait le même travail, mais il se dissout dans le gras. Selon la fiche d'un pharmacien en ligne, un disque contient 4,5 % d'acide lactique et 0,45 % d'acide salicylique ([Redcare Pharmacie](https://www.redcare-pharmacie.fr/beaute/F00599456/medicube-zero-pore-pad.htm)).",
     },
     {
       type: "fiche",
@@ -113,7 +113,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Les deux ingrédients orange sont le [Glycereth-26](/i/glycereth-26), un humectant fabriqué par un procédé polluant appelé éthoxylation, et un [polymère de synthèse](/i/ammonium-acryloyldimethyltaurate-vp-copolymer) qui épaissit le liquide. La note de Cosme Check tient compte de leur place : en fin de liste, un ingrédient à surveiller pèse moins.",
+        "Les deux ingrédients orange sont le Glycereth-26, un humectant fabriqué par un procédé polluant appelé éthoxylation, et un polymère de synthèse qui épaissit le liquide. La note de Cosme Check tient compte de leur place : en fin de liste, un ingrédient à surveiller pèse moins.",
     },
     {
       type: "p",
@@ -125,7 +125,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Pas pour tout le monde, mais il faut le savoir. Les Zero Pore Pad 2.0 contiennent des huiles d'orange douce, de citron, de pamplemousse, de [bergamote](/i/citrus-aurantium-bergamia-fruit-oil), de romarin, d'eucalyptus et de [lavande](/i/lavandula-angustifolia-oil). Elles parfument, et elles apportent du [limonène](/i/limonene), un allergène que l'Europe oblige à déclarer. Un allergène, c'est une substance qui peut déclencher une allergie chez certaines personnes.",
+        "Pas pour tout le monde, mais il faut le savoir. Les Zero Pore Pad 2.0 contiennent des huiles d'orange douce, de citron, de pamplemousse, de bergamote, de romarin, d'eucalyptus et de lavande. Elles parfument, et elles apportent du limonène, un allergène que l'Europe oblige à déclarer. Un allergène, c'est une substance qui peut déclencher une allergie chez certaines personnes.",
     },
     {
       type: "p",
@@ -153,7 +153,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le sérum s'effondre à cause de deux silicones, le [cyclopentasiloxane](/i/cyclopentasiloxane) (D5) et le cyclohexasiloxane (D6). L'Europe les limitera à 0,1 % dans les soins sans rinçage à partir de juin 2027 ([règlement (UE) 2024/1328](https://eur-lex.europa.eu/eli/reg/2024/1328/oj)). Ils restent autorisés d'ici là. S'y ajoute le [BHT](/i/bht), un antioxydant classé rouge dans Cosme Check.",
+        "Le sérum s'effondre à cause de deux silicones, le cyclopentasiloxane (D5) et le cyclohexasiloxane (D6). L'Europe les limitera à 0,1 % dans les soins sans rinçage à partir de juin 2027 ([règlement (UE) 2024/1328](https://eur-lex.europa.eu/eli/reg/2024/1328/oj)). Ils restent autorisés d'ici là. S'y ajoute le BHT, un antioxydant classé rouge dans Cosme Check.",
     },
     {
       type: "cta",

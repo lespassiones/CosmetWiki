@@ -4,10 +4,10 @@ import { SITE_URL } from "@/lib/siteUrl";
  * JSON-LD global injecté par le root layout sur toutes les pages :
  *   - Organization : identité de l'éditeur (entité réutilisée par les
  *     moteurs et les LLM pour attribuer le contenu à « Cosme Check »).
- *   - WebSite + SearchAction : décrit la recherche interne (/search?q=...)
- *     et rend le site éligible à la sitelinks searchbox Google.
- * Les pages ajoutent leurs propres blocs spécifiques (ChemicalSubstance sur
- * les fiches ingrédient, FAQPage sur /faq, Article sur le blog).
+ *   - WebSite : le site lui-même. Plus de SearchAction : la recherche interne
+ *     (/search) a été retirée avec les fiches ingrédient (novembre 2026).
+ * Les pages ajoutent leurs propres blocs spécifiques (FAQPage sur /faq,
+ * Article sur le blog).
  */
 export function SiteJsonLd() {
   const graph = {
@@ -32,14 +32,6 @@ export function SiteJsonLd() {
         name: "Cosme Check",
         inLanguage: "fr",
         publisher: { "@id": `${SITE_URL}/#organization` },
-        potentialAction: {
-          "@type": "SearchAction",
-          target: {
-            "@type": "EntryPoint",
-            urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
-          },
-          "query-input": "required name=search_term_string",
-        },
       },
     ],
   };

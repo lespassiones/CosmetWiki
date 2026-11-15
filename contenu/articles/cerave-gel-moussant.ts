@@ -81,12 +81,12 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Des tensioactifs doux, et aucun sulfate. Un tensioactif, c'est l'ingrédient qui attrape le gras et la saleté pour que l'eau les emporte. Les plus connus sont les sulfates, comme le [Sodium Laureth Sulfate](/i/sodium-laureth-sulfate), qui moussent beaucoup.",
+        "Des tensioactifs doux, et aucun sulfate. Un tensioactif, c'est l'ingrédient qui attrape le gras et la saleté pour que l'eau les emporte. Les plus connus sont les sulfates, comme le Sodium Laureth Sulfate, qui moussent beaucoup.",
     },
     {
       type: "p",
       texte:
-        "Le Gel Moussant utilise d'autres tensioactifs : la [Cocamidopropyl Hydroxysultaine](/i/cocamidopropyl-hydroxysultaine) en 2e place, puis le [Sodium Lauroyl Sarcosinate](/i/sodium-lauroyl-sarcosinate) en 4e. Ils moussent moins fort. Pourquoi c'est important ? Les tensioactifs trop forts peuvent abîmer les protéines et les graisses de la peau, d'où les tiraillements après le lavage ([Ananthapadmanabhan et al., *Dermatologic Therapy*, 2004](https://pubmed.ncbi.nlm.nih.gov/14728695/)).",
+        "Le Gel Moussant utilise d'autres tensioactifs : la Cocamidopropyl Hydroxysultaine en 2e place, puis le Sodium Lauroyl Sarcosinate en 4e. Ils moussent moins fort. Pourquoi c'est important ? Les tensioactifs trop forts peuvent abîmer les protéines et les graisses de la peau, d'où les tiraillements après le lavage ([Ananthapadmanabhan et al., *Dermatologic Therapy*, 2004](https://pubmed.ncbi.nlm.nih.gov/14728695/)).",
     },
     {
       type: "p",
@@ -129,12 +129,12 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Parce que ses 26 ingrédients sont tous verts ou jaunes dans la base. Pas de PEG, pas de polysorbate, pas de phénoxyéthanol. Elle lave avec des tensioactifs doux, comme le [Disodium Cocoyl Glutamate](/i/disodium-cocoyl-glutamate), et des [glycolipides](/i/glycolipids).",
+        "Parce que ses 26 ingrédients sont tous verts ou jaunes dans la base. Pas de PEG, pas de polysorbate, pas de phénoxyéthanol. Elle lave avec des tensioactifs doux, comme le Disodium Cocoyl Glutamate, et des glycolipides.",
     },
     {
       type: "p",
       texte:
-        "Les autres perdent des points sur des PEG, comme le [PEG-150 Pentaerythrityl Tetrastearate](/i/peg-150-pentaerythrityl-tetrastearate) qui épaissit le Gel Moussant. Un PEG est un ingrédient fabriqué par éthoxylation, un procédé polluant : la base les classe orange pour ça. Ce n'est pas un danger pour ta peau, c'est un choix de formule.",
+        "Les autres perdent des points sur des PEG, comme le PEG-150 Pentaerythrityl Tetrastearate qui épaissit le Gel Moussant. Un PEG est un ingrédient fabriqué par éthoxylation, un procédé polluant : la base les classe orange pour ça. Ce n'est pas un danger pour ta peau, c'est un choix de formule.",
     },
     {
       type: "cta",
@@ -146,7 +146,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "C'est un gel bien noté, à 12,18, avec un vrai dosage d'actif. L'[acide salicylique](/i/salicylic-acid) arrive en 6e place. C'est un BHA, un acide exfoliant qui entre dans les pores et décolle les cellules mortes de la surface.",
+        "C'est un gel bien noté, à 12,18, avec un vrai dosage d'actif. L'acide salicylique arrive en 6e place. C'est un BHA, un acide exfoliant qui entre dans les pores et décolle les cellules mortes de la surface.",
     },
     {
       type: "p",
@@ -177,7 +177,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Parce que sa liste compte 60 ingrédients, plus du double des autres. On y lit cinq PEG ou PPG, du [Chlorphenesin](/i/chlorphenesin), un conservateur, et un polysorbate : douze ingrédients orange au total. L'Huile Lavante Moussante, à 7,78, place un PEG dès la 3e place.",
+        "Parce que sa liste compte 60 ingrédients, plus du double des autres. On y lit cinq PEG ou PPG, du Chlorphenesin, un conservateur, et un polysorbate : douze ingrédients orange au total. L'Huile Lavante Moussante, à 7,78, place un PEG dès la 3e place.",
     },
     {
       type: "p",

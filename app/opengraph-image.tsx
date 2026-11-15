@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
+// Pas de `runtime = "edge"` : sans lui, l'image est générée UNE fois au build
+// et servie par le CDN. En edge, elle était recalculée par une fonction.
 export const alt = "Cosme Check, l'application qui te dit les cosmétiques faits pour toi.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";

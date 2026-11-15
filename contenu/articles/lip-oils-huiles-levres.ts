@@ -56,7 +56,7 @@ const article: Article = {
       items: [
         "**Nutrition immédiate :** les huiles végétales colmatent les micro-fissures des lèvres et limitent l'évaporation de l'eau.",
         "**Confort durable :** les versions sérieuses comprennent du beurre de karité, du squalane végétal ou de l'huile de jojoba.",
-        "**Effet plump léger :** certaines formules ajoutent de la *menthe poivrée* ou un extrait de piment ([Capsicum Annuum Fruit Extract](/i/capsicum-annuum-fruit-extract)) pour gonfler temporairement la lèvre. Joli sur Instagram, parfois irritant.",
+        "**Effet plump léger :** certaines formules ajoutent de la *menthe poivrée* ou un extrait de piment (Capsicum Annuum Fruit Extract) pour gonfler temporairement la lèvre. Joli sur Instagram, parfois irritant.",
       ],
     },
     {
@@ -77,17 +77,17 @@ const article: Article = {
       type: "liste",
       style: "coches",
       items: [
-        "**Premiers ingrédients = vraies huiles :** [Helianthus Annuus Seed Oil](/i/helianthus-annuus-seed-oil) (tournesol), [Ricinus Communis Seed Oil](/i/ricinus-communis-seed-oil) (ricin), [Simmondsia Chinensis Seed Oil](/i/simmondsia-chinensis-seed-oil) (jojoba), [Squalane](/i/squalane), [Butyrospermum Parkii Butter](/i/butyrospermum-parkii-butter) (karité).",
-        "**Pas que des esters :** certains lip oils ne contiennent que [Polybutene](/i/polybutene) et [Hydrogenated Polyisobutene](/i/hydrogenated-polyisobutene), des huiles synthétiques qui imitent les vraies. Brillant, mais pas nourrissant.",
-        "**Vitamine E ([Tocopherol](/i/tocopherol)) :** bon indicateur de qualité, antioxydant qui protège les huiles de l'oxydation.",
+        "**Premiers ingrédients = vraies huiles :** Helianthus Annuus Seed Oil (tournesol), Ricinus Communis Seed Oil (ricin), Simmondsia Chinensis Seed Oil (jojoba), Squalane, Butyrospermum Parkii Butter (karité).",
+        "**Pas que des esters :** certains lip oils ne contiennent que Polybutene et Hydrogenated Polyisobutene, des huiles synthétiques qui imitent les vraies. Brillant, mais pas nourrissant.",
+        "**Vitamine E (Tocopherol) :** bon indicateur de qualité, antioxydant qui protège les huiles de l'oxydation.",
       ],
     },
     {
       type: "liste",
       style: "alertes",
       items: [
-        "**Parfums forts** et arômes (cannelle, [huile de menthe poivrée](/i/mentha-piperita-oil)) : risque d'allergie ou de tiraillement.",
-        "**Colorants** ([CI 15850](/i/ci-15850), CI 15985) : ils sont autorisés en Europe, listés à l'annexe IV du [règlement (CE) 1223/2009](https://eur-lex.europa.eu/eli/reg/2009/1223/oj). Mais si tes lèvres réagissent facilement, une version transparente est plus sûre.",
+        "**Parfums forts** et arômes (cannelle, huile de menthe poivrée) : risque d'allergie ou de tiraillement.",
+        "**Colorants** (CI 15850, CI 15985) : ils sont autorisés en Europe, listés à l'annexe IV du [règlement (CE) 1223/2009](https://eur-lex.europa.eu/eli/reg/2009/1223/oj). Mais si tes lèvres réagissent facilement, une version transparente est plus sûre.",
       ],
     },
     {
@@ -104,7 +104,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "On a lu leurs listes dans notre base, le 06/11/2026. Surprise : le plus célèbre ne suit pas la règle des trois premiers ingrédients. Le *Dior Addict Lip Glow Oil* classique commence par deux huiles synthétiques, [Hydrogenated Polyisobutene](/i/hydrogenated-polyisobutene) et [Polybutene](/i/polybutene). Son huile de cerise (*Prunus Avium Seed Oil*) n'arrive qu'en ==12e place sur 25==, après le parfum.",
+        "On a lu leurs listes dans notre base, le 06/11/2026. Surprise : le plus célèbre ne suit pas la règle des trois premiers ingrédients. Le *Dior Addict Lip Glow Oil* classique commence par deux huiles synthétiques, Hydrogenated Polyisobutene et Polybutene. Son huile de cerise (*Prunus Avium Seed Oil*) n'arrive qu'en ==12e place sur 25==, après le parfum.",
     },
     {
       type: "tableau",

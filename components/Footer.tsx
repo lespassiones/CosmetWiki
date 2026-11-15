@@ -13,8 +13,8 @@ export function Footer() {
         </div>
         <span aria-hidden className="hidden sm:inline">·</span>
         <nav className="flex items-center gap-2.5">
-          <Link href="/ingredients" className="hover:text-ink-muted transition-colors">
-            Ingrédients INCI
+          <Link href="/blog" className="hover:text-ink-muted transition-colors">
+            Blog
           </Link>
           <span aria-hidden>·</span>
           <Link href="/mentions-legales" className="hover:text-ink-muted transition-colors">

@@ -60,7 +60,7 @@ const article: Article = {
       type: "liste",
       style: "coches",
       items: [
-        "**Humectants** (ils attirent l'eau dans la peau) : [glycérine](/i/glycerin), acide hyaluronique, urée, [panthénol](/i/panthenol).",
+        "**Humectants** (ils attirent l'eau dans la peau) : glycérine, acide hyaluronique, urée, panthénol.",
         "**Émollients** (ils lissent et assouplissent) : squalane, céramides, esters, beurres végétaux.",
         "**Occlusifs** (ils posent un film qui limite la perte d'eau) : cires, certaines huiles, silicones. Surtout utiles aux peaux sèches.",
       ],
@@ -81,7 +81,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Cherche glycérine + acide hyaluronique + [niacinamide](/i/niacinamide), texture fluide. Références souvent citées : La Roche-Posay Effaclar, CeraVe lotion hydratante, Bioderma Sébium. Évite les huiles lourdes et beurres occlusifs. Les autres gestes pour cette peau sont dans notre [guide anti-imperfections](/blog/meilleurs-produits-anti-imperfections).",
+        "Cherche glycérine + acide hyaluronique + niacinamide, texture fluide. Références souvent citées : La Roche-Posay Effaclar, CeraVe lotion hydratante, Bioderma Sébium. Évite les huiles lourdes et beurres occlusifs. Les autres gestes pour cette peau sont dans notre [guide anti-imperfections](/blog/meilleurs-produits-anti-imperfections).",
     },
     { type: "h3", texte: "Et la mention « non comédogène », elle vaut quoi ?" },
     {

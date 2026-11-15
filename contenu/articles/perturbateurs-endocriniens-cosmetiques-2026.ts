@@ -105,9 +105,9 @@ const article: Article = {
       inci: "Butylparaben, Propylparaben",
       niveau: "prouve",
       effet:
-        "Une faible activité hormonale (ils imitent un peu les œstrogènes) est démontrée en laboratoire. Les parabènes à courte chaîne, [Methylparaben](/i/methylparaben) et Ethylparaben, en ont beaucoup moins.",
+        "Une faible activité hormonale (ils imitent un peu les œstrogènes) est démontrée en laboratoire. Les parabènes à courte chaîne, Methylparaben et Ethylparaben, en ont beaucoup moins.",
       statut:
-        "[Butylparaben](/i/butylparaben) et [Propylparaben](/i/propylparaben) : 0,14 % au plus en Europe, interdits dans les soins sans rinçage pour le siège des moins de 3 ans ([règlement (UE) 1004/2014](https://eur-lex.europa.eu/eli/reg/2014/1004/oj)). [Isobutylparaben](/i/isobutylparaben), Isopropylparaben et trois autres : interdits depuis 2014 ([règlement (UE) 358/2014](https://eur-lex.europa.eu/eli/reg/2014/358/oj)).",
+        "Butylparaben et Propylparaben : 0,14 % au plus en Europe, interdits dans les soins sans rinçage pour le siège des moins de 3 ans ([règlement (UE) 1004/2014](https://eur-lex.europa.eu/eli/reg/2014/1004/oj)). Isobutylparaben, Isopropylparaben et trois autres : interdits depuis 2014 ([règlement (UE) 358/2014](https://eur-lex.europa.eu/eli/reg/2014/358/oj)).",
     },
     {
       type: "fiche",
@@ -116,7 +116,7 @@ const article: Article = {
       niveau: "prouve",
       effet: "Antibactérien. Perturbe la thyroïde chez l'animal ; on le soupçonne aussi de favoriser la résistance des bactéries.",
       statut:
-        "[Triclosan](/i/triclosan) : limité depuis 2014 à quelques produits, comme les dentifrices, les savons et les déodorants non sprays. La dose maximale est de 0,3 %, et de 0,2 % dans les bains de bouche ([règlement (UE) 358/2014](https://eur-lex.europa.eu/eli/reg/2014/358/oj)).",
+        "Triclosan : limité depuis 2014 à quelques produits, comme les dentifrices, les savons et les déodorants non sprays. La dose maximale est de 0,3 %, et de 0,2 % dans les bains de bouche ([règlement (UE) 358/2014](https://eur-lex.europa.eu/eli/reg/2014/358/oj)).",
     },
     { type: "h3", texte: "Niveau 2 : effet suspecté" },
     {
@@ -127,7 +127,7 @@ const article: Article = {
       effet:
         "Filtre UV. Activité hormonale chez l'animal ; on le retrouve dans le sang et l'urine après application sur la peau.",
       statut:
-        "[Benzophenone-3](/i/benzophenone-3) : depuis 2023, 6 % au plus dans les produits pour le visage, les mains et les lèvres, 2,2 % dans les produits pour le corps ([règlement (UE) 2022/1176](https://eur-lex.europa.eu/eli/reg/2022/1176/oj)).",
+        "Benzophenone-3 : depuis 2023, 6 % au plus dans les produits pour le visage, les mains et les lèvres, 2,2 % dans les produits pour le corps ([règlement (UE) 2022/1176](https://eur-lex.europa.eu/eli/reg/2022/1176/oj)).",
     },
     {
       type: "fiche",
@@ -137,7 +137,7 @@ const article: Article = {
       effet:
         "Filtre UV très répandu. Il peut se dégrader en benzophénone avec le temps et la chaleur.",
       statut:
-        "[Octocrylene](/i/octocrylene) : 10 % au plus, 9 % dans les sprays à gaz propulseur, depuis 2023 ([règlement (UE) 2022/1176](https://eur-lex.europa.eu/eli/reg/2022/1176/oj)). Ne garde pas une vieille crème solaire d'un été à l'autre.",
+        "Octocrylene : 10 % au plus, 9 % dans les sprays à gaz propulseur, depuis 2023 ([règlement (UE) 2022/1176](https://eur-lex.europa.eu/eli/reg/2022/1176/oj)). Ne garde pas une vieille crème solaire d'un été à l'autre.",
     },
     {
       type: "fiche",
@@ -147,7 +147,7 @@ const article: Article = {
       effet:
         "Des silicones qui donnent un toucher poudré. Suspectés chez l'animal, et ils s'accumulent dans l'environnement.",
       statut:
-        "[Cyclotetrasiloxane](/i/cyclotetrasiloxane) et [Cyclopentasiloxane](/i/cyclopentasiloxane) : 0,1 % au plus dans les produits rincés depuis 2020 ([règlement REACH (UE) 2018/35](https://eur-lex.europa.eu/eli/reg/2018/35/oj)).",
+        "Cyclotetrasiloxane et Cyclopentasiloxane : 0,1 % au plus dans les produits rincés depuis 2020 ([règlement REACH (UE) 2018/35](https://eur-lex.europa.eu/eli/reg/2018/35/oj)).",
     },
     { type: "h3", texte: "Niveau 3 : données incertaines" },
     {
@@ -156,7 +156,7 @@ const article: Article = {
       inci: "Dibutyl Phthalate, DEHP (interdits), Diethyl Phthalate (autorisé)",
       niveau: "incertain",
       effet:
-        "Effet anti-hormone mâle chez l'animal pour les phtalates lourds. Le [Diethyl Phthalate](/i/diethyl-phthalate) (DEP), lui, reste autorisé et peut se cacher derrière le mot « Parfum ».",
+        "Effet anti-hormone mâle chez l'animal pour les phtalates lourds. Le Diethyl Phthalate (DEP), lui, reste autorisé et peut se cacher derrière le mot « Parfum ».",
       statut:
         "Les phtalates lourds sont interdits dans les cosmétiques en Europe. Pour éviter le DEP, choisis des produits sans parfum.",
     },
@@ -181,12 +181,12 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le mot « Parfum » dans une liste cache souvent des dizaines de molécules, sans les nommer. La loi oblige seulement à écrire en clair les **allergènes**, ces molécules qui peuvent déclencher une allergie, comme [Limonene](/i/limonene) ou [Linalool](/i/linalool). Un allergène, ce n'est pas un perturbateur endocrinien : il irrite ou provoque une réaction, sans toucher aux hormones. Le vrai point de vigilance hormonal du parfum, c'est le DEP vu plus haut.",
+        "Le mot « Parfum » dans une liste cache souvent des dizaines de molécules, sans les nommer. La loi oblige seulement à écrire en clair les **allergènes**, ces molécules qui peuvent déclencher une allergie, comme Limonene ou Linalool. Un allergène, ce n'est pas un perturbateur endocrinien : il irrite ou provoque une réaction, sans toucher aux hormones. Le vrai point de vigilance hormonal du parfum, c'est le DEP vu plus haut.",
     },
     {
       type: "p",
       texte:
-        "Pour les conservateurs, ces ingrédients qui empêchent les microbes de pousser dans le pot, il faut séparer deux risques. Le risque hormonal concerne surtout les parabènes à longue chaîne. Le risque d'allergie, lui, a fait interdire la [Methylisothiazolinone](/i/methylisothiazolinone) dans les soins sans rinçage dès 2017 ([règlement (UE) 2016/1198](https://eur-lex.europa.eu/eli/reg/2016/1198/oj)). Le [Phenoxyethanol](/i/phenoxyethanol), très courant dans le maquillage, est limité à 1 %.",
+        "Pour les conservateurs, ces ingrédients qui empêchent les microbes de pousser dans le pot, il faut séparer deux risques. Le risque hormonal concerne surtout les parabènes à longue chaîne. Le risque d'allergie, lui, a fait interdire la Methylisothiazolinone dans les soins sans rinçage dès 2017 ([règlement (UE) 2016/1198](https://eur-lex.europa.eu/eli/reg/2016/1198/oj)). Le Phenoxyethanol, très courant dans le maquillage, est limité à 1 %.",
     },
 
     { type: "h2", texte: "Que dit la loi européenne ?" },
@@ -246,7 +246,7 @@ const article: Article = {
       style: "numeros",
       items: [
         "**Préfère les listes courtes** : moins d'ingrédients, c'est moins de molécules à surveiller.",
-        "**Repère les noms-clés** : Butylparaben, Propylparaben, Benzophenone-3, Triclosan, Parfum, Cyclopentasiloxane, Octocrylene, [Homosalate](/i/homosalate).",
+        "**Repère les noms-clés** : Butylparaben, Propylparaben, Benzophenone-3, Triclosan, Parfum, Cyclopentasiloxane, Octocrylene, Homosalate.",
         "**Scanne le produit avec Cosme Check** : chaque ingrédient a sa couleur, et l'app signale les perturbateurs endocriniens suspectés ou prouvés.",
       ],
     },

@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { retiredRedirects } from "./lib/retiredRoutes";
 
 // Content-Security-Policy — inventaire des origines réelles :
 //   Scripts  : 'self' + inline Next.js hydration + Vercel Analytics
@@ -78,6 +79,16 @@ const config: NextConfig = {
   async headers() {
     return [
       { source: "/(.*)", headers: securityHeaders },
+      // Sonde lue depuis l'admin (autre domaine) toutes les 10 s : la réponse
+      // est statique, servie par le CDN, donc l'en-tête CORS est posé ici,
+      // au routage, plutôt que par une fonction.
+      {
+        source: "/api/health",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
+        ],
+      },
       // Service worker must not be HTTP-cached, or updates ship slowly.
       {
         source: "/sw.js",
@@ -93,6 +104,11 @@ const config: NextConfig = {
       // Legacy : the standalone /analyser page was merged into the home - keep
       // existing links and bookmarks working.
       { source: "/analyser", destination: "/", permanent: true },
+      // Anciennes URLs (web app connectée, fiches ingrédient, recherche) :
+      // appliquées par le routage Vercel, AUCUNE fonction exécutée. Elles
+      // vivaient dans une middleware qui tournait sur chaque page vue et
+      // pesait 43 % du CPU facturé (cf. lib/retiredRoutes.ts).
+      ...retiredRedirects(),
     ];
   },
 };

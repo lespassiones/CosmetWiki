@@ -47,7 +47,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "C'est une molécule extraite des graines du babchi, une plante utilisée depuis longtemps en Inde et en Chine. Sur l'étiquette, son nom INCI est simplement **[Bakuchiol](/i/bakuchiol)**. Le nom INCI, c'est le nom officiel de l'ingrédient dans la liste écrite au dos du produit.",
+        "C'est une molécule extraite des graines du babchi, une plante utilisée depuis longtemps en Inde et en Chine. Sur l'étiquette, son nom INCI est simplement **Bakuchiol**. Le nom INCI, c'est le nom officiel de l'ingrédient dans la liste écrite au dos du produit.",
     },
     {
       type: "p",
@@ -125,9 +125,9 @@ const article: Article = {
       type: "tableau",
       entetes: ["Ce qu'on a compté", "Résultat"],
       lignes: [
-        ["Produits qui contiennent du [parfum](/i/parfum).", "812, soit 62 %."],
+        ["Produits qui contiennent du parfum.", "812, soit 62 %."],
         ["Produits où le bakuchiol est dans les cinq premiers ingrédients.", "98, soit 7,5 %."],
-        ["Produits qui mélangent bakuchiol et [rétinol](/i/retinol).", "164, soit 12,6 %."],
+        ["Produits qui mélangent bakuchiol et rétinol.", "164, soit 12,6 %."],
       ],
       legende: "Base Cosme Check, produits actifs, relevé du 25/10/2026.",
     },
@@ -162,7 +162,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Les deux premiers sont des huiles très courtes. La crème The Inkey List hydrate avec du [squalane](/i/squalane) et de la [glycérine](/i/glycerin), mais porte trois ingrédients orange. La crème Ole Henriksen est riche et contient des acides exfoliants ([acide glycolique](/i/glycolic-acid), [acide lactique](/i/lactic-acid)), qui font sans doute une bonne part de son effet « glow ». Son bakuchiol arrive après le parfum. C'est la méthode de [l'analyse de composition](/blog/analyse-composition-cosmetique) : ++l'ingrédient du nom doit apparaître assez haut dans la liste++.",
+        "Les deux premiers sont des huiles très courtes. La crème The Inkey List hydrate avec du squalane et de la glycérine, mais porte trois ingrédients orange. La crème Ole Henriksen est riche et contient des acides exfoliants (acide glycolique, acide lactique), qui font sans doute une bonne part de son effet « glow ». Son bakuchiol arrive après le parfum. C'est la méthode de [l'analyse de composition](/blog/analyse-composition-cosmetique) : ++l'ingrédient du nom doit apparaître assez haut dans la liste++.",
     },
 
     { type: "h2", texte: "Comment l'utiliser sans se tromper ?" },

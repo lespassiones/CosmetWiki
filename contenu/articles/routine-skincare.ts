@@ -104,7 +104,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Un actif, c'est l'ingrédient qui fait le travail promis : lisser, unifier le teint, exfolier. Les acides exfoliants décollent les cellules mortes de la surface. On parle d'AHA pour l'[acide glycolique](/i/glycolic-acid) ou l'[acide mandélique](/i/mandelic-acid), et de BHA pour l'[acide salicylique](/i/salicylic-acid). Les rétinoïdes sont la famille de la vitamine A, dont le [rétinol](/i/retinol) et le [rétinal](/i/retinal). Les deux familles irritent quand on les cumule.",
+        "Un actif, c'est l'ingrédient qui fait le travail promis : lisser, unifier le teint, exfolier. Les acides exfoliants décollent les cellules mortes de la surface. On parle d'AHA pour l'acide glycolique ou l'acide mandélique, et de BHA pour l'acide salicylique. Les rétinoïdes sont la famille de la vitamine A, dont le rétinol et le rétinal. Les deux familles irritent quand on les cumule.",
     },
     {
       type: "liste",
@@ -119,7 +119,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "D'autres actifs sont plus doux. La [niacinamide](/i/niacinamide) se marie avec presque tout, comme on l'explique dans [notre article sur la niacinamide](/blog/niacinamide). Le bakuchiol pique moins que le rétinol, mais ses preuves sont minces : [on a lu l'étude](/blog/bakuchiol).",
+        "D'autres actifs sont plus doux. La niacinamide se marie avec presque tout, comme on l'explique dans [notre article sur la niacinamide](/blog/niacinamide). Le bakuchiol pique moins que le rétinol, mais ses preuves sont minces : [on a lu l'étude](/blog/bakuchiol).",
     },
     {
       type: "encadre",
@@ -139,9 +139,9 @@ const article: Article = {
       entetes: ["Ce que contient le sérum", "Part des sérums"],
       lignes: [
         ["Du parfum.", "59,9 %."],
-        ["De la vitamine C ([acide ascorbique](/i/ascorbic-acid) ou un dérivé).", "24,2 %."],
+        ["De la vitamine C (acide ascorbique ou un dérivé).", "24,2 %."],
         ["De la niacinamide.", "22,6 %."],
-        ["Un acide exfoliant (glycolique, mandélique, salicylique, [gluconolactone](/i/gluconolactone)).", "13,3 %."],
+        ["Un acide exfoliant (glycolique, mandélique, salicylique, gluconolactone).", "13,3 %."],
         ["Un rétinoïde (rétinol, rétinal, palmitate de rétinyle).", "7,7 %."],
         ["Au moins deux de ces quatre familles d'actifs.", "15,4 %."],
       ],
@@ -150,7 +150,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Autrement dit, ==près d'un sérum sur six mélange déjà deux familles d'actifs==. Deux sérums « simples » l'un sur l'autre peuvent donc faire quatre actifs. Et six sur dix contiennent du [parfum](/i/parfum), une source fréquente de réactions sur les peaux sensibles. Pour lire une liste en deux minutes, suis [notre méthode d'analyse de composition](/blog/analyse-composition-cosmetique).",
+        "Autrement dit, ==près d'un sérum sur six mélange déjà deux familles d'actifs==. Deux sérums « simples » l'un sur l'autre peuvent donc faire quatre actifs. Et six sur dix contiennent du parfum, une source fréquente de réactions sur les peaux sensibles. Pour lire une liste en deux minutes, suis [notre méthode d'analyse de composition](/blog/analyse-composition-cosmetique).",
     },
     {
       type: "cta",

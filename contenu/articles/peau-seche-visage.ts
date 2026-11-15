@@ -96,9 +96,9 @@ const article: Article = {
       type: "tableau",
       entetes: ["Famille", "Ce qu'elle fait", "Noms à chercher dans la liste"],
       lignes: [
-        ["Humectants.", "Ils attirent l'eau dans la peau, comme une éponge.", "[Glycerin](/i/glycerin), [Urea](/i/urea), [Sodium Hyaluronate](/i/sodium-hyaluronate)."],
-        ["Émollients.", "Ils remplissent les fissures entre les cellules et adoucissent (les céramides sont les gras qui collent ces cellules entre elles).", "[Squalane](/i/squalane), [Butyrospermum Parkii Butter](/i/butyrospermum-parkii-butter) (karité), [Ceramide NP](/i/ceramide-np)."],
-        ["Occlusifs.", "Ils posent un film qui empêche l'eau de s'évaporer.", "[Petrolatum](/i/petrolatum) (vaseline), [Paraffinum Liquidum](/i/paraffinum-liquidum), [Lanolin](/i/lanolin)."],
+        ["Humectants.", "Ils attirent l'eau dans la peau, comme une éponge.", "Glycerin, Urea, Sodium Hyaluronate."],
+        ["Émollients.", "Ils remplissent les fissures entre les cellules et adoucissent (les céramides sont les gras qui collent ces cellules entre elles).", "Squalane, Butyrospermum Parkii Butter (karité), Ceramide NP."],
+        ["Occlusifs.", "Ils posent un film qui empêche l'eau de s'évaporer.", "Petrolatum (vaseline), Paraffinum Liquidum, Lanolin."],
       ],
     },
     {
@@ -154,7 +154,7 @@ const article: Article = {
       entetes: ["Ce qu'on a compté", "Résultat"],
       lignes: [
         ["Produits qui contiennent de la glycérine.", "1 264, soit 84,9 %."],
-        ["Produits qui contiennent du [parfum](/i/parfum).", "1 132, soit 76,0 %."],
+        ["Produits qui contiennent du parfum.", "1 132, soit 76,0 %."],
         ["Produits avec du karité.", "582, soit 39,1 %."],
         ["Produits avec de la vaseline ou une huile minérale.", "309, soit 20,8 %."],
         ["Produits avec de l'urée.", "179, soit 12,0 %."],
@@ -194,7 +194,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Les deux pots de vaseline se ressemblent, mais pas leurs listes. Le second ajoute du [BHT](/i/bht), un antioxydant qui sert à conserver le produit, classé rouge dans Cosme Check : c'est lui qui fait chuter la note. C'est tout l'intérêt de [lire la composition](/blog/analyse-composition-cosmetique) plutôt que la marque. Et si tu as déjà une [crème Nivea](/blog/creme-nivea-composition) dans un placard, elle est riche en huile minérale : moins occlusive que la vaseline, mais elle peut dépanner.",
+        "Les deux pots de vaseline se ressemblent, mais pas leurs listes. Le second ajoute du BHT, un antioxydant qui sert à conserver le produit, classé rouge dans Cosme Check : c'est lui qui fait chuter la note. C'est tout l'intérêt de [lire la composition](/blog/analyse-composition-cosmetique) plutôt que la marque. Et si tu as déjà une [crème Nivea](/blog/creme-nivea-composition) dans un placard, elle est riche en huile minérale : moins occlusive que la vaseline, mais elle peut dépanner.",
     },
 
     { type: "h2", texte: "Quelle routine pour une peau sèche en hiver ?" },

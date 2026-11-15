@@ -70,7 +70,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Ensuite viennent souvent la [glycérine](/i/glycerin), qui retient l'eau dans la peau, des huiles ou des beurres, et des silicones comme la [dimethicone](/i/dimethicone), qui rendent la texture glissante. Regarde ce trio de tête : il te dit si la crème est plutôt légère ou riche, bien avant le mot « hydratant » du devant.",
+        "Ensuite viennent souvent la glycérine, qui retient l'eau dans la peau, des huiles ou des beurres, et des silicones comme la dimethicone, qui rendent la texture glissante. Regarde ce trio de tête : il te dit si la crème est plutôt légère ou riche, bien avant le mot « hydratant » du devant.",
     },
 
     { type: "h2", texte: "Étape 3 : comment trouver la « ligne du 1 % » ?" },
@@ -82,7 +82,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le plus courant est le [phenoxyethanol](/i/phenoxyethanol). C'est un conservateur, un ingrédient qui empêche les microbes de pousser dans le pot. La loi le limite à 1 % (règlement 1223/2009, annexe V), et on le trouve dans ==un produit sur trois== de notre base. Tout ce qui est écrit après lui est dosé à 1 % au plus.",
+        "Le plus courant est le phenoxyethanol. C'est un conservateur, un ingrédient qui empêche les microbes de pousser dans le pot. La loi le limite à 1 % (règlement 1223/2009, annexe V), et on le trouve dans ==un produit sur trois== de notre base. Tout ce qui est écrit après lui est dosé à 1 % au plus.",
     },
     {
       type: "encadre",
@@ -96,12 +96,12 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Cherche le mot [Parfum](/i/parfum) ou *Fragrance*. Derrière ce seul mot se cache un mélange qui peut compter des dizaines de molécules, dont la recette reste secrète. Dans notre base, ==deux produits sur trois en contiennent== (318 072 sur 478 190).",
+        "Cherche le mot Parfum ou *Fragrance*. Derrière ce seul mot se cache un mélange qui peut compter des dizaines de molécules, dont la recette reste secrète. Dans notre base, ==deux produits sur trois en contiennent== (318 072 sur 478 190).",
     },
     {
       type: "p",
       texte:
-        "Certaines molécules du parfum doivent pourtant être écrites en clair, parce qu'elles peuvent provoquer une allergie : ce sont les allergènes à déclarer. Les plus fréquents sont [Limonene](/i/limonene), présent dans près d'un produit sur trois chez nous, [Linalool](/i/linalool), [Citral](/i/citral) et [Geraniol](/i/geraniol). Ils sont nommés au-delà de 0,001 % dans un soin qu'on garde sur la peau, 0,01 % dans un produit qu'on rince.",
+        "Certaines molécules du parfum doivent pourtant être écrites en clair, parce qu'elles peuvent provoquer une allergie : ce sont les allergènes à déclarer. Les plus fréquents sont Limonene, présent dans près d'un produit sur trois chez nous, Linalool, Citral et Geraniol. Ils sont nommés au-delà de 0,001 % dans un soin qu'on garde sur la peau, 0,01 % dans un produit qu'on rince.",
     },
     {
       type: "p",
@@ -121,7 +121,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Prends la promesse du devant et cherche-la dans la liste. Une crème « à l'aloe vera » dont l'[Aloe Barbadensis Leaf Juice](/i/aloe-barbadensis-leaf-juice) arrive après le phenoxyethanol en contient très peu. Un soin « à la vitamine B3 » doit afficher *Niacinamide*, et de préférence avant la ligne du 1 %.",
+        "Prends la promesse du devant et cherche-la dans la liste. Une crème « à l'aloe vera » dont l'Aloe Barbadensis Leaf Juice arrive après le phenoxyethanol en contient très peu. Un soin « à la vitamine B3 » doit afficher *Niacinamide*, et de préférence avant la ligne du 1 %.",
     },
     {
       type: "p",
@@ -132,7 +132,7 @@ const article: Article = {
       type: "tableau",
       entetes: ["Tu lis", "Ça veut dire"],
       lignes: [
-        ["[Aqua](/i/aqua)", "De l'eau, la base de la plupart des crèmes."],
+        ["Aqua", "De l'eau, la base de la plupart des crèmes."],
         ["Parfum, Fragrance", "Un mélange de parfum, recette secrète."],
         ["Limonene, Linalool", "Des molécules du parfum qui peuvent être allergisantes."],
         ["Phenoxyethanol", "Un conservateur, 1 % au plus : ce qui suit est encore moins dosé."],

@@ -56,7 +56,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Sur la liste INCI (la liste officielle des ingrédients, écrite du plus dosé au moins dosé), le tensioactif porte des noms comme [Poloxamer 184](/i/poloxamer-184), [PEG-6 Caprylic/Capric Glycerides](/i/peg-6-caprylic-capric-glycerides) ou [Coco-Glucoside](/i/coco-glucoside). On a lu les 3 456 eaux micellaires de notre base, le 06/11/2026.",
+        "Sur la liste INCI (la liste officielle des ingrédients, écrite du plus dosé au moins dosé), le tensioactif porte des noms comme Poloxamer 184, PEG-6 Caprylic/Capric Glycerides ou Coco-Glucoside. On a lu les 3 456 eaux micellaires de notre base, le 06/11/2026.",
     },
     {
       type: "tableau",
@@ -80,7 +80,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le point qui compte, c'est l'**ammonium quaternaire**. C'est un tensioactif chargé, qui sert aussi de conservateur. Dans une eau micellaire sur quatre, on trouve du [cetrimonium bromide](/i/cetrimonium-bromide) ou du [myrtrimonium bromide](/i/myrtrimonium-bromide). L'Europe le limite à 0,1 % comme conservateur, car ces ingrédients peuvent irriter la peau, surtout quand on en mélange plusieurs ([règlement (UE) 2014/866](https://eur-lex.europa.eu/eli/reg/2014/866/oj)).",
+        "Le point qui compte, c'est l'**ammonium quaternaire**. C'est un tensioactif chargé, qui sert aussi de conservateur. Dans une eau micellaire sur quatre, on trouve du cetrimonium bromide ou du myrtrimonium bromide. L'Europe le limite à 0,1 % comme conservateur, car ces ingrédients peuvent irriter la peau, surtout quand on en mélange plusieurs ([règlement (UE) 2014/866](https://eur-lex.europa.eu/eli/reg/2014/866/oj)).",
     },
     {
       type: "encadre",
@@ -114,7 +114,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Les deux Avène le montrent bien : 16,32 pour l'eau démaquillante, 6,95 pour la lotion. La première lave au Coco-Glucoside, la seconde au cetrimonium bromide. Et l'eau micellaire biphasée de Garnier, celle qui se secoue, contient du [cyclopentasiloxane](/i/cyclopentasiloxane), le D5. L'Europe limitera ce silicone à 0,1 % dans les soins sans rinçage à partir de juin 2027 ([règlement (UE) 2024/1328](https://eur-lex.europa.eu/eli/reg/2024/1328/oj)). Pour lire une liste toi-même, suis notre [méthode en 5 étapes](/blog/analyse-composition-cosmetique).",
+        "Les deux Avène le montrent bien : 16,32 pour l'eau démaquillante, 6,95 pour la lotion. La première lave au Coco-Glucoside, la seconde au cetrimonium bromide. Et l'eau micellaire biphasée de Garnier, celle qui se secoue, contient du cyclopentasiloxane, le D5. L'Europe limitera ce silicone à 0,1 % dans les soins sans rinçage à partir de juin 2027 ([règlement (UE) 2024/1328](https://eur-lex.europa.eu/eli/reg/2024/1328/oj)). Pour lire une liste toi-même, suis notre [méthode en 5 étapes](/blog/analyse-composition-cosmetique).",
     },
     {
       type: "cta",
@@ -141,7 +141,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Une bonne huile démaquillante contient un **émulsionnant**, un ingrédient qui la change en lait au contact de l'eau. C'est lui qui permet de la rincer sans film gras. Dans notre base, 85 % des 897 huiles démaquillantes en contiennent un, souvent le [Polyglyceryl-4 Oleate](/i/polyglyceryl-4-oleate) ou le [Sorbeth-30 Tetraoleate](/i/sorbeth-30-tetraoleate). Les autres sont de simples huiles, qui demandent un deuxième nettoyant.",
+        "Une bonne huile démaquillante contient un **émulsionnant**, un ingrédient qui la change en lait au contact de l'eau. C'est lui qui permet de la rincer sans film gras. Dans notre base, 85 % des 897 huiles démaquillantes en contiennent un, souvent le Polyglyceryl-4 Oleate ou le Sorbeth-30 Tetraoleate. Les autres sont de simples huiles, qui demandent un deuxième nettoyant.",
     },
     {
       type: "tableau",

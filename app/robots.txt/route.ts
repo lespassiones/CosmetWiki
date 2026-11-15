@@ -5,12 +5,11 @@ export const dynamic = "force-static";
 /**
  * robots.txt - stratégie SEO + GEO (2026-07).
  *
- * Ce qui a changé par rapport à l'ancienne version :
- *   - `/i/` (15 700 fiches ingrédient) est OUVERT. C'est le cœur du capital
- *     SEO du site : toutes les requêtes Google qui convertissent sont des
- *     noms INCI. Le coût Supabase est neutralisé par `unstable_cache`
- *     (30 j / fiche, cf. app/i/[slug]/page.tsx) : un crawl complet coûte
- *     ~1 RPC par fiche par mois.
+ * Le site est une vitrine plus un blog, entièrement statique (15 nov 2026) :
+ * les 15 700 fiches ingrédient /i/[slug], l'annuaire /ingredients et la
+ * recherche ont été retirés et redirigent vers l'accueil. Ouvrir le crawl ne
+ * coûte donc plus rien en calcul : toutes les pages sortent du CDN.
+ *
  *   - Plus de `Crawl-delay` global : Google l'ignore mais Bing le respecte,
  *     et à 5 s il plafonnait le crawl à ~17k pages/jour. Les bots légitimes
  *     gèrent leur propre cadence.
@@ -22,8 +21,8 @@ export const dynamic = "force-static";
  *     sont bannis : ils consommaient du crawl sans jamais envoyer un visiteur.
  *   - Les anciennes routes de la web app connectée (historique, routine,
  *     profil, comparaison, promesses, conseiller, offre, produits, auth) sont
- *     exclues. Elles n'existent plus : la middleware les redirige en 308 vers
- *     la page d'accueil. On les garde listées ici pour que les crawlers
+ *     exclues. Elles n'existent plus : elles sont redirigées en 308 vers la
+ *     page d'accueil (next.config.ts). On les garde listées ici pour que les crawlers
  *     cessent de les demander au lieu de suivre 40 redirections par passage.
  */
 
@@ -34,6 +33,8 @@ const PRIVATE_PATHS = [
   "/auth",
   "/compare",
   "/history",
+  "/i/",
+  "/ingredients",
   "/maintenance",
   "/offre",
   "/onboarding",
@@ -41,6 +42,7 @@ const PRIVATE_PATHS = [
   "/profile",
   "/promesses",
   "/routine",
+  "/search",
 ];
 
 // Bots des moteurs de réponse IA + collecte pour entraînement LLM.
@@ -83,8 +85,7 @@ export function GET() {
   ).join("\n\n");
 
   const body = `# Cosme Check - robots.txt
-# Tout le contenu public est crawlable : pages editoriales, blog, FAQ,
-# et les 15 700 fiches ingredient /i/[slug] (coeur du site).
+# Tout le contenu public est crawlable : pages editoriales, blog, FAQ.
 # Les moteurs IA sont explicitement les bienvenus (GEO).
 
 User-agent: *

@@ -51,7 +51,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "L'urée, c'est une toute petite molécule que ta peau fabrique elle-même. Elle fait partie des substances qui gardent naturellement l'eau dans la couche de surface de la peau. Celle des crèmes est fabriquée en usine, elle ne vient pas de l'urine. Sur la liste INCI (la liste officielle des ingrédients, du plus dosé au moins dosé), elle s'appelle **[Urea](/i/urea)**.",
+        "L'urée, c'est une toute petite molécule que ta peau fabrique elle-même. Elle fait partie des substances qui gardent naturellement l'eau dans la couche de surface de la peau. Celle des crèmes est fabriquée en usine, elle ne vient pas de l'urine. Sur la liste INCI (la liste officielle des ingrédients, du plus dosé au moins dosé), elle s'appelle **Urea**.",
     },
     {
       type: "p",
@@ -95,7 +95,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Parce que l'urée est rarement le problème. La note dépend du reste de la liste, et d'abord du [parfum](/i/parfum) : il est présent dans ==3 produits à l'urée sur 4== (75,6 %). Huit soins connus, relevés dans notre base le 10/11/2026.",
+        "Parce que l'urée est rarement le problème. La note dépend du reste de la liste, et d'abord du parfum : il est présent dans ==3 produits à l'urée sur 4== (75,6 %). Huit soins connus, relevés dans notre base le 10/11/2026.",
     },
     {
       type: "tableau",
@@ -115,14 +115,14 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "La lotion Eucerin tient sans parfum ni ingrédient pénalisé. Le lait Nivea, rien à voir avec [la boîte bleue et ses 21 ingrédients](/blog/creme-nivea-composition), place l'urée en 7e position, derrière la glycérine. Il ajoute de l'[acide salicylique](/i/salicylic-acid), un exfoliant, c'est-à-dire un ingrédient qui aide les cellules mortes à partir. Le stick Scholl contient deux huiles essentielles, menthe poivrée et lavande. Et le lait Lipikar à 10 %, sans parfum, perd des points sur six autres ingrédients. Pour lire une liste en entier, suis notre [méthode en 5 étapes](/blog/analyse-composition-cosmetique).",
+        "La lotion Eucerin tient sans parfum ni ingrédient pénalisé. Le lait Nivea, rien à voir avec [la boîte bleue et ses 21 ingrédients](/blog/creme-nivea-composition), place l'urée en 7e position, derrière la glycérine. Il ajoute de l'acide salicylique, un exfoliant, c'est-à-dire un ingrédient qui aide les cellules mortes à partir. Le stick Scholl contient deux huiles essentielles, menthe poivrée et lavande. Et le lait Lipikar à 10 %, sans parfum, perd des points sur six autres ingrédients. Pour lire une liste en entier, suis notre [méthode en 5 étapes](/blog/analyse-composition-cosmetique).",
     },
 
     { type: "h2", texte: "Imidazolidinyl urea, diazolidinyl urea : est-ce de l'urée ?" },
     {
       type: "p",
       texte:
-        "Non. [Imidazolidinyl Urea](/i/imidazolidinyl-urea) et [Diazolidinyl Urea](/i/diazolidinyl-urea) sont des **conservateurs**, des ingrédients qui empêchent les microbes de pousser dans le pot. Ils agissent en libérant lentement un peu de [formaldéhyde](/i/formaldehyde). Ce gaz tue les microbes, mais il peut aussi donner des allergies de contact aux personnes déjà sensibles.",
+        "Non. Imidazolidinyl Urea et Diazolidinyl Urea sont des **conservateurs**, des ingrédients qui empêchent les microbes de pousser dans le pot. Ils agissent en libérant lentement un peu de formaldéhyde. Ce gaz tue les microbes, mais il peut aussi donner des allergies de contact aux personnes déjà sensibles.",
     },
     {
       type: "p",
@@ -140,7 +140,7 @@ const article: Article = {
       items: [
         "Ta peau a déjà réagi à un conservateur : cherche « Imidazolidinyl Urea », « Diazolidinyl Urea » et la mention « libère du formaldéhyde ».",
         "Hors de l'Union européenne, au Québec par exemple, cette mention n'est pas imposée : seule la liste fait foi.",
-        "[Hydroxyethyl Urea](/i/hydroxyethyl-urea), dans 2 378 produits, est encore autre chose : un hydratant voisin, pas un conservateur.",
+        "Hydroxyethyl Urea, dans 2 378 produits, est encore autre chose : un hydratant voisin, pas un conservateur.",
       ],
     },
     {

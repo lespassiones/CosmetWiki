@@ -51,12 +51,12 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "L'acide salicylique est un **BHA**, un acide exfoliant : il aide les cellules mortes à se détacher de la surface de la peau. Son nom vient du saule, *Salix* en latin, dont l'écorce en contient un cousin. Celui des cosmétiques est fabriqué en usine. Sur la liste INCI (la liste officielle des ingrédients, du plus dosé au moins dosé), il s'écrit **[Salicylic Acid](/i/salicylic-acid)**.",
+        "L'acide salicylique est un **BHA**, un acide exfoliant : il aide les cellules mortes à se détacher de la surface de la peau. Son nom vient du saule, *Salix* en latin, dont l'écorce en contient un cousin. Celui des cosmétiques est fabriqué en usine. Sur la liste INCI (la liste officielle des ingrédients, du plus dosé au moins dosé), il s'écrit **Salicylic Acid**.",
     },
     {
       type: "p",
       texte:
-        "Son talent tient en un mot : il se dissout dans le gras. Il peut donc entrer dans le pore, rempli de sébum (le gras naturel de la peau), et défaire le bouchon. Les AHA comme l'[acide glycolique](/i/glycolic-acid), eux, restent surtout à la surface ([Arif, *Clinical, Cosmetic and Investigational Dermatology*, 2015](https://pmc.ncbi.nlm.nih.gov/articles/PMC4554394/)). D'où sa réputation contre les points noirs, dont on explique l'origine dans [notre article sur les comédons](/blog/comedogene).",
+        "Son talent tient en un mot : il se dissout dans le gras. Il peut donc entrer dans le pore, rempli de sébum (le gras naturel de la peau), et défaire le bouchon. Les AHA comme l'acide glycolique, eux, restent surtout à la surface ([Arif, *Clinical, Cosmetic and Investigational Dermatology*, 2015](https://pmc.ncbi.nlm.nih.gov/articles/PMC4554394/)). D'où sa réputation contre les points noirs, dont on explique l'origine dans [notre article sur les comédons](/blog/comedogene).",
     },
     {
       type: "fiche",
@@ -97,7 +97,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Il a aussi des cousins au nom voisin. [Sodium Salicylate](/i/sodium-salicylate) (5 507 produits) sert surtout de conservateur. [Capryloyl Salicylic Acid](/i/capryloyl-salicylic-acid) (1 715) est un dérivé plus doux, qu'on appelle LHA. Et [Betaine Salicylate](/i/betaine-salicylate) en compte 314.",
+        "Il a aussi des cousins au nom voisin. Sodium Salicylate (5 507 produits) sert surtout de conservateur. Capryloyl Salicylic Acid (1 715) est un dérivé plus doux, qu'on appelle LHA. Et Betaine Salicylate en compte 314.",
     },
 
     { type: "h2", texte: "Quelle dose d'acide salicylique est autorisée ?" },

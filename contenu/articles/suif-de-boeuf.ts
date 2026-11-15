@@ -61,7 +61,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le suif, c'est la graisse de bœuf fondue puis filtrée, souvent prise autour des reins. Sur une étiquette, son nom INCI (la liste officielle des ingrédients, du plus dosé au moins dosé) est [Tallow](/i/tallow) ou [Adeps Bovis](/i/adeps-bovis).",
+        "Le suif, c'est la graisse de bœuf fondue puis filtrée, souvent prise autour des reins. Sur une étiquette, son nom INCI (la liste officielle des ingrédients, du plus dosé au moins dosé) est Tallow ou Adeps Bovis.",
     },
     {
       type: "p",
@@ -99,7 +99,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Oui, et depuis longtemps. Dans notre base, ==777 fiches== listent une forme de suif. La grande majorité sont des savons : 602 produits contiennent du [Sodium Tallowate](/i/sodium-tallowate), et 492 le placent en premier ingrédient. Ça fait ++un savon solide sur quinze++.",
+        "Oui, et depuis longtemps. Dans notre base, ==777 fiches== listent une forme de suif. La grande majorité sont des savons : 602 produits contiennent du Sodium Tallowate, et 492 le placent en premier ingrédient. Ça fait ++un savon solide sur quinze++.",
     },
     {
       type: "p",

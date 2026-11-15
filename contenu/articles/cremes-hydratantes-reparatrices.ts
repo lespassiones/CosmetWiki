@@ -83,12 +83,12 @@ const article: Article = {
       type: "liste",
       style: "coches",
       items: [
-        "**[Glycérine](/i/glycerin)** (*Glycerin*) : l'humectant le plus étudié. Elle aide la peau à garder son eau et sa souplesse ([Fluhr et al., *British Journal of Dermatology*, 2008](https://doi.org/10.1111/j.1365-2133.2008.08643.x)). Souvent dans les cinq premiers ingrédients.",
-        "**[Acide hyaluronique](/i/sodium-hyaluronate)** (*Sodium Hyaluronate*) : il retient l'eau à la surface et donne un effet repulpé tout de suite.",
-        "**[Céramides](/i/ceramide-np)** (*Ceramide NP*, *AP*, *EOP*) : ce sont des graisses du ciment de la peau. Elles comptent surtout pour les peaux sèches et sensibles.",
+        "**Glycérine** (*Glycerin*) : l'humectant le plus étudié. Elle aide la peau à garder son eau et sa souplesse ([Fluhr et al., *British Journal of Dermatology*, 2008](https://doi.org/10.1111/j.1365-2133.2008.08643.x)). Souvent dans les cinq premiers ingrédients.",
+        "**Acide hyaluronique** (*Sodium Hyaluronate*) : il retient l'eau à la surface et donne un effet repulpé tout de suite.",
+        "**Céramides** (*Ceramide NP*, *AP*, *EOP*) : ce sont des graisses du ciment de la peau. Elles comptent surtout pour les peaux sèches et sensibles.",
         "**[Niacinamide](/blog/niacinamide)** : c'est la vitamine B3. Entre 2 et 5 %, elle aide la barrière à se renforcer et le teint à s'unifier.",
-        "**[Panthénol](/i/panthenol)** : la provitamine B5, c'est-à-dire une forme que la peau transforme en vitamine. Il apaise une peau qui tiraille.",
-        "**[Squalane](/i/squalane)** : un corps gras léger, proche du sébum, qui ne laisse pas de film collant.",
+        "**Panthénol** : la provitamine B5, c'est-à-dire une forme que la peau transforme en vitamine. Il apaise une peau qui tiraille.",
+        "**Squalane** : un corps gras léger, proche du sébum, qui ne laisse pas de film collant.",
       ],
     },
     {
@@ -117,7 +117,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Céramides, squalane, [beurre de karité](/i/butyrospermum-parkii-butter) et glycérine. C'est là qu'une crème réparatrice prend tout son sens, surtout en hiver, de l'air sec de Montréal au chauffage des appartements. Une crème simple comme [la boîte bleue de Nivea](/blog/creme-nivea-composition) peut suffire sur les zones très sèches.",
+        "Céramides, squalane, beurre de karité et glycérine. C'est là qu'une crème réparatrice prend tout son sens, surtout en hiver, de l'air sec de Montréal au chauffage des appartements. Une crème simple comme [la boîte bleue de Nivea](/blog/creme-nivea-composition) peut suffire sur les zones très sèches.",
     },
     { type: "h3", texte: "Peau sensible : une liste courte" },
     {

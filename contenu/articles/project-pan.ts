@@ -67,12 +67,12 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "À cause de l'eau. Les microbes ont besoin d'eau pour se multiplier. Un produit qui en contient a donc besoin de **conservateurs**, des ingrédients qui freinent les bactéries et les moisissures, comme le [phénoxyéthanol](/i/phenoxyethanol) ([Halla et al., *Molecules*, 2018](https://doi.org/10.3390/molecules23071571)). Une poudre sans eau leur offre peu de prise.",
+        "À cause de l'eau. Les microbes ont besoin d'eau pour se multiplier. Un produit qui en contient a donc besoin de **conservateurs**, des ingrédients qui freinent les bactéries et les moisissures, comme le phénoxyéthanol ([Halla et al., *Molecules*, 2018](https://doi.org/10.3390/molecules23071571)). Une poudre sans eau leur offre peu de prise.",
     },
     {
       type: "p",
       texte:
-        "Pour le savoir, pas besoin de laboratoire : lis la liste INCI, la liste officielle des ingrédients au dos de l'emballage. L'eau y porte le nom d'[Aqua](/i/aqua) ou de Water, souvent en premier. On a regardé combien de produits de notre base n'en contiennent pas du tout.",
+        "Pour le savoir, pas besoin de laboratoire : lis la liste INCI, la liste officielle des ingrédients au dos de l'emballage. L'eau y porte le nom d'Aqua ou de Water, souvent en premier. On a regardé combien de produits de notre base n'en contiennent pas du tout.",
     },
     {
       type: "tableau",
@@ -93,7 +93,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Sans eau ne veut pas dire éternel. Les huiles et les cires d'un rouge à lèvres finissent par rancir, c'est-à-dire s'oxyder à l'air et sentir fort. Et un produit qu'on pose sur la bouche ou près des yeux reçoit des microbes à chaque passage. Mais une palette de fards à base de [mica](/i/mica) et de [talc](/i/talc) tient bien plus longtemps qu'une crème.",
+        "Sans eau ne veut pas dire éternel. Les huiles et les cires d'un rouge à lèvres finissent par rancir, c'est-à-dire s'oxyder à l'air et sentir fort. Et un produit qu'on pose sur la bouche ou près des yeux reçoit des microbes à chaque passage. Mais une palette de fards à base de mica et de talc tient bien plus longtemps qu'une crème.",
     },
 
     { type: "h2", texte: "Quels produits ne faut-il surtout pas finir ?" },

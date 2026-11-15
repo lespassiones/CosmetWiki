@@ -95,12 +95,12 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Parce que presque chaque case sent bon. Gel douche, lait pour le corps, baume, mini parfum : dans notre base, ==deux produits sur trois contiennent du [Parfum](/i/parfum)== (relevé du 21/10/2026). Ouvrir un produit parfumé neuf chaque matin, c'est en mettre beaucoup plus que d'habitude sur la peau.",
+        "Parce que presque chaque case sent bon. Gel douche, lait pour le corps, baume, mini parfum : dans notre base, ==deux produits sur trois contiennent du Parfum== (relevé du 21/10/2026). Ouvrir un produit parfumé neuf chaque matin, c'est en mettre beaucoup plus que d'habitude sur la peau.",
     },
     {
       type: "p",
       texte:
-        "Or pour l'allergie, c'est la dose totale qui compte. Le [règlement (UE) 2023/1545](https://eur-lex.europa.eu/eli/reg/2023/1545/oj) le rappelle, en s'appuyant sur l'avis du SCCS de 2012 (le comité scientifique européen sur la sécurité des consommateurs). Les substances parfumantes viennent de nombreux produits, et c'est la quantité cumulée sur la peau qui pèse. Un allergène, c'est une molécule qui peut provoquer une allergie chez certaines personnes : [Limonene](/i/limonene), [Linalool](/i/linalool), [Coumarin](/i/coumarin) ou [Benzyl Alcohol](/i/benzyl-alcohol) en font partie.",
+        "Or pour l'allergie, c'est la dose totale qui compte. Le [règlement (UE) 2023/1545](https://eur-lex.europa.eu/eli/reg/2023/1545/oj) le rappelle, en s'appuyant sur l'avis du SCCS de 2012 (le comité scientifique européen sur la sécurité des consommateurs). Les substances parfumantes viennent de nombreux produits, et c'est la quantité cumulée sur la peau qui pèse. Un allergène, c'est une molécule qui peut provoquer une allergie chez certaines personnes : Limonene, Linalool, Coumarin ou Benzyl Alcohol en font partie.",
     },
     {
       type: "liste",
@@ -116,7 +116,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Non : un seul nouvel actif à la fois. Un actif, c'est l'ingrédient qui fait l'effet promis. Les calendriers de soin glissent souvent des sérums puissants dans les cases. Le [rétinol](/i/retinol) est un dérivé de la vitamine A qui peut tirailler au début. Les acides de fruits (AHA), comme l'[acide glycolique](/i/glycolic-acid) ou l'[acide lactique](/i/lactic-acid), font peler la couche de surface. Et il y a souvent de la vitamine C ([Ascorbic Acid](/i/ascorbic-acid)).",
+        "Non : un seul nouvel actif à la fois. Un actif, c'est l'ingrédient qui fait l'effet promis. Les calendriers de soin glissent souvent des sérums puissants dans les cases. Le rétinol est un dérivé de la vitamine A qui peut tirailler au début. Les acides de fruits (AHA), comme l'acide glycolique ou l'acide lactique, font peler la couche de surface. Et il y a souvent de la vitamine C (Ascorbic Acid).",
     },
     {
       type: "p",
@@ -147,7 +147,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le calendrier de maquillage est le plus recherché de tous. Ses cases demandent trois coups d'œil. D'abord, les produits pour les yeux : mascara et crayon se gardent peu une fois ouverts, et ne se prêtent pas. Ensuite, les couleurs : les noms en « CI » suivis de chiffres sont des pigments, comme le [mica](/i/mica) qui fait briller. Notre méthode pour [analyser une composition](/blog/analyse-composition-cosmetique) les décode.",
+        "Le calendrier de maquillage est le plus recherché de tous. Ses cases demandent trois coups d'œil. D'abord, les produits pour les yeux : mascara et crayon se gardent peu une fois ouverts, et ne se prêtent pas. Ensuite, les couleurs : les noms en « CI » suivis de chiffres sont des pigments, comme le mica qui fait briller. Notre méthode pour [analyser une composition](/blog/analyse-composition-cosmetique) les décode.",
     },
     {
       type: "p",

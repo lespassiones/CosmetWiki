@@ -69,7 +69,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Sa fiche dans Cosme Check est verte : [Sodium DNA](/i/sodium-dna). Rien d'inquiétant, donc. La vraie question, c'est ce qu'il fait une fois posé sur ta joue.",
+        "Sa fiche dans Cosme Check est verte : Sodium DNA. Rien d'inquiétant, donc. La vraie question, c'est ce qu'il fait une fois posé sur ta joue.",
     },
 
     { type: "h2", texte: "Le PDRN en crème fait-il la même chose qu'en injection ?" },
@@ -147,12 +147,12 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Les deux crèmes stars, celle d'Anua et celle de Medicube, perdent des points sur la même chose : des polymères de synthèse (des plastiques qui épaississent la crème), classés orange. La crème d'Anua a pourtant le PDRN le mieux placé du tableau, en 7e position. La [Glycereth-26](/i/glycereth-26) et le parfum pèsent sur le sérum de Medicube.",
+        "Les deux crèmes stars, celle d'Anua et celle de Medicube, perdent des points sur la même chose : des polymères de synthèse (des plastiques qui épaississent la crème), classés orange. La crème d'Anua a pourtant le PDRN le mieux placé du tableau, en 7e position. La Glycereth-26 et le parfum pèsent sur le sérum de Medicube.",
     },
     {
       type: "p",
       texte:
-        "La crème hyaluronique de Medicube est la plus basse. Elle contient en 5e place du [cyclopentasiloxane](/i/cyclopentasiloxane), un silicone que l'Europe limitera à 0,1 % dans les soins sans rinçage à partir de juin 2027 ([règlement (UE) 2024/1328](https://eur-lex.europa.eu/eli/reg/2024/1328/oj)). Il est autorisé d'ici là. Et la note mesure la formule, pas le plaisir : ++la lotion tonique la mieux notée est aussi la plus simple++.",
+        "La crème hyaluronique de Medicube est la plus basse. Elle contient en 5e place du cyclopentasiloxane, un silicone que l'Europe limitera à 0,1 % dans les soins sans rinçage à partir de juin 2027 ([règlement (UE) 2024/1328](https://eur-lex.europa.eu/eli/reg/2024/1328/oj)). Il est autorisé d'ici là. Et la note mesure la formule, pas le plaisir : ++la lotion tonique la mieux notée est aussi la plus simple++.",
     },
 
     { type: "h2", texte: "Alors, ça vaut le coup ?" },
@@ -161,7 +161,7 @@ const article: Article = {
       style: "coches",
       items: [
         "Achète un produit PDRN pour sa texture et son hydratation, pas pour « régénérer » ta peau.",
-        "Regarde les cinq premiers ingrédients : c'est eux qui font le travail. Cherche [glycérine](/i/glycerin), [niacinamide](/i/niacinamide) ou [hyaluronate de sodium](/i/sodium-hyaluronate).",
+        "Regarde les cinq premiers ingrédients : c'est eux qui font le travail. Cherche glycérine, niacinamide ou hyaluronate de sodium.",
         "Peau sensible : choisis une formule sans parfum. Un produit PDRN sur deux en contient.",
         "Garde ta routine simple : un nettoyant, une crème, une crème solaire. Le [bon ordre est ici](/blog/routine-skincare).",
       ],
@@ -170,7 +170,7 @@ const article: Article = {
       type: "liste",
       style: "alertes",
       items: [
-        "Allergie au poisson : demande d'abord à ton pharmacien. Certains produits ajoutent aussi des œufs de saumon ([Salmon Egg Extract](/i/salmon-egg-extract)) ou de la laitance ([Milt Extract](/i/milt-extract)).",
+        "Allergie au poisson : demande d'abord à ton pharmacien. Certains produits ajoutent aussi des œufs de saumon (Salmon Egg Extract) ou de la laitance (Milt Extract).",
         "Méfie-toi des promesses d'« effet injection » : une crème ne fait pas ce que fait une aiguille.",
         "Rougeurs ou boutons après quelques jours : arrête, et lis [ce que veut dire « comédogène »](/blog/comedogene).",
       ],

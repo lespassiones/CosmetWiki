@@ -77,8 +77,8 @@ const article: Article = {
       type: "liste",
       style: "coches",
       items: [
-        "**Les actifs pertinents pour ton objectif** (par exemple l'[acide salicylique](/i/salicylic-acid) si tu cibles les imperfections, l'[acide hyaluronique](/i/sodium-hyaluronate) si tu cibles l'hydratation).",
-        "**Les irritants pour TA peau** (le [parfum](/i/parfum) n'est un problème que s'il te fait réagir). Méfie-toi des étiquettes : dans notre base, 62,7 % des produits « peau sensible » contiennent du parfum (relevé du 07/11/2026).",
+        "**Les actifs pertinents pour ton objectif** (par exemple l'acide salicylique si tu cibles les imperfections, l'acide hyaluronique si tu cibles l'hydratation).",
+        "**Les irritants pour TA peau** (le parfum n'est un problème que s'il te fait réagir). Méfie-toi des étiquettes : dans notre base, 62,7 % des produits « peau sensible » contiennent du parfum (relevé du 07/11/2026).",
         "**La cohérence promesse / formule** : le produit tient-il ce que le marketing annonce, ou l'actif vedette est-il en fin de liste, à dose symbolique ? Exemple avec la [niacinamide](/blog/niacinamide), souvent écrite après la « ligne du 1 % ».",
       ],
     },

@@ -51,12 +51,12 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "L'acide glycolique est un **AHA**, un acide de fruit. Les AHA (acides alpha-hydroxylés) relâchent la « colle » qui tient les cellules mortes entre elles, à la surface de la peau. Elles partent plus vite, et la peau d'en dessous renvoie mieux la lumière. On le tire à l'origine de la canne à sucre, mais celui des cosmétiques est presque toujours fabriqué en usine. Sur la liste INCI (la liste officielle des ingrédients, du plus dosé au moins dosé), il s'écrit **[Glycolic Acid](/i/glycolic-acid)**.",
+        "L'acide glycolique est un **AHA**, un acide de fruit. Les AHA (acides alpha-hydroxylés) relâchent la « colle » qui tient les cellules mortes entre elles, à la surface de la peau. Elles partent plus vite, et la peau d'en dessous renvoie mieux la lumière. On le tire à l'origine de la canne à sucre, mais celui des cosmétiques est presque toujours fabriqué en usine. Sur la liste INCI (la liste officielle des ingrédients, du plus dosé au moins dosé), il s'écrit **Glycolic Acid**.",
     },
     {
       type: "p",
       texte:
-        "C'est le plus petit des AHA ([Kornhauser et al., *Clinical, Cosmetic and Investigational Dermatology*, 2010](https://pmc.ncbi.nlm.nih.gov/articles/PMC3047947/)). Il entre donc plus facilement dans la surface de la peau que l'[acide lactique](/i/lactic-acid), son cousin plus doux. Il ne faut pas le confondre avec l'[acide salicylique](/blog/acide-salicylique), un BHA : celui-là se dissout dans le gras et entre dans les pores, alors que l'acide glycolique travaille surtout à la surface.",
+        "C'est le plus petit des AHA ([Kornhauser et al., *Clinical, Cosmetic and Investigational Dermatology*, 2010](https://pmc.ncbi.nlm.nih.gov/articles/PMC3047947/)). Il entre donc plus facilement dans la surface de la peau que l'acide lactique, son cousin plus doux. Il ne faut pas le confondre avec l'[acide salicylique](/blog/acide-salicylique), un BHA : celui-là se dissout dans le gras et entre dans les pores, alors que l'acide glycolique travaille surtout à la surface.",
     },
     {
       type: "fiche",
@@ -97,14 +97,14 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Attention aux noms voisins. [Thioglycolic Acid](/i/thioglycolic-acid) (138 produits) n'a rien d'un exfoliant : c'est l'actif des crèmes dépilatoires et des permanentes, encadré à part par la loi. Et « Lactic Acid/Glycolic Acid Copolymer » (249 produits) est un plastique fait à partir de ces deux acides, qui ne les libère pas sur ta peau.",
+        "Attention aux noms voisins. Thioglycolic Acid (138 produits) n'a rien d'un exfoliant : c'est l'actif des crèmes dépilatoires et des permanentes, encadré à part par la loi. Et « Lactic Acid/Glycolic Acid Copolymer » (249 produits) est un plastique fait à partir de ces deux acides, qui ne les libère pas sur ta peau.",
     },
 
     { type: "h2", texte: "Pourquoi le pourcentage ne suffit-il pas ?" },
     {
       type: "p",
       texte:
-        "Parce que l'acide glycolique travaille selon l'acidité du produit, son **pH**. Le pH mesure l'acidité, de 0 (très acide) à 14 : la peau est autour de 5. Plus le pH est bas, plus l'acide est actif, et plus il pique. Les fabricants ajoutent donc presque toujours une base pour le remonter, comme la [soude](/i/sodium-hydroxide) (Sodium Hydroxide). On en trouve une dans 65 % de nos listes à l'acide glycolique.",
+        "Parce que l'acide glycolique travaille selon l'acidité du produit, son **pH**. Le pH mesure l'acidité, de 0 (très acide) à 14 : la peau est autour de 5. Plus le pH est bas, plus l'acide est actif, et plus il pique. Les fabricants ajoutent donc presque toujours une base pour le remonter, comme la soude (Sodium Hydroxide). On en trouve une dans 65 % de nos listes à l'acide glycolique.",
     },
     {
       type: "p",
@@ -158,7 +158,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "La célèbre lotion de The Ordinary place bien l'acide en 2e position, mais aligne 42 ingrédients. Deux sont classés orange dans l'app : un émulsifiant, le Polysorbate 20, et la [triéthanolamine](/i/triethanolamine), qui sert à régler le pH. Le shampoing Glycolic Gloss, lui, perd ses points sur ses tensioactifs et ses émulsifiants, pas sur l'acide. Pour lire une liste en entier, suis notre [méthode en 5 étapes](/blog/analyse-composition-cosmetique).",
+        "La célèbre lotion de The Ordinary place bien l'acide en 2e position, mais aligne 42 ingrédients. Deux sont classés orange dans l'app : un émulsifiant, le Polysorbate 20, et la triéthanolamine, qui sert à régler le pH. Le shampoing Glycolic Gloss, lui, perd ses points sur ses tensioactifs et ses émulsifiants, pas sur l'acide. Pour lire une liste en entier, suis notre [méthode en 5 étapes](/blog/analyse-composition-cosmetique).",
     },
 
     { type: "h2", texte: "Comment utiliser l'acide glycolique sans abîmer ta peau ?" },

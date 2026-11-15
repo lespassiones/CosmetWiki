@@ -59,7 +59,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Un filtre, c'est l'ingrédient qui arrête les UV. L'Europe tient une liste fermée des filtres permis, à l'annexe VI du [règlement (CE) 1223/2009](https://eur-lex.europa.eu/eli/reg/2009/1223/oj). Beaucoup de solaires coréens récents utilisent des filtres de cette liste, comme le [Tinosorb S](/i/bis-ethylhexyloxyphenol-methoxyphenyl-triazine) ou l'[Uvinul A Plus](/i/diethylamino-hydroxybenzoyl-hexyl-benzoate), qui protègent bien des UVA.",
+        "Un filtre, c'est l'ingrédient qui arrête les UV. L'Europe tient une liste fermée des filtres permis, à l'annexe VI du [règlement (CE) 1223/2009](https://eur-lex.europa.eu/eli/reg/2009/1223/oj). Beaucoup de solaires coréens récents utilisent des filtres de cette liste, comme le Tinosorb S ou l'Uvinul A Plus, qui protègent bien des UVA.",
     },
     {
       type: "p",
@@ -84,12 +84,12 @@ const article: Article = {
       type: "tableau",
       entetes: ["Produit", "Ce qui pèse sur la note", "Note Cosme Check"],
       lignes: [
-        ["Round Lab, Baby Mild Sun Cushion.", "filtres minéraux ([oxyde de zinc](/i/zinc-oxide), [dioxyde de titane](/i/titanium-dioxide)).", "16,32 sur 20."],
+        ["Round Lab, Baby Mild Sun Cushion.", "filtres minéraux (oxyde de zinc, dioxyde de titane).", "16,32 sur 20."],
         ["Beauty of Joseon, Relief Sun Riz + Probiotiques SPF 50+.", "filtres récents, sans parfum.", "8 sur 20."],
         ["Anua, Silky Moisture Sun Cream SPF 50.", "filtres récents, sans parfum.", "7,97 sur 20."],
         ["Round Lab, Birch Juice Moisturizing Sunscreen SPF 50+.", "filtres récents, sans parfum.", "7,9 sur 20."],
-        ["Innisfree, Daily UV Defense Sunscreen SPF 36.", "[homosalate](/i/homosalate) et parfum.", "3,59 sur 20."],
-        ["COSRX, Aloe Soothing Sun Cream SPF 50+.", "[octinoxate](/i/ethylhexyl-methoxycinnamate), parfum et alcool.", "1,16 sur 20."],
+        ["Innisfree, Daily UV Defense Sunscreen SPF 36.", "homosalate et parfum.", "3,59 sur 20."],
+        ["COSRX, Aloe Soothing Sun Cream SPF 50+.", "octinoxate, parfum et alcool.", "1,16 sur 20."],
       ],
       legende: "Listes et notes relevées dans la base Cosme Check le 05/11/2026.",
     },

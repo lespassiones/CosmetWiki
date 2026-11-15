@@ -58,7 +58,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Dans une crème, on parle d'un **humectant** : un ingrédient qui attire l'eau et la retient dans la couche de surface de la peau. Sur la liste INCI (la liste officielle des ingrédients, écrite du plus dosé au moins dosé), il porte presque toujours un autre nom : **[Sodium Hyaluronate](/i/sodium-hyaluronate)**, sa forme en sel, plus stable. On trouve aussi [Hyaluronic Acid](/i/hyaluronic-acid), [Hydrolyzed Hyaluronic Acid](/i/hydrolyzed-hyaluronic-acid) (coupé en petits morceaux) ou [Sodium Hyaluronate Crosspolymer](/i/sodium-hyaluronate-crosspolymer) (des chaînes reliées en filet).",
+        "Dans une crème, on parle d'un **humectant** : un ingrédient qui attire l'eau et la retient dans la couche de surface de la peau. Sur la liste INCI (la liste officielle des ingrédients, écrite du plus dosé au moins dosé), il porte presque toujours un autre nom : **Sodium Hyaluronate**, sa forme en sel, plus stable. On trouve aussi Hyaluronic Acid, Hydrolyzed Hyaluronic Acid (coupé en petits morceaux) ou Sodium Hyaluronate Crosspolymer (des chaînes reliées en filet).",
     },
     {
       type: "fiche",
@@ -121,10 +121,10 @@ const article: Article = {
       type: "tableau",
       entetes: ["Ce qu'on a compté", "Résultat"],
       lignes: [
-        ["Produits avec de la [glycérine](/i/glycerin) placée avant l'acide hyaluronique.", "4 219, soit 73 %."],
+        ["Produits avec de la glycérine placée avant l'acide hyaluronique.", "4 219, soit 73 %."],
         ["Produits où l'acide hyaluronique est dans les cinq premiers ingrédients.", "875, soit 15 %."],
         ["Produits où il est dans la seconde moitié de la liste.", "2 394, soit 42 %."],
-        ["Produits qui contiennent du [parfum](/i/parfum).", "3 824, soit 66,5 %."],
+        ["Produits qui contiennent du parfum.", "3 824, soit 66,5 %."],
       ],
       legende: "Base Cosme Check, produits actifs dont le nom contient « hyaluronique », relevé du 03/11/2026.",
     },
@@ -168,7 +168,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le sérum The Ordinary est le seul de ce tableau où l'acide hyaluronique passe avant la glycérine. La crème Nivea perd des points pour autre chose : ses filtres solaires, dont l'[octocrylène](/i/octocrylene), classé rouge dans l'app. Et la crème Vichy *Aqualia Thermal UV FPS 30*, vendue « avec acide hyaluronique », n'en contient aucune forme dans la liste relevée pour son code-barres (note 1,37 sur 20). La formule a peut-être changé depuis : c'est pour ça qu'on lit le pot qu'on a en main.",
+        "Le sérum The Ordinary est le seul de ce tableau où l'acide hyaluronique passe avant la glycérine. La crème Nivea perd des points pour autre chose : ses filtres solaires, dont l'octocrylène, classé rouge dans l'app. Et la crème Vichy *Aqualia Thermal UV FPS 30*, vendue « avec acide hyaluronique », n'en contient aucune forme dans la liste relevée pour son code-barres (note 1,37 sur 20). La formule a peut-être changé depuis : c'est pour ça qu'on lit le pot qu'on a en main.",
     },
 
     { type: "h2", texte: "Comment bien utiliser l'acide hyaluronique ?" },

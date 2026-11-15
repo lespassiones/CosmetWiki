@@ -56,16 +56,8 @@ function buildHomeJsonLd() {
           "L'application qui te dit si un produit cosmétique est fait pour toi : score de compatibilité, promesses vs formule, comparaison et objectifs de ta routine.",
         inLanguage: "fr",
         publisher: { "@id": `${SITE_URL}/#organization` },
-        // La recherche interne d'ingrédients (/search) reste publique, donc
-        // la sitelink searchbox garde du sens.
-        potentialAction: {
-          "@type": "SearchAction",
-          target: {
-            "@type": "EntryPoint",
-            urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
-          },
-          "query-input": "required name=search_term_string",
-        },
+        // Plus de SearchAction : la recherche interne (/search) a été retirée
+        // avec les fiches ingrédient (novembre 2026).
       },
       {
         // SoftwareApplication sur la home : c'est le noeud que les moteurs IA

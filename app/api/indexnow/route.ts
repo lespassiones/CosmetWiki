@@ -15,14 +15,13 @@
  *
  *   2. POST /api/indexnow
  *      body : { "sync": true }
- *      → soumet TOUTES les URLs du sitemap en cours (statiques + ingrédients).
+ *      → soumet TOUTES les URLs du sitemap en cours (pages + articles).
  *        Pratique après un gros changement, à appeler depuis un cron Vercel
  *        ou manuellement avec curl après chaque déploiement.
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { submitToIndexNow } from "@/lib/indexnow";
-import { ingredientPageUrls, staticPageUrls } from "@/lib/sitemapData";
-import { INDEX_INGREDIENTS } from "@/lib/seoConfig";
+import { staticPageUrls } from "@/lib/sitemapData";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -55,18 +54,9 @@ function isAuthorized(req: NextRequest): boolean {
 }
 
 async function loadAllSitemapUrls(): Promise<string[]> {
-  // Même source de vérité que les sitemaps (lib/sitemapData.ts). Si la RPC
-  // des slugs échoue, on soumet au moins les pages statiques.
-  const staticUrls = staticPageUrls();
-  // Les fiches ingrédient ne sont soumises à IndexNow que si on les indexe
-  // (cf. lib/seoConfig.ts). Positionnement = compatibilité, pas annuaire INCI.
-  if (!INDEX_INGREDIENTS) return staticUrls;
-  try {
-    const ingredientUrls = await ingredientPageUrls();
-    return [...staticUrls, ...ingredientUrls];
-  } catch {
-    return staticUrls;
-  }
+  // Même source de vérité que le sitemap (lib/sitemapData.ts) : pages et
+  // articles. Les fiches ingrédient n'existent plus depuis le 15 nov 2026.
+  return staticPageUrls();
 }
 
 export async function POST(req: NextRequest) {
@@ -113,7 +103,7 @@ export async function POST(req: NextRequest) {
  * (header injecté automatiquement quand la variable d'env CRON_SECRET est
  * définie sur le projet). On accepte aussi INDEXNOW_SECRET pour pouvoir
  * déclencher une synchro à la main avec curl.
- * Effet : soumet TOUTES les URLs du site (statiques + 15 700 fiches) à
+ * Effet : soumet TOUTES les URLs du site (pages + articles) à
  * IndexNow → Bing / DuckDuckGo / Yandex recrawlent sous quelques heures.
  */
 export async function GET(req: NextRequest) {
