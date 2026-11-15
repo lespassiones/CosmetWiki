@@ -91,6 +91,7 @@
  */
 import type { Categorie } from "@/contenu/rubriques";
 
+import acideGlycolique from "./articles/acide-glycolique";
 import acideHyaluronique from "./articles/acide-hyaluronique";
 import acideSalicylique from "./articles/acide-salicylique";
 import analyseComposition from "./articles/analyse-composition-cosmetique";
@@ -322,6 +323,7 @@ export const ARTICLES: readonly Article[] = [
   meilleuresCremesHydratantes,
   cremeNivea,
   niacinamide,
+  acideGlycolique,
   acideHyaluronique,
   analyseComposition,
   calendrierAvent,

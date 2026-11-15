@@ -22,7 +22,7 @@ const article: Article = {
   chapo:
     "Les sels d'aluminium ne se trouvent que dans les **anti-transpirants**, et aux doses autorisées en Europe, les experts les jugent sûrs. Entre les rumeurs, les déos « naturels » qui ne tiennent pas la journée et les irritations au bicarbonate, ++on fait le tri, preuves à l'appui++.",
   publieLe: "2026-06-17",
-  modifieLe: "2026-10-22",
+  modifieLe: "2026-11-15",
   minutes: 5,
   theme: "déodorant aluminium",
   motsCles: [
@@ -108,6 +108,7 @@ const article: Article = {
         "**Pierre d'alun** : souvent vendue « naturelle », alors qu'elle contient elle-même de l'aluminium ([Potassium Alum](/i/potassium-alum)). Un vrai paradoxe.",
         "**Oxyde ou ricinoléate de zinc** ([Zinc Ricinoleate](/i/zinc-ricinoleate)) : il neutralise les odeurs en douceur, une bonne option pour les peaux sensibles.",
         "**Amidons et huiles végétales** : ils absorbent l'humidité sans bloquer la sueur. C'est confortable, mais la tenue est plus courte en pleine chaleur.",
+        "**Acide glycolique sous les bras** : l'astuce des réseaux sociaux consiste à passer un tonique exfoliant à la place du déo. L'idée est qu'une peau plus acide gênerait les bactéries de l'odeur. Les fabricants restent prudents : dans notre base, 865 déodorants sur 18 065 contiennent un acide de fruit, presque tous de l'acide lactique, et 8 seulement de l'acide glycolique. Jamais sur une peau qui vient d'être rasée. On a lu [4 700 produits à l'acide glycolique](/blog/acide-glycolique) pour voir ce qu'il fait vraiment.",
       ],
     },
     {

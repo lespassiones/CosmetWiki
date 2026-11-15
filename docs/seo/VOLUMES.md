@@ -541,3 +541,28 @@ Zones retenues (« Andorre et 9 autres ») : **France, Belgique, Suisse, Luxembo
 | déconsommation (France seule) | 100 à 1 k | 0 % | 0 % | faible | |
 | project pan tiktok, underconsumption core, no buy 2026, low buy (France seule) | 10 à 100 | 0 % | 0 % | faible | |
 | project pan c'est quoi, project pan maquillage, finir ses produits de beauté (France seule) | pas de donnée | | | | |
+
+## 2026-11-15 : France seule, toutes les langues
+
+Zone laissée à « France » (proposée d'office) : pas de nouvel ajout des neuf autres zones aujourd'hui, les chiffres sont donc un **plancher**. Langue : « Toutes les langues ». Méthode : « Obtenir le volume » cliqué par référence, liste tapée dans le champ, « Commencer » **du champ** par référence (`find` le distingue de celui du bandeau « compte en veille »), tableau lu par `javascript_exec` sur `[role="row"]`.
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| elseve glycolic gloss | **1 k à 10 k** | 0 % | 0 % | élevée | sujet du jour (`acide-glycolique`), section dédiée |
+| glycolic gloss | **1 k à 10 k** | 0 % | 0 % | élevée | |
+| glycolic acid | 1 k à 10 k | 0 % | 0 % | élevée | |
+| the ordinary glycolic acid | 1 k à 10 k | 0 % | 0 % | élevée | |
+| acide glycolique visage, acide glycolique cheveux, acide glycolique aisselles | 100 à 1 k | 0 % | 0 % | élevée | « aisselles » repris en FAQ et dans `deodorant-sels-aluminium-verite` |
+| acide glycolique danger | 100 à 1 k | 0 % | 0 % | **faible** | repris en FAQ |
+| aha visage | 10 à 100 | 0 % | 0 % | élevée | |
+
+« Trouver de nouveaux mots clés » (dimanche), neuf mots de départ sur les routines : exfoliant visage, peau terne, routine soir visage, peau grasse hiver, peau sensible routine, gommage visage, crème de nuit, ordre des soins visage, peau qui pèle. Lecture des premières lignes seulement (tri par défaut) :
+
+| Requête | Volume mensuel | Concurrence | Remarque |
+|---|---|---|---|
+| exfoliant visage, exfoliant pour le visage, exfolier visage, exfoliation du visage | 1 k à 10 k chacune | élevée | grappe à prendre dans une routine « exfolier sans abîmer » ; `acide-glycolique` et `acide-salicylique` en sont les piliers |
+| gommage visage, gommage pour le visage, gommage du visage | 1 k à 10 k chacune | élevée | |
+| gommage visage maison, gommage maison visage | 1 k à 10 k | **faible** | intention fait maison (règlement 1223/2009, art. 10 : on ne recommande pas de recette) |
+| gommage lèvres, gommage des lèvres | 1 k à 10 k | élevée | |
+| crème de nuit | 1 k à 10 k | élevée | |
+| peau qui pèle, desquamation de la peau | 1 k à 10 k | faible | proche du médical : seulement le geste cosmétique, et quand consulter |
