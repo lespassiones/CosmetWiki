@@ -14,13 +14,13 @@ import type { Article } from "@/contenu/articles";
 const article: Article = {
   slug: "peau-seche-visage",
   titre: "Ta peau tire en hiver ? 3 produits « peau sèche » sur 4 contiennent du parfum",
-  titreSeo: "Peau sèche visage en hiver : que faire ?",
+  titreSeo: "Crème peau sèche visage : quoi chercher ?",
   resume:
-    "Peau sèche du visage en hiver : pourquoi elle tire, sèche ou déshydratée, ce qu'il faut dans ta crème, le slugging, et ce que cachent 1 489 produits.",
+    "Crème pour peau sèche du visage : les 3 familles d'ingrédients à chercher, le duo qui marche, et pourquoi 11 crèmes sur 178 seulement le cochent.",
   chapo:
     "Une peau de visage qui tire en hiver manque surtout de gras pour retenir son eau : le froid dehors et le chauffage dedans fragilisent sa couche protectrice. Le bon réflexe tient en deux gestes, une crème qui attire et garde l'eau, et le soir une fine couche de vaseline sur les zones qui tirent. Mais en rayon, ++trois produits « peau sèche » sur quatre contiennent du parfum++.",
   publieLe: "2026-10-26",
-  modifieLe: "2026-10-26",
+  modifieLe: "2026-11-16",
   minutes: 9,
   theme: "peau sèche visage",
   motsCles: [
@@ -52,7 +52,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Une revue de dermatologues européens l'a résumé en 2016. ==Le froid et l'air sec affaiblissent la barrière de la peau== et la rendent plus réactive aux produits irritants ([Engebretsen et al., *Journal of the European Academy of Dermatology and Venereology*, 2016](https://doi.org/10.1111/jdv.13301)). À Montréal en janvier comme dans un appartement chauffé à Lyon, le résultat se sent pareil au réveil.",
+        "Une revue de dermatologues européens l'a résumé en 2016. ==Le froid et l'air sec affaiblissent la barrière de la peau== et la rendent plus réactive aux produits irritants ([Engebretsen et al., *Journal of the European Academy of Dermatology and Venereology*, 2016](https://doi.org/10.1111/jdv.13301)).",
     },
     {
       type: "liste",
@@ -60,7 +60,7 @@ const article: Article = {
       items: [
         "Les douches longues et très chaudes dissolvent le gras de la peau.",
         "Les nettoyants qui moussent fort, ou un savon de toilette sur le visage, font pareil.",
-        "Les gommages répétés « pour enlever les peaux mortes » abîment encore plus la barrière.",
+        "Les gommages répétés abîment encore plus la barrière : une fois par semaine au plus, en douceur (voir comment [exfolier son visage](/blog/exfolier-visage)).",
       ],
     },
 
@@ -86,7 +86,7 @@ const article: Article = {
         "Dans les deux cas, la réponse se ressemble : une crème qui ramène de l'eau et un ingrédient qui l'empêche de repartir. Seule la texture change. Pour aller plus loin, lis notre guide [crème hydratante ou réparatrice](/blog/cremes-hydratantes-reparatrices).",
     },
 
-    { type: "h2", texte: "Que doit contenir une crème pour peau sèche ?" },
+    { type: "h2", texte: "Que doit contenir une crème pour peau sèche du visage ?" },
     {
       type: "p",
       texte:
@@ -106,12 +106,17 @@ const article: Article = {
       texte:
         "Le duo qui compte, c'est l'humectant **avec** l'occlusif. Une revue scientifique de 2017 le dit simplement : la glycérine soulage mieux la sécheresse quand elle est associée à un occlusif ([Purnamawati et al., *Clinical Medicine & Research*, 2017](https://doi.org/10.3121/cmr.2017.1363)). Un sérum à l'acide hyaluronique seul, sans crème par-dessus, laisse repartir l'eau qu'il a attirée.",
     },
+    {
+      type: "p",
+      texte:
+        "Ce duo est rare. Sur les ==178 crèmes visage « peau sèche »== de notre base (relevé du 16/11/2026), 166 ont de la glycérine, mais 59 seulement l'associent à un occlusif. Et ++11 seulement cochent le duo sans parfum++. Au rayon, cherche **Glycerin** en haut de la liste, **Petrolatum** ou **Paraffinum Liquidum** plus bas, et pas de **Parfum**.",
+    },
 
     { type: "h2", texte: "Le slugging, ça marche vraiment ?" },
     {
       type: "p",
       texte:
-        "Oui, sur une peau sèche, et c'est même le geste le mieux prouvé de cet article. Le slugging, c'est appliquer le soir une fine couche de vaseline en dernier, par-dessus ta crème, pour « sceller » l'eau dans la peau. Le nom vient de l'anglais *slug*, la limace, pour l'effet brillant.",
+        "Oui, sur une peau sèche, et c'est même le geste le mieux prouvé de cet article. Le slugging, c'est appliquer le soir une fine couche de vaseline en dernier, par-dessus ta crème, pour « sceller » l'eau dans la peau.",
     },
     {
       type: "p",
@@ -131,7 +136,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le texte européen est le [règlement (CE) n° 1223/2009](https://eur-lex.europa.eu/eli/reg/2009/1223/oj) (2009) : la vaseline vendue en cosmétique y est raffinée et contrôlée. Le débat porte surtout sur l'environnement, pas sur ta peau.",
+        "La vaseline cosmétique est raffinée et contrôlée ([règlement (CE) n° 1223/2009](https://eur-lex.europa.eu/eli/reg/2009/1223/oj), 2009) : le débat porte sur l'environnement, pas sur ta peau.",
     },
     {
       type: "liste",
@@ -177,7 +182,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Pas forcément le plus connu. Cinq produits qu'on croise souvent dans les tutos, et ce que dit leur liste :",
+        "Pas forcément le plus connu. Cinq produits vus dans les tutos.",
     },
     {
       type: "tableau",
@@ -214,7 +219,7 @@ const article: Article = {
       style: "coches",
       items: [
         "Choisis ta crème sans parfum, ou avec le parfum tout en bas de la liste.",
-        "Garde ta douche courte et tiède : c'est gratuit, et ça protège plus que n'importe quel pot.",
+        "Garde ta douche courte et tiède : ça protège plus que bien des pots.",
         "Teste chaque nouveau produit sur une petite zone pendant deux jours avant le visage entier.",
       ],
     },
@@ -226,7 +231,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le meilleur pour la fin : ==le produit le plus efficace contre la perte d'eau est aussi le plus simple== de ton armoire. Un pot de vaseline pure bat les formules à vingt ingrédients sur ce point précis. La crème apporte l'eau, la vaseline la garde : c'est tout le slugging.",
+        "Le meilleur pour la fin : ==le produit le plus efficace contre la perte d'eau est aussi le plus simple== de ton armoire. La crème apporte l'eau, la vaseline la garde : c'est tout le slugging.",
     },
   ],
   faq: [
