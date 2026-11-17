@@ -23,7 +23,7 @@ const article: Article = {
   chapo:
     "L'eau micellaire convient à un maquillage léger, l'huile démaquillante à un maquillage longue tenue ou à une crème solaire. Mais une eau micellaire, ce n'est pas de l'eau : ==97 % de celles de notre base contiennent un tensioactif==, un ingrédient qui lave. ++Et c'est le seul nettoyant qu'on te dit de ne pas rincer.++",
   publieLe: "2026-11-06",
-  modifieLe: "2026-11-06",
+  modifieLe: "2026-11-17",
   minutes: 7,
   theme: "démaquillage",
   motsCles: [
@@ -34,6 +34,7 @@ const article: Article = {
     "double nettoyage visage",
     "baume démaquillant",
     "eau micellaire danger",
+    "eau micellaire ou lait démaquillant",
   ],
   categorie: "Routines",
   couverture: {
@@ -184,11 +185,16 @@ const article: Article = {
         "L'Académie américaine de dermatologie donne les mêmes gestes : eau tiède, bout des doigts, nettoyant doux et sans alcool, jamais de frottement ([AAD](https://www.aad.org/public/everyday-care/skin-care-basics/care/face-washing-101)). Si ta peau reste rouge ou brûle après le démaquillage, parles-en à ton pharmacien ou à un dermatologue. Pour la suite de la routine, l'ordre complet est dans notre [routine skincare](/blog/routine-skincare), et la crème solaire du matin dans [les 7 erreurs du SPF](/blog/spf-50-visage-7-erreurs).",
     },
 
-    { type: "h2", texte: "Et le lait démaquillant ?" },
+    { type: "h2", texte: "Eau micellaire ou lait démaquillant : lequel choisir ?" },
     {
       type: "p",
       texte:
-        "C'est le produit le plus parfumé du rayon : ==84 % des 1 076 laits de notre base contiennent du parfum==. Et c'est là que le parfum pèse le plus. Les laits parfumés ont une note médiane de 11,93 sur 20, les laits sans parfum de 16,12.",
+        "Le lait pour une peau sèche, l'eau micellaire pour une peau mixte ou grasse. Les deux ne lavent pas de la même façon. L'eau micellaire lave avec un tensioactif. Le lait, lui, dissout le maquillage avec du gras. On a relu les 1 074 laits de notre base le 17/11/2026 : ==plus de huit sur dix placent une huile ou un corps gras dans leurs trois premiers ingrédients==. Moins d'un sur deux contient un tensioactif.",
+    },
+    {
+      type: "p",
+      texte:
+        "Le lait laisse donc un léger film gras, agréable sur une peau qui tiraille, lourd sur une peau qui brille. Retire-le avec un coton, puis rince ou passe une lotion douce. Son point faible est ailleurs : c'est le produit le plus parfumé du rayon, avec ==84 % de laits parfumés==. Les laits parfumés ont une note médiane de 11,93 sur 20, les laits sans parfum de 16,12.",
     },
     {
       type: "p",

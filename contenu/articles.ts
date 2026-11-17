@@ -104,6 +104,7 @@ import comedogene from "./articles/comedogene";
 import cosmetiqueFaitPourToi from "./articles/cosmetique-fait-pour-toi";
 import cosmetiquesGrossesse from "./articles/cosmetiques-grossesse";
 import cremeNivea from "./articles/creme-nivea-composition";
+import cremeDeNuit from "./articles/creme-de-nuit";
 import cremeUree from "./articles/creme-uree";
 import cremePerimee from "./articles/creme-perimee";
 import cremeSolaireCoreenne from "./articles/creme-solaire-coreenne-k-beauty";
@@ -324,6 +325,7 @@ export const ARTICLES: readonly Article[] = [
   cosmetiqueFaitPourToi,
   meilleuresCremesHydratantes,
   cremeNivea,
+  cremeDeNuit,
   niacinamide,
   acideGlycolique,
   acideHyaluronique,

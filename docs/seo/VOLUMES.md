@@ -566,3 +566,7 @@ Zone laissée à « France » (proposée d'office) : pas de nouvel ajout des neu
 | gommage lèvres, gommage des lèvres | 1 k à 10 k | élevée | |
 | crème de nuit | 1 k à 10 k | élevée | |
 | peau qui pèle, desquamation de la peau | 1 k à 10 k | faible | proche du médical : seulement le geste cosmétique, et quand consulter |
+
+## 2026-11-17 : pas de nouvelle mesure
+
+Planificateur non ouvert : « crème de nuit » (1 k à 10 k, 15/11) a moins de 60 jours, et aucune page ne pouvait être annoncée (site servi depuis le déploiement du 14/11, compte Vercel bloqué), donc Chrome n'a pas servi. Suggestions Google du jour (fr) : « crème de nuit visage », « … avis dermatologue », « … peau mature que choisir », « … la roche posay », « … caudalie », « … avene » ; « faut il mettre une creme de nuit », « … apres le serum », « … apres un masque » ; « pourquoi mettre creme de nuit », « pourquoi ma creme de nuit peluche » ; « difference creme de jour et creme de nuit », « creme de jour vs creme de nuit ». Variantes à mesurer au prochain passage dans le Planificateur.
