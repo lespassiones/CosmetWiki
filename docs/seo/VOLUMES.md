@@ -570,3 +570,22 @@ Zone laissée à « France » (proposée d'office) : pas de nouvel ajout des neu
 ## 2026-11-17 : pas de nouvelle mesure
 
 Planificateur non ouvert : « crème de nuit » (1 k à 10 k, 15/11) a moins de 60 jours, et aucune page ne pouvait être annoncée (site servi depuis le déploiement du 14/11, compte Vercel bloqué), donc Chrome n'a pas servi. Suggestions Google du jour (fr) : « crème de nuit visage », « … avis dermatologue », « … peau mature que choisir », « … la roche posay », « … caudalie », « … avene » ; « faut il mettre une creme de nuit », « … apres le serum », « … apres un masque » ; « pourquoi mettre creme de nuit », « pourquoi ma creme de nuit peluche » ; « difference creme de jour et creme de nuit », « creme de jour vs creme de nuit ». Variantes à mesurer au prochain passage dans le Planificateur.
+
+## 2026-11-17 (passage spécial GTA 6) : dix zones, toutes les langues
+
+Zones retenues (« Andorre et 9 autres ») : **France, Belgique, Suisse, Luxembourg, Monaco, Andorre, Canada, Nouvelle-Calédonie, Polynésie française, Saint-Pierre-et-Miquelon**. Langue : « Toutes les langues » (bouton désactivé sur « Mots clés enregistrés », non retenté). Méthode : verrou Chrome partagé pris à la cinquième minute (RevealChat puis Test Civique le tenaient), onglet neuf, carte « Obtenir le volume » par référence, liste collée en JavaScript (`value` puis `input`), « Commencer » du parent du `textarea` cliqué en JavaScript, zone ouverte par un clic sur « France », neuf zones ajoutées d'un seul appel `window.__inc` (neuf sur neuf), « Enregistrer » par référence. Chrome rendu tout de suite après la lecture (environ six minutes).
+
+| Requête | Volume mensuel | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|
+| gta 6 | **1 M à 10 M** | +900 % | moyenne | la requête de tendance ; son vrai pic est cette semaine |
+| poches sous les yeux | **10 k à 100 k** | -90 % | élevée | requête de fond visée (`gta-6-nuit-blanche-cernes`) |
+| nuit blanche | 10 k à 100 k | 0 % | faible | intention mêlée (sens propre, festival) |
+| cernes, cernes sous les yeux, cernes noires | 1 k à 10 k chacune | 0 % (« noires » -90 %) | faible à élevée | requêtes de fond visées |
+| contour des yeux | 1 k à 10 k | 0 % | élevée | |
+| teint terne | 1 k à 10 k | -90 % | élevée | |
+| contour des yeux caféine | 100 à 1 k | 0 % | élevée | FAQ |
+| yeux gonflés le matin | 100 à 1 k | 0 % | faible | FAQ |
+| lumière bleue peau, crème anti lumière bleue, peau fatiguée | 10 à 100 | 0 % | | trop petit pour un article : une section |
+| écran peau | pas de donnée | | | |
+
+Suggestions Google du jour : « gta 6 … » ne croise aucun sujet de peau (« leclerc », « pc », « ps5 », « prix », « carrefour », « sortie », « auchan ») ; « cernes … » : « sous les yeux », « noires », « bleues », « causes », « creuses » ; « lumière bleue peau … » : « vieillissement », « bienfaits », « danger », « écran » ; « contour des yeux caféine … » : « aroma zone », « the ordinary », « vitamine c », « niacinamide », « la roche posay » ; « yeux gonflés le matin … » : « solution », « causes », « pourquoi ».

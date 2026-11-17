@@ -113,6 +113,7 @@ import deodorantAluminium from "./articles/deodorant-sels-aluminium-verite";
 import eauMicellaire from "./articles/eau-micellaire-ou-huile-demaquillante";
 import exfolierVisage from "./articles/exfolier-visage";
 import glycerine from "./articles/glycerine";
+import gta6NuitBlancheCernes from "./articles/gta-6-nuit-blanche-cernes";
 import lipOils from "./articles/lip-oils-huiles-levres";
 import masqueBiodance from "./articles/masque-biodance";
 import masqueLed from "./articles/masque-led-visage";
@@ -326,6 +327,7 @@ export const ARTICLES: readonly Article[] = [
   meilleuresCremesHydratantes,
   cremeNivea,
   cremeDeNuit,
+  gta6NuitBlancheCernes,
   niacinamide,
   acideGlycolique,
   acideHyaluronique,
