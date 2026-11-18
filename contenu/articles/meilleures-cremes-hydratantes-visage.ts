@@ -29,7 +29,7 @@ const article: Article = {
   chapo:
     "Il n'existe pas *une* meilleure crème hydratante, mais la meilleure ==pour ta peau==. Vite dit : texture **fluide non comédogène** (qui ne favorise pas les points noirs) pour peau grasse, **riche aux céramides** pour peau sèche, **minimaliste sans parfum** pour peau sensible. Les références citées ici sont souvent recommandées, mais la seule façon de trancher reste de ++vérifier la compatibilité++ de la formule avec ton profil.",
   publieLe: "2026-07-20",
-  modifieLe: "2026-10-26",
+  modifieLe: "2026-11-18",
   minutes: 5,
   theme: "meilleure crème hydratante visage",
   motsCles: [
@@ -39,6 +39,7 @@ const article: Article = {
     "crème hydratante peau sensible",
     "meilleure crème visage",
     "crème hydratante non comédogène",
+    "crème hydratante pas chère",
   ],
   categorie: "Routines",
   couverture: {
@@ -136,6 +137,16 @@ const article: Article = {
       texte:
         "L'exemple parlant : [on a lu la composition de la boîte bleue Nivea](/blog/creme-nivea-composition), et 18 de ses 21 ingrédients se retrouvent dans une crème de luxe culte.",
     },
+    {
+      type: "p",
+      texte:
+        "Les chiffres de notre base vont dans le même sens. Sur 8 099 crèmes visage, la note médiane est de 12,05, la note du milieu du rayon. Les 30 crèmes visage Cien, la marque de Lidl, ont une médiane de ==16,15==, au-dessus de Nivea (11,6), La Roche-Posay (11,64), Avène (11,73) et CeraVe (12,09). Relevé du 18/11/2026.",
+    },
+    {
+      type: "p",
+      texte:
+        "Un piège fait plonger les notes : le filtre solaire dans la crème de jour. Chez Cien, les crèmes visage sans filtre ont une médiane de 16,18, celles avec filtre 7,63. ++Une crème hydratante à FPS 15 ne remplace pas une crème solaire++, et sa liste perd des points. [On a lu les 1 797 produits Cien](/blog/cien-lidl) pour voir lesquels prendre.",
+    },
 
     { type: "h2", texte: "Comment savoir si une crème est faite pour toi ?" },
     {
@@ -171,7 +182,7 @@ const article: Article = {
     {
       question: "Une crème hydratante chère est-elle meilleure ?",
       reponse:
-        "Non. Le prix ne fait pas la qualité de la formule. Des produits abordables comme CeraVe, The Ordinary ou Nivea rivalisent avec des crèmes de luxe sur les actifs qui comptent. Ce qui compte, c'est la composition, pas le flacon.",
+        "Non. Le prix ne fait pas la qualité de la formule. Des produits abordables comme CeraVe, The Ordinary, Nivea ou Cien de Lidl rivalisent avec des crèmes de luxe sur les actifs qui comptent. Dans notre base, les crèmes visage Cien ont même une médiane de 16,15, contre 12,05 pour le rayon.",
     },
     {
       question: "Quelle crème hydratante pour peau grasse ?",
