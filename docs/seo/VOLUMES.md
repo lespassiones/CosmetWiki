@@ -589,3 +589,7 @@ Zones retenues (« Andorre et 9 autres ») : **France, Belgique, Suisse, Luxembo
 | écran peau | pas de donnée | | | |
 
 Suggestions Google du jour : « gta 6 … » ne croise aucun sujet de peau (« leclerc », « pc », « ps5 », « prix », « carrefour », « sortie », « auchan ») ; « cernes … » : « sous les yeux », « noires », « bleues », « causes », « creuses » ; « lumière bleue peau … » : « vieillissement », « bienfaits », « danger », « écran » ; « contour des yeux caféine … » : « aroma zone », « the ordinary », « vitamine c », « niacinamide », « la roche posay » ; « yeux gonflés le matin … » : « solution », « causes », « pourquoi ».
+
+## 19/11/2026 : pas de nouvelle mesure
+
+Planificateur non ouvert : le sujet du jour (« volufiline » 10 k à 100 k, ligne du 22/10) et la traîne de l'optimisation (`glycerine`, 03 et 05/11) ont moins de 60 jours. Suggestions Google du jour : « volufiline avis », « stick », « danger », « avant après », « pharmacie », « the ordinary avis », « the ordinary avant après », « stick medicube », « c'est quoi », « comment utiliser la volufiline », « crème à la volufiline ». À mesurer au prochain passage dans le Planificateur : « volufiline the ordinary », « volufiline avis », « volufiline stick medicube » (le stick Medicube n'est pas dans la base au 19/11).

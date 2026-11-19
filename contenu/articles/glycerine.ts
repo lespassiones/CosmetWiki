@@ -23,7 +23,7 @@ const article: Article = {
   chapo:
     "La glycérine est un hydratant simple, bon marché et très bien étudié : elle attire l'eau dans la couche de surface de la peau et l'aide à se réparer. On la trouve dans ==8 crèmes hydratantes sur 10== de notre base. ++Ce n'est pas l'actif qu'on te vend, c'est souvent celui qui travaille.++",
   publieLe: "2026-11-05",
-  modifieLe: "2026-11-05",
+  modifieLe: "2026-11-19",
   minutes: 7,
   theme: "glycérine",
   motsCles: [
@@ -35,6 +35,8 @@ const article: Article = {
     "glycérine danger",
     "glycérine peau grasse",
     "crème urée",
+    "crème glycérine visage",
+    "crème hydratante glycérine",
   ],
   categorie: "Ingrédients",
   couverture: {
@@ -150,6 +152,30 @@ const article: Article = {
       type: "p",
       texte:
         "La crème mains Neutrogena tient en 13 ingrédients, dont la glycérine juste après l'eau : sa note est haute malgré le parfum. La crème CeraVe avec SPF perd des points à cause de ses filtres, pas de sa glycérine. La Nivea Soft contient de l'alcool dénaturé en quatrième place, qui peut dessécher les peaux fragiles. Pour lire une liste en entier, suis notre [méthode en 5 étapes](/blog/analyse-composition-cosmetique).",
+    },
+
+    { type: "h2", texte: "Quelle crème à la glycérine choisir pour le visage ?" },
+    {
+      type: "p",
+      texte:
+        "Une crème qui met la glycérine dans ses trois premiers ingrédients, sans parfum ni filtre solaire. Sur 8 714 crèmes visage de notre base (relevé du 19/11/2026), 4 200 placent la glycérine dans les trois premiers. ==Seules 505 n'ont en plus ni parfum ni filtre==. En voici cinq, faciles à trouver en pharmacie.",
+    },
+    {
+      type: "tableau",
+      entetes: ["Crème visage", "Place de la glycérine", "Note Cosme Check"],
+      lignes: [
+        ["Bioderma, Créaline AR Crème.", "2e sur 12.", "16,7 sur 20."],
+        ["Eucerin, UreaRepair Crème Visage 5 % d'urée.", "2e sur 18.", "16,66 sur 20."],
+        ["Avène, Tolérance Extrême Crème Riche.", "3e sur 8.", "16,62 sur 20."],
+        ["La Roche-Posay, Toleriane Double Réparateur Mat.", "2e sur 16.", "16,53 sur 20."],
+        ["Vichy, Minéral 89 Gel Sorbet Mat.", "2e sur 21.", "16,34 sur 20."],
+      ],
+      legende: "Listes et notes relevées dans la base Cosme Check le 19/11/2026.",
+    },
+    {
+      type: "p",
+      texte:
+        "Les deux dernières sont des gels légers, pour une peau grasse ou mixte. Les trois premières sont plus riches, pour une peau sèche ou qui tiraille.",
     },
 
     { type: "h2", texte: "La glycérine végétale pure sur le visage, bonne idée ?" },
@@ -271,6 +297,11 @@ const article: Article = {
       note: 7.48,
       releveeLe: "2026-11-05",
     },
+    { produit: "Bioderma, Créaline AR Crème", ean: "3401543262301", note: 16.7, releveeLe: "2026-11-19" },
+    { produit: "Eucerin, UreaRepair Crème Régénératrice Visage 5 % d'Urée (50 ml)", ean: "4005800036149", note: 16.66, releveeLe: "2026-11-19" },
+    { produit: "Avène, Tolérance Extrême Crème Riche (50 ml)", ean: "3282770053135", note: 16.62, releveeLe: "2026-11-19" },
+    { produit: "La Roche-Posay, Toleriane Double Réparateur Mat Hydratant Visage (75 ml)", ean: "3337875782999", note: 16.53, releveeLe: "2026-11-19" },
+    { produit: "Vichy, Minéral 89 Gel Sorbet Mat Hydratant 48h (50 ml)", ean: "3337875894104", note: 16.34, releveeLe: "2026-11-19" },
   ],
 };
 

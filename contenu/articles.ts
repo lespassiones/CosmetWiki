@@ -135,6 +135,7 @@ import serums from "./articles/serums-visage-guide";
 import suifDeBoeuf from "./articles/suif-de-boeuf";
 import spf50 from "./articles/spf-50-visage-7-erreurs";
 import typeDePeau from "./articles/type-de-peau";
+import volufiline from "./articles/volufiline";
 
 export { CATEGORIES, type Categorie } from "@/contenu/rubriques";
 
@@ -315,6 +316,7 @@ export type Article = {
 export const ARTICLES: readonly Article[] = [
   spf50,
   typeDePeau,
+  volufiline,
   cremeSolaireCoreenne,
   cremesHydratantesReparatrices,
   lipOils,
