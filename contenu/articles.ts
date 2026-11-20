@@ -105,6 +105,7 @@ import comedogene from "./articles/comedogene";
 import cosmetiqueFaitPourToi from "./articles/cosmetique-fait-pour-toi";
 import cosmetiquesGrossesse from "./articles/cosmetiques-grossesse";
 import cremeNivea from "./articles/creme-nivea-composition";
+import cremeCica from "./articles/creme-cica";
 import cremeDeNuit from "./articles/creme-de-nuit";
 import cremeUree from "./articles/creme-uree";
 import cremePerimee from "./articles/creme-perimee";
@@ -317,6 +318,7 @@ export const ARTICLES: readonly Article[] = [
   spf50,
   typeDePeau,
   volufiline,
+  cremeCica,
   cremeSolaireCoreenne,
   cremesHydratantesReparatrices,
   lipOils,

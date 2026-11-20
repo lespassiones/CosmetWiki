@@ -12,6 +12,10 @@ import type { Article } from "@/contenu/articles";
  * hydratante visage » à `meilleures-cremes-hydratantes-visage`), deux
  * sources, liens vers huit articles, termes expliqués, chiffres sans source
  * retirés (« 90 % des bonnes crèmes », « 1 000 fois son poids en eau »).
+ *
+ * Retouché le 20/11/2026 : section « Une crème « cica » est-elle une crème
+ * réparatrice ? » (173 des 237 produits « cica » de douze grandes marques
+ * sans centella, base du 20/11/2026), lien vers `creme-cica`.
  */
 const article: Article = {
   slug: "cremes-hydratantes-reparatrices",
@@ -22,13 +26,14 @@ const article: Article = {
   chapo:
     "Une crème **hydratante** apporte de l'eau à la peau, une crème **réparatrice** lui rend le gras qui la protège. La plupart des peaux ont besoin des deux, dans des proportions différentes. ++La bonne crème se lit dans ses cinq premiers ingrédients++, pas sur le pot.",
   publieLe: "2026-05-13",
-  modifieLe: "2026-10-24",
+  modifieLe: "2026-11-20",
   minutes: 6,
   theme: "crème hydratante visage",
   motsCles: [
     "crème hydratante visage",
     "crème réparatrice",
     "crème réparatrice visage",
+    "crème cica",
     "crème hydratante réparatrice",
     "crème pour peau sèche",
     "crème pour peau grasse",
@@ -130,6 +135,18 @@ const article: Article = {
       type: "p",
       texte:
         "Céramides, peptides et acide hyaluronique. Les peptides sont de petites chaînes de protéines qu'on ajoute aux crèmes anti-âge. Un rétinol le soir peut compléter, à part et doucement : [notre guide des sérums](/blog/serums-visage-guide) t'aide à choisir.",
+    },
+
+    { type: "h2", texte: "Une crème « cica » est-elle une crème réparatrice ?" },
+    {
+      type: "p",
+      texte:
+        "Oui, presque toujours, mais pas forcément à la plante. « Cica » désigne la *Centella asiatica*, une plante apaisante. Or dans notre base, ==173 des 237 produits « cica » de douze grandes marques de pharmacie et de supermarché n'en contiennent aucune trace== (relevé du 20/11/2026).",
+    },
+    {
+      type: "p",
+      texte:
+        "Ce qui répare, dans ces crèmes, ce sont des ingrédients plus simples : le panthénol, la glycérine et un corps gras qui retient l'eau. Le Cicaplast Baume B5 de La Roche-Posay met le panthénol en 6e place. ++Lis la liste plutôt que le mot « cica »++ : on a fait le tri dans [1 295 crèmes « cica »](/blog/creme-cica).",
     },
 
     { type: "h2", texte: "Quelles erreurs gâchent une bonne crème ?" },

@@ -593,3 +593,18 @@ Suggestions Google du jour : « gta 6 … » ne croise aucun sujet de peau (« l
 ## 19/11/2026 : pas de nouvelle mesure
 
 Planificateur non ouvert : le sujet du jour (« volufiline » 10 k à 100 k, ligne du 22/10) et la traîne de l'optimisation (`glycerine`, 03 et 05/11) ont moins de 60 jours. Suggestions Google du jour : « volufiline avis », « stick », « danger », « avant après », « pharmacie », « the ordinary avis », « the ordinary avant après », « stick medicube », « c'est quoi », « comment utiliser la volufiline », « crème à la volufiline ». À mesurer au prochain passage dans le Planificateur : « volufiline the ordinary », « volufiline avis », « volufiline stick medicube » (le stick Medicube n'est pas dans la base au 19/11).
+
+## 2026-11-20 : France seule, toutes les langues
+
+Zone : **France seule** (la recherche lancée depuis l'accueil repart sur France ; les chiffres sont un plancher pour la francophonie). Langue : « Toutes les langues », non retentée. Méthode : « Obtenir le volume » cliqué par coordonnées sur l'accueil, liste tapée dans le champ, « Commencer » **du champ** par référence (`find`), tableau lu par `javascript_exec` sur `[role="row"]`.
+
+| Requête | Volume mensuel | Variation 3 mois | Variation sur un an | Concurrence | Remarque |
+|---|---|---|---|---|---|
+| cicaplast | **10 k à 100 k** | 0 % | 0 % | élevée | gamme La Roche-Posay ; **sujet du jour** (`creme-cica`) |
+| cicalfate | **10 k à 100 k** | 0 % | 0 % | élevée | gamme Avène, sans centella dans la base |
+| cica | 1 k à 10 k | 0 % | 0 % | faible | |
+| crème cica | 100 à 1 k | 0 % | **+900 %** | élevée | |
+| centella asiatica crème, crème centella, madecassoside | 100 à 1 k | 0 % | 0 % | élevée | |
+| cica c'est quoi | 10 à 100 | 0 % | 0 % | faible | |
+
+Suggestions Google du jour : « cicaplast ou cicalfate » (et « … pour cicatrice », « … brûlure », « ou biafine », « ou cicabio », « ou vaseline »), « cicalfate visage », « cicalfate tatouage », « centella asiatica bienfaits visage », « centella asiatica danger », « centella asiatica skin1004 », « centella asiatica vergetures ». L'intention « cicatrice, plaie, brûlure, tatouage » est médicale : écartée, renvoyée au pharmacien.
