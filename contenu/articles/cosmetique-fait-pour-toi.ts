@@ -15,7 +15,7 @@ const article: Article = {
   chapo:
     "Un cosmétique n'est pas « bon » ou « mauvais » dans l'absolu. Il est ==compatible ou non avec toi==. Trois choses décident : **ton profil** (peau, cheveux), **tes objectifs** (ce que tu veux améliorer) et **ce que tu veux éviter** (sensibilités, ingrédients bannis). La bonne question n'est jamais « quelle est sa note », c'est « ++est-il fait pour moi++ ».",
   publieLe: "2026-07-20",
-  modifieLe: "2026-11-07",
+  modifieLe: "2026-11-21",
   minutes: 5,
   theme: "produit fait pour ma peau",
   motsCles: [
@@ -26,6 +26,7 @@ const article: Article = {
     "savoir si un produit me convient",
     "note cosmétique universelle",
     "score de compatibilité",
+    "pourquoi les applications cosmétiques ne donnent pas la même note",
   ],
   categorie: "Routines",
   couverture: {
@@ -89,6 +90,11 @@ const article: Article = {
         "Ne te fie pas au packaging « naturel » ou « hypoallergénique » : ce sont des arguments, pas des garanties. La loi demande seulement qu'ils soient honnêtes et prouvés ([règlement (UE) 655/2013](https://eur-lex.europa.eu/eli/reg/2013/655/oj)). ==La formule dit la vérité.==",
         "Un ingrédient « controversé » en fin de liste, à faible dose, ne pèse pas comme le même ingrédient en tête. Le contexte compte.",
       ],
+    },
+    {
+      type: "p",
+      texte:
+        "La place change tout, chiffres à l'appui. Dans notre base, on a pris les 56 440 produits qui n'ont qu'un seul ingrédient rouge. ==La note médiane est de 2,92 quand il est dans les cinq premiers, et de 11,13 en fin de liste== (notes sur 20, relevé du 21/11/2026). C'est aussi pour ça que deux applications ne donnent pas la même note au même produit : on l'explique dans [Yuka ou INCI Beauty, laquelle est fiable](/blog/yuka-ou-inci-beauty).",
     },
     {
       type: "p",

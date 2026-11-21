@@ -137,6 +137,7 @@ import suifDeBoeuf from "./articles/suif-de-boeuf";
 import spf50 from "./articles/spf-50-visage-7-erreurs";
 import typeDePeau from "./articles/type-de-peau";
 import volufiline from "./articles/volufiline";
+import yukaOuInciBeauty from "./articles/yuka-ou-inci-beauty";
 
 export { CATEGORIES, type Categorie } from "@/contenu/rubriques";
 
@@ -318,6 +319,7 @@ export const ARTICLES: readonly Article[] = [
   spf50,
   typeDePeau,
   volufiline,
+  yukaOuInciBeauty,
   cremeCica,
   cremeSolaireCoreenne,
   cremesHydratantesReparatrices,
