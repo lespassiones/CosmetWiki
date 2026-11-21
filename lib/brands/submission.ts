@@ -169,6 +169,32 @@ function fail(field: string, error: string): ValidationResult {
   return { ok: false, field, error };
 }
 
+/** Étape 1 du formulaire : la marque seule (saisie une fois pour tous les produits). */
+export function validateBrandContact(input: {
+  brand?: unknown;
+  contactEmail?: unknown;
+  contactName?: unknown;
+}): { ok: true } | { ok: false; field: string; error: string } {
+  const brand = str(input.brand);
+  if (!brand) return { ok: false, field: "brand", error: "Indiquez le nom de la marque." };
+  if (brand.length > LIMITS.brand) return { ok: false, field: "brand", error: "Nom de marque trop long." };
+  const email = str(input.contactEmail);
+  if (!email || !EMAIL_RE.test(email) || email.length > LIMITS.contactEmail) {
+    return { ok: false, field: "contactEmail", error: "Adresse e-mail invalide." };
+  }
+  if (str(input.contactName).length > LIMITS.contactName) {
+    return { ok: false, field: "contactName", error: "Nom trop long." };
+  }
+  return { ok: true };
+}
+
+/** Nombre maximal de produits par envoi (une marque peut renvoyer ensuite). */
+export const MAX_PRODUCTS_PER_BATCH = 50;
+/** Nombre maximal de produits par requête (le navigateur découpe l'envoi). */
+export const MAX_PRODUCTS_PER_REQUEST = 10;
+/** Clé d'une photo dans un envoi groupé (une photo partagée n'est envoyée qu'une fois). */
+export const PHOTO_KEY_RE = /^[a-z0-9]{1,16}$/;
+
 export function validateBrandSubmission(input: BrandSubmissionInput): ValidationResult {
   const brand = str(input.brand);
   if (!brand) return fail("brand", "Indiquez le nom de la marque.");

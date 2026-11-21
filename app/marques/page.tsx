@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { PublicHeader } from "@/components/PublicHeader";
-import { BrandProductForm } from "@/components/brands/BrandProductForm";
+import { BrandWizard } from "@/components/brands/BrandWizard";
 
 const TITLE = "Espace marques : référencez vos produits";
 const DESCRIPTION =
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 const STEPS = [
-  { title: "Vous envoyez la fiche", text: "Un produit par fiche, en deux minutes." },
+  { title: "Vous ajoutez vos produits", text: "Dupliquez-les pour aller plus vite." },
   { title: "Nous vérifions", text: "Composition, photos et page officielle." },
   { title: "Vous recevez la note", text: "Par e-mail, avec votre badge à afficher." },
 ];
@@ -101,9 +101,9 @@ export default function MarquesPage() {
       <main id="marques-formulaire" className="w-full scroll-mt-24 bg-white py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <h2 className="text-[26px] font-bold tracking-tight text-ink sm:text-[30px]">Référencer un produit</h2>
-          <p className="mt-2 text-[15px] text-ink-muted">Une fiche par produit.</p>
+          <p className="mt-2 text-[15px] text-ink-muted">Vos infos une seule fois, puis tous vos produits.</p>
           <div className="mt-8">
-            <BrandProductForm />
+            <BrandWizard />
           </div>
         </div>
       </main>

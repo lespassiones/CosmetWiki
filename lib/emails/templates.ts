@@ -93,14 +93,14 @@ ${row("Reçu le", escapeHtml(when))}
 
 // ─── Espace marques ────────────────────────────────────────────────────────
 
-export type BrandSubmissionForEmail = {
-  id: string;
+export type BrandContactForEmail = {
   brand: string;
-  company: string | null;
   contactName: string | null;
   contactEmail: string;
-  contactRole: string | null;
-  brandWebsite: string | null;
+};
+
+export type BrandProductForEmail = {
+  id: string;
   productName: string;
   ean: string | null;
   volume: string;
@@ -110,77 +110,71 @@ export type BrandSubmissionForEmail = {
   properties: string | null;
   madeIn: string | null;
   productUrl: string | null;
+  photoUrls: { label: string; url: string }[];
 };
 
-export function brandTeamEmail(
-  s: BrandSubmissionForEmail,
-  extra: { photoUrls: { label: string; url: string }[]; adminUrl?: string | null; earlierFromBrand?: number },
-): Email {
-  const photos = extra.photoUrls.length
-    ? extra.photoUrls.map((p) => link(p.url, p.label)).join(" · ")
-    : "Aucune photo jointe";
-  const body = `<p style="margin:0 0 6px 0;font-size:17px;font-weight:700;">Nouvelle demande de référencement</p>
-<p style="margin:0 0 16px 0;color:#6B7280;font-size:14px;">${escapeHtml(s.brand)} propose « ${escapeHtml(
-    s.productName,
-  )} ». À vérifier avant de le référencer.</p>
-<p style="margin:16px 0 4px 0;font-size:12px;font-weight:700;letter-spacing:0.6px;color:#9CA3AF;">LA MARQUE</p>
+function productBlock(p: BrandProductForEmail, n: number): string {
+  const photos = p.photoUrls.length ? p.photoUrls.map((x) => link(x.url, x.label)).join(" · ") : "Aucune";
+  return `<div style="margin:18px 0 0 0;padding:16px;border:1px solid #ECEEF1;border-radius:14px;">
+<p style="margin:0 0 8px 0;font-size:15px;font-weight:700;">${n}. ${escapeHtml(p.productName)}</p>
 <table role="presentation" cellpadding="0" cellspacing="0">
-${row("Marque", escapeHtml(s.brand))}
-${row("Société", s.company ? escapeHtml(s.company) : null)}
-${row(
-  "Contact",
-  s.contactName || s.contactRole ? escapeHtml([s.contactName, s.contactRole].filter(Boolean).join(", ")) : null,
-)}
-${row("E-mail", link(`mailto:${s.contactEmail}`, s.contactEmail))}
-${row("Site", s.brandWebsite ? link(s.brandWebsite) : null)}
+${row("Code-barres", escapeHtml(p.ean ?? "Sans code-barres"))}
+${row("Contenance", escapeHtml(p.volume))}
+${row("Type", p.productType ? escapeHtml(p.productType) : null)}
+${row("Zones", escapeHtml(p.zones.join(", ")))}
+${row("Fabriqué", p.madeIn ? escapeHtml(p.madeIn) : null)}
+${row("Page produit", p.productUrl ? link(p.productUrl) : "Non fournie")}
+${row("Photos", photos)}
+${row("Promesses", p.properties ? para(p.properties) : null)}
+</table>
+<div style="margin-top:8px;background:#F9FAFB;border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.5;font-family:Menlo,Consolas,monospace;">${para(
+    p.inci,
+  )}</div>
+</div>`;
+}
+
+/** Un seul mail pour toute l'équipe, quel que soit le nombre de produits envoyés. */
+export function brandTeamEmail(
+  c: BrandContactForEmail,
+  products: BrandProductForEmail[],
+  extra: { adminUrl?: string | null; earlierFromBrand?: number } = {},
+): Email {
+  const n = products.length;
+  const body = `<p style="margin:0 0 6px 0;font-size:17px;font-weight:700;">${
+    n > 1 ? `${n} produits à référencer` : "Un produit à référencer"
+  }</p>
+<p style="margin:0 0 14px 0;color:#6B7280;font-size:14px;">Envoyé par ${escapeHtml(c.brand)}. Rien n'est publié avant votre vérification.</p>
+<table role="presentation" cellpadding="0" cellspacing="0">
+${row("Marque", escapeHtml(c.brand))}
+${row("Contact", c.contactName ? escapeHtml(c.contactName) : null)}
+${row("E-mail", link(`mailto:${c.contactEmail}`, c.contactEmail))}
 ${row(
   "Déjà proposés",
-  extra.earlierFromBrand ? escapeHtml(`${extra.earlierFromBrand} autre(s) produit(s) par cette adresse`) : null,
+  extra.earlierFromBrand ? escapeHtml(`${extra.earlierFromBrand} produit(s) lors d'envois précédents`) : null,
 )}
 </table>
-<p style="margin:18px 0 4px 0;font-size:12px;font-weight:700;letter-spacing:0.6px;color:#9CA3AF;">LE PRODUIT</p>
-<table role="presentation" cellpadding="0" cellspacing="0">
-${row("Nom", escapeHtml(s.productName))}
-${row("Code-barres", escapeHtml(s.ean ?? "Sans code-barres"))}
-${row("Contenance", escapeHtml(s.volume))}
-${row("Type", s.productType ? escapeHtml(s.productType) : null)}
-${row("Zones", escapeHtml(s.zones.join(", ")))}
-${row("Fabriqué", s.madeIn ? escapeHtml(s.madeIn) : null)}
-${row("Page produit", s.productUrl ? link(s.productUrl) : "Non fournie")}
-${row("Photos", photos)}
-</table>
-<p style="margin:18px 0 6px 0;font-size:12px;font-weight:700;letter-spacing:0.6px;color:#9CA3AF;">COMPOSITION (INCI)</p>
-<div style="background:#F9FAFB;border:1px solid #ECEEF1;border-radius:12px;padding:14px;font-size:13px;line-height:1.55;font-family:Menlo,Consolas,monospace;">${para(
-    s.inci,
-  )}</div>
-${
-  s.properties
-    ? `<p style="margin:18px 0 6px 0;font-size:12px;font-weight:700;letter-spacing:0.6px;color:#9CA3AF;">PROPRIÉTÉS ANNONCÉES</p><div style="font-size:14px;">${para(
-        s.properties,
-      )}</div>`
-    : ""
-}
+${products.map((p, i) => productBlock(p, i + 1)).join("")}
 ${
   extra.adminUrl
     ? button(extra.adminUrl, "Vérifier dans l'admin")
     : `<p style="margin:20px 0 0 0;font-size:14px;">À traiter dans l'admin : Retours, onglet « Marques ».</p>`
-}
-<p style="margin:8px 0 0 0;font-size:12px;color:#9CA3AF;">Réf. ${escapeHtml(s.id)}</p>`;
+}`;
   return {
-    subject: `[Marques] ${s.brand} : ${s.productName}`,
+    subject: `[Marques] ${c.brand} : ${n > 1 ? `${n} produits` : products[0]?.productName ?? "1 produit"}`,
     html: layout("Demande de référencement", body, "Notification interne Cosme Check (espace marques du site)."),
   };
 }
 
-export function brandAckEmail(s: { contactName: string | null; brand: string; productName: string }): Email {
-  const body = `<p style="margin:0 0 14px 0;">Bonjour${s.contactName ? ` ${escapeHtml(s.contactName)}` : ""},</p>
-<p style="margin:0 0 14px 0;">Nous avons bien reçu votre demande de référencement pour <strong>${escapeHtml(
-    s.productName,
-  )}</strong> (${escapeHtml(s.brand)}).</p>
-<p style="margin:0 0 14px 0;">Notre équipe va vérifier les informations. Le produit n'est pas encore visible dans l'application : nous vous écrivons dès qu'il est référencé, avec sa note et votre badge.</p>
+export function brandAckEmail(c: { contactName: string | null; brand: string }, productNames: string[]): Email {
+  const n = productNames.length;
+  const list = productNames.map((p) => `<li style="margin:2px 0;">${escapeHtml(p)}</li>`).join("");
+  const body = `<p style="margin:0 0 14px 0;">Bonjour${c.contactName ? ` ${escapeHtml(c.contactName)}` : ""},</p>
+<p style="margin:0 0 10px 0;">Nous avons bien reçu ${n > 1 ? `vos ${n} produits` : "votre produit"} (${escapeHtml(c.brand)}) :</p>
+<ul style="margin:0 0 14px 0;padding-left:20px;">${list}</ul>
+<p style="margin:0 0 14px 0;">Notre équipe va vérifier les informations. Rien n'est encore visible dans l'application : nous vous écrivons pour chaque produit référencé, avec sa note et votre badge.</p>
 <p style="margin:0;">Bien cordialement,<br>L'équipe Cosme Check</p>`;
   return {
-    subject: `Nous avons bien reçu votre produit ${s.productName}`,
+    subject: n > 1 ? `Nous avons bien reçu vos ${n} produits` : `Nous avons bien reçu votre produit ${productNames[0]}`,
     html: layout("Demande reçue", body),
   };
 }

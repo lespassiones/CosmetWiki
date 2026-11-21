@@ -61,3 +61,11 @@ comment on table cosme_check.brand_product_submissions is
 -- l'admin, jamais envoyée à la marque.
 alter table cosme_check.brand_product_submissions
   add column if not exists check_note text check (check_note is null or char_length(check_note) <= 4000);
+
+-- Envoi groupé : une marque remplit ses infos une fois puis envoie N produits.
+-- Toutes les fiches d'un même envoi partagent batch_id (un seul mail équipe,
+-- un seul accusé de réception).
+alter table cosme_check.brand_product_submissions
+  add column if not exists batch_id uuid;
+create index if not exists brand_product_submissions_batch_idx
+  on cosme_check.brand_product_submissions (batch_id);

@@ -3,6 +3,7 @@ import {
   countInciIngredients,
   isValidGtin,
   normalizeUrl,
+  validateBrandContact,
   validateBrandSubmission,
 } from "@/lib/brands/submission";
 import { applyColorCap, starsForProduct, starsFromScore } from "@/lib/brands/stars";
@@ -127,38 +128,45 @@ describe("e-mails", () => {
     expect(m.html).toContain("&lt;b&gt;hop&lt;/b&gt;<br>ligne 2");
   });
 
-  it("marques : fiche complète pour l'équipe, accusé pour la marque", () => {
-    const team = brandTeamEmail(
-      {
-        id: "11111111-1111-1111-1111-111111111111",
-        brand: "Fleurs",
-        company: null,
-        contactName: null,
-        contactEmail: "a@b.fr",
-        contactRole: null,
-        brandWebsite: null,
-        productName: "Crème",
-        ean: null,
-        volume: "50 ml",
-        productType: null,
-        zones: ["Visage", "Corps"],
-        inci: "AQUA, GLYCERIN",
-        properties: null,
-        madeIn: null,
-        productUrl: null,
-      },
-      { photoUrls: [] },
-    );
-    expect(team.subject).toBe("[Marques] Fleurs : Crème");
-    expect(team.html).toContain("Sans code-barres");
-    expect(team.html).toContain("Visage, Corps");
-    expect(brandAckEmail({ contactName: null, brand: "Fleurs", productName: "Crème" }).html).toContain("Bonjour,");
+  it("marques : un seul mail équipe pour tout l'envoi, accusé listant les produits", () => {
+    const product = {
+      id: "1",
+      productName: "Crème",
+      ean: null,
+      volume: "50 ml",
+      productType: null,
+      zones: ["Visage", "Corps"],
+      inci: "AQUA, GLYCERIN",
+      properties: null,
+      madeIn: null,
+      productUrl: null,
+      photoUrls: [],
+    };
+    const c = { brand: "Fleurs", contactName: null, contactEmail: "a@b.fr" };
+    const one = brandTeamEmail(c, [product]);
+    expect(one.subject).toBe("[Marques] Fleurs : Crème");
+    expect(one.html).toContain("Sans code-barres");
+    expect(one.html).toContain("Visage, Corps");
+    const many = brandTeamEmail(c, [product, { ...product, id: "2", productName: "Sérum <b>" }]);
+    expect(many.subject).toBe("[Marques] Fleurs : 2 produits");
+    expect(many.html).toContain("Sérum &lt;b&gt;");
+    const ack = brandAckEmail(c, ["Crème", "Sérum"]);
+    expect(ack.subject).toBe("Nous avons bien reçu vos 2 produits");
+    expect(ack.html).toContain("Bonjour,");
+  });
+
+  it("validateBrandContact", () => {
+    expect(validateBrandContact({ brand: "A", contactEmail: "a@b.fr" }).ok).toBe(true);
+    const r = validateBrandContact({ brand: "", contactEmail: "a@b.fr" });
+    expect(!r.ok && r.field).toBe("brand");
+    const r2 = validateBrandContact({ brand: "A", contactEmail: "x" });
+    expect(!r2.ok && r2.field).toBe("contactEmail");
   });
 
   it("aucun tiret cadratin ni demi-cadratin dans les gabarits", () => {
     const all = [
       contactTeamEmail({ firstName: "a", email: "a@b.fr", subject: "Question", message: "m" }).html,
-      brandAckEmail({ contactName: "a", brand: "b", productName: "c" }).html,
+      brandAckEmail({ contactName: "a", brand: "b" }, ["c"]).html,
       buildBadgeSvg({ stars: 5 }),
     ].join("");
     expect(all).not.toMatch(/[–—]/);
