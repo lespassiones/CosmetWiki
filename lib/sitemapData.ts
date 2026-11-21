@@ -41,6 +41,7 @@ export function staticRoutes(): StaticRoute[] {
     { path: "/en-savoir-plus", priority: 0.7, changeFrequency: "monthly" },
     { path: "/equipe", priority: 0.5, changeFrequency: "yearly" },
     { path: "/contact", priority: 0.5, changeFrequency: "yearly" },
+    { path: "/marques", priority: 0.6, changeFrequency: "monthly" },
     // Retirés du sitemap avec la web app : `/produits` (navigation catalogue),
     // `/offre` (page Premium, remplacée par la section tarifs de la home) et
     // `/auth/sign-in` (il n'y a plus de connexion sur le site). Ils sont

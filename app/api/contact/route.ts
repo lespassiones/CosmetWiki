@@ -9,10 +9,16 @@
  *   - Honey-pot field rejects bots before we touch Postgres.
  *   - Per-IP rate-limit (5 / 10 min) via the existing rate_limits table.
  *   - Field length caps + email regex.
+ *
+ * Once stored, the team is notified by e-mail (contact@ + Brian's inbox, see
+ * lib/mail.ts). Fail-open: a Brevo outage never loses the message, it is
+ * already in `user_feedback` and visible in the admin.
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { supabaseServer, supabaseService } from "@/lib/supabase";
+import { notifyTeam } from "@/lib/mail";
+import { contactTeamEmail } from "@/lib/emails/templates";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -116,5 +122,16 @@ export async function POST(req: NextRequest) {
   if (error) {
     return NextResponse.json({ error: "Échec de l'envoi." }, { status: 500 });
   }
+
+  // Awaited on purpose: on Vercel the function is frozen as soon as the
+  // response is sent, a fire-and-forget fetch would be lost.
+  const mail = contactTeamEmail({ firstName, email, subject, message });
+  await notifyTeam({
+    subject: mail.subject,
+    html: mail.html,
+    replyTo: { email, name: firstName },
+    tags: ["contact"],
+  });
+
   return NextResponse.json({ ok: true });
 }

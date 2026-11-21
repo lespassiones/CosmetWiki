@@ -55,6 +55,7 @@ export function LandingFooter() {
           <FooterColumn title="Ressources">
             <FooterLink href="/blog">Blog</FooterLink>
             <FooterLink href="/faq">FAQ</FooterLink>
+            <FooterLink href="/marques">Espace marques</FooterLink>
             <FooterLink href="/contact">Contact</FooterLink>
           </FooterColumn>
         </div>
