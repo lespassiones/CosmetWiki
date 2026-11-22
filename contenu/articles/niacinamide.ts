@@ -18,8 +18,8 @@ const article: Article = {
   chapo:
     "La niacinamide, c'est la **vitamine B3** : un actif doux qui aide à limiter la brillance, atténuer les taches brunes et renforcer la peau. Elle ne fait pas ressortir les boutons et ne craint pas le soleil. Mais ++le sérum le plus dosé n'est pas forcément le meilleur++ : les études l'ont testée entre 2 et 5 %.",
   publieLe: "2026-10-20",
-  modifieLe: "2026-11-08",
-  minutes: 6,
+  modifieLe: "2026-11-22",
+  minutes: 7,
   theme: "niacinamide",
   motsCles: [
     "niacinamide à quoi ça sert",
@@ -29,6 +29,7 @@ const article: Article = {
     "niacinamide et vitamine c",
     "niacinamide quand utiliser",
     "vitamine b3 peau",
+    "niacinamide enceinte",
   ],
   categorie: "Ingrédients",
   couverture: {
@@ -210,7 +211,29 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Et voici le réflexe que peu de gens connaissent. Les ingrédients dosés à plus de 1 % sont rangés du plus dosé au moins dosé ; sous 1 %, l'ordre est libre ([règlement (CE) 1223/2009, article 19](https://eur-lex.europa.eu/eli/reg/2009/1223/oj)). Le *Phenoxyethanol*, un conservateur très courant, est limité à 1 % par la loi. Une niacinamide écrite après lui est donc dosée à 1 % au plus : ==bien en dessous des 2 à 5 % des études==. Elle fait joli sur l'étiquette, rarement plus. Pour lire le reste de la liste, notre article [« ce cosmétique est-il fait pour toi ? »](/blog/cosmetique-fait-pour-toi) t'aide.",
+        "Les ingrédients dosés à plus de 1 % sont rangés du plus dosé au moins dosé ; sous 1 %, l'ordre est libre ([règlement (CE) 1223/2009, article 19](https://eur-lex.europa.eu/eli/reg/2009/1223/oj)). Le *Phenoxyethanol*, un conservateur très courant, est limité à 1 % par la loi. Une niacinamide écrite après lui est donc dosée à 1 % au plus : ==bien en dessous des 2 à 5 % des études==. Pour lire le reste de la liste, notre article [« ce cosmétique est-il fait pour toi ? »](/blog/cosmetique-fait-pour-toi) t'aide.",
+    },
+    {
+      type: "p",
+      texte:
+        "Dans la base Cosme Check (relevé du 22/11/2026), ==29 031 produits contiennent de la niacinamide==. Seuls 7 564 la placent dans leurs cinq premiers ingrédients, soit un peu plus d'un sur quatre. Parmi les 13 477 qui contiennent aussi du phenoxyethanol, ==2 853 écrivent la niacinamide après lui==, donc à 1 % au plus.",
+    },
+    {
+      type: "p",
+      texte:
+        "Même parmi les 1 346 produits qui affichent « niacinamide » dans leur nom, 91 la rangent après le phenoxyethanol. Le nom sur le flacon ne suffit pas : lis la place.",
+    },
+
+    { type: "h2", texte: "Peut-on utiliser la niacinamide enceinte ?" },
+    {
+      type: "p",
+      texte:
+        "La niacinamide ne fait pas partie des actifs à éviter pendant la grossesse. Ceux que les autorités écartent, ce sont les rétinoïdes, la famille du rétinol, contre-indiqués sur la peau pendant la grossesse depuis 2018 ([ANSM, 2018](https://ansm.sante.fr/actualites/nouvelle-contre-indication-pendant-la-grossesse-pour-les-retinoides-utilises-par-voie-cutanee-dans-le-traitement-de-lacne)).",
+    },
+    {
+      type: "p",
+      texte:
+        "Montre quand même la liste complète à ton pharmacien : le reste de la formule compte aussi. Notre guide des [cosmétiques pendant la grossesse](/blog/cosmetiques-grossesse) liste les ingrédients à repérer.",
     },
   ],
   faq: [

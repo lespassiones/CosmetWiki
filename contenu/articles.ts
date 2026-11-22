@@ -123,6 +123,7 @@ import medicubeZeroPorePad from "./articles/medicube-zero-pore-pad";
 import meilleuresCremesHydratantes from "./articles/meilleures-cremes-hydratantes-visage";
 import antiImperfections from "./articles/meilleurs-produits-anti-imperfections";
 import niacinamide from "./articles/niacinamide";
+import niveaQ10 from "./articles/nivea-q10";
 import pdrn from "./articles/pdrn";
 import peptideDeCuivre from "./articles/peptide-de-cuivre";
 import peauSecheVisage from "./articles/peau-seche-visage";
@@ -320,6 +321,7 @@ export const ARTICLES: readonly Article[] = [
   typeDePeau,
   volufiline,
   yukaOuInciBeauty,
+  niveaQ10,
   cremeCica,
   cremeSolaireCoreenne,
   cremesHydratantesReparatrices,
