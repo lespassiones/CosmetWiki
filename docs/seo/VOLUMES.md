@@ -608,3 +608,21 @@ Zone : **France seule** (la recherche lancée depuis l'accueil repart sur France
 | cica c'est quoi | 10 à 100 | 0 % | 0 % | faible | |
 
 Suggestions Google du jour : « cicaplast ou cicalfate » (et « … pour cicatrice », « … brûlure », « ou biafine », « ou cicabio », « ou vaseline »), « cicalfate visage », « cicalfate tatouage », « centella asiatica bienfaits visage », « centella asiatica danger », « centella asiatica skin1004 », « centella asiatica vergetures ». L'intention « cicatrice, plaie, brûlure, tatouage » est médicale : écartée, renvoyée au pharmacien.
+
+## 2026-11-22 : « Trouver de nouveaux mots clés » du dimanche, ingrédients
+
+Zone : **France seule** ; langue : **French** (réglage par défaut de l'écran de saisie, lu sous le champ). Mots de départ : sérum vitamine c, panthénol, céramides, squalane, acide azélaïque, collagène crème, rétinal, allantoïne, acide lactique, peptides visage. Tableau lu par `javascript_exec` sur les lignes `[role="row"]` (première page seulement).
+
+| Requête | Volume mensuel | Évolution 3 mois | Évolution 1 an | Concurrence | Note |
+|---|---|---|---|---|---|
+| acide lactique, acide l lactique | 10 k à 100 k | 0 % | -90 % | faible | en partie alimentaire et sportif |
+| acide azelaique | 10 k à 100 k | 0 % | 0 % | élevée | sujet ingrédient fort |
+| acide azélaïque, acide azelaique the ordinary, creme acide azelaique, acide azelaique 15 | 1 k à 10 k | 0 % | **+900 %** | élevée | piste ingrédient de demain |
+| serum acide azelaique | 1 k à 10 k | 0 % | 0 % | élevée | |
+| sérum vitamine c, serum vitamine c, vitamine c sérum | 1 k à 10 k | 0 % | 0 % | élevée | (10 k à 100 k le 13/11 sur dix zones, toutes langues) |
+| creme collagene visage, creme visage collagene, creme collagène visage | 1 k à 10 k | **+900 %** | 0 % | élevée | |
+| crème collagène, creme au collagene | 1 k à 10 k | 0 % | 0 % | élevée | |
+| panthénol, squalane | 1 k à 10 k | 0 % | 0 % | élevée | |
+| allantoïne | 1 k à 10 k | 0 % | 0 % | faible | |
+
+Céramides, rétinal et peptides n'apparaissent pas dans la première page de résultats.

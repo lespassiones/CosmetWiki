@@ -75,6 +75,9 @@ Rappel des garde-fous : seulement ce que la personne a dit ou montré elle-même
 
 | Sujet | Requêtes | Volume |
 |---|---|---|
+| Acide azélaïque : l'actif qui monte, ce que disent les listes | acide azélaïque, acide azelaique the ordinary, creme acide azelaique | « acide azelaique » 10 k à 100 k, « acide azélaïque » 1 k à 10 k +900 % sur un an (France, French, 22/11/2026) ; **piste du prochain jour ingrédient** |
+| Crème au collagène : le collagène passe-t-il la peau ? | creme collagene visage, crème collagène | 1 k à 10 k, +900 % sur trois mois (22/11/2026) ; ne rien promettre sur la fermeté |
+| Panthénol, squalane, allantoïne : les « petits » actifs de pharmacie | panthénol, squalane, allantoïne | 1 k à 10 k chacun (22/11/2026) |
 | **Lire une liste INCI** | inci, liste inci, comment lire une composition | 1 k à 10 k (« inci », 5 zones, 19/10/2026) ; « liste inci » 100 à 1 k |
 | ~~Acide salicylique (BHA) : dose, place dans la liste, shampoings~~ → `acide-salicylique`, 13/11/2026 | acide salicylique, acide salicylique visage, point noir | 10 k à 100 k (dix zones, 13/11/2026) |
 | Acide glycolique (AHA) : la suite naturelle de l'acide salicylique | acide glycolique, aha | 10 k à 100 k (dix zones, 13/11/2026) |
