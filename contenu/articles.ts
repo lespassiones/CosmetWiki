@@ -92,6 +92,7 @@
  */
 import type { Categorie } from "@/contenu/rubriques";
 
+import acideAzelaique from "./articles/acide-azelaique";
 import acideGlycolique from "./articles/acide-glycolique";
 import acideHyaluronique from "./articles/acide-hyaluronique";
 import acideSalicylique from "./articles/acide-salicylique";
@@ -339,6 +340,7 @@ export const ARTICLES: readonly Article[] = [
   gta6NuitBlancheCernes,
   cienLidl,
   niacinamide,
+  acideAzelaique,
   acideGlycolique,
   acideHyaluronique,
   analyseComposition,

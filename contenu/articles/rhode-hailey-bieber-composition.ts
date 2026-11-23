@@ -21,7 +21,7 @@ const article: Article = {
   chapo:
     "Rhode, la marque fondée par Hailey Bieber, vend des soins simples, sans parfum dans les quatre listes qu'on a lues. Ses formules tiennent la route, mais ==le peptide de son baume star arrive en 17e place sur 27==. Et ++un détail de la loi européenne++ change la façon de lire ce genre de chiffre.",
   publieLe: "2026-11-09",
-  modifieLe: "2026-11-09",
+  modifieLe: "2026-11-23",
   minutes: 7,
   theme: "rhode hailey bieber",
   motsCles: [
@@ -35,6 +35,8 @@ const article: Article = {
     "rhode peptide lip treatment",
     "rhode barrier restore cream",
     "rhode sephora france",
+    "marque hailey bieber",
+    "produit hailey bieber",
   ],
   categorie: "Célébrités",
   couverture: {
@@ -62,6 +64,18 @@ const article: Article = {
       type: "p",
       texte:
         "Voici la limite de cet article : les produits Rhode ne sont pas encore dans la base Cosme Check. **Ils n'ont donc pas de note ici.** On a lu leur liste INCI, c'est-à-dire la liste officielle des ingrédients, sur les fiches [Sephora France](https://www.sephora.fr/p/peptide-lip-treatment---effet-glaze-nourrissant-P1000209352.html), le 9 novembre 2026.",
+    },
+
+    { type: "h2", texte: "Quels produits vend la marque de Hailey Bieber ?" },
+    {
+      type: "p",
+      texte:
+        "Surtout des soins : le baume Peptide Lip Treatment, sa version teintée Peptide Lip Tint, la Glazing Milk, le Peptide Glazing Fluid et la Barrier Restore Cream. Leurs listes plus bas. Le Pocket Blush, un blush crème en stick, est aussi en rayon chez [Sephora France](https://www.sephora.fr/p/pocket-blush---blush-creme-hydratant-modulable-792262.html).",
+    },
+    {
+      type: "p",
+      texte:
+        "La dernière nouveauté est le Pocket Plush, ==le premier blush mat de la marque==. Il sort en édition limitée pour les 30 ans de Hailey Bieber, sur le site de Rhode, depuis le 20 novembre 2026 ([Hypebae, novembre 2026](https://hypebae.com/fr/2026/11/rhode-hailey-bieber-birthday-navy-capsule-collection-windbreaker-where-to-buy)). Sa liste n'est pas encore publiée en France.",
     },
 
     { type: "h2", texte: "Que contient le Peptide Lip Treatment ?" },
@@ -162,7 +176,7 @@ const article: Article = {
       style: "coches",
       items: [
         "Cherche le premier conservateur plafonné à 1 %, comme le phénoxyéthanol : tout ce qui vient après lui est dosé à 1 % ou moins.",
-        "Regarde si l'actif vanté est chiffré sur l'emballage ou sur le site. Pas de chiffre, pas de promesse à prendre au mot.",
+        "Pas de dose chiffrée pour l'actif vanté ? Pas de promesse à prendre au mot.",
         "Juge un baume sur le confort : c'est son film protecteur qui fait le travail que tu sens.",
       ],
     },
@@ -176,7 +190,7 @@ const article: Article = {
       ton: "rose",
       titre: "À retenir",
       texte:
-        "Rhode fait des formules courtes, sans parfum dans les listes lues, avec des actifs connus. ++Rien de secret dedans++ : le trio de céramides, la niacinamide et ces peptides se trouvent aussi ailleurs.",
+        "Des formules courtes, sans parfum, avec des actifs connus. ++Rien de secret dedans++ : le trio de céramides, la niacinamide et ces peptides se trouvent aussi ailleurs.",
     },
   ],
   faq: [
