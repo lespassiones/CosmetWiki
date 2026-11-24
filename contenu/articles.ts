@@ -130,6 +130,7 @@ import peptideDeCuivre from "./articles/peptide-de-cuivre";
 import peauSecheVisage from "./articles/peau-seche-visage";
 import projectPan from "./articles/project-pan";
 import retinol from "./articles/retinol";
+import revitalift from "./articles/revitalift";
 import rhodeHaileyBieber from "./articles/rhode-hailey-bieber-composition";
 import perturbateursEndocriniens from "./articles/perturbateurs-endocriniens-cosmetiques-2026";
 import routineFoot from "./articles/routine-peau-joueurs-foot";
@@ -323,6 +324,7 @@ export const ARTICLES: readonly Article[] = [
   volufiline,
   yukaOuInciBeauty,
   niveaQ10,
+  revitalift,
   cremeCica,
   cremeSolaireCoreenne,
   cremesHydratantesReparatrices,

@@ -626,3 +626,18 @@ Zone : **France seule** ; langue : **French** (réglage par défaut de l'écran 
 | allantoïne | 1 k à 10 k | 0 % | 0 % | faible | |
 
 Céramides, rétinal et peptides n'apparaissent pas dans la première page de résultats.
+
+## 2026-11-24 : buzz du jour (Revitalift, marques de stars, tendances)
+
+Zone : **France seule** (zone par défaut du plan, non élargie) ; langue : **toutes les langues**. Le bouton de langue (« Toutes les langues ») était désactivé pendant le chargement (`find` le donne `disabled`), puis un clic par coordonnées n'a ouvert aucune liste : un essai, pas de boucle ; à retenter en réglant la langue sur l'écran de saisie, avant « Commencer ». Tableau lu par `javascript_exec` sur les lignes `[role="row"]`.
+
+| Requête | Volume mensuel | Évolution 3 mois | Évolution 1 an | Concurrence | Note |
+|---|---|---|---|---|---|
+| revitalift, l oréal revitalift | 1 k à 10 k | 0 % | 0 % | élevée | **sujet du jour** (`revitalift`) |
+| revitalift avis, revitalift acide hyaluronique | 10 à 100 | 0 % | 0 % / -90 % | élevée | |
+| revitalift laser, revitalift filler | pas de donnée | | | | absentes du tableau |
+| fenty skin, rare beauty blush | 1 k à 10 k | 0 % | 0 % | élevée | marques de stars, pistes buzz |
+| crème collagène | 1 k à 10 k | 0 % | 0 % | élevée | (+900 % sur trois mois le 22/11 sur « creme collagene visage ») |
+| kobido | 1 k à 10 k | 0 % | 0 % | moyenne | le massage « +9 000 % » de Biba |
+| crème de la mer | 100 à 1 k | 0 % | 0 % | élevée | |
+| crème la mer avis | 10 à 100 | 0 % | 0 % | élevée | |

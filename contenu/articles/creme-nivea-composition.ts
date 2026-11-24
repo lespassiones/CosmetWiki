@@ -17,8 +17,8 @@ const article: Article = {
   chapo:
     "La crème Nivea, c'est surtout **de l'eau, de l'huile minérale et des cires** : un mélange simple qui hydrate en posant un film sur la peau. Elle ne protège pas du soleil et ne lisse pas les rides. On a lu ses 21 ingrédients, et ++la fin réserve une surprise++.",
   publieLe: "2026-10-19",
-  modifieLe: "2026-11-10",
-  minutes: 6,
+  modifieLe: "2026-11-24",
+  minutes: 7,
   theme: "crème nivea",
   motsCles: [
     "crème nivea composition",
@@ -27,6 +27,8 @@ const article: Article = {
     "nivea boîte bleue",
     "crème nivea danger",
     "la crème nivea est elle bonne pour le visage",
+    "composition crème nivea bleu",
+    "nivea soft composition",
   ],
   categorie: "Tendances",
   couverture: {
@@ -207,6 +209,32 @@ const article: Article = {
       texte:
         "Dans Cosme Check, la boîte bleue obtient **11,32 sur 20** et la Crème de la Mer **7,60 sur 20** : la crème de luxe compte 6 ingrédients orange, contre 3. La note ne mesure ni le plaisir ni le flacon, elle lit la formule. ++Le prix ne fait pas la formule++, pour toutes les [crèmes hydratantes](/blog/cremes-hydratantes-reparatrices).",
     },
+
+    { type: "h2", texte: "Crème Nivea ou Nivea Soft : quelle différence de composition ?" },
+    {
+      type: "p",
+      texte:
+        "La Nivea Soft n'a pas la même recette. Elle compte 30 ingrédients, contre 21. La glycérine passe en 2e place, devant l'huile minérale : la texture est plus légère et s'étale plus facilement.",
+    },
+    {
+      type: "p",
+      texte:
+        "Elle ajoute de l'huile de jojoba, de la vitamine E et un conservateur, le phénoxyéthanol, absent de la boîte bleue. Elle contient aussi de l'alcool en 6e place, qui allège la crème mais peut gêner une peau très sèche. Dans Cosme Check, ==la Soft obtient 11,73 sur 20, la boîte bleue 11,32 sur 20== : presque à égalité.",
+    },
+    {
+      type: "liste",
+      style: "coches",
+      items: [
+        "**Peau sèche, mains abîmées, coudes** : la boîte bleue, plus grasse, protège plus longtemps.",
+        "**Visage, peau normale ou mixte** : la Soft, plus légère. Elle laisse moins de film brillant.",
+        "**Peau qui réagit au parfum** : aucune des deux. Les deux listes finissent par six ou sept allergènes du parfum.",
+      ],
+    },
+    {
+      type: "p",
+      texte:
+        "Cette logique de gamme, où la forme compte plus que le nom, se retrouve ailleurs : chez [Nivea Q10](/blog/nivea-q10) comme chez [L'Oréal Revitalift](/blog/revitalift).",
+    },
   ],
   faq: [
     {
@@ -242,6 +270,12 @@ const article: Article = {
       ean: "0747930000020",
       note: 7.6,
       releveeLe: "2026-10-19",
+    },
+    {
+      produit: "NIVEA Soft, crème hydratante visage, corps et mains (300 ml)",
+      ean: "0056594010123",
+      note: 11.73,
+      releveeLe: "2026-11-24",
     },
   ],
 };
