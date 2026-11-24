@@ -6,16 +6,14 @@ import { useEffect, useState } from "react";
 
 import { DownloadAppButton } from "@/components/download/DownloadAppButton";
 
+// Ordre demandé le 24 nov 2026. « Tarifs » n'est plus dans l'en-tête : la
+// section tarifs reste atteignable par le pied de page (/#tarifs) et la home.
 const NAV_ITEMS = [
   { href: "/fonctionnalites", label: "Fonctionnalités" },
-  // Ancre vers la section tarifs de la page d'accueil : les prix doivent être
-  // atteignables depuis n'importe quelle page du site, pas seulement en
-  // scrollant la home.
-  { href: "/#tarifs", label: "Tarifs" },
+  { href: "/marques", label: "Marques" },
   { href: "/en-savoir-plus", label: "En savoir plus" },
   { href: "/blog", label: "Blog" },
   { href: "/faq", label: "FAQ" },
-  { href: "/marques", label: "Marques" },
   { href: "/contact", label: "Contact" },
 ];
 

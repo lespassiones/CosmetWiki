@@ -28,7 +28,9 @@ export function LandingHero() {
             gap contrôlé, pour que le texte reste proche du mockup (pas de
             grand vide au milieu). */}
         <div className="relative z-10 mx-auto hidden w-full max-w-[1180px] items-center justify-center gap-10 px-6 pt-32 sm:px-8 lg:flex xl:gap-16">
-          <div className="w-full max-w-[560px] pb-8 reveal-on-mount">
+          {/* Texte calé en haut (même hauteur que le haut du téléphone) et non
+              centré : l'écart sous l'en-tête est divisé par deux (24 nov 2026). */}
+          <div className="w-full max-w-[560px] self-start pb-8 reveal-on-mount">
             <Headline />
             <div className="mt-10">
               <KpiRow />
