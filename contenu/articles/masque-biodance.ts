@@ -20,7 +20,7 @@ const article: Article = {
   chapo:
     "Le masque Biodance Bio-Collagen hydrate bien, mais pas grâce au collagène : il arrive en **25e position sur 34 ingrédients**, et sa molécule est bien trop grosse pour entrer dans la peau. Ce qui travaille, c'est l'eau, la glycérine et le gel qui colle à ton visage pendant des heures. On a lu toute la liste, et ++la note de la base te dit lequel des masques de la marque choisir++.",
   publieLe: "2026-10-24",
-  modifieLe: "2026-10-24",
+  modifieLe: "2026-11-25",
   minutes: 7,
   theme: "masque biodance",
   motsCles: [
@@ -31,6 +31,7 @@ const article: Article = {
     "bio collagen real deep mask",
     "masque biodance comment utiliser",
     "masque coréen collagène",
+    "masque biodance collagène avis",
   ],
   categorie: "Tendances",
   couverture: {
@@ -110,6 +111,18 @@ const article: Article = {
       type: "p",
       texte:
         "Ce n'est pas inutile pour autant : à la surface, le collagène retient l'eau comme un humectant. Il ne fabrique pas de collagène neuf, et il ne remplit pas les rides.",
+    },
+
+    { type: "h2", texte: "Masque Biodance collagène : quel avis après lecture des listes ?" },
+    {
+      type: "p",
+      texte:
+        "Un avis plutôt honnête, pour une marque « collagène ». Biodance a 33 fiches « collagène » dans notre base (relevé du 25/11/2026) : ==32 en contiennent vraiment==. C'est mieux que la moyenne, puisqu'un produit « collagène » sur trois n'en contient aucun, chez Vichy, Olay ou L'Oréal par exemple ([notre enquête sur 3 209 listes](/blog/creme-collagene)).",
+    },
+    {
+      type: "p",
+      texte:
+        "Mais il est toujours loin : 25e place en médiane. Et quand « Collagen Water » ouvre la liste, comme dans cinq soins de la marque, c'est surtout de l'eau. Dans la crème Pore Perfecting, le vrai extrait de collagène n'arrive qu'en 31e place.",
     },
 
     { type: "h2", texte: "Alors pourquoi la peau est si douce au réveil ?" },
