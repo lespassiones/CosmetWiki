@@ -641,3 +641,7 @@ Zone : **France seule** (zone par défaut du plan, non élargie) ; langue : **to
 | kobido | 1 k à 10 k | 0 % | 0 % | moyenne | le massage « +9 000 % » de Biba |
 | crème de la mer | 100 à 1 k | 0 % | 0 % | élevée | |
 | crème la mer avis | 10 à 100 | 0 % | 0 % | élevée | |
+
+## 2026-11-26 : pas de nouvelle mesure
+
+Sujet du jour (`routine-peau-grasse`) mesuré le 06/11/2026, moins de 60 jours : « peau grasse » 1 k à 10 k ; « routine peau grasse », « routine peau mixte », « peau grasse visage » 100 à 1 k, +900 %. Planificateur non ouvert. Suggestions Google du jour : « peau grasse que faire », « peau grasse qui tiraille », « peau grasse déshydratée », « peau grasse quel savon utiliser », « peau grasse quelle huile utiliser », « peau grasse au réveil », « routine peau grasse la roche-posay », « routine peau grasse homme », « routine peau mixte déshydratée ».

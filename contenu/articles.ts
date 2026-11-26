@@ -136,6 +136,7 @@ import rhodeHaileyBieber from "./articles/rhode-hailey-bieber-composition";
 import perturbateursEndocriniens from "./articles/perturbateurs-endocriniens-cosmetiques-2026";
 import routineFoot from "./articles/routine-peau-joueurs-foot";
 import routineSkincare from "./articles/routine-skincare";
+import routinePeauGrasse from "./articles/routine-peau-grasse";
 import serums from "./articles/serums-visage-guide";
 import suifDeBoeuf from "./articles/suif-de-boeuf";
 import spf50 from "./articles/spf-50-visage-7-erreurs";
@@ -320,6 +321,7 @@ export type Article = {
 };
 
 export const ARTICLES: readonly Article[] = [
+  routinePeauGrasse,
   spf50,
   typeDePeau,
   volufiline,

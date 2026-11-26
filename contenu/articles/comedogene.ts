@@ -20,8 +20,8 @@ const article: Article = {
   chapo:
     "Un produit **comédogène**, c'est un produit qui peut boucher les pores et faire apparaître des points noirs ou des points blancs. Le mot est partout sur les crèmes. Mais les listes d'ingrédients « à fuir » viennent de vieux tests faits sur des oreilles de lapin, et ++la mention « non comédogène » ne garantit rien pour ta peau à toi++.",
   publieLe: "2026-10-23",
-  modifieLe: "2026-11-12",
-  minutes: 6,
+  modifieLe: "2026-11-26",
+  minutes: 7,
   theme: "comédogène",
   motsCles: [
     "comédogène",
@@ -67,12 +67,12 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Un comédon, c'est un pore bouché par un mélange de sébum et de cellules mortes. Il en existe trois sortes : le microcomédon, trop petit pour se voir ; le comédon fermé, ou point blanc ; le comédon ouvert, ou point noir ([DermNet](https://dermnetnz.org/topics/comedonal-acne)).",
+        "Il existe trois sortes de comédons : le microcomédon, trop petit pour se voir ; le comédon fermé, ou point blanc ; le comédon ouvert, ou point noir ([DermNet](https://dermnetnz.org/topics/comedonal-acne)).",
     },
     {
       type: "p",
       texte:
-        "Le point noir n'est pas de la saleté. Sa couleur vient de la mélanine, le pigment de la peau, présente dans le bouchon ouvert à l'air. ++Frotter plus fort ne le fera donc pas partir++, et ça irrite. Un exfoliant doux (un soin qui décolle les cellules mortes) comme l'acide salicylique, décrit dans notre article sur les [disques Medicube](/blog/medicube-zero-pore-pad), l'entretient mieux que les doigts.",
+        "Le point noir n'est pas de la saleté. Sa couleur vient de la mélanine, le pigment de la peau, présente dans le bouchon ouvert à l'air. ++Frotter plus fort ne le fera donc pas partir++, et ça irrite. Un exfoliant doux (un soin qui décolle les cellules mortes) comme l'[acide salicylique](/blog/acide-salicylique), l'entretient mieux que les doigts.",
     },
 
     { type: "h2", texte: "D'où vient l'échelle de comédogénicité de 0 à 5 ?" },
@@ -84,7 +84,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Ce sont ces notes qui circulent aujourd'hui sur les blogs et les réseaux, dans des tableaux recopiés de site en site. Elles ont un défaut majeur : ++elles notent un ingrédient seul, pas la crème que tu tiens dans la main++.",
+        "Ces notes circulent aujourd'hui dans des tableaux recopiés de site en site. Elles ont un défaut majeur : ++elles notent un ingrédient seul, pas la crème que tu tiens dans la main++.",
     },
 
     { type: "h2", texte: "Pourquoi une liste d'ingrédients comédogènes ne suffit pas ?" },
@@ -111,6 +111,18 @@ const article: Article = {
       ],
       legende:
         "Part des produits de la base Cosme Check qui contiennent l'ingrédient (relevé du 23/10/2026). Être dans la liste ne veut pas dire boucher les pores dans ce produit-là.",
+    },
+
+    { type: "h2", texte: "Trouve-t-on des produits comédogènes parmi les soins pour peau grasse ?" },
+    {
+      type: "p",
+      texte:
+        "Rarement. Notre base compte 576 produits avec « peau grasse » dans leur nom. ==39 contiennent au moins un des six ingrédients du tableau==, et 14 en placent un dans leurs cinq premiers. L'Isopropyl Myristate revient le plus (14 produits), devant l'huile de coco (10), au relevé du 26/11/2026.",
+    },
+    {
+      type: "p",
+      texte:
+        "Le vrai risque est souvent dans les gestes : notre [routine peau grasse en 4 gestes](/blog/routine-peau-grasse) les détaille.",
     },
 
     { type: "h2", texte: "Que garantit la mention « non comédogène » ?" },
@@ -174,7 +186,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le suspect qu'on oublie presque toujours : ++les produits pour les cheveux++. Huile, cire, crème coiffante, après-shampooing sans rinçage glissent sur le front, les tempes et le contour du visage pendant la nuit. Si tes points noirs se rangent le long de la ligne des cheveux, lis d'abord la liste de ces flacons-là. Et si les boutons font mal, laissent des marques ou ne partent pas, parles-en à un dermatologue.",
+        "Le suspect qu'on oublie presque toujours : ++les produits pour les cheveux++. Huile, cire ou crème coiffante glissent sur le front pendant la nuit. Si tes points noirs se rangent le long de la ligne des cheveux, lis d'abord la liste de ces flacons-là. Et si les boutons font mal, laissent des marques ou ne partent pas, parles-en à un dermatologue.",
     },
   ],
   faq: [
