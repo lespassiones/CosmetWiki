@@ -645,3 +645,7 @@ Zone : **France seule** (zone par défaut du plan, non élargie) ; langue : **to
 ## 2026-11-26 : pas de nouvelle mesure
 
 Sujet du jour (`routine-peau-grasse`) mesuré le 06/11/2026, moins de 60 jours : « peau grasse » 1 k à 10 k ; « routine peau grasse », « routine peau mixte », « peau grasse visage » 100 à 1 k, +900 %. Planificateur non ouvert. Suggestions Google du jour : « peau grasse que faire », « peau grasse qui tiraille », « peau grasse déshydratée », « peau grasse quel savon utiliser », « peau grasse quelle huile utiliser », « peau grasse au réveil », « routine peau grasse la roche-posay », « routine peau grasse homme », « routine peau mixte déshydratée ».
+
+## 2026-11-27 : Planificateur inaccessible
+
+Google Ads renvoyait vers la page de connexion de Google (`accounts.google.com/ServiceLogin?service=adwords`) avec `authuser=0` puis `authuser=1` ; le robot ne se connecte jamais lui-même. Aucune mesure ce jour. Sujet du jour (`levres-gercees`) choisi **sans volume mesuré sur sa tête** : voisin mesuré « gommage lèvres, gommage des lèvres » 1 k à 10 k (15/11), saison, et suggestions Google du jour (« lèvres gercées causes / qui brûlent / que faire / qui ne guérissent pas / vaseline », « baume lèvres gercées », « carmex danger », « carmex composition », « baume à lèvres laneige / nuxe / yves rocher »). **À mesurer au prochain passage où Google Ads s'ouvre** : « lèvres gercées », « baume lèvres gercées », « lèvres sèches », « carmex », « labello », « baume à lèvres », « skip care », « routine visage homme », « crème visage homme ».

@@ -29,7 +29,7 @@ const article: Article = {
   chapo:
     "La Volufiline est un extrait de plante dilué dans une huile de synthèse, vendu comme un « filler en flacon ». Son unique étude publiée vient de son fabricant et a mesuré ==2,2 % de volume en plus, sur un sein, après deux mois==. ++Dans le sérum « 92 % », la plante elle-même pèse 1 % au plus.++",
   publieLe: "2026-11-19",
-  modifieLe: "2026-11-19",
+  modifieLe: "2026-11-27",
   minutes: 7,
   theme: "volufiline",
   motsCles: [
@@ -41,6 +41,7 @@ const article: Article = {
     "comment utiliser la volufiline",
     "anemarrhena asphodeloides",
     "filler sans aiguille",
+    "volufiline lèvres",
   ],
   categorie: "Tendances",
   couverture: {
@@ -84,7 +85,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "L'idée vient du fabricant. Sederma dit que la sarsasapogénine, la molécule clé de la plante, stimulerait le développement des adipocytes, les cellules qui stockent la graisse sous la peau ([Elle Belgique, 01/07/2026](https://www.elle.be/fr/473761-volufiline-magie-des-fillers-sans-aiguilles.html)). Plus de graisse, plus de volume : c'est la promesse.",
+        "L'idée vient du fabricant. Sederma dit que la sarsasapogénine, la molécule clé de la plante, stimulerait le développement des adipocytes, les cellules qui stockent la graisse sous la peau ([Elle Belgique, 01/07/2026](https://www.elle.be/fr/473761-volufiline-magie-des-fillers-sans-aiguilles.html)).",
     },
 
     { type: "h2", texte: "Que dit vraiment l'étude sur la Volufiline ?" },
@@ -115,7 +116,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Sept ingrédients, et surtout de l'huile. Le « 92 % » veut dire que le flacon contient 92 % de l'ingrédient Volufiline, donc 92 % du mélange huile et plante. Pas 92 % de plante. Voici la liste, dans l'ordre de notre base.",
+        "Sept ingrédients, et surtout de l'huile. Le « 92 % » veut dire que le flacon contient 92 % de l'ingrédient Volufiline, donc 92 % du mélange huile et plante. Pas 92 % de plante.",
     },
     {
       type: "liste",
@@ -176,6 +177,23 @@ const article: Article = {
         "Les notes vont de très bas à correct. La Peptide 9 Volume Essence Pro de Medi-Peel obtient 1,47 sur 20, l'Intensive Volufiline Spray Ampoule de d'Alba 12,48. La note dépend du reste de la liste, pas de la Volufiline.",
     },
 
+    { type: "h2", texte: "La Volufiline repulpe-t-elle les lèvres ?" },
+    {
+      type: "p",
+      texte:
+        "Rien ne le montre. Dans nos baumes, gloss et masques pour les lèvres (relevé du 27/11/2026), ==25 produits== contiennent sa plante : en 19e place médiane, et cinq fois en dernière place.",
+    },
+    {
+      type: "p",
+      texte:
+        "Ce que tu sens vient d'ailleurs : 13 d'entre eux ajoutent un ingrédient qui chauffe ou rafraîchit. Le *Reedle Shot Lip Plumper Expert* de VT met **Menthyl Lactate** et **Vanillyl Butyl Ether** en 6e et 7e place, la plante en 18e (12,56 sur 20). ++Le picotement gonfle un peu la lèvre en l'irritant, pour quelques heures.++",
+    },
+    {
+      type: "p",
+      texte:
+        "Le *Super Lustrous Glimmer Gloss* « repulpant » de Revlon obtient 7,81 sur 20 (parfum, BHT). Sur des lèvres sèches, un repulpant qui picote est un mauvais choix : voici les baumes qui conviennent aux [lèvres gercées](/blog/levres-gercees).",
+    },
+
     { type: "h2", texte: "La Volufiline est-elle dangereuse ?" },
     {
       type: "p",
@@ -230,6 +248,8 @@ const article: Article = {
     { produit: "The Ordinary, Volufiline 92% + Pal-Isoleucine 1% Serum (15 ml)", ean: "0769915236460", note: 12.06, releveeLe: "2026-11-19" },
     { produit: "PUPA Milano, Push me Up #fast Volumisant pour les Seins Action Rapide (75 ml)", ean: "8011607362776", note: 12.38, releveeLe: "2026-11-19" },
     { produit: "Medi-Peel, Peptide 9 Volume Tout En Un Essence Pro (100 ml)", ean: "8809941820386", note: 1.47, releveeLe: "2026-11-19" },
+    { produit: "VT Cosmetics, Reedle Shot Lip Plumper Expert (4,3 g)", ean: "8803463006501", note: 12.56, releveeLe: "2026-11-27" },
+    { produit: "Revlon, Super Lustrous Glimmer Gloss Repulpant 001 Diamond Drama (3,8 ml)", ean: "0309970174125", note: 7.81, releveeLe: "2026-11-27" },
     { produit: "d'Alba, Intensive Volufiline Spray Ampoule (50 ml)", ean: "8809563069026", note: 12.48, releveeLe: "2026-11-19" },
   ],
 };

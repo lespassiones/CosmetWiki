@@ -119,6 +119,7 @@ import exfolierVisage from "./articles/exfolier-visage";
 import glycerine from "./articles/glycerine";
 import gta6NuitBlancheCernes from "./articles/gta-6-nuit-blanche-cernes";
 import lipOils from "./articles/lip-oils-huiles-levres";
+import levresGercees from "./articles/levres-gercees";
 import masqueBiodance from "./articles/masque-biodance";
 import masqueLed from "./articles/masque-led-visage";
 import medicubeZeroPorePad from "./articles/medicube-zero-pore-pad";
@@ -322,6 +323,7 @@ export type Article = {
 
 export const ARTICLES: readonly Article[] = [
   routinePeauGrasse,
+  levresGercees,
   spf50,
   typeDePeau,
   volufiline,
