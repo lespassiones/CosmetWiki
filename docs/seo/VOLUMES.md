@@ -649,3 +649,7 @@ Sujet du jour (`routine-peau-grasse`) mesuré le 06/11/2026, moins de 60 jours :
 ## 2026-11-27 : Planificateur inaccessible
 
 Google Ads renvoyait vers la page de connexion de Google (`accounts.google.com/ServiceLogin?service=adwords`) avec `authuser=0` puis `authuser=1` ; le robot ne se connecte jamais lui-même. Aucune mesure ce jour. Sujet du jour (`levres-gercees`) choisi **sans volume mesuré sur sa tête** : voisin mesuré « gommage lèvres, gommage des lèvres » 1 k à 10 k (15/11), saison, et suggestions Google du jour (« lèvres gercées causes / qui brûlent / que faire / qui ne guérissent pas / vaseline », « baume lèvres gercées », « carmex danger », « carmex composition », « baume à lèvres laneige / nuxe / yves rocher »). **À mesurer au prochain passage où Google Ads s'ouvre** : « lèvres gercées », « baume lèvres gercées », « lèvres sèches », « carmex », « labello », « baume à lèvres », « skip care », « routine visage homme », « crème visage homme ».
+
+## 2026-11-28 : pas de mesure
+
+Sujet du jour (`serum-vitamine-c`) mesuré il y a moins de 60 jours : « sérum vitamine c » 1 k à 10 k (France, French, 15/11 ; 10 k à 100 k sur dix zones, toutes langues, 13/11), « meilleur sérum vitamine c » 100 à 1 k (06/11). Planificateur non rouvert (il demandait une connexion hier, voir le 27/11).

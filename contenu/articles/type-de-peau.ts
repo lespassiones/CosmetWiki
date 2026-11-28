@@ -21,7 +21,7 @@ const article: Article = {
   chapo:
     "Pour connaître ton type de peau, lave ton visage, n'applique rien et attends deux heures. Presse ensuite un mouchoir sur ton front, ton nez et tes joues : là où il marque du gras, ta peau en produit beaucoup. Simple, et pourtant ++la plupart des gens sous-estiment leur peau grasse++, selon une étude qui a mesuré le gras de leur visage.",
   publieLe: "2026-11-07",
-  modifieLe: "2026-11-07",
+  modifieLe: "2026-11-28",
   minutes: 9,
   theme: "type de peau",
   motsCles: [
@@ -182,7 +182,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le soin « matifiant » de Nivea perd ses points sur deux ingrédients. L'octocrylène, un filtre solaire dont l'Europe a limité la dose ([règlement (UE) 2022/1176](https://eur-lex.europa.eu/eli/reg/2022/1176/oj), 2022), et le methylparaben, un conservateur. Le soin Mixa contient du cyclohexasiloxane. L'Europe limitera ce silicone à 0,1 % dans les soins sans rinçage à partir de juin 2027 ([règlement (UE) 2024/1328](https://eur-lex.europa.eu/eli/reg/2024/1328/oj)). À l'inverse, les deux soins Eucerin sans parfum passent au-dessus de 12.",
+        "Le soin « matifiant » de Nivea perd ses points sur deux ingrédients. L'octocrylène, un filtre solaire dont l'Europe a limité la dose ([règlement (UE) 2022/1176](https://eur-lex.europa.eu/eli/reg/2022/1176/oj), 2022), et le methylparaben, un conservateur. Le soin Mixa contient du cyclohexasiloxane. L'Europe limitera ce silicone à 0,1 % dans les soins sans rinçage à partir de juin 2027 ([règlement (UE) 2024/1328](https://eur-lex.europa.eu/eli/reg/2024/1328/oj)). Les deux soins Eucerin sans parfum passent au-dessus de 12. Gamme CeraVe complète : [crème hydratante CeraVe](/blog/cerave-creme-hydratante).",
     },
 
     { type: "h2", texte: "Type de peau ou phototype : quelle différence ?" },

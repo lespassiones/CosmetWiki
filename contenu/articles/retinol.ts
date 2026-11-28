@@ -22,7 +22,7 @@ const article: Article = {
   chapo:
     "Le rétinol est une forme de vitamine A qui lisse les ridules et affine le grain de peau, à condition de commencer doucement, le soir, avec une crème solaire le matin. Depuis novembre 2025, l'Europe le limite à 0,3 % dans un soin visage. Et dans les 1 381 produits de notre base qui en contiennent, ++un sur deux le place dans la seconde moitié de sa liste++.",
   publieLe: "2026-10-31",
-  modifieLe: "2026-10-31",
+  modifieLe: "2026-11-28",
   minutes: 7,
   theme: "rétinol",
   motsCles: [
@@ -160,7 +160,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Les deux dernières lignes ne sont pas des erreurs. Ce sont des crèmes de jour au rétinol avec un filtre solaire, et certains de leurs filtres, comme l'octocrylène ou l'homosalate, sont classés rouge dans l'app. Sur les 95 produits au rétinol de la base qui contiennent un filtre solaire chimique, la note médiane tombe à 6,8. Pour lire ces listes toi-même, suis notre [méthode d'analyse de composition](/blog/analyse-composition-cosmetique).",
+        "Les deux dernières lignes ne sont pas des erreurs. Ce sont des crèmes de jour au rétinol avec un filtre solaire, et certains de leurs filtres, comme l'octocrylène ou l'homosalate, sont classés rouge dans l'app. Sur les 95 produits au rétinol de la base qui contiennent un filtre solaire chimique, la note médiane tombe à 6,8. Pour lire ces listes toi-même, suis notre [méthode d'analyse de composition](/blog/analyse-composition-cosmetique). Et pour la crème à poser après le sérum CeraVe, on a lu toute la gamme de la [crème hydratante CeraVe](/blog/cerave-creme-hydratante).",
     },
 
     { type: "h2", texte: "Comment débuter le rétinol sans irriter sa peau ?" },

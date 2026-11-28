@@ -24,7 +24,7 @@ const article: Article = {
   chapo:
     "L'acide hyaluronique est un hydratant : il attire l'eau et la garde à la surface de la peau, qui paraît plus souple et plus lisse. Il ne comble pas les rides comme une injection. Et dans les 5 753 produits de notre base qui l'affichent dans leur nom, ++trois sur quatre contiennent d'abord de la glycérine++.",
   publieLe: "2026-11-03",
-  modifieLe: "2026-11-03",
+  modifieLe: "2026-11-28",
   minutes: 7,
   theme: "acide hyaluronique",
   motsCles: [
@@ -168,7 +168,7 @@ const article: Article = {
     {
       type: "p",
       texte:
-        "Le sérum The Ordinary est le seul de ce tableau où l'acide hyaluronique passe avant la glycérine. La crème Nivea perd des points pour autre chose : ses filtres solaires, dont l'octocrylène, classé rouge dans l'app. Et la crème Vichy *Aqualia Thermal UV FPS 30*, vendue « avec acide hyaluronique », n'en contient aucune forme dans la liste relevée pour son code-barres (note 1,37 sur 20). La formule a peut-être changé depuis : c'est pour ça qu'on lit le pot qu'on a en main.",
+        "Le sérum The Ordinary est le seul de ce tableau où l'acide hyaluronique passe avant la glycérine. La crème Nivea perd des points pour autre chose : ses filtres solaires, dont l'octocrylène, classé rouge dans l'app. Et la crème Vichy *Aqualia Thermal UV FPS 30*, vendue « avec acide hyaluronique », n'en contient aucune forme dans la liste relevée pour son code-barres (note 1,37 sur 20). La formule a peut-être changé depuis : c'est pour ça qu'on lit le pot qu'on a en main. Les crèmes de CeraVe, elles, sont lues une par une dans notre article sur la [crème hydratante CeraVe](/blog/cerave-creme-hydratante).",
     },
 
     { type: "h2", texte: "Comment bien utiliser l'acide hyaluronique ?" },
